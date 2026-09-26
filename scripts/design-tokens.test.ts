@@ -20,6 +20,7 @@ import {
   tokenValueError,
   type TokenType,
 } from '../src/lib/design-tokens'
+import { COLOR_SECTIONS, TOKEN_META, tokenMatches } from '../src/lib/design-token-meta'
 
 let passed = 0
 function test(name: string, fn: () => void) {
@@ -229,6 +230,35 @@ test('every contrast pair references real tokens and resolves at defaults', () =
     for (const k of [p.fg, p.bg, p.over].filter(Boolean) as string[]) assert.ok(k in DEFAULT_TOKEN_VALUES, k)
     assert.notEqual(pairRatio(p, DEFAULT_TOKEN_VALUES), null, p.label)
   }
+})
+
+// --- C. labels ----------------------------------------------------------------
+
+test('every token has a label and a used-for line', () => {
+  const missing = Object.keys(DEFAULT_TOKEN_VALUES).filter((k) => !TOKEN_META[k]?.label || !TOKEN_META[k]?.usedFor)
+  assert.deepEqual(missing, [])
+})
+
+test('no label entries for tokens that do not exist', () => {
+  assert.deepEqual(Object.keys(TOKEN_META).filter((k) => !(k in DEFAULT_TOKEN_VALUES)), [])
+})
+
+test('every colour token sits in a known colour subsection; nothing else does', () => {
+  const ids = new Set(COLOR_SECTIONS.map((s) => s.id))
+  for (const k of Object.keys(DEFAULT_TOKEN_VALUES)) {
+    const isColor = typeOf(k) === 'color'
+    const section = TOKEN_META[k].section
+    if (isColor) assert.ok(section && ids.has(section), k)
+    else assert.equal(section, undefined, k)
+  }
+})
+
+test('search matches label, raw key and used-for, case-insensitively', () => {
+  assert.ok(tokenMatches('--afa-text-muted', 'MUTED TEXT'))
+  assert.ok(tokenMatches('--afa-text-muted', '--afa-text-mu'))
+  assert.ok(tokenMatches('--afa-text-muted', 'timestamps'))
+  assert.ok(!tokenMatches('--afa-text-muted', 'pill'))
+  assert.ok(tokenMatches('--afa-text-muted', '  '))
 })
 
 console.log(`\n${passed} passed`)

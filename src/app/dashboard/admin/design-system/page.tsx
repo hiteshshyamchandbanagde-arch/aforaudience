@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button'
 import { CONTRAST_PAIRS, contrastFailures, contrastMinimum, pairRatio, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import { COLOR_SECTIONS, tokenMeta, tokenMatches } from '@/lib/design-token-meta'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -71,7 +72,10 @@ const GROUP_META: Record<TokenGroup, { label: string; blurb: string }> = {
   spacing: { label: 'Spacing', blurb: '8px-based spacing grid.' },
   button: { label: 'Button', blurb: 'Button padding scale (sm/md/lg), consumed by the Button component.' },
 }
-const GROUP_ORDER: TokenGroup[] = ['color', 'font', 'size', 'radius', 'spacing', 'button']
+// GEN-2609-108 - 'spacing' is deliberately absent: GEN-2609-107 keeps
+// spacing out of admin control. Its tokens stay in code and in the DB
+// (and Reset still restores them); the editor just doesn't show them.
+const GROUP_ORDER: TokenGroup[] = ['color', 'font', 'size', 'radius', 'button']
 
 // GEN-2609-076 - "coverage" here means real, grepped consumer files
 // (TOKEN_COVERAGE, src/lib/design-token-coverage.ts), not a guess. A
@@ -116,13 +120,6 @@ function CoverageBadge({ status }: { status: CoverageStatus }) {
   )
 }
 
-const FONT_ROLE_LABEL: Record<string, string> = {
-  '--font-display': 'Display (headlines)',
-  '--font-ui': 'UI (buttons, tabs, chrome)',
-  '--font-sans': 'Sans (body copy)',
-  '--font-mono': 'Mono (eyebrows, prices, labels)',
-}
-
 export default function AdminDesignSystemPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -145,6 +142,7 @@ export default function AdminDesignSystemPage() {
   // A single accidental click used to apply site-wide immediately.
   const [confirmingRevert, setConfirmingRevert] = useState<DesignTokenVersion | null>(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -536,10 +534,27 @@ export default function AdminDesignSystemPage() {
               </div>
             )}
 
+            {/* GEN-2609-108 - filters every group by label, raw key or "used for". */}
+            <div style={{ ...panelStyle, marginBottom: 'var(--afa-space-6)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
+              <label htmlFor="token-search" style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', flexShrink: 0 }}>
+                Find a token
+              </label>
+              <input
+                id="token-search"
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="e.g. muted, border, --afa-radius-md, timestamps"
+                style={inputStyle}
+              />
+            </div>
+
             {GROUP_ORDER.map((group) => {
-              const groupTokens = tokensByGroup.get(group) ?? []
+              const allGroupTokens = tokensByGroup.get(group) ?? []
+              if (allGroupTokens.length === 0) return null
+              const groupTokens = allGroupTokens.filter((t) => tokenMatches(t.key, query))
               if (groupTokens.length === 0) return null
-              const coverage = groupCoverage(groupTokens)
+              const coverage = groupCoverage(allGroupTokens)
               const groupDisabled = coverage === 'unused'
               // GEN-2609-077 - "applies to: <groups>" derived live from
               // the same consumerFiles the coverage badge itself uses
@@ -547,38 +562,57 @@ export default function AdminDesignSystemPage() {
               // string that could drift out of date as later phases land.
               const groupAppliesTo = groupDisabled
                 ? []
-                : appliesTo(groupTokens.flatMap((t) => TOKEN_COVERAGE[t.key]?.consumerFiles ?? []))
+                : appliesTo(allGroupTokens.flatMap((t) => TOKEN_COVERAGE[t.key]?.consumerFiles ?? []))
+              const renderGrid = (list: DesignToken[]) => (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--afa-space-14px)' }}>
+                  {list.map((token) => (
+                    <TokenField
+                      key={token.key}
+                      token={token}
+                      value={pending.get(token.key) ?? token.value}
+                      onChange={(v) => setValue(token.key, v)}
+                      disabled={groupDisabled || tokenCoverage(token.key) === 'unused'}
+                      coverage={tokenCoverage(token.key)}
+                      error={fieldErrors.get(token.key) ?? null}
+                    />
+                  ))}
+                </div>
+              )
               return (
-                <div key={group} style={{ ...panelStyle, marginBottom: 24, opacity: groupDisabled ? 0.6 : 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div key={group} style={{ ...panelStyle, marginBottom: 'var(--afa-space-6)', opacity: groupDisabled ? 0.6 : 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-1)' }}>
                     <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>{GROUP_META[group].label}</h2>
                     <CoverageBadge status={coverage} />
                   </div>
-                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 16 }}>
+                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-4)' }}>
                     {GROUP_META[group].blurb}
                     {groupAppliesTo.length > 0 && <> Applies to: {groupAppliesTo.join(', ')}.</>}
                   </p>
                   {groupDisabled && (
-                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
+                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-4)', padding: 'var(--afa-space-2) var(--afa-space-3)', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
                       Not consumed anywhere in the app right now (checked via a real grep of every var(--…) usage, not assumed). Editing these has no visible effect until a future ticket adopts them — disabled here so that isn't a trap.
                     </p>
                   )}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
-                    {groupTokens.map((token) => (
-                      <TokenField
-                        key={token.key}
-                        token={token}
-                        value={pending.get(token.key) ?? token.value}
-                        onChange={(v) => setValue(token.key, v)}
-                        disabled={groupDisabled || tokenCoverage(token.key) === 'unused'}
-                        coverage={tokenCoverage(token.key)}
-                        error={fieldErrors.get(token.key) ?? null}
-                      />
-                    ))}
-                  </div>
+                  {group === 'color'
+                    ? COLOR_SECTIONS.map((section) => {
+                        const list = groupTokens.filter((t) => tokenMeta(t.key).section === section.id)
+                        if (list.length === 0) return null
+                        return (
+                          <section key={section.id} style={{ marginBottom: 'var(--afa-space-6)' }}>
+                            <h3 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)', paddingBottom: 'var(--afa-space-6px)', borderBottom: '1px solid var(--afa-border-resting)' }}>
+                              {section.label}
+                            </h3>
+                            {renderGrid(list)}
+                          </section>
+                        )
+                      })
+                    : renderGrid(groupTokens)}
                 </div>
               )
             })}
+            {query && GROUP_ORDER.every((g) => !(tokensByGroup.get(g) ?? []).some((t) => tokenMatches(t.key, query))) && (
+              <p style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-ui)' }}>No token matches “{query}”.</p>
+            )}
           </div>
         </main>
 
@@ -639,12 +673,13 @@ function TokenField({
   error: string | null
 }) {
   const invalid = error !== null
+  const meta = tokenMeta(token.key)
   const isSimpleHex = /^#[0-9a-fA-F]{6}$/.test(value)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, opacity: disabled ? 0.55 : 1 }}>
-      <label style={{ fontSize: 'var(--afa-text-micro)', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-        {token.key}
+      <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', flexWrap: 'wrap' }}>
+        {meta.label}
         {token.locked && (
           <span title="Locked — editable only with confirmation" style={{ color: 'var(--afa-amber)' }}>
             🔒
@@ -661,6 +696,8 @@ function TokenField({
           </span>
         )}
       </label>
+      {meta.usedFor && <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: 'calc(-1 * var(--afa-space-1))' }}>{meta.usedFor}</span>}
+      <span style={{ fontSize: 'var(--afa-text-caption)', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', marginTop: 'calc(-1 * var(--afa-space-1))' }}>{token.key}</span>
 
       {token.type === 'color' && (
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -719,7 +756,6 @@ function TokenField({
         </span>
       )}
 
-      {token.group === 'font' && <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)' }}>{FONT_ROLE_LABEL[token.key] ?? ''}</span>}
     </div>
   )
 }
