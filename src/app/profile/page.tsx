@@ -922,7 +922,7 @@ function ProfileContent() {
                 marginBottom: 'var(--afa-space-18px)',
                 cursor: 'pointer',
                 appearance: 'none',
-                // Chevron stroke inlined as rgba(245,245,240,0.65) - the same
+                // Chevron stroke inlined as a literal colour - the same
                 // value as --afa-text-secondary - since a data-URI can't
                 // reference a CSS custom property. Not a new color.
                 backgroundImage:

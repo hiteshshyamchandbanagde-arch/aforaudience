@@ -686,7 +686,7 @@ export default function SupportWidget() {
                       marginBottom: 'var(--afa-space-3)',
                       cursor: 'pointer',
                       appearance: 'none',
-                      // Chevron stroke inlined as rgba(245,245,240,0.65) - the
+                      // Chevron stroke inlined as a literal colour - the
                       // same value as --afa-text-secondary - since a data-URI
                       // can't reference a CSS custom property. Same technique
                       // as profile/page.tsx's display-currency select.

@@ -55,7 +55,7 @@ function getDashboardLink(role?: string) {
 // - Multi-language Phase 1 deepening.
 //
 // BUG-2608-081: this badge used to reuse var(--afa-terracotta) on
-// rgba(200,68,26,0.08) - the exact same color the active nav link uses
+// a faint terracotta tint - the exact same color the active nav link uses
 // (see primaryLinks' isActive styling below) - so it read as a live,
 // clickable nav state ("Hi, Nikita  Venue Owner" looked like "Venue
 // Owner" was itself a link) when it's actually a static identity label.
@@ -66,8 +66,8 @@ function getDashboardLink(role?: string) {
 // textTransform uppercase, letterSpacing 0.05em, padding 5px 10px,
 // borderRadius 999px) - that badge's own color pairs (sage/gold) are
 // semantic to publish-state though, so wrong to reuse verbatim on a role
-// label; here the color is neutral/muted (rgba(245,245,240,0.6) text on
-// a subtle rgba(245,245,240,0.15) border, transparent fill) rather than
+// label; here the color is neutral/muted (--afa-text-secondary text on
+// a subtle --afa-border-resting border, transparent fill) rather than
 // venue-status green, and a border was added (the source badge has none)
 // specifically to read as inert chrome, not nav. One shared style object
 // used by both the desktop and mobile "signed in as" rows below, so this
