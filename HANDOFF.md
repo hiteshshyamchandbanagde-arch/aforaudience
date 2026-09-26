@@ -1,3 +1,26 @@
+# Session Handoff — 26 Sept 2026, part 3 (chat — #706 radius merged, DB applied, bug batch dispatched)
+
+Delta-only. `qa` code at `136192b` (#706).
+
+## 1. Done
+- **#706 GEN-2609-112** squash-merged (head pinned `f4c3603`), CI green, branch deleted. Ratchet on qa: **radius 0**, spacing 1929, everything else unchanged. Old token names remain only in comments.
+- **QA DB:** `--afa-radius-12px` → `--afa-radius-lg` (12px kept), `--afa-radius-10px` deleted, xs/xl/2xl inserted. 8 radius rows now match globals.css exactly.
+- GEN-2609-112 → IN_TEST.
+- **Hitesh to eyeball:** dashboard cards, where 55 sites went 10px → 12px (CC had no login to screenshot them).
+
+## 2. Queued for CC
+- `docs/cc-dispatches/cc-prompt-bug-batch-053-054-050.md`: ticket REF code (populate, backfill SQL not run), username format check, special-notes badge contrast, and `@source not "../../Figma"`.
+
+## 3. Open product question for Hitesh (not blocking)
+- Refund tiers: 7–14 days refunds 50% of the total **including** the booking fee; 14+ days keeps the fee. Intended?
+
+## 4. Next
+Bug batch → colour dispatch (GEN-2609-113) → editor guardrails (108) → button phase 3 (110) → spacing (107).
+
+**Ratchet on qa:** hex 51, rgba 543, font-family 0, font-size 13, spacing 1929, radius 0, raw-button 2, bare-button 91.
+
+---
+
 # Session Handoff — 26 Sept 2026, part 2 (CC — GEN-2609-112 radius closeout, pushed, needs merge + DB SQL)
 
 Delta-only. Branch `chore/gen-2609-112-radius-closeout` off `qa@8b0265a`, pushed, **not merged**.
