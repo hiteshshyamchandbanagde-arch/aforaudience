@@ -9,7 +9,12 @@ import {
   KEY_RANGES,
   GROUP_RANGES,
   RADIUS_ORDER,
+  CONTRAST_PAIRS,
+  contrastFailures,
+  contrastMinimum,
+  contrastRatio,
   isValidTokenValue,
+  pairRatio,
   radiusOrderErrors,
   rangeFor,
   tokenValueError,
@@ -169,6 +174,60 @@ test('alpha 0-1', () => {
 test('injection characters still rejected', () => {
   for (const v of ['red;}body{x:y', '#fff</style>', 'rgba(1,2,3,0.5)/*']) {
     assert.equal(isValidTokenValue('color', v, '--afa-amber'), false, v)
+  }
+})
+
+// --- B. contrast guard -----------------------------------------------------
+
+test('muted text at 0.3 alpha fails on page and raised surface', () => {
+  const after = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.3)' }
+  const fails = contrastFailures(DEFAULT_TOKEN_VALUES, after)
+  assert.deepEqual(fails.map((f) => f.label).sort(), ['Muted text on page', 'Muted text on raised surface'])
+  for (const f of fails) {
+    assert.ok(f.before !== null && f.before >= 4.5)
+    assert.ok(f.after < 4.5)
+    assert.equal(f.min, 4.5)
+  }
+})
+
+test('defaults -> defaults reports nothing (pre-existing failures do not block)', () => {
+  assert.deepEqual(contrastFailures(DEFAULT_TOKEN_VALUES, DEFAULT_TOKEN_VALUES), [])
+})
+
+test('an already-failing pair made worse is reported; made better is not', () => {
+  // Form-submit (cream on fill-solid) is 2.81:1 at defaults.
+  const worse = { ...DEFAULT_TOKEN_VALUES, '--afa-fill-solid': '#FF8A66' }
+  assert.ok(contrastFailures(DEFAULT_TOKEN_VALUES, worse).some((f) => f.label === 'Form-submit button text on fill'))
+  const better = { ...DEFAULT_TOKEN_VALUES, '--afa-fill-solid': '#E04A26' }
+  assert.ok(!contrastFailures(DEFAULT_TOKEN_VALUES, better).some((f) => f.label === 'Form-submit button text on fill'))
+})
+
+test('var() indirection is resolved (on-fill-solid -> brown-black)', () => {
+  const after = { ...DEFAULT_TOKEN_VALUES, '--afa-brown-black': '#C0503A' }
+  assert.ok(contrastFailures(DEFAULT_TOKEN_VALUES, after).some((f) => f.label === 'Primary button text on fill'))
+})
+
+test('translucent backgrounds are composited over their surface', () => {
+  const tint = CONTRAST_PAIRS.find((p) => p.label === 'Error badge text on its tint')!
+  const composited = pairRatio(tint, DEFAULT_TOKEN_VALUES)!
+  // Error tint at 0.1 over #141414 is close to the page itself, so the
+  // ratio must sit near error-bright-on-page, not error-bright on the
+  // opaque tint hue.
+  const onPage = contrastRatio(DEFAULT_TOKEN_VALUES['--afa-error-bright'], DEFAULT_TOKEN_VALUES['--afa-surface-page'])!
+  const onOpaqueHue = contrastRatio(DEFAULT_TOKEN_VALUES['--afa-error-bright'], '#B3261E')!
+  assert.ok(Math.abs(composited - onPage) < 1, `${composited} vs ${onPage}`)
+  assert.ok(composited > onOpaqueHue + 1)
+})
+
+test('large pairs use 3:1', () => {
+  assert.equal(contrastMinimum({ fg: 'a', bg: 'b', label: 'x', large: true }), 3)
+  assert.equal(contrastMinimum({ fg: 'a', bg: 'b', label: 'x' }), 4.5)
+})
+
+test('every contrast pair references real tokens and resolves at defaults', () => {
+  for (const p of CONTRAST_PAIRS) {
+    for (const k of [p.fg, p.bg, p.over].filter(Boolean) as string[]) assert.ok(k in DEFAULT_TOKEN_VALUES, k)
+    assert.notEqual(pairRatio(p, DEFAULT_TOKEN_VALUES), null, p.label)
   }
 })
 

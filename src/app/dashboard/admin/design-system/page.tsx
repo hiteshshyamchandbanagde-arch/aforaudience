@@ -9,7 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
-import { contrastRatio, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { CONTRAST_PAIRS, contrastFailures, contrastMinimum, pairRatio, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 
@@ -123,25 +123,6 @@ const FONT_ROLE_LABEL: Record<string, string> = {
   '--font-mono': 'Mono (eyebrows, prices, labels)',
 }
 
-// Resolves one level of var(--afa-x) indirection — the only token that
-// needs it today is --afa-on-fill-solid (var(--afa-brown-black)) — so
-// contrast pairs below can be checked against pending, unsaved edits,
-// not just whatever's already saved.
-function resolveValue(key: string, pending: Map<string, string>): string {
-  const raw = pending.get(key) ?? ''
-  const ref = raw.match(/^var\((--afa-[a-z0-9-]+)\)$/)
-  if (ref) return pending.get(ref[1]) ?? raw
-  return raw
-}
-
-const CONTRAST_PAIRS: { fg: string; bg: string; label: string }[] = [
-  { fg: '--afa-text-primary', bg: '--afa-surface-page', label: 'Primary text on page background' },
-  { fg: '--afa-text-secondary', bg: '--afa-surface-page', label: 'Secondary text on page background' },
-  { fg: '--afa-on-fill-solid', bg: '--afa-fill-solid', label: 'Button text on Primary button fill' },
-  { fg: '--afa-cream', bg: '--afa-surface-raised', label: 'Cream text on raised surface' },
-  { fg: '--afa-amber', bg: '--afa-surface-page', label: 'Amber accent on page background' },
-]
-
 export default function AdminDesignSystemPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -154,6 +135,11 @@ export default function AdminDesignSystemPage() {
   const [forbidden, setForbidden] = useState(false)
   const [saving, setSaving] = useState(false)
   const [confirmingLocked, setConfirmingLocked] = useState(false)
+  // GEN-2609-108 - pairs this save would take below AA, waiting on the
+  // contrast confirm; `contrastConfirmed` carries that answer through
+  // the locked-token confirm when a save needs both.
+  const [confirmingContrast, setConfirmingContrast] = useState<ContrastFailure[] | null>(null)
+  const [contrastConfirmed, setContrastConfirmed] = useState(false)
   const [confirmingReset, setConfirmingReset] = useState(false)
   // BUG-2609-059 - the version a Restore click is waiting to confirm.
   // A single accidental click used to apply site-wide immediately.
@@ -233,17 +219,22 @@ export default function AdminDesignSystemPage() {
     })
   }
 
-  async function doSave(confirmLocked: boolean) {
+  async function doSave(confirmLocked: boolean, confirmContrast: boolean) {
     if (dirty.length === 0) return
     setSaving(true)
     try {
       const res = await fetch('/api/admin/design-tokens', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ changes: dirty, confirmLocked }),
+        body: JSON.stringify({ changes: dirty, confirmLocked, confirmContrast }),
       })
       if (res.status === 409) {
-        setConfirmingLocked(true)
+        const data = await res.json().catch(() => ({}))
+        if (data.code === 'contrast') setConfirmingContrast(data.contrastFailures ?? [])
+        else {
+          setContrastConfirmed(confirmContrast)
+          setConfirmingLocked(true)
+        }
         return
       }
       if (!res.ok) {
@@ -261,6 +252,21 @@ export default function AdminDesignSystemPage() {
       setSaving(false)
       setConfirmingLocked(false)
     }
+  }
+
+  // Values as saved vs. with every pending edit applied - the two sides
+  // of the contrast comparison, same as the API computes them.
+  const savedValues = useMemo(() => Object.fromEntries((tokens ?? []).map((t) => [t.key, t.value])), [tokens])
+  const pendingValues = useMemo(() => Object.fromEntries(pending), [pending])
+
+  function continueAfterContrast(confirmContrast: boolean) {
+    setConfirmingContrast(null)
+    if (dirtyTouchesLocked) {
+      setContrastConfirmed(confirmContrast)
+      setConfirmingLocked(true)
+      return
+    }
+    doSave(false, confirmContrast)
   }
 
   async function loadVersionsQuiet() {
@@ -282,11 +288,12 @@ export default function AdminDesignSystemPage() {
       showToast(`${firstError[0]}: ${firstError[1]}`, 'error')
       return
     }
-    if (dirtyTouchesLocked) {
-      setConfirmingLocked(true)
+    const failures = contrastFailures(savedValues, pendingValues)
+    if (failures.length > 0) {
+      setConfirmingContrast(failures)
       return
     }
-    doSave(false)
+    continueAfterContrast(false)
   }
 
   async function handleReset() {
@@ -509,10 +516,9 @@ export default function AdminDesignSystemPage() {
                 <h2 style={sectionTitleStyle}>Contrast check (WCAG)</h2>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {CONTRAST_PAIRS.map((pair) => {
-                    const fg = resolveValue(pair.fg, pending)
-                    const bg = resolveValue(pair.bg, pending)
-                    const ratio = contrastRatio(fg, bg)
-                    const pass = ratio !== null && ratio >= 4.5
+                    const ratio = pairRatio(pair, pendingValues)
+                    const min = contrastMinimum(pair)
+                    const pass = ratio !== null && ratio >= min
                     return (
                       <li key={pair.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
                         <span>{pair.label}</span>
@@ -520,7 +526,7 @@ export default function AdminDesignSystemPage() {
                           <span style={{ color: 'var(--afa-text-muted)' }}>—</span>
                         ) : (
                           <span style={{ color: pass ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', fontWeight: 700 }}>
-                            {ratio.toFixed(2)}:1 {pass ? '✓ AA' : '⚠ below AA (4.5:1)'}
+                            {ratio.toFixed(2)}:1 {pass ? '✓ AA' : `⚠ below AA (${min}:1)`}
                           </span>
                         )}
                       </li>
@@ -581,8 +587,17 @@ export default function AdminDesignSystemPage() {
             title="Editing locked brand tokens"
             body="This change touches one or more of the 5 core brand tokens (surfaces, amber accent, or the primary CTA fill/text pair). These define the site's identity everywhere — are you sure?"
             confirmLabel={saving ? 'Saving…' : 'Yes, save anyway'}
-            onConfirm={() => doSave(true)}
+            onConfirm={() => doSave(true, contrastConfirmed)}
             onCancel={() => setConfirmingLocked(false)}
+          />
+        )}
+        {confirmingContrast && (
+          <ConfirmDialog
+            title="This lowers text contrast"
+            body={<ContrastFailureList failures={confirmingContrast} />}
+            confirmLabel={saving ? 'Saving…' : 'Save anyway'}
+            onConfirm={() => continueAfterContrast(true)}
+            onCancel={() => setConfirmingContrast(null)}
           />
         )}
         {confirmingReset && (
@@ -730,6 +745,25 @@ function RestorePreview({ changes }: { changes: { key: string; from: string; to:
       {changes.length > shown.length && (
         <p style={{ marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-small)' }}>+{changes.length - shown.length} more</p>
       )}
+    </>
+  )
+}
+
+// GEN-2609-108 - each pair this save takes below AA, before → after.
+function ContrastFailureList({ failures }: { failures: ContrastFailure[] }) {
+  return (
+    <>
+      <p style={{ marginBottom: 'var(--afa-space-10px)' }}>
+        {failures.length === 1 ? 'This pair drops' : `These ${failures.length} pairs drop`} below the WCAG AA minimum. Text using them gets harder to read site-wide.
+      </p>
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
+        {failures.map((f) => (
+          <li key={f.label} style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)' }}>
+            {f.label}: {f.before === null ? '—' : `${f.before.toFixed(2)}:1`} → <span style={{ color: 'var(--afa-error-bright)', fontWeight: 700 }}>{f.after.toFixed(2)}:1</span>
+            <span style={{ color: 'var(--afa-text-muted)' }}> (needs {f.min}:1)</span>
+          </li>
+        ))}
+      </ul>
     </>
   )
 }

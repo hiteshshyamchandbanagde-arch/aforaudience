@@ -445,14 +445,82 @@ function flattenOnBackground(fg: [number, number, number, number], bg: [number, 
   return [fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a), 1]
 }
 
-export function contrastRatio(fgValue: string, bgValue: string): number | null {
+// `baseValue`: what a translucent background sits on (a tint over the
+// page, say). The background is flattened onto it first, then the text
+// onto that, so the ratio is for the colours actually on screen.
+export function contrastRatio(fgValue: string, bgValue: string, baseValue?: string): number | null {
   const fgRaw = parseCssColor(fgValue)
-  const bgRaw = parseCssColor(bgValue)
+  let bgRaw = parseCssColor(bgValue)
   if (!fgRaw || !bgRaw) return null
+  if (baseValue !== undefined && bgRaw[3] < 1) {
+    const base = parseCssColor(baseValue)
+    if (!base) return null
+    bgRaw = flattenOnBackground(bgRaw, base)
+  }
   const fg = flattenOnBackground(fgRaw, bgRaw)
   const l1 = relativeLuminance(fg)
   const l2 = relativeLuminance(bgRaw)
   const lighter = Math.max(l1, l2)
   const darker = Math.min(l1, l2)
   return (lighter + 0.05) / (darker + 0.05)
+}
+
+// Resolves one level of var(--afa-x) indirection (only
+// --afa-on-fill-solid uses it today).
+export function resolveTokenValue(values: Record<string, string>, key: string): string {
+  const raw = values[key] ?? ""
+  const ref = raw.match(/^var\((--afa-[a-z0-9-]+)\)$/)
+  return ref ? values[ref[1]] ?? raw : raw
+}
+
+// GEN-2609-108 - every text/surface pair the site uses at rest. `over`
+// is the surface a translucent `bg` sits on. `large`: text that only
+// ever renders large (>= 24px, or >= 18.66px bold) - 3:1 instead of 4.5:1.
+// No pair is large-only today (headings use the same primary-text pair
+// as body copy), so the flag exists for the next one.
+export type ContrastPair = { fg: string; bg: string; over?: string; label: string; large?: boolean }
+
+export const CONTRAST_PAIRS: ContrastPair[] = [
+  { fg: "--afa-text-primary", bg: "--afa-surface-page", label: "Primary text on page" },
+  { fg: "--afa-text-secondary", bg: "--afa-surface-page", label: "Secondary text on page" },
+  { fg: "--afa-text-muted", bg: "--afa-surface-page", label: "Muted text on page" },
+  { fg: "--afa-text-primary", bg: "--afa-surface-raised", label: "Primary text on raised surface" },
+  { fg: "--afa-text-secondary", bg: "--afa-surface-raised", label: "Secondary text on raised surface" },
+  { fg: "--afa-text-muted", bg: "--afa-surface-raised", label: "Muted text on raised surface" },
+  { fg: "--afa-cream", bg: "--afa-surface-raised", label: "Cream text on raised surface" },
+  { fg: "--afa-amber", bg: "--afa-surface-page", label: "Amber accent on page" },
+  { fg: "--afa-sage-bright", bg: "--afa-sage-tint", over: "--afa-surface-page", label: "Success badge text on its tint" },
+  { fg: "--afa-error-bright", bg: "--afa-error-tint", over: "--afa-surface-page", label: "Error badge text on its tint" },
+  { fg: "--afa-amber", bg: "--afa-amber-tint", over: "--afa-surface-page", label: "Amber badge text on its tint" },
+  { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Primary button text on fill" },
+  { fg: "--afa-cream", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
+  { fg: "--afa-cream", bg: "--afa-sage", label: "Success button text on sage" },
+]
+
+export function contrastMinimum(pair: ContrastPair): number {
+  return pair.large ? 3 : 4.5
+}
+
+export function pairRatio(pair: ContrastPair, values: Record<string, string>): number | null {
+  const base = pair.over ? resolveTokenValue(values, pair.over) : undefined
+  return contrastRatio(resolveTokenValue(values, pair.fg), resolveTokenValue(values, pair.bg), base)
+}
+
+export type ContrastFailure = { label: string; fg: string; bg: string; min: number; before: number | null; after: number }
+
+// A save "fails" a pair when it ends below the minimum and either
+// crossed it or made an already-failing pair worse. A pair that was
+// already under the bar and isn't touched doesn't block the save.
+export function contrastFailures(before: Record<string, string>, after: Record<string, string>): ContrastFailure[] {
+  const out: ContrastFailure[] = []
+  for (const pair of CONTRAST_PAIRS) {
+    const a = pairRatio(pair, after)
+    if (a === null) continue
+    const min = contrastMinimum(pair)
+    if (a >= min) continue
+    const b = pairRatio(pair, before)
+    if (b !== null && b < min && a >= b - 0.005) continue
+    out.push({ label: pair.label, fg: pair.fg, bg: pair.bg, min, before: b, after: a })
+  }
+  return out
 }
