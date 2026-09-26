@@ -433,5 +433,22 @@ t('GEN-2609-113: a hex inside quotes converts; an HTML entity never does', () =>
   assert.equal(processLine(ent, false, DEFAULT_DEFS), ent)
 })
 
+t('GEN-2609-113: an SVG presentation attribute is left for a hand move to style', () => {
+  const unresolved = []
+  const a = '<stop offset="0%" stopColor="#c9973a" stopOpacity={0.35} />'
+  assert.equal(processLine(a, false, DEFAULT_DEFS, unresolved), a)
+  const b = "<Cell fill={i === 0 ? '#c9973a' : 'rgba(201,151,58,0.45)'} />"
+  assert.equal(processLine(b, false, DEFAULT_DEFS, unresolved), b)
+  assert.equal(unresolved.length, 3)
+  assert.ok(unresolved.every((u) => /SVG/.test(u.why)))
+})
+
+t('GEN-2609-113: a literal var() fallback is dropped, not tokenised into var(--x, var(--x))', () => {
+  const line = "        background: mine ? 'var(--afa-sage, #4a6741)' : 'rgba(245,245,240,0.06)',"
+  assert.equal(processLine(line, false, DEFAULT_DEFS), "        background: mine ? 'var(--afa-sage)' : 'var(--afa-tint-06)',")
+  const unmapped = "  color: 'var(--afa-error, #b3261e)',"
+  assert.equal(processLine(unmapped, false, DEFAULT_DEFS), "  color: 'var(--afa-error)',")
+})
+
 console.log(`\n${passed} passed, ${failed} failed.`)
 process.exit(failed > 0 ? 1 : 0)

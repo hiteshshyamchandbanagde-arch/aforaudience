@@ -331,7 +331,7 @@ function colorItems(line, isColorToken) {
 const isCommentish = (l) => /^\s*(\/\/|\*|\/\*)/.test(l)
 const hasTokenOk = (l) => /\/\/\s*token-ok:|\{\/\*\s*token-ok:/.test(l)
 
-const colorStats = { equiv: 0, rounded: [], swaps: [], exempt: [], removed: [] }
+const colorStats = { equiv: 0, rounded: [], swaps: [], exempt: [], removed: [], dynamic: [] }
 function checkColorSites(file) {
   let oldText
   try {
@@ -393,6 +393,12 @@ function checkColorSites(file) {
         ok = false
         continue
       }
+      if (x.lit.includes('${')) {
+        // a runtime-built colour (template alpha) replaced by hand - nothing
+        // to compare statically, so it is listed for review instead
+        colorStats.dynamic.push({ site, from: x.lit, to: y.token })
+        continue
+      }
       const live = liveColorTable[y.token]
       const litRGBA = parseRGBA(x.lit)
       if (live && litRGBA && live.join(',') === litRGBA.join(',')) {
@@ -421,6 +427,7 @@ function printColorReport() {
   const sw = {}
   for (const r of c.swaps) sw[r.swap] = (sw[r.swap] || 0) + 1
   for (const [k, n] of Object.entries(sw)) console.log(`  swap ${n}x  ${k}`)
+  for (const d of c.dynamic) console.log(`  by hand (dynamic): ${d.site}  ${d.from} -> ${d.to}`)
   // A token whose own value changed (--afa-text-muted 0.4 -> 0.5) moves
   // every consumer at once - listed, not a per-site mismatch.
   const base = baseColorTable()

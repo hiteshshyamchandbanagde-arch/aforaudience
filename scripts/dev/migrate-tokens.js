@@ -527,6 +527,8 @@ function colorLiterals(line, inRawBlock) {
   return out
 }
 
+const SVG_ATTR_BEFORE_RE = /\b(?:fill|stroke|stopColor|floodColor|lightingColor)=(?:["']|\{[^{}]*)$/
+
 // The colour pass itself. `unresolved` (optional array) collects literals
 // left in place, with the reason, for the dry-run report.
 function migrateColorLiterals(line, inRawBlock, edits, unresolved) {
@@ -534,6 +536,19 @@ function migrateColorLiterals(line, inRawBlock, edits, unresolved) {
     if (edits.some((e) => c.start < e.end && c.end > e.start)) continue
     if (c.lit.includes('${')) {
       if (unresolved) unresolved.push({ ...c, why: 'dynamic value' })
+      continue
+    }
+    // A literal that is only a var() fallback (`var(--afa-sage, #4a6741)`)
+    // is dropped with its comma: the token is always defined in globals.css.
+    const fb = /,\s*$/.exec(line.slice(0, c.start))
+    if (fb && /var\(--[\w-]+\s*,\s*$/.test(line.slice(0, c.start)) && line[c.end] === ')') {
+      edits.push({ start: fb.index, end: c.end, replacement: '' })
+      continue
+    }
+    // SVG presentation attributes don't reliably resolve var(); those sites
+    // move the colour into style={{ ... }} by hand (decision record 2d).
+    if (SVG_ATTR_BEFORE_RE.test(line.slice(0, c.start))) {
+      if (unresolved) unresolved.push({ ...c, why: 'SVG presentation attribute - move to style by hand' })
       continue
     }
     const res = resolveColor(c.lit, c.ctx)
@@ -1049,6 +1064,7 @@ function run() {
       }
     }
     console.log(`\n${changedLines} line(s) would change (dry run - pass --apply to write).`)
+    for (const u of unresolved) console.log(`  left literal  line ${u.line}  ${u.lit}  (${u.why})`)
     return
   }
 
