@@ -81,12 +81,81 @@ export const FONT_ALLOWLIST = [
 ] as const
 
 const HEX_COLOR = /^#[0-9a-fA-F]{3,4}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/
-const RGB_COLOR = /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$/
+// GEN-2609-108 - channels 0-255 with no leading zeros (the old `\d{1,3}`
+// took 999), alpha 0-1. The regex fixes the shape; parseRgb checks the
+// numeric bounds.
+const RGB_COLOR = /^rgba?\(\s*(0|[1-9]\d{0,2})\s*,\s*(0|[1-9]\d{0,2})\s*,\s*(0|[1-9]\d{0,2})\s*(?:,\s*(0|1|1\.0+|0?\.\d+)\s*)?\)$/
 const COLOR_VAR_REF = /^var\(--afa-[a-z0-9-]+\)$/
-const DIMENSION = /^0$|^-?\d+(\.\d+)?(px|rem|em|%)$/
-const DIMENSION_SHORTHAND = /^\d+(\.\d+)?px(\s+\d+(\.\d+)?px){0,3}$/
+// No leading zeros (`0100000px` was saved once on QA), no bare `.5px`,
+// no sign. A token that genuinely needs a negative value goes in
+// NEGATIVE_ALLOWED_KEYS below.
+const DIMENSION = /^0$|^(0|[1-9]\d*)(\.\d+)?(px|rem|em|%)$/
+const DIMENSION_SHORTHAND = /^(0|[1-9]\d*)(\.\d+)?px(\s+(0|[1-9]\d*)(\.\d+)?px){0,3}$/
 
-export function isValidTokenValue(type: TokenType, value: string): boolean {
+// GEN-2609-108 - no token takes a negative value today. An explicit set
+// so allowing one later is a deliberate, reviewed edit.
+export const NEGATIVE_ALLOWED_KEYS = new Set<string>()
+
+// GEN-2609-108 - value ranges, px only. Every QA DB value sat inside
+// these on 26 Sep, so none of them rejects a value that is live today.
+// Lookup: exact key first (KEY_RANGES), then the key's group.
+export type TokenRange = { min: number; max: number }
+
+export const GROUP_RANGES = {
+  radius: { min: 0, max: 40 },
+  size: { min: 10, max: 72 },
+  spacing: { min: 0, max: 64 },
+  button: { min: 0, max: 64 },
+} satisfies Record<string, TokenRange>
+
+export const KEY_RANGES: Record<string, TokenRange> = {
+  // Below ~100px a tall pill starts showing flat sides.
+  "--afa-radius-pill": { min: 100, max: 9999 },
+  // Running-text roles (micro is the label size). Caption (10px badge
+  // micro-labels) stays on the group range: its default is under 11.
+  "--afa-text-micro": { min: 11, max: 24 },
+  "--afa-text-small": { min: 11, max: 24 },
+  "--afa-text-ui": { min: 11, max: 24 },
+  "--afa-text-body": { min: 11, max: 24 },
+  "--afa-text-body-lg": { min: 11, max: 24 },
+}
+
+// The radius scale must stay ordered. The pill is not part of it.
+export const RADIUS_ORDER = [
+  "--afa-radius-sharp",
+  "--afa-radius-xs",
+  "--afa-radius-sm",
+  "--afa-radius-md",
+  "--afa-radius-lg",
+  "--afa-radius-xl",
+  "--afa-radius-2xl",
+] as const
+
+// Group from the key's prefix, so validation needs only the key.
+// `--afa-text-*` colour tokens never reach the range check (type gate).
+export function rangeGroupForKey(key: string): keyof typeof GROUP_RANGES | null {
+  if (key.startsWith("--afa-radius-")) return "radius"
+  if (key.startsWith("--afa-space-")) return "spacing"
+  if (key.startsWith("--afa-btn-padding-")) return "button"
+  if (key.startsWith("--afa-text-")) return "size"
+  return null
+}
+
+export function rangeFor(key: string): TokenRange | null {
+  if (KEY_RANGES[key]) return KEY_RANGES[key]
+  const g = rangeGroupForKey(key)
+  return g ? GROUP_RANGES[g] : null
+}
+
+export function parsePx(part: string): number | null {
+  if (part === "0") return 0
+  const m = part.match(/^(-?\d+(?:\.\d+)?)px$/)
+  return m ? Number(m[1]) : null
+}
+
+// Shape only - what every stored value must satisfy before it goes near
+// the <style> tag. No key-specific rules.
+function isValidShape(type: TokenType, value: string): boolean {
   if (typeof value !== "string" || value.length === 0 || value.length > 120) return false
   // Belt-and-braces: none of these characters are ever legitimate inside
   // a single CSS custom property value in this app, and every one of
@@ -95,7 +164,7 @@ export function isValidTokenValue(type: TokenType, value: string): boolean {
 
   switch (type) {
     case "color":
-      return HEX_COLOR.test(value) || RGB_COLOR.test(value) || COLOR_VAR_REF.test(value)
+      return HEX_COLOR.test(value) || parseRgb(value) !== null || COLOR_VAR_REF.test(value)
     case "dimension":
       return DIMENSION.test(value)
     case "dimension-shorthand":
@@ -105,6 +174,110 @@ export function isValidTokenValue(type: TokenType, value: string): boolean {
     default:
       return false
   }
+}
+
+// Why a value can't be saved for this key, or null if it can. Shared by
+// the API (authoritative) and the editor (inline errors) so the two
+// can't disagree.
+export function tokenValueError(key: string, type: TokenType, value: string): string | null {
+  const isDim = type === "dimension" || type === "dimension-shorthand"
+  const negativeAllowed = isDim && NEGATIVE_ALLOWED_KEYS.has(key)
+  const shapeValue = negativeAllowed ? value.replace(/(^|\s)-/g, "$1") : value
+  if (!isValidShape(type, shapeValue)) {
+    if (isDim && /(^|\s)-/.test(value)) return "Negative values are not allowed."
+    if (isDim && /(^|\s)0\d/.test(value)) return "Remove the leading zero."
+    if (isDim) return "Use a px value, e.g. 12px."
+    if (type === "color") return "Use #hex, or rgba(r, g, b, a) with channels 0–255 and alpha 0–1."
+    return "Not an allowed value."
+  }
+  if (!isDim) return null
+  const range = rangeFor(key)
+  if (!range) return null
+  for (const part of value.trim().split(/\s+/)) {
+    const px = parsePx(part)
+    if (px === null) return "Use px for this token."
+    if (px < range.min || px > range.max) return `Must be between ${range.min}px and ${range.max}px.`
+  }
+  return null
+}
+
+// Pass `key` wherever it's known (every write path does). Without it
+// only the shape is checked: that's buildDesignTokenCss's defence-in-
+// depth pass, which must not drop a stored value just because a range
+// was tightened after it was saved.
+export function isValidTokenValue(type: TokenType, value: string, key?: string): boolean {
+  if (key === undefined) return isValidShape(type, value)
+  return tokenValueError(key, type, value) === null
+}
+
+// GEN-2609-108 - checks the full resulting value set (saved values with
+// edits applied) and names the neighbour each out-of-order radius
+// crosses. Only pairs touching `changed` are reported, so a scale that's
+// already out of order in the DB doesn't block an unrelated save.
+// GEN-2609-108 / BUG-2609-061 - what restoring a version would really
+// do, computed the same way by the confirm dialog and the API:
+// - changes: snapshot values that differ from live and still pass
+//   today's rules (the note's count is changes.length);
+// - skipped: snapshot values today's rules reject (older versions on QA
+//   hold `0px` pills and `200px` md radii), left as they are;
+// - newerKeys: live tokens the snapshot predates, left as they are.
+// Snapshot keys that no longer exist as tokens are ignored.
+export type RestorePlan = {
+  changes: { key: string; from: string; to: string }[]
+  skipped: { key: string; value: string; reason: string }[]
+  newerKeys: string[]
+  after: Record<string, string>
+}
+
+export function planRestore(snapshot: Record<string, unknown>, live: { key: string; value: string; type: TokenType }[]): RestorePlan {
+  const changes: RestorePlan["changes"] = []
+  const skipped: RestorePlan["skipped"] = []
+  const newerKeys: string[] = []
+  const after: Record<string, string> = Object.fromEntries(live.map((t) => [t.key, t.value]))
+  for (const t of live) {
+    if (!(t.key in snapshot)) {
+      newerKeys.push(t.key)
+      continue
+    }
+    const to = snapshot[t.key]
+    if (typeof to !== "string") {
+      skipped.push({ key: t.key, value: String(to), reason: "Not a string." })
+      continue
+    }
+    if (to === t.value) continue
+    const reason = tokenValueError(t.key, t.type, to)
+    if (reason) {
+      skipped.push({ key: t.key, value: to, reason })
+      continue
+    }
+    changes.push({ key: t.key, from: t.value, to })
+    after[t.key] = to
+  }
+  return { changes, skipped, newerKeys, after }
+}
+
+export function restoreNote(versionId: string, changed: number): string {
+  return `Restored version ${versionId} (${changed} token(s) changed)`
+}
+
+export function radiusOrderErrors(values: Record<string, string>, changed?: Iterable<string>): { key: string; message: string }[] {
+  const changedSet = changed ? new Set(changed) : null
+  const errors: { key: string; message: string }[] = []
+  for (let i = 0; i < RADIUS_ORDER.length - 1; i++) {
+    const lo = RADIUS_ORDER[i]
+    const hi = RADIUS_ORDER[i + 1]
+    const a = values[lo] !== undefined ? parsePx(values[lo]) : null
+    const b = values[hi] !== undefined ? parsePx(values[hi]) : null
+    if (a === null || b === null || a <= b) continue
+    if (changedSet && !changedSet.has(lo) && !changedSet.has(hi)) continue
+    // Blame whichever side moved; if both did, the lower one.
+    if (!changedSet || changedSet.has(lo)) {
+      errors.push({ key: lo, message: `Can't be larger than ${hi} (${values[hi]}).` })
+    } else {
+      errors.push({ key: hi, message: `Can't be smaller than ${lo} (${values[lo]}).` })
+    }
+  }
+  return errors
 }
 
 export function isTokenGroup(v: string): v is TokenGroup {
@@ -292,11 +465,33 @@ export function parseCssColor(value: string): [number, number, number, number] |
     const a = h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1
     return [r, g, b, a]
   }
-  const rgb = value.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(0|1|0?\.\d+)\s*)?\)$/)
-  if (rgb) {
-    return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3]), rgb[4] !== undefined ? Number(rgb[4]) : 1]
-  }
-  return null
+  return parseRgb(value)
+}
+
+// GEN-2609-108 - the editor's alpha slider writes values back in the
+// same spaced form the DB and globals.css use: rgba(245, 245, 240, 0.5).
+// Alpha is rounded to 2 places (the slider's step) with trailing zeros
+// dropped, so 0.50 -> 0.5 and 1.00 -> 1.
+export function formatAlpha(a: number): string {
+  return String(Math.round(Math.min(Math.max(a, 0), 1) * 100) / 100)
+}
+
+export function composeRgba(r: number, g: number, b: number, a: number): string {
+  return `rgba(${r}, ${g}, ${b}, ${formatAlpha(a)})`
+}
+
+export function rgbToHex([r, g, b]: [number, number, number, number]): string {
+  return "#" + [r, g, b].map((c) => Math.round(c).toString(16).padStart(2, "0")).join("").toUpperCase()
+}
+
+function parseRgb(value: string): [number, number, number, number] | null {
+  const m = value.match(RGB_COLOR)
+  if (!m) return null
+  const [r, g, b] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  if (r > 255 || g > 255 || b > 255) return null
+  const a = m[4] !== undefined ? Number(m[4]) : 1
+  if (a > 1) return null
+  return [r, g, b, a]
 }
 
 function relativeLuminance([r, g, b]: [number, number, number, number]): number {
@@ -312,14 +507,82 @@ function flattenOnBackground(fg: [number, number, number, number], bg: [number, 
   return [fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a), 1]
 }
 
-export function contrastRatio(fgValue: string, bgValue: string): number | null {
+// `baseValue`: what a translucent background sits on (a tint over the
+// page, say). The background is flattened onto it first, then the text
+// onto that, so the ratio is for the colours actually on screen.
+export function contrastRatio(fgValue: string, bgValue: string, baseValue?: string): number | null {
   const fgRaw = parseCssColor(fgValue)
-  const bgRaw = parseCssColor(bgValue)
+  let bgRaw = parseCssColor(bgValue)
   if (!fgRaw || !bgRaw) return null
+  if (baseValue !== undefined && bgRaw[3] < 1) {
+    const base = parseCssColor(baseValue)
+    if (!base) return null
+    bgRaw = flattenOnBackground(bgRaw, base)
+  }
   const fg = flattenOnBackground(fgRaw, bgRaw)
   const l1 = relativeLuminance(fg)
   const l2 = relativeLuminance(bgRaw)
   const lighter = Math.max(l1, l2)
   const darker = Math.min(l1, l2)
   return (lighter + 0.05) / (darker + 0.05)
+}
+
+// Resolves one level of var(--afa-x) indirection (only
+// --afa-on-fill-solid uses it today).
+export function resolveTokenValue(values: Record<string, string>, key: string): string {
+  const raw = values[key] ?? ""
+  const ref = raw.match(/^var\((--afa-[a-z0-9-]+)\)$/)
+  return ref ? values[ref[1]] ?? raw : raw
+}
+
+// GEN-2609-108 - every text/surface pair the site uses at rest. `over`
+// is the surface a translucent `bg` sits on. `large`: text that only
+// ever renders large (>= 24px, or >= 18.66px bold) - 3:1 instead of 4.5:1.
+// No pair is large-only today (headings use the same primary-text pair
+// as body copy), so the flag exists for the next one.
+export type ContrastPair = { fg: string; bg: string; over?: string; label: string; large?: boolean }
+
+export const CONTRAST_PAIRS: ContrastPair[] = [
+  { fg: "--afa-text-primary", bg: "--afa-surface-page", label: "Primary text on page" },
+  { fg: "--afa-text-secondary", bg: "--afa-surface-page", label: "Secondary text on page" },
+  { fg: "--afa-text-muted", bg: "--afa-surface-page", label: "Muted text on page" },
+  { fg: "--afa-text-primary", bg: "--afa-surface-raised", label: "Primary text on raised surface" },
+  { fg: "--afa-text-secondary", bg: "--afa-surface-raised", label: "Secondary text on raised surface" },
+  { fg: "--afa-text-muted", bg: "--afa-surface-raised", label: "Muted text on raised surface" },
+  { fg: "--afa-cream", bg: "--afa-surface-raised", label: "Cream text on raised surface" },
+  { fg: "--afa-amber", bg: "--afa-surface-page", label: "Amber accent on page" },
+  { fg: "--afa-sage-bright", bg: "--afa-sage-tint", over: "--afa-surface-page", label: "Success badge text on its tint" },
+  { fg: "--afa-error-bright", bg: "--afa-error-tint", over: "--afa-surface-page", label: "Error badge text on its tint" },
+  { fg: "--afa-amber", bg: "--afa-amber-tint", over: "--afa-surface-page", label: "Amber badge text on its tint" },
+  { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Primary button text on fill" },
+  { fg: "--afa-cream", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
+  { fg: "--afa-cream", bg: "--afa-sage", label: "Success button text on sage" },
+]
+
+export function contrastMinimum(pair: ContrastPair): number {
+  return pair.large ? 3 : 4.5
+}
+
+export function pairRatio(pair: ContrastPair, values: Record<string, string>): number | null {
+  const base = pair.over ? resolveTokenValue(values, pair.over) : undefined
+  return contrastRatio(resolveTokenValue(values, pair.fg), resolveTokenValue(values, pair.bg), base)
+}
+
+export type ContrastFailure = { label: string; fg: string; bg: string; min: number; before: number | null; after: number }
+
+// A save "fails" a pair when it ends below the minimum and either
+// crossed it or made an already-failing pair worse. A pair that was
+// already under the bar and isn't touched doesn't block the save.
+export function contrastFailures(before: Record<string, string>, after: Record<string, string>): ContrastFailure[] {
+  const out: ContrastFailure[] = []
+  for (const pair of CONTRAST_PAIRS) {
+    const a = pairRatio(pair, after)
+    if (a === null) continue
+    const min = contrastMinimum(pair)
+    if (a >= min) continue
+    const b = pairRatio(pair, before)
+    if (b !== null && b < min && a >= b - 0.005) continue
+    out.push({ label: pair.label, fg: pair.fg, bg: pair.bg, min, before: b, after: a })
+  }
+  return out
 }

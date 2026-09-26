@@ -25,8 +25,18 @@ async function fetchDesignTokens(): Promise<DesignTokenDTO[]> {
 // just needs the current values, not the admin CRUD surface). Kept as
 // its own tiny wrapper rather than inlining unstable_cache at the call
 // site so there's exactly one place that owns the cache key/tag.
+//
+// GEN-2609-108 - `revalidate: 300` is a safety net, not the main refresh
+// path (editor saves and the admin "Refresh site cache" button still
+// clear the tag immediately). Without it the entry never expired, so a
+// DB change made outside the editor (SQL applied after a merge) stayed
+// invisible until someone saved: on 26 Sep --afa-text-muted 0.5 sat
+// unseen for hours. Cost: at most one small DesignToken read (~110 rows)
+// per 5 minutes per cache, and only when a page is actually requested.
+const DESIGN_TOKEN_CACHE_SECONDS = 300
 const getCachedDesignTokens = unstable_cache(fetchDesignTokens, ["design-tokens-v1"], {
   tags: [DESIGN_TOKEN_CACHE_TAG],
+  revalidate: DESIGN_TOKEN_CACHE_SECONDS,
 })
 
 // Never throws - the root layout's whole point is to render even when

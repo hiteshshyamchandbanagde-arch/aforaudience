@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { isValidTokenValue, LOCKED_TOKEN_KEYS, type TokenType } from '@/lib/design-tokens'
+import { tokenValueError, radiusOrderErrors, contrastFailures, LOCKED_TOKEN_KEYS, type TokenType } from '@/lib/design-tokens'
 import { revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // GET /api/admin/design-tokens — every token row + recent version history
@@ -57,6 +57,7 @@ type PatchBody = {
   changes: { key: string; value: string }[]
   note?: string
   confirmLocked?: boolean
+  confirmContrast?: boolean
 }
 
 export async function PATCH(req: Request) {
@@ -91,21 +92,48 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: `Unknown token key(s): ${unknown.join(', ')}` }, { status: 400 })
   }
 
-  const touchesLocked = body.changes.some((c) => LOCKED_TOKEN_KEYS.has(c.key))
-  if (touchesLocked && !body.confirmLocked) {
+  // GEN-2609-108 - shape + range per value, then the radius order over
+  // the full resulting set. Checked before the locked-token confirm so
+  // a bad value is reported even when the save also touches a locked key.
+  const valueErrors: { key: string; message: string }[] = []
+  for (const change of body.changes) {
+    const token = existingByKey.get(change.key)!
+    const message = typeof change.value === 'string' ? tokenValueError(change.key, token.type as TokenType, change.value) : 'Not a string.'
+    if (message) valueErrors.push({ key: change.key, message })
+  }
+  const allRows = await prisma.designToken.findMany({ select: { key: true, value: true } })
+  const before: Record<string, string> = Object.fromEntries(allRows.map((r) => [r.key, r.value]))
+  const after: Record<string, string> = { ...before }
+  for (const c of body.changes) after[c.key] = c.value
+  if (valueErrors.length === 0) valueErrors.push(...radiusOrderErrors(after, keys))
+  if (valueErrors.length > 0) {
     return NextResponse.json(
-      { error: 'One or more changed tokens are locked — resubmit with confirmLocked: true after showing the confirm dialog', lockedKeys: body.changes.filter((c) => LOCKED_TOKEN_KEYS.has(c.key)).map((c) => c.key) },
+      { error: valueErrors.map((e) => `${e.key}: ${e.message}`).join(' '), code: 'invalid', errors: valueErrors },
+      { status: 400 },
+    )
+  }
+
+  // GEN-2609-108 - a save that takes a text/surface pair below AA needs
+  // an explicit confirm, same pattern as the locked tokens below.
+  const failures = contrastFailures(before, after)
+  if (failures.length > 0 && !body.confirmContrast) {
+    return NextResponse.json(
+      { error: 'This save lowers text contrast below WCAG AA — resubmit with confirmContrast: true after showing the confirm dialog', code: 'contrast', contrastFailures: failures },
       { status: 409 },
     )
   }
 
-  for (const change of body.changes) {
-    const token = existingByKey.get(change.key)!
-    if (!isValidTokenValue(token.type as TokenType, change.value)) {
-      return NextResponse.json({ error: `Invalid value for ${change.key}: ${change.value}` }, { status: 400 })
-    }
+  const touchesLocked = body.changes.some((c) => LOCKED_TOKEN_KEYS.has(c.key))
+  if (touchesLocked && !body.confirmLocked) {
+    return NextResponse.json(
+      { error: 'One or more changed tokens are locked — resubmit with confirmLocked: true after showing the confirm dialog', code: 'locked', lockedKeys: body.changes.filter((c) => LOCKED_TOKEN_KEYS.has(c.key)).map((c) => c.key) },
+      { status: 409 },
+    )
   }
 
+  // The version snapshot records the FULL token set as it will be right
+  // after this save (not just the diff) — reverting to any version later
+  // is then just "apply this snapshot," no diffing/merging logic needed.
   const now = new Date()
   await prisma.$transaction(
     [
@@ -117,7 +145,7 @@ export async function PATCH(req: Request) {
       ),
       prisma.designTokenVersion.create({
         data: {
-          snapshot: await snapshotAfter(body.changes),
+          snapshot: after,
           createdBy: admin.id,
           note: body.note ?? `Updated ${body.changes.length} token(s)`,
         },
@@ -134,14 +162,4 @@ export async function PATCH(req: Request) {
 
   const tokens = await prisma.designToken.findMany({ orderBy: { key: 'asc' } })
   return NextResponse.json({ tokens })
-}
-
-// The version snapshot records the FULL token set as it will be right
-// after this save (not just the diff) — reverting to any version later
-// is then just "apply this snapshot," no diffing/merging logic needed.
-async function snapshotAfter(changes: { key: string; value: string }[]): Promise<Record<string, string>> {
-  const allRows = await prisma.designToken.findMany({ select: { key: true, value: true } })
-  const map = new Map(allRows.map((r) => [r.key, r.value]))
-  for (const c of changes) map.set(c.key, c.value)
-  return Object.fromEntries(map)
 }
