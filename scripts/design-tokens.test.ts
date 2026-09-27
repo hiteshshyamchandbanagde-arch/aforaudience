@@ -20,7 +20,10 @@ import {
   parseCssColor,
   planRestore,
   radiusOrderErrors,
+  restoreContrastFailures,
   restoreNote,
+  snapshotNote,
+  SNAPSHOT_REASON_MAX,
   rangeFor,
   rgbToHex,
   tokenValueError,
@@ -109,11 +112,16 @@ test('radius order covers the whole scale, pill excluded', () => {
   assert.deepEqual([...RADIUS_ORDER], ['--afa-radius-sharp', '--afa-radius-xs', '--afa-radius-sm', '--afa-radius-md', '--afa-radius-lg', '--afa-radius-xl', '--afa-radius-2xl'])
 })
 
-test('font sizes 10-72px; running-text roles 11-24px', () => {
+test('font sizes 10-72px; running-text roles 11-24px; caption 9-16px', () => {
   assert.equal(tokenValueError('--afa-text-page-title-lg', 'dimension', '72px'), null)
   assert.notEqual(tokenValueError('--afa-text-page-title-lg', 'dimension', '73px'), null)
-  assert.notEqual(tokenValueError('--afa-text-caption', 'dimension', '9px'), null)
+  assert.notEqual(tokenValueError('--afa-text-page-title-lg', 'dimension', '9px'), null)
+  // GEN-2609-115 - caption is a small-text role
+  assert.notEqual(tokenValueError('--afa-text-caption', 'dimension', '8px'), null)
+  assert.equal(tokenValueError('--afa-text-caption', 'dimension', '9px'), null)
   assert.equal(tokenValueError('--afa-text-caption', 'dimension', '10px'), null)
+  assert.equal(tokenValueError('--afa-text-caption', 'dimension', '16px'), null)
+  assert.equal(tokenValueError('--afa-text-caption', 'dimension', '17px'), 'Must be between 9px and 16px.')
   for (const key of ['--afa-text-micro', '--afa-text-small', '--afa-text-ui', '--afa-text-body', '--afa-text-body-lg']) {
     assert.notEqual(tokenValueError(key, 'dimension', '10px'), null, key)
     assert.equal(tokenValueError(key, 'dimension', '11px'), null, key)
@@ -201,12 +209,22 @@ test('defaults -> defaults reports nothing (pre-existing failures do not block)'
   assert.deepEqual(contrastFailures(DEFAULT_TOKEN_VALUES, DEFAULT_TOKEN_VALUES), [])
 })
 
+// GEN-2609-115 - form-submit was the last failing pair (cream on fill,
+// 2.81:1); the editor's contrast panel should show none.
+test('every contrast pair passes at defaults', () => {
+  for (const p of CONTRAST_PAIRS) {
+    const r = pairRatio(p, DEFAULT_TOKEN_VALUES)!
+    assert.ok(r >= contrastMinimum(p), `${p.label}: ${r.toFixed(2)}`)
+  }
+})
+
 test('an already-failing pair made worse is reported; made better is not', () => {
-  // Form-submit (cream on fill-solid) is 2.81:1 at defaults.
-  const worse = { ...DEFAULT_TOKEN_VALUES, '--afa-fill-solid': '#FF8A66' }
-  assert.ok(contrastFailures(DEFAULT_TOKEN_VALUES, worse).some((f) => f.label === 'Form-submit button text on fill'))
-  const better = { ...DEFAULT_TOKEN_VALUES, '--afa-fill-solid': '#E04A26' }
-  assert.ok(!contrastFailures(DEFAULT_TOKEN_VALUES, better).some((f) => f.label === 'Form-submit button text on fill'))
+  // No default pair fails, so start from muted text at 0.3 (below AA).
+  const failing = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.3)' }
+  const worse = { ...failing, '--afa-text-muted': 'rgba(245, 245, 240, 0.25)' }
+  assert.ok(contrastFailures(failing, worse).some((f) => f.label === 'Muted text on page'))
+  const better = { ...failing, '--afa-text-muted': 'rgba(245, 245, 240, 0.35)' }
+  assert.ok(!contrastFailures(failing, better).some((f) => f.label === 'Muted text on page'))
 })
 
 test('var() indirection is resolved (on-fill-solid -> brown-black)', () => {
@@ -342,6 +360,50 @@ test('restore: snapshot keys that are no longer tokens are ignored', () => {
   const plan = planRestore({ ...DEFAULT_TOKEN_VALUES, '--afa-radius-10px': '10px' }, LIVE)
   assert.equal(plan.changes.length, 0)
   assert.equal('--afa-radius-10px' in plan.after, false)
+})
+
+// --- H. restore contrast check (GEN-2609-115) ----------------------------------
+
+test('restore: an old snapshot with muted text at 0.4 needs the contrast confirm', () => {
+  // Modelled on QA row cmuhmxlcc: pre-#708, muted 0.4.
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.4)' }
+  const fails = restoreContrastFailures(planRestore(snapshot, LIVE), LIVE)
+  assert.deepEqual(fails.map((f) => f.label).sort(), ['Muted text on page', 'Muted text on raised surface'])
+  for (const f of fails) assert.ok(f.before !== null && f.before >= 4.5 && f.after < 4.5)
+})
+
+test('restore: a snapshot that keeps every pair at AA needs no confirm', () => {
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-radius-md': '10px', '--afa-amber': '#D0A040' }
+  assert.deepEqual(restoreContrastFailures(planRestore(snapshot, LIVE), LIVE), [])
+})
+
+test('restore: values the plan skips are not counted against contrast', () => {
+  // A snapshot value today's rules reject never reaches plan.after.
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 4)' }
+  const plan = planRestore(snapshot, LIVE)
+  assert.equal(plan.skipped.length, 1)
+  assert.deepEqual(restoreContrastFailures(plan, LIVE), [])
+})
+
+test('restore: live values that already fail and are not worsened do not block', () => {
+  const failingLive = LIVE.map((t) => (t.key === '--afa-text-muted' ? { ...t, value: 'rgba(245, 245, 240, 0.3)' } : t))
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.4)' }
+  // 0.3 -> 0.4 improves an already-failing pair: no confirm.
+  assert.deepEqual(restoreContrastFailures(planRestore(snapshot, failingLive), failingLive), [])
+})
+
+// --- I. snapshot versions (GEN-2609-115) -----------------------------------------
+
+test('snapshot note: "Snapshot: <reason>", whitespace collapsed', () => {
+  assert.equal(snapshotNote('after #710 SQL'), 'Snapshot: after #710 SQL')
+  assert.equal(snapshotNote('  after\n  #710   SQL '), 'Snapshot: after #710 SQL')
+})
+
+test('snapshot note: reason required, a string, at most 200 chars', () => {
+  for (const bad of [undefined, null, 42, '', '   ', 'x'.repeat(SNAPSHOT_REASON_MAX + 1)]) {
+    assert.equal(snapshotNote(bad), null, String(bad))
+  }
+  assert.equal(snapshotNote('x'.repeat(SNAPSHOT_REASON_MAX)), `Snapshot: ${'x'.repeat(SNAPSHOT_REASON_MAX)}`)
 })
 
 console.log(`\n${passed} passed`)

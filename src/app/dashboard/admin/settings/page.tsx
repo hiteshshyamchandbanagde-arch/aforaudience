@@ -543,7 +543,7 @@ export default function AdminSettingsPage() {
         </p>
 
         {loadError && (
-          <ErrorBanner style={{ padding: 'var(--afa-space-3) 14px', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)', color: 'var(--afa-red-alt)' }}>{loadError}</ErrorBanner>
+          <ErrorBanner style={{ padding: 'var(--afa-space-3) 14px', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
         )}
 
         <div

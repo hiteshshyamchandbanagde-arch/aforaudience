@@ -89,21 +89,19 @@
   --afa-peach: #F5A26E;
   --afa-plum: #7A4A8A;
   --afa-plum-black: #1A0A1A;
-  --afa-red-alt: #EF4444;
   --afa-sage: #4A6741;
   --afa-social-blue: #1D9BF0;
   --afa-taupe: #8A827A;
-  --afa-terracotta: #C8441A;
   --afa-white: #FFF;
 
   /* Fixed brand-mark color for the "A" in the AforAudience wordmark -
-     deliberately NOT --afa-terracotta and NEVER overridden by any theme
+     deliberately NOT --afa-fill-solid and NEVER overridden by any theme
      block below. The logo should read as the same brand color everywhere
      (nav, hero, auth pages, app icon, splash screen, email) regardless
      of which accent theme a user has picked - otherwise the one mark
      meant to be instantly recognizable would shift color depending on a
      UI preference, which undermines the point of a fixed brand mark.
-     Same hex as the default terracotta today; kept as its own variable
+     Same hex as the retired terracotta accent; kept as its own variable
      so it can never accidentally get swept into a future theme block. */
   --afa-brand-mark: #C8441A;
 
@@ -147,7 +145,6 @@
   --afa-text-muted: rgba(245, 245, 240, 0.5);
   /* GEN-2609-113 - top of the text ladder (absorbs 0.75-0.85). */
   --afa-text-soft: rgba(245, 245, 240, 0.8);
-  --afa-text-inverse: #F5F5F0;
 
   /* GEN-2609-074 - a real, separate role from --afa-text-secondary,
      not a duplicate to merge away: hero-subtitle text sitting directly
@@ -238,10 +235,9 @@
        ~rgb(46,32,31), luminance ~0.0172 -> --afa-error-bright needs
        luminance >= ~0.2522 for 4.5:1. #E67870 measures ~0.314, giving
        ~5.43:1 at the real 0.10 alpha and ~5.10:1 at a hypothetical 0.20
-       alpha. (For reference: the existing --afa-red-alt, #EF4444,
-       measures only ~4.16:1 against this same background and would NOT
-       pass here - confirms why GEN-2609-067 folded red-alt into
-       --afa-error rather than reusing it as a tint-legible red.) */
+       alpha. (For reference: the old --afa-red-alt, #EF4444, measured
+       only ~4.16:1 against this same background. GEN-2609-115 folded
+       its remaining text uses into --afa-error-bright and removed it.) */
   --afa-sage-bright: #7AA86E;
   --afa-error-bright: #E67870;
 

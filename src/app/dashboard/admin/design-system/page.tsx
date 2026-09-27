@@ -9,7 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
-import { CONTRAST_PAIRS, composeRgba, planRestore, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { CONTRAST_PAIRS, composeRgba, planRestore, restoreContrastFailures, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
@@ -141,6 +141,9 @@ export default function AdminDesignSystemPage() {
   // BUG-2609-059 - the version a Restore click is waiting to confirm.
   // A single accidental click used to apply site-wide immediately.
   const [confirmingRevert, setConfirmingRevert] = useState<DesignTokenVersion | null>(null)
+  // GEN-2609-115 - a restore that would take a pair below AA, waiting on
+  // the same contrast confirm a save gets.
+  const [confirmingRevertContrast, setConfirmingRevertContrast] = useState<{ id: string; failures: ContrastFailure[] } | null>(null)
   const [showHistory, setShowHistory] = useState(false)
   const [query, setQuery] = useState('')
   const [refreshing, setRefreshing] = useState(false)
@@ -152,7 +155,7 @@ export default function AdminDesignSystemPage() {
   async function load() {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/design-tokens')
+      const res = await fetch('/api/admin/design-tokens', { cache: 'no-store' })
       if (res.status === 403) {
         setForbidden(true)
         return
@@ -244,7 +247,7 @@ export default function AdminDesignSystemPage() {
       setTokens(data.tokens)
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
       showToast('Saved. Live on the next page load everywhere.', 'success')
-      loadVersionsQuiet()
+      applyVersions(data)
     } catch (err: any) {
       showToast(err.message || 'Save failed', 'error')
     } finally {
@@ -268,9 +271,16 @@ export default function AdminDesignSystemPage() {
     doSave(false, confirmContrast)
   }
 
+  // GEN-2609-115 - every write route returns the fresh version list;
+  // use it, and refetch (uncached) only if a response lacks it.
+  function applyVersions(data: { versions?: DesignTokenVersion[] }) {
+    if (Array.isArray(data.versions)) setVersions(data.versions)
+    else loadVersionsQuiet()
+  }
+
   async function loadVersionsQuiet() {
     try {
-      const res = await fetch('/api/admin/design-tokens')
+      const res = await fetch('/api/admin/design-tokens', { cache: 'no-store' })
       if (res.ok) {
         const data = await res.json()
         setVersions(data.versions)
@@ -304,7 +314,7 @@ export default function AdminDesignSystemPage() {
       setTokens(data.tokens)
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
       showToast('Reset to defaults.', 'success')
-      loadVersionsQuiet()
+      applyVersions(data)
     } catch {
       showToast('Reset failed.', 'error')
     } finally {
@@ -328,10 +338,32 @@ export default function AdminDesignSystemPage() {
     }
   }
 
-  async function handleRevert(versionId: string) {
+  // GEN-2609-115 - the restore dialog's confirm: contrast check first
+  // (same rule the API applies), then the restore itself.
+  function confirmRevert(version: DesignTokenVersion) {
+    const failures = restoreContrastFailures(planRestore(version.snapshot, tokens ?? []), tokens ?? [])
+    setConfirmingRevert(null)
+    if (failures.length > 0) {
+      setConfirmingRevertContrast({ id: version.id, failures })
+      return
+    }
+    handleRevert(version.id, false)
+  }
+
+  async function handleRevert(versionId: string, confirmContrast: boolean) {
     setSaving(true)
     try {
-      const res = await fetch(`/api/admin/design-tokens/versions/${versionId}/revert`, { method: 'POST' })
+      const res = await fetch(`/api/admin/design-tokens/versions/${versionId}/revert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmContrast }),
+      })
+      if (res.status === 409) {
+        // The live values moved since the page loaded; show the server's list.
+        const data = await res.json().catch(() => ({}))
+        setConfirmingRevertContrast({ id: versionId, failures: data.contrastFailures ?? [] })
+        return
+      }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.error || 'Revert failed.')
@@ -341,12 +373,13 @@ export default function AdminDesignSystemPage() {
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
       const skipped = data.skipped?.length ?? 0
       showToast(`Restored ${data.changed} token(s).${skipped ? ` ${skipped} out-of-range value(s) left as they are.` : ''}`, 'success')
-      loadVersionsQuiet()
+      applyVersions(data)
     } catch (err) {
       showToast(err instanceof Error && err.message ? err.message : 'Revert failed.', 'error')
     } finally {
       setSaving(false)
       setConfirmingRevert(null)
+      if (confirmContrast) setConfirmingRevertContrast(null)
     }
   }
 
@@ -519,9 +552,11 @@ export default function AdminDesignSystemPage() {
                     --afa-surface-page (near-black too) made it
                     functionally invisible. Its own small fill-solid
                     wrapper previews it in the context it's actually
-                    used in, e.g. NotificationOptIn.tsx's banner. */}
+                    used in, e.g. NotificationOptIn.tsx's banner.
+                    GEN-2609-115 - labelled so the orange box reads as
+                    intentional. */}
                 <div style={{ ...previewStyle, background: 'var(--afa-fill-solid)', padding: '10px 14px' }}>
-                  <Button variant="outline" fullWidth={false} size={36}>Outline</Button>
+                  <Button variant="outline" fullWidth={false} size={36}>Outline (on orange)</Button>
                 </div>
                 <Button variant="form-submit" fullWidth={false} size={36}>Form submit</Button>
                 <Button variant="outline-neutral" fullWidth={false} size="sm">Outline neutral</Button>
@@ -680,8 +715,17 @@ export default function AdminDesignSystemPage() {
             title="Restore this version?"
             body={<RestorePreview plan={planRestore(confirmingRevert.snapshot, tokens ?? [])} />}
             confirmLabel={saving ? 'Restoring…' : 'Yes, restore'}
-            onConfirm={() => handleRevert(confirmingRevert.id)}
+            onConfirm={() => confirmRevert(confirmingRevert)}
             onCancel={() => setConfirmingRevert(null)}
+          />
+        )}
+        {confirmingRevertContrast && (
+          <ConfirmDialog
+            title="This restore lowers text contrast"
+            body={<ContrastFailureList failures={confirmingRevertContrast.failures} />}
+            confirmLabel={saving ? 'Restoring…' : 'Restore anyway'}
+            onConfirm={() => handleRevert(confirmingRevertContrast.id, true)}
+            onCancel={() => setConfirmingRevertContrast(null)}
           />
         )}
       </DashboardShell>

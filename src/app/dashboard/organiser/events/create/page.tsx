@@ -554,7 +554,7 @@ export default function CreateEventPage() {
           </p>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>

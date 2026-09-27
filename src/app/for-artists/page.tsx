@@ -14,7 +14,7 @@ function JourneyStep({ n, title, detail }: { n: number; title: string; detail: s
         {n}
       </div>
       <div>
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 600, color: "var(--afa-text-inverse)", margin: "0 0 8px" }}>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 600, color: "var(--afa-text-primary)", margin: "0 0 8px" }}>
           {title}
         </h3>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "var(--afa-text-soft)", margin: 0, maxWidth: "560px" }}>
@@ -82,7 +82,7 @@ export default function ForArtistsPage() {
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
             {tr.forArtistsPage.journeyEyebrow}
           </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 500, color: "var(--afa-text-inverse)", margin: "0 0 40px" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 40px" }}>
             {tr.forArtistsPage.journeyHeading}
           </h2>
           {steps.map((step, i) => (
@@ -109,7 +109,7 @@ export default function ForArtistsPage() {
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
           {tr.forArtistsPage.finalCtaEyebrow}
         </div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 500, color: "var(--afa-text-inverse)", margin: "0 0 16px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 16px" }}>
           {tr.forArtistsPage.finalCtaHeading}
         </h2>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "var(--afa-text-soft)", maxWidth: "480px", margin: "0 auto 32px" }}>

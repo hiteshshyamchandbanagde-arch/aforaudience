@@ -825,7 +825,7 @@ function ProfileContent() {
             <SuccessBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
           )}
 
           <div className="afa-profile-grid">

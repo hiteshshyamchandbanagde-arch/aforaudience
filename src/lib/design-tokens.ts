@@ -111,8 +111,10 @@ export const GROUP_RANGES = {
 export const KEY_RANGES: Record<string, TokenRange> = {
   // Below ~100px a tall pill starts showing flat sides.
   "--afa-radius-pill": { min: 100, max: 9999 },
-  // Running-text roles (micro is the label size). Caption (10px badge
-  // micro-labels) stays on the group range: its default is under 11.
+  // GEN-2609-115 - caption (10px badge micro-labels) is a small-text
+  // role, not a heading: its own range, below micro's floor.
+  "--afa-text-caption": { min: 9, max: 16 },
+  // Running-text roles (micro is the label size).
   "--afa-text-micro": { min: 11, max: 24 },
   "--afa-text-small": { min: 11, max: 24 },
   "--afa-text-ui": { min: 11, max: 24 },
@@ -260,6 +262,18 @@ export function restoreNote(versionId: string, changed: number): string {
   return `Restored version ${versionId} (${changed} token(s) changed)`
 }
 
+// GEN-2609-115 - a version row with no token changes: a restore point
+// recorded after the DB was changed outside the editor (SQL applied
+// after a merge). The reason is required, one line, at most 200 chars.
+export const SNAPSHOT_REASON_MAX = 200
+
+export function snapshotNote(reason: unknown): string | null {
+  if (typeof reason !== "string") return null
+  const r = reason.replace(/\s+/g, " ").trim()
+  if (r.length === 0 || r.length > SNAPSHOT_REASON_MAX) return null
+  return `Snapshot: ${r}`
+}
+
 export function radiusOrderErrors(values: Record<string, string>, changed?: Iterable<string>): { key: string; message: string }[] {
   const changedSet = changed ? new Set(changed) : null
   const errors: { key: string; message: string }[] = []
@@ -354,11 +368,9 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-peach": "#F5A26E",
   "--afa-plum": "#7A4A8A",
   "--afa-plum-black": "#1A0A1A",
-  "--afa-red-alt": "#EF4444",
   "--afa-sage": "#4A6741",
   "--afa-social-blue": "#1D9BF0",
   "--afa-taupe": "#8A827A",
-  "--afa-terracotta": "#C8441A",
   "--afa-white": "#FFF",
   "--afa-brand-mark": "#C8441A",
   "--afa-surface-page": "#141414",
@@ -368,7 +380,6 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-text-secondary": "rgba(245, 245, 240, 0.65)",
   "--afa-text-muted": "rgba(245, 245, 240, 0.5)",
   "--afa-text-soft": "rgba(245, 245, 240, 0.8)",
-  "--afa-text-inverse": "#F5F5F0",
   "--afa-text-on-image": "rgba(255, 255, 255, 0.5)",
   "--afa-fill-solid": "#FF5A36",
   "--afa-border-resting": "rgba(245, 245, 240, 0.15)",
@@ -555,7 +566,7 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: "--afa-error-bright", bg: "--afa-error-tint", over: "--afa-surface-page", label: "Error badge text on its tint" },
   { fg: "--afa-amber", bg: "--afa-amber-tint", over: "--afa-surface-page", label: "Amber badge text on its tint" },
   { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Primary button text on fill" },
-  { fg: "--afa-cream", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
+  { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
   { fg: "--afa-cream", bg: "--afa-sage", label: "Success button text on sage" },
 ]
 
@@ -585,4 +596,11 @@ export function contrastFailures(before: Record<string, string>, after: Record<s
     out.push({ label: pair.label, fg: pair.fg, bg: pair.bg, min, before: b, after: a })
   }
   return out
+}
+
+// GEN-2609-115 - a restore gets the same contrast check as a save:
+// live values before, the restore plan's result after. Shared by the
+// restore dialog and the revert API so the two can't disagree.
+export function restoreContrastFailures(plan: RestorePlan, live: { key: string; value: string }[]): ContrastFailure[] {
+  return contrastFailures(Object.fromEntries(live.map((t) => [t.key, t.value])), plan.after)
 }

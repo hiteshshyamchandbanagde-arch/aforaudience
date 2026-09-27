@@ -127,7 +127,7 @@ export default function VenueOwnerEditPage() {
             <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           <Card style={{ padding: '28px', marginBottom: '20px' }}>

@@ -442,21 +442,17 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
       // 4 files (own padding/font-size/font-weight, not primary's).
       // Real, repeated pattern - same discipline as the `outline`
       // variant added in GEN-2609-047, not invented from nothing.
-      // `color` was hardcoded 'white' at every call site - NOT swapped
-      // to `--afa-on-fill-solid` (that's `primary`'s text token here,
-      // but it resolves to `--afa-brown-black` / #1A1000, a near-black
-      // that would be a real, debatable text-color change on this
-      // background, not a safe extraction - caught only by checking the
-      // token's actual resolved value in globals.css before using it).
-      // `--afa-cream` (#F7F3EE) is used instead: this repo's own
-      // documented "primary text-on-dark" token, visually
-      // indistinguishable from literal white against `--afa-fill-solid`,
-      // so this removes the hardcoded literal with no visible change.
+      // GEN-2609-115 - text is `--afa-on-fill-solid`, the same as
+      // `primary`: a deliberate AA fix, and a visible change (light text
+      // becomes near-black). The earlier `--afa-cream` (standing in for
+      // the call sites' old hardcoded white) measured 2.81:1 on
+      // `--afa-fill-solid`, the only failing pair in the editor's
+      // contrast panel; `--afa-on-fill-solid` is 6.05:1.
       return {
         display: 'block',
         width: fullWidth ? '100%' : undefined,
         background: 'var(--afa-fill-solid)',
-        color: 'var(--afa-cream)',
+        color: 'var(--afa-on-fill-solid)',
         padding: 'var(--afa-space-4)',
         border: 'none',
         borderRadius: 'var(--afa-radius-md)',

@@ -10,13 +10,14 @@
 // Pure data, no imports beyond types: safe for the admin page (a Client
 // Component).
 
-export type ColorSection = "surfaces" | "text" | "brand" | "status" | "tints" | "overlays"
+export type ColorSection = "surfaces" | "text" | "brand" | "status" | "seatmap" | "tints" | "overlays"
 
 export const COLOR_SECTIONS: { id: ColorSection; label: string }[] = [
   { id: "surfaces", label: "Surfaces" },
   { id: "text", label: "Text" },
   { id: "brand", label: "Brand & actions" },
   { id: "status", label: "Status tones" },
+  { id: "seatmap", label: "Seat map" },
   { id: "tints", label: "Tints & borders" },
   { id: "overlays", label: "Overlays & shadows" },
 ]
@@ -40,9 +41,8 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-text-soft": { section: "text", label: "Soft text", usedFor: "quotes, stat values, slightly quieter body copy" },
   "--afa-text-secondary": { section: "text", label: "Secondary text", usedFor: "descriptions, supporting lines, inactive tabs" },
   "--afa-text-muted": { section: "text", label: "Muted text", usedFor: "timestamps, helper text, empty states" },
-  "--afa-text-inverse": { section: "text", label: "Text on dark hero", usedFor: "headings on the home, For Artists and Four Rooms dark panels" },
   "--afa-text-on-image": { section: "text", label: "Text on photo", usedFor: "subtitles over hero photos (Organisers, Venue Owners, Wall of Fame)" },
-  "--afa-cream": { section: "text", label: "Cream text", usedFor: "text on coloured fills (success and form-submit buttons, seat-map markers)" },
+  "--afa-cream": { section: "text", label: "Cream text", usedFor: "text on coloured fills (success button, critical badges, seat-map markers)" },
   "--afa-white": { section: "text", label: "White", usedFor: "text in your own message bubbles" },
 
   // --- Brand & actions
@@ -50,16 +50,14 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-fill-solid": { section: "brand", label: "Primary button fill", usedFor: "main call-to-action buttons, selected states" },
   "--afa-on-fill-solid": { section: "brand", label: "Primary button text", usedFor: "text and icons on the primary button fill" },
   "--afa-brand-mark": { section: "brand", label: "Logo \"A\"", usedFor: "the coloured A in the AforAudience wordmark" },
-  "--afa-terracotta": { section: "brand", label: "Terracotta (legacy)", usedFor: "no live style reads it; only a code comment in SiteNav mentions it" },
   "--afa-peach": { section: "brand", label: "Peach", usedFor: "the eyebrow label on the home hero rotator" },
   "--afa-social-blue": { section: "brand", label: "Verified-badge blue", usedFor: "the verified tick on artist profiles" },
 
   // --- Status tones
   "--afa-sage": { section: "status", label: "Success green", usedFor: "success button fill, confirmed borders" },
   "--afa-sage-bright": { section: "status", label: "Success text", usedFor: "success badge and status text on dark" },
-  "--afa-error": { section: "status", label: "Error red", usedFor: "error fills and borders, offline banner" },
+  "--afa-error": { section: "status", label: "Error red", usedFor: "error fills and borders, offline banner, critical-priority badges" },
   "--afa-error-bright": { section: "status", label: "Error text", usedFor: "error messages and error badge text on dark" },
-  "--afa-red-alt": { section: "status", label: "Alert red", usedFor: "load-error messages, critical-priority badges" },
   "--afa-gold": { section: "status", label: "Featured gold", usedFor: "featured-card and top-rank borders" },
   "--afa-green-deep": { section: "status", label: "Delivered green", usedFor: "delivered / rising / retry-ok labels" },
   "--afa-green-dark": { section: "status", label: "Auth success green", usedFor: "success notices on login, register and verify email" },
@@ -71,9 +69,11 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-gray-taupe": { section: "status", label: "Refunded grey", usedFor: "Refunded status on venue bookings" },
   "--afa-taupe": { section: "status", label: "Quiet label taupe", usedFor: "small meta labels on admin feedback (\"via chatbot\")" },
   "--afa-brown-gold": { section: "status", label: "Warning note", usedFor: "a warning note on the organiser event edit page" },
-  "--afa-blue-dark": { section: "status", label: "Seat map: blue", usedFor: "seat-map tier colour and Gate marker" },
-  "--afa-plum": { section: "status", label: "Seat map: plum", usedFor: "seat-map tier colour and stage-distance marker" },
-  "--afa-brown-dark": { section: "status", label: "Seat map: brown", usedFor: "seat-map tier colour" },
+
+  // --- Seat map
+  "--afa-blue-dark": { section: "seatmap", label: "Blue tier", usedFor: "seat-map tier colour and Gate marker" },
+  "--afa-plum": { section: "seatmap", label: "Plum tier", usedFor: "seat-map tier colour and stage-distance marker" },
+  "--afa-brown-dark": { section: "seatmap", label: "Brown tier", usedFor: "seat-map tier colour" },
 
   // --- Tints & borders
   "--afa-border-resting": { section: "tints", label: "Default border", usedFor: "card, input and divider borders" },

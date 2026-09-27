@@ -154,7 +154,7 @@ export default function OrganiserDashboard() {
           </div>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
           )}
 
           {events.length === 0 ? (
