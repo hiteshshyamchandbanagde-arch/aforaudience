@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
@@ -72,9 +72,19 @@ function VerifyPhoneInner() {
     await hookSendCode(phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>)
   }
 
+  // BUG-2609-063 - Verify no longer disables on a short code (SMS autofill
+  // may not fire onChange); the code is read and checked on submit.
+  const otpRef = useRef<HTMLInputElement>(null)
+
   const verifyCode = async () => {
-    if (!phone || !userId) return
-    const ok = await hookVerifyCode(phone, userId, otpCode, tr.registerPage.invalidCodeFallback)
+    if (!phone || !userId || submitting) return
+    const code = (otpRef.current?.value ?? otpCode).trim()
+    setOtpCode(code)
+    if (code.length !== 6) {
+      setError(tr.authCommon.enterSixDigitCode); otpRef.current?.focus()
+      return
+    }
+    const ok = await hookVerifyCode(phone, userId, code, tr.registerPage.invalidCodeFallback)
     // hookVerifyCode already refreshed the session (isVerified) via
     // update() - continue wherever the user was trying to go (e.g. back
     // to checkout) only once that's confirmed successful.
@@ -130,6 +140,9 @@ function VerifyPhoneInner() {
               ) : (
                 <>
                   <input
+                    ref={otpRef}
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     maxLength={6}
@@ -140,8 +153,8 @@ function VerifyPhoneInner() {
                   <Button
                     variant="form-submit"
                     onClick={verifyCode}
-                    disabled={submitting || otpCode.length !== 6}
-                    style={{ opacity: submitting || otpCode.length !== 6 ? 0.6 : 1, marginBottom: '10px' }}
+                    disabled={submitting}
+                    style={{ opacity: submitting ? 0.6 : 1, marginBottom: '10px' }}
                   >
                     {submitting ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
                   </Button>

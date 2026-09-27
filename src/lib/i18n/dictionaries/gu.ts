@@ -662,6 +662,11 @@ const gu: Dictionary = {
     showPassword: "પાસવર્ડ બતાવો",
     hidePassword: "પાસવર્ડ છુપાવો",
     accountSuspendedMessage: "તમારું ખાતું સ્થગિત કરવામાં આવ્યું છે. જો તમને લાગે કે આ ભૂલ છે, તો સપોર્ટનો સંપર્ક કરો.",
+    enterIdentifier: "તમારો ઇમેઇલ અથવા ફોન દાખલ કરો",
+    enterPassword: "તમારો પાસવર્ડ દાખલ કરો",
+    enterNewPassword: "નવો પાસવર્ડ દાખલ કરો",
+    enterEmail: "તમારો ઇમેઇલ દાખલ કરો",
+    enterSixDigitCode: "6-અંકનો કોડ દાખલ કરો",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "બધા ફીલ્ડ્સ જરૂરી છે",

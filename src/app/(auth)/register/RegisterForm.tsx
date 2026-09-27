@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
@@ -212,6 +212,10 @@ export default function RegisterForm() {
   const [fullPhone, setFullPhone] = useState<string | null>(null)
   const [otpCode, setOtpCode] = useState("")
   const [devOtp, setDevOtp] = useState<string | null>(null) // only ever set in QA
+  // BUG-2609-063 - Verify no longer disables on a short code (SMS autofill
+  // may not fire onChange); the code is read and checked on submit.
+  const otpRef = useRef<HTMLInputElement>(null)
+  const formCardRef = useRef<HTMLDivElement>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -220,7 +224,16 @@ export default function RegisterForm() {
   }
 
   const handleRegister = async () => {
-    if (form.password !== form.confirm) {
+    if (loading) return
+    // BUG-2609-063 - use what's actually in the inputs: autofill can fill
+    // them without firing onChange, leaving `form` state behind.
+    const live = { ...form }
+    for (const key of Object.keys(live) as (keyof typeof live)[]) {
+      const el = formCardRef.current?.querySelector<HTMLInputElement>(`input[name="${key}"]`)
+      if (el) live[key] = el.value
+    }
+    setForm(live)
+    if (live.password !== live.confirm) {
       setError(tr.registerPage.passwordsDontMatch); return
     }
     if (usernameStatus === "taken") {
@@ -229,7 +242,7 @@ export default function RegisterForm() {
     if (usernameStatus === "invalid") {
       setFieldErrors({ username: tr.authErrors.USERNAME_INVALID }); return
     }
-    if (!/^\d{10}$/.test(form.phoneNumber)) {
+    if (!/^\d{10}$/.test(live.phoneNumber)) {
       setFieldErrors({ phone: tr.registerPage.invalidPhoneNumber }); return
     }
 
@@ -237,18 +250,18 @@ export default function RegisterForm() {
     setError("")
     setFieldErrors({})
 
-    const phone = `+91${form.phoneNumber}`
+    const phone = `+91${live.phoneNumber}`
 
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName: form.fullName,
-          username: form.username,
-          email: form.email,
+          fullName: live.fullName,
+          username: live.username,
+          email: live.email,
           phone,
-          password: form.password,
+          password: live.password,
           intendedRole,
         })
       })
@@ -291,13 +304,20 @@ export default function RegisterForm() {
   }
 
   const handleVerifyOtp = async () => {
+    if (loading) return
+    const code = (otpRef.current?.value ?? otpCode).trim()
+    setOtpCode(code)
+    if (code.length !== 6) {
+      setError(tr.authCommon.enterSixDigitCode); otpRef.current?.focus()
+      return
+    }
     setLoading(true)
     setError("")
     try {
       const res = await fetch("/api/auth/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: fullPhone, userId, code: otpCode }),
+        body: JSON.stringify({ phone: fullPhone, userId, code }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -362,6 +382,9 @@ export default function RegisterForm() {
 
             <label style={labelStyle}>{tr.registerPage.enterCodeLabelTemplate.replace('{phone}', fullPhone ?? '')}</label>
             <input
+              ref={otpRef}
+              autoComplete="one-time-code"
+              inputMode="numeric"
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value)}
               maxLength={6}
@@ -372,7 +395,7 @@ export default function RegisterForm() {
             <Button
               variant="form-submit"
               onClick={handleVerifyOtp}
-              disabled={loading || otpCode.length !== 6}
+              disabled={loading}
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
             </Button>
@@ -403,7 +426,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
+        <div ref={formCardRef} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
           {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - new, above Full
               Name per docs/design.md. QST-2607-009 backend is merged so the
               call is wired for real, but it only actually completes once

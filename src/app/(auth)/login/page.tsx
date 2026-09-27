@@ -1,5 +1,5 @@
 "use client"
-import { useState, Suspense } from "react"
+import { useState, useRef, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
@@ -60,12 +60,40 @@ function LoginForm() {
   // missed in that PR. Same pattern, applied here as a same-day follow-up.
   const [showPassword, setShowPassword] = useState(false)
 
+  // BUG-2609-063 - Chrome autofill puts saved credentials into the inputs
+  // without firing onChange until the user interacts with the page, so
+  // state can still be "" while the fields visibly hold a value. The submit
+  // buttons used to disable on empty state, which left Sign In dead for
+  // anyone with a saved password. Now they only disable while a request is
+  // in flight, and each handler reads the real DOM value on submit.
+  const identifierRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const otpRef = useRef<HTMLInputElement>(null)
+  const [invalidField, setInvalidField] = useState<"identifier" | "password" | "otp" | null>(null)
+
+  // Falls back to state when the input isn't rendered (the identifier
+  // during OTP verify, e.g. for Resend code).
+  const readInput = (ref: React.RefObject<HTMLInputElement | null>, fallback: string, set: (v: string) => void) => {
+    const value = ref.current ? ref.current.value : fallback
+    if (value !== fallback) set(value)
+    return value
+  }
+  const flagEmpty = (field: "identifier" | "password" | "otp", ref: React.RefObject<HTMLInputElement | null>, message: string) => {
+    setError(message); setInvalidField(field); ref.current?.focus()
+  }
+
   const handleLogin = async () => {
+    if (loading) return
+    const id = readInput(identifierRef, identifier, setIdentifier).trim()
+    const pw = readInput(passwordRef, password, setPassword)
+    setInvalidField(null)
+    if (!id) return flagEmpty("identifier", identifierRef, tr.authCommon.enterIdentifier)
+    if (!pw) return flagEmpty("password", passwordRef, tr.authCommon.enterPassword)
     setLoading(true); setError("")
     try {
       const result = await signIn("credentials", {
-        identifier: identifier.trim(),
-        password,
+        identifier: id,
+        password: pw,
         redirect: false,
       })
       if (result?.error) {
@@ -88,12 +116,16 @@ function LoginForm() {
   }
 
   const handleRequestOtp = async () => {
+    if (loading) return
+    const id = readInput(identifierRef, identifier, setIdentifier).trim()
+    setInvalidField(null)
+    if (!id) return flagEmpty("identifier", identifierRef, tr.authCommon.enterIdentifier)
     setLoading(true); setError("")
     try {
       const res = await fetch("/api/auth/otp/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ purpose: "LOGIN", identifier: identifier.trim() }),
+        body: JSON.stringify({ purpose: "LOGIN", identifier: id }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -116,11 +148,15 @@ function LoginForm() {
   }
 
   const handleVerifyOtp = async () => {
+    if (loading) return
+    const code = readInput(otpRef, otpCode, setOtpCode).trim()
+    setInvalidField(null)
+    if (code.length !== 6) return flagEmpty("otp", otpRef, tr.authCommon.enterSixDigitCode)
     setLoading(true); setError("")
     try {
       const result = await signIn("otp-login", {
         identifier: identifier.trim(),
-        code: otpCode,
+        code,
         redirect: false,
       })
       if (result?.error) {
@@ -192,8 +228,12 @@ function LoginForm() {
               {tr.loginPage.identifierLabel}
             </label>
             <input
+              ref={identifierRef}
+              name="username"
+              autoComplete="username"
+              aria-invalid={invalidField === "identifier" || undefined}
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              onChange={(e) => { setIdentifier(e.target.value); setInvalidField(null) }}
               placeholder={tr.loginPage.identifierPlaceholder}
               onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
               style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
@@ -209,10 +249,14 @@ function LoginForm() {
               </label>
               <div style={{ position: "relative" }}>
                 <input
+                  ref={passwordRef}
+                  name="password"
+                  autoComplete="current-password"
+                  aria-invalid={invalidField === "password" || undefined}
                   type={showPassword ? "text" : "password"}
                   placeholder={tr.loginPage.passwordPlaceholder}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setInvalidField(null) }}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                   style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                 />
@@ -230,7 +274,7 @@ function LoginForm() {
             <Button
               variant="form-submit"
               onClick={handleLogin}
-              disabled={loading || !identifier || !password}
+              disabled={loading}
             >
               {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
             </Button>
@@ -249,7 +293,7 @@ function LoginForm() {
             <Button
               variant="form-submit"
               onClick={handleRequestOtp}
-              disabled={loading || !identifier}
+              disabled={loading}
             >
               {loading ? tr.loginPage.sendingEllipsis : tr.loginPage.sendCodeButton}
             </Button>
@@ -270,8 +314,12 @@ function LoginForm() {
                 {tr.loginPage.enterCodeLabel}
               </label>
               <input
+                ref={otpRef}
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                aria-invalid={invalidField === "otp" || undefined}
                 value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
+                onChange={(e) => { setOtpCode(e.target.value); setInvalidField(null) }}
                 maxLength={6}
                 onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
                 style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
@@ -280,7 +328,7 @@ function LoginForm() {
             <Button
               variant="form-submit"
               onClick={handleVerifyOtp}
-              disabled={loading || otpCode.length !== 6}
+              disabled={loading}
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.loginPage.verifyAndSignInButton}
             </Button>

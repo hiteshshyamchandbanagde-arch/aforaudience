@@ -662,6 +662,11 @@ const ta: Dictionary = {
     showPassword: "கடவுச்சொல்லைக் காட்டு",
     hidePassword: "கடவுச்சொல்லை மறை",
     accountSuspendedMessage: "உங்கள் கணக்கு இடைநிறுத்தப்பட்டுள்ளது. இது தவறு என்று நினைத்தால் ஆதரவைத் தொடர்பு கொள்ளுங்கள்.",
+    enterIdentifier: "உங்கள் மின்னஞ்சல் அல்லது தொலைபேசியை உள்ளிடவும்",
+    enterPassword: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்",
+    enterNewPassword: "புதிய கடவுச்சொல்லை உள்ளிடவும்",
+    enterEmail: "உங்கள் மின்னஞ்சலை உள்ளிடவும்",
+    enterSixDigitCode: "6-இலக்க குறியீட்டை உள்ளிடவும்",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "அனைத்து புலங்களும் தேவை",

@@ -662,6 +662,11 @@ const kn: Dictionary = {
     showPassword: "ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ",
     hidePassword: "ಪಾಸ್‌ವರ್ಡ್ ಮರೆಮಾಡಿ",
     accountSuspendedMessage: "ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಅಮಾನತುಗೊಳಿಸಲಾಗಿದೆ. ಇದು ತಪ್ಪು ಎಂದು ನೀವು ಭಾವಿಸಿದರೆ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    enterIdentifier: "ನಿಮ್ಮ ಇಮೇಲ್ ಅಥವಾ ಫೋನ್ ನಮೂದಿಸಿ",
+    enterPassword: "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+    enterNewPassword: "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+    enterEmail: "ನಿಮ್ಮ ಇಮೇಲ್ ನಮೂದಿಸಿ",
+    enterSixDigitCode: "6-ಅಂಕಿಯ ಕೋಡ್ ನಮೂದಿಸಿ",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯವಿದೆ",

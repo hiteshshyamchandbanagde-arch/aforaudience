@@ -671,6 +671,11 @@ const de: Dictionary = {
     showPassword: "Passwort anzeigen",
     hidePassword: "Passwort verbergen",
     accountSuspendedMessage: "Dein Konto wurde gesperrt. Kontaktiere den Support, wenn du denkst, dass dies ein Fehler ist.",
+    enterIdentifier: "Gib deine E-Mail-Adresse oder Telefonnummer ein",
+    enterPassword: "Gib dein Passwort ein",
+    enterNewPassword: "Gib ein neues Passwort ein",
+    enterEmail: "Gib deine E-Mail-Adresse ein",
+    enterSixDigitCode: "Gib den 6-stelligen Code ein",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "Alle Felder sind erforderlich",

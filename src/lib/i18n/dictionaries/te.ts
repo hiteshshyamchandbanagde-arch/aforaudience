@@ -662,6 +662,11 @@ const te: Dictionary = {
     showPassword: "పాస్‌వర్డ్ చూపించండి",
     hidePassword: "పాస్‌వర్డ్ దాచండి",
     accountSuspendedMessage: "మీ ఖాతా సస్పెండ్ చేయబడింది. ఇది తప్పు అని మీరు భావిస్తే సపోర్ట్‌ను సంప్రదించండి.",
+    enterIdentifier: "మీ ఇమెయిల్ లేదా ఫోన్‌ను నమోదు చేయండి",
+    enterPassword: "మీ పాస్‌వర్డ్‌ను నమోదు చేయండి",
+    enterNewPassword: "కొత్త పాస్‌వర్డ్‌ను నమోదు చేయండి",
+    enterEmail: "మీ ఇమెయిల్‌ను నమోదు చేయండి",
+    enterSixDigitCode: "6-అంకెల కోడ్‌ను నమోదు చేయండి",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "అన్ని ఫీల్డ్‌లు అవసరం",
