@@ -1,3 +1,11 @@
+# Session Handoff — 26 Sept 2026, part 11 (chat — editor reviewed live, GEN-2609-115 dispatched)
+
+- Hitesh's editor screenshots: guardrails UI live; cache refresh worked (muted 0.5, contrast panel 4.95:1). Click-through steps (bad value, contrast confirm, refresh, restore) not yet done: no version rows since 00:14 UTC.
+- **Correction to part 10:** primary buttons already use dark text on orange (6.05:1). The only failing pair is `form-submit` (cream on fill, 2.81:1, 4 auth pages), so there's no brand decision to make. Folded into GEN-2609-115 as a text-colour fix.
+- Queued for CC: `docs/cc-dispatches/cc-prompt-token-cleanup-115.md` (delete terracotta; fold text-inverse → primary and red-alt → error-bright; Seat map subsection; restore contrast check; form-submit text; caption range 9–16px; "Outline (on orange)" preview label).
+
+---
+
 # Session Handoff — 26 Sept 2026, part 10 (chat — #709 guardrails merged)
 
 - **#709** (GEN-2609-108 + BUG-2609-061) squash-merged, `qa` @ `e0ebede`. Merge gated on check-runs **and** Vercel commit status (the new rule). READY, 0 runtime errors. Both tickets → IN_TEST. Token cache now expires every 5 min, so the manual editor-save refresh is no longer needed.
