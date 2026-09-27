@@ -378,17 +378,13 @@ export default function FeedbackDetailPanel({
                 </Button>
                 {DEPLOY_STAGES.map((ds) => (
                   <Button
-                    variant="bare"
+                    variant="toggle-pill"
+                    size="pill-sm"
+                    fullWidth={false}
                     key={ds}
+                    selected={item.deployStage === ds}
                     disabled={busy}
                     onClick={() => onSetDeployStage(ds)}
-                    style={{
-                      fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)',
-                      border: item.deployStage === ds ? 'none' : '1px solid var(--afa-border-resting)',
-                      background: item.deployStage === ds ? 'var(--afa-sage)' : undefined,
-                      color: item.deployStage === ds ? 'white' : 'var(--afa-text-primary)',
-                      cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
-                    }}
                   >
                     {labelize(ds)}
                   </Button>

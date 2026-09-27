@@ -296,10 +296,12 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           </Button>
           {zoom > 1 && (
             <Button
-              variant="bare"
+              variant="outline-neutral"
+              size="sm"
+              fullWidth={false}
               type="button"
               onClick={resetView}
-              style={{ padding: '0 10px', height: '28px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-tint-20)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-micro)', fontWeight: 600 }}
+              style={{ height: '28px' }}
             >
               Reset
             </Button>
