@@ -50,7 +50,6 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-fill-solid": { section: "brand", label: "Primary button fill", usedFor: "main call-to-action buttons, selected states" },
   "--afa-on-fill-solid": { section: "brand", label: "Primary button text", usedFor: "text and icons on the primary button fill" },
   "--afa-brand-mark": { section: "brand", label: "Logo \"A\"", usedFor: "the coloured A in the AforAudience wordmark" },
-  "--afa-terracotta": { section: "brand", label: "Terracotta (legacy)", usedFor: "no live style reads it; only a code comment in SiteNav mentions it" },
   "--afa-peach": { section: "brand", label: "Peach", usedFor: "the eyebrow label on the home hero rotator" },
   "--afa-social-blue": { section: "brand", label: "Verified-badge blue", usedFor: "the verified tick on artist profiles" },
 

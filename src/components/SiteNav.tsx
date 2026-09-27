@@ -54,7 +54,7 @@ function getDashboardLink(role?: string) {
 // Takes the translated roles dict (t.roles) rather than hardcoding English
 // - Multi-language Phase 1 deepening.
 //
-// BUG-2608-081: this badge used to reuse var(--afa-terracotta) on
+// BUG-2608-081: this badge used to reuse the old terracotta accent on
 // a faint terracotta tint - the exact same color the active nav link uses
 // (see primaryLinks' isActive styling below) - so it read as a live,
 // clickable nav state ("Hi, Nikita  Venue Owner" looked like "Venue

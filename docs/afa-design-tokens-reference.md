@@ -26,6 +26,12 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-text-on-image:   rgba(255, 255, 255, 0.5);  /* GEN-2609-074 — hero-subtitle text over a PHOTOGRAPH, not a flat surface; a cooler/purer white than --afa-text-secondary's warm cream tint, tuned for legibility across a photo's unpredictable luminance rather than reused for token-count tidiness */
 ```
 
+**Removed (GEN-2609-115, 27 Sep).** Don't reintroduce these; use the replacement.
+
+| Removed | Use instead | Why |
+|---|---|---|
+| `--afa-terracotta` (`#C8441A`) | `--afa-fill-solid` for actions, `--afa-brand-mark` for the logo "A" | 0 live uses since Phase 2c |
+
 **GEN-2609-075 — radius + button-padding scale (new tokens, admin-controlled).** Promoted out of `Button.tsx`'s `SIZE_CHROME`/per-variant `borderRadius`, where these were previously plain hardcoded numbers, never a CSS custom property:
 
 ```css

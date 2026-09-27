@@ -93,17 +93,16 @@
   --afa-sage: #4A6741;
   --afa-social-blue: #1D9BF0;
   --afa-taupe: #8A827A;
-  --afa-terracotta: #C8441A;
   --afa-white: #FFF;
 
   /* Fixed brand-mark color for the "A" in the AforAudience wordmark -
-     deliberately NOT --afa-terracotta and NEVER overridden by any theme
+     deliberately NOT --afa-fill-solid and NEVER overridden by any theme
      block below. The logo should read as the same brand color everywhere
      (nav, hero, auth pages, app icon, splash screen, email) regardless
      of which accent theme a user has picked - otherwise the one mark
      meant to be instantly recognizable would shift color depending on a
      UI preference, which undermines the point of a fixed brand mark.
-     Same hex as the default terracotta today; kept as its own variable
+     Same hex as the retired terracotta accent; kept as its own variable
      so it can never accidentally get swept into a future theme block. */
   --afa-brand-mark: #C8441A;
 

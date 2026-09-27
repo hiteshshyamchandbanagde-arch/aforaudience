@@ -358,7 +358,6 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-sage": "#4A6741",
   "--afa-social-blue": "#1D9BF0",
   "--afa-taupe": "#8A827A",
-  "--afa-terracotta": "#C8441A",
   "--afa-white": "#FFF",
   "--afa-brand-mark": "#C8441A",
   "--afa-surface-page": "#141414",
