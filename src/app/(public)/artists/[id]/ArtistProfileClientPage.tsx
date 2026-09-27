@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import Button from "@/components/ui/Button"
+import { SELECTED, SELECTED_BG } from "@/lib/statusStyle"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import CorporateInquiryModal from "@/components/CorporateInquiryModal"
 import Photo from "@/components/Photo"
@@ -517,13 +518,14 @@ export default function ArtistProfilePage({
                   style={{
                     width: "34px", height: "34px", borderRadius: "50%",
                     border: "1.5px solid var(--afa-text-muted)",
-                    background: notifyEnabled ? "var(--afa-fill-tint)" : "transparent",
+                    // GEN-2609-118 - notifications on is a state: amber tint, not orange.
+                    background: notifyEnabled ? SELECTED_BG : "transparent",
                     cursor: followBusy ? "default" : "pointer",
                     opacity: followBusy ? 0.6 : 1,
                   }}
                 >
                   {notifyEnabled ? (
-                    <BellIcon style={{ width: "15px", height: "15px", color: "var(--afa-amber)" }} />
+                    <BellIcon style={{ width: "15px", height: "15px", color: SELECTED }} />
                   ) : (
                     <BellOffIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }} />
                   )}
