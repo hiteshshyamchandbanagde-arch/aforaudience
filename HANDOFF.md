@@ -1,3 +1,15 @@
+# Session Handoff — 27 Sept 2026, part 6 (chat — #711 opened, Vercel builds blocked by Google Fonts)
+
+- **GEN-2609-099 was already merged** (#697, 22 Sep); a stale handoff was re-pasted. Nothing to do there. Its shorthand follow-up is GEN-2609-100 (RESOLVED).
+- **#711 GEN-2609-110** opened, head `5b1065a`, mergeable, `design-tokens` green. **Vercel red**, not caused by the branch: the `next/font/google` fetch fails (Noto Gujarati, then Malayalam on a forced redeploy). `qa@fda34f1` (docs-only) is also red; `9523344` was READY. Per Rule 4 (two fails) no more re-runs. **Not merged.**
+- **BUG-2609-062** raised to HIGH, BUILD_QUEUE. Scope corrected: 11 families (4 Latin + their 4 Phys duplicates + 7 Noto Indic), not 4. Dispatch: `docs/cc-dispatches/cc-prompt-local-fonts-062.md`. **Run this first; it blocks every preview.**
+- **#711 review decisions** (Hitesh delegated them to chat): accepted the support-widget underlined tabs, /venues amber underline, rate-type match, Guided Setup off-state and mono sort headers. Fix: locale-code tap target (≥ pre-#711 area, never under 24×24) and seat-picker Reset matching the −/+ buttons. Check `scrim` focus. Dispatch: `docs/cc-dispatches/cc-prompt-button-phase3-110-amend.md`. **Run after 062 has merged** (it rebases #711 onto the fixed `qa`).
+- **BUG-2609-064** logged (LOW): hydration warning from the intro splash in `layout.tsx`.
+- After #711 merges: record the button variants and the tab decision in `docs/design.md` and the tokens reference.
+- Order: 062 → merge → 110-amend → merge #711 → then BUG-2609-063 (autofill Sign In) + the 13 font-size literals → spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 5 (CC — GEN-2609-110 Button phase 3, pushed, needs merge)
 
 Branch `feat/gen-2609-110-button-phase3` off `origin/qa` at `9523344`. **Not merged.** No DB changes.
