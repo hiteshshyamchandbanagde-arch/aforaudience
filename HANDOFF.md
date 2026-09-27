@@ -1,3 +1,150 @@
+# Session Handoff — 27 Sept 2026, part 16 (CC — GEN-2609-118 colour rule built, pushed, NOT merged)
+
+**Branch:** `feat/gen-2609-118-colour-rule`, off `4f23b73`, 4 commits:
+- `19a2e42`: tokens and the central helpers (Button, statusStyle), admin meta, reference doc
+- `c500800`: straggler sweep and the seat legend
+- `2cd2862`: demotions to outline, coverage, ratchet baseline
+- `f27f185`: saved-event heart
+
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-118-colour-rule?expand=1
+
+Needs: Vercel preview check, merge, then the `DesignToken` INSERT below.
+
+## Verify
+- **Checks:** tsc clean. `next build` passes. `check-design-tokens.js` reports no new literals.
+- **Ratchet:** every category at or below baseline. Spacing went 1866 → 1864, because the seat legend swatches now use tokens; the baseline was lowered.
+- **Tests:** self-tests 48/48 (design-tokens), 80/80 (check-design-tokens), 63/63 (migrate-tokens), plus ticket-code and username.
+- **eslint:** 80 errors in the touched files, all pre-existing. None is on a changed line (checked by intersecting the eslint output with the diff hunks).
+- **Dev check on :3100:** `/events` mobile filter sheet. The selected pill computes to amber text `rgb(201,151,58)` on `rgba(201,151,58,0.08)` with a `rgba(201,151,58,0.4)` border. Apply stays orange. Screenshot checked.
+- **Not checked live:**
+  - SeatPicker (needs an event with a seat map)
+  - Seat Map Builder, venue edit, admin editor (need auth)
+
+## Contrast (guard pairs added to `CONTRAST_PAIRS`)
+
+| Pair | Ratio | Min |
+|---|---|---|
+| `--afa-selected` on `--afa-selected-bg` over page (NEW guard pair) | **6.26** | 4.5 |
+| `--afa-selected` on `--afa-selected-bg` over raised (NEW guard pair) | **5.52** | 4.5 |
+| selected text on page, no tint (tabs, text-toggle) | 6.99 | 4.5 |
+| selected solid border vs raised (toggle-box, card, seat ring) | 6.26 | 3 (non-text) |
+| `--afa-selected-border` (0.4) vs page, the pill edge | 2.12 | 3 (non-text) |
+| *light, for reference:* amber on cream / on white | 2.38 / 2.63 | 4.5 |
+
+- **Pill edge (2.12):** it doesn't carry the state alone, because the text colour and the tint change too. The old orange pill edge was 0.25 alpha, which is fainter still.
+- **Light surfaces:** no selected site sits on a light surface today. The only cream background in `src/` is the ticket QR tile, so there's no border-plus-dark-text fallback to build. If a light surface is added later, the two guard pairs will fail and block the save.
+
+## DesignToken INSERT (NOT run — chat runs it after merge)
+```sql
+BEGIN;
+INSERT INTO "DesignToken" ("key", "value", "group", "type", "locked", "updatedAt") VALUES
+('--afa-selected',        'var(--afa-amber)',          'color', 'color', false, now()),
+('--afa-selected-bg',     'rgba(201, 151, 58, 0.08)', 'color', 'color', false, now()),
+('--afa-selected-border', 'rgba(201, 151, 58, 0.4)',  'color', 'color', false, now())
+ON CONFLICT ("key") DO NOTHING;
+COMMIT;
+```
+
+Until the rows exist, the site renders from the `globals.css` defaults (identical to amber), and the admin editor has nothing to edit. All 3 are unlocked. They appear under a new colour subsection, **"Selected state"**.
+
+## Classification of every `--afa-fill-solid` / fill-tint hit
+
+**Selected → moved to `--afa-selected*`**
+
+| Site | What |
+|---|---|
+| `ui/Button.tsx` `toggle-pill` / `toggle-box` / `card` | Selected tint, border and text. `tab`, `tab-display`, `text-toggle` and `menu-row` were already amber and now read `SELECTED*` too. Covers the filter sheet, facilities, rate type, register initials chips, feedback/status filters, level switches, and seating/path cards. |
+| `RangePicker.tsx` | Chosen period |
+| `SeatPicker.tsx` | Selected seat: tint plus amber ring and number (was solid orange). Legend swatch. |
+| `venue/[id]/seat-map/page.tsx` | Level-tab × (2px border + tint), the Recommended card's icon tile and label, selected seat outline, selected marker outline |
+| `venue/create/page.tsx` | Path card icon tile and "✓ Selected" label |
+| `artists/[id]/ArtistProfileClientPage.tsx` | Notifications-on bell toggle (was `--afa-fill-tint`) |
+| `EventSaveButton.tsx` | Saved heart. **Not on the known list:** it's an on-state, so I moved it. Revert if Hitesh wants the heart orange. |
+
+**Secondary action → demoted to `outline-neutral`**
+
+| Site | Primary that stays orange |
+|---|---|
+| `organiser/page.tsx` event card **Edit** (now matches View) | none on the card |
+| `profile/page.tsx` **Change photo** | the card's Save |
+| `SupportWidget.tsx` **Attach screenshot** | Send |
+| `venue/[id]/edit/page.tsx` **Open Seat Map Builder →** (GA and Numbered; they never show together) | Save Changes / Save & Publish |
+| Seat Map Builder **Generate / Update Layout** | **Save Seat Map** |
+
+- `outline` in Button is the dark-on-orange banner variant and is invisible on dark surfaces, so the demotions use `outline-neutral`, the dark-surface secondary.
+
+**CTA → keep:**
+- `Button` `primary` / `solid` / `form-submit`
+- Seat-map Save
+- Artist-profile ticket links and login CTA
+- `.afa-book-btn`
+- organiser event **Edit Event**
+- venue dashboard CTA
+- Hero, ArtistHero, FourRooms and for-artists CTAs
+- HomeHeader and SiteNav Sign up
+- ComingSoon home link
+- `VenuePortalUI` primary link
+- InstallPrompt
+- The `NotificationOptIn` banner, whose Button inside is the action
+
+**Not an action or a state → kept.** These are listed so nothing is skipped silently. Rule follow-ups are below.
+- **Spinners:** 10 `borderTopColor` sites, plus the `VenuesGridClient` spinner accent.
+- **Charts:** organiser/venue sales bars, `FeedbackTrends`, the artist completion bar.
+- **Accent text and links:**
+  - "view it here" / "Browse events" / "Set up direct payouts" / back links (`BackLink`)
+  - Tour/corporate/checkout links, Directions
+  - Distance labels (`NearYouTabs`, `TonightNearYou`, `ArtistsNearYou`)
+  - `Ledger` numerals, `EMBER` on about/legal/razorpay-test
+  - Organiser edit AUDIENCE/PANELIST/CELEBRITY labels, venue dashboard price text
+  - `FeedbackDetailPanel` code, Wall of Fame and ComingSoon eyebrows, tours eyebrow
+- **Badges and dots:**
+  - HEADLINER badge, corporate "New" badge, `STATUS_TONE.orange`
+  - Nav count badges (HomeHeader, MobileTopBar, MobileTabBar)
+  - Lineup/slot number circles, filling-fast dot, Hero ping dot, `EnvBadge`
+- **Decorative:**
+  - `HeroRotator` backdrop, `AuthBrandPanel` glow, the `ContributionMoment` seal
+  - `HelpIcon` tooltip fill, artists-page underline and spark icon
+  - Artist skill tags (`FILL_SOLID_TINT`), the tickets "You've been tagged" card border, the verify-phone QA dev-OTP box
+- **Seat colours:** the seat-map Front/Middle/Upper tier fills (`fillSolidTint`), the zone colours.
+
+`statusStyle` split: every `FILL_SOLID_TINT` / `FILL_SOLID_BORDER_TINT` consumer that expressed selection moved to the new `SELECTED` / `SELECTED_BG` / `SELECTED_BORDER`. What's left is artist dashboard (completion card, skill tags), tickets tagged-card border, verify-phone dev-OTP box, seat-map tier fills, and the corporate "New" badge. None of these is a selected state.
+
+## Flagged for Hitesh (not changed; the "one primary" or the colour is unclear)
+1. **Stage bars are solid orange** in 4 places: SeatPicker, the builder canvas, the wizard preview, SeatLayoutPreview. So are the builder's **Front-tier seats**. They're labels and zone fills, not actions, which breaks "nothing else is solid orange". Fixing it needs a colour choice (e.g. neutral `--afa-tint-20` with primary text), which is out of scope here. This is probably the "3rd orange" on the Seat Map Builder.
+2. **Artist profile:** + Follow (solid), the per-show ticket links (solid) and the prev/next artist arrows (solid) are all orange on one screen. Which one is the primary?
+3. **Profile page:** 6 `primary` buttons, one Save per card. Is it one primary per card or per screen?
+4. **Amber-direct selected sites:** these are already amber, but read `--afa-amber` / `--afa-amber-tint` rather than `--afa-selected*`. So editing `--afa-selected` won't reach them:
+   - DashboardShell nav (active tint)
+   - MobileTabBar (active tab + drawer row)
+   - SiteNav (active link + tint)
+   - venue bookings calendar (selected day)
+   - profile role cards (active ring)
+
+   Their backgrounds use `amber-tint` (0.15), not the selected wash (0.08), so moving them would change how they look. That's a follow-up ticket, not done here.
+5. **Seat colour:** a selected seat is now an amber ring on a faint tint. `TIER_COLORS` includes `--afa-gold` (#8A6A1F), so check that a selected seat in a gold zone still reads clearly.
+
+## Click-through for Hitesh (on the Vercel preview or after merge)
+1. **/events filter sheet (mobile):** selected chips are amber-tinted; only Apply is orange.
+2. **/register initials chips:** amber tint, not orange.
+3. **Seat picker** (an event with a seat map):
+   - selected seats show an amber ring, amber number and faint tint
+   - the legend reads Available (zone colours) / Selected / Held / booked, plus Not on sale if any
+4. **Organiser dashboard event card:** Edit matches View (outline).
+5. **Seat Map Builder:**
+   - Save Seat Map is the only orange button; Generate is an outline
+   - the level tab ×, a selected seat or marker, and the Recommended card are amber
+   - Stage is still orange (flag 1)
+6. **Admin design-system** (after the INSERT):
+   - "Selected state" section lists the 3 tokens
+   - edit `--afa-selected`: the preview's toggle pill, toggle box, tabs, text toggle, menu row and card all change, and Primary does not
+   - contrast panel shows the 2 new pairs
+7. **Venue edit:** Open Seat Map Builder is an outline; Save is the only orange.
+8. **Sales period picker:** the chosen period is amber.
+
+Feedback: GEN-2609-118 → `BUILD_COMPLETE` (pushed, not merged).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 15 (chat — colour rule decided, GEN-2609-118 queued)
 
 - **Colour rule DECIDED (Hitesh):** orange = single primary action per screen; amber = selected, via new admin-editable `--afa-selected*` tokens. Full rule in design.md GEN-2609-118. The part-14 "Decision pending" section is closed.
