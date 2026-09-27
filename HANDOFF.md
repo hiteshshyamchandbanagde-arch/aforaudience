@@ -1,3 +1,112 @@
+# Session Handoff — 27 Sept 2026, part 12 (CC — GEN-2609-116 small bundle, pushed, needs merge + 1 DB row)
+
+Branch `fix/gen-2609-116-small-bundle` off `origin/qa` at `91241db`. **Not merged.** One DB row to insert (§3, not run). qa didn't move during the run: re-fetched before the push, still `91241db`.
+
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/gen-2609-116-small-bundle?expand=1
+
+## 1. Commits
+- `6b57170` BUG-2609-063: auth submit buttons work with Chrome autofill (17 files)
+- `e81ab04` GEN-2609-116: font-size-literal ratchet 13 → 0 (20 files)
+- `6de5609` BUG-2609-062 follow-up: commit the font build and parity scripts (9 files)
+
+## 2. Item 1: BUG-2609-063 (autofill)
+**Fix:** submit buttons disable only while a request is in flight. Each handler reads the real DOM value on submit (ref), syncs it into state, and if a field is empty shows the message in the existing error banner and focuses that field. Nothing shows before submit. Login inputs also got `autoComplete` (`username`, `current-password`, `one-time-code`) and `aria-invalid` on the flagged field. 5 new `authCommon` strings in all 11 locales (`enterIdentifier`, `enterPassword`, `enterNewPassword`, `enterEmail`, `enterSixDigitCode`).
+
+| Site | Before | Now |
+|---|---|---|
+| `login/page.tsx:277` Sign In | `loading \|\| !identifier \|\| !password` | `loading`; "Enter your email or phone" / "Enter your password" |
+| `login/page.tsx:296` Send code | `loading \|\| !identifier` | `loading`; "Enter your email or phone" |
+| `login/page.tsx:331` Verify | `loading \|\| otpCode.length !== 6` | `loading`; "Enter the 6-digit code" |
+| `forgot-password/page.tsx:107` Send reset link | `loading \|\| !email` | `loading`; "Enter your email" |
+| `register/RegisterForm.tsx:398` OTP Verify | `loading \|\| otpCode.length !== 6` | `loading`; "Enter the 6-digit code" |
+| `verify-phone/page.tsx:156` Verify | `submitting \|\| otpCode.length !== 6` | `submitting`; "Enter the 6-digit code" |
+| `reset-password/page.tsx:143` Update | already `loading` only | now reads DOM values; empty → "Enter a new password" |
+| `register/RegisterForm.tsx:680` Create account | gated on username status, not emptiness | unchanged gate; `handleRegister` (L226) now reads live input values |
+| `verify-email` | no form (token-only) | unchanged |
+| `verify-phone/page.tsx:135` Send code | `!phone` is the account's phone from the API, not an input | unchanged |
+
+Pre-existing, not changed: register's empty submit shows only the phone error (its first client check). The server's `ALL_FIELDS_REQUIRED` covers the other fields.
+
+**Autofill colour, scoped differently from the dispatch, on purpose.** Inputs don't sit on `--afa-surface-inverse`: auth inputs are `transparent` over the `#1F1F1F` card; the shared input helpers are 9× `--afa-surface-raised`, 5× + `Input.tsx` `--afa-surface-page`, and only 3× inverse. An inset box-shadow in `#0A0A0A` would have painted near-black boxes on most of them. The global rule in `globals.css` instead sets `-webkit-text-fill-color` + `caret-color` to `--afa-text-primary`, and defers the browser's background with `transition: background-color 0s 600000s`, so each field keeps the background it declares. It covers `input` (+ `:hover`/`:focus`/`:active`), `textarea` and `select`.
+
+**Tests** (Playwright; autofill simulated by setting the value through `HTMLInputElement.prototype`'s setter with no input events, which is what Chrome does before the first interaction):
+- **46/46 pass** on the production build and on dev, at 390 and 1280. Covered: empty submit → message + focus + no request; message only after submit; autofilled → Sign In enabled, the first click posts the DOM values; keyboard Enter (autofilled and empty); OTP Send code; forgot-password; register.
+- **Negative control:** on qa's `login/page.tsx`, the same autofill leaves Sign In **disabled, 0 requests** after a click. On the branch: enabled, 1 request.
+- **Real `:autofill` colours:** CDP `Autofill.trigger` (headed Chromium, credit-card fill) put real fields into the `:autofill` state on `/login`. With the rule: the field keeps its own background (transparent, `#141414`, `#1F1F1F` and `#0A0A0A` all tested) and the text is `#F5F5F0`. With the rule neutralised: Chrome's `#E8F0FE` with black text, which is the reported bug.
+- On a **cold** dev server, 5 checks failed once: next-auth's `/api/auth/providers` took ~1.6s to compile, longer than the test's 1.5s wait. Warm dev and production: 46/46.
+
+## 3. Item 2: font-size literals 13 → 0
+No type-scale token was within 0.5px of any of the 13 values (the scale stops at 32px). **26px appears 4 times in one role**, so it gets a new token under the 3-site rule: **`--afa-text-display: 26px`**. It's in `globals.css`, `DEFAULT_TOKEN_VALUES`, the admin meta ("Display"), `FONT_SIZE_MAP` and the tokens reference. The other 9 are one-offs with `token-ok` reasons.
+
+| file:line | Old | New token / reason | Visible change |
+|---|---|---|---|
+| `artists/[id]/ArtistProfileClientPage.tsx:600` | 26px | `--afa-text-display` (date numeral) | 0px |
+| `venues/VenuesGridClient.tsx:254` | 26px | `--afa-text-display` (venue card title) | 0px |
+| `components/PlatformGrowthStrip.tsx:67` | 26px | `--afa-text-display` (stat figure) | 0px |
+| `dashboard/VenuePortalUI.tsx:393` | 26px | `--afa-text-display` (stat value) | 0px |
+| `dashboard/venue/page.tsx:243` | 21px | token-ok: venue card title, only 21px, between subtitle 20 / subheading 22 | 0px |
+| `dashboard/audience/page.tsx:42` | 30 | token-ok: stat figure, only 30px, between page-title 28 / -lg 32 | 0px |
+| `tours/[slug]/page.tsx:54` | 34px | token-ok: tour h1, above page-title-lg (32px) | 0px |
+| `dashboard/VenuePortalUI.tsx:363` | 34px | token-ok: Venue Portal h1 in the UI font, above page-title-lg | 0px |
+| `venue-owners/[id]/page.tsx:64` | 36px | token-ok: initial inside the 96px avatar circle | 0px |
+| `components/ComingSoon.tsx:33` | 36px | token-ok: one-off marketing display title | 0px |
+| `components/CorporateInquiryModal.tsx:181` | 40px | token-ok: emoji used as a success icon | 0px |
+| `components/AuthBrandPanel.tsx:71` | 2.5rem | token-ok: brand-panel tagline, only 40px display line | 0px |
+| `components/FourRooms.tsx:69` | 56px | token-ok: decorative room numeral | 0px |
+
+- **Split lines:** a trailing `token-ok` exempts **every** literal on its line, and my first pass hid 3 spacing literals (spacing 1866 → 1863). Those single-line JSX styles are now one prop per line with the reason on the `fontSize` line only, and spacing is back to **1866**. All 12 files are equivalent to qa after whitespace normalisation (with `var(--afa-text-display)` ≡ 26px).
+- **Computed sizes** (production and dev): venue card titles and growth-strip stats render **26px**, the Four Rooms numerals 56px, and the brand-panel tagline 40px. The artist date numeral and the Venue Portal stat use the same var but weren't reachable: no artist had upcoming performances, and the portal needs auth.
+- **Gotcha:** the dev server that was already running served stale CSS without the new token, so those sites computed 16px. `next build` had it and a fresh `next dev` had it. **Restart `next dev` after adding a `:root` token.**
+- `TOKEN_COVERAGE` regenerated last: +`--afa-text-display` (4 consumers). It also picked up #711's SiteNav/HomeHeader use of `--afa-space-2px`/`-6`, which was stale drift.
+- `migrate-tokens.test.js`: the "unmapped value stays literal" case used 26px; it now uses 27px, and a new case checks 26 → display.
+
+**DB, not run:** the admin editor can't control the new token until its row exists. Until then it renders from the `globals.css` default (26px), so nothing is broken.
+```sql
+BEGIN;
+INSERT INTO "DesignToken" ("key", "value", "group", "type", "locked", "updatedAt") VALUES
+('--afa-text-display', '26px', 'size', 'dimension', false, now())
+ON CONFLICT ("key") DO NOTHING;
+COMMIT;
+```
+
+## 4. Item 3: font scripts (`scripts/dev/fonts/`)
+| File | Role |
+|---|---|
+| `fonts.json` | per woff2: upstream path, pinned google/fonts commit **and sha256**, served `wght` range, checked weights, output, locale |
+| `fetch_sources.py` | downloads pinned TTFs + `OFL.txt`, verifies sha256 (`--no-verify` for an upgrade) |
+| `build_fonts.py` | the BUG-2609-062 instancer/subset/woff2 recipe (logic unchanged) |
+| `verify_parity.py` | outlines + advances per codepoint × weight, HarfBuzz shaping (incl. every Indic dictionary string), `hhea`/`OS/2` metrics, vs git `HEAD` or a folder |
+| `common.py` | shared helpers |
+| `offline-build-proxy.mjs` | the Google-blocking proxy from part 7 (ESM, so it lints clean) |
+| `requirements.txt` | fonttools 4.66.0, brotli 1.2.0, uharfbuzz 0.56.2 (Python 3.14) |
+
+- **Change from the originals:** they read codepoint sets from JSON derived from the old Google build, which no longer exists. `build_fonts.py` now reads each set from the committed woff2's cmap (identical sets), plus `--add`. A new family has no reference: the build requires `--add`, and parity skips it.
+- **Verified:** all 12 fetched TTFs match the pinned hashes, and all 11 `OFL.txt` match the committed blobs. A full rebuild is **byte-identical for all 12 woff2 files**. Parity reports **0 differences**, and a swapped-file control fails (1,956 differences, exit 1). The proxy refuses `fonts.googleapis.com`/`fonts.gstatic.com` and tunnels GitHub.
+- Dev-only: nothing in `src/` references the folder; CI (`design-tokens.yml`) and `next build` don't run it. A folder `.gitignore` keeps out `__pycache__/`. The README has 0 hits for the old loader's import path, and neither does the scripts folder.
+- `src/fonts/README.md`: "Updating a font" replaced by "Rerunning the build", covering the reproduce check, upgrading a version, adding codepoints and adding a family.
+
+## 5. Verification
+- `tsc` clean. `next build` passes (fresh `.next`).
+- Checker vs origin/qa: no new literals.
+- Ratchet: **font-size 13 → 0**, spacing 1866, every other category 0 → 0. Baseline lowered.
+- Self-tests: check-design-tokens 80/80, migrate-tokens 63/63 (was 62 + 1 new), design-tokens 48/48, ticket-code 5/5, username 4/4.
+- ESLint on all 34 touched lintable files, qa vs branch: per-rule counts identical, 0 findings on added lines.
+- Screenshots (390 + 1280, dev and production): `/login`, `/register`, `/forgot-password` × empty submit / filled / autofilled, plus login after the autofilled submit. `/login` also has real-autofill colour shots, with and without the rule. No font-size site changed visibly, so there are no before/after shots for them.
+- `next dev` (fresh) renders all of the above. The only console issue is the known intro-splash hydration mismatch (BUG-2609-064).
+- **Vercel preview on `6de5609`: READY** (`dpl_BNafAQhCK8e3hJ9EzqGeQZFW6nqX`).
+
+## 6. Click-through for Hitesh (logged out, real Chrome profile with a saved AforAudience password)
+1. Open `/login` on the preview. The saved email/password show filled in. Don't click the page first. Click **Sign In** once: it should sign you in on the first click.
+2. The autofilled fields keep the dark card look (no light-blue box, light text).
+3. Sign out, clear both fields, click Sign In: you should see "Enter your email or phone" and the cursor in that field. Type the email only, press Enter: you should see "Enter your password".
+4. `/forgot-password`: an empty click shows "Enter your email".
+5. Optional, on a phone: an OTP code from SMS autofill verifies on the first tap (login OTP and register).
+
+## 7. Next
+- Merge → run the §3 SQL → per part 11: chat scopes the Indic system-font ticket, then spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 11 (chat — GEN-2609-116 small bundle dispatched)
 
 - Queued for CC: `docs/cc-dispatches/cc-prompt-small-bundle-116.md`. GEN-2609-116 = BUG-2609-063 (autofill Sign In + autofill colour) + `font-size-literal` 13 → 0 + the BUG-2609-062 font scripts in `scripts/dev/fonts/`. BUG-2609-063 and GEN-2609-116 are BUILD_QUEUE.
