@@ -1,3 +1,11 @@
+# Session Handoff — 27 Sept 2026, part 4 (chat — button phase 3 dispatched)
+
+- Goal status: Colour, Font (13 stray sizes), radius, instant live updates and a safe editor are done. The last gap is **Button**: 91 `variant="bare"` buttons use colour/radius tokens but not the button layer (variant look, padding tokens, hover/focus/disabled).
+- Queued for CC: `docs/cc-dispatches/cc-prompt-button-phase3-110.md`. Done = every bare button migrated or annotated with `// bare-reason:`; the checker counts only unexplained bare → 0.
+- After this: small run for BUG-2609-062 (self-host fonts) + BUG-2609-063 (autofill-disabled Sign In, autofill styling) + the 13 font-size literals. Then spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 3 (chat — #710 merged, DB applied, snapshot written)
 
 - **#710 GEN-2609-115** squash-merged, `qa` @ `43b66b5`. The first preview **failed** (Google Fonts `jetbrains_mono` module-not-found). Chat did **not** merge on red: it pushed an empty commit (`0bdc1ed`) to re-run the preview, got checks + Vercel status green, then merged. READY, 0 runtime errors.
