@@ -111,8 +111,10 @@ export const GROUP_RANGES = {
 export const KEY_RANGES: Record<string, TokenRange> = {
   // Below ~100px a tall pill starts showing flat sides.
   "--afa-radius-pill": { min: 100, max: 9999 },
-  // Running-text roles (micro is the label size). Caption (10px badge
-  // micro-labels) stays on the group range: its default is under 11.
+  // GEN-2609-115 - caption (10px badge micro-labels) is a small-text
+  // role, not a heading: its own range, below micro's floor.
+  "--afa-text-caption": { min: 9, max: 16 },
+  // Running-text roles (micro is the label size).
   "--afa-text-micro": { min: 11, max: 24 },
   "--afa-text-small": { min: 11, max: 24 },
   "--afa-text-ui": { min: 11, max: 24 },

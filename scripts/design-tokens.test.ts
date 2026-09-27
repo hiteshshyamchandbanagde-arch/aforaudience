@@ -110,11 +110,16 @@ test('radius order covers the whole scale, pill excluded', () => {
   assert.deepEqual([...RADIUS_ORDER], ['--afa-radius-sharp', '--afa-radius-xs', '--afa-radius-sm', '--afa-radius-md', '--afa-radius-lg', '--afa-radius-xl', '--afa-radius-2xl'])
 })
 
-test('font sizes 10-72px; running-text roles 11-24px', () => {
+test('font sizes 10-72px; running-text roles 11-24px; caption 9-16px', () => {
   assert.equal(tokenValueError('--afa-text-page-title-lg', 'dimension', '72px'), null)
   assert.notEqual(tokenValueError('--afa-text-page-title-lg', 'dimension', '73px'), null)
-  assert.notEqual(tokenValueError('--afa-text-caption', 'dimension', '9px'), null)
+  assert.notEqual(tokenValueError('--afa-text-page-title-lg', 'dimension', '9px'), null)
+  // GEN-2609-115 - caption is a small-text role
+  assert.notEqual(tokenValueError('--afa-text-caption', 'dimension', '8px'), null)
+  assert.equal(tokenValueError('--afa-text-caption', 'dimension', '9px'), null)
   assert.equal(tokenValueError('--afa-text-caption', 'dimension', '10px'), null)
+  assert.equal(tokenValueError('--afa-text-caption', 'dimension', '16px'), null)
+  assert.equal(tokenValueError('--afa-text-caption', 'dimension', '17px'), 'Must be between 9px and 16px.')
   for (const key of ['--afa-text-micro', '--afa-text-small', '--afa-text-ui', '--afa-text-body', '--afa-text-body-lg']) {
     assert.notEqual(tokenValueError(key, 'dimension', '10px'), null, key)
     assert.equal(tokenValueError(key, 'dimension', '11px'), null, key)
