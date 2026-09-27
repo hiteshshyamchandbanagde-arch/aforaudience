@@ -1,0 +1,102 @@
+{
+  "_about": "Dev-only config for the self-hosted font scripts in this folder (BUG-2609-062). Read by fetch_sources.py, build_fonts.py and verify_parity.py. See src/fonts/README.md.",
+  "upstream": "https://raw.githubusercontent.com/google/fonts",
+  "fonts": [
+    {
+      "family": "Young Serif", "style": "normal",
+      "source": "ofl/youngserif/YoungSerif-Regular.ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "42bb2602364b28569fdce5eeb6ab3d81cf8090ba81b211f1229ed69f33155523",
+      "wght": null, "weights": [400],
+      "out": "young-serif/YoungSerif-Regular.woff2", "locale": null
+    },
+    {
+      "family": "Schibsted Grotesk", "style": "normal",
+      "source": "ofl/schibstedgrotesk/SchibstedGrotesk[wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "6ceeadf6be8e1fd7687011c7fa38ed0edd1abe967a0b73d97caec183552e823d",
+      "wght": [400, 900], "weights": [400, 500, 600, 700, 800],
+      "out": "schibsted-grotesk/SchibstedGrotesk-VF.woff2", "locale": null
+    },
+    {
+      "family": "Schibsted Grotesk", "style": "italic",
+      "source": "ofl/schibstedgrotesk/SchibstedGrotesk-Italic[wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "b49fedb6f3a2ff9b43e13351888641505dc8e5f300941e597eecbc3f52ba357b",
+      "wght": [400, 900], "weights": [400, 500, 600, 700, 800],
+      "out": "schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", "locale": null
+    },
+    {
+      "family": "Instrument Sans", "style": "normal",
+      "source": "ofl/instrumentsans/InstrumentSans[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "b24f1812584816958afcf22e22d08e44318c5e51651e25d2438efdde389b33b1",
+      "wght": [400, 700], "weights": [400, 500, 600],
+      "out": "instrument-sans/InstrumentSans-VF.woff2", "locale": null
+    },
+    {
+      "family": "JetBrains Mono", "style": "normal",
+      "source": "ofl/jetbrainsmono/JetBrainsMono[wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda",
+      "wght": [400, 800], "weights": [400, 500, 600],
+      "out": "jetbrains-mono/JetBrainsMono-VF.woff2", "locale": null
+    },
+    {
+      "family": "Noto Sans Devanagari", "style": "normal",
+      "source": "ofl/notosansdevanagari/NotoSansDevanagari[wdth,wght].ttf",
+      "commit": "03a182001fd7b1ccb3960a8faa8b616619c0d1a1",
+      "sha256": "9ce7b04f60e363d8870e5997744cf85cf69d38a4d7d129d364d92a3b14b461d7",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-devanagari/NotoSansDevanagari-VF.woff2", "locale": "hi"
+    },
+    {
+      "family": "Noto Sans Tamil", "style": "normal",
+      "source": "ofl/notosanstamil/NotoSansTamil[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "aa3a9b321f4b0bb2c40203ffbde9af89713227866e0e13f76e5b9eeea727cf88",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-tamil/NotoSansTamil-VF.woff2", "locale": "ta"
+    },
+    {
+      "family": "Noto Sans Telugu", "style": "normal",
+      "source": "ofl/notosanstelugu/NotoSansTelugu[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "e618af7bf999df192ed4f388eba2e563f2b5015034e9cbb317b5bd793bd7334d",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-telugu/NotoSansTelugu-VF.woff2", "locale": "te"
+    },
+    {
+      "family": "Noto Sans Kannada", "style": "normal",
+      "source": "ofl/notosanskannada/NotoSansKannada[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "cca4f3b3a8cb12fb261f1b43baf5d2f7f59d90fe123d41f0065ed3a183997ec9",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-kannada/NotoSansKannada-VF.woff2", "locale": "kn"
+    },
+    {
+      "family": "Noto Sans Malayalam", "style": "normal",
+      "source": "ofl/notosansmalayalam/NotoSansMalayalam[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "312e0e7c3cc15fa09eb42a8f749eeb246b593ed420e3c81aafe8d910c3a6fb56",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-malayalam/NotoSansMalayalam-VF.woff2", "locale": "ml"
+    },
+    {
+      "family": "Noto Sans Gujarati", "style": "normal",
+      "source": "ofl/notosansgujarati/NotoSansGujarati[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "9901d8552f1dd5d2c50dbd4caa6f6e174e74e8264f06594ab259ae6e7b1ac428",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-gujarati/NotoSansGujarati-VF.woff2", "locale": "gu"
+    },
+    {
+      "family": "Noto Sans Bengali", "style": "normal",
+      "source": "ofl/notosansbengali/NotoSansBengali[wdth,wght].ttf",
+      "commit": "23e54b51ddffbc7713c583748e3bd86f62b1fa4a",
+      "sha256": "dcd42978094e584a849c84a51450eeac40c8826057d566ea6d4b9627a403a05a",
+      "wght": [100, 900], "weights": [400, 500],
+      "out": "noto-sans-bengali/NotoSansBengali-VF.woff2", "locale": "bn"
+    }
+  ]
+}
