@@ -1,3 +1,13 @@
+# Session Handoff — 27 Sept 2026, part 3 (chat — #710 merged, DB applied, snapshot written)
+
+- **#710 GEN-2609-115** squash-merged, `qa` @ `43b66b5`. The first preview **failed** (Google Fonts `jetbrains_mono` module-not-found). Chat did **not** merge on red: it pushed an empty commit (`0bdc1ed`) to re-run the preview, got checks + Vercel status green, then merged. READY, 0 runtime errors.
+- **QA DB:** deleted `--afa-terracotta`, `--afa-text-inverse`, `--afa-red-alt` (106 tokens left); wrote `Snapshot: after GEN-2609-115 SQL` (106 keys) as the current restore point. **Standing rule:** every chat DB change to `DesignToken` ends with a snapshot row.
+- GEN-2609-115 → IN_TEST. Logged **BUG-2609-062** (MEDIUM): intermittent Google Fonts fetch failures in builds (2 of the last 4 previews); fix is to self-host with `next/font/local`.
+- **Hitesh click-through (CC's HANDOFF 27 Sep part 2):** `/login` submit button now dark text; editor contrast panel 0 failing; restore of an old version shows the contrast confirm; the new history row appears without reload.
+- **Next:** button phase 3 (GEN-2609-110), then BUG-2609-062, then spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 2 (CC — GEN-2609-115 token cleanup, pushed, needs merge + DB SQL)
 
 Branch `chore/gen-2609-115-token-cleanup` off `origin/qa` at `ef58c23`. **Not merged.** DB SQL below, not run.
