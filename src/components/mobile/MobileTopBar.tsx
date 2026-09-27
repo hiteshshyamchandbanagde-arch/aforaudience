@@ -207,10 +207,10 @@ export default function MobileTopBar() {
           >
             {LOCALES.map((l) => (
               <Button
-                variant="bare"
+                variant="menu-row"
                 key={l.id}
+                selected={locale === l.id}
                 onClick={() => { setLocale(l.id); setLangOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'var(--afa-amber-wash)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
               >
                 {l.nativeLabel}
               </Button>

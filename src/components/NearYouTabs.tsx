@@ -125,16 +125,20 @@ export default function NearYouTabs() {
 
       <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid var(--afa-border-resting)' }}>
         <Button
-          variant="bare"
+          variant="tab"
+          size="sm"
+          fullWidth={false}
+          selected={isEvents}
           onClick={() => setTab('events')}
-          style={{ padding: '0 0 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: isEvents ? 'var(--afa-cream)' : 'var(--afa-text-secondary)', borderBottom: isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabEvents}
         </Button>
         <Button
-          variant="bare"
+          variant="tab"
+          size="sm"
+          fullWidth={false}
+          selected={!isEvents}
           onClick={() => setTab('artists')}
-          style={{ padding: '0 10px 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: !isEvents ? 'var(--afa-cream)' : 'var(--afa-text-secondary)', borderBottom: !isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabArtists}
         </Button>

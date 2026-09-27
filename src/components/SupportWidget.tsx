@@ -501,30 +501,22 @@ export default function SupportWidget() {
         >
           <div style={{ display: 'flex', borderBottom: '1px solid var(--afa-border-resting)' }}>
             <Button
-              variant="bare"
+              variant="tab"
+              size="md"
+              fullWidth={false}
+              selected={panel === 'chat'}
               onClick={() => setPanel('chat')}
-              style={{
-                flex: 1,
-                padding: 'var(--afa-space-3) var(--afa-space-2)',
-                background: panel === 'chat' ? 'var(--afa-amber)' : undefined,
-                color: panel === 'chat' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-                fontWeight: 600,
-                fontSize: 'var(--afa-text-body)',
-              }}
+              style={{ flex: 1, marginBottom: '-1px' }}
             >
               Ask a question
             </Button>
             <Button
-              variant="bare"
+              variant="tab"
+              size="md"
+              fullWidth={false}
+              selected={panel === 'feedback'}
               onClick={switchToFeedbackPanel}
-              style={{
-                flex: 1,
-                padding: 'var(--afa-space-3) var(--afa-space-2)',
-                background: panel === 'feedback' ? 'var(--afa-amber)' : undefined,
-                color: panel === 'feedback' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-                fontWeight: 600,
-                fontSize: 'var(--afa-text-body)',
-              }}
+              style={{ flex: 1, marginBottom: '-1px' }}
             >
               Feedback
             </Button>
@@ -614,14 +606,8 @@ export default function SupportWidget() {
                         You&apos;ve reached the question limit for this session. Need more
                         help?{' '}
                         <Button
-                          variant="bare"
+                          variant="text-link"
                           onClick={switchToFeedbackPanel}
-                          style={{
-                            color: 'var(--afa-amber)',
-                            fontWeight: 600,
-                            padding: 0,
-                            textDecoration: 'underline',
-                          }}
                         >
                           Use the feedback form
                         </Button>
@@ -792,14 +778,8 @@ export default function SupportWidget() {
                         }}
                       />
                       <Button
-                        variant="bare"
+                        variant="text-link"
                         onClick={clearAttachment}
-                        style={{
-                          fontSize: 'var(--afa-text-small)',
-                          color: 'var(--afa-amber)',
-                          padding: 0,
-                          textDecoration: 'underline',
-                        }}
                       >
                         Remove
                       </Button>

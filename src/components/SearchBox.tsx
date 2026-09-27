@@ -86,7 +86,7 @@ export default function SearchBox() {
                 <div style={{ marginBottom: "6px" }}>
                   <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.events}</div>
                   {results.events.map((e) => (
-                    <Button variant="bare" key={e.id} onClick={() => go(`/events/${e.id}`)} style={rowStyle}>
+                    <Button variant="menu-row" key={e.id} onClick={() => go(`/events/${e.id}`)}>
                       <span style={{ fontWeight: 600 }}>{e.title}</span>
                       <span style={{ opacity: 0.5, marginLeft: "8px" }}>{new Date(e.date).toLocaleDateString()}{e.city ? ` · ${e.city}` : ""}</span>
                     </Button>
@@ -97,7 +97,7 @@ export default function SearchBox() {
                 <div style={{ marginBottom: "6px" }}>
                   <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.artists}</div>
                   {results.artists.map((a) => (
-                    <Button variant="bare" key={a.id} onClick={() => go(`/artists/${a.id}`)} style={rowStyle}>
+                    <Button variant="menu-row" key={a.id} onClick={() => go(`/artists/${a.id}`)}>
                       <span style={{ fontWeight: 600 }}>{a.name}</span>
                       {a.genre && <span style={{ opacity: 0.5, marginLeft: "8px" }}>{a.genre}</span>}
                     </Button>
@@ -108,7 +108,7 @@ export default function SearchBox() {
                 <div>
                   <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.venues}</div>
                   {results.venues.map((v) => (
-                    <Button variant="bare" key={v.id} onClick={() => go(`/venues/${v.id}`)} style={rowStyle}>
+                    <Button variant="menu-row" key={v.id} onClick={() => go(`/venues/${v.id}`)}>
                       <span style={{ fontWeight: 600 }}>{v.name}</span>
                       <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
                     </Button>
@@ -121,9 +121,4 @@ export default function SearchBox() {
       )}
     </div>
   )
-}
-
-const rowStyle: React.CSSProperties = {
-  display: "block", width: "100%", textAlign: "left", padding: "8px 16px",
-  border: "none", background: "transparent", cursor: "pointer", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)",
 }

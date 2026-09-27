@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { colorForZone } from '@/components/SeatLayoutPreview'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
@@ -322,16 +321,13 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
           {levels.map((lvl) => (
             <Button
-              variant="bare"
+              variant="toggle-box"
+              size="sm"
+              fullWidth={false}
+              selected={activeLevel === lvl}
               key={lvl}
               type="button"
               onClick={() => setActiveLevel(lvl)}
-              style={{
-                fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: 'var(--afa-radius-sm)',
-                border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)',
-                background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-              }}
             >
               {lvl || 'Main'}
             </Button>

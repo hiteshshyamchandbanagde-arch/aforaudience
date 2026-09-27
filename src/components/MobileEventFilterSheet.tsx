@@ -66,11 +66,10 @@ export default function MobileEventFilterSheet({
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
       <Button
-        variant="bare"
+        variant="scrim"
         aria-label={tr.eventsPage.filterSheetCloseLabel}
         onClick={onClose}
         className="afa-backdrop-mount"
-        style={{ position: "absolute", inset: 0, background: "var(--afa-scrim)" }}
       >
         {null}
       </Button>

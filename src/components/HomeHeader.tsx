@@ -234,10 +234,11 @@ export default function HomeHeader() {
                 <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 6px", padding: "6px 16px 8px" }}>
                   {LOCALES.map((l) => (
                     <Button
-                      variant="bare"
+                      variant="text-toggle"
+                      fullWidth={false}
                       key={l.id}
+                      selected={locale === l.id}
                       onClick={() => setLocale(l.id)}
-                      style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, padding: "2px 4px" }}
                     >
                       {l.id.toUpperCase()}
                     </Button>
@@ -250,9 +251,8 @@ export default function HomeHeader() {
                   <>
                     <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
                     <Button
-                      variant="bare"
+                      variant="menu-row"
                       onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
-                      style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}
                     >
                       {t.nav.signOut}
                     </Button>
