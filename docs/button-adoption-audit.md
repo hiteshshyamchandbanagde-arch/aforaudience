@@ -1176,3 +1176,124 @@ The existing variants absorb the rest: `outline-neutral` 25, `solid` 8, two-stat
 | Line | Class | Target / reason |
 |---|---|---|
 | 138 | structural | text-only "Not now" dismiss on a fill-solid banner |
+
+---
+
+# Phase 3: the last 91 `variant="bare"` uses (GEN-2609-110)
+
+Measured at `qa@9523344`: `bare-button` 91 across 45 files, `raw-button` 2. Every site read in full (style object, className, and any page CSS the className pulls in), not classified by grep heuristic. Line numbers are `qa@9523344`.
+
+## Destinations
+
+| Destination | Sites | Kind |
+|---|---|---|
+| `toggle-box` (new) | 18 | Bordered box selectors: 2px fill-solid border + fill tint when selected, raised surface otherwise |
+| `menu-row` (new) | 16 | Full-width left-aligned rows in dropdowns, autocomplete lists, search results, account menus |
+| `text-link` (new) | 7 | Inline underlined text actions inside a sentence or under a field |
+| `text-toggle` (new) | 7 | Mono uppercase text-only filters/switches (colour-only selection) |
+| `tab` (new) | 5 | In-card tabs with a 2px amber underline |
+| `tab-display` (new) | 3 | Page-level display-font tabs with the same underline (events, venues) |
+| `disclosure` (new) | 4 | Compact ▸/▾ section toggles |
+| `card` (new) | 4 | Whole-card buttons (choose-a-path cards, feedback items) |
+| `scrim` (new) | 3 | Full-screen click-to-dismiss backdrops |
+| `toggle-pill` (existing) | 1 | Deploy-stage pills (its own "Unset" sibling already is one) |
+| `outline-neutral` (existing) | 1 | Seat picker zoom "Reset" |
+| stays `bare` + `// bare-reason:` | 22 | See the reasons in HANDOFF (27 Sep, GEN-2609-110) |
+
+## Per-site table
+
+| # | File:line | What it is | Current look | Destination |
+|---|---|---|---|---|
+| 1 | `(auth)/register/RegisterForm.tsx:492` | "Try more" after the initials suggestions | small, primary @0.6, no underline | `text-link` |
+| 2 | `(auth)/register/RegisterForm.tsx:528` | "Use {username} instead" | small, error-bright, underline | `text-link` |
+| 3 | `(public)/artists/[id]/ArtistProfileClientPage.tsx:625` | About / Shows tabs | body 600, amber active, 2px amber underline | `tab` md |
+| 4 | `(public)/artists/page.tsx:275` | Genre index filter | serif italic title size, animated hover underline | bare-reason |
+| 5 | `(public)/events/[id]/EventDetailClientPage.tsx:518` | 1-5 numbered rating circles | 20px amber circles, opacity = rating | bare-reason |
+| 6 | `(public)/events/[id]/rate/RatePromptClientPage.tsx:23` | ★ rating (hero) | page-title-lg glyph, amber / tint-20 | bare-reason |
+| 7 | `(public)/events/[id]/rate/RatePromptClientPage.tsx:207` | ★ rating (per performer) | title glyph, amber / tint-20 | bare-reason |
+| 8 | `(public)/events/page.tsx:416` | Events / Organisers mode tab | `.afa-events-mode-tab`: font-ui lead, muted→primary, amber ::after | `tab-display` |
+| 9 | `(public)/events/page.tsx:419` | same | same | `tab-display` |
+| 10 | `(public)/events/page.tsx:495` | Upcoming / Past | mono ui, amber / muted | `text-toggle` |
+| 11 | `(public)/events/page.tsx:554` | "All nights" type filter | `.afa-events-type-filter`: mono micro .2em, amber active | `text-toggle` |
+| 12 | `(public)/events/page.tsx:567` | Event-type filter (icon + label) | same | `text-toggle` |
+| 13 | `(public)/events/page.tsx:589` | All / Free / Paid | `.afa-events-price-filter`: mono small .1em | `text-toggle` |
+| 14 | `checkout/[bookingId]/page.tsx:747` | Companion search result row (name + "Tag") | tint-10 bordered row, body | `menu-row` |
+| 15 | `dashboard/admin/artists/page.tsx:162` | Sortable column header (all 7 headers) | sans micro 700 uppercase, amber when sorted | `text-toggle` |
+| 16 | `dashboard/admin/artists/page.tsx:294` | View / Hide note | micro, secondary, underline | `text-link` |
+| 17 | `dashboard/admin/diary/page.tsx:196` | Diary status chips | pill, per-status STATUS_META colours | bare-reason |
+| 18 | `dashboard/admin/feedback/page.tsx:606` | ▸ Pending Approvals | small 700, primary @0.7 | `disclosure` |
+| 19 | `dashboard/admin/feedback/page.tsx:662` | ▸ Pending Genre Requests | same | `disclosure` |
+| 20 | `dashboard/admin/feedback/page.tsx:693` | ▸ Pending Event Notes | same | `disclosure` |
+| 21 | `dashboard/admin/feedback/page.tsx:731` | ▸ Trends | same | `disclosure` |
+| 22 | `dashboard/organiser/events/[id]/checkin/page.tsx:311` | Attendee List card header (title ↔ Show/Hide) | full-width, body 600, space-between | bare-reason |
+| 23 | `dashboard/organiser/events/[id]/checkin/page.tsx:333` | All / Checked In / Pending | box selector, small | `toggle-box` md |
+| 24 | `dashboard/organiser/events/[id]/edit/page.tsx:898` | Celebrity search result row | 10/12, ui | `menu-row` |
+| 25 | `dashboard/organiser/events/[id]/edit/page.tsx:956` | Panelist search result row | 10/12, ui | `menu-row` |
+| 26 | `dashboard/organiser/events/[id]/edit/page.tsx:1136` | Default compensation type | box selector, radius-sm | `toggle-box` md |
+| 27 | `dashboard/organiser/events/[id]/lineup/page.tsx:121` | ☆ Vouch Featured | pill, gold border + amber tint when on | bare-reason |
+| 28 | `dashboard/organiser/events/create/page.tsx:903` | Default compensation type | box selector, radius-sm | `toggle-box` md |
+| 29 | `dashboard/organiser/events/create/page.tsx:931` | Manual / Auto approval | box selector, flex 1 | `toggle-box` md |
+| 30 | `dashboard/venue/[id]/edit/page.tsx:373` | Hourly / Daily / Flexible | box selector, flex 1 | `toggle-box` md |
+| 31 | `dashboard/venue/[id]/seat-map/page.tsx:1442` | General Admission | box selector | `toggle-box` md |
+| 32 | `dashboard/venue/[id]/seat-map/page.tsx:1454` | Numbered Seating | box selector | `toggle-box` md |
+| 33 | `dashboard/venue/[id]/seat-map/page.tsx:1517` | Level tab (joined to its × button) | box selector, left-rounded only | `toggle-box` md (keeps its joined radius) |
+| 34 | `dashboard/venue/[id]/seat-map/page.tsx:1559` | "Guided setup" path card (recommended) | card, fill tint 0.5 border, card-lift gradient | `card` selected |
+| 35 | `dashboard/venue/[id]/seat-map/page.tsx:1580` | "Draw it myself" path card | card, tint-20 border | `card` |
+| 36 | `dashboard/venue/[id]/seat-map/page.tsx:1606` | ← Back to setup options | small, primary @0.7, underline | `text-link` |
+| 37 | `dashboard/venue/[id]/seat-map/page.tsx:1630` | Guided Setup panel toggle | box selector, fill-solid text even when off | `toggle-box` md |
+| 38 | `dashboard/venue/[id]/seat-map/page.tsx:1648` | Manual placement ON/OFF | box selector | `toggle-box` md |
+| 39 | `dashboard/venue/[id]/seat-map/page.tsx:1692` | Wizard: straight rows | box selector, small | `toggle-box` md |
+| 40 | `dashboard/venue/[id]/seat-map/page.tsx:1695` | Wizard: curved / other | box selector, small | `toggle-box` md |
+| 41 | `dashboard/venue/[id]/seat-map/page.tsx:1716` | Wizard: one section | box selector, small | `toggle-box` md |
+| 42 | `dashboard/venue/[id]/seat-map/page.tsx:1719` | Wizard: multiple sections | box selector, small | `toggle-box` md |
+| 43 | `dashboard/venue/[id]/seat-map/page.tsx:1779` | Row alignment left/center/right | box selector, small | `toggle-box` md |
+| 44 | `dashboard/venue/[id]/seat-map/page.tsx:1862` | Marker type (+ Stage, + Bar …) | per-marker MARKER_META colours | bare-reason |
+| 45 | `dashboard/venue/bookings/page.tsx:203` | Calendar day cell | square grid cell with status dots | bare-reason |
+| 46 | `dashboard/venue/create/page.tsx:403` | Hourly / Daily / Flexible | box selector, amber family | `toggle-box` md |
+| 47 | `dashboard/venue/create/page.tsx:593` | Seating path card | `.afa-path-card`, fill-solid border when active | `card` |
+| 48 | `dashboard/venue/sales/page.tsx:297` | Show top N only | small, muted, underline | `text-link` |
+| 49 | `my-feedback/page.tsx:368` | Feedback item card | raised card, radius-lg | `card` |
+| 50 | `organisers/[id]/page.tsx:420` | View all N past events → | mono micro eyebrow, amber, arrow | bare-reason |
+| 51 | `profile/page.tsx:734` | Settings list rows (icon, title/hint, chevron) | 14/16 rows with hairline dividers | bare-reason |
+| 52 | `venues/VenuesGridClient.tsx:138` | City filter trigger | field-shaped box matching the search input | bare-reason |
+| 53 | `venues/VenuesGridClient.tsx:153` | "All cities" option | dropdown row, amber when selected | `menu-row` |
+| 54 | `venues/VenuesGridClient.tsx:165` | City option | same | `menu-row` |
+| 55 | `venues/VenuesViewToggle.tsx:58` | Grid / Map view tab (with count) | `.afa-view-tab`: font-ui subtitle, underline span | `tab-display` |
+| 56 | `components/AddressAutocomplete.tsx:153` | Prediction row | 10/12, body | `menu-row` |
+| 57 | `components/BrowseSearchDropdown.tsx:87` | Result row | 10/20, body | `menu-row` |
+| 58 | `components/CityAutocomplete.tsx:142` | Prediction row | 10/12, body | `menu-row` |
+| 59 | `components/ContributionMoment.tsx:172` | Backdrop | absolute inset 0, scrim | `scrim` |
+| 60 | `components/DashboardShell.tsx:627` | Mobile tab bar "More" | Tailwind flex-col slot | bare-reason |
+| 61 | `components/FeeSheet.tsx:39` | Backdrop | same | `scrim` |
+| 62 | `components/HomeHeader.tsx:186` | Account menu trigger (avatar pill) | pill, resting border, 4/10/4/4 around the avatar | bare-reason |
+| 63 | `components/HomeHeader.tsx:237` | Locale code (EN, HI …) | mono micro, amber active | `text-toggle` |
+| 64 | `components/HomeHeader.tsx:253` | Sign out (menu) | 9/16, body | `menu-row` |
+| 65 | `components/LocationChip.tsx:101` | Location chip trigger | 3 context looks via `chipStyle` | bare-reason |
+| 66 | `components/LocationChip.tsx:136` | City row | 8/8, ui, fill tint when current | `menu-row` |
+| 67 | `components/MobileEventFilterSheet.tsx:69` | Backdrop | same | `scrim` |
+| 68 | `components/NearYouTabs.tsx:128` | Events tab | small 700, cream / secondary, amber underline | `tab` sm |
+| 69 | `components/NearYouTabs.tsx:135` | Artists tab | same | `tab` sm |
+| 70 | `components/PhotoRotationDots.tsx:28` | Carousel dot | 4px bar, width animates | bare-reason |
+| 71 | `components/RangePicker.tsx:19` | Week / Month … segments | borderless segments in a tinted track | bare-reason |
+| 72 | `components/SearchBox.tsx:89` | Event result row | `rowStyle` 8/16, ui | `menu-row` |
+| 73 | `components/SearchBox.tsx:100` | Artist result row | same | `menu-row` |
+| 74 | `components/SearchBox.tsx:111` | Venue result row | same | `menu-row` |
+| 75 | `components/SeatLayoutPreview.tsx:74` | Level switch | box selector, 4/10 radius-sm | `toggle-box` sm |
+| 76 | `components/SeatPicker.tsx:299` | Zoom Reset | 28px bordered box beside the icon zoom buttons | `outline-neutral` sm |
+| 77 | `components/SeatPicker.tsx:323` | Level switch | box selector, 5/12 radius-sm | `toggle-box` sm |
+| 78 | `components/SiteNav.tsx:452` | Language menu row | 9/10, ui, amber-wash when current | `menu-row` |
+| 79 | `components/SiteNav.tsx:552` | Account menu trigger (avatar pill) | same as #62 | bare-reason |
+| 80 | `components/SiteNav.tsx:617` | Locale code | same as #63 | `text-toggle` |
+| 81 | `components/SiteNav.tsx:635` | Sign out (menu) | same as #64 | `menu-row` |
+| 82 | `components/SupportWidget.tsx:504` | "Ask a question" panel tab | flex 1, amber fill when active | `tab` md |
+| 83 | `components/SupportWidget.tsx:518` | "Feedback" panel tab | same | `tab` md |
+| 84 | `components/SupportWidget.tsx:617` | "Use the feedback form" (in a sentence) | amber 600 underline | `text-link` |
+| 85 | `components/SupportWidget.tsx:795` | Remove attachment | small amber underline | `text-link` |
+| 86 | `components/admin/FeedbackDetailPanel.tsx:381` | Deploy stage pills | pill, sage fill when set | `toggle-pill` pill-sm |
+| 87 | `components/admin/FeedbackDetailPanel.tsx:415` | Severity pills | pill, per-severity SEVERITY_COLORS fill | bare-reason |
+| 88 | `components/mobile/MobileTabBar.tsx:482` | Mobile tab bar "More" | Tailwind flex-col slot | bare-reason |
+| 89 | `components/mobile/MobileTopBar.tsx:210` | Language menu row | same as #78 | `menu-row` |
+| 90 | `components/mobile/MobileTopBar.tsx:225` | Sign out (top bar) | mono caption uppercase, matches the Sign in `<Link>` | bare-reason |
+| 91 | `components/pwa/InstallPrompt.tsx:139` | "Not now" on the orange install banner | on-fill-solid @0.7 | bare-reason |
+
+Raw `<button>`s: `RegisterForm.tsx:473` (initials suggestion chip: fill tint, fill tint border, fill-solid text, pill) → `toggle-pill` pill-sm selected; `VenuePortalUI.tsx:262` (the venue portal's own `Button`) → rebuilt on the shared Button (`primary` → `solid` lg, `outline` → `outline-neutral` lg; its single `ghost` caller, venue-requests "Decline", → `outline-error` lg).
