@@ -1,3 +1,79 @@
+# Session Handoff — 27 Sept 2026, part 2 (CC — GEN-2609-115 token cleanup, pushed, needs merge + DB SQL)
+
+Branch `chore/gen-2609-115-token-cleanup` off `origin/qa` at `ef58c23`. **Not merged.** DB SQL below, not run.
+
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-115-token-cleanup?expand=1
+
+## 1. Commits (in order, one per item)
+- `058afc6` 1: delete `--afa-terracotta`
+- `868c28c` 2: fold `--afa-text-inverse` → `--afa-text-primary`
+- `178f8dc` 3: fold `--afa-red-alt` → `--afa-error-bright` (CRITICAL badge → `--afa-error`, see §3)
+- `3222fb4` 4: "Seat map" colour subsection (Blue / Plum / Brown tier)
+- `26b4be2` 5: restores get the save-time contrast check (+4 self-tests)
+- `398a127` 6: `form-submit` text `--afa-cream` → `--afa-on-fill-solid`
+- `8baca8f` 7: caption range 9–16px
+- `fe1a36c` 8: preview label "Outline (on orange)"
+- `d729d84` 9: version list refreshes after every save/restore
+- `8a49e5e` 10: snapshot-only version rows (API + SQL in the reference doc)
+- `01c0a76` coverage regenerated: 106 keys, 101 site-wide / 5 button-only / 0 unused
+
+## 2. Item 2: `--afa-text-inverse` → `--afa-text-primary` (8 uses, same value, no visible change)
+- `src/app/for-artists/page.tsx`: 3 (lines 17, 85, 112)
+- `src/app/page.tsx`: 2 (footer, 204 and 208)
+- `src/components/FourRooms.tsx`: 3 (75, 78, 175)
+
+## 3. Item 3: `--afa-red-alt` (14 uses, 14 files)
+- **13 text uses → `--afa-error-bright`.** All were `<ErrorBanner style={{ …, color: 'var(--afa-red-alt)' }}>`. ErrorBanner's own default colour is already `--afa-error-bright`, so the override was deleted, not rewritten. On the banner's error tint: 4.17 → 5.44:1 over raised, 4.66 → 6.08:1 over page (red-alt failed AA on raised). Files: `dashboard/admin/settings`, `dashboard/organiser/{page,edit,events/create,payouts,tours}`, `dashboard/venue/{page,[id],bookings,create,edit}`, `dashboard/venue-requests`, `profile`.
+- **1 fill → `--afa-error`, with the text changed too.** Admin feedback's CRITICAL severity badge (`SEVERITY_BADGE.CRITICAL`) was a solid red fill with dark text. The dispatch said a fill takes `--afa-error`, but dark text on `--afa-error` is 2.87:1, so the text is now `--afa-cream` (5.92:1). Old: 4.99:1. Visible: deeper red, light label. Still clearly distinct from the tinted HIGH badge.
+
+## 4. Item 6: form-submit contrast
+| | Text | On `--afa-fill-solid` |
+|---|---|---|
+| Before | `--afa-cream` #F7F3EE | **2.81:1** (fails AA) |
+| After | `--afa-on-fill-solid` → #1A1000 | **6.05:1** |
+- **Wider than the dispatch said.** `form-submit` is used on 6 pages, not 4: login (3 buttons), register (2), forgot-password, reset-password, **verify-phone (2)** and **the artist profile page** (`ArtistProfileClientPage.tsx:800`). None overrides the colour, so all of them change.
+- The contrast pair now tracks the real text token (`--afa-on-fill-solid`). Editor contrast panel: **0 failing pairs** (14/14 pass; verified in the UI and by a new self-test).
+
+## 5. DB SQL — NOT RUN. Apply to aforaudience-qa after merge.
+```sql
+BEGIN;
+DELETE FROM "DesignToken" WHERE "key" IN ('--afa-terracotta', '--afa-text-inverse', '--afa-red-alt');
+COMMIT;
+```
+Then record a restore point (item 10's SQL; its SELECT was checked read-only against QA: 109 rows → 109-key object, so expect 106 after the DELETE):
+```sql
+INSERT INTO "DesignTokenVersion" ("id", "snapshot", "createdBy", "createdAt", "note")
+SELECT 'snap_' || replace(gen_random_uuid()::text, '-', ''), jsonb_object_agg("key", "value"), NULL, now(), 'Snapshot: after GEN-2609-115 SQL'
+FROM "DesignToken";
+```
+- Until the DELETE runs nothing breaks: nothing reads the 3 keys, and the editor doesn't show keys it has no label for. QA values for every touched token equal the code defaults (checked read-only), so the ratios above hold on QA.
+- Reset to defaults is also safe before the SQL: it only writes `DEFAULT_TOKEN_VALUES` keys.
+
+## 6. Verification
+- `tsc` clean. `next build` passes; `/api/admin/design-tokens/snapshot` is in the route table.
+- Checker vs origin/qa: no new literals. Ratchet: unchanged from origin/qa (hex 0, rgba 0, font-family 0, font-size 13, spacing 1918, radius 0, raw-button 2, bare-button 91).
+- Self-tests: design-tokens **48/48** (was 41: +4 restore-contrast, +1 all-pairs-pass, +2 snapshot note; the old "made worse" test now starts from muted 0.3, since no default pair fails any more; the caption range test was updated). Checker 70/70, migrate-tokens 62/62, ticket-code 5/5, username 4/4.
+- ESLint on all 28 touched lint-able files, origin/qa vs branch: identical per file per rule (112 errors / 23 warnings on both sides, all pre-existing). New snapshot route: clean.
+- `verify-equivalence --base=origin/qa`: 0 unexplained changes. It flagged only the intended ones: 8× text-inverse → text-primary (item 2), 13× red-alt override removed (item 3). Files whose line counts changed (Button, feedback, editor, routes, libs) were reviewed by hand.
+- **Before/after screenshots** (origin/qa vs branch production builds, 1280 + 390, mocked session, forced API errors): `/login` button text rgb(247,243,238) → rgb(26,16,0); organiser + venue dashboard error banners rgb(239,68,68) → rgb(230,120,112); feedback CRITICAL badge dark-on-#EF4444 → cream-on-#B3261E.
+- **Editor, branch production build, 1280 + 390** (Playwright; GET mocked with the default token set plus a pre-#708 version with muted 0.4; writes intercepted): contrast panel 0 below AA; Seat map subsection holds the 3 tier colours and Status tones holds none; caption shows 9–16px; "Outline (on orange)" present; no horizontal overflow. Restoring the 0.4 version → the dialog lists muted 4.95 → 3.61 and 4.76 → 3.55; **Cancel sends nothing**; Restore anyway POSTs `{"confirmContrast":true}`. The mocked GET always returned the old 2-row list, yet the new "Restored version…" row appeared, so the list is driven by the restore response.
+- **Not verified live (needs an admin login):** the revert route's 409 on a real server, the snapshot route writing a row, and the list refresh against the real DB.
+
+## 7. Hitesh click-through (after merge + SQL, qa, admin login)
+1. `/login` (logged out): the Sign In button label is dark on orange, not light. Same on register and forgot-password.
+2. `/dashboard/admin/design-system` → Contrast check: every row ✓ AA, Form-submit 6.05:1.
+3. Show version history → Restore any version from before 26 Sep (muted 0.4) → "Yes, restore" → **"This restore lowers text contrast"** lists 2 muted pairs → **Cancel**: nothing changes, no new row.
+4. Restore a harmless version (or repeat step 3 with Restore anyway, then restore the row above it to undo): the new "Restored version…" row appears at the top **without a reload**.
+5. Colour → new "Seat map" subsection with Blue / Plum / Brown tier.
+
+## 8. Worth knowing
+- I didn't pin down item 9's root cause: the old code did refetch after a restore, and I couldn't reproduce the stale list without a real admin session. The fix removes the second request (save, restore and reset return the fresh list) and fetches GETs with `cache: 'no-store'`. Step 4 above confirms it live.
+- Snapshot route: `POST /api/admin/design-tokens/snapshot/` `{ "reason": "…" }` (trailing slash). There is no editor button; the dispatch asked for the route and the SQL only.
+- The coverage regen also picked up drift from #709 (the editor preview card): +1 on several space/radius/tint tokens, −1 on brown-black. Noted in the file header.
+- Historical docs (`docs/design.md`, audits, `CC_HANDOFF.md`) still mention the 3 removed tokens as history; I didn't rewrite them. `docs/afa-design-tokens-reference.md` has a "Removed" table.
+
+---
+
 # Session Handoff — 27 Sept 2026 (chat — guardrails click-through passed)
 
 - Hitesh's admin click-through of #709 passed against the real server: 200px refused inline; contrast confirm listed muted 4.95→2.57 and 4.76→2.58, Cancel sent nothing; cache refresh OK; restore round-trip wrote 2 rows with flat notes and 109-key snapshots, and muted is back at 0.5. **GEN-2609-108 and BUG-2609-061 RESOLVED/DEPLOYED_QA.**
