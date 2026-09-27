@@ -16,6 +16,9 @@ All items were decided by chat on 26 Sep, delegated by Hitesh. Report if anythin
 7. **Caption range.** `--afa-text-caption` shows 10–72px in the editor; it belongs with the small-text roles. Use 9–16px unless a real use needs more.
 8. **Preview label.** Label the Outline sample in the live preview "Outline (on orange)", so its orange backing box reads as intentional.
 
+9. **Version list refresh.** After a restore, the history list doesn't show the new row until reload (the buttons update, the list doesn't). Refetch versions after every save and restore.
+10. **Snapshot after out-of-band DB changes.** Add a way to write a full-snapshot version row with no token changes (note: `Snapshot: <reason>`), so chat can record a current restore point after applying SQL post-merge. Admin-only API route, plus the SQL equivalent documented in the reference doc.
+
 ## DB SQL (write it in the handoff, don't run it)
 Delete rows for `--afa-terracotta`, `--afa-text-inverse`, `--afa-red-alt`. Nothing else changes in the DB.
 

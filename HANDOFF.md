@@ -1,3 +1,11 @@
+# Session Handoff — 27 Sept 2026 (chat — guardrails click-through passed)
+
+- Hitesh's admin click-through of #709 passed against the real server: 200px refused inline; contrast confirm listed muted 4.95→2.57 and 4.76→2.58, Cancel sent nothing; cache refresh OK; restore round-trip wrote 2 rows with flat notes and 109-key snapshots, and muted is back at 0.5. **GEN-2609-108 and BUG-2609-061 RESOLVED/DEPLOYED_QA.**
+- Caught during the test: restoring any pre-#708 version would bring back light-theme values (`--afa-amber-tint #FFF8E1`) and muted 0.4 with no contrast warning. Hitesh cancelled. The two new full versions (27 Sep 08:54 IST) are now safe restore points.
+- Added to GEN-2609-115 dispatch: item 9 (history list refresh), item 10 (snapshot-only version for post-SQL restore points).
+
+---
+
 # Session Handoff — 26 Sept 2026, part 11 (chat — editor reviewed live, GEN-2609-115 dispatched)
 
 - Hitesh's editor screenshots: guardrails UI live; cache refresh worked (muted 0.5, contrast panel 4.95:1). Click-through steps (bad value, contrast confirm, refresh, restore) not yet done: no version rows since 00:14 UTC.
