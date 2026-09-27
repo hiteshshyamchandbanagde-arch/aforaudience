@@ -1,3 +1,10 @@
+# Session Handoff — 27 Sept 2026, part 11 (chat — GEN-2609-116 small bundle dispatched)
+
+- Queued for CC: `docs/cc-dispatches/cc-prompt-small-bundle-116.md`. GEN-2609-116 = BUG-2609-063 (autofill Sign In + autofill colour) + `font-size-literal` 13 → 0 + the BUG-2609-062 font scripts in `scripts/dev/fonts/`. BUG-2609-063 and GEN-2609-116 are BUILD_QUEUE.
+- After this: chat scopes the Indic system-font ticket (the Font goal), then spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 10 (chat — #711 merged, Button goal area closed)
 
 - **#711 GEN-2609-110** was squash-merged at pinned head `7b573c8`, making `qa` @ `98e3abb`. The amend run rebased cleanly and its preview was green, as was the `design-tokens` check. The branch has been deleted. The `qa` deploy is READY with 0 runtime errors. Feedback: BUILD_COMPLETE / DEPLOYED_QA. The design.md entry covers #712 and #711.
