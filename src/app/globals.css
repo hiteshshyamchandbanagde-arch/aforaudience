@@ -501,6 +501,25 @@ html {
   outline-offset: 2px;
 }
 
+/* GEN-2609-110 - states the shared Button (src/components/ui/Button.tsx)
+   can't set inline. Every Button carries .afa-btn plus .afa-btn-<variant>.
+   The focus ring is the .afa-focusable ring above, on every variant. The
+   hover rules only touch properties the variant leaves unset inline for
+   the resting state, so a selected option keeps its selected colour. */
+.afa-btn:focus-visible {
+  outline: 2px solid var(--afa-amber);
+  outline-offset: 2px;
+}
+.afa-btn-scrim:focus-visible { outline-offset: -2px; }
+.afa-btn-menu-row { background: transparent; }
+.afa-btn-menu-row:not(:disabled):hover { background: var(--afa-tint-06); }
+.afa-btn-tab { color: var(--afa-text-secondary); transition: color 0.2s ease; }
+.afa-btn-tab:hover { color: var(--afa-text-primary); }
+.afa-btn-tab-display { color: var(--afa-text-muted); transition: color 0.2s ease; }
+.afa-btn-tab-display:hover { color: var(--afa-text-secondary); }
+.afa-btn-text-toggle { color: var(--afa-text-muted); transition: color 0.2s ease; }
+.afa-btn-text-toggle:hover { color: var(--afa-text-secondary); }
+
 /* Venue Owner Portal shared UI (src/components/dashboard/VenuePortalUI.tsx) -
    ported from the approved Figma Make export. Scoped under .avp- so these
    hover/focus rules (impossible to express as inline styles) can't drift
