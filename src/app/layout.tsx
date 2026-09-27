@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Young_Serif, Schibsted_Grotesk, Instrument_Sans, JetBrains_Mono,
-  Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu,
-  Noto_Sans_Kannada, Noto_Sans_Malayalam, Noto_Sans_Gujarati, Noto_Sans_Bengali,
-} from "next/font/google";
+import localFont from "next/font/local";
+import "../fonts/fallbacks.css";
 import "./globals.css";
 import { getDesignTokensSafe } from "@/lib/design-tokens.server";
 import { buildDesignTokenCss } from "@/lib/design-tokens";
@@ -47,34 +44,114 @@ import MobileTopBar from "@/components/mobile/MobileTopBar";
 // text) that used to ride along on --font-display just because nothing
 // else existed for it. --font-sans (Instrument Sans, plain body copy)
 // and --font-mono are untouched - out of scope for this migration.
-// Young Serif ships no italic style via next/font/google (unlike
+// Young Serif ships no italic style on Google Fonts (unlike
 // Archivo before it) - components applying fontStyle:"italic" to
 // var(--font-display) will get browser-synthesized fake-oblique, not a
 // real italic. Flagged in this migration's report, not silently
 // worked around - a handful of real components do this
 // (ArtistNoPhoto.tsx, ArtistProfileClientPage.tsx, artists/page.tsx,
 // FourRooms.tsx, PlatformGrowthStrip.tsx, HeroRotator.tsx).
-const youngSerif = Young_Serif({ subsets: ["latin"], weight: ["400"], style: ["normal"], variable: "--font-display", display: "swap" });
-const schibstedGrotesk = Schibsted_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], variable: "--font-ui", display: "swap" });
-const instrumentSans = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
-const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
+//
+// BUG-2609-062 - self-hosted via next/font/local (files + provenance in
+// src/fonts/README.md). The Google Fonts loader fetched from Google at build
+// time and that fetch started failing every Vercel build on 27 Sep. Each
+// file is Google's own upstream font (same version Google served),
+// subset to exactly the codepoints Google's per-subset files rendered
+// (latin + latin-ext merged into one file, so e.g. the rupee sign still
+// comes from Schibsted Grotesk), unhinted like Google's. Variable fonts:
+// one file backs every weight, declared per weight exactly as Google's
+// CSS did, so weight matching (and synthetic bold above the top weight)
+// is unchanged.
+// next/font requires literal arguments (no shared consts/helpers), so
+// the per-weight src lists are spelled out - all entries of a family
+// point at the same file.
+const youngSerif = localFont({
+  src: [
+    { path: "../fonts/young-serif/YoungSerif-Regular.woff2", weight: "400", style: "normal" },
+  ],
+  variable: "--font-display", display: "swap", adjustFontFallback: false, fallback: ["Young Serif Fallback"],
+});
+const schibstedGrotesk = localFont({
+  src: [
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "800", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "400", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "600", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "700", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "800", style: "italic" },
+  ],
+  variable: "--font-ui", display: "swap", adjustFontFallback: false, fallback: ["Schibsted Grotesk Fallback"],
+});
+const instrumentSans = localFont({
+  src: [
+    { path: "../fonts/instrument-sans/InstrumentSans-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/instrument-sans/InstrumentSans-VF.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/instrument-sans/InstrumentSans-VF.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-sans", display: "swap", adjustFontFallback: false, fallback: ["Instrument Sans Fallback"],
+});
+const jetBrainsMono = localFont({
+  src: [
+    { path: "../fonts/jetbrains-mono/JetBrainsMono-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/jetbrains-mono/JetBrainsMono-VF.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/jetbrains-mono/JetBrainsMono-VF.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-mono", display: "swap", adjustFontFallback: false, fallback: ["JetBrains Mono Fallback"],
+});
 
 // GEN-2609-075 - stable, role-independent aliases for the same 4
 // families above, used only as the admin design-token panel's font
 // allowlist (src/lib/design-tokens.ts's FONT_ALLOWLIST). Each of these
 // re-requests the identical weight/subset config as its role sibling
-// above, so Next self-hosts it under the same static font file it
-// already generated for that sibling - no second network fetch, just
-// one extra @font-face declaration under its own CSS variable name.
+// above, so Next emits the same static font file it already emitted
+// for that sibling (same path - no duplicate file), just one extra
+// @font-face declaration under its own CSS variable name.
 // The indirection is the point: --font-display etc. are themselves
 // admin-overridable (a role can be reassigned to a different physical
 // font), so anything that names a PHYSICAL font unambiguously - e.g.
 // "render this role as Schibsted Grotesk, whatever --font-ui currently
 // points at" - needs a name that never itself gets reassigned.
-const youngSerifPhys = Young_Serif({ subsets: ["latin"], weight: ["400"], style: ["normal"], variable: "--font-phys-young-serif", display: "swap" });
-const schibstedGroteskPhys = Schibsted_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], variable: "--font-phys-schibsted-grotesk", display: "swap" });
-const instrumentSansPhys = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-phys-instrument-sans", display: "swap" });
-const jetBrainsMonoPhys = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-phys-jetbrains-mono", display: "swap" });
+const youngSerifPhys = localFont({
+  src: [
+    { path: "../fonts/young-serif/YoungSerif-Regular.woff2", weight: "400", style: "normal" },
+  ],
+  variable: "--font-phys-young-serif", display: "swap", adjustFontFallback: false, fallback: ["Young Serif Fallback"],
+});
+const schibstedGroteskPhys = localFont({
+  src: [
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-VF.woff2", weight: "800", style: "normal" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "400", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "600", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "700", style: "italic" },
+    { path: "../fonts/schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2", weight: "800", style: "italic" },
+  ],
+  variable: "--font-phys-schibsted-grotesk", display: "swap", adjustFontFallback: false, fallback: ["Schibsted Grotesk Fallback"],
+});
+const instrumentSansPhys = localFont({
+  src: [
+    { path: "../fonts/instrument-sans/InstrumentSans-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/instrument-sans/InstrumentSans-VF.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/instrument-sans/InstrumentSans-VF.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-phys-instrument-sans", display: "swap", adjustFontFallback: false, fallback: ["Instrument Sans Fallback"],
+});
+const jetBrainsMonoPhys = localFont({
+  src: [
+    { path: "../fonts/jetbrains-mono/JetBrainsMono-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/jetbrains-mono/JetBrainsMono-VF.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/jetbrains-mono/JetBrainsMono-VF.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-phys-jetbrains-mono", display: "swap", adjustFontFallback: false, fallback: ["JetBrains Mono Fallback"],
+});
 
 // Phase 2c multi-script fix (FEAT-2608-051): --font-sans (Manrope) only
 // covers Latin, so headings/body silently fell back to a generic system
@@ -84,13 +161,67 @@ const jetBrainsMonoPhys = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "
 // *character* via each font's unicode-range, so listing all 7 costs
 // nothing extra for a Latin-only page - the Devanagari font file is
 // only ever fetched when Devanagari characters are actually present.
-const notoDevanagari = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["400", "500"], variable: "--font-devanagari", display: "swap" });
-const notoTamil = Noto_Sans_Tamil({ subsets: ["tamil"], weight: ["400", "500"], variable: "--font-tamil", display: "swap" });
-const notoTelugu = Noto_Sans_Telugu({ subsets: ["telugu"], weight: ["400", "500"], variable: "--font-telugu", display: "swap" });
-const notoKannada = Noto_Sans_Kannada({ subsets: ["kannada"], weight: ["400", "500"], variable: "--font-kannada", display: "swap" });
-const notoMalayalam = Noto_Sans_Malayalam({ subsets: ["malayalam"], weight: ["400", "500"], variable: "--font-malayalam", display: "swap" });
-const notoGujarati = Noto_Sans_Gujarati({ subsets: ["gujarati"], weight: ["400", "500"], variable: "--font-gujarati", display: "swap" });
-const notoBengali = Noto_Sans_Bengali({ subsets: ["bengali"], weight: ["400", "500"], variable: "--font-bengali", display: "swap" });
+// BUG-2609-062: each file holds only its script's subset (Google's
+// latin/latin-ext files for these families are dropped - Latin always
+// resolves earlier in the stack), the explicit unicode-range is that
+// file's exact coverage, and preload is off so a Latin-only page never
+// downloads them (the Google Fonts loader preloaded all 7 on every page).
+const notoDevanagari = localFont({
+  src: [
+    { path: "../fonts/noto-sans-devanagari/NotoSansDevanagari-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-devanagari/NotoSansDevanagari-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-devanagari", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Devanagari Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+900-97F,U+1CD0-1CF6,U+1CF8-1CF9,U+200C-200D,U+20B9,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09" }],
+});
+const notoTamil = localFont({
+  src: [
+    { path: "../fonts/noto-sans-tamil/NotoSansTamil-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-tamil/NotoSansTamil-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-tamil", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Tamil Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+964-965,U+B82-B83,U+B85-B8A,U+B8E-B90,U+B92-B95,U+B99-B9A,U+B9C,U+B9E-B9F,U+BA3-BA4,U+BA8-BAA,U+BAE-BB9,U+BBE-BC2,U+BC6-BC8,U+BCA-BCD,U+BD0,U+BD7,U+BE6-BFA,U+200C-200D,U+20B9,U+25CC" }],
+});
+const notoTelugu = localFont({
+  src: [
+    { path: "../fonts/noto-sans-telugu/NotoSansTelugu-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-telugu/NotoSansTelugu-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-telugu", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Telugu Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+951-952,U+964-965,U+C00-C0C,U+C0E-C10,U+C12-C28,U+C2A-C39,U+C3C-C44,U+C46-C48,U+C4A-C4D,U+C55-C56,U+C58-C5A,U+C5D,U+C60-C63,U+C66-C6F,U+C77-C7F,U+1CDA,U+1CF2,U+200C-200D,U+25CC" }],
+});
+const notoKannada = localFont({
+  src: [
+    { path: "../fonts/noto-sans-kannada/NotoSansKannada-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-kannada/NotoSansKannada-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-kannada", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Kannada Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+951-952,U+964-965,U+C80-C8C,U+C8E-C90,U+C92-CA8,U+CAA-CB3,U+CB5-CB9,U+CBC-CC4,U+CC6-CC8,U+CCA-CCD,U+CD5-CD6,U+CDD-CDE,U+CE0-CE3,U+CE6-CEF,U+CF1-CF3,U+1CD0,U+1CD2,U+1CDA,U+1CF2,U+1CF4,U+200C-200D,U+20B9,U+25CC,U+A830-A835" }],
+});
+const notoMalayalam = localFont({
+  src: [
+    { path: "../fonts/noto-sans-malayalam/NotoSansMalayalam-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-malayalam/NotoSansMalayalam-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-malayalam", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Malayalam Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+307,U+323,U+951-952,U+964-965,U+D00-D0C,U+D0E-D10,U+D12-D44,U+D46-D48,U+D4A-D4F,U+D54-D63,U+D66-D7F,U+1CDA,U+200C-200D,U+20B9,U+25CC,U+A830-A832" }],
+});
+const notoGujarati = localFont({
+  src: [
+    { path: "../fonts/noto-sans-gujarati/NotoSansGujarati-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-gujarati/NotoSansGujarati-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-gujarati", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Gujarati Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+302-303,U+307-308,U+312,U+326-327,U+951-952,U+964-965,U+A81-A83,U+A85-A8D,U+A8F-A91,U+A93-AA8,U+AAA-AB0,U+AB2-AB3,U+AB5-AB9,U+ABC-AC5,U+AC7-AC9,U+ACB-ACD,U+AD0,U+AE0-AE3,U+AE6-AF1,U+AF9-AFF,U+200C-200D,U+20B9,U+25CC,U+A830-A839" }],
+});
+const notoBengali = localFont({
+  src: [
+    { path: "../fonts/noto-sans-bengali/NotoSansBengali-VF.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/noto-sans-bengali/NotoSansBengali-VF.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-bengali", display: "swap", preload: false, adjustFontFallback: false, fallback: ["Noto Sans Bengali Fallback"],
+  declarations: [{ prop: "unicode-range", value: "U+951-952,U+964-965,U+980-983,U+985-98C,U+98F-990,U+993-9A8,U+9AA-9B0,U+9B2,U+9B6-9B9,U+9BC-9C4,U+9C7-9C8,U+9CB-9CE,U+9D7,U+9DC-9DD,U+9DF-9E3,U+9E6-9FE,U+1CD0,U+1CD2,U+1CD5-1CD6,U+1CD8,U+1CE1,U+1CEA,U+1CED,U+1CF2,U+1CF5-1CF7,U+200C-200D,U+20B9,U+25CC,U+A8F1" }],
+});
 
 export const metadata: Metadata = {
   title: "A for Audience — Where Art Finds Its Crowd",
