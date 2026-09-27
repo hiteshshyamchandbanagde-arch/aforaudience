@@ -8153,3 +8153,15 @@ Feedback: BUG-2609-062 and GEN-2609-110 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Ve
 - **Font size:** `font-size-literal` is at 0. The new token `--afa-text-display` (26px, "Display") is used for big numbers and card titles at 4 sites. The other 9 sizes are one-offs with `token-ok` reasons. The DesignToken row was inserted in QA. **Restart `next dev` after adding a `:root` token**, because a running dev server keeps serving stale CSS.
 - **Fonts:** `scripts/dev/fonts/` rebuilds all 12 files byte-identical from pinned sources; rerun instructions are in `src/fonts/README.md`.
 - **Known gap, fix before spacing:** GEN-2609-117. A `token-ok` comment exempts every literal on its line.
+
+## GEN-2609-118 — colour rule: orange = primary action, amber = selected (decision, 27 Sep; build queued)
+
+**Decision (Hitesh, 27 Sep) — standing rule:**
+- **Orange (`--afa-fill-solid`) = the single primary action on a screen.** Book, Pay, Publish, Accept, Save. At most one solid-orange button per screen. Secondary actions are `outline`, tertiary are `text-link`, destructive is red outline (solid red only on a final confirm).
+- **Amber = selected / active state.** Chips, toggle boxes, tabs, seats, period pickers, status filters. Selected is shown as an amber border + amber text on a faint amber tint — **never a solid fill**, so "solid = action, tinted = state" holds even without colour.
+- Selection gets its **own admin-editable token family `--afa-selected*`** (defaults point at the existing amber values), not `--afa-amber` directly — amber already has a second job (quiet accents, photo duotone), and reusing it would rebuild the double role one level down.
+- **Root cause being fixed:** `--afa-fill-solid` was documented as "main call-to-action buttons, selected states". That double role meant an admin changing the CTA colour also changed every selected chip. The reference doc wording changes with the build.
+- **Contrast:** amber text failed on light surfaces in the 27 Sep click-through (2.48). On light surfaces the selected state uses the amber border with dark text. The build runs the contrast guard on every new pairing.
+- Checkmark on selected chips: deferred (tint alone first; revisit after live check).
+
+Feedback: GEN-2609-118 → `BUILD_QUEUE`.

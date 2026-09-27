@@ -1,3 +1,13 @@
+# Session Handoff — 27 Sept 2026, part 15 (chat — colour rule decided, GEN-2609-118 queued)
+
+- **Colour rule DECIDED (Hitesh):** orange = single primary action per screen; amber = selected, via new admin-editable `--afa-selected*` tokens. Full rule in design.md GEN-2609-118. The part-14 "Decision pending" section is closed.
+- Logged **GEN-2609-118** (`BUILD_QUEUE`, MEDIUM). CC prompt drafted in chat (`cc-prompt-gen-2609-118-colour-rule.md`).
+- Scoping note: selection is already mostly centralised (Button `toggle-pill`/`toggle-box`/`tab` variants + `FILL_SOLID_TINT`/`FILL_SOLID_BORDER_TINT` in `src/lib/statusStyle.ts`), so the build is mostly repointing those plus sweeping stragglers.
+- New PAT provided and verified this session (admin/push). Hitesh: revoke it at session end.
+- Next order unchanged after 118: MEDIUM bug bundle → Indic fonts → GEN-2609-117 → spacing GEN-2609-107.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 14 (chat — Hitesh click-through of #711/#712/#713 on qa; next-session start point)
 
 ## State
