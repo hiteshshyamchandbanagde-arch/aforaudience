@@ -133,6 +133,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
 
         <div ref={cityRef} style={{ position: "relative", width: "256px", flexShrink: 0 }}>
           <Button
+            // bare-reason: select-field trigger that must match the SearchInputBox field beside it (border, surface, padding, hover border); a form field, not a button look
             variant="bare"
             type="button"
             onClick={() => setCityOpen((o) => !o)}

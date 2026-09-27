@@ -408,6 +408,7 @@ export default function FeedbackDetailPanel({
               </Button>
               {SEVERITIES.map((sev) => (
                 <Button
+                  // bare-reason: each pill's selected fill is that severity's own SEVERITY_COLORS colour (data-driven); toggle-pill's selection is always the one fill-solid tint
                   variant="bare"
                   key={sev}
                   disabled={busy}

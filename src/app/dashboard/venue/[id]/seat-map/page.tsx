@@ -1846,6 +1846,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700 }}>Safety markers:</span>
                     {(Object.keys(MARKER_META) as MarkerType[]).map((t) => (
                       <Button
+                        // bare-reason: each marker type's border/fill is its own MARKER_META colour, the colour the marker takes on the canvas; no variant takes a per-item colour
                         variant="bare"
                         key={t}
                         onClick={() => setMarkerMode((v) => (v === t ? null : t))}

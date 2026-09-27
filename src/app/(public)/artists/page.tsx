@@ -272,6 +272,7 @@ export default function ArtistsPage() {
           {["All", ...genres].map((g) => (
             <Button
               key={g}
+              // bare-reason: editorial genre index in the display serif at title size, with an animated hover underline from the page CSS; text-toggle is the small mono UI filter
               variant="bare"
               onClick={() => setSelectedGenre(g)}
               className="afa-genre-filter"

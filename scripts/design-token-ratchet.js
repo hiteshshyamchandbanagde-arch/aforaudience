@@ -47,7 +47,7 @@
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
-const { RULES, isCheckedFile, isExemptFile, tokenOkReason } = require('./check-design-tokens')
+const { RULES, isCheckedFile, isExemptFile, tokenOkReason, bareReason } = require('./check-design-tokens')
 
 const BASELINE_PATH = path.join(__dirname, 'design-token-baseline.json')
 const UPDATE = process.argv.includes('--update-baseline')
@@ -68,6 +68,7 @@ function countAll() {
   for (const rule of RULES) counts[rule.name] = 0
   const perFile = {}
   const tokenOkUses = []
+  const bareReasonUses = []
 
   for (const file of listCheckedFiles()) {
     let text
@@ -77,7 +78,13 @@ function countAll() {
       continue // deleted-but-still-listed edge case (rare, ls-files is normally live-tree accurate)
     }
     let fileTotal = 0
+    // GEN-2609-110 - bare-button reads the line above (bare-reason).
+    let prevLine = ''
     for (const line of text.split('\n')) {
+      const above = prevLine
+      prevLine = line
+      const bare = bareReason(line)
+      if (bare) bareReasonUses.push({ file, reason: bare })
       const reason = tokenOkReason(line)
       if (reason) {
         tokenOkUses.push({ file, reason, content: line.trim() })
@@ -85,7 +92,7 @@ function countAll() {
       }
       for (const rule of RULES) {
         if (rule.isExemptFile && rule.isExemptFile(file)) continue
-        const literals = rule.extract ? rule.extract(line) : (rule.test(line) ? [line] : [])
+        const literals = rule.extract ? rule.extract(line, above) : (rule.test(line, above) ? [line] : [])
         if (literals.length > 0) {
           counts[rule.name] += literals.length
           fileTotal += literals.length
@@ -94,7 +101,7 @@ function countAll() {
     }
     if (fileTotal > 0) perFile[file] = fileTotal
   }
-  return { counts, perFile, tokenOkUses }
+  return { counts, perFile, tokenOkUses, bareReasonUses }
 }
 
 function loadBaseline() {
@@ -142,8 +149,14 @@ function printReport(counts, baseline, perFile) {
 }
 
 function main() {
-  const { counts, perFile, tokenOkUses } = countAll()
+  const { counts, perFile, tokenOkUses, bareReasonUses } = countAll()
   const baseline = loadBaseline()
+
+  if (bareReasonUses.length > 0) {
+    console.log(`design-token ratchet: ${bareReasonUses.length} bare Button(s) explained via // bare-reason: (always shown, not counted by bare-button):\n`)
+    for (const u of bareReasonUses) console.log(`  ${u.file}  ${u.reason}`)
+    console.log('')
+  }
 
   if (tokenOkUses.length > 0) {
     console.log(`design-token ratchet: ${tokenOkUses.length} line(s) currently allowed via // token-ok: (always shown):\n`)

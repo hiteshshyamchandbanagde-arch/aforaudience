@@ -16,6 +16,7 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
     <div style={{ display: 'inline-flex', gap: '4px', background: 'var(--afa-tint-04)', padding: '4px', borderRadius: 'var(--afa-radius-md)' }}>
       {RANGES.map((r) => (
         <Button
+          // bare-reason: segmented control: borderless segments inside one shared tinted track; toggle-box and toggle-pill are free-standing bordered options
           variant="bare"
           key={r.value}
           onClick={() => onChange(r.value)}

@@ -307,6 +307,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <Button
+              // bare-reason: full-width card header (title left, Show/Hide right, body type) toggling the list below; disclosure is the compact small-type toggle, menu-row a list item
               variant="bare"
               onClick={() => {
                 const next = !listOpen

@@ -193,6 +193,7 @@ export default function AdminDiaryPage() {
                   {STATUS_ORDER.map((s) => (
                     <Button
                       key={s}
+                      // bare-reason: each chip's selected colour is that status's own STATUS_META colour (data-driven); toggle-pill's selection is always the one fill-solid tint
                       variant="bare"
                       onClick={() => handleStatusChange(entry.id, s)}
                       disabled={updatingId === entry.id || s === entry.status}

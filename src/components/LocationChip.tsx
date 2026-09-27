@@ -97,7 +97,13 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
 
   return (
     <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>
-      <Button variant="bare" type="button" onClick={() => setOpen((v) => !v)} style={chipStyle}>
+      <Button
+        // bare-reason: renders one of three context looks (mobile menu row, top-bar label, pill chip) to match the header hosting it; no one variant covers all three
+        variant="bare"
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={chipStyle}
+      >
         {variant !== 'topbar' && <span aria-hidden>📍</span>}
         <span>{label}</span>
         <span style={{ opacity: 0.5, fontSize: variant === 'topbar' ? '8px' : '10px' }}>▾</span>

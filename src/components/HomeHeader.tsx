@@ -183,6 +183,7 @@ export default function HomeHeader() {
 
           <div ref={menuRef} style={{ position: "relative" }}>
             <Button
+              // bare-reason: account trigger pill whose padding hugs the 28px avatar unevenly (4px left, 10px right); a padding token would push the avatar off-centre
               variant="bare"
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
