@@ -1,3 +1,43 @@
+# Session Handoff — 27 Sept 2026, part 9 (CC — #711 amend: rebased on fixed qa, locale tap targets + seat-picker Reset, pushed, needs merge)
+
+Branch `feat/gen-2609-110-button-phase3` (PR #711), now on `origin/qa` @ `b2829fd`/`f46a9e2`. **Not merged.** No DB changes. No new PR.
+
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-110-button-phase3?expand=1
+
+## 1. Rebase
+- `5b1065a` rebased onto `origin/qa` @ `f46a9e2`: **clean, no conflicts** (the 10 commits touch nothing the local-fonts change touched). Force-pushed with lease **before** any change: `5b1065a → 2a8a639`.
+- The ratchet baseline needed no update after the rebase.
+
+## 2. Commits (on top of the rebased 10)
+- `7b573c8` amend: locale-code tap targets ≥ 24×24; seat-picker Reset matches −/+ (3 files, +5/−1)
+
+## 3. Fixes
+- **Locale codes (SiteNav ~L618, HomeHeader ~L238 only):** call-site `style` with `minWidth`/`minHeight: var(--afa-space-6)` (24px), the pre-#711 `2px 4px` padding (`--afa-space-2px`/`--afa-space-1`), and `justifyContent: center`. Text is unchanged at 12px. The other 5 `text-toggle` sites and `Button.tsx` are untouched.
+  - Hit area, measured in production builds: **pre-#711 21.2×20.5 → #711 16.8×18.0 → now 24.8×24.0** (all 11 codes, both menus).
+  - Side effect: the 160px menu panel now wraps the codes 6+5 instead of 8+3 (one extra row, about 28px taller).
+- **SeatPicker Reset (~L296):** still `outline-neutral sm`, with call-site border `1px solid --afa-tint-20`, background `--afa-surface-raised` and colour `--afa-text-primary`. Computed styles now match Zoom out exactly: border rgba(245,245,240,.2), bg rgb(31,31,31), text rgb(245,245,240), 28px height, 6px radius. Before: border .15, transparent, text .65. Width still comes from the label.
+
+## 4. `scrim` focus check
+- The scrim **is** focusable, deliberately: it's a real `<button>` with an aria-label, so keyboard and screen-reader users have a dismiss control. Checked on /events at 390 with the mobile filter sheet open: 12 Tabs reach it, `:focus-visible` is true, and the outline is **solid 2px amber (#C9973A), offset −2px** (the existing `.afa-btn-scrim` inset rule).
+- The ring shows as amber lines down both sides of the exposed scrim strip above the sheet. Its top edge is under the fixed top bar and its bottom edge is under the sheet, so it's a partial ring, but it's visible. No change made.
+- Pre-existing, not in scope: the sheet has no focus trap, so Tab walks the page behind it before reaching the scrim.
+
+## 5. Screenshots (production builds, before = `2a8a639`, after = `7b573c8`)
+- **Locale menus:** taken at **1024, not 390**. Both SiteNav and HomeHeader are `display:none` below 1024px (the mobile shell replaces them), so the locale codes don't exist at 390. 1024 (iPad landscape) is the narrowest touch width where they render. Before: tight row with no padding. After: same text, evenly spaced 24px targets, 2 rows.
+- **Seat picker (390, zoomed in, qa-jaipur-event-0001):** before, Reset is dimmer (grey text, no fill) than −/+. After, it's identical to them apart from width.
+
+## 6. Verification
+- `tsc` clean. `next build` passes.
+- Checker vs origin/qa: no new literals. Ratchet: every category equal to baseline (spacing 1866, font-size 13, bare/raw-button 0).
+- Self-tests: checker 80/80, migrate-tokens 62/62, design-tokens 48/48, ticket-code 5/5, username 4/4.
+- ESLint per-rule, before vs after on the 3 files: identical (SiteNav 0, HomeHeader 0, SeatPicker 1 set-state-in-effect + 2 no-explicit-any, all pre-existing).
+- **Vercel preview on `7b573c8`: READY** (`dpl_Etv4VaUmi4VzMHF5AZm9okVq389L`). The rebased `2a8a639` was also READY; the pre-rebase `5b1065a` was ERROR (Google Fonts), so the fonts fix did unblock #711.
+
+## 7. Next
+- Merge #711 → then per part 6: record the button variants and the tab decision in `docs/design.md` and the tokens reference → BUG-2609-063 + 13 font-size literals + commit the font scripts (part 8) → spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 8 (chat — #712 merged, Vercel green again)
 
 - **#712 BUG-2609-062** was squash-merged at pinned head `39c783b`, making `qa` @ `b2829fd`. The PR preview was green, the `design-tokens` check was green, and the branch has been deleted. On `qa`, `layout.tsx` has 0 `next/font/google` imports and 2 `next/font/local` imports. The `qa` deploy is READY with 0 runtime errors. Feedback: BUILD_COMPLETE / DEPLOYED_QA.
