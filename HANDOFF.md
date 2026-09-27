@@ -1,3 +1,12 @@
+# Session Handoff — 27 Sept 2026, part 8 (chat — #712 merged, Vercel green again)
+
+- **#712 BUG-2609-062** was squash-merged at pinned head `39c783b`, making `qa` @ `b2829fd`. The PR preview was green, the `design-tokens` check was green, and the branch has been deleted. On `qa`, `layout.tsx` has 0 `next/font/google` imports and 2 `next/font/local` imports. The `qa` deploy is READY with 0 runtime errors. Feedback: BUILD_COMPLETE / DEPLOYED_QA.
+- **Next: the #711 amend dispatch** (`docs/cc-dispatches/cc-prompt-button-phase3-110-amend.md`). It rebases #711 onto `b2829fd` so its preview can go green.
+- Decision: **commit the font build and parity scripts** to `scripts/dev/fonts/` so a future font upgrade can be reproduced. Do this in the next small run (with BUG-2609-063 + the 13 font-size literals), not in the #711 amend.
+- Flag: CC reports that most Hindi, Tamil, Bengali and Gujarati text still renders in the **system font**, not Noto, both before and after #712. FEAT-2608-051 is still marked IN_TEST, but that gap is open. It also counts against the Font goal, since the admin can't control that text. Chat will scope it as its own ticket after #711 merges.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 7 (CC — BUG-2609-062 self-hosted fonts, pushed, needs merge)
 
 Branch `fix/bug-2609-062-local-fonts` off `origin/qa` at `d2f7739`. **Not merged.** No DB changes. Blocker: merge this first, then run the #711 amend dispatch.
