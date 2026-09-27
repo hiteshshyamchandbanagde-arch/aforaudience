@@ -354,7 +354,6 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-peach": "#F5A26E",
   "--afa-plum": "#7A4A8A",
   "--afa-plum-black": "#1A0A1A",
-  "--afa-red-alt": "#EF4444",
   "--afa-sage": "#4A6741",
   "--afa-social-blue": "#1D9BF0",
   "--afa-taupe": "#8A827A",

@@ -140,7 +140,7 @@ export default function OrganiserEditPage() {
             <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>

@@ -31,6 +31,7 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 |---|---|---|
 | `--afa-terracotta` (`#C8441A`) | `--afa-fill-solid` for actions, `--afa-brand-mark` for the logo "A" | 0 live uses since Phase 2c |
 | `--afa-text-inverse` (`#F5F5F0`) | `--afa-text-primary` | Same value; its 8 uses (home footer, For Artists, Four Rooms headings) were rewritten |
+| `--afa-red-alt` (`#EF4444`) | `--afa-error-bright` for text, `--afa-error` for fills | One error red. It was 4.17:1 on error-tint over raised (fails AA); error-bright is 5.44:1 |
 
 **GEN-2609-075 — radius + button-padding scale (new tokens, admin-controlled).** Promoted out of `Button.tsx`'s `SIZE_CHROME`/per-variant `borderRadius`, where these were previously plain hardcoded numbers, never a CSS custom property:
 

@@ -55,9 +55,8 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   // --- Status tones
   "--afa-sage": { section: "status", label: "Success green", usedFor: "success button fill, confirmed borders" },
   "--afa-sage-bright": { section: "status", label: "Success text", usedFor: "success badge and status text on dark" },
-  "--afa-error": { section: "status", label: "Error red", usedFor: "error fills and borders, offline banner" },
+  "--afa-error": { section: "status", label: "Error red", usedFor: "error fills and borders, offline banner, critical-priority badges" },
   "--afa-error-bright": { section: "status", label: "Error text", usedFor: "error messages and error badge text on dark" },
-  "--afa-red-alt": { section: "status", label: "Alert red", usedFor: "load-error messages, critical-priority badges" },
   "--afa-gold": { section: "status", label: "Featured gold", usedFor: "featured-card and top-rank borders" },
   "--afa-green-deep": { section: "status", label: "Delivered green", usedFor: "delivered / rising / retry-ok labels" },
   "--afa-green-dark": { section: "status", label: "Auth success green", usedFor: "success notices on login, register and verify email" },

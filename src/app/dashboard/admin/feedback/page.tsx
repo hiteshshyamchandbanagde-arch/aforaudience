@@ -75,12 +75,14 @@ const CATEGORY_BADGE = { bg: 'var(--afa-amber-tint)', color: 'var(--afa-amber)' 
 
 // Severity IS a real urgency axis, so it keeps a graduated scale — low to
 // high maps green -> amber -> tinted red -> solid red, using only tokens
-// already in the locked palette.
+// already in the locked palette. GEN-2609-115: CRITICAL's solid red is
+// the --afa-error fill (was --afa-red-alt); cream text on it is 5.92:1,
+// the old dark text would be 2.87:1.
 const SEVERITY_BADGE: Record<string, { bg: string; color: string }> = {
   LOW: { bg: 'var(--afa-success-tint)', color: 'var(--afa-green-deep)' },
   MEDIUM: { bg: 'var(--afa-amber-tint)', color: 'var(--afa-amber)' },
   HIGH: { bg: 'var(--afa-error-tint)', color: 'var(--afa-error-bright)' },
-  CRITICAL: { bg: 'var(--afa-red-alt)', color: 'var(--afa-on-fill-solid)' },
+  CRITICAL: { bg: 'var(--afa-error)', color: 'var(--afa-cream)' },
 }
 
 // Workflow overhaul (session 63, Hitesh's design). Two-field split -

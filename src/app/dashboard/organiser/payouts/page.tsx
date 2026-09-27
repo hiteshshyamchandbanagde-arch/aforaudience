@@ -112,7 +112,7 @@ export default function OrganiserPayoutsPage() {
           </p>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-08)', marginBottom: '20px' }}>
