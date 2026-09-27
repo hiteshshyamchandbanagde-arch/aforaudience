@@ -365,17 +365,8 @@ export default function MyFeedbackPage() {
               return (
                 <Button
                   key={item.id}
-                  variant="bare"
+                  variant="card"
                   onClick={() => setSelectedIndex(i)}
-                  style={{
-                    background: 'var(--afa-surface-raised)',
-                    borderRadius: 'var(--afa-radius-lg)',
-                    padding: '18px 20px',
-                    border: '1px solid var(--afa-tint-08)',
-                    textAlign: 'left',
-                    width: '100%',
-                    font: 'inherit',
-                  }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                     <div style={{ minWidth: 0 }}>

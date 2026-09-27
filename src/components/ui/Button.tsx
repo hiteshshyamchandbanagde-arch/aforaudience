@@ -614,11 +614,11 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
       // sites (/events Events/Organisers, /venues Grid/Map). Same underline
       // as `tab`, but no side padding (the tabs sit flush on the page's
       // left edge) and the page-heading type. Resting colour + hover from
-      // `.afa-btn-tab-display`.
+      // `.afa-btn-tab-display`. Inline-block, not flex: /venues puts a
+      // superscript count after the label, and vertical-align needs
+      // inline layout.
       return {
-        display: 'inline-flex',
-        alignItems: 'baseline',
-        gap: 'var(--afa-space-2)',
+        display: 'inline-block',
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
         border: 'none',

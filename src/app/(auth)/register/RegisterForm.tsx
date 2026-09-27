@@ -489,18 +489,11 @@ export default function RegisterForm() {
                       </button>
                     ))}
                     <Button
-                      variant="bare"
+                      variant="text-link"
                       type="button"
                       onClick={() => fetchInitialsSuggestions(initialsSeed)}
                       disabled={initialsLoading}
                       title={tr.registerPage.tryMoreSuggestionsTitle}
-                      style={{
-                        fontSize: "var(--afa-text-small)",
-                        color: "var(--afa-text-primary)",
-                        opacity: initialsLoading ? 0.4 : 0.6,
-                        cursor: initialsLoading ? "default" : "pointer",
-                        padding: "var(--afa-space-1) var(--afa-space-2px)",
-                      }}
                     >
                       {initialsLoading ? "…" : tr.registerPage.tryMoreButton}
                     </Button>
@@ -525,10 +518,9 @@ export default function RegisterForm() {
                   {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
                     <Button
-                      variant="bare"
+                      variant="text-link"
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
-                      style={{ color: "var(--afa-error-bright)", textDecoration: "underline", fontSize: "var(--afa-text-small)", padding: 0 }}
                     >
                       {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
                     </Button>

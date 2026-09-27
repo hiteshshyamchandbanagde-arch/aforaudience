@@ -346,16 +346,6 @@ function EventsPageContent() {
         @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
         @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
         .afa-events-search-box { flex: 1; min-width: 220px; }
-        .afa-events-type-filter { font-family: var(--font-mono); font-size: var(--afa-text-micro); text-transform: uppercase; letter-spacing: 0.2em; color: var(--afa-text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
-        .afa-events-type-filter:hover { color: var(--afa-text-secondary); }
-        .afa-events-type-filter.active { color: var(--afa-amber); }
-        .afa-events-mode-tab { font-family: var(--font-ui); font-size: var(--afa-text-lead); background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: var(--afa-text-muted); transition: color 0.2s ease; }
-        .afa-events-mode-tab:hover { color: var(--afa-text-secondary); }
-        .afa-events-mode-tab.active { color: var(--afa-text-primary); }
-        .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-amber); }
-        .afa-events-price-filter { font-family: var(--font-mono); font-size: var(--afa-text-small); text-transform: uppercase; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; color: var(--afa-text-muted); padding: 0; transition: color 0.2s ease; }
-        .afa-events-price-filter:hover { color: var(--afa-text-secondary); }
-        .afa-events-price-filter.active { color: var(--afa-amber); }
         .afa-events-select { padding: 8px 12px; border-radius: var(--afa-radius-xs); border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
         .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--afa-radius-xs); border: none; cursor: pointer; background: transparent; color: var(--afa-text-muted); transition: color 0.2s ease, background 0.2s ease; }
         .afa-events-view-btn:hover { color: var(--afa-text-primary); }
@@ -413,10 +403,10 @@ function EventsPageContent() {
             treatment (not pills) matching the Venues/Owners toggle
             convention elsewhere in the app. */}
         <div style={{ display: "flex", gap: "32px", marginTop: "40px", borderBottom: "1px solid var(--afa-tint-10)" }}>
-          <Button variant="bare" className={`afa-events-mode-tab${contentMode === "events" ? " active" : ""}`} onClick={() => setContentMode("events")} style={{ fontFamily: "var(--font-ui)", color: undefined }}>
+          <Button variant="tab-display" fullWidth={false} selected={contentMode === "events"} onClick={() => setContentMode("events")} style={{ marginBottom: "-1px" }}>
             {tr.eventsPage.toggleEvents}
           </Button>
-          <Button variant="bare" className={`afa-events-mode-tab${contentMode === "organisers" ? " active" : ""}`} onClick={() => setContentMode("organisers")} style={{ fontFamily: "var(--font-ui)", color: undefined }}>
+          <Button variant="tab-display" fullWidth={false} selected={contentMode === "organisers"} onClick={() => setContentMode("organisers")} style={{ marginBottom: "-1px" }}>
             {tr.eventsPage.toggleOrganisers}
           </Button>
         </div>
@@ -492,10 +482,10 @@ function EventsPageContent() {
               {(["upcoming", "past"] as const).map((t) => (
                 <Button
                   key={t}
-                  variant="bare"
+                  variant="text-toggle"
+                  fullWidth={false}
+                  selected={tab === t}
                   onClick={() => setTab(t)}
-                  className="afa-events-price-filter"
-                  style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: tab === t ? "var(--afa-amber)" : "var(--afa-text-muted)" }}
                 >
                   {t === "upcoming" ? tr.eventsPage.tabUpcoming : tr.eventsPage.tabPast}
                 </Button>
@@ -551,10 +541,10 @@ function EventsPageContent() {
             <div className="afa-desktop-filters" style={{ marginTop: "20px", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "20px" }}>
               <div className="events-type-row" style={{ marginBottom: "16px" }}>
                 <Button
-                  variant="bare"
+                  variant="text-toggle"
+                  fullWidth={false}
+                  selected={selectedType === null}
                   onClick={() => setSelectedType(null)}
-                  className={`afa-events-type-filter${selectedType === null ? " active" : ""}`}
-                  style={{ fontFamily: "var(--font-mono)", color: undefined }}
                 >
                   {tr.eventsPage.filterAllNights}
                 </Button>
@@ -564,10 +554,10 @@ function EventsPageContent() {
                   return (
                     <Button
                       key={type}
-                      variant="bare"
+                      variant="text-toggle"
+                      fullWidth={false}
+                      selected={on}
                       onClick={() => setSelectedType(on ? null : type)}
-                      className={`afa-events-type-filter${on ? " active" : ""}`}
-                      style={{ fontFamily: "var(--font-mono)", color: undefined }}
                     >
                       <EventTypeIcon type={type} style={{ width: "14px", height: "14px", color: "currentColor" }} />
                       {tr.eventTypes[typeKey]}
@@ -586,10 +576,10 @@ function EventsPageContent() {
                   {["All", "Free", "Paid"].map((p) => (
                     <Button
                       key={p}
-                      variant="bare"
+                      variant="text-toggle"
+                      fullWidth={false}
+                      selected={priceFilter === p}
                       onClick={() => setPriceFilter(p)}
-                      className={`afa-events-price-filter${priceFilter === p ? " active" : ""}`}
-                      style={{ fontFamily: "var(--font-mono)", color: undefined }}
                     >
                       {p === "All" ? tr.eventsPage.filterAll : p === "Free" ? tr.eventsPage.filterFree : tr.eventsPage.filterPaid}
                     </Button>
