@@ -1,3 +1,68 @@
+# Session Handoff — 27 Sept 2026, part 14 (chat — Hitesh click-through of #711/#712/#713 on qa; next-session start point)
+
+## State
+- `qa` HEAD is `cfb2789` (#713) plus docs commits. No open PRs or branches waiting. Vercel is green.
+- Merged today: #711 GEN-2609-110 (Button phase 3), #712 BUG-2609-062 (self-hosted fonts), #713 GEN-2609-116 (autofill Sign In, font-size 13 → 0, font scripts). The DesignToken row `--afa-text-display` is inserted (QA).
+- Design-token ratchet: every category is at 0 except `spacing-literal` 1866.
+- **Hitesh:** revoke the GitHub PAT pasted in chat today. The next session needs a fresh one.
+
+## Click-through results (Hitesh, live on qa)
+- **PASS:**
+  - 1: autofill login works on the first click; fields don't turn light blue.
+  - 2: the filter sheet opens and closes.
+  - 3: /events tabs and filters.
+  - 4: /venues tabs, city dropdown and hover.
+  - 5: language codes in 2 rows, support-widget underlined tabs.
+  - 6: register initials chips and Try more (on a fresh form).
+  - 7: seat picker Reset matches −/+ and hides again at zoom 1.
+  - 9: restore confirm dialog; contrast guard fires (3 pairs, including amber badge 5.55 → 2.48), and Cancel changes nothing; a harmless restore adds a row live. Muted text was restored back to 0.5.
+  - 10: feedback disclosures and detail panel.
+  - 11: artists sort headers in mono.
+  - 12: seat map Guided Setup is neutral when collapsed; the level-tab × is flush.
+  - 13: rate type matches create and edit.
+  - 14: Sales "Show top 5 only".
+  - 15: Decline is a red outline. Tested by creating a request as Omkar ("Event Sepp 001" at Ganesh Open Mic, ₹555), which Vinayak then declined. The event stays unpublished.
+- **Partly verified:**
+  - 8: the live preview shows all 9 variants, contrast is all AA, the Seat map subsection and Display 26px are present. Hitesh hasn't confirmed the live edit round-trip (Radius md, Display → /venues).
+  - 6: the "Use … instead" link (taken username) wasn't captured.
+  - Chat is off: `chatMaxMessagesPerSession` = 0 in PlatformSettings. That's intentional unless Hitesh says otherwise.
+- **Still open from Hitesh:** a screenshot of the DevTools Issues panel (the blue count rose to 38 on venue pages). Probably form-field label/name issues; not seen yet.
+
+## Bugs logged during the click-through (all NEW)
+- **MEDIUM:**
+  - 067: Seat Map Builder overflows horizontally on mobile.
+  - 068: the chat bubble covers Cancel and other bottom actions on mobile.
+  - 071: dates follow the browser locale (M/D/YYYY). 17 bare toLocaleDateString() calls; admin version history is affected too.
+  - 072: toasts are see-through; confirmed for info and success toasts, so it's the component itself.
+  - 074: clearing Username leaves a stale "Available" and hides the initials chips. Race in RegisterForm.tsx.
+  - 075: selected seats get a 1.5x boost that covers neighbours (SeatPicker ~L393); seats have no gaps; the legend is missing Available.
+- **LOW:**
+  - 066: /events empty state for a city with no events.
+  - 069: seat map uses window.prompt to name a level.
+  - 070: venue-sales By venue chart draws an empty axis at all-zero; the expand/collapse controls don't match.
+  - 073: the Flexible Requests badge doesn't refresh live.
+  - 076: page title "A for Audience", the 🔀 emoji, uneven artist-card stat rows.
+- Earlier today: 064 (hydration warning, LOW), 065 (sheets don't trap focus, MEDIUM), GEN-2609-117 (`token-ok` exempts the whole line, MEDIUM; must go before spacing).
+- Known data issue, confirmed live: "Pune (IN)" and "Pune" are two city records (both chips light up together, venue cards show mixed labels). Needs a data merge, which is Pune-launch relevant.
+
+## Decision pending (blocks the next ticket): the colour rule
+- Chat's recommendation: **amber = selected** (chips, toggle boxes, tabs, seats, period pickers) and **orange = only the single primary action per screen**. Implement it as a new admin-editable `Selected` token, because `--afa-fill-solid` is currently documented as "main call-to-action buttons, selected states". That double role is the root cause.
+- Evidence seen live:
+  - Selection in orange: mobile filter chips, facilities, rate type, seating cards, period picker, feedback status, register chips.
+  - Orange buttons on secondary actions: Edit on every organiser event card, Change photo, Attach screenshot.
+  - Several orange CTAs on one screen: Seat Map Builder (3), venue edit (2).
+  - Good models: venue-requests (Accept orange, Counter and Decline outline), event create (Publish orange only).
+- Hitesh hasn't answered yet.
+
+## Suggested next order
+1. Hitesh's colour-rule decision → chat scopes one ticket (Selected token + sweep of misused orange).
+2. A MEDIUM bug bundle for CC: 072 toast, 068 bubble, 074 register race, 075 seat picker, 067 seat-map overflow, 071 date formatter (071 may be its own run: 17 sites plus a checker rule).
+3. Indic system-font gap (Font goal; chat to scope).
+4. GEN-2609-117, then spacing GEN-2609-107 (Size goal).
+5. The LOW items as a polish bundle whenever convenient.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 13 (chat — #713 merged, font-size at 0)
 
 - **#713 GEN-2609-116** was squash-merged at pinned head `6de5609`, making `qa` @ `cfb2789`. The preview and the `design-tokens` check were green, the branch has been deleted, and the `qa` deploy is READY with 0 runtime errors. The **DesignToken row for `--afa-text-display` has been inserted (QA)**. GEN-2609-116 and BUG-2609-063 are BUILD_COMPLETE / DEPLOYED_QA. The design.md entry has been added.
