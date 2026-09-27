@@ -1,3 +1,122 @@
+# Session Handoff — 27 Sept 2026, part 5 (CC — GEN-2609-110 Button phase 3, pushed, needs merge)
+
+Branch `feat/gen-2609-110-button-phase3` off `origin/qa` at `9523344`. **Not merged.** No DB changes.
+
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-110-button-phase3?expand=1
+
+## 1. Result
+- `bare-button` **91 → 0 unexplained**: 69 sites moved to real variants, 22 stay `bare` with a `// bare-reason:` comment (§5). `raw-button` **2 → 0**. Nothing else rose; `spacing-literal` fell 1929 → 1866 as a side effect (per-site padding objects deleted).
+- 9 new variants (§3), all tokenized. Every Button now carries `.afa-btn` (amber 2px focus-visible ring, the same ring `.afa-focusable` already uses) and `.afa-btn-<variant>` (hover for the variants that need it).
+
+## 2. Commits (in order)
+- `a0593ce` 1: classification of all 91 (`docs/button-adoption-audit.md`, "Phase 3", full per-site table)
+- `3f43247` 2: existing variants — SeatPicker Reset → `outline-neutral` sm; deploy-stage pills → `toggle-pill` (its own "Unset" sibling already was one)
+- `7ea8a93` 3: the 9 variants, `.afa-btn` CSS, editor live-preview samples
+- `66dc983` 4 public · `db4c865` 4 dashboard · `8d04bd6` 4 components · `acd6ccc` 4 seat-map
+- `6e3e908` 5: 22 `bare-reason`s; checker counts only unexplained bare (+10 self-tests)
+- `47d37fe` 6: the 2 raw buttons
+- `5b1065a` 7: ratchet baseline + TOKEN_COVERAGE
+
+## 3. New variants (name · look · sites)
+| Variant | Look | Sites |
+|---|---|---|
+| `toggle-box` | Box selector: selected = 2px fill-solid border + fill tint + fill-solid text; resting = 1px border-resting on raised. sm/md sizes | 18: seat-map ×12 (seating mode ×2, level tab, guided-setup toggle, manual placement, wizard ×4, row alignment), organiser compensation ×2 + approval mode, venue rate type ×2 (create + edit), check-in filter, SeatPicker + SeatLayoutPreview level switches |
+| `menu-row` | Full-width left row, btn-padding-md, body type, radius-sm; hover tint-06; selected = amber wash + amber 600 | 16: SearchBox ×3, BrowseSearchDropdown, Address/CityAutocomplete, LocationChip cities, /venues city options ×2, language menus ×2, account-menu Sign out ×2, organiser invite search ×2, checkout companion search |
+| `text-link` | Inline amber underlined text, small 500, no padding | 7: register "Try more"/"Use … instead", admin "View note", seat-map "Back to setup options", venue sales "Show top N", support "Use the feedback form"/"Remove" |
+| `text-toggle` | Mono uppercase text selector, small, 0.1em; muted → hover secondary → amber when selected | 7: /events upcoming/past, type filters ×2, price filter; locale codes ×2; admin artists sort headers |
+| `tab` | In-card tab, 2px amber underline when selected; secondary → hover primary → primary | 5: artist profile About/Shows, Near You Events/Artists, support widget panel tabs ×2 |
+| `tab-display` | Page tab in the display face (font-ui, lead 18px), same underline; muted → hover secondary → primary | 3: /events Events/Organisers, /venues Venues/Owners |
+| `disclosure` | "▸ Section (n)" toggle: small 700, text-secondary | 4: admin feedback (Approvals, Genre Requests, Event Notes, Trends) |
+| `card` | Whole-card button: raised, tint-12 border, radius-lg, space-5; selected = fill-solid border + fill tint | 4: seat-map setup cards ×2, venue create path card, /my-feedback items |
+| `scrim` | Absolute inset-0 `--afa-scrim` backdrop | 3: FeeSheet, ContributionMoment, /events filter sheet |
+
+Plus the 2 raw buttons: register initials chip → `toggle-pill` pill-sm selected; VenuePortalUI's own `Button` now maps onto the shared one (`primary` → `solid` lg, `outline` → `outline-neutral` lg); its one `ghost` caller (venue-requests "Decline") → `outline-error` lg.
+
+## 4. Accepted trivial differences
+- `toggle-box`: the seat-map/organiser/venue sites had padding 7–10px × 10–16px; now btn-padding-md (9×17). Worst case 3px horizontal. Small-type sites (12px) are now 13px. Resting border `--afa-tint-20` → `--afa-border-resting` (0.20 → 0.15 alpha). Compensation-type boxes radius-sm → radius-md (6 → 8px).
+- `menu-row`: 8–10px × 8–20px → 9×17 (language menus lose 7px of side padding in a 160px panel); 13px rows → 14px; language rows' resting weight 500 → 400.
+- `text-toggle`: 11px type/locale labels → 12px; type filter tracking 0.2em → 0.1em; locale codes lose their 2×4px padding; sort headers sans → mono.
+- `tab-display` on /venues: 20px → 18px, bottom padding 16 → 12px.
+- `disclosure`: text-primary @0.7 → text-secondary (0.65). Pixel-identical at my diff threshold.
+- `card`: padding 22 / 18×20 → 20; borders tint-08/tint-20 → tint-12.
+
+## 5. `bare-reason`s (22)
+| File:line | Reason, short |
+|---|---|
+| `(public)/artists/page.tsx:275` | Editorial genre index in the display serif with an animated underline |
+| `(public)/events/[id]/EventDetailClientPage.tsx:518` | 1–5 rating circles; opacity is the rating |
+| `(public)/events/[id]/rate/RatePromptClientPage.tsx:23`, `:208` | Star-glyph rating |
+| `dashboard/admin/diary/page.tsx:196` | Per-status colours (STATUS_META) |
+| `dashboard/organiser/events/[id]/checkin/page.tsx:310` | Full-width card header disclosure |
+| `dashboard/organiser/events/[id]/lineup/page.tsx:121` | Featured gold/amber is a status, not a selection |
+| `dashboard/venue/[id]/seat-map/page.tsx:1849` | Per-marker colours (MARKER_META) |
+| `dashboard/venue/bookings/page.tsx:203` | Calendar day cell |
+| `organisers/[id]/page.tsx:420` | Mono eyebrow "View all" with arrow |
+| `profile/page.tsx:734` | Settings list row (icon, 2-line, chevron) |
+| `venues/VenuesGridClient.tsx:136` | Select-field trigger matching the search field |
+| `components/DashboardShell.tsx:627`, `components/mobile/MobileTabBar.tsx:482` | Tab-bar "More" slot matching sibling `<Link>`s |
+| `components/HomeHeader.tsx:186`, `components/SiteNav.tsx:552` | Avatar pill with uneven padding around the avatar |
+| `components/LocationChip.tsx:101` | Three context looks from one trigger |
+| `components/PhotoRotationDots.tsx:28` | Carousel progress dot |
+| `components/RangePicker.tsx:19` | Segmented control in a shared track |
+| `components/admin/FeedbackDetailPanel.tsx:411` | Per-severity colours (SEVERITY_COLORS) |
+| `components/mobile/MobileTopBar.tsx:225` | Sign out matching the Sign in / Register `<Link>`s |
+| `components/pwa/InstallPrompt.tsx:139` | Dismiss text on the fill-solid banner |
+
+The full reason text is on each line and is printed by both the checker and the ratchet.
+
+**Checker rule:** the `// bare-reason:` (or `{/* bare-reason: */}`) must be on the line directly above `variant="bare"`, with at least 20 characters of reason. The diff check now reads 1 line of context, so it sees that line, and it flags a reason deleted from above an unchanged bare Button.
+
+## 6. Ratchet (origin/qa → branch)
+hex 0 → 0 · rgba 0 → 0 · font-family 0 → 0 · font-size 13 → 13 · spacing 1929 → 1866 · radius 0 → 0 · **raw-button 2 → 0 · bare-button 91 → 0**. TOKEN_COVERAGE: 106 keys, 101 site-wide / 5 button-only / 0 unused. No status changed; the counts moved from call sites into Button.tsx (per-token deltas in the file header).
+
+## 7. Visual check (origin/qa vs branch production builds, 390 + 1280, pixel-diffed; mocked admin session for the dashboard pages)
+- **Unchanged:** event detail; seat picker (default state); admin feedback (the disclosure colour change is under the diff threshold).
+- **As expected:** /events (tab row +1px; filter labels 11 → 12px, tighter tracking); SiteNav/HomeHeader menus (locale codes 12px with no padding); /venues (display tabs 20 → 18px; the underline is now **amber, it was orange**; city rows 2px shorter; the selected city gets the amber wash); seat-map builder (boxes and setup cards within 2–4px; "Back to setup options" is now an amber link).
+- **Worth a look:**
+  1. **Support widget tabs**: the amber-filled half-tab is now an underline tab, 6px shorter. This is the one real look change.
+  2. **SeatPicker Reset** (visible after zooming in): text-secondary on transparent, a little dimmer than the − / + icon buttons beside it.
+  3. **Venue create rate type** moves from the amber family to fill-solid, the same as the identical control on venue edit.
+  4. **Guided Setup toggle**: when off it now has primary text and a resting border. It used to stay orange as a "recommended" cue.
+  5. **Artist profile tabs**: the active tab text is primary, no longer amber; the underline stays amber.
+  6. **Admin artists** sort headers are now mono.
+- **Keyboard:** Tab reaches every migrated variant with the amber 2px ring (toggle-box 88, menu-row 84, text-toggle 198, tab 10, tab-display 38, disclosure 28, card 30, text-link 6 focus stops across 9 pages). `scrim` wasn't exercised, because it only exists while a sheet is open.
+- Pre-existing, not from this branch: seat-map editor overflows horizontally at 390 on both builds; `next dev` logs a hydration warning from layout.tsx's intro splash (a file this branch doesn't touch).
+
+## 8. Verification
+- `tsc` clean. `next build` passes.
+- Checker vs origin/qa: no new literals; it lists the 22 reasons.
+- Ratchet: all categories at or below the new baseline.
+- Self-tests: checker **80/80** (was 70; +10 bare-reason), migrate-tokens 62/62, design-tokens 48/48, ticket-code 5/5, username 4/4.
+- ESLint on all 53 touched files, origin/qa vs branch: identical per file per rule (215 problems on both sides, all pre-existing).
+- `next dev`: all 12 screenshot and touched pages return 200. A Playwright pass shows no page errors.
+
+## 9. Hitesh click-through (after merge, qa)
+Logged out:
+1. `/events`: Events/Organisers tabs, Upcoming/Past, type and price filters. Hover greys and selected amber should match the old look.
+2. `/venues`: Venues/Owners tabs (the underline is amber now); open the city filter; the current city has a wash; rows hover.
+3. Search from the nav, and the account menu: the result rows and language codes. Open the support widget: the tabs are underlined now.
+4. `/register`: the initials suggestion chips, "Try more", and the "Use … instead" link once a username is taken.
+
+Admin login:
+5. `/dashboard/admin/design-system` → Live preview: samples for all 9 new variants. Edit `--afa-btn-padding-md` or `--afa-radius-md` and watch toggle-box, menu-row and tab move.
+6. `/dashboard/admin/feedback`: 4 disclosures; open an item: the deploy-stage pills are toggle-pills now, and severity is unchanged.
+7. `/dashboard/admin/artists`: the sort headers (mono now).
+
+Venue owner (or admin):
+8. `/dashboard/venue/<id>/seat-map`: seating mode, Guided Setup, manual placement, wizard options, row alignment, and levels. Add a level and check that the × is still flush with the tab.
+9. `/dashboard/venue/create`: rate type and path cards. `/dashboard/venue/sales` → "Show top N only". `/dashboard/venue-requests`: Accept / Counter / **Decline** (now red outline).
+
+Organiser:
+10. Event create/edit: compensation type, approval mode, celebrity/panelist search rows. Event check-in: the All / Checked In / Pending filter.
+
+## 10. Worth knowing
+- Hover lives in `globals.css` (`.afa-btn-menu-row/-tab/-tab-display/-text-toggle`). For those variants the inline style leaves the resting colour/background unset on purpose, so a hover can win. Don't add them back inline.
+- `selected` now means "the chosen option" on 7 variants. On seat-map's "Guided setup" card it marks the recommended path.
+- Page CSS the variants replaced is gone: `.afa-events-mode-tab/-type-filter/-price-filter`, `.afa-view-tab`, `.afa-city-filter-option`, `.avp-btn-ghost`.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 4 (chat — button phase 3 dispatched)
 
 - Goal status: Colour, Font (13 stray sizes), radius, instant live updates and a safe editor are done. The last gap is **Button**: 91 `variant="bare"` buttons use colour/radius tokens but not the button layer (variant look, padding tokens, hover/focus/disabled).
