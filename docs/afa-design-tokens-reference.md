@@ -33,6 +33,23 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 | `--afa-text-inverse` (`#F5F5F0`) | `--afa-text-primary` | Same value; its 8 uses (home footer, For Artists, Four Rooms headings) were rewritten |
 | `--afa-red-alt` (`#EF4444`) | `--afa-error-bright` for text, `--afa-error` for fills | One error red. It was 4.17:1 on error-tint over raised (fails AA); error-bright is 5.44:1 |
 
+**Snapshot versions (GEN-2609-115).** After changing `DesignToken` rows outside the editor (SQL applied after a merge), record a restore point so History has a row matching the live values. The version holds the full live set and changes no tokens.
+
+- Admin API: `POST /api/admin/design-tokens/snapshot/` with `{ "reason": "after #710 SQL" }` (admin session; note the trailing slash, `trailingSlash` is on). Returns the new version and the refreshed history.
+- SQL equivalent (run after the token SQL):
+
+```sql
+INSERT INTO "DesignTokenVersion" ("id", "snapshot", "createdBy", "createdAt", "note")
+SELECT 'snap_' || replace(gen_random_uuid()::text, '-', ''),
+       jsonb_object_agg("key", "value"),
+       NULL,
+       now(),
+       'Snapshot: <reason>'
+FROM "DesignToken";
+```
+
+`createdBy` is NULL for SQL rows, so History shows no author. The id isn't a cuid; nothing depends on that.
+
 **GEN-2609-075 — radius + button-padding scale (new tokens, admin-controlled).** Promoted out of `Button.tsx`'s `SIZE_CHROME`/per-variant `borderRadius`, where these were previously plain hardcoded numbers, never a CSS custom property:
 
 ```css

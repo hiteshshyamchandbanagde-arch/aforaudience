@@ -262,6 +262,18 @@ export function restoreNote(versionId: string, changed: number): string {
   return `Restored version ${versionId} (${changed} token(s) changed)`
 }
 
+// GEN-2609-115 - a version row with no token changes: a restore point
+// recorded after the DB was changed outside the editor (SQL applied
+// after a merge). The reason is required, one line, at most 200 chars.
+export const SNAPSHOT_REASON_MAX = 200
+
+export function snapshotNote(reason: unknown): string | null {
+  if (typeof reason !== "string") return null
+  const r = reason.replace(/\s+/g, " ").trim()
+  if (r.length === 0 || r.length > SNAPSHOT_REASON_MAX) return null
+  return `Snapshot: ${r}`
+}
+
 export function radiusOrderErrors(values: Record<string, string>, changed?: Iterable<string>): { key: string; message: string }[] {
   const changedSet = changed ? new Set(changed) : null
   const errors: { key: string; message: string }[] = []

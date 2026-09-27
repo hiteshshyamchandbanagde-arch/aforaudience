@@ -22,6 +22,8 @@ import {
   radiusOrderErrors,
   restoreContrastFailures,
   restoreNote,
+  snapshotNote,
+  SNAPSHOT_REASON_MAX,
   rangeFor,
   rgbToHex,
   tokenValueError,
@@ -388,6 +390,20 @@ test('restore: live values that already fail and are not worsened do not block',
   const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.4)' }
   // 0.3 -> 0.4 improves an already-failing pair: no confirm.
   assert.deepEqual(restoreContrastFailures(planRestore(snapshot, failingLive), failingLive), [])
+})
+
+// --- I. snapshot versions (GEN-2609-115) -----------------------------------------
+
+test('snapshot note: "Snapshot: <reason>", whitespace collapsed', () => {
+  assert.equal(snapshotNote('after #710 SQL'), 'Snapshot: after #710 SQL')
+  assert.equal(snapshotNote('  after\n  #710   SQL '), 'Snapshot: after #710 SQL')
+})
+
+test('snapshot note: reason required, a string, at most 200 chars', () => {
+  for (const bad of [undefined, null, 42, '', '   ', 'x'.repeat(SNAPSHOT_REASON_MAX + 1)]) {
+    assert.equal(snapshotNote(bad), null, String(bad))
+  }
+  assert.equal(snapshotNote('x'.repeat(SNAPSHOT_REASON_MAX)), `Snapshot: ${'x'.repeat(SNAPSHOT_REASON_MAX)}`)
 })
 
 console.log(`\n${passed} passed`)
