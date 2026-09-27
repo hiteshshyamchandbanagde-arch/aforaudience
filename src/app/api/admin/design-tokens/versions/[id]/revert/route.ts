@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { planRestore, radiusOrderErrors, restoreContrastFailures, restoreNote, type TokenType } from '@/lib/design-tokens'
-import { revalidateDesignTokens } from '@/lib/design-tokens.server'
+import { listDesignTokenVersions, revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // POST /api/admin/design-tokens/versions/:id/revert — apply an older
 // version's full snapshot back onto DesignToken, recorded as ANOTHER new
@@ -101,6 +101,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   revalidateDesignTokens()
 
-  const tokens = await prisma.designToken.findMany({ orderBy: { key: 'asc' } })
-  return NextResponse.json({ tokens, changed: plan.changes.length, skipped: plan.skipped })
+  const [tokens, versions] = await Promise.all([prisma.designToken.findMany({ orderBy: { key: 'asc' } }), listDesignTokenVersions()])
+  return NextResponse.json({ tokens, versions, changed: plan.changes.length, skipped: plan.skipped })
 }

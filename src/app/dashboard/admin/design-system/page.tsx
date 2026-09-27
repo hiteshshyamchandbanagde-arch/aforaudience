@@ -155,7 +155,7 @@ export default function AdminDesignSystemPage() {
   async function load() {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/design-tokens')
+      const res = await fetch('/api/admin/design-tokens', { cache: 'no-store' })
       if (res.status === 403) {
         setForbidden(true)
         return
@@ -247,7 +247,7 @@ export default function AdminDesignSystemPage() {
       setTokens(data.tokens)
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
       showToast('Saved. Live on the next page load everywhere.', 'success')
-      loadVersionsQuiet()
+      applyVersions(data)
     } catch (err: any) {
       showToast(err.message || 'Save failed', 'error')
     } finally {
@@ -271,9 +271,16 @@ export default function AdminDesignSystemPage() {
     doSave(false, confirmContrast)
   }
 
+  // GEN-2609-115 - every write route returns the fresh version list;
+  // use it, and refetch (uncached) only if a response lacks it.
+  function applyVersions(data: { versions?: DesignTokenVersion[] }) {
+    if (Array.isArray(data.versions)) setVersions(data.versions)
+    else loadVersionsQuiet()
+  }
+
   async function loadVersionsQuiet() {
     try {
-      const res = await fetch('/api/admin/design-tokens')
+      const res = await fetch('/api/admin/design-tokens', { cache: 'no-store' })
       if (res.ok) {
         const data = await res.json()
         setVersions(data.versions)
@@ -307,7 +314,7 @@ export default function AdminDesignSystemPage() {
       setTokens(data.tokens)
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
       showToast('Reset to defaults.', 'success')
-      loadVersionsQuiet()
+      applyVersions(data)
     } catch {
       showToast('Reset failed.', 'error')
     } finally {
@@ -366,7 +373,7 @@ export default function AdminDesignSystemPage() {
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
       const skipped = data.skipped?.length ?? 0
       showToast(`Restored ${data.changed} token(s).${skipped ? ` ${skipped} out-of-range value(s) left as they are.` : ''}`, 'success')
-      loadVersionsQuiet()
+      applyVersions(data)
     } catch (err) {
       showToast(err instanceof Error && err.message ? err.message : 'Revert failed.', 'error')
     } finally {

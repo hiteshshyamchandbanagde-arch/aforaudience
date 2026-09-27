@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { DEFAULT_TOKEN_VALUES } from '@/lib/design-tokens'
-import { revalidateDesignTokens } from '@/lib/design-tokens.server'
+import { listDesignTokenVersions, revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // POST /api/admin/design-tokens/reset — restore every token to its
 // globals.css default (DEFAULT_TOKEN_VALUES), recorded as a new version
@@ -56,6 +56,6 @@ export async function POST() {
 
   revalidateDesignTokens()
 
-  const tokens = await prisma.designToken.findMany({ orderBy: { key: 'asc' } })
-  return NextResponse.json({ tokens })
+  const [tokens, versions] = await Promise.all([prisma.designToken.findMany({ orderBy: { key: 'asc' } }), listDesignTokenVersions()])
+  return NextResponse.json({ tokens, versions })
 }

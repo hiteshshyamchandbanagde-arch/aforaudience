@@ -65,3 +65,24 @@ export async function getDesignTokensSafe(): Promise<DesignTokenDTO[]> {
 export function revalidateDesignTokens() {
   revalidateTag(DESIGN_TOKEN_CACHE_TAG, { expire: 0 })
 }
+
+// The editor's version history: newest 20, each with a readable
+// creator. GEN-2609-076 - `createdBy` is a bare user id, resolved here
+// (one extra query, bounded by the distinct admins in those 20) rather
+// than on the client.
+// GEN-2609-115 - shared by GET and every write route (save, restore,
+// reset, snapshot), which return the fresh list in their own response.
+// The editor used to refetch it with a second GET after each write, and
+// after a restore the list kept showing the old rows until a reload.
+export async function listDesignTokenVersions() {
+  const versions = await prisma.designTokenVersion.findMany({ orderBy: { createdAt: "desc" }, take: 20 })
+  const creatorIds = [...new Set(versions.map((v) => v.createdBy).filter((id): id is string => !!id))]
+  const creators = creatorIds.length
+    ? await prisma.user.findMany({ where: { id: { in: creatorIds } }, select: { id: true, displayName: true, name: true, email: true } })
+    : []
+  const creatorLabelById = new Map(creators.map((c) => [c.id, c.displayName || c.name || c.email]))
+  return versions.map((v) => ({
+    ...v,
+    creatorLabel: v.createdBy ? creatorLabelById.get(v.createdBy) ?? v.createdBy : null,
+  }))
+}

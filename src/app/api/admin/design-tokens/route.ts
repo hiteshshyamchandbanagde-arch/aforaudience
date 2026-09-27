@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { tokenValueError, radiusOrderErrors, contrastFailures, LOCKED_TOKEN_KEYS, type TokenType } from '@/lib/design-tokens'
-import { revalidateDesignTokens } from '@/lib/design-tokens.server'
+import { listDesignTokenVersions, revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // GET /api/admin/design-tokens — every token row + recent version history
 // PATCH /api/admin/design-tokens — bulk update (one save = one version)
@@ -29,28 +29,14 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // GEN-2609-076 - versions carry a readable creator label; see
+  // listDesignTokenVersions.
   const [tokens, versions] = await Promise.all([
     prisma.designToken.findMany({ orderBy: { key: 'asc' } }),
-    prisma.designTokenVersion.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }),
+    listDesignTokenVersions(),
   ])
 
-  // GEN-2609-076 - version history previously showed only a note string
-  // and timestamp; an admin had no way to tell WHO made a change without
-  // cross-referencing elsewhere. `createdBy` is a bare user id - resolve
-  // it to something readable here (one extra query, bounded by however
-  // many distinct admins appear in the last 20 versions) rather than
-  // pushing that join onto the client.
-  const creatorIds = [...new Set(versions.map((v) => v.createdBy).filter((id): id is string => !!id))]
-  const creators = creatorIds.length
-    ? await prisma.user.findMany({ where: { id: { in: creatorIds } }, select: { id: true, displayName: true, name: true, email: true } })
-    : []
-  const creatorLabelById = new Map(creators.map((c) => [c.id, c.displayName || c.name || c.email]))
-  const versionsWithCreator = versions.map((v) => ({
-    ...v,
-    creatorLabel: v.createdBy ? creatorLabelById.get(v.createdBy) ?? v.createdBy : null,
-  }))
-
-  return NextResponse.json({ tokens, versions: versionsWithCreator })
+  return NextResponse.json({ tokens, versions })
 }
 
 type PatchBody = {
@@ -160,6 +146,6 @@ export async function PATCH(req: Request) {
 
   revalidateDesignTokens()
 
-  const tokens = await prisma.designToken.findMany({ orderBy: { key: 'asc' } })
-  return NextResponse.json({ tokens })
+  const [tokens, versions] = await Promise.all([prisma.designToken.findMany({ orderBy: { key: 'asc' } }), listDesignTokenVersions()])
+  return NextResponse.json({ tokens, versions })
 }
