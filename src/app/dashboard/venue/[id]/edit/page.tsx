@@ -14,7 +14,7 @@ import CityAutocomplete from '@/components/CityAutocomplete'
 import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
-import Button from '@/components/ui/Button'
+import Button, { variantStyle } from '@/components/ui/Button'
 
 interface Venue {
   id: string
@@ -461,9 +461,10 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                         Section pricing above is for General Admission. Use the Seat Map builder to lay out individual numbered seats on a canvas matching your venue's shape.
                       </div>
                     </div>
+                    {/* GEN-2609-118 - outline (both links): Save is this screen's one primary action. */}
                     <Link
                       href={`/dashboard/venue/${id}/seat-map`}
-                      style={{ flexShrink: 0, fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-10px) var(--afa-space-18px)', borderRadius: 'var(--afa-radius-md)', whiteSpace: 'nowrap' }}
+                      style={{ ...variantStyle('outline-neutral', false, 'md'), flexShrink: 0, whiteSpace: 'nowrap' }}
                     >
                       Open Seat Map Builder →
                     </Link>
@@ -481,7 +482,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   </div>
                   <Link
                     href={`/dashboard/venue/${id}/seat-map`}
-                    style={{ flexShrink: 0, fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-10px) var(--afa-space-18px)', borderRadius: 'var(--afa-radius-md)', whiteSpace: 'nowrap' }}
+                    style={{ ...variantStyle('outline-neutral', false, 'md'), flexShrink: 0, whiteSpace: 'nowrap' }}
                   >
                     Open Seat Map Builder →
                   </Link>
