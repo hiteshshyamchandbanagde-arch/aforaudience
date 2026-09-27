@@ -552,7 +552,7 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: "--afa-error-bright", bg: "--afa-error-tint", over: "--afa-surface-page", label: "Error badge text on its tint" },
   { fg: "--afa-amber", bg: "--afa-amber-tint", over: "--afa-surface-page", label: "Amber badge text on its tint" },
   { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Primary button text on fill" },
-  { fg: "--afa-cream", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
+  { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
   { fg: "--afa-cream", bg: "--afa-sage", label: "Success button text on sage" },
 ]
 

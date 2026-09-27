@@ -202,12 +202,22 @@ test('defaults -> defaults reports nothing (pre-existing failures do not block)'
   assert.deepEqual(contrastFailures(DEFAULT_TOKEN_VALUES, DEFAULT_TOKEN_VALUES), [])
 })
 
+// GEN-2609-115 - form-submit was the last failing pair (cream on fill,
+// 2.81:1); the editor's contrast panel should show none.
+test('every contrast pair passes at defaults', () => {
+  for (const p of CONTRAST_PAIRS) {
+    const r = pairRatio(p, DEFAULT_TOKEN_VALUES)!
+    assert.ok(r >= contrastMinimum(p), `${p.label}: ${r.toFixed(2)}`)
+  }
+})
+
 test('an already-failing pair made worse is reported; made better is not', () => {
-  // Form-submit (cream on fill-solid) is 2.81:1 at defaults.
-  const worse = { ...DEFAULT_TOKEN_VALUES, '--afa-fill-solid': '#FF8A66' }
-  assert.ok(contrastFailures(DEFAULT_TOKEN_VALUES, worse).some((f) => f.label === 'Form-submit button text on fill'))
-  const better = { ...DEFAULT_TOKEN_VALUES, '--afa-fill-solid': '#E04A26' }
-  assert.ok(!contrastFailures(DEFAULT_TOKEN_VALUES, better).some((f) => f.label === 'Form-submit button text on fill'))
+  // No default pair fails, so start from muted text at 0.3 (below AA).
+  const failing = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.3)' }
+  const worse = { ...failing, '--afa-text-muted': 'rgba(245, 245, 240, 0.25)' }
+  assert.ok(contrastFailures(failing, worse).some((f) => f.label === 'Muted text on page'))
+  const better = { ...failing, '--afa-text-muted': 'rgba(245, 245, 240, 0.35)' }
+  assert.ok(!contrastFailures(failing, better).some((f) => f.label === 'Muted text on page'))
 })
 
 test('var() indirection is resolved (on-fill-solid -> brown-black)', () => {

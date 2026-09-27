@@ -42,7 +42,7 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-text-secondary": { section: "text", label: "Secondary text", usedFor: "descriptions, supporting lines, inactive tabs" },
   "--afa-text-muted": { section: "text", label: "Muted text", usedFor: "timestamps, helper text, empty states" },
   "--afa-text-on-image": { section: "text", label: "Text on photo", usedFor: "subtitles over hero photos (Organisers, Venue Owners, Wall of Fame)" },
-  "--afa-cream": { section: "text", label: "Cream text", usedFor: "text on coloured fills (success and form-submit buttons, seat-map markers)" },
+  "--afa-cream": { section: "text", label: "Cream text", usedFor: "text on coloured fills (success button, critical badges, seat-map markers)" },
   "--afa-white": { section: "text", label: "White", usedFor: "text in your own message bubbles" },
 
   // --- Brand & actions
