@@ -1,3 +1,17 @@
+# Session Handoff — 27 Sept 2026, part 13 (chat — #713 merged, font-size at 0)
+
+- **#713 GEN-2609-116** was squash-merged at pinned head `6de5609`, making `qa` @ `cfb2789`. The preview and the `design-tokens` check were green, the branch has been deleted, and the `qa` deploy is READY with 0 runtime errors. The **DesignToken row for `--afa-text-display` has been inserted (QA)**. GEN-2609-116 and BUG-2609-063 are BUILD_COMPLETE / DEPLOYED_QA. The design.md entry has been added.
+- Accepted CC's deviation on the autofill colour rule (see design.md).
+- **Logged GEN-2609-117 (MEDIUM):** `token-ok` exempts every literal on its line. It has to be fixed **before** the spacing migration, which will add many reasons.
+- **Hitesh click-through (qa):**
+  - Log in with a Chrome saved password: the first click on Sign In works, and autofilled fields aren't light blue.
+  - Submit /login empty: an inline message appears.
+  - `/dashboard/admin/design-system`: a "Display" size (26px) is listed; edit it and the venue cards on /venues change.
+  - Also the #711 list (part 5 §9).
+- **Goal status:** Colour, radius, Button and font-size are done. Left: the Indic system-font gap (Font), then GEN-2609-117 → spacing GEN-2609-107 (Size).
+
+---
+
 # Session Handoff — 27 Sept 2026, part 12 (CC — GEN-2609-116 small bundle, pushed, needs merge + 1 DB row)
 
 Branch `fix/gen-2609-116-small-bundle` off `origin/qa` at `91241db`. **Not merged.** One DB row to insert (§3, not run). qa didn't move during the run: re-fetched before the push, still `91241db`.

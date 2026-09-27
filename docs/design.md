@@ -8146,3 +8146,10 @@ Feedback: all 4 → `RESOLVED` / `DEPLOYED_QA`. Vercel READY, 0 runtime errors.
 - Follow-ups: BUG-2609-064 (intro-splash hydration warning, LOW) and BUG-2609-065 (bottom sheets don't trap focus, MEDIUM).
 
 Feedback: BUG-2609-062 and GEN-2609-110 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Vercel READY, 0 runtime errors after each merge.
+
+## GEN-2609-116 — autofill Sign In, font-size literals 13 → 0, font scripts (PR #713, qa @ cfb2789, 27 Sep)
+
+- **BUG-2609-063 (standing rule):** submit buttons on forms disable **only while a request is in flight**. They never disable because a field looks empty. On submit, read the real field values and show an inline message on the empty field, with focus on it. The reason: Chrome autofill fills fields without firing `onChange`. Autofill styling keeps each field's own background and sets only the text colour to `--afa-text-primary`. The dispatch's `--afa-surface-inverse` fill was rejected because most inputs are transparent over `#1F1F1F`.
+- **Font size:** `font-size-literal` is at 0. The new token `--afa-text-display` (26px, "Display") is used for big numbers and card titles at 4 sites. The other 9 sizes are one-offs with `token-ok` reasons. The DesignToken row was inserted in QA. **Restart `next dev` after adding a `:root` token**, because a running dev server keeps serving stale CSS.
+- **Fonts:** `scripts/dev/fonts/` rebuilds all 12 files byte-identical from pinned sources; rerun instructions are in `src/fonts/README.md`.
+- **Known gap, fix before spacing:** GEN-2609-117. A `token-ok` comment exempts every literal on its line.
