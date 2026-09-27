@@ -545,9 +545,11 @@ export default function AdminDesignSystemPage() {
                     --afa-surface-page (near-black too) made it
                     functionally invisible. Its own small fill-solid
                     wrapper previews it in the context it's actually
-                    used in, e.g. NotificationOptIn.tsx's banner. */}
+                    used in, e.g. NotificationOptIn.tsx's banner.
+                    GEN-2609-115 - labelled so the orange box reads as
+                    intentional. */}
                 <div style={{ ...previewStyle, background: 'var(--afa-fill-solid)', padding: '10px 14px' }}>
-                  <Button variant="outline" fullWidth={false} size={36}>Outline</Button>
+                  <Button variant="outline" fullWidth={false} size={36}>Outline (on orange)</Button>
                 </div>
                 <Button variant="form-submit" fullWidth={false} size={36}>Form submit</Button>
                 <Button variant="outline-neutral" fullWidth={false} size="sm">Outline neutral</Button>
