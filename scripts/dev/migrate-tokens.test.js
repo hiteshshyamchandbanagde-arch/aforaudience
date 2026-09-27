@@ -224,8 +224,14 @@ t('GEN-2609-105: never produces the bare (unhinted) text-[var(...)] form - that 
 })
 
 t('GEN-2609-105: a value with no FONT_SIZE_MAP entry stays literal', () => {
-  const out = migrateTailwindFontSizeBracket('text-[26px]', FONT_SIZE_MAP, ['px'])
+  // 27px, not 26px: 26px maps to --afa-text-display since GEN-2609-116
+  const out = migrateTailwindFontSizeBracket('text-[27px]', FONT_SIZE_MAP, ['px'])
   assert.equal(out, null)
+})
+
+t('GEN-2609-116: 26px maps to --afa-text-display', () => {
+  const out = migrateTailwindFontSizeBracket('text-[26px]', FONT_SIZE_MAP, ['px'])
+  assert.equal(out, 'text-[length:var(--afa-text-display)]')
 })
 
 t('GEN-2609-105: a rem bracket stays literal when only px is in scope', () => {

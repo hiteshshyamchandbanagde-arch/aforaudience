@@ -49,7 +49,13 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-fill-solid)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
           Tour · {tour.organiser.orgName}
         </p>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '34px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: '34px', // token-ok: tour page h1, the only 34px display-font title, above page-title-lg (32px), the top step of the scale
+          fontWeight: 700,
+          color: 'var(--afa-text-primary)',
+          marginBottom: '12px',
+        }}>
           {tour.title}
         </h1>
         {tour.subject && (

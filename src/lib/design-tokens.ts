@@ -413,6 +413,7 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-text-title": "16px",
   "--afa-text-subheading": "22px",
   "--afa-text-heading": "24px",
+  "--afa-text-display": "26px",
   "--afa-text-page-title": "28px",
   "--afa-text-page-title-lg": "32px",
   "--afa-space-1": "4px",

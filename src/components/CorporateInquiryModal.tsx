@@ -177,7 +177,10 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
 
         {submitted ? (
           <div style={{ textAlign: "center", padding: "24px 8px" }}>
-            <div style={{ fontSize: "40px", marginBottom: "12px" }}>✅</div>
+            <div style={{
+              fontSize: "40px", // token-ok: emoji glyph used as a success icon, an icon size rather than text
+              marginBottom: "12px",
+            }}>✅</div>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               Inquiry sent!
             </h2>

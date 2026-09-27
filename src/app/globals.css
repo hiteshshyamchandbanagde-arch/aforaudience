@@ -271,6 +271,11 @@
      this just names that existing decision, doesn't retrofit it. */
   --afa-text-page-title: 28px;
   --afa-text-page-title-lg: 32px;
+  /* GEN-2609-116 - large display-size figures between heading (24px)
+     and page-title (28px): stat numbers, date numerals and venue card
+     titles. 4 sites had kept a 26px literal after the GEN-2609-106
+     closeout; 3+ sites of one value is the bar for a new token. */
+  --afa-text-display: 26px;
 
   /* GEN-2609-075 - radius + button-padding scale, promoted out of
      Button.tsx's SIZE_CHROME (where these were plain hardcoded numbers,
