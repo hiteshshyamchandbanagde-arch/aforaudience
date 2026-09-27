@@ -201,11 +201,11 @@ export default function Home() {
       <PlatformGrowthStrip />
 
       {/* FOOTER */}
-      <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-inverse)", padding: "64px 48px 32px" }}>
+      <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-primary)", padding: "64px 48px 32px" }}>
         <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-inverse)", marginBottom: "var(--afa-space-3)" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
                 <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               </div>
               <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-muted)", lineHeight: 1.65, maxWidth: "280px" }}>

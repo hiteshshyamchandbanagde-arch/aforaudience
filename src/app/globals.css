@@ -146,7 +146,6 @@
   --afa-text-muted: rgba(245, 245, 240, 0.5);
   /* GEN-2609-113 - top of the text ladder (absorbs 0.75-0.85). */
   --afa-text-soft: rgba(245, 245, 240, 0.8);
-  --afa-text-inverse: #F5F5F0;
 
   /* GEN-2609-074 - a real, separate role from --afa-text-secondary,
      not a duplicate to merge away: hero-subtitle text sitting directly

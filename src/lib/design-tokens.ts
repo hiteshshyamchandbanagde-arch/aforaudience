@@ -367,7 +367,6 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-text-secondary": "rgba(245, 245, 240, 0.65)",
   "--afa-text-muted": "rgba(245, 245, 240, 0.5)",
   "--afa-text-soft": "rgba(245, 245, 240, 0.8)",
-  "--afa-text-inverse": "#F5F5F0",
   "--afa-text-on-image": "rgba(255, 255, 255, 0.5)",
   "--afa-fill-solid": "#FF5A36",
   "--afa-border-resting": "rgba(245, 245, 240, 0.15)",

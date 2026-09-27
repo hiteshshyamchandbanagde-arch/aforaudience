@@ -21,7 +21,6 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-text-secondary:  rgba(245, 245, 240, 0.65);
 --afa-text-muted:      rgba(245, 245, 240, 0.5);   /* GEN-2609-113: was 0.4 (3.6:1 on surface-page, fails AA); 0.5 = 4.95:1 */
 --afa-text-soft:       rgba(245, 245, 240, 0.8);   /* GEN-2609-113, new: absorbs 0.75-0.85 */
---afa-text-inverse:    #F5F5F0;  /* pre-existing gap, fixed by GEN-2609-075 — defined in globals.css since before GEN-2609-074, 3 real consumers (src/app/page.tsx, for-artists/page.tsx, FourRooms.tsx), just never had a row in this table. Not caused by -074, which only added its own -on-image row correctly. */
 
 --afa-text-on-image:   rgba(255, 255, 255, 0.5);  /* GEN-2609-074 — hero-subtitle text over a PHOTOGRAPH, not a flat surface; a cooler/purer white than --afa-text-secondary's warm cream tint, tuned for legibility across a photo's unpredictable luminance rather than reused for token-count tidiness */
 ```
@@ -31,6 +30,7 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 | Removed | Use instead | Why |
 |---|---|---|
 | `--afa-terracotta` (`#C8441A`) | `--afa-fill-solid` for actions, `--afa-brand-mark` for the logo "A" | 0 live uses since Phase 2c |
+| `--afa-text-inverse` (`#F5F5F0`) | `--afa-text-primary` | Same value; its 8 uses (home footer, For Artists, Four Rooms headings) were rewritten |
 
 **GEN-2609-075 — radius + button-padding scale (new tokens, admin-controlled).** Promoted out of `Button.tsx`'s `SIZE_CHROME`/per-variant `borderRadius`, where these were previously plain hardcoded numbers, never a CSS custom property:
 
