@@ -240,6 +240,8 @@ export default function HomeHeader() {
                       key={l.id}
                       selected={locale === l.id}
                       onClick={() => setLocale(l.id)}
+                      // text-toggle has no padding; a 24px minimum keeps the tap target at WCAG 2.5.8 size
+                      style={{ minWidth: "var(--afa-space-6)", minHeight: "var(--afa-space-6)", padding: "var(--afa-space-2px) var(--afa-space-1)", justifyContent: "center" }}
                     >
                       {l.id.toUpperCase()}
                     </Button>
