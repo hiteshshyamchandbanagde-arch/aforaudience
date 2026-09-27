@@ -10,13 +10,14 @@
 // Pure data, no imports beyond types: safe for the admin page (a Client
 // Component).
 
-export type ColorSection = "surfaces" | "text" | "brand" | "status" | "tints" | "overlays"
+export type ColorSection = "surfaces" | "text" | "brand" | "status" | "seatmap" | "tints" | "overlays"
 
 export const COLOR_SECTIONS: { id: ColorSection; label: string }[] = [
   { id: "surfaces", label: "Surfaces" },
   { id: "text", label: "Text" },
   { id: "brand", label: "Brand & actions" },
   { id: "status", label: "Status tones" },
+  { id: "seatmap", label: "Seat map" },
   { id: "tints", label: "Tints & borders" },
   { id: "overlays", label: "Overlays & shadows" },
 ]
@@ -68,9 +69,11 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-gray-taupe": { section: "status", label: "Refunded grey", usedFor: "Refunded status on venue bookings" },
   "--afa-taupe": { section: "status", label: "Quiet label taupe", usedFor: "small meta labels on admin feedback (\"via chatbot\")" },
   "--afa-brown-gold": { section: "status", label: "Warning note", usedFor: "a warning note on the organiser event edit page" },
-  "--afa-blue-dark": { section: "status", label: "Seat map: blue", usedFor: "seat-map tier colour and Gate marker" },
-  "--afa-plum": { section: "status", label: "Seat map: plum", usedFor: "seat-map tier colour and stage-distance marker" },
-  "--afa-brown-dark": { section: "status", label: "Seat map: brown", usedFor: "seat-map tier colour" },
+
+  // --- Seat map
+  "--afa-blue-dark": { section: "seatmap", label: "Blue tier", usedFor: "seat-map tier colour and Gate marker" },
+  "--afa-plum": { section: "seatmap", label: "Plum tier", usedFor: "seat-map tier colour and stage-distance marker" },
+  "--afa-brown-dark": { section: "seatmap", label: "Brown tier", usedFor: "seat-map tier colour" },
 
   // --- Tints & borders
   "--afa-border-resting": { section: "tints", label: "Default border", usedFor: "card, input and divider borders" },
