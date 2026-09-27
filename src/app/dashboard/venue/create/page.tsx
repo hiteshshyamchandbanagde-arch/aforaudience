@@ -400,16 +400,14 @@ export default function CreateVenuePage() {
               <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-18px)' }}>
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
                   <SharedButton
-                    variant="bare"
+                    variant="toggle-box"
+                    size="md"
+                    fullWidth={false}
+                    selected={rateType === t}
                     key={t}
                     type="button"
                     onClick={() => setRateType(t)}
-                    style={{
-                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                      border: rateType === t ? '1px solid var(--afa-amber)' : '1px solid var(--afa-tint-08)',
-                      background: rateType === t ? 'var(--afa-amber-tint)' : 'var(--afa-surface-inverse)',
-                      color: rateType === t ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
-                    }}
+                    style={{ flex: 1 }}
                   >
                     {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
                   </SharedButton>
@@ -590,19 +588,13 @@ function PathCard({
 }) {
   return (
     <SharedButton
-      variant="bare"
+      variant="card"
+      fullWidth={false}
+      selected={active}
       type="button"
       onClick={onClick}
       className={`afa-path-card${active ? ' afa-path-card-active afa-card-lift' : ''}`}
-      style={{
-        textAlign: 'left',
-        borderRadius: 'var(--afa-radius-lg)',
-        border: active ? '1px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-12)',
-        background: active ? undefined : 'var(--afa-surface-page)',
-        padding: 'var(--afa-space-5)',
-        cursor: 'pointer',
-        transition: 'border-color 150ms, transform 150ms',
-      }}
+      style={{ transition: 'border-color 150ms, transform 150ms' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
         <span

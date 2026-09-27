@@ -11,7 +11,7 @@ import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
 import Button from '@/components/ui/Button'
-import { STATUS_TONE, FILL_SOLID_TINT } from '@/lib/statusStyle'
+import { STATUS_TONE } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -895,11 +895,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           {celebritySearchResults.map((u) => (
                             <Button
                               key={u.id}
-                              variant="bare"
+                              variant="menu-row"
                               type="button"
                               onClick={() => inviteCelebrity(u.id)}
                               disabled={celebrityInviting}
-                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: 'var(--afa-space-10px) var(--afa-space-3)', fontSize: 'var(--afa-text-ui)', opacity: 1 }}
                             >
                               {u.displayName || u.name}
                             </Button>
@@ -953,11 +952,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           {panelistSearchResults.map((u) => (
                             <Button
                               key={u.id}
-                              variant="bare"
+                              variant="menu-row"
                               type="button"
                               onClick={() => invitePanelist(u.id)}
                               disabled={panelistInviting}
-                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: 'var(--afa-space-10px) var(--afa-space-3)', fontSize: 'var(--afa-text-ui)', opacity: 1 }}
                             >
                               {u.displayName || u.name}
                             </Button>
@@ -1133,15 +1131,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 ] as const).map((opt) => (
                   <Button
                     key={opt.value}
-                    variant="bare"
+                    variant="toggle-box"
+                    size="md"
+                    fullWidth={false}
+                    selected={defaultCompensationType === opt.value}
                     type="button"
                     onClick={() => setDefaultCompensationType(opt.value)}
-                    style={{
-                      padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                      background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                      color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                    }}
                   >
                     {opt.label}
                   </Button>
