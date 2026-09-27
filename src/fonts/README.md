@@ -2,7 +2,7 @@
 
 Every webfont the app uses lives here and is loaded by `next/font/local`
 in `src/app/layout.tsx`. Nothing is fetched from Google at build time or
-at runtime. (Until 27 Sep 2026 `next/font/google` downloaded these at
+at runtime. (Until 27 Sep 2026 the Google Fonts loader downloaded these at
 build time; that fetch started failing every Vercel build.)
 
 Each folder has the family's `OFL.txt` (SIL Open Font License 1.1).
