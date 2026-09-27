@@ -10,12 +10,13 @@
 // Pure data, no imports beyond types: safe for the admin page (a Client
 // Component).
 
-export type ColorSection = "surfaces" | "text" | "brand" | "status" | "seatmap" | "tints" | "overlays"
+export type ColorSection = "surfaces" | "text" | "brand" | "selection" | "status" | "seatmap" | "tints" | "overlays"
 
 export const COLOR_SECTIONS: { id: ColorSection; label: string }[] = [
   { id: "surfaces", label: "Surfaces" },
   { id: "text", label: "Text" },
   { id: "brand", label: "Brand & actions" },
+  { id: "selection", label: "Selected state" },
   { id: "status", label: "Status tones" },
   { id: "seatmap", label: "Seat map" },
   { id: "tints", label: "Tints & borders" },
@@ -47,11 +48,16 @@ export const TOKEN_META: Record<string, TokenMeta> = {
 
   // --- Brand & actions
   "--afa-amber": { section: "brand", label: "Amber accent", usedFor: "links, highlights, active nav, focus accents" },
-  "--afa-fill-solid": { section: "brand", label: "Primary button fill", usedFor: "main call-to-action buttons, selected states" },
+  "--afa-fill-solid": { section: "brand", label: "Primary button fill", usedFor: "the one primary action per screen (Book, Pay, Publish, Save). Not used for selected states" },
   "--afa-on-fill-solid": { section: "brand", label: "Primary button text", usedFor: "text and icons on the primary button fill" },
   "--afa-brand-mark": { section: "brand", label: "Logo \"A\"", usedFor: "the coloured A in the AforAudience wordmark" },
   "--afa-peach": { section: "brand", label: "Peach", usedFor: "the eyebrow label on the home hero rotator" },
   "--afa-social-blue": { section: "brand", label: "Verified-badge blue", usedFor: "the verified tick on artist profiles" },
+
+  // --- Selected state (GEN-2609-118)
+  "--afa-selected": { section: "selection", label: "Selected text", usedFor: "text, icons and the solid border of selected chips, toggle boxes, tabs, seats and period pickers" },
+  "--afa-selected-bg": { section: "selection", label: "Selected background", usedFor: "the faint tint behind a selected chip, toggle box, menu row, card or seat" },
+  "--afa-selected-border": { section: "selection", label: "Selected border", usedFor: "the translucent border of a selected pill (filters, facilities, username chips)" },
 
   // --- Status tones
   "--afa-sage": { section: "status", label: "Success green", usedFor: "success button fill, confirmed borders" },

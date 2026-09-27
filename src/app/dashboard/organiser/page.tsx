@@ -205,7 +205,8 @@ export default function OrganiserDashboard() {
                       <Link
                         href={`/dashboard/organiser/events/${event.id}/edit`}
                         onClick={(e) => e.stopPropagation()}
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
+                        // GEN-2609-118 - a secondary action beside View, so the same outline; orange is for a screen's one primary action.
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
                       >
                         Edit
                       </Link>

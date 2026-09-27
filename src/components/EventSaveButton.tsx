@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { HeartIcon } from '@/components/icons/EventIcons'
 import Button from '@/components/ui/Button'
+import { SELECTED } from '@/lib/statusStyle'
 
 // Mobile Redesign Phase 4b (GEN-2609-007) - self-contained follow/unfollow
 // island for a single event, mirroring useVenueFollow's shape
@@ -103,9 +104,10 @@ export function EventSaveHeartButton({
         cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
       }}
     >
+      {/* GEN-2609-118 - saved is an on-state, so amber (--afa-selected), not the CTA orange. */}
       <HeartIcon
         filled={saved}
-        style={{ width: iconSize, height: iconSize, color: saved ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}
+        style={{ width: iconSize, height: iconSize, color: saved ? SELECTED : 'var(--afa-text-primary)' }}
       />
     </Button>
   )

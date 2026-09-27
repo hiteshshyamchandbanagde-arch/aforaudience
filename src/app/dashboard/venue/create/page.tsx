@@ -16,6 +16,7 @@ import AddressAutocomplete from '@/components/AddressAutocomplete'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
+import { SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 
 const inputStyle = {
   width: '100%',
@@ -605,8 +606,9 @@ function PathCard({
             width: '40px',
             height: '40px',
             borderRadius: 'var(--afa-radius-md)',
-            background: active ? 'var(--afa-fill-tint)' : 'var(--afa-tint-08)',
-            color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)',
+            // GEN-2609-118 - the chosen seating path is a selected state: amber.
+            background: active ? SELECTED_BG : 'var(--afa-tint-08)',
+            color: active ? SELECTED : 'var(--afa-text-secondary)',
           }}
         >
           {icon}
@@ -624,7 +626,7 @@ function PathCard({
           </li>
         ))}
       </ul>
-      <span style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)' }}>
+      <span style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: active ? SELECTED : 'var(--afa-text-secondary)' }}>
         {active ? '✓ Selected' : 'Choose this →'}
       </span>
     </SharedButton>

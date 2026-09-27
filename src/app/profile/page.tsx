@@ -882,7 +882,8 @@ function ProfileContent() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
               )}
-              <label style={{ ...variantStyle('primary', false, 36), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+              {/* GEN-2609-118 - outline: an optional photo is secondary, not the card's primary action. */}
+              <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                 {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
                 <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
               </label>

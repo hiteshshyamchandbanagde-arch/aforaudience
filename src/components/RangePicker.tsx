@@ -1,6 +1,6 @@
 'use client'
 
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import { SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
 
 const RANGES: { value: string; label: string }[] = [
@@ -25,8 +25,9 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
             fontWeight: 600,
             padding: '6px 14px',
             borderRadius: 'var(--afa-radius-sm)',
-            color: value === r.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-            background: value === r.value ? FILL_SOLID_TINT : undefined,
+            // GEN-2609-118 - the chosen period is a selected state: amber.
+            color: value === r.value ? SELECTED : 'var(--afa-text-primary)',
+            background: value === r.value ? SELECTED_BG : undefined,
           }}
         >
           {r.label}

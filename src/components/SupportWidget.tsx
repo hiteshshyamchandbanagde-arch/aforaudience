@@ -786,7 +786,8 @@ export default function SupportWidget() {
                     </div>
                   ) : (
                     <div style={{ marginBottom: 'var(--afa-space-3)' }}>
-                      <label style={{ ...variantStyle('primary', false, 'md'), cursor: 'pointer' }}>
+                      {/* GEN-2609-118 - outline: Send is the form's primary action. */}
+                      <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: 'pointer' }}>
                         Attach screenshot
                         <input
                           ref={fileInputRef}

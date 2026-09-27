@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { colorForZone } from '@/components/SeatLayoutPreview'
 import Button from '@/components/ui/Button'
+import { SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
 // x/y layout the Venue Owner builder saved, read-only except for click-
@@ -391,11 +392,13 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           // to never shrink below 1x (no boost needed once the zoom
           // itself already makes the seat comfortably large).
           const selectedBoost = Math.max(1, 1.5 / zoom)
+          // GEN-2609-118 - selected is a state, not an action: amber tint
+          // with an amber ring and number, never the solid orange fill.
           const bg =
             s.status === 'taken'
               ? 'var(--afa-tint-12)'
               : isSelected
-              ? 'var(--afa-fill-solid)'
+              ? SELECTED_BG
               : s.status === 'priceUnset'
               ? 'var(--afa-tint-08)'
               : colorForZone(s.tierLabel, zoneOrder)
@@ -441,8 +444,8 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 // neighboring seat drawn after it in DOM order.
                 transform: isSelected ? `scale(${selectedBoost})` : undefined,
                 zIndex: isSelected ? 2 : undefined,
-                boxShadow: isSelected ? '0 0 0 2px var(--afa-text-primary)' : undefined,
-                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-text-muted)' : 'var(--afa-text-primary)',
+                boxShadow: isSelected ? `0 0 0 2px ${SELECTED}` : undefined,
+                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-text-muted)' : isSelected ? SELECTED : 'var(--afa-text-primary)',
                 fontSize: isSelected ? '10px' : 'clamp(5px, 1.3cqw, 9px)',
                 fontWeight: isSelected ? 700 : 400,
                 display: 'flex',
@@ -459,8 +462,22 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-fill-solid)', marginRight: '4px' }} />Selected</span>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-12)', marginRight: '4px' }} />Taken</span>
+        {/* BUG-2609-075 (legend part) - each swatch is drawn the way that
+            seat state renders on the canvas above. Available seats take
+            their zone's colour, so its swatch shows the zones in play. */}
+        {zoneOrder.length > 0 && (
+          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+            {zoneOrder.slice(0, 3).map((zone) => (
+              <span key={zone} style={{ display: 'inline-block', width: 'var(--afa-space-10px)', height: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-xs)', background: colorForZone(zone, zoneOrder), marginRight: 'var(--afa-space-2px)' }} />
+            ))}
+            <span style={{ marginLeft: 'var(--afa-space-2px)' }}>Available</span>
+          </span>
+        )}
+        <span><span style={{ display: 'inline-block', width: 'var(--afa-space-10px)', height: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-xs)', background: SELECTED_BG, boxShadow: `inset 0 0 0 2px ${SELECTED}`, marginRight: 'var(--afa-space-1)' }} />Selected</span>
+        <span><span style={{ display: 'inline-block', width: 'var(--afa-space-10px)', height: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-12)', marginRight: 'var(--afa-space-1)' }} />Held / booked</span>
+        {levelSeats.some((s: SeatInfo) => s.status === 'priceUnset') && (
+          <span><span style={{ display: 'inline-block', width: 'var(--afa-space-10px)', height: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-08)', marginRight: 'var(--afa-space-1)' }} />Not on sale</span>
+        )}
       </div>
     </div>
   )

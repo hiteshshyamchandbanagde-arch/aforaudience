@@ -8,7 +8,7 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
-import { FILL_SOLID_TINT, fillSolidTint } from '@/lib/statusStyle'
+import { fillSolidTint, SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLockGlyph } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
 
@@ -1524,8 +1524,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         aria-label={`Remove ${levelLabel(lvl)}`}
                         style={{
                           padding: '7px var(--afa-space-2)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-md) var(--afa-radius-md) var(--afa-radius-sharp)', fontSize: 'var(--afa-text-ui)',
-                          border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)', borderLeft: 'none',
-                          background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                          border: activeLevel === lvl ? `2px solid ${SELECTED}` : '1px solid var(--afa-border-resting)', borderLeft: 'none',
+                          background: activeLevel === lvl ? SELECTED_BG : 'var(--afa-surface-raised)',
                           color: 'var(--afa-error)',
                         }}
                       >
@@ -1556,10 +1556,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               style={{ flex: '1 1 300px' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: 'var(--afa-radius-md)', background: fillSolidTint(0.2), color: 'var(--afa-fill-solid)' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: 'var(--afa-radius-md)', background: SELECTED_BG, color: SELECTED }}>
                   <IconSection size={18} />
                 </span>
-                <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-fill-solid)' }}>Recommended</div>
+                <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: SELECTED }}>Recommended</div>
               </div>
               <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>Guided Setup</div>
               <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
@@ -1828,7 +1828,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         </div>
                       </div>
 
-                      <Button variant="solid" size="lg" fullWidth={false} onClick={generateGrid} disabled={seatMapFrozen}>
+                      {/* GEN-2609-118 - outline: Save Seat Map is this screen's one primary action. */}
+                      <Button variant="outline-neutral" size="lg" fullWidth={false} onClick={generateGrid} disabled={seatMapFrozen}>
                         Generate / Update Layout
                       </Button>
                       <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.45, marginTop: 'var(--afa-space-2)' }}>
@@ -2036,7 +2037,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         // rule, plus dark label text so it stays legible.
                         boxShadow: tf.marker ? `inset -6px 6px 0 -3px ${tf.marker}` : undefined,
                         opacity: selectedId === s.clientId ? 1 : 0.85,
-                        outline: selectedId === s.clientId ? '2px solid var(--afa-fill-solid)' : 'none',
+                        outline: selectedId === s.clientId ? `2px solid ${SELECTED}` : 'none',
                         outlineOffset: '2px',
                         color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)',
                         fontSize: 'var(--afa-text-caption)',
@@ -2073,7 +2074,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           borderRadius: '50%',
                           background: meta.color,
                           opacity: selectedMarkerId === m.clientId ? 1 : 0.9,
-                          outline: selectedMarkerId === m.clientId ? '2px solid var(--afa-fill-solid)' : '2px solid var(--afa-cream)',
+                          outline: selectedMarkerId === m.clientId ? `2px solid ${SELECTED}` : '2px solid var(--afa-cream)',
                           outlineOffset: '1px',
                           color: 'var(--afa-cream)',
                           // GEN-2609-083 - coincidentally equals --afa-text-micro
