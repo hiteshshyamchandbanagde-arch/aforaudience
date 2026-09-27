@@ -489,8 +489,9 @@ export default function RegisterForm() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginTop: "var(--afa-space-6px)", alignItems: "center" }}>
                     {/* GEN-2609-110 - was left raw by GEN-2609-096 as a tint
                         chip; its look is exactly toggle-pill's selected
-                        state (fill tint, fill border tint, fill-solid text,
-                        pill), so it is one now. */}
+                        state (tint, border tint, text colour, pill), so it
+                        is one now. GEN-2609-118: that state is amber
+                        (--afa-selected*), no longer orange. */}
                     {initialsSuggestions.map((suggestion) => (
                       <Button
                         key={suggestion}

@@ -14,7 +14,7 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-cream:           #F7F3EE;   /* primary text-on-dark color, NOT a light background anymore */
 --afa-amber:           #C9973A;   /* accent — eyebrows, icons, hover states, badges */
 
---afa-fill-solid:      #FF5A36;   /* bright accent for solid CTA fills (Phase 2c) */
+--afa-fill-solid:      #FF5A36;   /* the ONE primary action per screen (Book, Pay, Publish, Save) - never a selected state (GEN-2609-118) */
 --afa-on-fill-solid:   var(--afa-brown-black);  /* text color on top of fill-solid */
 
 --afa-text-primary:    #F5F5F0;
@@ -118,6 +118,12 @@ FROM "DesignToken";
 --afa-amber-tint:   rgba(201, 151, 58, 0.15);  /* 0.10-0.20 */
 --afa-amber-border: rgba(201, 151, 58, 0.4);   /* 0.25-0.50 */
 --afa-amber-strong: rgba(201, 151, 58, 0.6);   /* 0.55, 0.60; 0.80 -> solid --afa-amber */
+
+/* selected / active state (GEN-2609-118) - own family, admin-editable,
+   defaults equal the amber values. Tinted, never a solid fill. */
+--afa-selected:        var(--afa-amber);            /* selected text, icon, box border, tab underline */
+--afa-selected-bg:     rgba(201, 151, 58, 0.08);    /* tint behind a selected chip / box / row / card / seat */
+--afa-selected-border: rgba(201, 151, 58, 0.4);     /* translucent edge of a selected pill */
 --afa-error-tint:   rgba(179, 38, 30, 0.1);    /* 0.08-0.15 */
 --afa-error-edge:   rgba(179, 38, 30, 0.3);    /* 0.30, 0.40 */
 --afa-sage-tint:    rgba(74, 103, 65, 0.12);
@@ -269,7 +275,7 @@ orange: { bg: 'rgba(255,90,54,0.1)',   color: 'var(--afa-fill-solid)' }   // dec
 | `tag` | `11px` / `500` / `2px 8px` padding / `999px` radius | `admin/bookings`'s "FREE" tag — a fixed fact, not a lifecycle state |
 | `pill` | `13px` / `700` / `5px 12px` padding / `999px` radius | `artist/events`' compensation pill, "Lineup full" pill |
 
-**Related, but deliberately not part of `STATUS_TONE`:** `FILL_SOLID_TINT` (`rgba(255,90,54,0.08)`) and `FILL_SOLID_BORDER_TINT` (`rgba(255,90,54,0.25)`), plus the `fillSolidTint(alpha)` helper, live in the same file (GEN-2609-063/-066) but aren't a 6th tone — they're the translucent-selected-state companion to `--afa-fill-solid`, which (unlike `--afa-error`/`--afa-gold`/`--afa-sage`) has no CSS-level "-tint" variable of its own.
+**Related, but deliberately not part of `STATUS_TONE`:** `FILL_SOLID_TINT` (`rgba(255,90,54,0.08)`) and `FILL_SOLID_BORDER_TINT` (`rgba(255,90,54,0.25)`), plus the `fillSolidTint(alpha)` helper, live in the same file (GEN-2609-063/-066) but aren't a 6th tone — they're the translucent-selected-state companion to `--afa-fill-solid`, which (unlike `--afa-error`/`--afa-gold`/`--afa-sage`) has no CSS-level "-tint" variable of its own. **GEN-2609-118:** these are no longer used for selected states. Selection uses `SELECTED` / `SELECTED_BG` / `SELECTED_BORDER` (same file), backed by `--afa-selected*`; the fill tints remain only for CTA-adjacent accents.
 
 ## 6. Illustrated no-photo fallback (reuse candidate for dashboard empty states)
 

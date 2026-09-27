@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
+import { SELECTED, SELECTED_BG, SELECTED_BORDER } from '@/lib/statusStyle'
 
 // Shared Button - Step 4 of the UI/UX audit sequence
 // (docs/afa-uiux-design-audit.md, Section 06/12 Step 4): extracted from
@@ -133,7 +133,8 @@ const FONT_FAMILY = 'var(--font-sans)'
 // fill), the same architectural pattern as the selection-pills
 // GEN-2609-063 already centralized via `statusStyle.ts`'s
 // `FILL_SOLID_TINT`/`fillSolidTint()` - not a `Button`-shaped CTA, so
-// it's fixed there instead of getting a 3rd pill size here.
+// it's fixed there instead of getting a 3rd pill size here. (GEN-2609-118:
+// selection now uses `SELECTED_*` from the same file, not the fill tint.)
 // GEN-2609-075 - sm/md/lg's padding/radius/font-size now read from the
 // admin-controlled --afa-btn-padding-*/--afa-radius-*/--afa-text-*
 // tokens (src/app/globals.css) instead of hardcoded numbers, so an
@@ -486,24 +487,26 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
       // divergence to flag - `pill-sm`'s 13px is exactly
       // `--afa-text-ui`, `pill-md`'s 14px is exactly `--afa-text-body`.
       //
-      // Selected state deliberately uses FILL_SOLID_BORDER_TINT (a
-      // translucent border), NOT the solid `2px solid var(--afa-fill-
-      // solid)` border GEN-2609-063/-066/BUG-2609-048's 26 already-
+      // Selected state deliberately uses SELECTED_BORDER (a
+      // translucent border), NOT the solid `2px solid` SELECTED
+      // border GEN-2609-063/-066/BUG-2609-048's 26 already-
       // shipped box-shaped selector sites use - a real, locked
       // difference from that convention for this specific pill shape,
       // not an inconsistency to reconcile. Both states keep the same
       // 1px border width - only color/background move - since the
       // spec calls for discrete individually-bordered pills, not a
       // width change on selection.
+      // GEN-2609-118 - selected colours moved from the orange fill-solid
+      // family to --afa-selected*; the shape is unchanged.
       return {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 'var(--afa-space-6px)',
         width: fullWidth ? '100%' : undefined,
-        background: selected ? FILL_SOLID_TINT : 'transparent',
-        border: `1px solid ${selected ? FILL_SOLID_BORDER_TINT : 'var(--afa-border-resting)'}`,
-        color: selected ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)',
+        background: selected ? SELECTED_BG : 'transparent',
+        border: `1px solid ${selected ? SELECTED_BORDER : 'var(--afa-border-resting)'}`,
+        color: selected ? SELECTED : 'var(--afa-text-secondary)',
         // Own baseline chrome (same defensive convention as
         // `outline-neutral`) so this renders sensibly even if a future
         // caller omits `size` - callers should always pass `pill-sm`/
@@ -521,21 +524,22 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
       // seating mode/level/wizard/alignment/placement toggles, organiser
       // compensation + approval mode, venue rate type x2, check-in list
       // filter, the seat picker + layout preview level switches). The
-      // selected state is the 2px fill-solid border over the fill tint that
+      // selected state is the 2px solid border over the selected tint that
       // `toggle-pill`'s own comment calls the box-selector convention; the
       // resting border drifted between --afa-border-resting and
       // --afa-tint-20 and is unified on the former. Unlike `toggle-pill`
       // the border width changes on selection - that is how every one of
       // these sites already behaved. md fallback, same as `solid`.
+      // GEN-2609-118 - selected is amber (--afa-selected*), not orange.
       return {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 'var(--afa-space-6px)',
         width: fullWidth ? '100%' : undefined,
-        background: selected ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-        border: selected ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-        color: selected ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
+        background: selected ? SELECTED_BG : 'var(--afa-surface-raised)',
+        border: selected ? `2px solid ${SELECTED}` : '1px solid var(--afa-border-resting)',
+        color: selected ? SELECTED : 'var(--afa-text-primary)',
         padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',
         fontSize: 'var(--afa-text-ui)',
@@ -580,7 +584,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         background: 'transparent',
         border: 'none',
         padding: 0,
-        color: selected ? 'var(--afa-amber)' : undefined,
+        color: selected ? SELECTED : undefined,
         fontFamily: 'var(--font-mono)',
         fontSize: 'var(--afa-text-small)',
         fontWeight: 500,
@@ -601,7 +605,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
         border: 'none',
-        borderBottom: `2px solid ${selected ? 'var(--afa-amber)' : 'transparent'}`,
+        borderBottom: `2px solid ${selected ? SELECTED : 'transparent'}`,
         color: selected ? 'var(--afa-text-primary)' : undefined,
         padding: 'var(--afa-btn-padding-md)',
         fontSize: 'var(--afa-text-ui)',
@@ -622,7 +626,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
         border: 'none',
-        borderBottom: `2px solid ${selected ? 'var(--afa-amber)' : 'transparent'}`,
+        borderBottom: `2px solid ${selected ? SELECTED : 'transparent'}`,
         color: selected ? 'var(--afa-text-primary)' : undefined,
         padding: '0 0 var(--afa-space-3)',
         fontFamily: 'var(--font-ui)',
@@ -645,9 +649,9 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'block',
         width: fullWidth ? '100%' : undefined,
         textAlign: 'left',
-        background: selected ? 'var(--afa-amber-wash)' : undefined,
+        background: selected ? SELECTED_BG : undefined,
         border: 'none',
-        color: selected ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
+        color: selected ? SELECTED : 'var(--afa-text-primary)',
         padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-sm)',
         fontSize: 'var(--afa-text-body)',
@@ -681,12 +685,13 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
       // /my-feedback items). Raised surface, radius-lg, 20px padding;
       // `selected` is the chosen (or recommended) path. Content layout
       // stays the caller's own children.
+      // GEN-2609-118 - the chosen path is a selected state: amber, not orange.
       return {
         display: 'block',
         width: fullWidth ? '100%' : undefined,
         textAlign: 'left',
-        background: selected ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-        border: `1px solid ${selected ? 'var(--afa-fill-solid)' : 'var(--afa-tint-12)'}`,
+        background: selected ? SELECTED_BG : 'var(--afa-surface-raised)',
+        border: `1px solid ${selected ? SELECTED : 'var(--afa-tint-12)'}`,
         color: 'var(--afa-text-primary)',
         padding: 'var(--afa-space-5)',
         borderRadius: 'var(--afa-radius-lg)',

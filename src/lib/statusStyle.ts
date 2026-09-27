@@ -56,6 +56,10 @@ export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange',
 // already the design-tokens check's exempt "shared tone source," same
 // reasoning as STATUS_TONE above) rather than leaving 6 files with a
 // brand-new hardcoded literal apiece.
+// GEN-2609-118 - no longer for selected states. Orange is the primary
+// action only; what's left here is CTA-adjacent (a profile-completion
+// callout, skill tags on the artist dashboard, the seat-map builder's
+// orange tier fills). Selection uses the SELECTED_* values below.
 export const FILL_SOLID_TINT = 'rgba(255,90,54,0.08)'
 export const FILL_SOLID_BORDER_TINT = 'rgba(255,90,54,0.25)'
 
@@ -66,3 +70,13 @@ export const FILL_SOLID_BORDER_TINT = 'rgba(255,90,54,0.25)'
 export function fillSolidTint(alpha: number): string {
   return `rgba(255,90,54,${alpha})`
 }
+
+// GEN-2609-118 - the selected / active state: amber text on a faint
+// amber tint with an amber border, never a solid fill. Backed by the
+// admin-editable --afa-selected* tokens (globals.css), so changing the
+// CTA colour no longer changes every selected chip. SELECTED_BORDER is
+// the translucent edge a pill uses; a box-shaped selector uses the
+// solid SELECTED colour as its border instead (see Button.tsx).
+export const SELECTED = 'var(--afa-selected)'
+export const SELECTED_BG = 'var(--afa-selected-bg)'
+export const SELECTED_BORDER = 'var(--afa-selected-border)'

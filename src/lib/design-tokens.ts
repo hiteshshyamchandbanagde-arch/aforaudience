@@ -394,6 +394,9 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-amber-tint": "rgba(201, 151, 58, 0.15)",
   "--afa-amber-border": "rgba(201, 151, 58, 0.4)",
   "--afa-amber-strong": "rgba(201, 151, 58, 0.6)",
+  "--afa-selected": "var(--afa-amber)",
+  "--afa-selected-bg": "rgba(201, 151, 58, 0.08)",
+  "--afa-selected-border": "rgba(201, 151, 58, 0.4)",
   "--afa-error-tint": "rgba(179, 38, 30, 0.1)",
   "--afa-error-edge": "rgba(179, 38, 30, 0.3)",
   "--afa-sage-tint": "rgba(74, 103, 65, 0.12)",
@@ -539,8 +542,8 @@ export function contrastRatio(fgValue: string, bgValue: string, baseValue?: stri
   return (lighter + 0.05) / (darker + 0.05)
 }
 
-// Resolves one level of var(--afa-x) indirection (only
-// --afa-on-fill-solid uses it today).
+// Resolves one level of var(--afa-x) indirection (--afa-on-fill-solid
+// and --afa-selected use it today).
 export function resolveTokenValue(values: Record<string, string>, key: string): string {
   const raw = values[key] ?? ""
   const ref = raw.match(/^var\((--afa-[a-z0-9-]+)\)$/)
@@ -566,6 +569,8 @@ export const CONTRAST_PAIRS: ContrastPair[] = [
   { fg: "--afa-sage-bright", bg: "--afa-sage-tint", over: "--afa-surface-page", label: "Success badge text on its tint" },
   { fg: "--afa-error-bright", bg: "--afa-error-tint", over: "--afa-surface-page", label: "Error badge text on its tint" },
   { fg: "--afa-amber", bg: "--afa-amber-tint", over: "--afa-surface-page", label: "Amber badge text on its tint" },
+  { fg: "--afa-selected", bg: "--afa-selected-bg", over: "--afa-surface-page", label: "Selected text on its tint (page)" },
+  { fg: "--afa-selected", bg: "--afa-selected-bg", over: "--afa-surface-raised", label: "Selected text on its tint (raised surface)" },
   { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Primary button text on fill" },
   { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
   { fg: "--afa-cream", bg: "--afa-sage", label: "Success button text on sage" },
