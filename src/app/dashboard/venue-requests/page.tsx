@@ -8,6 +8,7 @@ import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
+import SharedButton from '@/components/ui/Button'
 
 interface Offer {
   id: string
@@ -225,14 +226,16 @@ export default function VenueRequestsPage() {
                         >
                           {lastOffer ? 'Counter' : 'Send quote'}
                         </Button>
-                        <Button
-                          variant="ghost"
+                        <SharedButton
+                          variant="outline-error"
+                          size="lg"
+                          fullWidth={false}
                           onClick={() => act(r.id, 'decline')}
                           disabled={actingOn === r.id}
-                          style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', opacity: actingOn === r.id ? 0.6 : 1 }}
+                          style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)' }}
                         >
                           Decline
-                        </Button>
+                        </SharedButton>
                       </div>
                     </div>
                   )}

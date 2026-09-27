@@ -533,7 +533,6 @@ html {
 .avp-btn-primary:hover { filter: brightness(1.1); }
 .avp-btn-primary:active { filter: brightness(0.95); }
 .avp-btn-outline:hover { border-color: rgba(245, 245, 240, 0.4); background: rgba(245, 245, 240, 0.03); }
-.avp-btn-ghost:hover { color: var(--afa-text-primary); background: rgba(245, 245, 240, 0.04); }
 .avp-hover-border:hover { border-color: rgba(245, 245, 240, 0.2); color: var(--afa-text-primary); }
 .avp-field:focus { border-color: rgba(201, 151, 58, 0.5); outline: none; box-shadow: 0 0 0 1px rgba(201, 151, 58, 0.35); }
 
