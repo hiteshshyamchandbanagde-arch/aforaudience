@@ -1,3 +1,86 @@
+# Session Handoff — 27 Sept 2026, part 7 (CC — BUG-2609-062 self-hosted fonts, pushed, needs merge)
+
+Branch `fix/bug-2609-062-local-fonts` off `origin/qa` at `d2f7739`. **Not merged.** No DB changes. Blocker: merge this first, then run the #711 amend dispatch.
+
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/bug-2609-062-local-fonts?expand=1
+
+## 1. Result
+- All 15 `next/font/google` calls are now `next/font/local`. `grep -rn "next/font/google" src` returns nothing. Same CSS variable names, weights, styles and `display: swap`. The 4 `*Phys` aliases point at the same files as their role siblings. Only `src/app/layout.tsx` and `src/fonts/` changed.
+- **Offline build passes.** Google Fonts was blocked at the network layer and the production build still passed (exit 0), requesting nothing (see §5).
+- **Glyph parity: 0 differences** (§4). `₹` still comes from Schibsted Grotesk. In Young Serif, Instrument Sans and JetBrains Mono it still renders from the same metric-matched Arial/Times fallback, as before: those three fonts have no `₹` glyph, upstream or on Google.
+
+## 2. Commits
+- `625e582` self-host all fonts: `layout.tsx`, 12 woff2 files, 11 `OFL.txt`, `src/fonts/fallbacks.css`, `src/fonts/README.md`
+- `39c783b` README wording, so the grep above stays clean
+
+## 3. Files (woff2 bytes)
+| File | Bytes | Codepoints rendered |
+|---|---|---|
+| `young-serif/YoungSerif-Regular.woff2` | 23,084 | 447 |
+| `schibsted-grotesk/SchibstedGrotesk-VF.woff2` | 59,756 | 390 |
+| `schibsted-grotesk/SchibstedGrotesk-Italic-VF.woff2` | 63,764 | 390 |
+| `instrument-sans/InstrumentSans-VF.woff2` | 43,904 | 318 |
+| `jetbrains-mono/JetBrainsMono-VF.woff2` | 45,116 | 663 |
+| `noto-sans-devanagari/NotoSansDevanagari-VF.woff2` | 121,580 | 226 |
+| `noto-sans-tamil/NotoSansTamil-VF.woff2` | 50,004 | 78 |
+| `noto-sans-telugu/NotoSansTelugu-VF.woff2` | 122,264 | 109 |
+| `noto-sans-kannada/NotoSansKannada-VF.woff2` | 92,304 | 110 |
+| `noto-sans-malayalam/NotoSansMalayalam-VF.woff2` | 89,220 | 132 |
+| `noto-sans-gujarati/NotoSansGujarati-VF.woff2` | 132,548 | 116 |
+| `noto-sans-bengali/NotoSansBengali-VF.woff2` | 108,136 | 117 |
+
+Plus `fallbacks.css` (2.7 KB), `README.md`, and one `OFL.txt` per family.
+
+**Font weight** (woff2 in `.next/static/media`): **1,325,384 bytes / 37 files → 951,680 bytes / 12 files (−28%)**. Preloaded on every page: **872,580 bytes (12 files, all 7 Noto included) → 235,624 bytes (5 Latin files)**. Font files downloaded by an English page: 13 → 5; by a Hindi page: 13 → 5–6.
+
+## 4. Source, subset/merge decision, parity
+- **Source:** the full upstream TTFs from google/fonts, pinned (`23e54b51`; Devanagari from `03a18200`). These are the same versions Google was serving, checked against the name tables of the files the old loader downloaded. Devanagari is pinned back to 2.006 because upstream moved to 2.007 on 9 Sep and Google still served 2.006. `@fontsource` wasn't used: it ships the same per-subset split, so it wouldn't have helped with merging.
+- **Decision: merge into one file per family and style**, not multiple `src` entries. Reason: `next/font/local` can't give each `src` its own `unicode-range`, so Google's split files can't be reproduced one-to-one. Merging keeps every glyph in the same font.
+  - Each file is the source font subset to **exactly** the codepoints Google's files rendered (each subset file's cmap ∩ its unicode-range, unioned).
+  - `wdth` is pinned to 100 and `wght` limited to Google's served range. The instancer is skipped when the range already matches, because a no-op pass drifted outlines by up to 0.28 units and was caught by the parity check.
+  - Unhinted, like Google's files. Bytes are reproducible (hash seed fixed, source timestamp kept). Recipe is in `src/fonts/README.md`.
+- **Noto:** script subset only. Google's latin and latin-ext files for these families are dropped, because Latin resolves earlier in the stack. Each has an exact `unicode-range` and `preload: false`, so English pages no longer download them.
+  - The file keeps U+0020 in its cmap, which HarfBuzz uses to hide ZWNJ (caught in 256 Kannada strings).
+  - Side effect: Noto Telugu no longer holds `₹` (it only ever sat in Telugu's latin-ext file). This can't be reached: `₹` resolves in Instrument Sans Fallback (Arial) first, and Noto Devanagari has it anyway.
+- **Fallback faces:** `next/font/local` computes its own size-adjust, which drifted (JetBrains Mono 131.49% vs Google's 134.59%). That matters because the fallback face is what renders `₹` in mono prices. So `fallbacks.css` carries Google's 11 fallback faces verbatim, and `layout.tsx` uses `adjustFontFallback: false` plus `fallback: ["<Family> Fallback"]`.
+- **Parity check** against the qa@d2f7739 build's own files:
+  - every rendered codepoint × every declared weight: same decomposed outline (1/100 unit) and same advance, 11,436 checks;
+  - HarfBuzz shaping of every subset's full string and every string in the 7 Indic dictionaries: ~40k runs, identical;
+  - `hhea`/`OS/2` vertical metrics identical;
+  - **0 differences.**
+
+## 5. Offline build (how it was blocked)
+Not via the hosts file: it isn't writable without admin on this machine. A Node-level block (`NODE_OPTIONS --require`) also turned out useless: the negative control still passed, because under Turbopack the Google fetch runs inside the native `@next/swc` binary.
+
+What worked: a local filtering proxy that refuses `fonts.googleapis.com` and `fonts.gstatic.com`, tunnels everything else and logs every host requested. The build was pointed at it through `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (and lower-case), with a fresh `.next`.
+- **Negative control** (qa's `layout.tsx`): **fails**, with the same "issue establishing a connection while requesting https://fonts.googleapis.com/…" errors as Vercel. The proxy logged 11 blocked connects.
+- **Branch:** **exit 0**, no errors, 12 font files emitted. The proxy received **zero** requests from the build.
+
+## 6. Screenshots (390 + 1280, production builds, before = qa@d2f7739)
+Pages: `/` en · `/events/qa-demo-event-full-7` scrolled to `₹350 / seat` · `/dashboard/admin/artists` (mocked admin session + fixture roster with "Zoë"/"Śarma" to exercise latin-ext) · `/` in hi, ta, bn, gu.
+- **Rendered glyphs per actual font file** (CDP `getPlatformFontsForNode`, every element): identical on all 14 shots, and the font behind every `₹` node is identical.
+- **Pixels:**
+  - 13 of 14 shots are within the noise floor. A second qa-vs-qa run shows the same pattern: the chat-widget button's animation box, plus a ≤4/255 flicker by the top-right button.
+  - **One real difference: `admin-artists-1280`, the word "Śarma".** The Ś→a kerning now applies, because both letters are in one file (Schibsted +22 units at 400; Instrument Sans −2…0). A few pixels, max delta 67/255, invisible without a diff. It's the typographically correct rendering, and it only affects words that mix Latin-1 and Latin Extended-A letters.
+- **Pre-existing, unchanged:** most Indic text renders in the system font (Nirmala UI on Windows), with only 4–6 glyphs from Noto on these pages. Inline `fontFamily: var(--font-sans)` bypasses the Noto chain. This is the known FEAT-2608-051 gap, not this ticket.
+
+## 7. Verification
+- `tsc` ✅
+- `next build` online ✅ and with Google blocked ✅ (§5)
+- checker vs origin/qa: no new literals ✅
+- ratchet: output byte-identical to qa's ✅
+- self-tests: check-design-tokens 70 ✅ · migrate-tokens 62 ✅ · ticket-code 5 ✅ · username 4 ✅ · design-tokens.test.ts 48 ✅
+- ESLint `layout.tsx`: 0 → 0 messages ✅
+- `next dev`: all 7 screenshot pages at both widths, same per-font glyph counts as production ✅
+
+## 8. Notes for Chat
+- Internal `font-family` names are now `youngSerif`, `schibstedGroteskPhys`, … instead of `"Young Serif"`. Nothing in `src` reads them (everything goes through the CSS variables), and the admin allowlist labels are unaffected.
+- The intro splash was left alone (BUG-2609-064).
+- To update a font later: follow `src/fonts/README.md`'s recipe and re-check parity. The build and parity scripts weren't committed (they need the old Google build's files as a reference, which won't exist after this). Say if you want them in `scripts/dev/` anyway.
+- Next per part 6: merge this → run `cc-prompt-button-phase3-110-amend.md` (rebases #711 onto the fixed qa) → merge #711.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 6 (chat — #711 opened, Vercel builds blocked by Google Fonts)
 
 - **GEN-2609-099 was already merged** (#697, 22 Sep); a stale handoff was re-pasted. Nothing to do there. Its shorthand follow-up is GEN-2609-100 (RESOLVED).
