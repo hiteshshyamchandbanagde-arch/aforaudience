@@ -661,6 +661,11 @@ const hi: Dictionary = {
     showPassword: "पासवर्ड दिखाएं",
     hidePassword: "पासवर्ड छुपाएं",
     accountSuspendedMessage: "आपका खाता निलंबित कर दिया गया है। यदि आपको लगता है कि यह गलती है तो सहायता से संपर्क करें।",
+    enterIdentifier: "अपना ईमेल या फ़ोन डालें",
+    enterPassword: "अपना पासवर्ड डालें",
+    enterNewPassword: "नया पासवर्ड डालें",
+    enterEmail: "अपना ईमेल डालें",
+    enterSixDigitCode: "6 अंकों का कोड डालें",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "सभी फ़ील्ड आवश्यक हैं",

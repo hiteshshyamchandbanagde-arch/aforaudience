@@ -251,7 +251,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             </div>
 
             <div style={{ padding: "14px 18px 20px" }}>
-              <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "26px", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "6px" }}>
+              <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-display)", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "6px" }}>
                 {v.name}
               </h2>
               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>

@@ -694,6 +694,12 @@ const en = {
     showPassword: "Show password",
     hidePassword: "Hide password",
     accountSuspendedMessage: "Your account has been suspended. Contact support if you believe this is a mistake.",
+    // BUG-2609-063 - shown on submit when a field is empty (buttons no longer disable on empty, so Chrome autofill works).
+    enterIdentifier: "Enter your email or phone",
+    enterPassword: "Enter your password",
+    enterNewPassword: "Enter a new password",
+    enterEmail: "Enter your email",
+    enterSixDigitCode: "Enter the 6-digit code",
   },
   // Stable error-code -> message map for server-side validation/auth errors.
   // The API routes return a `code` alongside the (English, for logs) `error`

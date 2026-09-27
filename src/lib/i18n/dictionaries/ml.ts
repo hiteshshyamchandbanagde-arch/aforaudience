@@ -662,6 +662,11 @@ const ml: Dictionary = {
     showPassword: "പാസ്‌വേഡ് കാണിക്കുക",
     hidePassword: "പാസ്‌വേഡ് മറയ്ക്കുക",
     accountSuspendedMessage: "നിങ്ങളുടെ അക്കൗണ്ട് സസ്പെൻഡ് ചെയ്തിരിക്കുന്നു. ഇത് ഒരു തെറ്റാണെന്ന് നിങ്ങൾ കരുതുന്നെങ്കിൽ സപ്പോർട്ടിനെ ബന്ധപ്പെടുക.",
+    enterIdentifier: "നിങ്ങളുടെ ഇമെയിൽ അല്ലെങ്കിൽ ഫോൺ നൽകുക",
+    enterPassword: "നിങ്ങളുടെ പാസ്‌വേഡ് നൽകുക",
+    enterNewPassword: "ഒരു പുതിയ പാസ്‌വേഡ് നൽകുക",
+    enterEmail: "നിങ്ങളുടെ ഇമെയിൽ നൽകുക",
+    enterSixDigitCode: "6-അക്ക കോഡ് നൽകുക",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "എല്ലാ ഫീൽഡുകളും ആവശ്യമാണ്",

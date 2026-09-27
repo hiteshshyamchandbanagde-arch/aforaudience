@@ -666,6 +666,11 @@ const es: Dictionary = {
     showPassword: "Mostrar contraseña",
     hidePassword: "Ocultar contraseña",
     accountSuspendedMessage: "Tu cuenta ha sido suspendida. Contacta con soporte si crees que esto es un error.",
+    enterIdentifier: "Introduce tu correo electrónico o teléfono",
+    enterPassword: "Introduce tu contraseña",
+    enterNewPassword: "Introduce una nueva contraseña",
+    enterEmail: "Introduce tu correo electrónico",
+    enterSixDigitCode: "Introduce el código de 6 dígitos",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "Todos los campos son obligatorios",

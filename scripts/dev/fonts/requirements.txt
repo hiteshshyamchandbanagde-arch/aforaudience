@@ -1,0 +1,5 @@
+# Dev-only: the self-hosted font scripts in this folder (see src/fonts/README.md).
+# Pinned to the versions that built the committed src/fonts/ files (Python 3.14).
+fonttools==4.66.0
+brotli==1.2.0
+uharfbuzz==0.56.2

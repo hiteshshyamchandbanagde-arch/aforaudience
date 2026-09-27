@@ -87,6 +87,7 @@ FROM "DesignToken";
 --afa-text-lead:       18px;
 --afa-text-subtitle:   20px;
 --afa-text-subheading: 22px;  /* new, GEN-2609-106 */
+--afa-text-display:    26px;  /* new, GEN-2609-116: stat figures, date numerals, venue card titles (4 sites) */
 
 /* --afa-radius-10px / --afa-radius-12px: removed 26 Sep (GEN-2609-112) -
    10px retired into --afa-radius-lg (10 -> 12px), 12px renamed to lg. */

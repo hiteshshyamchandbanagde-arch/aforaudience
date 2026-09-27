@@ -360,7 +360,7 @@ export function PageHead({
           <h1
             style={{
               fontFamily: 'var(--font-ui)',
-              fontSize: '34px',
+              fontSize: '34px', // token-ok: Venue Portal page h1 in the UI font, the only 34px UI-font title, above page-title-lg (32px)
               fontWeight: 500,
               lineHeight: 1,
               letterSpacing: '-0.01em',
@@ -390,7 +390,7 @@ export function Stat({ label, value, delta }: { label: string; value: string; de
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
         {label}
       </p>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '26px', lineHeight: 1, color: 'var(--afa-text-primary)', margin: '12px 0 0' }}>{value}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-display)', lineHeight: 1, color: 'var(--afa-text-primary)', margin: '12px 0 0' }}>{value}</p>
       {delta ? (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage)', margin: '8px 0 0' }}>▲ {delta}</p>
       ) : null}

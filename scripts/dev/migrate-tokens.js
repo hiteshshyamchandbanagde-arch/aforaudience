@@ -208,6 +208,7 @@ const FONT_SIZE_MAP = {
   20: '--afa-text-subtitle',
   22: '--afa-text-subheading',
   24: '--afa-text-heading',
+  26: '--afa-text-display',
   28: '--afa-text-page-title',
   32: '--afa-text-page-title-lg',
 }

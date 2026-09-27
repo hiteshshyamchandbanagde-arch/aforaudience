@@ -597,7 +597,7 @@ export default function ArtistProfilePage({
                 return (
                   <div key={p.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "var(--afa-space-4)", padding: "var(--afa-space-4) 0", borderTop: "1px solid var(--afa-tint-10)" }}>
                     <div style={{ textAlign: "center", width: "48px" }}>
-                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "26px", lineHeight: 1, color: "var(--afa-text-primary)" }}>{eventDate.getDate()}</div>
+                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-display)", lineHeight: 1, color: "var(--afa-text-primary)" }}>{eventDate.getDate()}</div>
                       <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{eventDate.toLocaleDateString("en-IN", { month: "short" })}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>

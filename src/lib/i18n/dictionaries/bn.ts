@@ -662,6 +662,11 @@ const bn: Dictionary = {
     showPassword: "পাসওয়ার্ড দেখান",
     hidePassword: "পাসওয়ার্ড লুকান",
     accountSuspendedMessage: "আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি যদি মনে করেন এটি একটি ভুল, তাহলে সাপোর্টের সাথে যোগাযোগ করুন।",
+    enterIdentifier: "আপনার ইমেইল বা ফোন লিখুন",
+    enterPassword: "আপনার পাসওয়ার্ড লিখুন",
+    enterNewPassword: "একটি নতুন পাসওয়ার্ড লিখুন",
+    enterEmail: "আপনার ইমেইল লিখুন",
+    enterSixDigitCode: "৬-সংখ্যার কোড লিখুন",
   },
   authErrors: {
     ALL_FIELDS_REQUIRED: "সব ফিল্ড প্রয়োজন",

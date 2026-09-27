@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, useRef, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
@@ -36,13 +36,24 @@ function ResetPasswordForm() {
   // Same eye-toggle pattern as register (PR #62) and login, applied here
   // too for consistency across every password-entry field in the app.
   const [visible, setVisible] = useState({ password: false, confirm: false })
+  // BUG-2609-063 - read the DOM values on submit (a password manager can
+  // fill these without firing onChange), and say so if one is empty.
+  const inputRefs = { password: useRef<HTMLInputElement>(null), confirm: useRef<HTMLInputElement>(null) }
 
   const handleSubmit = async () => {
+    if (loading) return
+    const password = inputRefs.password.current?.value ?? form.password
+    const confirm = inputRefs.confirm.current?.value ?? form.confirm
+    setForm({ password, confirm })
     if (!token) {
       setError(tr.resetPasswordPage.resetLinkInvalidOrExpired)
       return
     }
-    if (form.password !== form.confirm) {
+    if (!password) {
+      setError(tr.authCommon.enterNewPassword); inputRefs.password.current?.focus()
+      return
+    }
+    if (password !== confirm) {
       setError(tr.registerPage.passwordsDontMatch)
       return
     }
@@ -53,7 +64,7 @@ function ResetPasswordForm() {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password: form.password }),
+        body: JSON.stringify({ token, password }),
       })
       const data = await res.json()
 
@@ -106,6 +117,8 @@ function ResetPasswordForm() {
                   </label>
                   <div style={{ position: "relative" }}>
                     <input
+                      ref={inputRefs[field.name as keyof typeof inputRefs]}
+                      autoComplete="new-password"
                       type={visible[field.name as keyof typeof visible] ? "text" : "password"}
                       placeholder={field.placeholder}
                       value={form[field.name as keyof typeof form]}

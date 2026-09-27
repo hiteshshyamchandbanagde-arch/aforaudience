@@ -64,7 +64,7 @@ export default function PlatformGrowthStrip() {
           <div className="growth-strip-stats" style={{ display: 'flex', gap: '36px', flexShrink: 0 }}>
             {statItems.map((s) => (
               <div key={s.label}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--afa-cream)' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-display)', fontWeight: 700, color: 'var(--afa-cream)' }}>
                   {s.value!.toLocaleString('en-IN')}
                 </div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>

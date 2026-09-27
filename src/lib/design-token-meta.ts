@@ -119,6 +119,7 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-text-subtitle": { label: "Subtitle", usedFor: "dialog titles, sub-sections" },
   "--afa-text-subheading": { label: "Subheading", usedFor: "big stat figures, section headings" },
   "--afa-text-heading": { label: "Heading", usedFor: "section headings" },
+  "--afa-text-display": { label: "Display", usedFor: "large stat figures, date numerals, venue card titles" },
   "--afa-text-page-title": { label: "Page title", usedFor: "dashboard page titles" },
   "--afa-text-page-title-lg": { label: "Page title (large)", usedFor: "public page titles" },
 
