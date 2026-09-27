@@ -7,7 +7,6 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 type ScanResult = {
   ok: boolean
@@ -308,6 +307,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <Button
+              // bare-reason: full-width card header (title left, Show/Hide right, body type) toggling the list below; disclosure is the compact small-type toggle, menu-row a list item
               variant="bare"
               onClick={() => {
                 const next = !listOpen
@@ -330,14 +330,12 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                   {(['all', 'checked_in', 'pending'] as const).map((f) => (
                     <Button
                       key={f}
-                      variant="bare"
+                      variant="toggle-box"
+                      size="md"
+                      fullWidth={false}
+                      selected={listFilter === f}
                       onClick={() => setListFilter(f)}
-                      style={{
-                        flex: 1, padding: 'var(--afa-space-2)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600,
-                        border: listFilter === f ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                        background: listFilter === f ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                        color: listFilter === f ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                      }}
+                      style={{ flex: 1 }}
                     >
                       {f === 'all' ? 'All' : f === 'checked_in' ? 'Checked In' : 'Pending'}
                     </Button>

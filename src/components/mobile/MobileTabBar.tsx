@@ -479,6 +479,7 @@ export default function MobileTabBar() {
 
         {moreItems.length > 0 && (
           <Button
+            // bare-reason: tab-bar slot that must match its sibling tab items, which are <Link>s styled by the same Tailwind classes, not Buttons
             variant="bare"
             type="button"
             onClick={() => setMoreOpen(true)}

@@ -23,6 +23,7 @@ const {
   shouldFlag,
   tokenOkReason,
   stripLineComments,
+  bareReason,
   findOffenses,
   isAllowlistedLength,
   isAllowlistedFontFamily,
@@ -550,6 +551,96 @@ t('bare-button (count-based): token-ok suppresses it like every other rule', () 
   const { offenses, tokenOkUses } = findOffenses(diff)
   assert.equal(offenses.length, 0)
   assert.equal(tokenOkUses.length, 1)
+})
+
+// GEN-2609-110 - bare-button counts only bare Buttons WITHOUT a
+// `bare-reason` comment on the line directly above.
+const REASON = '// bare-reason: seat-grid cell sized by the canvas grid, no variant fits'
+t('bare-reason: both comment forms parse; a short or empty reason does not count', () => {
+  assert.equal(bareReason(`        ${REASON}`), 'seat-grid cell sized by the canvas grid, no variant fits')
+  assert.equal(bareReason('      {/* bare-reason: carousel progress dot, width animates */}'), 'carousel progress dot, width animates')
+  assert.equal(bareReason('        // bare-reason: custom'), null)
+  assert.equal(bareReason('        // bare-reason:'), null)
+  assert.equal(bareReason('        variant="bare" // bare-reason: trailing on the same line is not above it'), null)
+  assert.equal(bareReason(undefined), null)
+})
+t('bare-button: a bare-reason on the line above explains it (not counted)', () => {
+  const rule = ruleByName('bare-button')
+  assert.equal(rule.extract('        variant="bare"', `        ${REASON}`).length, 0)
+  assert.equal(rule.test('        variant="bare"', `        ${REASON}`), false)
+  assert.equal(rule.extract('        variant="bare"', '        key={n}').length, 1)
+  assert.equal(rule.extract('        variant="bare"').length, 1)
+})
+t('bare-button: the reason line itself is never counted as a bare Button', () => {
+  const rule = ruleByName('bare-button')
+  assert.equal(rule.extract('        // bare-reason: keeps variant="bare" because the dot animates').length, 0)
+})
+t('bare-button (diff): a new bare Button with a reason above passes', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    `+        ${REASON}`,
+    '+        variant="bare"',
+    '         onClick={go}',
+  ])
+  const { offenses, bareReasonUses } = findOffenses(diff)
+  assert.equal(offenses.length, 0)
+  assert.equal(bareReasonUses.length, 1)
+})
+t('bare-button (diff): a new bare Button without a reason still fails', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    '+        variant="bare"',
+    '         onClick={go}',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].rule, 'bare-button')
+})
+t('bare-button (diff): a too-short reason does not explain a new bare Button', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    '+        // bare-reason: custom',
+    '+        variant="bare"',
+  ])
+  assert.equal(findOffenses(diff).offenses.length, 1)
+})
+t('bare-button (diff): deleting the reason above an unchanged bare Button fails', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    `-        ${REASON}`,
+    '         variant="bare"',
+    '         onClick={go}',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].rule, 'bare-button')
+})
+t('bare-button (diff): adding a reason above an existing bare Button passes', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    `+        ${REASON}`,
+    '         variant="bare"',
+  ])
+  assert.equal(findOffenses(diff).offenses.length, 0)
+})
+t('bare-button (diff): an explained bare -> real variant is not a surplus', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    `-        ${REASON}`,
+    '-        variant="bare"',
+    '+        variant="toggle-box"',
+  ])
+  assert.equal(findOffenses(diff).offenses.length, 0)
+})
+t('bare-button (diff): context lines keep new-file line numbers right', () => {
+  const diff = oneFileDiff([
+    '       <Button',
+    '         key={n}',
+    '+        variant="bare"',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].line, 3)
 })
 
 console.log(`\n${passed} passed, ${failed} failed.`)

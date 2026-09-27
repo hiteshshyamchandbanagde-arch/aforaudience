@@ -42,6 +42,12 @@
 // diff-wide surplus mechanism - both are now flagged `countBased` - and
 // stops raw-button counting `<button` inside code comments.
 //
+// GEN-2609-110 - `bare-button` now counts only UNEXPLAINED bare buttons:
+// a `variant="bare"` whose line directly above carries
+// `// bare-reason: <why no variant fits>` (see bareReason()) is a
+// deliberate custom button, not debt. The diff is read with one line of
+// context so that line above is always visible.
+//
 // Deliberately diff-only: pre-existing literals elsewhere in src/ (e.g.
 // the hand-authored rgba() borders documented in
 // docs/afa-design-tokens-reference.md Section 1) are real, known debt
@@ -93,6 +99,23 @@ const RAW_BUTTON_JSX_RE = /<button(?=[\s>/]|$)/
 const BARE_BUTTON_SRC = String.raw`\bvariant=(?:"bare"|'bare'|\{\s*(["'\x60])bare\1\s*\})`
 const BARE_BUTTON_RE = new RegExp(BARE_BUTTON_SRC)
 const BARE_BUTTON_RE_G = new RegExp(BARE_BUTTON_SRC, 'g')
+
+// GEN-2609-110 - the escape hatch for a bare Button that is custom on
+// purpose (a seat-grid cell, a carousel dot, a per-item-coloured chip).
+// The comment goes on the line DIRECTLY above the `variant="bare"` line:
+// inside a multi-line opening tag that is a plain `// bare-reason: ...`
+// line (valid between JSX attributes); above a one-line tag in JSX
+// children it is `{/* bare-reason: ... */}`. Honor system like token-ok,
+// with one guard: a reason shorter than BARE_REASON_MIN_LENGTH ("custom",
+// "seat") doesn't count, since the reason has to say why no variant fits.
+const BARE_REASON_RE = /^\s*(?:\/\/|\{\/\*)\s*bare-reason:\s*(.*?)\s*(?:\*\/\})?\s*$/
+const BARE_REASON_MIN_LENGTH = 20
+
+function bareReason(line) {
+  if (!line) return null
+  const m = BARE_REASON_RE.exec(line)
+  return m && m[1].length >= BARE_REASON_MIN_LENGTH ? m[1] : null
+}
 
 // Matches `propName: value` where value is either a bare/unit-suffixed
 // number (React inline-style shorthand, e.g. `fontSize: 14` or
@@ -390,10 +413,13 @@ const RULES = [
   // restyle of an existing bare site is -1/+1 and nets to 0, and
   // converting a bare site to a real variant is a pure -1), so only a
   // genuine net increase fails. Counted per occurrence, not per line.
+  // GEN-2609-110 - `prevLine` is the line directly above; a valid
+  // `bare-reason` there makes every bare Button on this line explained,
+  // so it isn't counted (see bareReason()).
   {
     name: 'bare-button',
-    test: (line) => BARE_BUTTON_RE.test(stripLineComments(line)),
-    extract: (line) => stripLineComments(line).match(BARE_BUTTON_RE_G) || [],
+    test: (line, prevLine) => BARE_BUTTON_RE.test(stripLineComments(line)) && !bareReason(prevLine),
+    extract: (line, prevLine) => (bareReason(prevLine) ? [] : stripLineComments(line).match(BARE_BUTTON_RE_G) || []),
     skipRelocatedCheck: true,
     countBased: true,
   },
@@ -555,7 +581,9 @@ function getDiff() {
   const range = `${BASE_REF}...${HEAD_REF}`
   try {
     return execSync(
-      `git diff --unified=0 --diff-filter=ACMR "${range}" -- src`,
+      // GEN-2609-110 - one context line (was 0), so the line above any
+      // changed line is always in the diff for bare-reason.
+      `git diff --unified=1 --diff-filter=ACMR "${range}" -- src`,
       { encoding: 'utf8', maxBuffer: 1024 * 1024 * 64 }
     )
   } catch (err) {
@@ -579,9 +607,15 @@ const PER_LINE_RULES = RULES.filter((r) => !r.countBased)
 function findOffenses(diffText) {
   const offenses = []
   const tokenOkUses = []
+  const bareReasonUses = []
   let currentFile = null
   let checkCurrentFile = false
   let newLineNo = 0
+  // GEN-2609-110 - the line directly above the current one, in the new
+  // file (for `+` lines) and in the old file (for `-` lines). Context
+  // lines (` `) are in both. Unknown ('') at the start of a hunk.
+  let prevNew = ''
+  let prevOld = ''
 
   // GEN-2609-080 - accumulated across the WHOLE diff (every file the PR
   // touches), not per-file: a raw button genuinely moved from one file
@@ -605,13 +639,36 @@ function findOffenses(diffText) {
     if (rawLine.startsWith('@@')) {
       const m = /^@@ -\d+(?:,\d+)? \+(\d+)/.exec(rawLine)
       newLineNo = m ? parseInt(m[1], 10) : 0
+      prevNew = ''
+      prevOld = ''
       continue
     }
     if (!checkCurrentFile) continue
     if (rawLine.startsWith('---')) continue
 
+    if (rawLine.startsWith(' ')) {
+      // GEN-2609-110 - an unchanged line can still change status: a bare
+      // Button under a bare-reason comment that this diff added or removed.
+      // Its count moves by the difference between old and new context.
+      const content = rawLine.slice(1)
+      for (const rule of COUNT_RULES) {
+        if (countFileExempt(rule) || tokenOkReason(content)) continue
+        const delta = rule.extract(content, prevNew).length - rule.extract(content, prevOld).length
+        for (let i = 0; i < delta; i++) countAdded.get(rule.name).push({ file: currentFile, line: newLineNo, content: content.trim() })
+        if (delta < 0) countRemoved.set(rule.name, countRemoved.get(rule.name) - delta)
+      }
+      prevNew = content
+      prevOld = content
+      newLineNo++
+      continue
+    }
+
     if (rawLine.startsWith('+')) {
       const content = rawLine.slice(1)
+      const prevLine = prevNew
+      prevNew = content
+      const bare = bareReason(content)
+      if (bare) bareReasonUses.push({ file: currentFile, line: newLineNo, reason: bare })
       const reason = tokenOkReason(content)
       if (reason) {
         // token-ok suppresses every rule on this line, raw-button
@@ -631,7 +688,7 @@ function findOffenses(diffText) {
       for (const rule of COUNT_RULES) {
         if (countFileExempt(rule)) continue
         // one entry per occurrence, so two bare Buttons on one line count as 2
-        for (let i = 0; i < rule.extract(content).length; i++) {
+        for (let i = 0; i < rule.extract(content, prevLine).length; i++) {
           countAdded.get(rule.name).push({ file: currentFile, line: newLineNo, content: content.trim() })
         }
       }
@@ -639,9 +696,11 @@ function findOffenses(diffText) {
     } else if (rawLine.startsWith('-')) {
       // removed line - doesn't occupy a line number in the new file
       const content = rawLine.slice(1)
+      const prevLine = prevOld
+      prevOld = content
       for (const rule of COUNT_RULES) {
         if (countFileExempt(rule)) continue
-        countRemoved.set(rule.name, countRemoved.get(rule.name) + rule.extract(content).length)
+        countRemoved.set(rule.name, countRemoved.get(rule.name) + rule.extract(content, prevLine).length)
       }
     }
   }
@@ -664,12 +723,18 @@ function findOffenses(diffText) {
     }
   }
 
-  return { offenses, tokenOkUses }
+  return { offenses, tokenOkUses, bareReasonUses }
 }
 
 function main() {
   const diffText = getDiff()
-  const { offenses, tokenOkUses } = findOffenses(diffText)
+  const { offenses, tokenOkUses, bareReasonUses } = findOffenses(diffText)
+
+  if (bareReasonUses.length > 0) {
+    console.log(`design-token check: ${bareReasonUses.length} bare Button reason(s) added (always shown):\n`)
+    for (const u of bareReasonUses) console.log(`  ${u.file}:${u.line}  bare-reason: ${u.reason}`)
+    console.log('')
+  }
 
   if (tokenOkUses.length > 0) {
     console.log(`design-token check: ${tokenOkUses.length} line(s) allowed via // token-ok: (always shown, never a silent bypass):\n`)
@@ -708,6 +773,7 @@ module.exports = {
   isKnownLiteralInBase,
   shouldFlag,
   tokenOkReason,
+  bareReason,
   stripLineComments,
   findOffenses,
   extractPropValues,

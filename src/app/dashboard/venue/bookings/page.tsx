@@ -200,6 +200,7 @@ export default function VenueBookingsPage() {
                 const isSelected = selectedDay === key
                 return (
                   <SharedButton
+                    // bare-reason: calendar day cell: a square grid cell sized by the 7-column grid, holding the date and status dots; not a button shape any variant describes
                     variant="bare"
                     key={i}
                     onClick={() => dayBookings.length > 0 && setSelectedDay(isSelected ? null : key)}

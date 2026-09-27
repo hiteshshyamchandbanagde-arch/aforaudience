@@ -1,5 +1,6 @@
 import type { ReactNode, ButtonHTMLAttributes, CSSProperties } from 'react'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import SharedButton from '@/components/ui/Button'
 export { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 
 // Shared visual layer for the Venue Owner Portal (dashboard/venue/*,
@@ -231,37 +232,30 @@ export function StatusPill({ tone, children }: { tone: StatusPillTone; children:
 
 /* ---------------- Buttons ---------------- */
 
-type ButtonVariant = 'primary' | 'outline' | 'ghost'
+// GEN-2609-110 - was this portal's own raw <button>, so no admin edit to
+// the button tokens reached the venue portal. Now a mapping onto the
+// shared Button at size lg: `primary` is `solid`, `outline` is
+// `outline-neutral`. Its one `ghost` caller (venue-requests "Decline") is
+// a destructive action and uses `outline-error` directly. The avp-* class
+// keeps the portal's hover.
+type ButtonVariant = 'primary' | 'outline'
 
 export function Button({
   variant = 'primary',
-  style,
   className = '',
   children,
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
-  const base: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    borderRadius: 'var(--afa-radius-md)',
-    fontFamily: 'var(--font-sans)',
-    fontSize: 'var(--afa-text-body)',
-    padding: '11px 20px',
-    cursor: 'pointer',
-    transition: 'filter 150ms, border-color 150ms, background 150ms, color 150ms',
-  }
-  const variants: Record<ButtonVariant, CSSProperties> = {
-    primary: { background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontWeight: 600, border: 'none' },
-    outline: { background: 'transparent', color: 'var(--afa-text-primary)', border: '1px solid var(--afa-tint-20)' },
-    ghost: { background: 'transparent', color: 'var(--afa-text-secondary)', border: 'none' },
-  }
-  const cls = { primary: 'avp-btn-primary', outline: 'avp-btn-outline', ghost: 'avp-btn-ghost' }[variant]
   return (
-    <button className={`${cls} ${className}`} style={{ ...base, ...variants[variant], ...style }} {...rest}>
+    <SharedButton
+      variant={variant === 'primary' ? 'solid' : 'outline-neutral'}
+      size="lg"
+      fullWidth={false}
+      className={`${variant === 'primary' ? 'avp-btn-primary' : 'avp-btn-outline'} ${className}`}
+      {...rest}
+    >
       {children}
-    </button>
+    </SharedButton>
   )
 }
 

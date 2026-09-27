@@ -294,9 +294,9 @@ export default function VenueOwnerSalesOverviewPage() {
                     ))}
                     {showAllVenues && (
                       <Button
-                        variant="bare"
+                        variant="text-link"
                         onClick={() => setShowAllVenues(false)}
-                        style={{ alignSelf: 'flex-start', padding: '4px 12px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                        style={{ alignSelf: 'flex-start' }}
                       >
                         Show top {TOP_VENUES_SHOWN} only
                       </Button>

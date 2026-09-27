@@ -207,10 +207,10 @@ export default function MobileTopBar() {
           >
             {LOCALES.map((l) => (
               <Button
-                variant="bare"
+                variant="menu-row"
                 key={l.id}
+                selected={locale === l.id}
                 onClick={() => { setLocale(l.id); setLangOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'var(--afa-amber-wash)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
               >
                 {l.nativeLabel}
               </Button>
@@ -222,6 +222,7 @@ export default function MobileTopBar() {
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? '8px' : '5px' }}>
         {status === 'loading' ? null : user ? (
           <Button
+            // bare-reason: must match the Sign in / Register <Link>s it swaps with in the same top-bar slot (mono caption type); those are links, not Buttons
             variant="bare"
             onClick={() => signOut({ callbackUrl: '/' })}
             style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', padding: 0 }}

@@ -20,6 +20,7 @@ function Stars({ value, onChange }: { value: number; onChange: (n: number) => vo
       {[1, 2, 3, 4, 5].map((n) => (
         <Button
           key={n}
+          // bare-reason: star-glyph rating: the glyph and its colour are the rating value itself; no variant models a per-value rating scale
           variant="bare"
           type="button"
           onClick={() => onChange(n)}
@@ -204,6 +205,7 @@ export default function RatePromptClientPage({
                         {[1, 2, 3, 4, 5].map((n) => (
                           <Button
                             key={n}
+                            // bare-reason: star-glyph rating: the glyph and its colour are the rating value itself; no variant models a per-value rating scale
                             variant="bare"
                             onClick={() => setPerfDrafts((prev) => ({ ...prev, [p.id]: n }))}
                             aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}

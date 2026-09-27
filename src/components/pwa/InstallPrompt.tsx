@@ -136,6 +136,7 @@ export default function InstallPrompt() {
         </div>
       </div>
       <Button
+        // bare-reason: text dismiss on the --afa-fill-solid install banner: every ghost variant's text colour is tuned for dark surfaces, this one needs --afa-on-fill-solid
         variant="bare"
         onClick={onDismiss}
         aria-label="Dismiss install prompt"

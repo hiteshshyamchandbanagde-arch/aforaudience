@@ -84,14 +84,9 @@ export default function BrowseSearchDropdown<T>({
           ) : (
             visible.map((item) => (
               <Button
-                variant="bare"
+                variant="menu-row"
                 key={getId(item)}
                 onClick={() => { setFocused(false); onSelect(item) }}
-                style={{
-                  display: "block", width: "100%", textAlign: "left", padding: "10px 20px",
-                  fontSize: "var(--afa-text-body)",
-                  color: "var(--afa-text-primary)",
-                }}
               >
                 {renderRow(item)}
               </Button>

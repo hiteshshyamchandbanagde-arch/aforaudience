@@ -603,9 +603,10 @@ function AdminFeedbackBoard() {
               just wants the feedback board isn't forced to scroll past
               it every time. */}
           <Button
-            variant="bare"
+            variant="disclosure"
+            fullWidth={false}
             onClick={() => setApprovalsOpen((v) => !v)}
-            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
+            style={{ marginBottom: 'var(--afa-space-10px)' }}
           >
             {approvalsOpen ? '▾' : '▸'} Pending Approvals ({organisers.length + venueOwners.length})
           </Button>
@@ -659,9 +660,10 @@ function AdminFeedbackBoard() {
               already shows their genre regardless - this only gates the
               GLOBAL filter surface. */}
           <Button
-            variant="bare"
+            variant="disclosure"
+            fullWidth={false}
             onClick={() => setGenreRequestsOpen((v) => !v)}
-            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
+            style={{ marginBottom: 'var(--afa-space-10px)' }}
           >
             {genreRequestsOpen ? '▾' : '▸'} Pending Genre Requests ({genreRequests.length})
           </Button>
@@ -690,9 +692,10 @@ function AdminFeedbackBoard() {
               shows it on the event's public page; rejecting requires a
               reason so the organiser knows what to fix. */}
           <Button
-            variant="bare"
+            variant="disclosure"
+            fullWidth={false}
             onClick={() => setEventNotesOpen((v) => !v)}
-            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
+            style={{ marginBottom: 'var(--afa-space-10px)' }}
           >
             {eventNotesOpen ? '▾' : '▸'} Pending Event Notes ({eventNotes.length})
           </Button>
@@ -728,16 +731,10 @@ function AdminFeedbackBoard() {
           </p>
 
           <Button
-            variant="bare"
+            variant="disclosure"
+            fullWidth={false}
             onClick={() => setTrendsOpen((v) => !v)}
-            style={{
-              fontSize: 'var(--afa-text-small)',
-              fontWeight: 700,
-              color: 'var(--afa-text-primary)',
-              padding: 0,
-              marginBottom: 'var(--afa-space-10px)',
-              opacity: 0.7,
-            }}
+            style={{ marginBottom: 'var(--afa-space-10px)' }}
           >
             {trendsOpen ? '▾' : '▸'} Trends
           </Button>

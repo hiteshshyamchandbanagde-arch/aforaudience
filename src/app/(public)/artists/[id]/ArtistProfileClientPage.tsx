@@ -622,9 +622,12 @@ export default function ArtistProfilePage({
             {(["about", "shows"] as const).map((tab) => (
               <Button
                 key={tab}
-                variant="bare"
+                variant="tab"
+                size="md"
+                fullWidth={false}
+                selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
-                style={{ padding: "var(--afa-space-3) var(--afa-space-6)", fontSize: "var(--afa-text-body)", fontWeight: 600, color: activeTab === tab ? "var(--afa-amber)" : "var(--afa-text-primary)", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-amber)" : "transparent"}`, marginBottom: "-2px" }}
+                style={{ marginBottom: "-2px" }}
               >
                 {TAB_LABEL[tab]}
               </Button>

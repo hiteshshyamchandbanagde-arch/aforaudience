@@ -449,10 +449,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', boxShadow: '0 8px 24px var(--afa-shadow)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
                     {LOCALES.map((l) => (
                       <Button
-                        variant="bare"
+                        variant="menu-row"
                         key={l.id}
+                        selected={locale === l.id}
                         onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', width: '100%', textAlign: 'left', padding: '9px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'var(--afa-amber-wash)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
                       >
                         {l.nativeLabel}
                       </Button>
@@ -549,6 +549,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
               <div ref={menuRef} style={{ position: "relative" }}>
                 <Button
+                  // bare-reason: account trigger pill whose padding hugs the 28px avatar unevenly (4px left, 10px right); a padding token would push the avatar off-centre
                   variant="bare"
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-label="Account menu"
@@ -614,10 +615,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
                       {LOCALES.map((l) => (
                         <Button
-                          variant="bare"
+                          variant="text-toggle"
+                          fullWidth={false}
                           key={l.id}
+                          selected={locale === l.id}
                           onClick={() => setLocale(l.id)}
-                          style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, padding: "var(--afa-space-2px) var(--afa-space-1)" }}
+                          // text-toggle has no padding; a 24px minimum keeps the tap target at WCAG 2.5.8 size
+                          style={{ minWidth: "var(--afa-space-6)", minHeight: "var(--afa-space-6)", padding: "var(--afa-space-2px) var(--afa-space-1)", justifyContent: "center" }}
                         >
                           {l.id.toUpperCase()}
                         </Button>
@@ -632,9 +636,8 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       <>
                         <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                         <Button
-                          variant="bare"
+                          variant="menu-row"
                           onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
-                          style={{ display: "block", width: "100%", textAlign: "left", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}
                         >
                           {t.nav.signOut}
                         </Button>

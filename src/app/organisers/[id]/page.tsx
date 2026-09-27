@@ -417,6 +417,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
             </div>
             {!pastExpanded && past.length > PAST_EVENTS_PAGE_SIZE && (
               <Button
+                // bare-reason: section-header 'View all' in the mono eyebrow type with a trailing arrow, so it reads as part of the header; text-link is sentence-level text
                 variant="bare"
                 onClick={() => setPastExpanded(true)}
                 className="afa-organiser-view-all"

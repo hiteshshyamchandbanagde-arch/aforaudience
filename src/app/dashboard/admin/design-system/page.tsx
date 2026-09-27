@@ -564,6 +564,27 @@ export default function AdminDesignSystemPage() {
                 <Button variant="outline-error" fullWidth={false} size="md">Outline error</Button>
                 <Button variant="toggle-pill" fullWidth={false} size="pill-sm">Toggle pill</Button>
                 <Button variant="toggle-pill" fullWidth={false} size="pill-sm" selected>Toggle pill (selected)</Button>
+                {/* GEN-2609-110 - the phase-3 variants, each resting + selected where it has both. */}
+                <Button variant="toggle-box" fullWidth={false} size="md">Toggle box</Button>
+                <Button variant="toggle-box" fullWidth={false} size="md" selected>Toggle box (selected)</Button>
+                <Button variant="tab" fullWidth={false}>Tab</Button>
+                <Button variant="tab" fullWidth={false} selected>Tab (selected)</Button>
+                <Button variant="tab-display" fullWidth={false}>Display tab</Button>
+                <Button variant="tab-display" fullWidth={false} selected>Display tab (selected)</Button>
+                <Button variant="text-toggle" fullWidth={false}>Text toggle</Button>
+                <Button variant="text-toggle" fullWidth={false} selected>Text toggle (on)</Button>
+                <Button variant="text-link" fullWidth={false}>Text link</Button>
+                <Button variant="disclosure" fullWidth={false}>{'\u25B8'} Disclosure</Button>
+                <div style={{ ...previewStyle, background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-6px)' }}>
+                  <Button variant="menu-row">Menu row</Button>
+                  <Button variant="menu-row" selected>Menu row (selected)</Button>
+                </div>
+                <Button variant="card" fullWidth={false}>Card</Button>
+                <Button variant="card" fullWidth={false} selected>Card (selected)</Button>
+                <div style={{ ...previewStyle, position: 'relative', padding: 'var(--afa-space-3) var(--afa-space-5)' }}>
+                  <Button variant="scrim" aria-label="Scrim sample">{null}</Button>
+                  <span style={{ position: 'relative', pointerEvents: 'none', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-small)' }}>Scrim</span>
+                </div>
                 <Button variant="secondary" fullWidth={false} size={36}>Secondary</Button>
                 <Button variant="secondary-reveal" fullWidth={false} size={36}>See more →</Button>
                 <Button variant="close" fullWidth={false} size={36}>✕</Button>

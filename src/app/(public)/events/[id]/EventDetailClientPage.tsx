@@ -515,6 +515,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             {[1, 2, 3, 4, 5].map((n) => (
                               <Button
                                 key={n}
+                                // bare-reason: numbered 1-5 rating circle whose fill opacity is the draft rating value; no variant models a per-value rating scale
                                 variant="bare"
                                 onClick={() => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: n, comment: prev[p.id]?.comment || "" } }))}
                                 style={{ width: "20px", height: "20px", borderRadius: "50%", border: "1px solid var(--afa-amber)", fontSize: "var(--afa-text-caption)", padding: 0, color: "var(--afa-amber)", opacity: (reviewDrafts[p.id]?.rating || 0) >= n ? 1 : 0.3 }}

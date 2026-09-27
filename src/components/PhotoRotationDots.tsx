@@ -25,6 +25,7 @@ export default function PhotoRotationDots({
     <div style={{ marginTop: "56px", display: "flex", alignItems: "center", gap: "10px" }}>
       {photos.map((photo, i) => (
         <Button
+          // bare-reason: carousel progress dot: a 4px bar whose width animates and which holds the progress fill; not a text button
           variant="bare"
           key={photo.src}
           aria-label={`Photo ${i + 1} of ${photos.length}`}

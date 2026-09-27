@@ -139,18 +139,10 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
         >
           {predictions.map((p) => (
             <Button
-              variant="bare"
+              variant="menu-row"
               key={p.placeId}
               type="button"
               onClick={() => handleSelect(p)}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 12px',
-                fontSize: 'var(--afa-text-body)',
-                color: 'var(--afa-text-primary)',
-              }}
               onMouseDown={(e) => e.preventDefault()}
             >
               <span style={{ fontWeight: 600 }}>{p.mainText}</span>

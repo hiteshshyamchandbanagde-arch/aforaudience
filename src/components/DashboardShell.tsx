@@ -624,6 +624,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           })}
           {roleSections.length > 0 && (
             <Button
+              // bare-reason: tab-bar slot that must match its sibling tab items, which are <Link>s styled by the same Tailwind classes, not Buttons
               variant="bare"
               onClick={() => setDrawerOpen(true)}
               aria-label="More"

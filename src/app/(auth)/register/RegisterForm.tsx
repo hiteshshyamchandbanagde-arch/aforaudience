@@ -7,7 +7,6 @@ import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
-import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from "@/lib/statusStyle"
 import { isValidUsernameFormat } from "@/lib/validation"
 
 const inputStyle = (hasError?: boolean) => ({
@@ -465,42 +464,29 @@ export default function RegisterForm() {
                     {tr.registerPage.suggestedFromInitials}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginTop: "var(--afa-space-6px)", alignItems: "center" }}>
-                    {/* GEN-2609-096 - left raw deliberately: a translucent-tint
-                        utility chip (GEN-2609-066 precedent), the same
-                        architectural pattern as statusStyle.ts's selection
-                        pills, not a Button-shaped CTA. */}
+                    {/* GEN-2609-110 - was left raw by GEN-2609-096 as a tint
+                        chip; its look is exactly toggle-pill's selected
+                        state (fill tint, fill border tint, fill-solid text,
+                        pill), so it is one now. */}
                     {initialsSuggestions.map((suggestion) => (
-                      <button
+                      <Button
                         key={suggestion}
+                        variant="toggle-pill"
+                        size="pill-sm"
+                        fullWidth={false}
+                        selected
                         type="button"
                         onClick={() => setForm((f) => ({ ...f, username: suggestion }))}
-                        style={{
-                          fontSize: "var(--afa-text-small)",
-                          fontWeight: 600,
-                          color: "var(--afa-fill-solid)",
-                          background: FILL_SOLID_TINT,
-                          border: `1px solid ${FILL_SOLID_BORDER_TINT}`,
-                          borderRadius: "var(--afa-radius-pill)",
-                          padding: "var(--afa-space-1) var(--afa-space-3)",
-                          cursor: "pointer",
-                        }}
                       >
                         {suggestion}
-                      </button>
+                      </Button>
                     ))}
                     <Button
-                      variant="bare"
+                      variant="text-link"
                       type="button"
                       onClick={() => fetchInitialsSuggestions(initialsSeed)}
                       disabled={initialsLoading}
                       title={tr.registerPage.tryMoreSuggestionsTitle}
-                      style={{
-                        fontSize: "var(--afa-text-small)",
-                        color: "var(--afa-text-primary)",
-                        opacity: initialsLoading ? 0.4 : 0.6,
-                        cursor: initialsLoading ? "default" : "pointer",
-                        padding: "var(--afa-space-1) var(--afa-space-2px)",
-                      }}
                     >
                       {initialsLoading ? "…" : tr.registerPage.tryMoreButton}
                     </Button>
@@ -525,10 +511,9 @@ export default function RegisterForm() {
                   {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
                     <Button
-                      variant="bare"
+                      variant="text-link"
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
-                      style={{ color: "var(--afa-error-bright)", textDecoration: "underline", fontSize: "var(--afa-text-small)", padding: 0 }}
                     >
                       {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
                     </Button>

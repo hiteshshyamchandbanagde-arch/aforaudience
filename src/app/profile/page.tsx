@@ -731,6 +731,7 @@ function ProfileContent() {
                     {group.rows.map((row, i) => (
                       <Button
                         key={row.title}
+                        // bare-reason: settings list row: icon, two-line title/hint and chevron at touch height, hairline-divided in a grouped card; menu-row is the single-line dropdown row
                         variant="bare"
                         onClick={row.onClick}
                         style={{

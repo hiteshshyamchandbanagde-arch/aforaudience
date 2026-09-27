@@ -744,14 +744,10 @@ export default function CheckoutPage() {
                     .map((u) => (
                       <Button
                         key={u.id}
-                        variant="bare"
+                        variant="menu-row"
                         onClick={() => addCompanion(u)}
                         disabled={companionBusy}
-                        style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          textAlign: 'left', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)',
-                          cursor: companionBusy ? 'default' : 'pointer', fontSize: 'var(--afa-text-body)', opacity: 1,
-                        }}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-small)' }}>@{u.name}</span></span>
                         <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600, fontSize: 'var(--afa-text-small)' }}>{tr.checkoutPage.tagButtonLabel}</span>

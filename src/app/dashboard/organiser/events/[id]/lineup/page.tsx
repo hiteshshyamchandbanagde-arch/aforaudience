@@ -118,6 +118,7 @@ function SortableRow({
       </div>
 
       <Button
+        // bare-reason: on-state is the Featured scene-status gold/amber pair, a status mark rather than a selection; toggle-pill's fill-solid tint would read as 'selected'
         variant="bare"
         onClick={() => onFeaturedToggle(item.id)}
         title={

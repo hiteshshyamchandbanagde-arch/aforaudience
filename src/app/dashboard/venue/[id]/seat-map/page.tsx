@@ -1439,26 +1439,20 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
           <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
             <Button
-              variant="bare"
+              variant="toggle-box"
+              size="md"
+              fullWidth={false}
+              selected={seatingMode === 'GENERAL_ADMISSION'}
               onClick={() => setSeatingMode('GENERAL_ADMISSION')}
-              style={{
-                padding: '9px var(--afa-space-4)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                border: seatingMode === 'GENERAL_ADMISSION' ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                background: seatingMode === 'GENERAL_ADMISSION' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-              }}
             >
               General Admission
             </Button>
             <Button
-              variant="bare"
+              variant="toggle-box"
+              size="md"
+              fullWidth={false}
+              selected={seatingMode === 'NUMBERED'}
               onClick={() => setSeatingMode('NUMBERED')}
-              style={{
-                padding: '9px var(--afa-space-4)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                border: seatingMode === 'NUMBERED' ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                background: seatingMode === 'NUMBERED' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                color: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-              }}
             >
               Numbered Seating
             </Button>
@@ -1512,16 +1506,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6px)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Level</div>
                 <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
                   {levels.map((lvl) => (
-                    <div key={lvl} style={{ display: 'flex', alignItems: 'center' }}>
+                    <div key={lvl} style={{ display: 'flex', alignItems: 'stretch' }}>
                       <Button
-                        variant="bare"
+                        variant="toggle-box"
+                        size="md"
+                        fullWidth={false}
+                        selected={activeLevel === lvl}
                         onClick={() => setActiveLevel(lvl)}
-                        style={{
-                          padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md) var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                          border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                          background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                          color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                        }}
+                        style={{ borderRadius: 'var(--afa-radius-md) var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-md)' }}
                       >
                         {levelLabel(lvl)}
                       </Button>
@@ -1556,14 +1548,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && effectivePath === 'choose' && !isMobile && (
           <div className="afa-glow-orange" style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap', maxWidth: '780px', padding: 'var(--afa-space-5)', margin: '0 -20px', borderRadius: 'var(--afa-radius-lg)' }}>
             <Button
-              variant="bare"
+              variant="card"
+              fullWidth={false}
+              selected
               onClick={startWizard}
               className="afa-card-lift"
-              style={{
-                flex: '1 1 300px', textAlign: 'left', padding: '22px',
-                borderRadius: 'var(--afa-radius-lg)', border: `1px solid ${fillSolidTint(0.5)}`,
-                background: undefined,
-              }}
+              style={{ flex: '1 1 300px' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: 'var(--afa-radius-md)', background: fillSolidTint(0.2), color: 'var(--afa-fill-solid)' }}>
@@ -1577,12 +1567,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </div>
             </Button>
             <Button
-              variant="bare"
+              variant="card"
+              fullWidth={false}
               onClick={startDrawMyself}
-              style={{
-                flex: '1 1 300px', textAlign: 'left', padding: '22px',
-                borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-20)', background: 'var(--afa-surface-raised)',
-              }}
+              style={{ flex: '1 1 300px' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }}>
@@ -1603,7 +1591,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             <div>
               <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)', fontStyle: 'italic' }}>
                 {!isMobile && (
-                  <Button variant="bare" onClick={backToChoice} style={{ display: 'block', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7, padding: 0, marginBottom: 'var(--afa-space-2)', textDecoration: 'underline' }}>
+                  <Button variant="text-link" onClick={backToChoice} style={{ display: 'block', marginBottom: 'var(--afa-space-2)' }}>
                     ← Back to setup options
                   </Button>
                 )}
@@ -1627,9 +1615,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       seats freehand" works without losing guided progress. */}
                   <div style={{ display: 'flex', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
                     <Button
-                      variant="bare"
+                      variant="toggle-box"
+                      size="md"
+                      fullWidth={false}
+                      selected={guidedPanelOpen}
                       onClick={() => setGuidedPanelOpen((v) => !v)}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px var(--afa-space-4)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, border: guidedPanelOpen ? '2px solid var(--afa-fill-solid)' : `1px solid ${fillSolidTint(0.4)}`, background: guidedPanelOpen ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: 'var(--afa-fill-solid)' }}
                     >
                       <IconSection size={14} /> {guidedPanelOpen ? 'Collapse Guided Setup' : 'Guided Setup'}
                     </Button>
@@ -1645,15 +1635,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       Reset Layout
                     </Button>
                     <Button
-                      variant="bare"
+                      variant="toggle-box"
+                      size="md"
+                      fullWidth={false}
+                      selected={manualPlacement}
                       onClick={() => setManualPlacement((v) => !v)}
                       title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
-                      style={{
-                        padding: '9px var(--afa-space-4)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                        border: manualPlacement ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)',
-                        background: manualPlacement ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                        color: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                      }}
                     >
                       {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
                     </Button>
@@ -1689,10 +1676,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           What's your seating shape?
                         </label>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
-                          <Button variant="bare" onClick={() => setWizardShape('rows')} style={{ padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardShape !== 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardShape !== 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape !== 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="toggle-box" size="md" fullWidth={false} selected={wizardShape !== 'other'} onClick={() => setWizardShape('rows')}>
                             Straight rows facing the stage
                           </Button>
-                          <Button variant="bare" onClick={() => setWizardShape('other')} style={{ padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardShape === 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardShape === 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape === 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="toggle-box" size="md" fullWidth={false} selected={wizardShape === 'other'} onClick={() => setWizardShape('other')}>
                             Curved rows, round tables, or a U-shape
                           </Button>
                         </div>
@@ -1713,10 +1700,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           <IconSection size={13} style={{ opacity: 0.6 }} /> Sections
                         </label>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
-                          <Button variant="bare" onClick={() => setMultiZone(false)} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardMultiZone === false ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardMultiZone === false ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="toggle-box" size="md" fullWidth={false} selected={wizardMultiZone === false} onClick={() => setMultiZone(false)}>
                             One section for everything
                           </Button>
-                          <Button variant="bare" onClick={() => setMultiZone(true)} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardMultiZone === true ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardMultiZone === true ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="toggle-box" size="md" fullWidth={false} selected={wizardMultiZone === true} onClick={() => setMultiZone(true)}>
                             Multiple sections
                           </Button>
                         </div>
@@ -1776,7 +1763,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         </label>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                           {(['left', 'center', 'right'] as const).map((opt) => (
-                            <Button variant="bare" key={opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: gridConfig.rowAlignment === opt ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            <Button variant="toggle-box" size="md" fullWidth={false} key={opt} selected={gridConfig.rowAlignment === opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ textTransform: 'capitalize' }}>
                               {opt}
                             </Button>
                           ))}
@@ -1859,6 +1846,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700 }}>Safety markers:</span>
                     {(Object.keys(MARKER_META) as MarkerType[]).map((t) => (
                       <Button
+                        // bare-reason: each marker type's border/fill is its own MARKER_META colour, the colour the marker takes on the canvas; no variant takes a per-item colour
                         variant="bare"
                         key={t}
                         onClick={() => setMarkerMode((v) => (v === t ? null : t))}

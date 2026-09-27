@@ -37,7 +37,12 @@ import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 // audit.md, "Phase 2"): each is a shape found at 3+ CTA-styled `bare`
 // sites that no existing variant covered (the GEN-2609-066 3-site rule).
 // See each case block below for its sites.
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'solid' | 'outline-error' | 'outline-accent' | 'success' | 'outline-success' | 'dashed' | 'link' | 'icon' | 'bare'
+// GEN-2609-110 - `toggle-box`/`menu-row`/`text-link`/`text-toggle`/`tab`/
+// `tab-display`/`disclosure`/`card`/`scrim` added for phase 3, the last 91
+// `bare` sites (docs/button-adoption-audit.md, "Phase 3"): again one
+// variant per look found at 3+ sites. What is left on `bare` carries a
+// `// bare-reason:` comment saying why no variant fits.
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'toggle-box' | 'solid' | 'outline-error' | 'outline-accent' | 'success' | 'outline-success' | 'dashed' | 'link' | 'text-link' | 'text-toggle' | 'tab' | 'tab-display' | 'menu-row' | 'disclosure' | 'card' | 'scrim' | 'icon' | 'bare'
 
 // GEN-2609-058 - a size scale orthogonal to variant: controls padding/
 // font-size/font-weight/border-radius only, never color/background.
@@ -68,10 +73,10 @@ type BaseProps = {
    * as they were before this prop existed - no default size token is
    * silently applied. */
   size?: number | ButtonSizeToken
-  /** `toggle-pill` only - whether this pill is the currently-selected
-   * option in its group. Ignored by every other variant (each of those
-   * is a single-state CTA role, not a two-state selector) - see
-   * `toggle-pill`'s own case in `variantBaseStyle` below. */
+  /** Whether this is the currently-selected option in its group, for the
+   * two-state variants: `toggle-pill`, `toggle-box`, `text-toggle`, `tab`,
+   * `tab-display`, `menu-row` and `card`. Ignored by every other variant
+   * (each of those is a single-state CTA role, not a selector). */
   selected?: boolean
   /** Optional leading icon, rendered before `children` - same additive,
    * optional-and-harmless convention as `Badge.tsx`/`MessageButton.tsx`
@@ -158,7 +163,12 @@ export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: n
   // font-size/font-weight/border-radius only) - deliberately after the
   // variant's own base style so it wins, and deliberately never touches
   // color/background/border-color, which stay whatever the variant says.
-  return typeof size === 'string' ? { ...base, ...SIZE_CHROME[size] } : base
+  if (typeof size !== 'string') return base
+  const chrome = SIZE_CHROME[size]
+  // GEN-2609-110 - `tab` draws its selection as a bottom border, which a
+  // corner radius would curl at both ends, so for it a size token moves
+  // padding and type only.
+  return variant === 'tab' ? { ...base, padding: chrome.padding, fontSize: chrome.fontSize } : { ...base, ...chrome }
 }
 
 function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken, selected: boolean): React.CSSProperties {
@@ -506,6 +516,197 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         cursor: 'pointer',
         textDecoration: 'none',
       }
+    case 'toggle-box':
+      // GEN-2609-110 - the box-shaped selector, 18 `bare` sites (seat-map
+      // seating mode/level/wizard/alignment/placement toggles, organiser
+      // compensation + approval mode, venue rate type x2, check-in list
+      // filter, the seat picker + layout preview level switches). The
+      // selected state is the 2px fill-solid border over the fill tint that
+      // `toggle-pill`'s own comment calls the box-selector convention; the
+      // resting border drifted between --afa-border-resting and
+      // --afa-tint-20 and is unified on the former. Unlike `toggle-pill`
+      // the border width changes on selection - that is how every one of
+      // these sites already behaved. md fallback, same as `solid`.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--afa-space-6px)',
+        width: fullWidth ? '100%' : undefined,
+        background: selected ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+        border: selected ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
+        color: selected ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
+        padding: 'var(--afa-btn-padding-md)',
+        borderRadius: 'var(--afa-radius-md)',
+        fontSize: 'var(--afa-text-ui)',
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'text-link':
+      // GEN-2609-110 - an inline underlined action inside a sentence or
+      // under a field, 7 `bare` sites (register "Try more"/"Use ... instead",
+      // admin "View note", seat-map "Back to setup options", venue sales
+      // "Show top N", support "Use the feedback form"/"Remove"). Not `link`:
+      // that is the full-width, centred, padded login link. Colour drifted
+      // across amber, error-bright, secondary and muted; unified on amber,
+      // the colour `link` and `secondary-reveal` already use for "this text
+      // is an action".
+      return {
+        display: 'inline',
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
+        color: 'var(--afa-amber)',
+        fontSize: 'var(--afa-text-small)',
+        fontWeight: 500,
+        fontFamily: FONT_FAMILY,
+        textDecoration: 'underline',
+        cursor: 'pointer',
+      }
+    case 'text-toggle':
+      // GEN-2609-110 - a text-only mono selector: selection is a colour
+      // change, no box or underline. 7 `bare` sites (/events upcoming/past,
+      // type and price filters; the locale codes in SiteNav and HomeHeader;
+      // admin artists' sort headers). The resting colour and its hover come
+      // from `.afa-btn-text-toggle` in globals.css (an inline colour can't
+      // express :hover), so only the selected colour is set here.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 'var(--afa-space-2)',
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
+        color: selected ? 'var(--afa-amber)' : undefined,
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--afa-text-small)',
+        fontWeight: 500,
+        textTransform: 'uppercase',
+        letterSpacing: '0.1em',
+        cursor: 'pointer',
+      }
+    case 'tab':
+      // GEN-2609-110 - an in-card tab: text over a 2px amber underline when
+      // selected. 5 `bare` sites (artist profile About/Shows, the homepage
+      // Near You card, the support widget's two panel tabs). Resting colour
+      // + hover from `.afa-btn-tab` in globals.css, as for `text-toggle`.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--afa-space-6px)',
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        border: 'none',
+        borderBottom: `2px solid ${selected ? 'var(--afa-amber)' : 'transparent'}`,
+        color: selected ? 'var(--afa-text-primary)' : undefined,
+        padding: 'var(--afa-btn-padding-md)',
+        fontSize: 'var(--afa-text-ui)',
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+      }
+    case 'tab-display':
+      // GEN-2609-110 - the page-level tab set in the display face, 3 `bare`
+      // sites (/events Events/Organisers, /venues Grid/Map). Same underline
+      // as `tab`, but no side padding (the tabs sit flush on the page's
+      // left edge) and the page-heading type. Resting colour + hover from
+      // `.afa-btn-tab-display`. Inline-block, not flex: /venues puts a
+      // superscript count after the label, and vertical-align needs
+      // inline layout.
+      return {
+        display: 'inline-block',
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        border: 'none',
+        borderBottom: `2px solid ${selected ? 'var(--afa-amber)' : 'transparent'}`,
+        color: selected ? 'var(--afa-text-primary)' : undefined,
+        padding: '0 0 var(--afa-space-3)',
+        fontFamily: 'var(--font-ui)',
+        fontSize: 'var(--afa-text-lead)',
+        fontWeight: 400,
+        cursor: 'pointer',
+      }
+    case 'menu-row':
+      // GEN-2609-110 - a full-width, left-aligned row in a dropdown, list or
+      // menu, 16 `bare` sites (search results x3, browse dropdown, address
+      // + city autocomplete, LocationChip's city list, /venues city filter
+      // x2, language menus x2, account-menu Sign out x2, organiser invite
+      // search x2, checkout companion search). The selected row takes the
+      // amber wash (the language menus' existing treatment) with amber
+      // text. `display: block`, not flex, so a row's inline spans keep
+      // their spacing; a row that lays out two ends sets its own flex.
+      // Hover comes from `.afa-btn-menu-row` in globals.css, which is why
+      // the resting background is left unset here.
+      return {
+        display: 'block',
+        width: fullWidth ? '100%' : undefined,
+        textAlign: 'left',
+        background: selected ? 'var(--afa-amber-wash)' : undefined,
+        border: 'none',
+        color: selected ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
+        padding: 'var(--afa-btn-padding-md)',
+        borderRadius: 'var(--afa-radius-sm)',
+        fontSize: 'var(--afa-text-body)',
+        fontWeight: selected ? 600 : 400,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'disclosure':
+      // GEN-2609-110 - a compact "> Section (n)" show/hide toggle, the 4
+      // `bare` sites on admin feedback. Was text-primary at 70% opacity;
+      // --afa-text-secondary is the same alpha family at 65%, as a token.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 'var(--afa-space-6px)',
+        width: fullWidth ? '100%' : undefined,
+        textAlign: 'left',
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
+        color: 'var(--afa-text-secondary)',
+        fontSize: 'var(--afa-text-small)',
+        fontWeight: 700,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+      }
+    case 'card':
+      // GEN-2609-110 - a whole card as the click target, 4 `bare` sites
+      // (seat-map's two setup-path cards, venue create's path cards,
+      // /my-feedback items). Raised surface, radius-lg, 20px padding;
+      // `selected` is the chosen (or recommended) path. Content layout
+      // stays the caller's own children.
+      return {
+        display: 'block',
+        width: fullWidth ? '100%' : undefined,
+        textAlign: 'left',
+        background: selected ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+        border: `1px solid ${selected ? 'var(--afa-fill-solid)' : 'var(--afa-tint-12)'}`,
+        color: 'var(--afa-text-primary)',
+        padding: 'var(--afa-space-5)',
+        borderRadius: 'var(--afa-radius-lg)',
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'scrim':
+      // GEN-2609-110 - the click-to-dismiss backdrop behind a sheet or
+      // modal, 3 `bare` sites (FeeSheet, ContributionMoment, the /events
+      // filter sheet). Fills its positioned parent; the caller passes an
+      // aria-label and `{null}` children.
+      return {
+        position: 'absolute',
+        inset: 0,
+        background: 'var(--afa-scrim)',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+      }
     case 'link':
       // GEN-2609-096 - Class B: the one real 3+-site exact-match shape
       // found in the raw-<button> audit (docs/button-adoption-audit.md)
@@ -594,7 +795,11 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
 }
 
 export default function Button(props: ButtonProps) {
-  const { variant, children, fullWidth = true, size = 36, selected = false, icon, style, className } = props
+  const { variant, children, fullWidth = true, size = 36, selected = false, icon, style, className: callerClassName } = props
+  // GEN-2609-110 - `afa-btn` carries the shared focus-visible ring and
+  // `afa-btn-<variant>` any :hover a variant needs (globals.css) - states
+  // an inline style can't express.
+  const className = ['afa-btn', `afa-btn-${variant}`, callerClassName].filter(Boolean).join(' ')
   const merged: React.CSSProperties = {
     ...variantStyle(variant, fullWidth, size, selected),
     ...('disabled' in props && props.disabled ? { opacity: 0.7, cursor: 'default' } : null),

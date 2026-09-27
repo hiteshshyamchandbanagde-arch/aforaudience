@@ -13,7 +13,6 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 interface SeatSection {
   id?: string
@@ -900,15 +899,12 @@ export default function CreateEventPage() {
                   ] as const).map((opt) => (
                     <Button
                       key={opt.value}
-                      variant="bare"
+                      variant="toggle-box"
+                      size="md"
+                      fullWidth={false}
+                      selected={defaultCompensationType === opt.value}
                       type="button"
                       onClick={() => setDefaultCompensationType(opt.value)}
-                      style={{
-                        padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                        background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                        color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                      }}
                     >
                       {opt.label}
                     </Button>
@@ -928,15 +924,13 @@ export default function CreateEventPage() {
                   {(['MANUAL', 'AUTO'] as const).map((mode) => (
                     <Button
                       key={mode}
-                      variant="bare"
+                      variant="toggle-box"
+                      size="md"
+                      fullWidth={false}
+                      selected={applicationApprovalMode === mode}
                       type="button"
                       onClick={() => setApplicationApprovalMode(mode)}
-                      style={{
-                        flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                        border: applicationApprovalMode === mode ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                        background: applicationApprovalMode === mode ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                        color: applicationApprovalMode === mode ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                      }}
+                      style={{ flex: 1 }}
                     >
                       {mode === 'MANUAL' ? 'Manual — I review each one' : 'Auto — verified artists only'}
                     </Button>

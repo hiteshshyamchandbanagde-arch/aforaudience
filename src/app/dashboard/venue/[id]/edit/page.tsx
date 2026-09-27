@@ -14,7 +14,6 @@ import CityAutocomplete from '@/components/CityAutocomplete'
 import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
 
 interface Venue {
@@ -370,15 +369,13 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
                   <Button
                     key={t}
-                    variant="bare"
+                    variant="toggle-box"
+                    size="md"
+                    fullWidth={false}
+                    selected={rateType === t}
                     type="button"
                     onClick={() => setRateType(t)}
-                    style={{
-                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                      border: rateType === t ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
-                      background: rateType === t ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
-                      color: rateType === t ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                    }}
+                    style={{ flex: 1 }}
                   >
                     {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
                   </Button>

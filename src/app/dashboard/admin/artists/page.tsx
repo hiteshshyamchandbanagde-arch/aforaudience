@@ -159,13 +159,10 @@ export default function AdminArtistsPage() {
 
   const sortButton = (key: SortKey, label: string) => (
     <Button
-      variant="bare"
+      variant="text-toggle"
+      fullWidth={false}
+      selected={sortKey === key}
       onClick={() => toggleSort(key)}
-      style={{
-        padding: 0,
-        fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: sortKey === key ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
-        textTransform: 'uppercase', letterSpacing: '0.04em',
-      }}
     >
       {label}{sortKey === key ? (sortDesc ? ' ↓' : ' ↑') : ''}
     </Button>
@@ -291,9 +288,8 @@ export default function AdminArtistsPage() {
                       )}
                       {a.headlinerNote && (
                         <Button
-                          variant="bare"
+                          variant="text-link"
                           onClick={() => setExpandedNote(expandedNote === a.id ? null : a.id)}
-                          style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-micro)', textDecoration: 'underline' }}
                         >
                           {expandedNote === a.id ? 'Hide note' : 'View note'}
                         </Button>

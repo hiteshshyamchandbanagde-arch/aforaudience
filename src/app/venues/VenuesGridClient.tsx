@@ -104,8 +104,6 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
            :hover reasoning as the card border above. */
         .afa-city-filter-trigger { border-color: var(--afa-border-resting); }
         .afa-city-filter-trigger:hover { border-color: var(--afa-amber-border); }
-        .afa-city-filter-option { background: transparent; }
-        .afa-city-filter-option:hover { background: var(--afa-tint-06); }
       `}</style>
 
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-start" }}>
@@ -135,6 +133,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
 
         <div ref={cityRef} style={{ position: "relative", width: "256px", flexShrink: 0 }}>
           <Button
+            // bare-reason: select-field trigger that must match the SearchInputBox field beside it (border, surface, padding, hover border); a form field, not a button look
             variant="bare"
             type="button"
             onClick={() => setCityOpen((o) => !o)}
@@ -150,11 +149,10 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px var(--afa-shadow)" }}>
               <li>
                 <Button
-                  variant="bare"
+                  variant="menu-row"
                   type="button"
+                  selected={selectedCity === "All Cities"}
                   onClick={() => { setSelectedCity("All Cities"); setCityOpen(false) }}
-                  className="afa-city-filter-option"
-                  style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: selectedCity === "All Cities" ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
                 >
                   {tr.venuesPage.filterAllCities}
                 </Button>
@@ -162,11 +160,10 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               {cityOptions.map((c) => (
                 <li key={c.city}>
                   <Button
-                    variant="bare"
+                    variant="menu-row"
                     type="button"
+                    selected={c.city === selectedCity}
                     onClick={() => { setSelectedCity(c.city); setCityOpen(false) }}
-                    className="afa-city-filter-option"
-                    style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: c.city === selectedCity ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
                   >
                     {c.label}
                   </Button>

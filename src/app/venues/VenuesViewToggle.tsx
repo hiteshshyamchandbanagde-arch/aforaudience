@@ -40,42 +40,22 @@ export default function VenuesViewToggle({
 
   return (
     <div>
-      <style>{`
-        /* Export: inactive tab has hover:text-cream-dim - color set via
-           inline style can't express :hover at all (same bug pattern as
-           BUG-2608-072 gap 4 / BUG-2608-073 gap 4), so the class controls
-           color instead and the inline style only sets layout. */
-        .afa-view-tab { color: var(--afa-text-muted); }
-        .afa-view-tab:hover { color: var(--afa-text-secondary); }
-        .afa-view-tab.afa-view-tab-active, .afa-view-tab.afa-view-tab-active:hover { color: var(--afa-text-primary); }
-      `}</style>
       <div style={{ display: "flex", alignItems: "center", gap: "32px", borderBottom: "1px solid var(--afa-border-resting)", marginBottom: "32px" }}>
         {tabs.map((t) => {
           const active = view === t.key
           return (
             <Button
               key={t.key}
-              variant="bare"
+              variant="tab-display"
+              fullWidth={false}
+              selected={active}
               onClick={() => setView(t.key)}
-              className={`afa-view-tab${active ? " afa-view-tab-active" : ""}`}
-              style={{
-                position: "relative",
-                paddingBottom: "16px",
-                marginBottom: "-1px",
-                fontFamily: "var(--font-ui)",
-                fontSize: "var(--afa-text-subtitle)",
-                letterSpacing: "-0.01em",
-                transition: "color 0.2s ease",
-                color: undefined,
-              }}
+              style={{ marginBottom: "-1px" }}
             >
               {t.label}
               <span style={{ marginLeft: "8px", verticalAlign: "super", fontSize: "var(--afa-text-micro)", fontWeight: 400, fontFamily: "var(--font-mono)", color: "var(--afa-text-muted)" }}>
                 {t.count}
               </span>
-              {active && (
-                <span style={{ position: "absolute", left: 0, right: 0, bottom: "-1px", height: "2px", background: "var(--afa-fill-solid)" }} />
-              )}
             </Button>
           )
         })}
