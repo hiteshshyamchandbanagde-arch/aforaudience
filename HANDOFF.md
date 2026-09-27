@@ -1,3 +1,13 @@
+# Session Handoff — 27 Sept 2026, part 10 (chat — #711 merged, Button goal area closed)
+
+- **#711 GEN-2609-110** was squash-merged at pinned head `7b573c8`, making `qa` @ `98e3abb`. The amend run rebased cleanly and its preview was green, as was the `design-tokens` check. The branch has been deleted. The `qa` deploy is READY with 0 runtime errors. Feedback: BUILD_COMPLETE / DEPLOYED_QA. The design.md entry covers #712 and #711.
+- **Hitesh click-through:** part 5 §9, on `qa` (not a preview). Add the zoomed seat picker (Reset now matches −/+) and the language menu at ≥1024px (codes on 2 rows).
+- **Logged:** BUG-2609-065 (MEDIUM): bottom sheets don't trap focus. It predates #711.
+- **Goal status:** Colour, radius and Button are done. Font has these left: the 13 font-size literals, and the Indic system-font gap (FEAT-2608-051 is marked IN_TEST, but most Indic text still renders in the system font, which admin font edits can't reach). Size (spacing, GEN-2609-107) has 1,866 literals, not started.
+- **Next run (small):** BUG-2609-063 (autofill Sign In) + the 13 font-size literals + commit the font scripts to `scripts/dev/fonts/`. Then the Indic font ticket (chat scopes it), then spacing.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 9 (CC — #711 amend: rebased on fixed qa, locale tap targets + seat-picker Reset, pushed, needs merge)
 
 Branch `feat/gen-2609-110-button-phase3` (PR #711), now on `origin/qa` @ `b2829fd`/`f46a9e2`. **Not merged.** No DB changes. No new PR.

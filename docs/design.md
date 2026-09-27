@@ -8126,3 +8126,23 @@ Not re-verified (same gap `GEN-2609-075`'s own entry already flagged and for the
 **BUG-2609-060 — admin bookings payment label:** "Free event" only when total is 0; amber (`--afa-amber`) "No payment record" when total > 0 and no payment; payment line unchanged otherwise.
 
 Feedback: all 4 → `RESOLVED` / `DEPLOYED_QA`. Vercel READY, 0 runtime errors.
+
+## BUG-2609-062 + GEN-2609-110 — local fonts and Button phase 3 (PRs #712, #711; qa @ 98e3abb, 27 Sep)
+
+**BUG-2609-062 — fonts are self-hosted (standing rule):** every font is loaded through `next/font/local` from `src/fonts/`. It never uses `next/font/google`. The Google fetch at build time had failed every Vercel build from ~05:15 UTC on 27 Sep. The files are Google's upstream fonts at the versions Google was serving; the Noto Devanagari pin to 2.006 is intentional. There is one merged file per family and style, cut to the exact coverage of Google's split files. Parity checks found 0 outline or shaping differences, and the build passes with Google Fonts blocked. Font bytes −28%; per-page preload 872,580 → 235,624 bytes. **To add or upgrade a font,** use the build and parity scripts, not a Google import (the scripts are going into `scripts/dev/fonts/` in the next small run).
+
+**GEN-2609-110 — Button phase 3:**
+- `bare-button` went from 91 to 0 unexplained and `raw-button` from 2 to 0. There are 9 new variants: `toggle-box`, `menu-row`, `text-link`, `text-toggle`, `tab`, `tab-display`, `disclosure`, `card`, `scrim`. The full classification is in `docs/button-adoption-audit.md` under "Phase 3".
+- **Standing rule:** a `variant="bare"` button needs a `// bare-reason:` comment of at least 20 characters on the line above it, saying why no variant fits. The checker fails an unexplained bare button, and also fails if a reason is removed.
+- Every Button carries `.afa-btn`, which gives one amber focus-visible ring site-wide.
+- **Decisions (chat, delegated by Hitesh):**
+  - The support-widget panel tabs become underlined `tab`s (6px shorter).
+  - The /venues tab underline is amber.
+  - Venue-create rate type matches venue-edit.
+  - The Guided Setup toggle has no orange when it's off.
+  - The admin artists sort headers use the mono font.
+  - The locale codes in SiteNav and HomeHeader keep a 24×24 minimum tap area (WCAG 2.5.8), set at those two call sites. They wrap to 2 rows in the menu.
+  - The seat-picker Reset button matches the −/+ zoom buttons.
+- Follow-ups: BUG-2609-064 (intro-splash hydration warning, LOW) and BUG-2609-065 (bottom sheets don't trap focus, MEDIUM).
+
+Feedback: BUG-2609-062 and GEN-2609-110 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Vercel READY, 0 runtime errors after each merge.
