@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { planRestore, radiusOrderErrors, restoreNote, type TokenType } from '@/lib/design-tokens'
+import { planRestore, radiusOrderErrors, restoreContrastFailures, restoreNote, type TokenType } from '@/lib/design-tokens'
 import { revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // POST /api/admin/design-tokens/versions/:id/revert — apply an older
@@ -21,10 +21,19 @@ async function requireAdmin() {
   return user
 }
 
-export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const admin = await requireAdmin()
   if (!admin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  // GEN-2609-115 - body is optional; only { confirmContrast } is read.
+  let confirmContrast = false
+  try {
+    const body = await req.json()
+    confirmContrast = body?.confirmContrast === true
+  } catch {
+    // no body: same as confirmContrast false
   }
 
   const { id } = await params
@@ -50,6 +59,17 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json(
       { error: `Restoring this version would put the radius scale out of order: ${orderErrors.map((e) => `${e.key}: ${e.message}`).join(' ')}`, code: 'invalid', errors: orderErrors },
       { status: 400 },
+    )
+  }
+
+  // GEN-2609-115 - same guard as PATCH: a restore that takes a text/
+  // surface pair below AA needs confirmContrast: true. Before this, old
+  // versions restored muted text to 0.4 with no warning.
+  const failures = restoreContrastFailures(plan, live)
+  if (failures.length > 0 && !confirmContrast) {
+    return NextResponse.json(
+      { error: 'This restore lowers text contrast below WCAG AA — resubmit with confirmContrast: true after showing the confirm dialog', code: 'contrast', contrastFailures: failures },
+      { status: 409 },
     )
   }
 

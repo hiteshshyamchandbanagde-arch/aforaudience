@@ -20,6 +20,7 @@ import {
   parseCssColor,
   planRestore,
   radiusOrderErrors,
+  restoreContrastFailures,
   restoreNote,
   rangeFor,
   rgbToHex,
@@ -342,6 +343,36 @@ test('restore: snapshot keys that are no longer tokens are ignored', () => {
   const plan = planRestore({ ...DEFAULT_TOKEN_VALUES, '--afa-radius-10px': '10px' }, LIVE)
   assert.equal(plan.changes.length, 0)
   assert.equal('--afa-radius-10px' in plan.after, false)
+})
+
+// --- H. restore contrast check (GEN-2609-115) ----------------------------------
+
+test('restore: an old snapshot with muted text at 0.4 needs the contrast confirm', () => {
+  // Modelled on QA row cmuhmxlcc: pre-#708, muted 0.4.
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.4)' }
+  const fails = restoreContrastFailures(planRestore(snapshot, LIVE), LIVE)
+  assert.deepEqual(fails.map((f) => f.label).sort(), ['Muted text on page', 'Muted text on raised surface'])
+  for (const f of fails) assert.ok(f.before !== null && f.before >= 4.5 && f.after < 4.5)
+})
+
+test('restore: a snapshot that keeps every pair at AA needs no confirm', () => {
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-radius-md': '10px', '--afa-amber': '#D0A040' }
+  assert.deepEqual(restoreContrastFailures(planRestore(snapshot, LIVE), LIVE), [])
+})
+
+test('restore: values the plan skips are not counted against contrast', () => {
+  // A snapshot value today's rules reject never reaches plan.after.
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 4)' }
+  const plan = planRestore(snapshot, LIVE)
+  assert.equal(plan.skipped.length, 1)
+  assert.deepEqual(restoreContrastFailures(plan, LIVE), [])
+})
+
+test('restore: live values that already fail and are not worsened do not block', () => {
+  const failingLive = LIVE.map((t) => (t.key === '--afa-text-muted' ? { ...t, value: 'rgba(245, 245, 240, 0.3)' } : t))
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-text-muted': 'rgba(245, 245, 240, 0.4)' }
+  // 0.3 -> 0.4 improves an already-failing pair: no confirm.
+  assert.deepEqual(restoreContrastFailures(planRestore(snapshot, failingLive), failingLive), [])
 })
 
 console.log(`\n${passed} passed`)

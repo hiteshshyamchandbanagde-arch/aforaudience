@@ -583,3 +583,10 @@ export function contrastFailures(before: Record<string, string>, after: Record<s
   }
   return out
 }
+
+// GEN-2609-115 - a restore gets the same contrast check as a save:
+// live values before, the restore plan's result after. Shared by the
+// restore dialog and the revert API so the two can't disagree.
+export function restoreContrastFailures(plan: RestorePlan, live: { key: string; value: string }[]): ContrastFailure[] {
+  return contrastFailures(Object.fromEntries(live.map((t) => [t.key, t.value])), plan.after)
+}

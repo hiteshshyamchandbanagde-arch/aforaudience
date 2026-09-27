@@ -9,7 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
-import { CONTRAST_PAIRS, composeRgba, planRestore, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { CONTRAST_PAIRS, composeRgba, planRestore, restoreContrastFailures, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
@@ -141,6 +141,9 @@ export default function AdminDesignSystemPage() {
   // BUG-2609-059 - the version a Restore click is waiting to confirm.
   // A single accidental click used to apply site-wide immediately.
   const [confirmingRevert, setConfirmingRevert] = useState<DesignTokenVersion | null>(null)
+  // GEN-2609-115 - a restore that would take a pair below AA, waiting on
+  // the same contrast confirm a save gets.
+  const [confirmingRevertContrast, setConfirmingRevertContrast] = useState<{ id: string; failures: ContrastFailure[] } | null>(null)
   const [showHistory, setShowHistory] = useState(false)
   const [query, setQuery] = useState('')
   const [refreshing, setRefreshing] = useState(false)
@@ -328,10 +331,32 @@ export default function AdminDesignSystemPage() {
     }
   }
 
-  async function handleRevert(versionId: string) {
+  // GEN-2609-115 - the restore dialog's confirm: contrast check first
+  // (same rule the API applies), then the restore itself.
+  function confirmRevert(version: DesignTokenVersion) {
+    const failures = restoreContrastFailures(planRestore(version.snapshot, tokens ?? []), tokens ?? [])
+    setConfirmingRevert(null)
+    if (failures.length > 0) {
+      setConfirmingRevertContrast({ id: version.id, failures })
+      return
+    }
+    handleRevert(version.id, false)
+  }
+
+  async function handleRevert(versionId: string, confirmContrast: boolean) {
     setSaving(true)
     try {
-      const res = await fetch(`/api/admin/design-tokens/versions/${versionId}/revert`, { method: 'POST' })
+      const res = await fetch(`/api/admin/design-tokens/versions/${versionId}/revert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmContrast }),
+      })
+      if (res.status === 409) {
+        // The live values moved since the page loaded; show the server's list.
+        const data = await res.json().catch(() => ({}))
+        setConfirmingRevertContrast({ id: versionId, failures: data.contrastFailures ?? [] })
+        return
+      }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.error || 'Revert failed.')
@@ -347,6 +372,7 @@ export default function AdminDesignSystemPage() {
     } finally {
       setSaving(false)
       setConfirmingRevert(null)
+      if (confirmContrast) setConfirmingRevertContrast(null)
     }
   }
 
@@ -680,8 +706,17 @@ export default function AdminDesignSystemPage() {
             title="Restore this version?"
             body={<RestorePreview plan={planRestore(confirmingRevert.snapshot, tokens ?? [])} />}
             confirmLabel={saving ? 'Restoring…' : 'Yes, restore'}
-            onConfirm={() => handleRevert(confirmingRevert.id)}
+            onConfirm={() => confirmRevert(confirmingRevert)}
             onCancel={() => setConfirmingRevert(null)}
+          />
+        )}
+        {confirmingRevertContrast && (
+          <ConfirmDialog
+            title="This restore lowers text contrast"
+            body={<ContrastFailureList failures={confirmingRevertContrast.failures} />}
+            confirmLabel={saving ? 'Restoring…' : 'Restore anyway'}
+            onConfirm={() => handleRevert(confirmingRevertContrast.id, true)}
+            onCancel={() => setConfirmingRevertContrast(null)}
           />
         )}
       </DashboardShell>
