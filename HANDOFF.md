@@ -1,3 +1,121 @@
+# Session Handoff — 29 Sept 2026, part 20 (CC — MEDIUM bug bundle 068/072/074/075/067, pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/medium-bug-bundle-2609?expand=1
+  - The branch is off `6e6b27a`. qa has since gained `b6b0faf` (docs-only: HANDOFF, design.md), and the branch merges cleanly with it.
+- **Vercel preview:** READY on the pushed head `df05eb4` (`dpl_GD37wQ3WvzQPJEWC5oRa4GgoqgCe`).
+- **No DB changes.**
+- **Next step (chat):** merge, then move these to BUILD_COMPLETE / DEPLOYED_QA: BUG-2609-067, 068, 072, 074 and 075.
+
+## Commits (one per bug; each commit passes `tsc` on its own)
+`b686cc4` 068 · `df39495` 072 · `b15ba7e` 074 · `3bc63bf` 075 · `ddbefb3` 067 · `df05eb4` Button.tsx cleanup.
+068 comes before 072 because the toast reuses 068's hook and offsets.
+
+## Per bug
+**072 toast see-through**
+- **Root cause:** every toast kind used a translucent tint (`--afa-*-tint`, 0.1–0.15 alpha), so whatever sat behind it showed through. It was the component, not one call site.
+- **Fix:**
+  - Surface: every kind now uses opaque `--afa-surface-raised`, with a `--afa-border-resting` border and a `--afa-shadow` shadow. The old shadow used a border colour.
+  - Colour: message text is `--afa-text-primary`. The kind's colour appears only on the 4px left edge and the icon.
+  - Desktop position: top-right, 80px below the nav.
+  - Mobile position: stacked above the chat button (which sits above the tab bar).
+  - Beyond the dispatch: while a `data-afa-action-row` overlaps that bottom band on mobile, the stack moves to the top (72px under the top bar). Without this, the now-opaque toast still covered Publish / Save as Draft for its 6s, which was the original report. This uses the same hook as 068.
+- **Call sites:** 23 files, 154 `showToast` calls, all through `useToast` → `Toast.tsx`. There are no hand-rolled toasts.
+  - One non-component case: the check-in scanner's full-width result banner (`organiser/events/[id]/checkin`). It is solid-coloured, so not see-through, and it is a deliberate scanner pattern. Left as is.
+- **Verified live:**
+  - Tested on `/dashboard/organiser/events/create` with a mocked ORGANISER client session.
+  - Trigger: an empty Publish, which fires the error toast on the same page.
+  - Before: background `rgba(179,38,30,0.1)`, bottom-centre, over the buttons.
+  - After: background `rgb(31,31,31)`.
+    - At 390 the toast sits at the top and doesn't overlap any button.
+    - At 1280 it sits top-right.
+- **Not verified live:** the info variant after a successful Publish. That needs the whole form plus a mocked POST; it's the same component and code path.
+
+**068 chat bubble covers bottom actions**
+- **Root cause:** the fixed bubble rests at `64px + safe-area + 8px` from the bottom, which is exactly where a page's bottom action row sits once scrolled into view.
+- **Fix:** a new hook, `mobile/useActionRowClearance.ts`.
+  - It watches `[data-afa-action-row]` with an IntersectionObserver, plus a MutationObserver rescan, at most once per frame.
+  - While a row overlaps the bubble's resting spot on mobile (≤1023px), the closed bubble lifts to 8px above it.
+  - If the lifted top would be under 72px, the bubble hides.
+  - The resting spot is measured from an invisible probe with the same offsets.
+  - Mobile chrome offsets are now in `mobile/chromeOffsets.ts`.
+- **Marked:**
+  - Venue edit row
+  - Venue create row
+  - Event create row
+  - Profile: Save display name, Save about, Save currency, and the 3 Apply buttons
+  - Checkout Pay
+  - Seat Map Builder Save
+- **Verified live** on venue edit (Jaipur venue, mocked VENUE_OWNER session; `/owner` served from the public venue JSON):
+  - Before, at 390 and 440: the bubble (716–772) covers a control in the row.
+  - After: the bubble is lifted to 661–717 (row top 726) at 390, and to 684–740 (row top 749) at 440. It covers nothing.
+  - It returns to its resting spot (716–772) once the row scrolls away.
+- **Not live-exercised:** the "hide" branch (it needs a row tall enough to push the bubble under the top bar), and the other 5 marked pages.
+- **Checkout:** `/checkout` is excluded from the SupportWidget entirely, so the bubble never showed there. The mark is harmless.
+
+**074 register race**
+- **Root cause:** the check effect's cleanup only cleared the debounce timer. A fetch already in flight when the field was cleared resolved afterwards with "Available", and the initials chips (shown only while idle) never came back.
+- **Fix:**
+  - One AbortController per check, aborted in cleanup.
+  - A response is dropped unless its value equals the latest field value (tracked in a ref updated in an effect).
+  - The initials fetch (debounced, and "Try more") gets the same abort plus seed match.
+  - Clearing the field also drops a stale "Use … instead" suggestion.
+- **Verified live** on /register, no login needed. The check response was delayed to 1.5s; the test types `willsmith99`, clears the field while the request is in flight, then waits.
+  - Before: "Available" on an empty field, no chips, no Try more.
+  - After: idle, no status, and the chips (`ws`, `ws34`, `ws.curtaincall`) plus Try more are back.
+
+**075 seat picker**
+- **Root cause:** a selected seat was drawn with `scale(max(1, 1.5/zoom))`, a fixed 10px label and an outside ring. Seats sit edge to edge, so the scaled seat covered its neighbours.
+- **Fix:**
+  - No scale.
+  - An inset 2px `--afa-selected` ring, which stays inside the seat.
+  - Bold label, sized from the seat's own width: `max(<every seat's size>, min(11px, 0.42 × seat width))`. It is never wider than the seat.
+- **Legend:** "Available" had already landed in #714, so nothing was left to add.
+- **Heading:** numbered maps now say "Choose your seats" (new `eventDetailPage.chooseSeats`, in all 11 locales) on the seat page and the event page. Section-level maps keep "Choose your section".
+- **Verified live** on `/events/qa-jaipur-event-0001/seats`, 390, public page, with H1–H4 selected:
+  - Before: `matrix(1.5…)`, 36px wide, 14.2px overlap between neighbours, heading "Choose your section".
+  - After: `transform: none`, 24px wide, label 10.1px bold, and all 4 labels readable. Heading: "Choose your seats".
+  - The 2.2px overlap between adjacent seats is the layout's own geometry (seat size 22 on a 20-unit pitch), the same for unselected seats. It is pre-existing and not changed here.
+
+**067 Seat Map Builder overflow**
+- **Root cause:** the canvas column was a plain flex item, so it sized to the canvas's full pixel width. Every text block above the canvas then stretched to that width.
+- **Fix:** the column now has `flex: 1 1 320px; minWidth: 0; maxWidth: 100%`. Only the existing `overflow: auto` canvas box scrolls.
+- **Verified live** on the Jaipur venue, mocked VENUE_OWNER session:
+  - Before: `scrollWidth` 922 at both 390 and 440. The orientation note, the "Viewing only" box and the reference-image row all ran out to 922.
+  - After: `scrollWidth === clientWidth` (390 and 440), with 0 elements wider than the viewport.
+- **Desktop:** not screenshotted. The layout is the same side-by-side, but the column now fills the row instead of taking the canvas's width.
+
+**Cleanup:** removed the no-op `token-ok(radius-literal)` at `Button.tsx:789`.
+
+## Verification
+- `tsc`: clean on every commit.
+- `next build`: ✓.
+- Checker vs origin/qa: 0 new literals.
+- **Ratchet:** every category equals its baseline: hex 0, rgba 0, font-family 0, font-size 0, spacing 1864 (±0), radius 0, raw-button 0, bare-button 0.
+- **Self-tests:**
+  - check-design-tokens: 91
+  - migrate-tokens: 65
+  - design-tokens: 48
+  - ticket-code: 5
+  - username: 4
+- **ESLint, qa vs branch per touched file:** counts are the same everywhere.
+  - RegisterForm: the same 3 findings, on shifted lines.
+  - SupportWidget: the same 2 findings, on shifted lines.
+  - The 2 new files: 0 findings.
+- **Console:**
+  - Every page logs a hydration-attribute mismatch, identically on qa, so it's pre-existing (likely BUG-2609-064).
+  - Dashboard pages also log 401s from authenticated APIs, which is expected with a mocked client session.
+- **Testing method:**
+  - Dev servers ran for both origin/qa (a worktree) and the branch.
+  - No real login was used: dashboard pages ran with a mocked `/api/auth/session` (ORGANISER; VENUE_OWNER `qa-jaipur-venowneru1`), so no server-side write was exercised.
+  - Before/after screenshots at 390 (and 440 for 067 and 068, 1280 for the toast) are local only. Chat can ask for them.
+
+## Flags (seen, not changed)
+- The chat bubble covers the password show/hide eye on /register at 390. That field isn't an action row.
+- Profile's full-width settings list rows have right-hand chevrons the bubble can sit over. Marking those rows would make the bubble hide across the whole list, which is a product call.
+- The seat picker's right edge (the I10/J10 area) sits near the bubble at 390; it didn't overlap in the test.
+
+---
+
 # Session Handoff — 29 Sept 2026, part 19 (chat — #715 merged; bug bundle dispatched)
 
 - **#715 GEN-2609-117** squash-merged at pinned head `8aace22` → `qa` @ `90c7e02`. CI (design-tokens, Vercel preview) green; branch deleted; `parseTokenOk` verified on `qa` via Contents API; qa deploy READY; 0 runtime errors (30 min). Chat re-ran check-design-tokens 91/91 and migrate-tokens 65/65 on the branch; `src/` diff comment-only; 0 unscoped `token-ok:` left.
