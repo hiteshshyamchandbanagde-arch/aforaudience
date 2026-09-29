@@ -8154,7 +8154,7 @@ Feedback: BUG-2609-062 and GEN-2609-110 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Ve
 - **Fonts:** `scripts/dev/fonts/` rebuilds all 12 files byte-identical from pinned sources; rerun instructions are in `src/fonts/README.md`.
 - **Known gap, fix before spacing:** GEN-2609-117. A `token-ok` comment exempts every literal on its line.
 
-## GEN-2609-118 — colour rule: orange = primary action, amber = selected (decision, 27 Sep; build queued)
+## GEN-2609-118 — colour rule: orange = primary action, amber = selected (decision 27 Sep; merged #714, 27 Sep)
 
 **Decision (Hitesh, 27 Sep) — standing rule:**
 - **Orange (`--afa-fill-solid`) = the single primary action on a screen.** Book, Pay, Publish, Accept, Save. At most one solid-orange button per screen. Secondary actions are `outline`, tertiary are `text-link`, destructive is red outline (solid red only on a final confirm).
@@ -8165,3 +8165,5 @@ Feedback: BUG-2609-062 and GEN-2609-110 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Ve
 - Checkmark on selected chips: deferred (tint alone first; revisit after live check).
 
 Feedback: GEN-2609-118 → `BUILD_QUEUE`.
+
+**Shipped (27 Sep):** PR #714 merged to `qa` as `0a03fb4`. The 3 `DesignToken` rows (`--afa-selected`, `-bg`, `-border`) are in QA, unlocked, under "Selected state". Light-surface fallback not built: no selected site sits on a light surface today, and the two `CONTRAST_PAIRS` guards will block a save if one is added. Feedback: `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh's click-through (HANDOFF part 16).

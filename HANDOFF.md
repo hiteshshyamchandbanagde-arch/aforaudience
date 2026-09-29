@@ -1,3 +1,14 @@
+# Session Handoff — 29 Sept 2026, part 17 (chat — goal status check, docs catch-up)
+
+- `qa` HEAD `0a03fb4` (#714 GEN-2609-118, merged 27 Sep). No open PRs/branches. Nothing merged since.
+- Post-merge for 118 was done (3 `--afa-selected*` rows in QA, Feedback BUILD_COMPLETE/DEPLOYED_QA) but part 16 still read "NOT merged" and design.md said "build queued" — both corrected here.
+- Ratchet: all categories 0 except `spacing-literal` 1864.
+- Open for Hitesh: 118 click-through (part 16 list) → RESOLVED.
+- Flagged to Hitesh: brand surfaces exempt from the checker (`api/posters/*`, `lib/email.ts`, `lib/ticket-pdf.ts`, `app/manifest.ts`) don't follow admin token edits; all are server-rendered, so they could read resolved `DesignToken` values. Decision pending.
+- Next order unchanged: MEDIUM bug bundle → Indic fonts → GEN-2609-117 → spacing GEN-2609-107.
+
+---
+
 # Session Handoff — 27 Sept 2026, part 16 (CC — GEN-2609-118 colour rule built, pushed, NOT merged)
 
 **Branch:** `feat/gen-2609-118-colour-rule`, off `4f23b73`, 4 commits:
