@@ -39,6 +39,7 @@
 // see docs/design.md's own GEN-2609-089 Phase 2 dispatch).
 const fs = require('fs')
 const path = require('path')
+const { parseTokenOk } = require('../check-design-tokens')
 
 const file = require.main === module ? process.argv[2] : null
 const APPLY = process.argv.includes('--apply')
@@ -777,8 +778,10 @@ function isCommentLine(line) {
   return t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')
 }
 
+// GEN-2609-117 - any token-ok comment (scoped, or one the checker
+// rejects) leaves the line alone; the checker's parser decides.
 function tokenOkReason(line) {
-  return /\/\/\s*token-ok:/.test(line) || /\{\/\*\s*token-ok:/.test(line)
+  return parseTokenOk(line) !== null
 }
 
 // Replace exact-match parts of a whitespace-separated value (a single

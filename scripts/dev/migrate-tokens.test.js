@@ -141,8 +141,18 @@ t('processLine: a comment line is never touched, even one that looks like a comp
   assert.equal(out, line)
 })
 
-t('processLine: a `token-ok:` annotated line is never touched', () => {
+t('processLine: a `token-ok(<rule>):` annotated line is never touched', () => {
+  const line = "        border: '1px solid rgba(245,245,240,0.08)', // token-ok(rgb-rgba-literal): intentional literal"
+  const out = processLine(line, false, DEFAULT_DEFS)
+  assert.equal(out, line)
+})
+t('processLine: a token-ok the checker rejects (unscoped) is still left for a human', () => {
   const line = "        border: '1px solid rgba(245,245,240,0.08)', // token-ok: intentional literal"
+  const out = processLine(line, false, DEFAULT_DEFS)
+  assert.equal(out, line)
+})
+t('processLine: the scoped JSX form is never touched', () => {
+  const line = '      <path fill="#4285F4" style={{ border: "1px solid rgba(245,245,240,0.08)" }}/>{/* token-ok(rgb-rgba-literal): brand */}'
   const out = processLine(line, false, DEFAULT_DEFS)
   assert.equal(out, line)
 })

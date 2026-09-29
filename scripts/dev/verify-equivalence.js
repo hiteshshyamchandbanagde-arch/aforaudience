@@ -51,6 +51,7 @@
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
+const { parseTokenOk } = require('../check-design-tokens')
 
 const { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP, RADIUS_ROUND, COLOR_MAP, COLOR_ROUND, FONT_SIZE_ROUNDED_KEYS, RADIUS_PROPS, colorContext, resolveColor } = require('./migrate-tokens')
 
@@ -329,7 +330,7 @@ function colorItems(line, isColorToken) {
   return items
 }
 const isCommentish = (l) => /^\s*(\/\/|\*|\/\*)/.test(l)
-const hasTokenOk = (l) => /\/\/\s*token-ok:|\{\/\*\s*token-ok:/.test(l)
+const hasTokenOk = (l) => parseTokenOk(l) !== null // GEN-2609-117 - shared parser
 
 const colorStats = { equiv: 0, rounded: [], swaps: [], exempt: [], removed: [], dynamic: [] }
 function checkColorSites(file) {
