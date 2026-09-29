@@ -4,6 +4,7 @@
 - Chat review: the lift is measured, not guessed; the register fix aborts stale requests and ignores stale results; the 2 commits `qa` was ahead were docs-only.
 - 067/068/072/074/075 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Needs Hitesh's click-through (part 20 gaps: the other 5 marked pages; the info toast after a real Publish; the bubble-hide case).
 - Logged **BUG-2609-081** (bubble covers register password toggle / profile rows; chat rec: hide on /login, /register, /profile with a help link instead) and **GEN-2609-120** (no `mr` locale). Both need Hitesh.
+- Hitesh agreed all 6 decisions: logged **GEN-2609-121** (colour follow-ups, BUILD_QUEUE); BUG-2609-081 and GEN-2609-120 → BUILD_QUEUE. Detail in design.md "Decisions 29 Sep". Hitesh doing the combined #714/#716 click-through now.
 - **Next dispatch:** `docs/cc-dispatches/cc-prompt-spacing-107-phase1.md` (exact-match only, zero visual change, exempt paths excluded, non-matching table back to chat).
 
 ---

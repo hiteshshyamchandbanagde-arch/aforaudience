@@ -8194,3 +8194,13 @@ Feedback: GEN-2609-117 → `RESOLVED` / `DEPLOYED_QA` (tooling only, no visual c
 - **Follow-ups logged:** BUG-2609-081 (bubble still covers mid-page controls: register password toggle, profile rows) and GEN-2609-120 (no Marathi locale; launch is Pune-first). Both need Hitesh.
 
 Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh's click-through.
+
+## Decisions 29 Sep (Hitesh agreed all chat recommendations)
+
+- **GEN-2609-121 — colour-rule follow-ups (from #714's flags):**
+  - Stage bars and the builder's front-tier seats become neutral (`--afa-tint-20` fill, primary text). They're labels, not actions.
+  - Artist profile: the per-show ticket links are the primary (orange). + Follow is an outline; prev/next arrows are plain icon buttons.
+  - Profile: a card's Save is an outline, and becomes primary only while that card has unsaved changes. The rule stays "one primary in view".
+  - Amber-direct active states (DashboardShell nav, MobileTabBar, SiteNav, venue bookings calendar, profile role cards) move onto `--afa-selected*`, so admin edits reach them. The fainter 0.08 wash is accepted, pending a live check.
+- **BUG-2609-081:** no chat bubble on `/login`, `/register` or `/profile`. Auth pages get a small "Need help?" link, and profile gets a "Help & support" row.
+- **GEN-2609-120:** add Marathi (`mr`) before the Pune launch, scoped together with the Indic font gap.
