@@ -47,7 +47,7 @@
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
-const { RULES, isCheckedFile, isExemptFile, tokenOkReason, bareReason } = require('./check-design-tokens')
+const { RULES, isCheckedFile, isExemptFile, parseTokenOk, bareReason } = require('./check-design-tokens')
 
 const BASELINE_PATH = path.join(__dirname, 'design-token-baseline.json')
 const UPDATE = process.argv.includes('--update-baseline')
@@ -63,12 +63,49 @@ function listCheckedFiles() {
     .filter((f) => isCheckedFile(f) && !isExemptFile(f))
 }
 
-function countAll() {
+// Counts one file's text into `acc` (counts, tokenOkUses,
+// tokenOkErrors, bareReasonUses) and returns the file's total.
+// GEN-2609-117 - a token-ok exempts only the rules it names; one that
+// doesn't parse exempts nothing and is recorded as an error.
+function countLines(file, text, acc) {
+  let fileTotal = 0
+  // GEN-2609-110 - bare-button reads the line above (bare-reason).
+  let prevLine = ''
+  text.split('\n').forEach((line, i) => {
+    const above = prevLine
+    prevLine = line
+    const bare = bareReason(line)
+    if (bare) acc.bareReasonUses.push({ file, reason: bare })
+    const ok = parseTokenOk(line)
+    let exempt = []
+    if (ok && ok.error) {
+      acc.tokenOkErrors.push({ file, line: i + 1, error: ok.error, content: line.trim() })
+    } else if (ok) {
+      exempt = ok.rules
+      acc.tokenOkUses.push({ file, line: i + 1, rules: ok.rules, reason: ok.reason, content: line.trim() })
+    }
+    for (const rule of RULES) {
+      if (rule.isExemptFile && rule.isExemptFile(file)) continue
+      if (exempt.includes(rule.name)) continue
+      const literals = rule.extract ? rule.extract(line, above) : (rule.test(line, above) ? [line] : [])
+      if (literals.length > 0) {
+        acc.counts[rule.name] += literals.length
+        fileTotal += literals.length
+      }
+    }
+  })
+  return fileTotal
+}
+
+function newAccumulator() {
   const counts = {}
   for (const rule of RULES) counts[rule.name] = 0
+  return { counts, tokenOkUses: [], tokenOkErrors: [], bareReasonUses: [] }
+}
+
+function countAll() {
+  const acc = newAccumulator()
   const perFile = {}
-  const tokenOkUses = []
-  const bareReasonUses = []
 
   for (const file of listCheckedFiles()) {
     let text
@@ -77,31 +114,10 @@ function countAll() {
     } catch {
       continue // deleted-but-still-listed edge case (rare, ls-files is normally live-tree accurate)
     }
-    let fileTotal = 0
-    // GEN-2609-110 - bare-button reads the line above (bare-reason).
-    let prevLine = ''
-    for (const line of text.split('\n')) {
-      const above = prevLine
-      prevLine = line
-      const bare = bareReason(line)
-      if (bare) bareReasonUses.push({ file, reason: bare })
-      const reason = tokenOkReason(line)
-      if (reason) {
-        tokenOkUses.push({ file, reason, content: line.trim() })
-        continue
-      }
-      for (const rule of RULES) {
-        if (rule.isExemptFile && rule.isExemptFile(file)) continue
-        const literals = rule.extract ? rule.extract(line, above) : (rule.test(line, above) ? [line] : [])
-        if (literals.length > 0) {
-          counts[rule.name] += literals.length
-          fileTotal += literals.length
-        }
-      }
-    }
+    const fileTotal = countLines(file, text, acc)
     if (fileTotal > 0) perFile[file] = fileTotal
   }
-  return { counts, perFile, tokenOkUses, bareReasonUses }
+  return { ...acc, perFile }
 }
 
 function loadBaseline() {
@@ -149,7 +165,7 @@ function printReport(counts, baseline, perFile) {
 }
 
 function main() {
-  const { counts, perFile, tokenOkUses, bareReasonUses } = countAll()
+  const { counts, perFile, tokenOkUses, tokenOkErrors, bareReasonUses } = countAll()
   const baseline = loadBaseline()
 
   if (bareReasonUses.length > 0) {
@@ -159,15 +175,26 @@ function main() {
   }
 
   if (tokenOkUses.length > 0) {
-    console.log(`design-token ratchet: ${tokenOkUses.length} line(s) currently allowed via // token-ok: (always shown):\n`)
+    console.log(`design-token ratchet: ${tokenOkUses.length} line(s) currently allowed via token-ok(<rule>) (always shown):\n`)
     for (const u of tokenOkUses) {
-      console.log(`  ${u.file}  reason: ${u.reason}`)
+      console.log(`  ${u.file}:${u.line}  [${u.rules.join(', ')}]  reason: ${u.reason}`)
       console.log(`    ${u.content}`)
     }
     console.log('')
   }
 
   const rows = printReport(counts, baseline, perFile)
+
+  // GEN-2609-117 - checked before --update-baseline, so a bad comment
+  // can never be written into a baseline either.
+  if (tokenOkErrors.length > 0) {
+    console.error(`\ndesign-token ratchet: FAILED - ${tokenOkErrors.length} invalid token-ok comment(s):`)
+    for (const e of tokenOkErrors) {
+      console.error(`  ${e.file}:${e.line}  ${e.error}`)
+      console.error(`    ${e.content}`)
+    }
+    process.exit(1)
+  }
 
   if (UPDATE) {
     if (!baseline) {
@@ -214,4 +241,4 @@ if (require.main === module) {
   main()
 }
 
-module.exports = { countAll, loadBaseline, writeBaseline, BASELINE_PATH }
+module.exports = { countAll, countLines, newAccumulator, loadBaseline, writeBaseline, BASELINE_PATH }

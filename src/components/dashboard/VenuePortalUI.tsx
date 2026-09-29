@@ -360,7 +360,7 @@ export function PageHead({
           <h1
             style={{
               fontFamily: 'var(--font-ui)',
-              fontSize: '34px', // token-ok: Venue Portal page h1 in the UI font, the only 34px UI-font title, above page-title-lg (32px)
+              fontSize: '34px', // token-ok(font-size-literal): Venue Portal page h1 in the UI font, the only 34px UI-font title, above page-title-lg (32px)
               fontWeight: 500,
               lineHeight: 1,
               letterSpacing: '-0.01em',

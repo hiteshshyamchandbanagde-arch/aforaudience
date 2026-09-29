@@ -30,7 +30,7 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
         </div>
         <h1 style={{
           fontFamily: "var(--font-display)",
-          fontSize: "36px", // token-ok: one-off marketing display title on the Coming Soon placeholder (see docs/afa-design-tokens-reference.md, one-off display text)
+          fontSize: "36px", // token-ok(font-size-literal): one-off marketing display title on the Coming Soon placeholder (see docs/afa-design-tokens-reference.md, one-off display text)
           fontWeight: 700,
           color: "var(--afa-text-primary)",
           marginBottom: "16px",

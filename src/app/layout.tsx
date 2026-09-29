@@ -277,7 +277,7 @@ export const viewport: Viewport = {
   // theme_color - all 3 must stay in sync by hand (see docs/design.md's
   // GEN-2609-094 entry for the known limitation: this won't follow an
   // admin's live change to --afa-fill-solid the way most tokens do).
-  themeColor: "#FF5A36", // token-ok: meta content attribute, not a CSS context - var() cannot resolve here; must equal manifest.ts's theme_color
+  themeColor: "#FF5A36", // token-ok(hex-color-literal): meta content attribute, not a CSS context - var() cannot resolve here; must equal manifest.ts's theme_color
 };
 
 export default async function RootLayout({

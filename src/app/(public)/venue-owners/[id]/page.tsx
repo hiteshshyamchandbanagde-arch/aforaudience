@@ -61,7 +61,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "36px", // token-ok: initial letter inside the 96px avatar circle, sized to the circle, not a type-scale role
+            fontSize: "36px", // token-ok(font-size-literal): initial letter inside the 96px avatar circle, sized to the circle, not a type-scale role
             fontWeight: 700,
             color: "var(--afa-text-primary)",
             flexShrink: 0,

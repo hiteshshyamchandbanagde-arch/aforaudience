@@ -68,7 +68,7 @@ export default function AuthBrandPanel() {
           <p
             className="font-light text-[color:var(--afa-text-primary)] leading-[1.15]"
             style={{
-              fontSize: "2.5rem", // token-ok: brand-panel tagline, the only 40px display line, sized to the desktop panel
+              fontSize: "2.5rem", // token-ok(font-size-literal): brand-panel tagline, the only 40px display line, sized to the desktop panel
               fontFamily: "var(--font-display)",
             }}
           >
