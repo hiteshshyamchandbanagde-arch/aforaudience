@@ -1,3 +1,13 @@
+# Session Handoff — 29 Sept 2026, part 21 (chat — #716 merged; spacing phase 1 dispatched)
+
+- **#716 bug bundle** squash-merged at pinned head `df05eb4` → `qa` @ `5965ee5`. CI green (design-tokens + Vercel preview); branch deleted; `useActionRowClearance` and the Button.tsx cleanup verified on `qa`; deploy READY; 0 runtime errors.
+- Chat review: the lift is measured, not guessed; the register fix aborts stale requests and ignores stale results; the 2 commits `qa` was ahead were docs-only.
+- 067/068/072/074/075 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Needs Hitesh's click-through (part 20 gaps: the other 5 marked pages; the info toast after a real Publish; the bubble-hide case).
+- Logged **BUG-2609-081** (bubble covers register password toggle / profile rows; chat rec: hide on /login, /register, /profile with a help link instead) and **GEN-2609-120** (no `mr` locale). Both need Hitesh.
+- **Next dispatch:** `docs/cc-dispatches/cc-prompt-spacing-107-phase1.md` (exact-match only, zero visual change, exempt paths excluded, non-matching table back to chat).
+
+---
+
 # Session Handoff — 29 Sept 2026, part 20 (CC — MEDIUM bug bundle 068/072/074/075/067, pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/medium-bug-bundle-2609?expand=1

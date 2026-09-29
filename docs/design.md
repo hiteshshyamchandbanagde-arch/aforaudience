@@ -8183,3 +8183,14 @@ Feedback: GEN-2609-117 → `RESOLVED` / `DEPLOYED_QA` (tooling only, no visual c
 - **Approach:** all four render on the server. Reuse `getDesignTokensSafe()` (`src/lib/design-tokens.server.ts`: cached and tagged, so an admin save already invalidates it). Add one resolver that follows `var()` chains to a concrete colour, plus a pdf-lib `rgb(0..1)` adapter. Once converted, remove these files' checker exemptions so the ratchet guards them too.
 - **Stays fixed:** logo colours (pixel copies of `icon.svg`) and third-party brand marks.
 - Sequenced after spacing GEN-2609-107. Feedback: GEN-2609-119 → `BUILD_QUEUE`.
+
+## MEDIUM bug bundle — BUG-2609-068/072/074/075/067 (merged #716, 29 Sep)
+
+- **Standing rule (068):** bottom action rows carry `data-afa-action-row`. On mobile, the chat bubble (`useActionRowClearance`) lifts to sit above any such row in view, and hides only when lifting would put it under the top bar. Any new page with a bottom Save/Publish/Cancel row must add the attribute.
+- **Toasts (072):** one component for all 23 sites. Opaque `--afa-surface-raised` with a border and shadow; the variant colour appears only on the edge and icon. Top-right on desktop. On mobile it sits above the bubble, and moves to the top while an action row is in that band, so it never covers the buttons it reports on.
+- **Register (074):** username checks and initials fetches abort stale requests and ignore any result whose input no longer matches.
+- **Seats (075):** selected seats keep their size (state = colour/border/weight only); the label is sized from the seat's width. Heading "Choose your seats" on seat-level maps (11 locales).
+- **Seat Map Builder (067):** the page body never scrolls sideways; only the canvas scrolls.
+- **Follow-ups logged:** BUG-2609-081 (bubble still covers mid-page controls: register password toggle, profile rows) and GEN-2609-120 (no Marathi locale; launch is Pune-first). Both need Hitesh.
+
+Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh's click-through.
