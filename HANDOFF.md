@@ -5,7 +5,8 @@
 - `Button.tsx:789` no-op exemption: delete (folded into the bundle).
 - **Next dispatch:** `docs/cc-dispatches/cc-prompt-medium-bug-bundle-072-068-074-075-067.md`. 068 decision: bubble lifts above `data-afa-action-row` rows, hides only if no room.
 - After the bundle: spacing GEN-2609-107. Chat scopes Indic fonts meanwhile. 071 (dates) and 065 (sheet focus trap) stay separate runs.
-- Open for Hitesh: GEN-2609-118 click-through; GEN-2609-119 in/out of scope.
+- Open for Hitesh: GEN-2609-118 click-through.
+- **GEN-2609-119 decided IN SCOPE (Hitesh)** → `BUILD_QUEUE`, after spacing. Approach in design.md.
 
 ---
 

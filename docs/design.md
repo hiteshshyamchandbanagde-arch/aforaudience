@@ -8176,3 +8176,10 @@ Feedback: GEN-2609-118 → `BUILD_QUEUE`.
 - Decision (chat, 29 Sep): a `token-ok` that exempts nothing is deleted, not kept as documentation (first case: `Button.tsx:789` `borderRadius: '50%'`, removed in the MEDIUM bug bundle).
 
 Feedback: GEN-2609-117 → `RESOLVED` / `DEPLOYED_QA` (tooling only, no visual change, no click-through needed).
+
+## GEN-2609-119 — brand outputs follow admin token edits (decision 29 Sep; queued after spacing)
+
+- **Decision (Hitesh, 29 Sep):** the central-control goal includes what users receive and download. Share posters (`src/app/api/posters/*`), transactional email (`src/lib/email.ts`), the ticket PDF (`src/lib/ticket-pdf.ts`) and the PWA manifest (`src/app/manifest.ts`) must take their colours from the live `DesignToken` values, not hardcoded literals.
+- **Approach:** all four render on the server. Reuse `getDesignTokensSafe()` (`src/lib/design-tokens.server.ts`: cached and tagged, so an admin save already invalidates it). Add one resolver that follows `var()` chains to a concrete colour, plus a pdf-lib `rgb(0..1)` adapter. Once converted, remove these files' checker exemptions so the ratchet guards them too.
+- **Stays fixed:** logo colours (pixel copies of `icon.svg`) and third-party brand marks.
+- Sequenced after spacing GEN-2609-107. Feedback: GEN-2609-119 → `BUILD_QUEUE`.
