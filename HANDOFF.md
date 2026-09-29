@@ -5,7 +5,9 @@
 - Ratchet: all categories 0 except `spacing-literal` 1864.
 - Open for Hitesh: 118 click-through (part 16 list) → RESOLVED.
 - Flagged to Hitesh: brand surfaces exempt from the checker (`api/posters/*`, `lib/email.ts`, `lib/ticket-pdf.ts`, `app/manifest.ts`) don't follow admin token edits; all are server-rendered, so they could read resolved `DesignToken` values. Decision pending.
-- Next order unchanged: MEDIUM bug bundle → Indic fonts → GEN-2609-117 → spacing GEN-2609-107.
+- **Next (chat decision, delegated):** GEN-2609-117 first (small, unblocks spacing), then the MEDIUM bug bundle, then spacing GEN-2609-107. Indic fonts scoped by chat in parallel. Dispatch: `docs/cc-dispatches/cc-prompt-token-ok-scope-117.md`. GEN-2609-117 → `BUILD_QUEUE`.
+- Correction: spacing admin exposure was already decided (GEN-2609-107, 24 Sep) and built (GEN-2609-108: spacing hidden from the editor). Not an open question.
+- Logged **GEN-2609-119** (FEATURE_IDEA, NEW, MEDIUM): brand surfaces (posters, email, ticket PDF, manifest) follow admin token edits. Awaiting Hitesh's in/out-of-scope call.
 
 ---
 
