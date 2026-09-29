@@ -1,3 +1,74 @@
+# Session Handoff — 29 Sept 2026, part 18 (CC — GEN-2609-117 token-ok scope, pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-117-token-ok-scope?expand=1 (branch off `origin/qa` @ `b8fe94c`; qa did not move during the run).
+- **Commits:** `6ffda29` scoped parser + checker/ratchet + self-tests + the 31 `src/` conversions (one commit, so the ratchet stays green at every commit) · `6092447` dev scripts use the shared parser · `8aace22` docs.
+- **No DB, no visual change.** Nothing to run after merge except moving GEN-2609-117 to BUILD_COMPLETE / DEPLOYED_QA.
+
+## Finding: the revealed delta is 0, not ~+3
+The dispatch expected spacing to rise by ~3. It doesn't, because #713 already put those 3 back: part 12 §3 "Split lines" split the single-line styles so the reason sits on the `fontSize` line only (spacing back to 1866 at the time). Before this change, every one of the 31 `token-ok` lines held **exactly one literal of one rule**, so scoping reveals nothing. **The baseline was not touched.**
+
+| rule | origin/qa | branch |
+|---|---|---|
+| hex-color-literal | 0 | 0 |
+| rgb-rgba-literal | 0 | 0 |
+| hardcoded-font-family | 0 | 0 |
+| font-size-literal | 0 | 0 |
+| spacing-literal | 1864 | 1864 |
+| radius-literal | 0 | 0 |
+| raw-button | 0 | 0 |
+| bare-button | 0 | 0 |
+
+Revealed literals: **none**. For a negative control, the new ratchet was run on the unconverted tree first. It failed with 31 `unscoped` errors, and the tree stopped hiding 13 hex, 8 rgba and 9 font-size literals (the 31st line hides nothing, see below). After conversion, every count equals qa.
+
+## Syntax (as built)
+- `// token-ok(<rule>[,<rule>]): <reason>` and `{/* token-ok(<rule>): <reason> */}`, at the end of the line. `<rule>` must be a `RULES` name. The scope exempts only the named rules; every other rule still runs on that line.
+- The following are errors in **both** the checker and the ratchet: unscoped `token-ok:`, an unknown rule, an empty `()`, a missing reason, or a token-ok not at line end.
+  - In the checker, the error is a `token-ok-syntax` offense, and the line exempts nothing.
+  - In the ratchet, it is a failure checked before `--update-baseline` can write.
+- There is one parser, `parseTokenOk` in `check-design-tokens.js`. The ratchet imports it, and its per-file loop is now an exported `countLines` so a self-test can compare the ratchet and checker counts on one fixture.
+- Both `(always shown)` listings print `file:line  [rule, ...]  reason: ...`. The ratchet listing gained line numbers.
+
+## Beyond the dispatch's list (needed for it to hold)
+- **`scripts/dev/migrate-tokens.js` and `scripts/dev/verify-equivalence.js`** had their own `token-ok:` regexes. With the new form, the codemod would have **rewritten lines carrying a scoped token-ok**. The negative control confirms it: with the old matcher, 2 of the new migrate-tokens tests fail. Both now call `parseTokenOk(line) !== null`, so any token-ok comment, valid or rejected, still leaves the line alone.
+- **Removed lines in the checker's count rules:** a removed `<button>` used to count as −1 even when it had a token-ok (it was never counted as +1). Now a `token-ok(raw-button)` / `(bare-button)` removal isn't a −1 either, so it can't pay for a new button. There is a self-test for this.
+
+## The 31 conversions (reason text unchanged; the rule is whatever actually fires on the line)
+- `hex-color-literal` (13): `(auth)/login/page.tsx:366,367,368,369` · `(auth)/register/RegisterForm.tsx:55,56,57,58` · `app/layout.tsx:280` · `components/BrandLoader.tsx:15,16,19,22`
+- `rgb-rgba-literal` (8): `app/page.tsx:96` · `app/profile/page.tsx:931` · `app/tickets/page.tsx:591` · `components/HeroRotator.tsx:63` · `components/PhotoCrossfadeBackdrop.tsx:46,51,60` · `components/SupportWidget.tsx:680`
+- `font-size-literal` (9): `(public)/tours/[slug]/page.tsx:54` · `(public)/venue-owners/[id]/page.tsx:64` · `dashboard/audience/page.tsx:42` · `dashboard/venue/page.tsx:243` · `components/AuthBrandPanel.tsx:71` · `components/ComingSoon.tsx:33` · `components/CorporateInquiryModal.tsx:181` · `components/FourRooms.tsx:69` · `components/dashboard/VenuePortalUI.tsx:363`
+- `radius-literal` (1): `components/ui/Button.tsx:789`. **This reason covers nothing.** It sits on `borderRadius: '50%'`, and `%` is allowlisted, so `radius-literal` never fires on that line. It was scoped to `radius-literal` (what the reason describes) and kept. **Chat:** delete it or keep it as documentation.
+- No line needed 2 rules.
+- Check: every changed `src/` line equals its qa line once `(<rule>)` is removed, 31/31 lines, with CRLF preserved.
+
+## Verification
+- `npx tsc --noEmit -p .`: exit 0.
+- `next build`: ✓ compiled.
+- `BASE_REF=origin/qa node scripts/check-design-tokens.js`: 0 offenses, 31 uses listed with their rules.
+- `node scripts/design-token-ratchet.js`: all categories equal the baseline.
+- Self-tests:
+  - `check-design-tokens.test.js`: 91 passed (was 80).
+  - `dev/migrate-tokens.test.js`: 65 passed.
+  - `design-tokens.test.ts`: 48 passed.
+- New tests cover:
+  - A scoped comment exempts its rule, and another rule on the same line is still flagged.
+  - Multi-rule scope.
+  - The unscoped form errors.
+  - An unknown rule errors.
+  - An empty scope or missing reason errors.
+  - The JSX form, and a malformed JSX form.
+  - bare-button with the wrong rule named is still counted.
+  - A raw-button removal under token-ok.
+  - The checker and ratchet produce identical per-rule counts on an 8-line fixture (hex/rgba/spacing/radius/bare-button, including an unscoped line and 2 "wrong rule named" lines).
+- `verify-equivalence.js` smoke run: 0 mismatches.
+- ESLint, qa vs branch per touched file: all 20 `src/` files are identical. `scripts/` has 3 new `@typescript-eslint/no-require-imports` hits (the new `require` lines); every one of those CommonJS scripts already triggers that rule on its existing `require`s.
+
+## Docs
+- `docs/afa-design-tokens-reference.md` never documented the syntax. The Enforcement paragraph (§1) now documents it.
+- `docs/design.md`: the GEN-2609-078 `token-ok` paragraph has a one-line "superseded by GEN-2609-117" note. No new design.md entry was written; chat adds it on merge, as usual.
+- The other `token-ok:` mentions in `docs/` are dated records (old dispatches, batch entries, `token-migration-status.md`) and were left alone.
+
+---
+
 # Session Handoff — 29 Sept 2026, part 17 (chat — goal status check, docs catch-up)
 
 - `qa` HEAD `0a03fb4` (#714 GEN-2609-118, merged 27 Sep). No open PRs/branches. Nothing merged since.
