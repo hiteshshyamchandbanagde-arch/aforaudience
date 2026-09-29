@@ -8167,3 +8167,12 @@ Feedback: BUG-2609-062 and GEN-2609-110 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Ve
 Feedback: GEN-2609-118 → `BUILD_QUEUE`.
 
 **Shipped (27 Sep):** PR #714 merged to `qa` as `0a03fb4`. The 3 `DesignToken` rows (`--afa-selected`, `-bg`, `-border`) are in QA, unlocked, under "Selected state". Light-surface fallback not built: no selected site sits on a light surface today, and the two `CONTRAST_PAIRS` guards will block a save if one is added. Feedback: `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh's click-through (HANDOFF part 16).
+
+## GEN-2609-117 — `token-ok` is scoped to the rule it names (merged #715, 29 Sep)
+
+- **Standing syntax:** `// token-ok(<rule>[,<rule>]): <reason>` or `{/* token-ok(<rule>): <reason> */}`. Only the named rules are exempt on that line. The unscoped form, an unknown rule, or a malformed comment fails the checker and the ratchet (shared `parseTokenOk`, also used by `scripts/dev/migrate-tokens.js` and `verify-equivalence.js`).
+- Revealed delta was 0 in every category: #713 had already isolated those lines. Baseline untouched.
+- A deleted `token-ok` button no longer counts as −1 in the diff check.
+- Decision (chat, 29 Sep): a `token-ok` that exempts nothing is deleted, not kept as documentation (first case: `Button.tsx:789` `borderRadius: '50%'`, removed in the MEDIUM bug bundle).
+
+Feedback: GEN-2609-117 → `RESOLVED` / `DEPLOYED_QA` (tooling only, no visual change, no click-through needed).

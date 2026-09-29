@@ -1,3 +1,14 @@
+# Session Handoff — 29 Sept 2026, part 19 (chat — #715 merged; bug bundle dispatched)
+
+- **#715 GEN-2609-117** squash-merged at pinned head `8aace22` → `qa` @ `90c7e02`. CI (design-tokens, Vercel preview) green; branch deleted; `parseTokenOk` verified on `qa` via Contents API; qa deploy READY; 0 runtime errors (30 min). Chat re-ran check-design-tokens 91/91 and migrate-tokens 65/65 on the branch; `src/` diff comment-only; 0 unscoped `token-ok:` left.
+- GEN-2609-117 → `RESOLVED` / `DEPLOYED_QA` (tooling, nothing to click through). design.md entry added.
+- `Button.tsx:789` no-op exemption: delete (folded into the bundle).
+- **Next dispatch:** `docs/cc-dispatches/cc-prompt-medium-bug-bundle-072-068-074-075-067.md`. 068 decision: bubble lifts above `data-afa-action-row` rows, hides only if no room.
+- After the bundle: spacing GEN-2609-107. Chat scopes Indic fonts meanwhile. 071 (dates) and 065 (sheet focus trap) stay separate runs.
+- Open for Hitesh: GEN-2609-118 click-through; GEN-2609-119 in/out of scope.
+
+---
+
 # Session Handoff — 29 Sept 2026, part 18 (CC — GEN-2609-117 token-ok scope, pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-117-token-ok-scope?expand=1 (branch off `origin/qa` @ `b8fe94c`; qa did not move during the run).
