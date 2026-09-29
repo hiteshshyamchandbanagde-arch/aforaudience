@@ -1,7 +1,9 @@
 'use client';
 
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
+import { ABOVE_CHAT_BUTTON_MOBILE, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
+import { useActionRowClearance } from '@/components/mobile/useActionRowClearance';
 
 /**
  * Global toast/snackbar. Fixed-position, so it's visible regardless of
@@ -42,6 +44,19 @@ export function useToast(): ToastContextValue {
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  // BUG-2609-072 - on mobile the stack rests above the chat button, which
+  // is where form action rows sit when scrolled into view (the Publish row
+  // after Publish). While a data-afa-action-row overlaps that band, the
+  // stack moves to the top, under the top bar, instead of covering it.
+  // The probe is the stack's resting spot at its current height.
+  const stackRef = useRef<HTMLDivElement>(null);
+  const probeRef = useRef<HTMLDivElement>(null);
+  const [stackHeight, setStackHeight] = useState(0);
+  useLayoutEffect(() => {
+    setStackHeight(stackRef.current?.offsetHeight ?? 0);
+  }, [toasts]);
+  const clearance = useActionRowClearance(probeRef, toasts.length > 0);
+  const atTop = clearance.bottom !== null || clearance.hidden;
 
   const showToast = useCallback((message: string, kind: ToastKind = 'error') => {
     const id = Date.now() + Math.random();
@@ -65,13 +80,27 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           from { width: 100%; }
           to { width: 0%; }
         }
+        /* BUG-2609-072 - clear of page content: top-right under the
+           sticky nav on desktop; on mobile, above the tab bar and the
+           chat button (it used to sit bottom-centre, on top of form
+           action rows). */
+        .afa-toast-stack { top: calc(var(--nudge-stack-height, 0px) + 80px); right: 24px; }
+        @media (max-width: ${MOBILE_BREAKPOINT_MAX}px) {
+          .afa-toast-stack { top: auto; bottom: ${ABOVE_CHAT_BUTTON_MOBILE}; right: 16px; left: 16px; width: auto !important; }
+          .afa-toast-stack.afa-toast-stack-top { top: calc(var(--nudge-stack-height, 0px) + 72px); bottom: auto; }
+        }
       `}</style>
       <div
+        ref={probeRef}
+        aria-hidden="true"
+        className="afa-toast-stack"
+        style={{ position: 'fixed', width: 420, maxWidth: 'calc(100vw - 32px)', height: stackHeight, visibility: 'hidden', pointerEvents: 'none' }}
+      />
+      <div
+        ref={stackRef}
+        className={atTop ? 'afa-toast-stack afa-toast-stack-top' : 'afa-toast-stack'}
         style={{
           position: 'fixed',
-          bottom: 24,
-          left: '50%',
-          transform: 'translateX(-50%)',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
@@ -94,9 +123,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           // page. Same translucent-on-dark treatment ErrorBanner/
           // SuccessBanner already use, extended to the 'info' kind they
           // don't have.
+          //
+          // BUG-2609-072 - those tints are translucent (0.1-0.15 alpha), so
+          // whatever sat behind a toast printed through it (the button row
+          // after Publish, the version-history row after a restore). Every
+          // kind now shares one opaque raised surface with a border and a
+          // shadow; the kind's colour lives only on the edge and the icon.
           const accent = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
-          const bg = t.kind === 'error' ? 'var(--afa-error-tint)' : t.kind === 'info' ? 'var(--afa-amber-tint)' : 'var(--afa-sage-tint)'
-          const text = t.kind === 'error' ? 'var(--afa-error-bright)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-sage-bright)'
           // BUG-2609-043: the badge glyph's color was a hardcoded 'white'
           // literal - only actually legible against 2 of these 3 dynamic
           // `accent` backgrounds (measured ~6.5:1 on error/green, but only
@@ -115,14 +148,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: 12,
-                background: bg,
-                color: text,
+                background: 'var(--afa-surface-raised)',
+                color: 'var(--afa-text-primary)',
                 borderRadius: 'var(--afa-radius-lg)',
+                border: '1px solid var(--afa-border-resting)',
                 borderLeft: `4px solid ${accent}`,
                 padding: '14px 16px 16px',
                 fontSize: 'var(--afa-text-body)',
                 lineHeight: 1.45,
-                boxShadow: '0 10px 30px var(--afa-border-resting)',
+                boxShadow: '0 10px 30px var(--afa-shadow)',
                 animation: 'toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                 overflow: 'hidden',
               }}
@@ -153,8 +187,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 onClick={() => dismiss(t.id)}
                 style={{
                   flexShrink: 0,
-                  color: text,
-                  opacity: 0.5,
+                  color: 'var(--afa-text-secondary)',
                   fontSize: 'var(--afa-text-title)',
                   lineHeight: 1,
                   padding: 2,
