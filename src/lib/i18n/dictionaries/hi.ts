@@ -529,6 +529,7 @@ const hi: Dictionary = {
     seatsReserved: "सीटें आरक्षित",
     freeEntry: "मुफ़्त प्रवेश",
     chooseSection: "अपना सेक्शन चुनें",
+    chooseSeats: "अपनी सीटें चुनें",
     priceTBD: "मूल्य जल्द तय होगा",
     seatsAvailableSummary: "{total} में से {available} सीटें उपलब्ध · अधिकतम {max} प्रति बुकिंग",
     generalAdmission: "सामान्य प्रवेश",

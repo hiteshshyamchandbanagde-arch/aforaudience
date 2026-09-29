@@ -246,7 +246,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const priceLabel = event.isFree
     ? tr.eventDetailPage.freeEntry
     : event.ticketTiers.length > 0
-    ? tr.eventDetailPage.chooseSection
+    ? // BUG-2609-075 - a numbered map is picked seat by seat
+      event.venue?.seatingMode === 'NUMBERED'
+      ? tr.eventDetailPage.chooseSeats
+      : tr.eventDetailPage.chooseSection
     : event.ticketPrice
     ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}`
     : tr.eventDetailPage.priceTBD

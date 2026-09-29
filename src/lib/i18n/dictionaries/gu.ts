@@ -530,6 +530,7 @@ const gu: Dictionary = {
     seatsReserved: "સીટો રિઝર્વ કરી",
     freeEntry: "મફત પ્રવેશ",
     chooseSection: "તમારો વિભાગ પસંદ કરો",
+    chooseSeats: "તમારી સીટો પસંદ કરો",
     priceTBD: "કિંમત પછીથી નક્કી થશે",
     seatsAvailableSummary: "કુલ {total} માંથી {available} સીટો · બુકિંગ દીઠ મહત્તમ {max}",
     generalAdmission: "સામાન્ય પ્રવેશ",

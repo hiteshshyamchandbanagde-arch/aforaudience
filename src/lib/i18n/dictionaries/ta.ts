@@ -530,6 +530,7 @@ const ta: Dictionary = {
     seatsReserved: "இருக்கைகள் முன்பதிவு செய்யப்பட்டன",
     freeEntry: "இலவச நுழைவு",
     chooseSection: "உங்கள் பிரிவைத் தேர்ந்தெடுக்கவும்",
+    chooseSeats: "உங்கள் இருக்கைகளைத் தேர்ந்தெடுக்கவும்",
     priceTBD: "விலை பின்னர் நிர்ணயிக்கப்படும்",
     seatsAvailableSummary: "மொத்தம் {total} இல் {available} இருக்கைகள் · முன்பதிவுக்கு அதிகபட்சம் {max}",
     generalAdmission: "பொது நுழைவு",

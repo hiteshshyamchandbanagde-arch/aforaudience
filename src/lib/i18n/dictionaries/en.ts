@@ -554,6 +554,7 @@ const en = {
     seatsReserved: "Seats reserved",
     freeEntry: "Free Entry",
     chooseSection: "Choose your section",
+    chooseSeats: "Choose your seats",
     priceTBD: "Price TBD",
     seatsAvailableSummary: "{available} of {total} seats total · max {max} per booking",
     generalAdmission: "General Admission",
