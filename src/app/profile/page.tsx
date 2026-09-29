@@ -859,6 +859,7 @@ function ProfileContent() {
             <Button
               variant="primary"
               fullWidth={false}
+              data-afa-action-row
               onClick={saveDisplayName}
               disabled={savingName || displayName.trim() === initialDisplayName.trim()}
             >
@@ -899,6 +900,7 @@ function ProfileContent() {
             <Button
               variant="primary"
               fullWidth={false}
+              data-afa-action-row
               onClick={saveAbout}
               disabled={savingAbout || (avatar === initialAvatar && bio === initialBio)}
             >
@@ -943,6 +945,7 @@ function ProfileContent() {
             <Button
               variant="primary"
               fullWidth={false}
+              data-afa-action-row
               onClick={saveDisplayCurrency}
               disabled={savingCurrency || displayCurrency === initialDisplayCurrency}
             >
@@ -969,7 +972,7 @@ function ProfileContent() {
                 <div style={{ marginBottom: 'var(--afa-space-3)' }}>
                   <GenrePicker value={genre} onChange={setGenre} size="lg" />
                 </div>
-                <Button variant="primary" fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
+                <Button data-afa-action-row variant="primary" fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
                   {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
                 </Button>
               </>
@@ -996,7 +999,7 @@ function ProfileContent() {
                   placeholder={tr.profilePage.orgNamePlaceholder}
                   style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)' }}
                 />
-                <Button variant="primary" fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
+                <Button data-afa-action-row variant="primary" fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
                   {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
                 </Button>
               </>
@@ -1015,7 +1018,7 @@ function ProfileContent() {
             {venueStatus?.hasProfile ? (
               renderRoleStatus(venueStatus, 'venue', tr.profilePage.roleLabelVenue)
             ) : (
-              <Button variant="primary" fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
+              <Button data-afa-action-row variant="primary" fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
                 {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
               </Button>
             )}

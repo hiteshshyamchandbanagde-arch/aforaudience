@@ -534,6 +534,7 @@ const es: Dictionary = {
     seatsReserved: "Asientos reservados",
     freeEntry: "Entrada gratuita",
     chooseSection: "Elige tu sección",
+    chooseSeats: "Elige tus asientos",
     priceTBD: "Precio por confirmar",
     seatsAvailableSummary: "{available} de {total} asientos en total · máx. {max} por reserva",
     generalAdmission: "Entrada general",

@@ -380,18 +380,6 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
         {levelSeats.map((s: SeatInfo) => {
           const isSelected = selected.includes(s.id)
-          // Selected seats get a visual "pop" (scale + ring) so the seat
-          // number reads clearly - but that pop is a CSS transform on top
-          // of the canvas wrapper's own zoom transform, and transforms
-          // compound multiplicatively, not additively. At zoom 1 this was
-          // fine (a flat 1.5x). Once pinch-zoom shipped, a selected seat
-          // at e.g. 3x zoom rendered at 1.5 * 3 = 4.5x - ballooning large
-          // enough to swallow its neighbors (live report, session 65).
-          // Dividing the boost by the current zoom keeps the seat's pop
-          // roughly constant on screen regardless of zoom level, clamped
-          // to never shrink below 1x (no boost needed once the zoom
-          // itself already makes the seat comfortably large).
-          const selectedBoost = Math.max(1, 1.5 / zoom)
           // GEN-2609-118 - selected is a state, not an action: amber tint
           // with an amber ring and number, never the solid orange fill.
           const bg =
@@ -436,17 +424,20 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 marginTop: `-${seatWidthPct / 2}%`,
                 borderRadius: 'var(--afa-radius-sm)',
                 background: bg,
-                // Selected seats get their own visual weight (scale + white
-                // ring + larger, bold text) rather than relying on the same
-                // tiny clamped font every other seat uses - reported live
-                // (28 Jul) that the seat number wasn't legible once picked.
-                // z-index lift keeps the ring from being clipped by a
-                // neighboring seat drawn after it in DOM order.
-                transform: isSelected ? `scale(${selectedBoost})` : undefined,
-                zIndex: isSelected ? 2 : undefined,
-                boxShadow: isSelected ? `0 0 0 2px ${SELECTED}` : undefined,
+                // BUG-2609-075 - selected changes colour, ring and weight
+                // only, never size. The old "pop" (scale(max(1, 1.5 / zoom))
+                // plus a fixed 10px label and an outside ring) drew a
+                // selected seat about 2x at zoom 1; seats sit edge to edge,
+                // so J3 covered J2 and J4, and 4 adjacent selected seats
+                // stacked into one where only the last was readable. The
+                // ring is inset, so it stays inside the seat at any zoom.
+                // A selected label is sized from the seat's own width (the
+                // seat is seatWidthPct cqw wide; "J10" in bold fits at 0.42
+                // of it), capped at 11px and never below every other
+                // seat's size - as readable as the seat allows, never wider.
+                boxShadow: isSelected ? `inset 0 0 0 2px ${SELECTED}` : undefined,
                 color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-text-muted)' : isSelected ? SELECTED : 'var(--afa-text-primary)',
-                fontSize: isSelected ? '10px' : 'clamp(5px, 1.3cqw, 9px)',
+                fontSize: isSelected ? `max(clamp(5px, 1.3cqw, 9px), min(11px, ${(seatWidthPct * 0.42).toFixed(3)}cqw))` : 'clamp(5px, 1.3cqw, 9px)',
                 fontWeight: isSelected ? 700 : 400,
                 display: 'flex',
                 alignItems: 'center',

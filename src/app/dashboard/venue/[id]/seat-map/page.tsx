@@ -1588,7 +1588,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
         {seatingMode === 'NUMBERED' && (effectivePath === 'canvas' || isMobile) && (
           <div style={{ display: 'flex', gap: 'var(--afa-space-6)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div>
+            {/* BUG-2609-067 - as a plain flex item this column sized to its
+                widest child, the canvas at its full pixel width, so every
+                text block above it (orientation note, "Viewing only", the
+                reference-image help) stretched to the canvas and the page
+                scrolled sideways on a phone. minWidth 0 + a flexible basis
+                keeps it at most the row's width; only the canvas box below
+                scrolls (overflow: auto). */}
+            <div style={{ flex: '1 1 320px', minWidth: 0, maxWidth: '100%' }}>
               <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)', fontStyle: 'italic' }}>
                 {!isMobile && (
                   <Button variant="text-link" onClick={backToChoice} style={{ display: 'block', marginBottom: 'var(--afa-space-2)' }}>
@@ -2199,7 +2206,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        <Button variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || seatMapFrozen} style={{ marginTop: 'var(--afa-space-6)' }}>
+        <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || seatMapFrozen} style={{ marginTop: 'var(--afa-space-6)' }}>
           {saving ? 'Saving...' : 'Save Seat Map'}
         </Button>
       </div>

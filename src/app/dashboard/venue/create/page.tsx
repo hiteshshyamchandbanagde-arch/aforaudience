@@ -540,7 +540,7 @@ export default function CreateVenuePage() {
             </Card>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               {seatingChoice === 'GENERAL_ADMISSION' && (
                 <SharedButton variant="solid" size="md" fullWidth={false} type="button" disabled={saving} onClick={() => submit(true)}>
                   {saving ? 'Publishing...' : 'Publish Venue'}

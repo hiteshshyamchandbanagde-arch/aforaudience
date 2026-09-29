@@ -786,7 +786,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         justifyContent: 'center',
         width: diameter,
         height: diameter,
-        borderRadius: '50%', // token-ok(radius-literal): geometric circle, not a design-scale radius choice
+        borderRadius: '50%',
         flexShrink: 0,
         background: 'var(--afa-tint-08)',
         color: 'var(--afa-text-secondary)',

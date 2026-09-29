@@ -530,6 +530,7 @@ const ml: Dictionary = {
     seatsReserved: "സീറ്റുകൾ റിസർവ് ചെയ്തു",
     freeEntry: "സൗജന്യ പ്രവേശനം",
     chooseSection: "നിങ്ങളുടെ വിഭാഗം തിരഞ്ഞെടുക്കുക",
+    chooseSeats: "നിങ്ങളുടെ സീറ്റുകൾ തിരഞ്ഞെടുക്കുക",
     priceTBD: "വില പിന്നീട് നിശ്ചയിക്കും",
     seatsAvailableSummary: "ആകെ {total} ൽ {available} സീറ്റുകൾ · ഒരു ബുക്കിംഗിന് പരമാവധി {max}",
     generalAdmission: "പൊതു പ്രവേശനം",

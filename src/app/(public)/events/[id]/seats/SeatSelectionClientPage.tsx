@@ -275,7 +275,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
             <>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
                 <span style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
-                  {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? tr.eventDetailPage.chooseSection : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
+                  {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? (isNumbered ? tr.eventDetailPage.chooseSeats : tr.eventDetailPage.chooseSection) : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
                 </span>
                 <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
               </div>

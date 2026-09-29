@@ -148,26 +148,52 @@ export default function RegisterForm() {
     return seed.length >= 2 ? seed : ""
   })()
 
+  // BUG-2609-074 - a response is applied only while it still describes
+  // what's in the field: each request is aborted when a newer one starts
+  // (or the effect cleans up), and anything that lands anyway is dropped
+  // unless its value matches the latest one. Without this, a check still
+  // in flight when the field was cleared resolved afterwards and put a
+  // stale "Available" back on an empty field, which also kept the
+  // initials chips (shown only while idle) hidden.
+  const latestUsername = useRef(form.username)
+  const latestSeed = useRef(initialsSeed)
+  useEffect(() => {
+    latestUsername.current = form.username
+    latestSeed.current = initialsSeed
+  })
+  const initialsRequest = useRef<AbortController | null>(null)
+
   const fetchInitialsSuggestions = async (seed: string) => {
+    initialsRequest.current?.abort()
+    const controller = new AbortController()
+    initialsRequest.current = controller
+    const current = () => !controller.signal.aborted && latestSeed.current === seed
     setInitialsLoading(true)
     try {
-      const res = await fetch(`/api/auth/username-suggestions?seed=${encodeURIComponent(seed)}`)
+      const res = await fetch(`/api/auth/username-suggestions?seed=${encodeURIComponent(seed)}`, { signal: controller.signal })
       const data = await res.json()
-      setInitialsSuggestions(data.variants ?? [])
+      if (current()) setInitialsSuggestions(data.variants ?? [])
     } catch {
-      setInitialsSuggestions([])
+      if (current()) setInitialsSuggestions([])
     } finally {
-      setInitialsLoading(false)
+      if (initialsRequest.current === controller) {
+        initialsRequest.current = null
+        setInitialsLoading(false)
+      }
     }
   }
 
   useEffect(() => {
     if (!initialsSeed) {
+      initialsRequest.current?.abort()
       setInitialsSuggestions([])
       return
     }
     const timeout = setTimeout(() => fetchInitialsSuggestions(initialsSeed), 500)
-    return () => clearTimeout(timeout)
+    return () => {
+      clearTimeout(timeout)
+      initialsRequest.current?.abort()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialsSeed])
 
@@ -175,6 +201,7 @@ export default function RegisterForm() {
   useEffect(() => {
     if (!form.username) {
       setUsernameStatus("idle")
+      setUsernameSuggestion(null)
       return
     }
     // BUG-2609-054 - same rule as the server; don't ask about availability
@@ -185,10 +212,13 @@ export default function RegisterForm() {
       return
     }
     setUsernameStatus("checking")
+    const value = form.username
+    const controller = new AbortController()
     const timeout = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/auth/username-check?value=${encodeURIComponent(form.username)}`)
+        const res = await fetch(`/api/auth/username-check?value=${encodeURIComponent(value)}`, { signal: controller.signal })
         const data = await res.json()
+        if (controller.signal.aborted || latestUsername.current !== value) return
         if (data.invalid) {
           setUsernameStatus("invalid")
           setUsernameSuggestion(null)
@@ -200,10 +230,14 @@ export default function RegisterForm() {
           setUsernameSuggestion(data.suggestion ?? null)
         }
       } catch {
+        if (controller.signal.aborted || latestUsername.current !== value) return
         setUsernameStatus("idle")
       }
     }, 400)
-    return () => clearTimeout(timeout)
+    return () => {
+      clearTimeout(timeout)
+      controller.abort()
+    }
   }, [form.username])
 
   // ---- Stage 2: phone OTP verification, shown after successful register ----

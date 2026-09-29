@@ -530,6 +530,7 @@ const te: Dictionary = {
     seatsReserved: "సీట్లు రిజర్వ్ చేయబడ్డాయి",
     freeEntry: "ఉచిత ప్రవేశం",
     chooseSection: "మీ సెక్షన్‌ను ఎంచుకోండి",
+    chooseSeats: "మీ సీట్లను ఎంచుకోండి",
     priceTBD: "ధర త్వరలో నిర్ణయించబడుతుంది",
     seatsAvailableSummary: "మొత్తం {total}లో {available} సీట్లు · బుకింగ్‌కు గరిష్టంగా {max}",
     generalAdmission: "సాధారణ ప్రవేశం",

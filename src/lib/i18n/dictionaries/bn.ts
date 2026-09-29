@@ -530,6 +530,7 @@ const bn: Dictionary = {
     seatsReserved: "সিট সংরক্ষিত হয়েছে",
     freeEntry: "বিনামূল্যে প্রবেশ",
     chooseSection: "আপনার সেকশন বেছে নিন",
+    chooseSeats: "আপনার সিট বেছে নিন",
     priceTBD: "দাম পরে নির্ধারণ করা হবে",
     seatsAvailableSummary: "মোট {total} এর মধ্যে {available}টি সিট · প্রতি বুকিংয়ে সর্বোচ্চ {max}",
     generalAdmission: "সাধারণ প্রবেশ",

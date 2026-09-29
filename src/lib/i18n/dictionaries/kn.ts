@@ -530,6 +530,7 @@ const kn: Dictionary = {
     seatsReserved: "ಸೀಟುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
     freeEntry: "ಉಚಿತ ಪ್ರವೇಶ",
     chooseSection: "ನಿಮ್ಮ ವಿಭಾಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    chooseSeats: "ನಿಮ್ಮ ಸೀಟುಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
     priceTBD: "ಬೆಲೆ ನಂತರ ನಿರ್ಧರಿಸಲಾಗುವುದು",
     seatsAvailableSummary: "ಒಟ್ಟು {total} ರಲ್ಲಿ {available} ಸೀಟುಗಳು · ಬುಕಿಂಗ್‌ಗೆ ಗರಿಷ್ಠ {max}",
     generalAdmission: "ಸಾಮಾನ್ಯ ಪ್ರವೇಶ",
