@@ -779,7 +779,7 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <Button variant="primary" onClick={handlePay} disabled={paying || confirming}>
+        <Button data-afa-action-row variant="primary" onClick={handlePay} disabled={paying || confirming}>
           {confirming
             ? tr.checkoutPage.confirmingYourBooking
             : paying

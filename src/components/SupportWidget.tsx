@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Button, { variantStyle } from '@/components/ui/Button';
 import { CheckIcon } from '@/components/icons/EventIcons';
+import { CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
+import { useActionRowClearance } from '@/components/mobile/useActionRowClearance';
 
 /**
  * Floating support widget: chat first, feedback-form fallback.
@@ -94,6 +96,7 @@ const FEEDBACK_CATEGORIES: { value: string; label: string }[] = [
 ];
 
 const SESSION_COUNT_KEY = 'afora_chat_message_count';
+const EXCLUDED_PREFIXES = ['/auth', '/checkout', '/api', '/admin', '/dashboard/messages'];
 const MAX_ATTACHMENT_DIMENSION = 1280; // px, longest side, before compression
 const JPEG_QUALITY = 0.7;
 const MAX_ATTACHMENT_BYTES = 1_000_000; // matches server's ~1.4MB data-URL cap with base64 overhead
@@ -106,9 +109,9 @@ const MAX_ATTACHMENT_BYTES = 1_000_000; // matches server's ~1.4MB data-URL cap 
 // applies below the same 1023px breakpoint the tab bar itself renders
 // at (`lg:hidden` elsewhere in this codebase) - desktop keeps its
 // original flat offsets, since there's no tab bar there to clear.
-const MOBILE_TAB_BAR_HEIGHT = 'calc(64px + env(safe-area-inset-bottom))';
-const CHAT_BUTTON_MOBILE_BOTTOM = `calc(${MOBILE_TAB_BAR_HEIGHT} + 8px)`;
-const CHAT_PANEL_MOBILE_BOTTOM = `calc(${CHAT_BUTTON_MOBILE_BOTTOM} + 56px + 12px)`; // clears the 56px button + the same 12px gap it always opened with
+// BUG-2609-072 - the offsets now live in mobile/chromeOffsets.ts, shared
+// with Toast.tsx, which stacks above this button on mobile.
+const CHAT_PANEL_MOBILE_BOTTOM = `calc(${CHAT_BUTTON_MOBILE_BOTTOM} + ${CHAT_BUTTON_SIZE}px + 12px)`; // clears the 56px button + the same 12px gap it always opened with
 const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} - 52px)`; // same 52px top clearance the old bottom:88/maxHeight pairing reserved
 
 // Shared shape for every text input/textarea/select in this widget (same
@@ -130,6 +133,11 @@ const inputStyle = {
 export default function SupportWidget() {
   const pathname = usePathname();
   const [panel, setPanel] = useState<Panel>('closed');
+  // BUG-2609-068 - the closed bubble lifts above (or hides behind) a
+  // bottom action row on mobile instead of covering it.
+  const restingProbeRef = useRef<HTMLDivElement>(null);
+  const excluded = !!pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p));
+  const clearance = useActionRowClearance(restingProbeRef, panel === 'closed' && !excluded);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -201,8 +209,7 @@ export default function SupportWidget() {
 
   const capReached = maxMessages !== null && sessionCount >= maxMessages;
 
-  const EXCLUDED_PREFIXES = ['/auth', '/checkout', '/api', '/admin', '/dashboard/messages'];
-  if (pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p))) {
+  if (excluded) {
     return null;
   }
 
@@ -444,11 +451,17 @@ export default function SupportWidget() {
       <style>{`
         .afa-support-chat-btn { bottom: 20px; }
         .afa-support-chat-panel { bottom: 88px; max-height: calc(100vh - 140px); }
-        @media (max-width: 1023px) {
+        @media (max-width: ${MOBILE_BREAKPOINT_MAX}px) {
           .afa-support-chat-btn { bottom: ${CHAT_BUTTON_MOBILE_BOTTOM}; }
           .afa-support-chat-panel { bottom: ${CHAT_PANEL_MOBILE_BOTTOM}; max-height: ${CHAT_PANEL_MOBILE_MAX_HEIGHT}; }
         }
       `}</style>
+      <div
+        ref={restingProbeRef}
+        aria-hidden="true"
+        className="afa-support-chat-btn"
+        style={{ position: 'fixed', right: 20, width: CHAT_BUTTON_SIZE, height: CHAT_BUTTON_SIZE, visibility: 'hidden', pointerEvents: 'none' }}
+      />
       <Button
         variant="icon"
         className="afa-support-chat-btn"
@@ -459,8 +472,10 @@ export default function SupportWidget() {
           position: 'fixed',
           right: 20,
           zIndex: 45,
-          width: 56,
-          height: 56,
+          width: CHAT_BUTTON_SIZE,
+          height: CHAT_BUTTON_SIZE,
+          ...(clearance.bottom !== null ? { bottom: clearance.bottom } : null),
+          ...(clearance.hidden ? { visibility: 'hidden' as const, pointerEvents: 'none' as const } : null),
           borderRadius: '50%',
           background: 'var(--afa-amber)',
           color: 'var(--afa-on-fill-solid)',

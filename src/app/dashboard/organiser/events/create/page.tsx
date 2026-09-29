@@ -951,7 +951,7 @@ export default function CreateEventPage() {
                 it'll go public automatically once the venue owner confirms your booking request.
               </p>
             )}
-            <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
+            <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
               <Button
                 variant="primary"
                 size="lg"

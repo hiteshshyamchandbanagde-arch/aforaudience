@@ -2199,7 +2199,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        <Button variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || seatMapFrozen} style={{ marginTop: 'var(--afa-space-6)' }}>
+        <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || seatMapFrozen} style={{ marginTop: 'var(--afa-space-6)' }}>
           {saving ? 'Saving...' : 'Save Seat Map'}
         </Button>
       </div>

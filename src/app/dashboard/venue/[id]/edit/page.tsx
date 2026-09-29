@@ -490,7 +490,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="primary"
                 size="lg"
