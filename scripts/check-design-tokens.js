@@ -15,7 +15,7 @@
 // (font-size-literal, spacing-literal, radius-literal, raw-button), a
 // small value-based allowlist (0, hairline 1px/0.5px, and any %
 // value - the last one falls out of the unit scoping below rather
-// than needing its own check), and a per-line `// token-ok: <reason>`
+// than needing its own check), and a per-line `// token-ok(<rule>): <reason>`
 // escape hatch for genuinely-exempt cases (documented, not silently
 // widened rules) - printed in CI output whenever used, so it stays
 // visible rather than becoming a silent bypass. The whole-repo ratchet
@@ -33,8 +33,8 @@
 // broke on real PRs (GEN-2609-079's seat-map and organiser-event-edit
 // batches). `raw-button` is now the one rule handled outside the
 // generic per-line loop in findOffenses() - it counts `<button` across
-// the WHOLE diff (added vs. removed, excluding Button.tsx and
-// `token-ok` lines) and flags only the surplus. See that function's
+// the WHOLE diff (added vs. removed, excluding Button.tsx and lines
+// with a `token-ok(raw-button)`) and flags only the surplus. See that function's
 // own comments for the full mechanism.
 //
 // GEN-2609-109 - adds `bare-button` (`<Button variant="bare">`, the
@@ -452,12 +452,45 @@ const RULES = [
 // inject a stray whitespace text node). Both forms are simple
 // substring/regex matches, same "honor system, not a parser" tradeoff
 // as the original - see this file's own header and docs/design.md.
-const TOKEN_OK_RE = /\/\/\s*token-ok:\s*(.+?)\s*$/
-const TOKEN_OK_JSX_RE = /\{\/\*\s*token-ok:\s*(.+?)\s*\*\/\}\s*$/
+//
+// GEN-2609-117 - scoped to the rule(s) it names. The unscoped form
+// exempted every rule on its line, so a one-line style with an exempt
+// fontSize also hid its padding (#713: spacing 1866 -> 1863). Now
+// `// token-ok(<rule>[,<rule>]): <reason>` (or the JSX form) exempts
+// only those RULES names; every other rule still runs on the line. The
+// unscoped form, an unknown rule name, or any other `token-ok` comment
+// that doesn't parse is an error, not a silent no-op. This is the one
+// parser; design-token-ratchet.js uses it too, so both agree.
+const TOKEN_OK_RE = /\/\/\s*token-ok\(([^)]*)\):\s*(.+?)\s*$/
+const TOKEN_OK_JSX_RE = /\{\/\*\s*token-ok\(([^)]*)\):\s*(.+?)\s*\*\/\}\s*$/
+const TOKEN_OK_MARKER_RE = /(?:\/\/|\/\*)\s*token-ok\b/
+const RULE_NAMES = RULES.map((r) => r.name)
+const TOKEN_OK_SYNTAX =
+  '`// token-ok(<rule>[,<rule>]): <reason>` or `{/* token-ok(<rule>): <reason> */}`'
 
-function tokenOkReason(line) {
+// null (no token-ok comment), { rules, reason }, or { error }.
+function parseTokenOk(line) {
+  if (!line || !TOKEN_OK_MARKER_RE.test(line)) return null
   const m = TOKEN_OK_RE.exec(line) || TOKEN_OK_JSX_RE.exec(line)
-  return m ? m[1] : null
+  if (!m) {
+    if (/token-ok\s*:/.test(line)) {
+      return { error: `unscoped \`token-ok:\` is no longer accepted; name the rule(s) it exempts: ${TOKEN_OK_SYNTAX}` }
+    }
+    return { error: `malformed token-ok comment; expected ${TOKEN_OK_SYNTAX} at the end of the line` }
+  }
+  const rules = [...new Set(m[1].split(',').map((s) => s.trim()).filter(Boolean))]
+  if (rules.length === 0) return { error: `token-ok names no rule; expected ${TOKEN_OK_SYNTAX}` }
+  const unknown = rules.filter((r) => !RULE_NAMES.includes(r))
+  if (unknown.length > 0) {
+    return { error: `unknown rule ${unknown.map((r) => `"${r}"`).join(', ')} in token-ok; valid: ${RULE_NAMES.join(', ')}` }
+  }
+  return { rules, reason: m[2] }
+}
+
+// The rule names a valid token-ok on this line exempts ([] otherwise).
+function tokenOkRules(line) {
+  const ok = parseTokenOk(line)
+  return ok && ok.rules ? ok.rules : []
 }
 
 // GEN-2609-057 - a pure refactor/extraction can move an existing literal
@@ -651,8 +684,9 @@ function findOffenses(diffText) {
       // Button under a bare-reason comment that this diff added or removed.
       // Its count moves by the difference between old and new context.
       const content = rawLine.slice(1)
+      const exempt = tokenOkRules(content)
       for (const rule of COUNT_RULES) {
-        if (countFileExempt(rule) || tokenOkReason(content)) continue
+        if (countFileExempt(rule) || exempt.includes(rule.name)) continue
         const delta = rule.extract(content, prevNew).length - rule.extract(content, prevOld).length
         for (let i = 0; i < delta; i++) countAdded.get(rule.name).push({ file: currentFile, line: newLineNo, content: content.trim() })
         if (delta < 0) countRemoved.set(rule.name, countRemoved.get(rule.name) - delta)
@@ -669,16 +703,20 @@ function findOffenses(diffText) {
       prevNew = content
       const bare = bareReason(content)
       if (bare) bareReasonUses.push({ file: currentFile, line: newLineNo, reason: bare })
-      const reason = tokenOkReason(content)
-      if (reason) {
-        // token-ok suppresses every rule on this line, raw-button
-        // included - it never enters the added count below.
-        tokenOkUses.push({ file: currentFile, line: newLineNo, reason, content: content.trim() })
-        newLineNo++
-        continue
+      // GEN-2609-117 - token-ok suppresses only the rules it names (a
+      // named count rule never enters the added count below); a comment
+      // that doesn't parse is itself an offense and exempts nothing.
+      const ok = parseTokenOk(content)
+      let exempt = []
+      if (ok && ok.error) {
+        offenses.push({ file: currentFile, line: newLineNo, rule: 'token-ok-syntax', content: content.trim(), message: ok.error })
+      } else if (ok) {
+        exempt = ok.rules
+        tokenOkUses.push({ file: currentFile, line: newLineNo, rules: ok.rules, reason: ok.reason, content: content.trim() })
       }
       for (const rule of PER_LINE_RULES) {
         if (rule.isExemptFile && rule.isExemptFile(currentFile)) continue
+        if (exempt.includes(rule.name)) continue
         if (!rule.test(content)) continue
         const literals = rule.extract ? rule.extract(content) : []
         if (shouldFlag(rule, literals, isKnownLiteralInBase)) {
@@ -686,7 +724,7 @@ function findOffenses(diffText) {
         }
       }
       for (const rule of COUNT_RULES) {
-        if (countFileExempt(rule)) continue
+        if (countFileExempt(rule) || exempt.includes(rule.name)) continue
         // one entry per occurrence, so two bare Buttons on one line count as 2
         for (let i = 0; i < rule.extract(content, prevLine).length; i++) {
           countAdded.get(rule.name).push({ file: currentFile, line: newLineNo, content: content.trim() })
@@ -698,8 +736,10 @@ function findOffenses(diffText) {
       const content = rawLine.slice(1)
       const prevLine = prevOld
       prevOld = content
+      // an exempted button was never counted, so removing it isn't a -1
+      const exempt = tokenOkRules(content)
       for (const rule of COUNT_RULES) {
-        if (countFileExempt(rule)) continue
+        if (countFileExempt(rule) || exempt.includes(rule.name)) continue
         countRemoved.set(rule.name, countRemoved.get(rule.name) + rule.extract(content, prevLine).length)
       }
     }
@@ -737,9 +777,9 @@ function main() {
   }
 
   if (tokenOkUses.length > 0) {
-    console.log(`design-token check: ${tokenOkUses.length} line(s) allowed via // token-ok: (always shown, never a silent bypass):\n`)
+    console.log(`design-token check: ${tokenOkUses.length} line(s) allowed via token-ok(<rule>) (always shown, never a silent bypass):\n`)
     for (const u of tokenOkUses) {
-      console.log(`  ${u.file}:${u.line}  reason: ${u.reason}`)
+      console.log(`  ${u.file}:${u.line}  [${u.rules.join(', ')}]  reason: ${u.reason}`)
       console.log(`    ${u.content}`)
     }
     console.log('')
@@ -754,9 +794,10 @@ function main() {
   for (const o of offenses) {
     console.error(`  ${o.file}:${o.line}  [${o.rule}]`)
     console.error(`    ${o.content}`)
+    if (o.message) console.error(`    ${o.message}`)
   }
   console.error('\nUse the --afa-* / --font-* tokens from src/app/globals.css instead of literal values.')
-  console.error('Genuinely exempt (e.g. a fixed third-party brand color)? Add a trailing `// token-ok: <reason>` comment on the same line.')
+  console.error(`Genuinely exempt (e.g. a fixed third-party brand color)? End the line with ${TOKEN_OK_SYNTAX}, naming only the rule(s) the reason covers.`)
   console.error('See docs/afa-design-tokens-reference.md Section 1 and docs/design.md.')
   process.exit(1)
 }
@@ -772,7 +813,8 @@ module.exports = {
   EXEMPT_FILES,
   isKnownLiteralInBase,
   shouldFlag,
-  tokenOkReason,
+  parseTokenOk,
+  tokenOkRules,
   bareReason,
   stripLineComments,
   findOffenses,

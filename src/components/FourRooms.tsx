@@ -66,7 +66,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
           top: "20px",
           fontFamily: "var(--font-display)",
           fontStyle: "italic",
-          fontSize: "56px", // token-ok: decorative oversized room numeral on the homepage Four Rooms art panel, one-off display size
+          fontSize: "56px", // token-ok(font-size-literal): decorative oversized room numeral on the homepage Four Rooms art panel, one-off display size
           color: "var(--afa-border-resting)",
         }}>
           {room.n}

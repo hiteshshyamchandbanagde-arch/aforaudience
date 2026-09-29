@@ -39,7 +39,7 @@ function StatTile({ label, value, icon, sub }: { label: string; value: string; i
       </div>
       <div style={{
         fontFamily: 'var(--font-display)',
-        fontSize: 30, // token-ok: audience dashboard stat figure, the only 30px size, between page-title (28px) and page-title-lg (32px)
+        fontSize: 30, // token-ok(font-size-literal): audience dashboard stat figure, the only 30px size, between page-title (28px) and page-title-lg (32px)
         color: 'var(--afa-text-primary)',
         lineHeight: 1,
       }}>{value}</div>

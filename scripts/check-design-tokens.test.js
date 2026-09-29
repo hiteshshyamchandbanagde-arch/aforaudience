@@ -2,7 +2,7 @@
 // rule set: one positive (must be flagged) and one negative (must NOT be
 // flagged) fixture per rule, plus dedicated cases for the Tailwind
 // arbitrary-value forms, the allowlist, the raw-button file exemption +
-// its skipRelocatedCheck behavior, and the `// token-ok:` escape hatch.
+// its skipRelocatedCheck behavior, and the `// token-ok(<rule>):` escape hatch.
 //
 // No test framework is configured in this repo (no Jest/Vitest - checked
 // package.json before writing this; `test:e2e` is Playwright, a
@@ -21,7 +21,7 @@ const {
   RULES,
   isExemptFile,
   shouldFlag,
-  tokenOkReason,
+  parseTokenOk,
   stripLineComments,
   bareReason,
   findOffenses,
@@ -242,24 +242,76 @@ t('spacing-literal (contrast case): shouldFlag() DOES honor the relocated-litera
 })
 
 // ---------------------------------------------------------------------
-// // token-ok: <reason> escape hatch.
+// // token-ok(<rule>): <reason> escape hatch (GEN-2609-117: scoped).
 // ---------------------------------------------------------------------
-t('tokenOkReason: extracts the reason text from a trailing comment', () => {
-  assert.equal(
-    tokenOkReason(`        fill="#4285F4" // token-ok: Google-brand SVG fixed color`),
-    'Google-brand SVG fixed color'
+t('parseTokenOk: extracts the rule and reason from a trailing comment', () => {
+  assert.deepEqual(
+    parseTokenOk(`        fill="#4285F4" // token-ok(hex-color-literal): Google-brand SVG fixed color`),
+    { rules: ['hex-color-literal'], reason: 'Google-brand SVG fixed color' }
   )
 })
-t('tokenOkReason: returns null when no token-ok comment is present', () => {
-  assert.equal(tokenOkReason(`        fill="#4285F4"`), null)
+t('parseTokenOk: returns null when no token-ok comment is present', () => {
+  assert.equal(parseTokenOk(`        fill="#4285F4"`), null)
 })
-t('findOffenses: a line with // token-ok: is suppressed and reported separately, not as an offense', () => {
+t('parseTokenOk: multi-rule scope, whitespace tolerated, duplicates dropped', () => {
+  assert.deepEqual(
+    parseTokenOk(`  x // token-ok( font-size-literal , spacing-literal,font-size-literal ): one-off hero`).rules,
+    ['font-size-literal', 'spacing-literal']
+  )
+})
+t('parseTokenOk: the unscoped form is an error naming the new syntax', () => {
+  const r = parseTokenOk(`  fill="#4285F4" // token-ok: Google-brand SVG fixed color`)
+  assert.ok(r.error, 'unscoped is an error')
+  assert.match(r.error, /unscoped/)
+  assert.match(r.error, /token-ok\(<rule>/)
+  assert.ok(parseTokenOk(`  <path fill="#4285F4"/>{/* token-ok: brand */}`).error, 'unscoped JSX form is an error too')
+})
+t('parseTokenOk: an unknown rule name is an error listing the valid ones', () => {
+  const r = parseTokenOk(`  fontSize: 30, // token-ok(font-size): stat figure`)
+  assert.match(r.error, /unknown rule "font-size"/)
+  assert.match(r.error, /font-size-literal/)
+  assert.match(parseTokenOk(`  x // token-ok(font-size-literal,bogus): r`).error, /"bogus"/, 'one bad name in a list fails the whole comment')
+})
+t('parseTokenOk: an empty scope or a missing reason is an error', () => {
+  assert.ok(parseTokenOk(`  fontSize: 30, // token-ok(): stat figure`).error)
+  assert.ok(parseTokenOk(`  fontSize: 30, // token-ok(font-size-literal):`).error)
+  assert.ok(parseTokenOk(`  fontSize: 30, // token-ok(font-size-literal) stat figure`).error)
+})
+t('findOffenses: an unscoped token-ok on an added line is a token-ok-syntax offense and exempts nothing', () => {
+  const diff = oneFileDiff(['+  fill="#ABCDE3" // token-ok: Google-brand SVG fixed color'])
+  const { offenses, tokenOkUses } = findOffenses(diff)
+  assert.equal(tokenOkUses.length, 0)
+  assert.deepEqual(offenses.map((o) => o.rule).sort(), ['hex-color-literal', 'token-ok-syntax'])
+  assert.match(offenses.find((o) => o.rule === 'token-ok-syntax').message, /unscoped/)
+})
+t('findOffenses: an unknown-rule token-ok is a token-ok-syntax offense', () => {
+  const diff = oneFileDiff([`+  style={{ fontSize: '41px' }} // token-ok(fontsize-literal): one-off`])
+  const { offenses } = findOffenses(diff)
+  assert.ok(offenses.some((o) => o.rule === 'token-ok-syntax' && /unknown rule/.test(o.message)))
+})
+t('findOffenses: a scoped token-ok exempts its rule; another rule on the same line is still flagged', () => {
+  const diff = oneFileDiff([
+    `+  <h1 style={{ fontSize: '4211px', padding: '4213px' }} />{/* token-ok(font-size-literal): one-off hero */}`,
+  ])
+  const { offenses, tokenOkUses } = findOffenses(diff)
+  assert.equal(tokenOkUses.length, 1)
+  assert.deepEqual(tokenOkUses[0].rules, ['font-size-literal'])
+  assert.deepEqual(offenses.map((o) => o.rule), ['spacing-literal'], 'the padding is not hidden by the fontSize reason')
+})
+t('findOffenses: a multi-rule scope exempts each named rule and nothing else', () => {
+  const diff = oneFileDiff([
+    `+  style={{ fontSize: '4211px', padding: '4213px', borderRadius: '4217px' }} // token-ok(font-size-literal,spacing-literal): one-off hero`,
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.deepEqual(offenses.map((o) => o.rule), ['radius-literal'])
+})
+t('findOffenses: a line with // token-ok(<rule>): is suppressed and reported separately, not as an offense', () => {
   const diff = [
     'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
     '--- a/src/app/foo.tsx',
     '+++ b/src/app/foo.tsx',
     '@@ -0,0 +1,2 @@',
-    '+  fill="#4285F4" // token-ok: Google-brand SVG fixed color',
+    '+  fill="#4285F4" // token-ok(hex-color-literal): Google-brand SVG fixed color',
     '+  fill="#111827"',
   ].join('\n')
   const { offenses, tokenOkUses } = findOffenses(diff)
@@ -276,25 +328,24 @@ t('findOffenses: a line with // token-ok: is suppressed and reported separately,
 // literal sibling text node instead. See check-design-tokens.js's own
 // comment above TOKEN_OK_JSX_RE.
 // ---------------------------------------------------------------------
-t('tokenOkReason: extracts the reason text from a trailing JSX comment', () => {
-  assert.equal(
-    tokenOkReason(`      <path fill="#4285F4" d="M1 2"/>{/* token-ok: Google-brand SVG fixed color */}`),
-    'Google-brand SVG fixed color'
+t('parseTokenOk: extracts the rule and reason from a trailing JSX comment', () => {
+  assert.deepEqual(
+    parseTokenOk(`      <path fill="#4285F4" d="M1 2"/>{/* token-ok(hex-color-literal): Google-brand SVG fixed color */}`),
+    { rules: ['hex-color-literal'], reason: 'Google-brand SVG fixed color' }
   )
 })
-t('tokenOkReason: JSX comment form returns null when malformed (missing closing brace)', () => {
-  assert.equal(
-    tokenOkReason(`      <path fill="#4285F4"/>{/* token-ok: reason */`),
-    null
-  )
+t('parseTokenOk: JSX comment form is an error when malformed (missing closing brace)', () => {
+  const r = parseTokenOk(`      <path fill="#4285F4"/>{/* token-ok(hex-color-literal): reason */`)
+  assert.ok(r.error)
+  assert.match(r.error, /malformed/)
 })
-t('findOffenses: a line with {/* token-ok: */} is suppressed and reported separately, not as an offense', () => {
+t('findOffenses: a line with {/* token-ok(<rule>): */} is suppressed and reported separately, not as an offense', () => {
   const diff = [
     'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
     '--- a/src/app/foo.tsx',
     '+++ b/src/app/foo.tsx',
     '@@ -0,0 +1,2 @@',
-    '+      <path fill="#4285F4" d="M1 2"/>{/* token-ok: Google-brand SVG fixed color */}',
+    '+      <path fill="#4285F4" d="M1 2"/>{/* token-ok(hex-color-literal): Google-brand SVG fixed color */}',
     '+      <path fill="#111827" d="M3 4"/>',
   ].join('\n')
   const { offenses, tokenOkUses } = findOffenses(diff)
@@ -432,7 +483,7 @@ t('raw-button (count-based): a token-ok-annotated new button is suppressed, not 
     '--- a/src/app/foo.tsx',
     '+++ b/src/app/foo.tsx',
     '@@ -0,0 +1,1 @@',
-    '+      <button onClick={onSave}>New</button> // token-ok: one-off, see PR description',
+    '+      <button onClick={onSave}>New</button> // token-ok(raw-button): one-off, see PR description',
   ].join('\n')
   const { offenses, tokenOkUses } = findOffenses(diff)
   assert.equal(offenses.length, 0)
@@ -544,13 +595,65 @@ t('bare-button (count-based): 2 bare on one added line vs 1 removed nets a surpl
   assert.equal(offenses.length, 1)
   assert.equal(offenses[0].rule, 'bare-button')
 })
-t('bare-button (count-based): token-ok suppresses it like every other rule', () => {
+t('bare-button (count-based): token-ok(bare-button) suppresses it like every other rule', () => {
   const diff = oneFileDiff([
-    '+      <Button variant="bare" onClick={go}>Cell</Button> {/* token-ok: seat cell, structural */}',
+    '+      <Button variant="bare" onClick={go}>Cell</Button> {/* token-ok(bare-button): seat cell, structural */}',
   ])
   const { offenses, tokenOkUses } = findOffenses(diff)
   assert.equal(offenses.length, 0)
   assert.equal(tokenOkUses.length, 1)
+})
+t('bare-button (count-based): a token-ok naming another rule does not suppress it', () => {
+  const diff = oneFileDiff([
+    '+      <Button variant="bare" onClick={go}>Cell</Button> {/* token-ok(spacing-literal): seat cell, structural */}',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.deepEqual(offenses.map((o) => o.rule), ['bare-button'])
+})
+t('raw-button (count-based): removing a token-ok(raw-button) line is not a -1 that pays for a new button', () => {
+  const diff = oneFileDiff([
+    '-      <button onClick={a}>Old</button> // token-ok(raw-button): one-off',
+    '+      <button onClick={b}>New</button>',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.deepEqual(offenses.map((o) => o.rule), ['raw-button'])
+})
+
+// GEN-2609-117 - the checker (diff) and the ratchet (whole file) share
+// parseTokenOk, so the same fixture must count the same per rule. Each
+// line holds at most one literal per rule (the checker reports per
+// line, the ratchet per literal). Values are ones git grep won't find
+// in origin/qa, so the relocated-literal exemption stays out of it.
+t('checker and ratchet agree per rule on a token-ok fixture', () => {
+  const { countLines, newAccumulator } = require('./design-token-ratchet')
+  const fixture = [
+    `  <h1 style={{ fontSize: '4211px', padding: '4213px' }} />{/* token-ok(font-size-literal): hero */}`,
+    `  style={{ fontSize: '4219px', padding: '4223px', borderRadius: '4217px' }} // token-ok(font-size-literal,spacing-literal): hero`,
+    `  fill="#ABCDE1" // token-ok(hex-color-literal): brand`,
+    `  fill="#ABCDE2" // token-ok: brand`,
+    `  background: 'rgba(1,2,3,0.4211)', // token-ok(font-size-literal): wrong rule named`,
+    `  <button onClick={go}>x</button> // token-ok(raw-button): one-off`,
+    `  <Button variant="bare">x</Button> // token-ok(radius-literal): wrong rule named`,
+    `  gap: '4229px',`,
+  ]
+  const file = 'src/app/fixture-117.tsx'
+  const diff = oneFileDiff(fixture.map((l) => `+${l}`), file)
+  const { offenses } = findOffenses(diff)
+  const checker = {}
+  for (const o of offenses) if (o.rule !== 'token-ok-syntax') checker[o.rule] = (checker[o.rule] || 0) + 1
+  const acc = newAccumulator()
+  countLines(file, fixture.join('\n'), acc)
+  const ratchet = Object.fromEntries(Object.entries(acc.counts).filter(([, n]) => n > 0))
+  assert.deepEqual(checker, ratchet)
+  assert.deepEqual(ratchet, {
+    'hex-color-literal': 1,
+    'rgb-rgba-literal': 1,
+    'spacing-literal': 2,
+    'radius-literal': 1,
+    'bare-button': 1,
+  })
+  assert.equal(acc.tokenOkErrors.length, 1, 'the unscoped line is an error in the ratchet')
+  assert.equal(offenses.filter((o) => o.rule === 'token-ok-syntax').length, 1, 'and in the checker')
 })
 
 // GEN-2609-110 - bare-button counts only bare Buttons WITHOUT a

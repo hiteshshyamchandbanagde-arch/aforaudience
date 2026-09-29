@@ -51,7 +51,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         </p>
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '34px', // token-ok: tour page h1, the only 34px display-font title, above page-title-lg (32px), the top step of the scale
+          fontSize: '34px', // token-ok(font-size-literal): tour page h1, the only 34px display-font title, above page-title-lg (32px), the top step of the scale
           fontWeight: 700,
           color: 'var(--afa-text-primary)',
           marginBottom: '12px',
