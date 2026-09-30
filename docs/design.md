@@ -8202,5 +8202,5 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
   - Artist profile: the per-show ticket links are the primary (orange). + Follow is an outline; prev/next arrows are plain icon buttons.
   - Profile: a card's Save is an outline, and becomes primary only while that card has unsaved changes. The rule stays "one primary in view".
   - Amber-direct active states (DashboardShell nav, MobileTabBar, SiteNav, venue bookings calendar, profile role cards) move onto `--afa-selected*`, so admin edits reach them. The fainter 0.08 wash is accepted, pending a live check.
-- **BUG-2609-081:** no chat bubble on `/login`, `/register` or `/profile`. Auth pages get a small "Need help?" link, and profile gets a "Help & support" row.
+- **BUG-2609-081 (revised later on 29 Sep by Hitesh): keep the chat bubble on mobile, on every page.** It must never cover a control, via four rules: every bottom action row is marked `data-afa-action-row`; the bubble keeps lifting while its panel is open; every page reserves bottom clearance after its last content; and on short pages it lifts above any control it would overlap at rest. BUG-2609-068 folds into this.
 - **GEN-2609-120:** add Marathi (`mr`) before the Pune launch, scoped together with the Indic font gap.

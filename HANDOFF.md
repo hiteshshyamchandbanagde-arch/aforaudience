@@ -1,3 +1,14 @@
+# Session Handoff — 29 Sept 2026, part 22 (chat — Hitesh click-through in progress)
+
+- Click-through (#714/#716): pass 1, 3, 4, 5, 6, 9, 10; fail 7 (bubble on venue edit Save & Unpublish). Left: 2, 8, 11, 12.
+- Resolved: BUG-2609-067, 072, 075. BUG-2609-068 REOPENED, folded into 081.
+- **081 decision changed (Hitesh): KEEP the bubble on mobile everywhere**; fix overlap (rules in design.md).
+- New: BUG-2609-082 (plurals), 083 (unrounded hours / 15-h event), 084 (organiser event detail tab bar), 085 (invisible "Check approval status"), 086 (native dialogs in Seat Map Builder), 087 (Bookings vs Sales revenue basis), **088 HIGH (service worker caches RSC page payloads: stale/cross-user data + TypeError)**. GEN-2609-121 extended (5-7).
+- QA chat assistant is off because PlatformSettings.chatMaxMessagesPerSession = 0 (setting, not a bug).
+- **Next CC after spacing p1: BUG-2609-088.**
+
+---
+
 # Session Handoff — 29 Sept 2026, part 21 (chat — #716 merged; spacing phase 1 dispatched)
 
 - **#716 bug bundle** squash-merged at pinned head `df05eb4` → `qa` @ `5965ee5`. CI green (design-tokens + Vercel preview); branch deleted; `useActionRowClearance` and the Button.tsx cleanup verified on `qa`; deploy READY; 0 runtime errors.
