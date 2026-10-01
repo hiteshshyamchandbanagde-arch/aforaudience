@@ -1,5 +1,5 @@
 "use client"
-import { Suspense, useEffect, useRef, useState, useTransition } from "react"
+import { Suspense, useEffect, useLayoutEffect, useRef, useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import Button from "@/components/ui/Button"
@@ -8,7 +8,6 @@ import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
 import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
 import SearchInputBox from "@/components/SearchInputBox"
-import { ErrorBanner } from "@/components/ErrorBanner"
 import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
 import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from "@/components/mobile/MobileTopBar"
 import { useLocale } from "@/lib/i18n/translate"
@@ -122,7 +121,11 @@ function EventsPageContent() {
 
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  // BUG-2609-077 - true only while the latest load failed. Kept apart
+  // from `events` so a failed load can never be mistaken for "loaded,
+  // and there are no events". Bumping reloadKey re-runs the load (Retry).
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
   const [search, setSearch] = useState(() => searchParams.get("search") ?? "")
   const [selectedType, setSelectedType] = useState<string | null>(null)
@@ -216,23 +219,41 @@ function EventsPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cities])
 
+  // BUG-2609-077 - the initial "All Cities" load and the load for the
+  // auto-applied location city (effect above) overlap on most visits.
+  // Each run owns an AbortController that its cleanup aborts, so only
+  // the load for the current selectedCity may touch state: a superseded
+  // one is dropped whether it resolves, rejects or was already aborted.
+  // The ref closes the gap between a city change committing and that
+  // (passive) cleanup running, where an old response could still land.
+  const latestCityRef = useRef(selectedCity)
+  useLayoutEffect(() => {
+    latestCityRef.current = selectedCity
+  }, [selectedCity])
   useEffect(() => {
+    const controller = new AbortController()
+    const city = selectedCity
+    const isStale = () => controller.signal.aborted || latestCityRef.current !== city
     const fetchEvents = async () => {
       setLoading(true)
+      setLoadFailed(false)
       try {
-        const url = selectedCity === "All Cities" ? "/api/events" : `/api/events?city=${encodeURIComponent(selectedCity)}`
-        const res = await fetch(url)
+        const url = city === "All Cities" ? "/api/events" : `/api/events?city=${encodeURIComponent(city)}`
+        const res = await fetch(url, { signal: controller.signal })
         if (!res.ok) throw new Error("Failed to load events")
         const data = await res.json()
+        if (isStale()) return
         setEvents(data)
+        setLoading(false)
       } catch (err: any) {
-        setError(err.message)
-      } finally {
+        if (isStale() || err?.name === "AbortError") return
+        setLoadFailed(true)
         setLoading(false)
       }
     }
     fetchEvents()
-  }, [selectedCity])
+    return () => controller.abort()
+  }, [selectedCity, reloadKey])
 
   const filtered = events.filter((e) => {
     const matchSearch =
@@ -377,7 +398,7 @@ function EventsPageContent() {
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {contentMode === "organisers"
               ? tr.eventsPage.heroSubtitleOrganisers
-              : loading ? tr.eventsPage.loadingEvents : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
+              : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
           </span>
           <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
             {contentMode === "organisers" ? (
@@ -392,10 +413,6 @@ function EventsPageContent() {
             </p>
           )}
         </header>
-
-        {error && (
-          <ErrorBanner style={{ marginTop: "24px" }}>{error}</ErrorBanner>
-        )}
 
         {/* EVENTS / ORGANISERS TOGGLE - discovery entry point for the
             public Organiser bio profiles (session 62, design.md §9.5),
@@ -610,21 +627,29 @@ function EventsPageContent() {
             </div>
 
             <div style={{ marginTop: "16px", marginBottom: "16px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
-              {tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
+              {!loading && loadFailed ? "\u00A0" : tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
             </div>
 
             {/* EVENTS GRID */}
             {loading ? (
               <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
-            ) : filtered.length === 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px 20px", textAlign: "center" }}>
+            ) : loadFailed || filtered.length === 0 ? (
+              // A failed load gets the error + Retry here, never the
+              // "nothing published" copy - that one is only true after a
+              // load that succeeded and returned no events.
+              <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px 20px", textAlign: "center" }}>
                 <TheaterMark style={{ width: "40px", height: "40px", color: "var(--afa-amber-strong)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
-                  {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
+                  {loadFailed ? tr.eventsPage.loadErrorTitle : tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
                 </p>
                 <p style={{ maxWidth: "360px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", margin: 0 }}>
-                  {tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
+                  {loadFailed ? tr.eventsPage.loadErrorSub : tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
                 </p>
+                {loadFailed && (
+                  <Button variant="outline-accent" size="pill-md" fullWidth={false} onClick={() => setReloadKey((k) => k + 1)}>
+                    {tr.eventsPage.retry}
+                  </Button>
+                )}
               </div>
             ) : (
               <>
