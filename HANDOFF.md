@@ -1,3 +1,55 @@
+# Session Handoff — 1 Oct 2026, part 25 (CC — BUG-2609-088 + BUG-2609-077 pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/sw-088-events-077?expand=1
+- **Base:** `7be6c2e` (= `origin/qa` at push time; dispatch re-checked before push, unchanged).
+- **Commits:** `4b731e3` 088 · `8307e16` 077. Each passes `tsc` on its own.
+- **Vercel preview:** READY on the pushed head `8307e16` (`dpl_CXnKXNDRkzZNsNAjLMYBxu2Td9SC`).
+- **No DB changes.** The check (b) title edit on `qa-general-event-06` was reverted both times (title is back to `Nimbahera Showcase #6`).
+- **Next step (chat):** merge, then BUG-2609-088 and 077 → BUILD_COMPLETE / DEPLOYED_QA. Three findings below need a decision.
+
+## 088 checks (Playwright Chromium, SW on, `next build` + `next start` against the QA DB; "before" = `origin/qa` built the same way)
+
+| Check | Before (`origin/qa`) | After (branch) |
+|---|---|---|
+| **(a) Cross-user** | **Reproduces.** Vinayak → sign out → Omkar, client-side nav to `/dashboard/venue`: Omkar is served Vinayak's cached layout payload (`ORGANISER:false, VENUE_OWNER:true`), so his sidebar has no ORGANISER section. A hard load shows ORGANISER + VENUE OWNER. 71 RSC entries in the runtime cache, 76 after sign-out. | Pass. Omkar's client-side nav shows ORGANISER + VENUE OWNER, same as the hard load. 0 RSC entries cached at any point. |
+| **(b) Stale** | `/events` list: new title shows (it reads `/api/events`, which the SW never cached, so the list was never stale). **Event detail `/events/[id]`: reproduces**, old title after nav away and back. | Pass. List and detail both show the new title. |
+| **(c) Offline** | **Reproduces.** Client-side nav offline: 4× `TypeError: Failed to convert value to 'Response'` inside the worker. Hard nav → `offline.html`. | Pass. 0 worker errors (Next's own "Failed to fetch RSC payload, falling back to browser navigation" is the only console line). Hard nav → `offline.html`. |
+| **(c) `/tickets` offline** | SW serves the cached `/tickets` HTML (200, from SW), then the page redirects to `/login`. | Same. Not a regression, see finding 1. |
+| **(d) Upgrade** | n/a | Pass. Old worker's `afora-precache-v2-2026-08-16` + `afora-runtime-v2-2026-08-16` (38 entries, 30 RSC) and a planted `afora-runtime-git-0123456789` are all gone after the new worker activates. Only the two `v3-2026-10-01` caches remain, 0 RSC entries. |
+| **(e) Signed-in header** | **Does not reproduce** (desktop + 412px mobile). Signed out → browse → sign in → client-side nav to `/`: header shows the signed-in state. | Same, pass. See finding 2. |
+
+- Route note for (a): `/dashboard` itself is a 404 (no page); the check used `/dashboard/venue` and `/dashboard/venue/qa-demo-venue-full-1`.
+
+## 088 what changed
+- `public/sw.js`: non-GET and router requests (`RSC` header, any `Next-Router-*` header, `_rsc` param) bypass the worker. The catch-all is an allowlist (`/_next/image`, images/icons/fonts by extension, manifest, `robots.txt`, `sitemap.xml`); everything else same-origin goes to the network. `cacheFirst` and stale-while-revalidate fall back to a 503 `Response`. Navigation network-first + offline fallback kept.
+  - The extension list also covers `jpg/jpeg/gif/webp/avif/ico` (the homepage fallback photos in `public/images` are JPGs).
+- `src/lib/sw-cache.ts`: `clearSwRuntimeCache()`, `signOutAndClearCache()` (all 8 `signOut` calls, 6 files, now go through it), `clearSwRuntimeCacheOnUserChange()` (called from `SessionGuard`; last user id in `localStorage` key `afa-sw-last-user`).
+  - A signed-out state is deliberately **not** treated as a user change: a failed session fetch while offline looks the same, and clearing then would delete the offline pages when they are needed.
+- **Final `CACHE_VERSION`:** the literal is `v3-2026-10-01`. On every Vercel build `scripts/stamp-sw-version.js` (prebuild) overwrites it with `git-<first 10 of the commit SHA>`, so the deployed value will be `git-` + the merge commit. Either way the old runtime cache is dropped on activate.
+
+## 077
+- **Repro: does not reproduce.** Toggling desktop ↔ Pixel 9 Pro emulation (CDP metrics + touch + UA, with and without reload, plus rapid toggles mid-load): 21 states on the `origin/qa` build and 21 on live `qa.aforaudience.com`, 0 zero-event states.
+- **Root path: the caught error, not a stale response.** Fault injection on `origin/qa`:
+  - Stale order (All Cities landing after the city load, or the reverse): 6 events, correct. A stale response cannot produce 0, because All Cities is a superset and the client-side city filter still applies.
+  - Events fetch fails (network error or 500) before any load succeeded: `0 events happening near you` + `No events published yet` — Hitesh's exact screen. A client-side failure never reaches Vercel, which matches "every logged request was 200".
+  - One of the two loads fails: events show, with a `Failed to fetch` banner that never clears.
+- **Fix (`src/app/(public)/events/page.tsx`):** one `AbortController` per `selectedCity` load, aborted in cleanup; superseded and aborted loads never touch state; the failed flag resets on every load; a failed load renders "Couldn't load events" + **Retry** in place of the empty state. After: the same faults give the error + Retry, Retry loads 6 events, and a failed superseded load is ignored.
+- New `eventsPage` strings `loadErrorTitle`, `loadErrorSub`, `retry` in all 11 locales. The top `ErrorBanner` on this page is gone (the error now sits where the list would be).
+- **Artist events page: listed, not fixed.** `src/app/dashboard/artist/events/page.tsx` ~L118 has the same race and the same false empty state ("No published events yet. Check back soon!" after a failed load), but its error goes to a toast and it has no error state, so it is not the same 5-line shape. Needs its own error + Retry UI.
+
+## Verification
+- `tsc` clean; `next build` passes (run twice on the branch).
+- Design-token checker vs `origin/qa`: no new literals. Ratchet: all categories at baseline except `spacing-literal` 1863 vs 1864 (**-1**, the removed banner margin). Baseline file not touched.
+- Self-tests: 91 / 65 / 5 / 4 / 48 passed. ESLint per-line diff on touched files: 0 new.
+- `e2e/smoke.spec.ts` locally: 4 passed, 2 failed (the "Jaipur Mic Gala 100" test, both viewports). **Fails the same way on live QA** — the event is in the past, so it is not on the Upcoming tab. Test-data drift, not this branch.
+
+## Findings for chat / Hitesh
+1. **"Offline tickets" does not work today, before or after.** The SW does serve the cached `/tickets` HTML offline, but the page then sees no session (the session fetch fails offline) and redirects to `/login`; the bookings come from `/api/bookings/my`, which is never cached. The install prompt's promise needs its own ticket (cache bookings client-side, don't redirect while offline).
+2. **Check (e) is not 088 evidence.** `/` is a client page: its header and tab bar both read the same client session, and its payload carries no session data. A signed-out visitor sees SIGN IN / SIGN UP **and** the same DISCOVER / MESSAGES / TICKETS / SAVED / PROFILE tab bar, so the 29 Sep screenshot is what `/` looks like whenever the client session reads as signed out (e.g. one failed `/api/auth/session` fetch). Suggest removing it from the 088 Feedback message.
+3. Artist events page (above) needs a ticket.
+
+---
+
 # Session Handoff — 1 Oct 2026, part 24 (chat — session start; 088/077 dispatch written)
 
 - **Stale CC run (no harm):** CC ran the old GEN-2609-099 prompt on base `af757e3` (22 Sep). The branch never reached the remote, and the QA `DesignToken` tint-08/10 rows are unchanged (1 each, 26 Sep). 099/100/113 shipped long ago. **Spacing p1 has NOT run yet.** Every dispatch now says: stop if base < the stated SHA.
