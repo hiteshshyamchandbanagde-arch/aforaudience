@@ -1,3 +1,25 @@
+# Session Handoff — 1 Oct 2026, part 26 (chat — #717 merged)
+
+- **#717** (BUG-2609-088 SW + BUG-2609-077 /events) was squash-merged at pinned head `8307e16`, giving `qa` @ `ef891e2`.
+  - CI green (design-tokens + Vercel). Branch deleted. `isRouterRequest` and `src/lib/sw-cache.ts` verified on `qa` via the Contents API.
+  - QA deploy `dpl_znUVULR6ApNueRKvJgZfvhqqe8S1` is READY; 0 runtime errors.
+- Chat review:
+  - The SW is now an allowlist: router/RSC requests and non-GET go to the network, and `respondWith` always gets a Response.
+  - Sign-out goes through `signOutAndClearCache` (all 7 sites).
+  - User-change clearing deliberately ignores "signed out", so an offline session-fetch failure can't wipe the offline copy.
+  - `CACHE_VERSION` is stamped per build by the existing `scripts/stamp-sw-version.js`.
+  - 077 uses AbortController plus a latest-city ref; a failed load shows error + Retry and never the "No events published yet" copy.
+- 088 and 077 → `BUILD_COMPLETE` / `DEPLOYED_QA`. Hitesh retest: sign out/in as a different user on the same device, then client-side nav; and `/events` desktop↔mobile toggling.
+- **CC findings, actioned:**
+  - **BUG-2610-001 (MEDIUM):** "offline tickets" never worked. Offline, `/tickets` redirects to `/login` and bookings come from `/api`. Needs Hitesh's decision: build it properly, or remove the claim from InstallPrompt.
+  - **BUG-2610-002 (LOW):** the artist events page has the same race and false empty state.
+  - Check (e) is **not** 088 evidence: a signed-out visitor sees the same tab bar. A correction was appended to the 088 message (the part 24 note on (b) is superseded).
+- New `CodeCounter` row: BUG 2610 (seq 2).
+- **Next CC:** spacing phase 1 (`docs/cc-dispatches/cc-prompt-spacing-107-phase1.md`; its base requirement `≥ 5965ee5` is satisfied by `ef891e2`). Then BUG-2609-081, GEN-2609-121, and 082-087 / 119 / 120.
+- Still on Hitesh: rotate Razorpay + Google Places keys; revoke today's PAT; click-through items 2 and 11-12; the Pune duplicate-city merge; FeeSheet copy (GEN-2609-009); the BUG-2610-001 decision.
+
+---
+
 # Session Handoff — 1 Oct 2026, part 25 (CC — BUG-2609-088 + BUG-2609-077 pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/sw-088-events-077?expand=1
