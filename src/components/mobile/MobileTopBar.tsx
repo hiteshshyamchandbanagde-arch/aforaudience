@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutAndClearCache } from '@/lib/sw-cache'
 import { useLocale } from '@/lib/i18n/translate'
 import { LOCALES } from '@/lib/i18n/locales'
 import LocationChip from '@/components/LocationChip'
@@ -224,7 +225,7 @@ export default function MobileTopBar() {
           <Button
             // bare-reason: must match the Sign in / Register <Link>s it swaps with in the same top-bar slot (mono caption type); those are links, not Buttons
             variant="bare"
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={() => signOutAndClearCache({ callbackUrl: '/' })}
             style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', padding: 0 }}
           >
             {t.nav.signOut}

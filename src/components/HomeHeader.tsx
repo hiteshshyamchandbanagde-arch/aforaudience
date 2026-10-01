@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { signOut, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
+import { signOutAndClearCache } from "@/lib/sw-cache"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
@@ -255,7 +256,7 @@ export default function HomeHeader() {
                     <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
                     <Button
                       variant="menu-row"
-                      onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
+                      onClick={() => { setMenuOpen(false); signOutAndClearCache({ callbackUrl: "/" }) }}
                     >
                       {t.nav.signOut}
                     </Button>

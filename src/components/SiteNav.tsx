@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, type CSSProperties } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
+import { signOutAndClearCache } from "@/lib/sw-cache"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
@@ -506,7 +507,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     variant="solid"
                     size="lg"
                     fullWidth={false}
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    onClick={() => signOutAndClearCache({ callbackUrl: "/" })}
                   >
                     {t.nav.signOut}
                   </Button>
@@ -637,7 +638,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                         <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                         <Button
                           variant="menu-row"
-                          onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
+                          onClick={() => { setMenuOpen(false); signOutAndClearCache({ callbackUrl: "/" }) }}
                         >
                           {t.nav.signOut}
                         </Button>

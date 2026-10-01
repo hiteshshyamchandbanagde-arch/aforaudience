@@ -1,6 +1,7 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutAndClearCache } from '@/lib/sw-cache'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
@@ -719,7 +720,7 @@ function ProfileContent() {
                   rows: [
                     { icon: <ReceiptIcon style={{ width: 18, height: 18 }} />, title: 'Fee breakdown', hint: 'How our 0% commission works', onClick: () => setFeeSheetOpen(true) },
                     { icon: <GearIcon style={{ width: 18, height: 18 }} />, title: 'Settings', onClick: () => scrollToCard('account-settings', undefined, false) },
-                    { icon: <LogoutIcon style={{ width: 18, height: 18 }} />, title: 'Log out', danger: true, onClick: () => signOut({ callbackUrl: '/' }) },
+                    { icon: <LogoutIcon style={{ width: 18, height: 18 }} />, title: 'Log out', danger: true, onClick: () => signOutAndClearCache({ callbackUrl: '/' }) },
                   ],
                 },
               ].map((group) => (
