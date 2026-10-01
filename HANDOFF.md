@@ -9,7 +9,11 @@
 - **Order (chat rec):** 088/077 BEFORE spacing p1. Stale or cross-user payloads make every click-through untrustworthy, including part 23 open question (b). Spacing p1 is zero-visual hygiene. Both dispatches are ready; Hitesh's choice.
 - Feedback: BUG-2609-088 and 077 → `BUILD_QUEUE`.
 - Deleted the remote branch `feat/gen-2609-118-colour-rule` (fully contained in `qa`, #714).
-- Part 23 open questions (a)/(b)/(c) and the "Still on Hitesh" list carry over unchanged.
+- **Part 23 open questions answered:**
+  - (a) Keep the floating bubble, lift-and-space; no dock (design.md 081 updated).
+  - (b) He did NOT sign in between the screenshots, so this is 088 evidence. Added to the 088 Feedback message and as dispatch check (e).
+  - (c) He doesn't remember. That doesn't matter: the draft is browser `localStorage` only (`afa-seatmap-draft:<venueId>`), and the server is intact (Ganesh Open Mic frozen, 44 Seat rows = capacity 44). The only risk is unfreeze + Save from that same browser with the old draft restored. Noted on BUG-2609-086: a frozen map shouldn't offer draft restore at all.
+- "Still on Hitesh" list from part 23 carries over unchanged.
 
 ---
 

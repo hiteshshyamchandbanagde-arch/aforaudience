@@ -33,6 +33,7 @@ Context: `main` (production) has no service worker, so this is QA-only. No DB ch
   - With context `offline=true`, a client-side nav shows no `Failed to convert value to Response` in the console, and a hard nav gives `offline.html`.
   - A previously visited `/tickets` still loads offline.
 - **(d) Upgrade:** a context that has the old SW plus a populated `afora-runtime-v2-2026-08-16` has that cache gone after the new SW activates.
+- **(e) Signed-in header:** sign in, then client-side nav to `/`. The header must show the signed-in state, not SIGN IN/SIGN UP next to a signed-in tab bar. Hitesh saw exactly that mismatch on 29 Sep without signing in between screens (confirmed 1 Oct), which is evidence of a stale cached `/` payload. It must reproduce on `origin/qa` and be gone on the branch.
 - QA personas are in `e2e/helpers/roles.ts`, password `QaPass!2026`.
 
 ## 2. BUG-2609-077: `src/app/(public)/events/page.tsx` (~L219-235, ~L396, ~L620-626)
@@ -49,7 +50,7 @@ Context: `main` (production) has no service worker, so this is QA-only. No DB ch
 
 ## Handoff (delta-only)
 - Compare link and commits.
-- The (a)-(d) results, each with its before-on-`origin/qa` result.
+- The (a)-(e) results, each with its before-on-`origin/qa` result.
 - 077: repro result and root path.
 - Whether the artist events page was fixed or listed.
 - The final `CACHE_VERSION`.
