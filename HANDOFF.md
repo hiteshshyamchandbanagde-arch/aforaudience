@@ -1,3 +1,17 @@
+# Session Handoff — 29 Sept 2026, part 23 (chat — session end, read this first)
+
+**Start of next chat session:** run session-start protocol, then pick up here.
+
+- `qa` HEAD = this commit. Merged today: #715 (GEN-2609-117), #716 (bug bundle). No open PRs.
+- **CC:** spacing phase 1 dispatched (`docs/cc-dispatches/cc-prompt-spacing-107-phase1.md`). If its handoff has arrived, merge it, then decide phase 2 from its non-matching-value table.
+- **Next CC after spacing p1: BUG-2609-088 (HIGH, service worker caches RSC page payloads).** Dispatch not written yet. Then BUG-2609-081 (bubble never covers a control; KEEP bubble on mobile), then GEN-2609-121 (colour follow-ups 1-7), then 082-087 and 119/120.
+- **Hitesh click-through (#714/#716):** pass 1, 3, 4, 5, 6, 9, 10; fail 7 (in 081). **Still to do: 2 (register, incognito), 8 (venue create; covered by 081), 11-12 (admin design-system token edit + revert).** GEN-2609-118 stays BUILD_COMPLETE until 11 passes.
+- **Open questions to Hitesh:** (a) "dock it" — dock the mobile bubble into the tab-bar strip so it never sits over content, or the lift-and-space fix as planned (default if no answer); (b) did he sign in between the home-page screenshot showing SIGN IN/SIGN UP plus signed-in tab bar and the /profile as Omkar screenshot? If not, add it to 088 as evidence (stale home HTML); (c) Ganesh Open Mic seat map was frozen during testing; did he press OK on the "14998 minutes ago" draft restore? If yes, the builder may hold a stale 44-seat draft.
+- **Still on Hitesh:** rotate Razorpay + Google Places keys (since 25 Aug); revoke the 29 Sep GitHub PAT; Pune (IN) vs Pune duplicate-city merge (chat brings sample rows first); FeeSheet copy (GEN-2609-009).
+- QA test data created today: event "My Event Sep Night" (Omkar, Koregaon Park Lounge, 1 Oct 23:55 to 14:53, ₹37,417 venue booking, CONFIRMED by Vinayak); Atul reservation D5-D8 on qa-jaipur-event-0001 (expired hold).
+
+---
+
 # Session Handoff — 29 Sept 2026, part 22 (chat — Hitesh click-through in progress)
 
 - Click-through (#714/#716): pass 1, 3, 4, 5, 6, 9, 10; fail 7 (bubble on venue edit Save & Unpublish). Left: 2, 8, 11, 12.
