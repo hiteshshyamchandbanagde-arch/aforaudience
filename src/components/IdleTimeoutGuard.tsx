@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutAndClearCache } from '@/lib/sw-cache'
 
 // Feedback a3630648: no session timeout enforced anywhere. Originally
 // scoped Admin-only (PR #203); extended here per Hitesh's follow-up
@@ -40,7 +41,7 @@ export default function IdleTimeoutGuard() {
     const resetTimer = () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => {
-        signOut({ callbackUrl: '/login?idle=1' })
+        signOutAndClearCache({ callbackUrl: '/login?idle=1' })
       }, limit)
     }
 
