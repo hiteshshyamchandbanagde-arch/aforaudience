@@ -1,3 +1,18 @@
+# Session Handoff — 1 Oct 2026, part 24 (chat — session start; 088/077 dispatch written)
+
+- **Stale CC run (no harm):** CC ran the old GEN-2609-099 prompt on base `af757e3` (22 Sep). The branch never reached the remote, and the QA `DesignToken` tint-08/10 rows are unchanged (1 each, 26 Sep). 099/100/113 shipped long ago. **Spacing p1 has NOT run yet.** Every dispatch now says: stop if base < the stated SHA.
+- **New dispatch:** `docs/cc-dispatches/cc-prompt-sw-088-events-077.md`. Branch `fix/sw-088-events-077`.
+  - 088 root cause verified in `public/sw.js`: RSC fetches hit the catch-all SWR (stale/cross-user), and `respondWith(undefined)` causes the TypeError.
+  - Kept: navigation network-first and offline `/tickets`. Cross-user is closed by clearing the runtime cache on sign-out or user change.
+  - 077 is a separate /events race plus a never-cleared error state (`/api` isn't SW-cached).
+  - `main` has no SW, so this is QA-only.
+- **Order (chat rec):** 088/077 BEFORE spacing p1. Stale or cross-user payloads make every click-through untrustworthy, including part 23 open question (b). Spacing p1 is zero-visual hygiene. Both dispatches are ready; Hitesh's choice.
+- Feedback: BUG-2609-088 and 077 → `BUILD_QUEUE`.
+- Deleted the remote branch `feat/gen-2609-118-colour-rule` (fully contained in `qa`, #714).
+- Part 23 open questions (a)/(b)/(c) and the "Still on Hitesh" list carry over unchanged.
+
+---
+
 # Session Handoff — 29 Sept 2026, part 23 (chat — session end, read this first)
 
 **Start of next chat session:** run session-start protocol, then pick up here.
