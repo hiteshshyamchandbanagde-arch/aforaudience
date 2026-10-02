@@ -152,8 +152,8 @@ export default function VenueOwnerSalesOverviewPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
-  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
-  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>No data</div></DashboardShell></>)
+  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
+  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></DashboardShell></>)
 
   const { totals, previousTotals, venues, organisers, timeline } = data
   const topVenues = venues.slice(0, TOP_VENUES_SHOWN)
@@ -164,7 +164,7 @@ export default function VenueOwnerSalesOverviewPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
           <div>
             <PageHead
               eyebrow="Analytics"
@@ -176,10 +176,10 @@ export default function VenueOwnerSalesOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
             <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} />
             <StatCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
             <StatCard label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
@@ -234,7 +234,7 @@ export default function VenueOwnerSalesOverviewPage() {
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
             ) : (
               <>
-                <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: '20px' }}>
+                <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: 'var(--afa-space-5)' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
                       <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} horizontal={false} />
@@ -268,8 +268,8 @@ export default function VenueOwnerSalesOverviewPage() {
                 )}
 
                 {(showAllVenues || !hasMoreVenues) && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: hasMoreVenues ? '16px' : 0 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', marginTop: hasMoreVenues ? '16px' : 0 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 var(--afa-space-3)' }}>
                       <span>Venue</span>
                       <span>City</span>
                       <span>Revenue</span>
@@ -282,7 +282,7 @@ export default function VenueOwnerSalesOverviewPage() {
                         className="avp-hover-border"
                         style={{
                           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                          fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)',
+                          fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)',
                           border: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                         }}
                       >
@@ -309,8 +309,8 @@ export default function VenueOwnerSalesOverviewPage() {
 
           {/* Demoted relative to "By venue" - secondary context for a
               venue owner (who they're renting to), not a primary metric. */}
-          <div style={{ padding: '4px 4px 40px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 10px' }}>
+          <div style={{ padding: 'var(--afa-space-1) var(--afa-space-1) 40px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-10px)' }}>
               By organiser
             </p>
             {organisers.length === 0 ? (
@@ -322,7 +322,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     key={o.organiserId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: '9px 12px', background: 'var(--afa-tint-04)', color: 'var(--afa-text-secondary)',
+                      fontSize: 'var(--afa-text-ui)', padding: '9px var(--afa-space-3)', background: 'var(--afa-tint-04)', color: 'var(--afa-text-secondary)',
                     }}
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>
@@ -342,15 +342,15 @@ export default function VenueOwnerSalesOverviewPage() {
 
 function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
   return (
-    <Card style={{ padding: '18px' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
+    <Card style={{ padding: 'var(--afa-space-18px)' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error-bright)', marginTop: '6px', marginBottom: 0 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
         </p>
       ) : sub ? (
-        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: '6px', marginBottom: 0 }}>{sub}</p>
+        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>{sub}</p>
       ) : null}
     </Card>
   )
@@ -358,8 +358,8 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Card style={{ padding: '20px', marginBottom: '20px' }}>
-      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 16px' }}>{title}</h2>
+    <Card style={{ padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)' }}>
+      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-4)' }}>{title}</h2>
       {children}
     </Card>
   )

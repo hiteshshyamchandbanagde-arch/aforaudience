@@ -114,7 +114,7 @@ function groupCoverage(tokens: DesignToken[]): CoverageStatus {
 function CoverageBadge({ status }: { status: CoverageStatus }) {
   const meta = COVERAGE_META[status]
   return (
-    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px 8px', borderRadius: 'var(--afa-radius-pill)', color: meta.color, background: meta.bg }}>
+    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', color: meta.color, background: meta.bg }}>
       {meta.label}
     </span>
   )
@@ -407,9 +407,9 @@ export default function AdminDesignSystemPage() {
       <>
         <SiteNav />
         <DashboardShell>
-          <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'var(--font-sans)' }}>
+          <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', fontFamily: 'var(--font-sans)' }}>
             <div style={{ maxWidth: 560, margin: '0 auto' }}>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
                 Admins only
               </h1>
               <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>This page is only visible to platform admins.</p>
@@ -427,18 +427,18 @@ export default function AdminDesignSystemPage() {
     <>
       <SiteNav />
       <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '32px 24px 120px', fontFamily: 'var(--font-sans)' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-32px) var(--afa-space-6) 120px', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-6)' }}>
               <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 4 }}>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
                   Design System
                 </h1>
                 <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
                   Edit here, save, and it's live on the next page load — everywhere, no deploy.
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                 <Button
                   variant="outline-neutral"
                   size="md"
@@ -485,7 +485,7 @@ export default function AdminDesignSystemPage() {
                 {versions.length === 0 ? (
                   <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)' }}>No versions yet.</p>
                 ) : (
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                     {versions.map((v, i) => {
                       // versions is newest-first, so index i+1 is the
                       // version immediately BEFORE this one in time -
@@ -499,8 +499,8 @@ export default function AdminDesignSystemPage() {
                       // this count is exactly what the restore will write.
                       const wouldRestore = planRestore(v.snapshot, tokens ?? []).changes.length
                       return (
-                        <li key={v.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--afa-border-resting)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                        <li key={v.id} style={{ padding: 'var(--afa-space-10px) 0', borderBottom: '1px solid var(--afa-border-resting)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)' }}>
                             <div>
                               <div style={{ color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>{v.note || 'Update'}</div>
                               <div style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>
@@ -521,7 +521,7 @@ export default function AdminDesignSystemPage() {
                             </Button>
                           </div>
                           {changedByThisSave.length > 0 && (
-                            <ul style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 'var(--afa-space-6px) 0 0', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2px)' }}>
                               {changedByThisSave.map((c) => (
                                 <li key={c.key} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)' }}>
                                   {c.key}: <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{c.from}</span> → <span style={{ color: 'var(--afa-text-secondary)' }}>{c.to}</span>
@@ -537,12 +537,12 @@ export default function AdminDesignSystemPage() {
               </div>
             )}
 
-            <div style={{ ...panelStyle, marginBottom: 24 }}>
+            <div style={{ ...panelStyle, marginBottom: 'var(--afa-space-6)' }}>
               <h2 style={sectionTitleStyle}>Live preview</h2>
-              <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 16 }}>
+              <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-4)' }}>
                 Reflects unsaved edits below: the real Button component, then a sample card. Nothing outside this box changes until you save.
               </p>
-              <div style={{ ...previewStyle, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: 20, background: 'var(--afa-surface-page)' }}>
+              <div style={{ ...previewStyle, display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-3)', alignItems: 'center', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-page)' }}>
                 <Button variant="primary" fullWidth={false} size={36}>Primary</Button>
                 {/* GEN-2609-076 - `outline`'s text/border color is
                     --afa-on-fill-solid (near-black by design), meant to
@@ -555,7 +555,7 @@ export default function AdminDesignSystemPage() {
                     used in, e.g. NotificationOptIn.tsx's banner.
                     GEN-2609-115 - labelled so the orange box reads as
                     intentional. */}
-                <div style={{ ...previewStyle, background: 'var(--afa-fill-solid)', padding: '10px 14px' }}>
+                <div style={{ ...previewStyle, background: 'var(--afa-fill-solid)', padding: 'var(--afa-space-10px) var(--afa-space-14px)' }}>
                   <Button variant="outline" fullWidth={false} size={36}>Outline (on orange)</Button>
                 </div>
                 <Button variant="form-submit" fullWidth={false} size={36}>Form submit</Button>
@@ -588,7 +588,7 @@ export default function AdminDesignSystemPage() {
                 <Button variant="secondary" fullWidth={false} size={36}>Secondary</Button>
                 <Button variant="secondary-reveal" fullWidth={false} size={36}>See more →</Button>
                 <Button variant="close" fullWidth={false} size={36}>✕</Button>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                   <Button variant="primary" fullWidth={false} size="sm">Sm</Button>
                   <Button variant="primary" fullWidth={false} size="md">Md</Button>
                   <Button variant="primary" fullWidth={false} size="lg">Lg</Button>
@@ -598,9 +598,9 @@ export default function AdminDesignSystemPage() {
             </div>
 
             {CONTRAST_PAIRS.length > 0 && (
-              <div style={{ ...panelStyle, marginBottom: 24 }}>
+              <div style={{ ...panelStyle, marginBottom: 'var(--afa-space-6)' }}>
                 <h2 style={sectionTitleStyle}>Contrast check (WCAG)</h2>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-6px)' }}>
                   {CONTRAST_PAIRS.map((pair) => {
                     const ratio = pairRatio(pair, pendingValues)
                     const min = contrastMinimum(pair)
@@ -773,7 +773,7 @@ function TokenField({
   const meta = tokenMeta(token.key)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, opacity: disabled ? 0.55 : 1 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-6px)', opacity: disabled ? 0.55 : 1 }}>
       <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', flexWrap: 'wrap' }}>
         {meta.label}
         {token.locked && (
@@ -1108,12 +1108,12 @@ function ContrastFailureList({ failures }: { failures: ContrastFailure[] }) {
 
 function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { title: string; body: React.ReactNode; confirmLabel: string; onConfirm: () => void; onCancel: () => void }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'var(--afa-scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-      <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 24, maxWidth: 440, width: '100%' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--afa-scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--afa-space-5)' }}>
+      <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 'var(--afa-space-6)', maxWidth: 440, width: '100%' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>{title}</h3>
         {/* div, not p: body may be a ReactNode with block content (RestorePreview's list) */}
-        <div style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</div>
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+        <div style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 'var(--afa-space-5)' }}>{body}</div>
+        <div style={{ display: 'flex', gap: 'var(--afa-space-10px)', justifyContent: 'flex-end' }}>
           <Button variant="outline-neutral" size="md" fullWidth={false} onClick={onCancel}>
             Cancel
           </Button>
@@ -1129,19 +1129,19 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { tit
 const panelStyle: React.CSSProperties = {
   background: 'var(--afa-surface-page)',
   border: '1px solid var(--afa-border-resting)',
-  padding: 20,
+  padding: 'var(--afa-space-5)',
 }
 const sectionTitleStyle: React.CSSProperties = {
   fontFamily: 'var(--font-display)',
   fontSize: 'var(--afa-text-lead)',
   color: 'var(--afa-text-primary)',
-  marginBottom: 4,
+  marginBottom: 'var(--afa-space-1)',
 }
 const swatchStyle: React.CSSProperties = { width: 'var(--afa-space-32px)', height: 'var(--afa-space-32px)' }
 const inputStyle: React.CSSProperties = {
   flex: 1,
   minWidth: 0,
-  padding: '6px 10px',
+  padding: 'var(--afa-space-6px) var(--afa-space-10px)',
   fontSize: 'var(--afa-text-ui)',
   background: 'var(--afa-surface-raised)',
   color: 'var(--afa-text-primary)',

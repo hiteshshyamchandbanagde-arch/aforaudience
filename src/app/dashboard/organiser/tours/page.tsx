@@ -67,11 +67,11 @@ export default function OrganiserToursPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) 80px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-28px)', flexWrap: 'wrap', gap: 'var(--afa-space-3)' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
-            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-1)' }}>
               A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
             </p>
           </div>
@@ -81,13 +81,13 @@ export default function OrganiserToursPage() {
         </div>
 
         {error && (
-          <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
+          <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
         )}
 
         {tours.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
-            <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No Tours yet</p>
-            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
+          <div style={{ textAlign: 'center', padding: '64px var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+            <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>No Tours yet</p>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
               Create a Tour to group a series of stops under one shared page for your audience.
             </p>
             <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/tours/create">
@@ -95,7 +95,7 @@ export default function OrganiserToursPage() {
             </Button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--afa-space-5)' }}>
             {tours.map((tour) => {
               const statusStyle = STATUS_STYLE[tour.status] || STATUS_STYLE.DRAFT
               const pendingConsents = tour.consents.filter((c) => c.status === 'PENDING').length
@@ -104,19 +104,19 @@ export default function OrganiserToursPage() {
                 <div
                   key={tour.id}
                   onClick={() => router.push(`/dashboard/organiser/tours/${tour.id}`)}
-                  style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '24px', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
+                  style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-14px)', gap: 'var(--afa-space-10px)' }}>
                     <div>
                       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h3>
                       {tour.subject && (
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>{tour.subject}</p>
                       )}
                     </div>
                     <Badge tone={statusStyle}>{statusStyle.label}</Badge>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '16px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                     <span><strong>{tour.stops.length}</strong> stop{tour.stops.length !== 1 ? 's' : ''}</span>
                     <span><strong>{liveStops}</strong> live</span>
                     {pendingConsents > 0 && (

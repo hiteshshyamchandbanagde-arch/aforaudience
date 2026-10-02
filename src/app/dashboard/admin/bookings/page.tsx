@@ -117,7 +117,7 @@ export default function AdminBookingsPage() {
       <>
         <SiteNav />
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-          <div style={{ padding: '32px', color: 'var(--afa-text-primary)' }}>Loading…</div>
+          <div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-text-primary)' }}>Loading…</div>
         </main>
       </>
     )
@@ -130,8 +130,8 @@ export default function AdminBookingsPage() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
               Admin access only
             </h1>
             <p style={{ color: 'var(--afa-text-secondary)' }}>This page is restricted to platform administrators.</p>
@@ -146,7 +146,7 @@ export default function AdminBookingsPage() {
     const active = id === tab
     return (
       <Button key={id} variant="toggle-pill" size="pill-sm" fullWidth={false} selected={active} onClick={() => setTab(id)}>
-        {label} <span style={{ opacity: 0.7, marginLeft: '4px' }}>({count})</span>
+        {label} <span style={{ opacity: 0.7, marginLeft: 'var(--afa-space-1)' }}>({count})</span>
       </Button>
     )
   }
@@ -169,16 +169,16 @@ export default function AdminBookingsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px 80px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 80px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
             Bookings &amp; delivery
           </h1>
-          <p style={{ color: 'var(--afa-text-secondary)', marginBottom: '20px', fontSize: 'var(--afa-text-body)' }}>
+          <p style={{ color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', fontSize: 'var(--afa-text-body)' }}>
             Confirmed bookings, grouped by ticket-delivery state. Retry re-fires the delivery pipeline on failed
             attempts (30-second cooldown enforced by the endpoint).
           </p>
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-6)' }}>
             {tabButton('errored', 'Failed', counts.errored)}
             {tabButton('pending', 'Pending delivery', counts.pending)}
             {tabButton('delivered', 'Delivered', counts.delivered)}
@@ -186,9 +186,9 @@ export default function AdminBookingsPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: '32px 0', color: 'var(--afa-text-secondary)' }}>Loading bookings…</div>
+            <div style={{ padding: 'var(--afa-space-32px) 0', color: 'var(--afa-text-secondary)' }}>Loading bookings…</div>
           ) : bookings.length === 0 ? (
-            <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--afa-text-secondary)' }}>
+            <div style={{ padding: 'var(--afa-space-48px) 0', textAlign: 'center', color: 'var(--afa-text-secondary)' }}>
               {tab === 'errored'
                 ? 'Nothing failed. Ticket delivery is healthy.'
                 : tab === 'pending'
@@ -208,21 +208,21 @@ export default function AdminBookingsPage() {
                     style={{
                       background: 'var(--afa-surface-page)',
                       borderRadius: 'var(--afa-radius-lg)',
-                      padding: '18px 20px',
+                      padding: 'var(--afa-space-18px) var(--afa-space-5)',
                       border: '1px solid var(--afa-tint-08)',
                     }}
                   >
                     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2px)' }}>
                           {b.event?.title || 'Event deleted'}
                           {b.event?.isFree ? (
-                            <Badge variant="tag" tone={{ bg: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: '8px' }}>
+                            <Badge variant="tag" tone={{ bg: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: 'var(--afa-space-2)' }}>
                               FREE
                             </Badge>
                           ) : null}
                         </div>
-                        <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '6px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)' }}>
                           {displayName} — {b.user.email}
                         </div>
                         <div style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'var(--font-mono)' }}>
@@ -231,16 +231,16 @@ export default function AdminBookingsPage() {
                       </div>
                       <div className="text-left lg:text-right" style={{ fontSize: 'var(--afa-text-ui)', flexShrink: 0 }}>
                         <div style={{ fontWeight: 600, color: s.color }}>{s.label}</div>
-                        <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px' }}>{formatDate(b.createdAt)}</div>
+                        <div style={{ color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{formatDate(b.createdAt)}</div>
                         {isDelivered && b.deliveredAt ? (
-                          <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px', fontSize: 'var(--afa-text-small)' }}>
+                          <div style={{ color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)', fontSize: 'var(--afa-text-small)' }}>
                             Delivered {formatDate(b.deliveredAt)}
                           </div>
                         ) : null}
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '10px', fontSize: 'var(--afa-text-ui)', display: 'flex', gap: '16px', flexWrap: 'wrap', color: 'var(--afa-text-secondary)' }}>
+                    <div style={{ marginTop: 'var(--afa-space-10px)', fontSize: 'var(--afa-text-ui)', display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap', color: 'var(--afa-text-secondary)' }}>
                       <span>Total: <strong style={{ color: 'var(--afa-text-primary)' }}>{formatMoney(b.totalAmount)}</strong></span>
                       {b.bookingFeeAmount > 0 ? <span>Fee: {formatMoney(b.bookingFeeAmount)}</span> : null}
                       {b.payment ? (
@@ -261,8 +261,8 @@ export default function AdminBookingsPage() {
                     {isErrored && b.deliveryError ? (
                       <div
                         style={{
-                          marginTop: '12px',
-                          padding: '10px 12px',
+                          marginTop: 'var(--afa-space-3)',
+                          padding: 'var(--afa-space-10px) var(--afa-space-3)',
                           background: 'var(--afa-error-tint)',
                           border: '1px solid var(--afa-error-edge)',
                           borderRadius: 'var(--afa-radius-md)',
@@ -280,7 +280,7 @@ export default function AdminBookingsPage() {
                     {retryMessage?.id === b.id ? (
                       <div
                         style={{
-                          marginTop: '10px',
+                          marginTop: 'var(--afa-space-10px)',
                           fontSize: 'var(--afa-text-ui)',
                           color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : 'var(--afa-error-bright)',
                         }}
@@ -290,7 +290,7 @@ export default function AdminBookingsPage() {
                     ) : null}
 
                     {!isDelivered ? (
-                      <div style={{ marginTop: '12px' }}>
+                      <div style={{ marginTop: 'var(--afa-space-3)' }}>
                         <Button
                           variant="primary"
                           size="pill-sm"

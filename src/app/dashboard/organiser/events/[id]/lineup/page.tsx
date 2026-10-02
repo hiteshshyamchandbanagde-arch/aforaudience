@@ -81,8 +81,8 @@ function SortableRow({
         ...style,
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        padding: '14px',
+        gap: 'var(--afa-space-3)',
+        padding: 'var(--afa-space-14px)',
         background: 'var(--afa-surface-raised)',
         borderRadius: 'var(--afa-radius-lg)',
         border: '1px solid var(--afa-tint-08)',
@@ -97,7 +97,7 @@ function SortableRow({
           cursor: 'grab',
           fontSize: 'var(--afa-text-lead)',
           color: 'var(--afa-text-muted)',
-          padding: '4px 8px',
+          padding: 'var(--afa-space-1) var(--afa-space-2)',
           touchAction: 'none',
         }}
       >
@@ -129,8 +129,8 @@ function SortableRow({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
-          padding: '5px 10px',
+          gap: 'var(--afa-space-1)',
+          padding: '5px var(--afa-space-10px)',
           borderRadius: 'var(--afa-radius-pill)',
           fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
@@ -145,14 +145,14 @@ function SortableRow({
 
       <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ₹${compAmount}` : ''}</Badge>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
         <input
           type="number"
           min={1}
           max={180}
           value={item.duration}
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
-          style={{ width: '56px', padding: '6px 8px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+          style={{ width: '56px', padding: 'var(--afa-space-6px) var(--afa-space-2)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
         <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>min</span>
       </div>
@@ -282,39 +282,39 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
+  if (error && !event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></>)
 
   return (
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 96px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-6px)' }}>
             🎤 {event.title} — Lineup
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '24px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
             Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).
             {event.maxPerformers !== null && ` Max ${event.maxPerformers} performer${event.maxPerformers === 1 ? '' : 's'}.`}
           </p>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error}</div>
           )}
 
           {lineup.length > 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '16px', marginBottom: '16px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-secondary)', marginBottom: '8px' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-2)' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                 <input
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                  style={{ flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <Button
                   variant="primary"
@@ -331,7 +331,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '32px', textAlign: 'center', border: '1px solid var(--afa-tint-06)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-32px)', textAlign: 'center', border: '1px solid var(--afa-tint-06)' }}>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>
@@ -339,7 +339,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={lineup.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                   {lineup.map((item) => (
                     <SortableRow key={item.id} item={item} onDurationChange={handleDurationChange} onFeaturedToggle={handleFeaturedToggle} />
                   ))}
@@ -349,7 +349,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length > 0 && (
-            <div style={{ position: 'sticky', bottom: '24px', marginTop: '24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
+            <div style={{ position: 'sticky', bottom: '24px', marginTop: 'var(--afa-space-6)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
               <Button
                 variant="primary"
                 size="lg"

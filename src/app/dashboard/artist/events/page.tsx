@@ -190,11 +190,11 @@ export default function BrowseEventsToApplyPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             Browse Events
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
             Apply to perform at published events.
           </p>
 
@@ -204,7 +204,7 @@ export default function BrowseEventsToApplyPage() {
             style={{
               fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)',
               background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)',
-              borderRadius: 'var(--afa-radius-pill)', padding: '8px 14px', marginBottom: '32px', cursor: 'pointer',
+              borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2) var(--afa-space-14px)', marginBottom: 'var(--afa-space-32px)', cursor: 'pointer',
             }}
           >
             <option value="All Cities">All Cities</option>
@@ -214,21 +214,21 @@ export default function BrowseEventsToApplyPage() {
           </select>
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-4)' }}>
               {events.map((event) => {
                 const existingStatus = applicationStatus[event.id]
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
                   <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)', gap: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>
                       </div>
@@ -237,7 +237,7 @@ export default function BrowseEventsToApplyPage() {
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-3)' }}>
                       <Badge variant="pill" tone={comp}>{comp.label}</Badge>
                       {full && !existingStatus && (
                         <Badge variant="pill" tone={{ bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }}>
@@ -255,12 +255,12 @@ export default function BrowseEventsToApplyPage() {
                         dashboard's "Recorded Earnings" section, for
                         consistency. */}
                     {event.defaultCompensationType === 'BUY_IN' && (
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-6px', marginBottom: '12px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-6px', marginBottom: 'var(--afa-space-3)' }}>
                         Pay directly to the organiser - not yet processed or confirmed by the platform.
                       </p>
                     )}
 
-                    <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
+                    <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-14px)' }}>{event.description}</p>
 
                     {existingStatus ? (
                       <>
@@ -268,7 +268,7 @@ export default function BrowseEventsToApplyPage() {
                           {STATUS_LABEL[existingStatus]?.label || existingStatus}
                         </span>
                         {performanceIdByEvent[event.id] && (
-                          <div style={{ marginTop: '14px' }}>
+                          <div style={{ marginTop: 'var(--afa-space-14px)' }}>
                             <PosterShareCard
                               src={`/api/posters/artist/${performanceIdByEvent[event.id]}`}
                               filename={`${event.title}-my-poster.png`}
@@ -284,7 +284,7 @@ export default function BrowseEventsToApplyPage() {
                           onChange={(e) => setMessage((prev) => ({ ...prev, [event.id]: e.target.value }))}
                           placeholder="Optional note to the organiser"
                           rows={2}
-                          style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                          style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-10px)', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
                         <Button
                           variant="primary"
@@ -297,7 +297,7 @@ export default function BrowseEventsToApplyPage() {
                             color: full ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                             background: full ? 'transparent' : undefined,
                             border: full ? '1.5px solid var(--afa-tint-20)' : 'none',
-                            padding: '8px 20px',
+                            padding: 'var(--afa-space-2) var(--afa-space-5)',
                             opacity: applying === event.id ? 0.6 : 1,
                           }}
                         >

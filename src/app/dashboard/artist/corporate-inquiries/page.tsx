@@ -90,11 +90,11 @@ export default function CorporateInquiriesPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             Corporate Inquiries
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Direct booking inquiries from companies and private event organisers. Reach out to them directly - AforAudience doesn't handle payment for these.
           </p>
 
@@ -103,20 +103,20 @@ export default function CorporateInquiriesPage() {
               No inquiries yet. They'll show up here when a company sends you a booking request from your public profile.
             </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-14px)' }}>
               {inquiries.map((inq) => {
                 const meta = STATUS_META[inq.status]
                 return (
-                  <div key={inq.id} style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                  <div key={inq.id} style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
                         <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                       </div>
-                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>
+                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>
                     </div>
 
-                    <div style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: '10px' }}>
+                    <div style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: 'var(--afa-space-10px)' }}>
                       <div><strong>Contact:</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-fill-solid)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
                       {inq.eventType && <div><strong>Event type:</strong> {inq.eventType}</div>}
                       {inq.city && <div><strong>City:</strong> {inq.city}</div>}
@@ -125,12 +125,12 @@ export default function CorporateInquiriesPage() {
                     </div>
 
                     {inq.message && (
-                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: '10px 12px', marginBottom: '12px', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-3)', marginBottom: 'var(--afa-space-3)', whiteSpace: 'pre-wrap' }}>
                         {inq.message}
                       </p>
                     )}
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                       {inq.status !== 'CONTACTED' && (
                         <Button
                           variant="outline-success"

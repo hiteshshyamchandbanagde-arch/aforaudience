@@ -112,7 +112,7 @@ export default function AdminDiaryPage() {
 
   const inputStyle: CSSProperties = {
     width: '100%',
-    padding: '12px 14px',
+    padding: 'var(--afa-space-3) var(--afa-space-14px)',
     borderRadius: 'var(--afa-radius-lg)',
     border: '1px solid var(--afa-tint-10)',
     fontSize: 'var(--afa-text-body)',
@@ -127,24 +127,24 @@ export default function AdminDiaryPage() {
         background: 'var(--afa-surface-page)',
         border: '1px solid var(--afa-tint-08)',
         borderRadius: 'var(--afa-radius-xl)',
-        padding: '20px',
+        padding: 'var(--afa-space-5)',
       }}
     >
-      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', marginBottom: '14px' }}>
+      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-14px)' }}>
         New entry
       </p>
       <input
         value={newTitle}
         onChange={(e) => setNewTitle(e.target.value)}
         placeholder="Title (e.g. GST registration)"
-        style={{ ...inputStyle, marginBottom: '10px' }}
+        style={{ ...inputStyle, marginBottom: 'var(--afa-space-10px)' }}
       />
       <textarea
         value={newNotes}
         onChange={(e) => setNewNotes(e.target.value)}
         placeholder="Notes (optional)"
         rows={3}
-        style={{ ...inputStyle, marginBottom: '14px', fontFamily: 'inherit', resize: 'vertical' }}
+        style={{ ...inputStyle, marginBottom: 'var(--afa-space-14px)', fontFamily: 'inherit', resize: 'vertical' }}
       />
       <Button variant="solid" size="lg" fullWidth onClick={handleCreate} disabled={saving || !newTitle.trim()}>
         {saving ? 'Saving...' : 'Add entry'}
@@ -161,11 +161,11 @@ export default function AdminDiaryPage() {
         overflow: 'hidden',
       }}
     >
-      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', padding: '18px 20px 4px' }}>
+      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-18px) var(--afa-space-5) var(--afa-space-1)' }}>
         Past entries
       </p>
       {loading ? (
-        <div style={{ padding: '24px 20px 32px' }}>
+        <div style={{ padding: 'var(--afa-space-6) var(--afa-space-5) var(--afa-space-32px)' }}>
           <BrandLoader label="Loading diary..." />
         </div>
       ) : entries && entries.length > 0 ? (
@@ -176,20 +176,20 @@ export default function AdminDiaryPage() {
               <div
                 key={entry.id}
                 style={{
-                  padding: '16px 20px',
+                  padding: 'var(--afa-space-4) var(--afa-space-5)',
                   borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : 'none',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '6px' : '0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)', marginBottom: entry.notes ? '6px' : '0' }}>
                   <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
                   <Badge variant="status-compact" tone={meta} style={{ fontWeight: 600, flexShrink: 0 }}>
                     {meta.label}
                   </Badge>
                 </div>
                 {entry.notes && (
-                  <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: '10px' }}>{entry.notes}</div>
+                  <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 'var(--afa-space-10px)' }}>{entry.notes}</div>
                 )}
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
                   {STATUS_ORDER.map((s) => (
                     <Button
                       key={s}
@@ -200,7 +200,7 @@ export default function AdminDiaryPage() {
                       style={{
                         fontSize: 'var(--afa-text-micro)',
                         fontWeight: 600,
-                        padding: '5px 12px',
+                        padding: '5px var(--afa-space-3)',
                         borderRadius: 'var(--afa-radius-pill)',
                         border: s === entry.status ? `1px solid ${STATUS_META[s].color}` : '1px solid var(--afa-tint-12)',
                         background: s === entry.status ? STATUS_META[s].bg : 'var(--afa-surface-raised)',
@@ -221,7 +221,7 @@ export default function AdminDiaryPage() {
           })}
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '48px 20px 40px', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
+        <div style={{ textAlign: 'center', padding: 'var(--afa-space-48px) var(--afa-space-5) 40px', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
           No diary entries yet. Add the first one on the left.
         </div>
       )}
@@ -233,11 +233,11 @@ export default function AdminDiaryPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 80px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 6px' }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 80px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-6px)' }}>
           Admin Diary
         </h1>
-        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: '24px' }}>
+        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 'var(--afa-space-6)' }}>
           Company, legal, and administrative milestones — registration, PAN, GST, current account, CA sign-offs, and anything else worth tracking outside the product Feedback board.
         </p>
 

@@ -144,7 +144,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
       >
         {icon}
       </div>
-      <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+      <div style={{ padding: 'var(--afa-space-3) var(--afa-space-4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
@@ -172,7 +172,7 @@ const sectionLabel: React.CSSProperties = {
   letterSpacing: '0.06em',
   color: 'var(--afa-text-secondary)',
   textTransform: 'uppercase',
-  marginBottom: '10px',
+  marginBottom: 'var(--afa-space-10px)',
 }
 
 export default function AdminCommandCenter() {
@@ -217,7 +217,7 @@ export default function AdminCommandCenter() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-          <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
+          <div style={{ maxWidth: '720px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-5)' }}>
             <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
           </div>
         </main>
@@ -234,8 +234,8 @@ export default function AdminCommandCenter() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
-        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 64px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
           Command Center
         </h1>
         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>
@@ -244,9 +244,9 @@ export default function AdminCommandCenter() {
 
         {/* Needs attention — only rendered if something is actually outstanding */}
         {data && data.attention.length > 0 && (
-          <div style={{ marginBottom: '28px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
             <div style={sectionLabel}>Needs attention</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
               {data.attention.map((a) => (
                 <Link
                   key={a.label}
@@ -260,7 +260,7 @@ export default function AdminCommandCenter() {
                     alignItems: 'center',
                     textDecoration: 'none',
                     borderLeft: `4px solid ${a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)'}`,
-                    padding: '14px 18px',
+                    padding: 'var(--afa-space-14px) var(--afa-space-18px)',
                   }}
                 >
                   <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{a.label}</span>
@@ -271,7 +271,7 @@ export default function AdminCommandCenter() {
                       color: a.tone === 'critical' ? 'var(--afa-error-bright)' : 'var(--afa-amber)',
                       background: a.tone === 'critical' ? 'var(--afa-error-tint)' : 'var(--afa-amber-tint)',
                       borderRadius: 'var(--afa-radius-pill)',
-                      padding: '2px 10px',
+                      padding: 'var(--afa-space-2px) var(--afa-space-10px)',
                     }}
                   >
                     {a.count}
@@ -284,12 +284,12 @@ export default function AdminCommandCenter() {
         {data && data.attention.length === 0 && (
           <div
             style={{
-              marginBottom: '28px',
+              marginBottom: 'var(--afa-space-28px)',
               background: 'var(--afa-success-tint)',
               border: '1px solid var(--afa-tint-08)',
               borderLeft: '4px solid var(--afa-green-deep)',
               borderRadius: 'var(--afa-radius-lg)',
-              padding: '14px 18px',
+              padding: 'var(--afa-space-14px) var(--afa-space-18px)',
               // BUG-2609-050 - green-deep text on this tint was 2.15:1.
               // No STATUS_TONE matches this green bg, so text only.
               color: 'var(--afa-sage-bright)',
@@ -302,9 +302,9 @@ export default function AdminCommandCenter() {
         )}
 
         {/* Feedback health */}
-        <div style={{ marginBottom: '10px' }}>
+        <div style={{ marginBottom: 'var(--afa-space-10px)' }}>
           <div style={sectionLabel}>Feedback health</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 'var(--afa-space-3)' }}>
             <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=ALL" />
             <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=NEW" />
             <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="In Test" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=IN_TEST" />
@@ -314,9 +314,9 @@ export default function AdminCommandCenter() {
         </div>
 
         {/* Business this month */}
-        <div style={{ marginTop: '24px', marginBottom: '24px' }}>
+        <div style={{ marginTop: 'var(--afa-space-6)', marginBottom: 'var(--afa-space-6)' }}>
           <div style={sectionLabel}>This month</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 'var(--afa-space-3)' }}>
             <TicketTile icon={<IconRupee />} value={k ? formatINR(k.monthRevenue) : '—'} label="Revenue" accent="var(--afa-amber)" />
             <TicketTile icon={<IconTicket />} value={k?.monthBookings ?? '—'} label="Bookings" accent="var(--afa-amber)" />
           </div>
@@ -328,11 +328,11 @@ export default function AdminCommandCenter() {
             background: 'var(--afa-surface-raised)',
             borderRadius: 'var(--afa-radius-lg)',
             border: '1px solid var(--afa-tint-08)',
-            padding: '20px 22px',
+            padding: 'var(--afa-space-5) 22px',
             marginBottom: '26px',
           }}
         >
-          <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
+          <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
             Issues raised vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 14 days</span>
           </div>
           {/* Fluid width, no horizontal scroll — bars compress on narrow
@@ -349,7 +349,7 @@ export default function AdminCommandCenter() {
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '3px', height: '100%' }}>
               {(data?.dailyTrend || []).map((d, i, arr) => (
                 <div key={d.day} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                  <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '108px', width: '100%', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-2px)', alignItems: 'flex-end', height: '108px', width: '100%', justifyContent: 'center' }}>
                     <div
                       title={`Opened: ${d.opened}`}
                       style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }}
@@ -359,14 +359,14 @@ export default function AdminCommandCenter() {
                       style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-green-deep)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }}
                     />
                   </div>
-                  <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: '6px', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
+                  <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-6px)', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
                     {dayLabel(d.day)}
                   </span>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '16px', marginTop: '14px', fontSize: 'var(--afa-text-small)' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-small)' }}>
             <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
             </span>

@@ -43,7 +43,7 @@ function StatTile({ label, value, icon, sub }: { label: string; value: string; i
         color: 'var(--afa-text-primary)',
         lineHeight: 1,
       }}>{value}</div>
-      {sub && <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-small)', marginTop: 6 }}>{sub}</p>}
+      {sub && <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-small)', marginTop: 'var(--afa-space-6px)' }}>{sub}</p>}
     </div>
   )
 }
@@ -88,7 +88,7 @@ export default function AudienceActivityPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
 
   const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
   const totalSpend = confirmed.reduce((sum, b) => sum + b.totalAmount, 0)
@@ -107,26 +107,26 @@ export default function AudienceActivityPage() {
       <SiteNav />
       <DashboardShell>
         <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '900px', padding: '48px 24px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+          <div style={{ maxWidth: '900px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.audienceActivityPage.heading}
             </h1>
-            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
               {tr.audienceActivityPage.subtitle}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ marginBottom: '16px' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ marginBottom: 'var(--afa-space-4)' }}>
               <StatTile label={tr.audienceActivityPage.totalSpend} value={`₹${totalSpend.toLocaleString('en-IN')}`} icon="creditCard" />
               <StatTile label={tr.audienceActivityPage.eventsAttended} value={String(totalEventsAttended)} icon="calendar" />
               <StatTile label={tr.audienceActivityPage.freeEventsAttended} value={String(freeEventsAttended)} icon="gift" />
             </div>
-            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: '24px' }}>
+            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: 'var(--afa-space-6)' }}>
               {tr.audienceActivityPage.tipsNote}
             </p>
 
             {confirmed.length === 0 && (
-              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-06)', textAlign: 'center', marginBottom: '24px' }}>
-                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
+              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', border: '1px solid var(--afa-tint-06)', textAlign: 'center', marginBottom: 'var(--afa-space-6)' }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-4)' }}>
                   {tr.audienceActivityPage.noConfirmedBookings}
                 </p>
                 <Link href="/events" style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)', textDecoration: 'none' }}>

@@ -138,7 +138,7 @@ export default function VenueBookingsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
           <div>
             <PageHead
               eyebrow="Bookings & Revenue"
@@ -148,30 +148,30 @@ export default function VenueBookingsPage() {
           </div>
 
           {loadError && (
-            <ErrorBanner style={{ marginBottom: '24px' }}>{loadError}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{loadError}</ErrorBanner>
           )}
 
           {/* F3 - Revenue summary */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
             {[
               { label: 'This month', value: thisMonthRevenue },
               { label: 'Total confirmed', value: totalRevenue },
               { label: 'Pending value', value: pendingValue },
             ].map((s) => (
-              <Card key={s.label} style={{ padding: '18px 20px' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{s.label}</p>
+              <Card key={s.label} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{s.label}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
               </Card>
             ))}
           </div>
 
           {/* F3 - Calendar */}
-          <Card style={{ padding: '20px 24px', marginBottom: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <Card style={{ padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-5)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--afa-space-4)' }}>
               <SharedButton
                 variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)); setSelectedDay(null) }}
-                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: '4px 8px' }}
+                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-1) var(--afa-space-2)' }}
               >
                 ←
               </SharedButton>
@@ -181,18 +181,18 @@ export default function VenueBookingsPage() {
               <SharedButton
                 variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)); setSelectedDay(null) }}
-                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: '4px 8px' }}
+                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-1) var(--afa-space-2)' }}
               >
                 →
               </SharedButton>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--afa-space-1)', marginBottom: 'var(--afa-space-1)' }}>
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                <div key={i} style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-muted)', padding: '4px 0' }}>{d}</div>
+                <div key={i} style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-muted)', padding: 'var(--afa-space-1) 0' }}>{d}</div>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--afa-space-1)' }}>
               {calendarCells.map((day, i) => {
                 if (!day) return <div key={i} />
                 const key = day.toDateString()
@@ -208,12 +208,12 @@ export default function VenueBookingsPage() {
                       aspectRatio: '1', borderRadius: 'var(--afa-radius-md)', border: isSelected ? '1px solid var(--afa-amber)' : '1px solid var(--afa-tint-08)',
                       background: isSelected ? 'var(--afa-amber-tint)' : dayBookings.length > 0 ? 'var(--afa-tint-04)' : 'transparent',
                       cursor: dayBookings.length > 0 ? 'pointer' : 'default',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', padding: 0,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'var(--afa-space-2px)', padding: 0,
                     }}
                   >
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: dayBookings.length > 0 ? 'var(--afa-text-primary)' : 'var(--afa-text-muted)' }}>{day.getDate()}</span>
                     {dayBookings.length > 0 && (
-                      <div style={{ display: 'flex', gap: '2px' }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2px)' }}>
                         {dayBookings.slice(0, 3).map((b) => (
                           <span key={b.id} style={{ width: '5px', height: '5px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status] }} />
                         ))}
@@ -225,10 +225,10 @@ export default function VenueBookingsPage() {
             </div>
 
             {selectedDay && bookingsByDate[selectedDay] && (
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--afa-tint-08)' }}>
+              <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-08)' }}>
                 {bookingsByDate[selectedDay].map((b) => (
-                  <div key={b.id} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', padding: '4px 0' }}>
-                    <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: '6px' }} />
+                  <div key={b.id} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-1) 0' }}>
+                    <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: 'var(--afa-space-6px)' }} />
                     {b.event?.title || 'Untitled event'} — {b.venue.name} · ₹{b.amount.toLocaleString('en-IN')} · <span style={{ color: 'var(--afa-text-secondary)' }}>{b.status.toLowerCase()}</span>
                   </div>
                 ))}
@@ -237,34 +237,34 @@ export default function VenueBookingsPage() {
           </Card>
 
           {/* Pending */}
-          <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-32px)' }}>
+            <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               Pending {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No pending booking requests.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-3)' }}>
                 {pending.map((b) => (
-                  <Card key={b.id} style={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                  <Card key={b.id} style={{ padding: 'var(--afa-space-5)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-10px)' }}>
                       <div>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || 'Untitled event'}</p>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: '2px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>
                           for {b.venue.name}, {b.venue.city} · requested by {b.organiser.orgName}
                         </p>
                       </div>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>₹{b.amount}</span>
                     </div>
-                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '16px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-4)' }}>
                       📅 {new Date(b.fromDate).toLocaleDateString()}
                       {b.fromDate !== b.toDate && ` – ${new Date(b.toDate).toLocaleDateString()}`}
                     </p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <Button onClick={() => respond(b.id, 'CONFIRMED')} disabled={actingOn === b.id} style={{ padding: '8px 18px', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
+                      <Button onClick={() => respond(b.id, 'CONFIRMED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
                         <IconCheck /> Confirm
                       </Button>
-                      <Button variant="outline" onClick={() => respond(b.id, 'CANCELLED')} disabled={actingOn === b.id} style={{ padding: '8px 18px', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
+                      <Button variant="outline" onClick={() => respond(b.id, 'CANCELLED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
                         <IconX /> Reject
                       </Button>
                     </div>
@@ -277,17 +277,17 @@ export default function VenueBookingsPage() {
           {/* Resolved */}
           {resolved.length > 0 && (
             <div>
-              <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+              <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
                 Past Requests
               </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {resolved.map((b) => {
                   const tone = STATUS_TONE[b.status] || 'gold'
                   return (
-                    <Card key={b.id} style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                    <Card key={b.id} style={{ padding: 'var(--afa-space-4) var(--afa-space-5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-10px)' }}>
                       <div>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || 'Untitled event'}</p>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: '2px' }}>{b.venue.name} · {b.organiser.orgName} · ₹{b.amount}</p>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{b.venue.name} · {b.organiser.orgName} · ₹{b.amount}</p>
                       </div>
                       <StatusPill tone={tone}>{b.status.toLowerCase()}</StatusPill>
                       {b.status === 'CONFIRMED' && (

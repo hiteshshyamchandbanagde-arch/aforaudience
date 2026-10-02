@@ -123,22 +123,22 @@ export default function AdminUsersPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
           <div className="lg:hidden">
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
             Accounts
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '640px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', maxWidth: '640px' }}>
             Suspending blocks login immediately and hides the account's future events/venues from public
             listings. It does not cancel existing confirmed bookings or already-published events. Fully
             reversible — unsuspend at any time.
           </p>
 
-          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: '10px', marginBottom: '20px' }}>
+          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-5)' }}>
             <SearchInputBox
               value={search}
               onChange={setSearch}
@@ -148,7 +148,7 @@ export default function AdminUsersPage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>{r || 'All roles'}</option>
@@ -164,9 +164,9 @@ export default function AdminUsersPage() {
             </Button>
           </form>
 
-          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error}</div>}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
             {users.length === 0 && !loading && (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No users match.</p>
             )}
@@ -174,19 +174,19 @@ export default function AdminUsersPage() {
               <div
                 key={u.id}
                 style={{
-                  background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
+                  background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)',
                   border: u.isSuspended ? '1px solid var(--afa-error-edge)' : '1px solid var(--afa-tint-08)',
                 }}
               >
-                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '10px' }}>
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: 'var(--afa-space-10px)' }}>
                   <div>
                     <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                       {u.displayName || u.name}
-                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error-bright)', textTransform: 'uppercase' }}>Suspended</span>}
+                      {u.isSuspended && <span style={{ marginLeft: 'var(--afa-space-2)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error-bright)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{u.email} · {u.role}</p>
                     {u.isSuspended && u.suspendReason && (
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: '6px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)' }}>
                         Reason: {u.suspendReason}
                       </p>
                     )}
@@ -205,12 +205,12 @@ export default function AdminUsersPage() {
                         Unsuspend
                       </Button>
                     ) : (
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', alignItems: 'center', flexShrink: 0 }}>
                         <input
                           value={reasonDraft[u.id] || ''}
                           onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
                           placeholder="Reason..."
-                          style={{ padding: '8px 10px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                          style={{ padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                         />
                         <Button variant="solid" size="md" fullWidth={false} onClick={() => handleSuspend(u.id)} disabled={actioningId === u.id}>
                           Suspend
