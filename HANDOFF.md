@@ -1,3 +1,20 @@
+# Session Handoff — 2 Oct 2026, part 31 (chat — #719 merged)
+
+- **#719** (BUG-2609-081 + 068, chat bubble) was squash-merged at pinned head `15cfbb0`, giving `qa` @ `cf940bd`.
+  - CI green; Vercel preview READY. Branch deleted.
+  - QA deploy `dpl_2TLaVEtLFLyhojYv8vw1sApEX8nE` READY; 0 runtime errors.
+  - 081 and 068 → `BUILD_COMPLETE` / `DEPLOYED_QA`.
+- Chat review: the panel anchors to the lifted button. Body clearance applies only while the page scrolls; once applied it can't flip back off, so no oscillation. Toasts move to the top while the button is lifted.
+- **Chat decisions on CC's four flags (implementation-level, within Hitesh's rules):**
+  1. /register hiding the bubble for 64px of scroll: accepted.
+  2. Rule 4 stays opt-in (auth pages + verify-phone), not widened.
+  3. Card marks only on the organiser dashboard and My Venues; the other card lists stay unmarked, since rule 3 clearance already lets them scroll clear.
+  4. Extra scroll on short pages: accepted.
+- Hitesh to check on his phone: venue edit with the chat open; /register; the seat page Reserve; My Venues. Admin settings Save marks were not live-checked (CC has no admin login).
+- **Next CC:** `docs/cc-dispatches/cc-prompt-colour-121-114.md`. Its precondition (081 merged) is now met.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 30 (CC — BUG-2609-081 + 068 chat bubble pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/bubble-081?expand=1
