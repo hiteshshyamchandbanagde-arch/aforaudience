@@ -966,7 +966,13 @@ function processLine(line, inRawBlock, activeDefs, unresolved) {
       // Bare numeric value (unquoted) - e.g. `fontSize: 14` (JS, always
       // a single token) or `padding: 16px 20px !important;` (raw CSS,
       // may be a multi-value shorthand - see MATCH_RE_CSS's own comment).
-      const migrated = migrateValue(m[3], target.map, target.units, !inRawBlock, target.round)
+      // GEN-2609-107 - a kebab-case property (`margin-top: 14px`) can
+      // only be CSS text: an unquoted JS object key can't contain `-`.
+      // That catches CSS outside a `<style>{`...`}` block too (e.g. the
+      // intro splash's plain <style> inside an HTML string in
+      // layout.tsx), where quoting the var() produced invalid CSS.
+      const cssText = inRawBlock || propRaw.includes('-')
+      const migrated = migrateValue(m[3], target.map, target.units, !cssText, target.round)
       if (migrated === null) continue
       const start = m.index + prefixLen
       const end = start + m[3].length
@@ -974,7 +980,7 @@ function processLine(line, inRawBlock, activeDefs, unresolved) {
       // style object it must become a quoted string to hold var(...);
       // inside a raw <style>{`...`}</style> block it stays unquoted
       // CSS text.
-      const replacement = inRawBlock ? migrated : `'${migrated}'`
+      const replacement = cssText ? migrated : `'${migrated}'`
       edits.push({ start, end, replacement })
     } else if (m[5] !== undefined) {
       // Quoted value - may be a single value or a multi-value shorthand.

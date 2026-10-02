@@ -467,6 +467,17 @@ t('GEN-2609-113: a literal var() fallback is dropped, not tokenised into var(--x
   assert.equal(processLine(unmapped, false, DEFAULT_DEFS), "  color: 'var(--afa-error)',")
 })
 
+t('GEN-2609-107: a kebab-case property is CSS text, so its var() is never quoted', () => {
+  const SPACING_DEFS = [CATEGORY_DEFS.spacing]
+  // Plain <style> inside an HTML string (layout.tsx intro splash) - not a <style>{`...`} block.
+  const css = '  #intro-tagline { opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }'
+  assert.equal(processLine(css, false, SPACING_DEFS), '  #intro-tagline { opacity: 0; margin-top: var(--afa-space-14px); letter-spacing: 0.02em; }')
+  // A JS style object still gets a quoted string.
+  assert.equal(processLine('  marginTop: 14,', false, SPACING_DEFS), "  marginTop: 'var(--afa-space-14px)',")
+  // A unitless number in CSS text is not a length - left alone.
+  assert.equal(processLine('  .x { margin-top: 14; }', false, SPACING_DEFS), '  .x { margin-top: 14; }')
+})
+
 t('GEN-2609-107: var()-incompatible files and token sources are never migrated', () => {
   const path = require('node:path')
   for (const f of [
