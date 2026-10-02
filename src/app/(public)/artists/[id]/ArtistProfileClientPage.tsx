@@ -386,10 +386,10 @@ export default function ArtistProfilePage({
             onClick={goToPrevArtist}
             disabled={!prevArtistId}
             aria-label="Previous artist"
-            className={prevArtistId ? "afa-cta-solid" : undefined}
+            // GEN-2609-121 - paging is navigation, not the page's action: a plain icon button.
             style={{
-              background: prevArtistId ? "var(--afa-fill-solid)" : "var(--afa-surface-raised)",
-              border: prevArtistId ? "none" : "1px solid var(--afa-tint-12)",
+              background: "var(--afa-surface-raised)",
+              border: "1px solid var(--afa-tint-12)",
               borderRadius: "var(--afa-radius-pill)",
               width: "34px",
               height: "34px",
@@ -397,7 +397,7 @@ export default function ArtistProfilePage({
               fontWeight: 700,
               cursor: prevArtistId ? "pointer" : "default",
               opacity: prevArtistId ? 1 : 0.35,
-              color: prevArtistId ? "var(--afa-on-fill-solid)" : "var(--afa-text-primary)",
+              color: "var(--afa-text-primary)",
             }}
           >
             ‹
@@ -410,10 +410,10 @@ export default function ArtistProfilePage({
             onClick={goToNextArtist}
             disabled={!nextArtistId}
             aria-label="Next artist"
-            className={nextArtistId ? "afa-cta-solid" : undefined}
+            // GEN-2609-121 - paging is navigation, not the page's action: a plain icon button.
             style={{
-              background: nextArtistId ? "var(--afa-fill-solid)" : "var(--afa-surface-raised)",
-              border: nextArtistId ? "none" : "1px solid var(--afa-tint-12)",
+              background: "var(--afa-surface-raised)",
+              border: "1px solid var(--afa-tint-12)",
               borderRadius: "var(--afa-radius-pill)",
               width: "34px",
               height: "34px",
@@ -421,7 +421,7 @@ export default function ArtistProfilePage({
               fontWeight: 700,
               cursor: nextArtistId ? "pointer" : "default",
               opacity: nextArtistId ? 1 : 0.35,
-              color: nextArtistId ? "var(--afa-on-fill-solid)" : "var(--afa-text-primary)",
+              color: "var(--afa-text-primary)",
             }}
           >
             ›
@@ -498,13 +498,16 @@ export default function ArtistProfilePage({
               </p>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-4)", flexWrap: "wrap" }}>
+              {/* GEN-2609-121 - Follow is secondary here (the per-show ticket links are
+                  the primary), so an outline in both states; the not-yet-following
+                  state gets the stronger text colour. */}
               <Button
-                variant={following ? "outline-neutral" : "solid"}
+                variant="outline-neutral"
                 size="md"
                 fullWidth={false}
                 onClick={toggleFollow}
                 disabled={followBusy}
-                className={!following ? "afa-cta-solid" : undefined}
+                style={following ? undefined : { color: "var(--afa-text-primary)" }}
               >
                 {following ? "✓ Following" : "+ Follow"}
               </Button>
