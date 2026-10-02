@@ -612,7 +612,7 @@ export default function ArtistDashboard() {
                             inset: 0,
                             zIndex: 2,
                             borderRadius: 'var(--afa-radius-lg)',
-                            background: 'var(--afa-tint-30)',
+                            background: 'var(--afa-scrim)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',

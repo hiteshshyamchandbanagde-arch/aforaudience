@@ -89,7 +89,7 @@ export default function AuthPromptSheet({
       {/* Overlay — click to dismiss, resuming guest browsing (no forced login) */}
       <div
         onClick={onClose}
-        style={{ position: "absolute", inset: 0, background: "var(--afa-tint-30)", animation: "authSheetFadeIn 0.15s ease-out" }}
+        style={{ position: "absolute", inset: 0, background: "var(--afa-scrim)", animation: "authSheetFadeIn 0.15s ease-out" }}
       />
 
       <div
