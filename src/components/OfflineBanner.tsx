@@ -85,7 +85,7 @@ export default function OfflineBanner() {
         textAlign: 'center',
         fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
-        padding: '8px 16px',
+        padding: 'var(--afa-space-2) var(--afa-space-4)',
         letterSpacing: '0.01em',
       }}
     >

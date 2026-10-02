@@ -151,7 +151,7 @@ export default function ArtistsPage() {
       <style>{`
         .afa-artist-card { transition: transform 0.25s ease, border-color 0.25s ease; }
         .afa-artist-card:hover, .afa-artist-card:focus-visible { transform: translateY(-3px); border-color: var(--afa-amber-border) !important; outline: none; }
-        .afa-genre-filter { position: relative; padding-bottom: 4px; background: none; border: none; cursor: pointer; }
+        .afa-genre-filter { position: relative; padding-bottom: var(--afa-space-1); background: none; border: none; cursor: pointer; }
         .afa-genre-filter::after { content: ""; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%; background: var(--afa-amber); opacity: 0.5; transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
         .afa-genre-filter:hover::after { transform: scaleX(1); }
         .afa-cta-solid { transition: filter 0.15s ease; }
@@ -199,9 +199,9 @@ export default function ArtistsPage() {
            including locales where heroPrefix is empty and heroEmphasis
            leads the phrase (e.g. Hindi "कलाकारों को खोजें" - amber noun,
            cream trailing verb). */
-        .afa-artists-hero-grid { display: flex; flex-direction: column; gap: 16px; }
+        .afa-artists-hero-grid { display: flex; flex-direction: column; gap: var(--afa-space-4); }
         .afa-artists-hero-subtitle { max-width: 560px; }
-        .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+        .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--afa-space-5); }
         @media (min-width: 768px) { .afa-artists-stat-row { flex-direction: row; align-items: center; justify-content: space-between; } }
         /* BUG-2608-074: featured artist card was a fixed 2-column grid
            (photo | name+button) with no mobile breakpoint - on phone
@@ -211,13 +211,13 @@ export default function ArtistsPage() {
         @media (max-width: 700px) {
           .afa-featured-artist-card { grid-template-columns: 1fr !important; }
           .afa-featured-artist-card .afa-featured-artist-photo { min-height: 200px !important; }
-          .afa-featured-artist-card .afa-featured-artist-content { padding: 20px 20px 24px !important; }
+          .afa-featured-artist-card .afa-featured-artist-content { padding: var(--afa-space-5) var(--afa-space-5) var(--afa-space-6) !important; }
         }
       `}</style>
       <SiteNav active="artists" />
 
       {/* HERO */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 24px 0" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 0" }}>
         <div className="afa-artists-hero-grid">
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.eyebrowDirectory.replace("{n}", String(filtered.length))}
@@ -233,7 +233,7 @@ export default function ArtistsPage() {
           </p>
         </div>
 
-        <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid var(--afa-tint-10)", borderBottom: "1px solid var(--afa-tint-10)", padding: "20px 0" }}>
+        <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid var(--afa-tint-10)", borderBottom: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-5) 0" }}>
           <div style={{ flex: "1 1 280px" }}>
             <BrowseSearchDropdown
               query={search}
@@ -245,7 +245,7 @@ export default function ArtistsPage() {
               renderRow={(a) => (
                 <>
                   <span style={{ fontWeight: 600 }}>{a.user.displayName || a.user.name}</span>
-                  {a.genre.length > 0 && <span style={{ opacity: 0.5, marginLeft: "8px" }}>{a.genre.join(", ")}</span>}
+                  {a.genre.length > 0 && <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{a.genre.join(", ")}</span>}
                 </>
               )}
             >
@@ -260,15 +260,15 @@ export default function ArtistsPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "var(--afa-space-32px) var(--afa-space-6)" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "var(--afa-shadow)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
+          <div style={{ padding: "var(--afa-space-14px) var(--afa-space-4)", background: "var(--afa-shadow)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)", marginBottom: "var(--afa-space-6)" }}>
             {error}
           </div>
         )}
 
         {/* FILTERS - editorial underline row, not pill-chip buttons */}
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "baseline", marginBottom: "24px", borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "18px" }}>
+        <div style={{ display: "flex", gap: "var(--afa-space-5)", flexWrap: "wrap", alignItems: "baseline", marginBottom: "var(--afa-space-6)", borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "var(--afa-space-18px)" }}>
           {["All", ...genres].map((g) => (
             <Button
               key={g}
@@ -293,23 +293,23 @@ export default function ArtistsPage() {
 
         {/* FEATURED / RISING STAR */}
         {risingStar && (
-          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-xl)", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
+          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-xl)", overflow: "hidden", marginBottom: "var(--afa-space-6)", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
             <div className="afa-featured-artist-photo" style={{ position: "relative", minHeight: "260px" }}>
               {risingStarPortraitUrl && !risingStarPhotoFailed ? (
                 <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} onError={() => setRisingStarPhotoFailed(true)} />
               ) : (
                 <ArtistNoPhoto name={risingStar.user.displayName || risingStar.user.name} genres={risingStar.genre} size="card" />
               )}
-              <div style={{ position: "absolute", top: "16px", left: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ position: "absolute", top: "16px", left: "16px", display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
                 <SparkIcon style={{ width: "16px", height: "16px", color: "var(--afa-fill-solid)" }} />
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-primary)", textShadow: "0 1px 6px var(--afa-scrim)" }}>
                   {tr.artistsPage.topArtistNow}
                 </span>
               </div>
             </div>
-            <div className="afa-featured-artist-content" style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "center", gap: "16px" }}>
+            <div className="afa-featured-artist-content" style={{ padding: "var(--afa-space-28px) var(--afa-space-32px)", display: "flex", flexDirection: "column", justifyContent: "center", gap: "var(--afa-space-4)" }}>
               <div>
-                <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "6px" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-6px)" }}>
                   {risingStar.user.displayName || risingStar.user.name}
                 </div>
                 <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
@@ -334,11 +334,11 @@ export default function ArtistsPage() {
 
         {/* ARTIST GRID */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5, fontFamily: "var(--font-sans)" }}>{tr.artistsPage.loadingArtists}</div>
+          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5, fontFamily: "var(--font-sans)" }}>{tr.artistsPage.loadingArtists}</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <SearchIcon style={{ width: "32px", height: "32px", color: "var(--afa-amber)", marginBottom: "16px" }} />
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)" }}>
+            <SearchIcon style={{ width: "32px", height: "32px", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }} />
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetTitle : tr.artistsPage.emptyNoneFoundTitle}
             </div>
             <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
@@ -346,7 +346,7 @@ export default function ArtistsPage() {
             </p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "var(--afa-space-5)" }}>
             {filtered.map((artist) => {
               const isNavigatingThis = navigatingId === artist.id
               const displayName = artist.user.displayName || artist.user.name
@@ -434,7 +434,7 @@ export default function ArtistsPage() {
                           fontFamily: "var(--font-sans)",
                           fontSize: "var(--afa-text-caption)",
                           fontWeight: 700,
-                          padding: "3px 10px",
+                          padding: "3px var(--afa-space-10px)",
                           borderRadius: "var(--afa-radius-pill)",
                           letterSpacing: "0.03em",
                           textTransform: "uppercase",
@@ -450,17 +450,17 @@ export default function ArtistsPage() {
 
                   {/* WALL-LABEL - mono/amber/diamond caption device,
                       genre + shows count. */}
-                  <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ padding: "var(--afa-space-10px) var(--afa-space-18px) 0", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
                     <span>{artist.genre.length > 0 ? artist.genre.slice(0, 2).join(" / ") : tr.artistsPage.genreNotSet}</span>
                     <span>◆</span>
                     <span>{artist._count.performances} {artist._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</span>
                   </div>
 
-                  <div style={{ padding: "6px 18px 18px" }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
-                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
+                  <div style={{ padding: "var(--afa-space-6px) var(--afa-space-18px) var(--afa-space-18px)" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>{displayName}</div>
+                    <div style={{ display: "flex", gap: "var(--afa-space-6px)", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span>
                       ))}
                     </div>
                   </div>

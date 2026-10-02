@@ -101,18 +101,18 @@ function ResetPasswordForm() {
         ) : (
           <>
             {error && (
-              <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+              <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
                 {error}
               </div>
             )}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)", marginBottom: "var(--afa-space-6)" }}>
               {[
                 { label: tr.resetPasswordPage.newPasswordLabel, name: "password", placeholder: tr.registerPage.minCharsPlaceholder },
                 { label: tr.resetPasswordPage.confirmNewPasswordLabel, name: "confirm", placeholder: tr.registerPage.repeatPasswordPlaceholder },
               ].map((field) => (
                 <div key={field.name}>
-                  <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "var(--afa-space-6px)" }}>
                     {field.label}
                   </label>
                   <div style={{ position: "relative" }}>
@@ -124,14 +124,14 @@ function ResetPasswordForm() {
                       value={form[field.name as keyof typeof form]}
                       onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
                       onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                      style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                     />
                     <Button
                       variant="icon"
                       type="button"
                       onClick={() => setVisible({ ...visible, [field.name]: !visible[field.name as keyof typeof visible] })}
                       aria-label={visible[field.name as keyof typeof visible] ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
+                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
                     >
                       <EyeIcon visible={visible[field.name as keyof typeof visible]} />
                     </Button>

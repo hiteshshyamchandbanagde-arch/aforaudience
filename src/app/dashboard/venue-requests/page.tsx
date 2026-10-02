@@ -120,7 +120,7 @@ export default function VenueRequestsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
           <div>
             <PageHead
               eyebrow="Flexible-rate negotiations"
@@ -134,7 +134,7 @@ export default function VenueRequestsPage() {
           </div>
 
           {loadError && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{loadError}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
           )}
 
           {requests.length === 0 ? (
@@ -147,13 +147,13 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <Card key={r.id} style={{ padding: '22px 24px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px', gap: '10px' }}>
+                <Card key={r.id} style={{ padding: '22px var(--afa-space-6)', marginBottom: 'var(--afa-space-4)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-1)', gap: 'var(--afa-space-10px)' }}>
                     <div>
                       <p style={{ fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>
                         {r.event?.title || 'Untitled event'}
                       </p>
-                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', margin: '2px 0 0' }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', margin: 'var(--afa-space-2px) 0 0' }}>
                         {r.venue.name}, {r.venue.city} · {new Date(r.requestedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {r.durationHours}hr
                         {callerSide === 'VENUE_OWNER' && <> · {r.organiser.orgName} ({r.organiser.user.email})</>}
                       </p>
@@ -162,9 +162,9 @@ export default function VenueRequestsPage() {
                   </div>
 
                   {r.offers.length > 0 && (
-                    <div style={{ background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', margin: '16px 0' }}>
+                    <div style={{ background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', margin: 'var(--afa-space-4) 0' }}>
                       {r.offers.map((o) => (
-                        <div key={o.id} style={{ padding: '4px 0' }}>
+                        <div key={o.id} style={{ padding: 'var(--afa-space-1) 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)' }}>
                             <span style={{ color: 'var(--afa-text-secondary)' }}>
                               {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
@@ -172,7 +172,7 @@ export default function VenueRequestsPage() {
                             <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--afa-amber)' }}>₹{o.amount.toLocaleString('en-IN')}</span>
                           </div>
                           {o.comment && (
-                            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: '2px 0 0' }}>
+                            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: 'var(--afa-space-2px) 0 0' }}>
                               "{o.comment}"
                             </p>
                           )}
@@ -182,14 +182,14 @@ export default function VenueRequestsPage() {
                   )}
 
                   {r.status === 'PENDING' && (
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 14px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-14px)' }}>
                       Round {roundsUsed} of 6 · expires 48hr after the last offer with no response
                     </p>
                   )}
 
                   {r.status === 'PENDING' && canRespond && (
                     <div>
-                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
                         <input
                           type="number"
                           placeholder={lastOffer ? `Counter ₹${lastOffer.amount}` : 'Propose an amount (₹)'}
@@ -198,10 +198,10 @@ export default function VenueRequestsPage() {
                           min="1"
                           max="10000000"
                           className="avp-field"
-                          style={{ flex: 1, padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
+                          style={{ flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
                         />
                       </div>
-                      <div style={{ marginBottom: '12px' }}>
+                      <div style={{ marginBottom: 'var(--afa-space-3)' }}>
                         <input
                           type="text"
                           placeholder="Add a note (optional) — e.g. can do ₹4000 but need load-in by 6pm"
@@ -209,12 +209,12 @@ export default function VenueRequestsPage() {
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
                           maxLength={300}
                           className="avp-field"
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
                         />
                       </div>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                         {lastOffer && (
-                          <Button onClick={() => act(r.id, 'accept')} disabled={actingOn === r.id} style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id ? 0.6 : 1 }}>
+                          <Button onClick={() => act(r.id, 'accept')} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id ? 0.6 : 1 }}>
                             <IconCheck /> Accept ₹{lastOffer.amount.toLocaleString('en-IN')}
                           </Button>
                         )}
@@ -222,7 +222,7 @@ export default function VenueRequestsPage() {
                           variant="outline"
                           onClick={() => act(r.id, 'counter')}
                           disabled={actingOn === r.id || roundsUsed >= 6}
-                          style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
+                          style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
                         >
                           {lastOffer ? 'Counter' : 'Send quote'}
                         </Button>
@@ -232,7 +232,7 @@ export default function VenueRequestsPage() {
                           fullWidth={false}
                           onClick={() => act(r.id, 'decline')}
                           disabled={actingOn === r.id}
-                          style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)' }}
+                          style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)' }}
                         >
                           Decline
                         </SharedButton>

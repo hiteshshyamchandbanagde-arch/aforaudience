@@ -68,10 +68,10 @@ function DiscoverCarouselRow({
 }) {
   return (
     <div>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", marginBottom: "12px" }}>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
         {title}
       </div>
-      <div className="afa-discover-carousel-track" style={{ display: "flex", gap: "12px", overflowX: "auto", scrollSnapType: "x proximity", paddingBottom: "4px", WebkitOverflowScrolling: "touch" }}>
+      <div className="afa-discover-carousel-track" style={{ display: "flex", gap: "var(--afa-space-3)", overflowX: "auto", scrollSnapType: "x proximity", paddingBottom: "var(--afa-space-1)", WebkitOverflowScrolling: "touch" }}>
         {events.map((event) => (
           <div key={event.id} style={{ flex: "0 0 168px", scrollSnapAlign: "start" }}>
             <EventCard
@@ -358,8 +358,8 @@ function EventsPageContent() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: 56px 24px 112px; }
-        @media (min-width: 640px) { .afa-events-page-container { padding: 80px 32px 112px; } }
+        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: 56px var(--afa-space-6) 112px; }
+        @media (min-width: 640px) { .afa-events-page-container { padding: 80px var(--afa-space-32px) 112px; } }
         .afa-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease, opacity 0.15s ease; }
         .afa-event-card:hover { border-color: var(--afa-amber-border); }
         .afa-event-card-grid .afa-event-card-poster { aspect-ratio: 4 / 5; }
@@ -367,7 +367,7 @@ function EventsPageContent() {
         @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
         @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
         .afa-events-search-box { flex: 1; min-width: 220px; }
-        .afa-events-select { padding: 8px 12px; border-radius: var(--afa-radius-xs); border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
+        .afa-events-select { padding: var(--afa-space-2) var(--afa-space-3); border-radius: var(--afa-radius-xs); border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
         .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--afa-radius-xs); border: none; cursor: pointer; background: transparent; color: var(--afa-text-muted); transition: color 0.2s ease, background 0.2s ease; }
         .afa-events-view-btn:hover { color: var(--afa-text-primary); }
         /* GEN-2609-073 (resolved) - Hitesh's call: background moves to
@@ -400,7 +400,7 @@ function EventsPageContent() {
               ? tr.eventsPage.heroSubtitleOrganisers
               : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
           </span>
-          <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
+          <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
             {contentMode === "organisers" ? (
               <>{tr.eventsPage.heroPrefixOrganisers}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.eventsPage.heroEmphasisOrganisers}</em>{tr.eventsPage.heroSuffixOrganisers}</>
             ) : (
@@ -408,7 +408,7 @@ function EventsPageContent() {
             )}
           </h1>
           {contentMode === "events" && (
-            <p style={{ marginTop: "20px", maxWidth: "560px", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>
+            <p style={{ marginTop: "var(--afa-space-5)", maxWidth: "560px", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>
               {tr.eventsPage.heroSubtitleEvents}
             </p>
           )}
@@ -419,7 +419,7 @@ function EventsPageContent() {
             deliberately not a new top-level nav route. Underline-tab
             treatment (not pills) matching the Venues/Owners toggle
             convention elsewhere in the app. */}
-        <div style={{ display: "flex", gap: "32px", marginTop: "40px", borderBottom: "1px solid var(--afa-tint-10)" }}>
+        <div style={{ display: "flex", gap: "var(--afa-space-32px)", marginTop: "40px", borderBottom: "1px solid var(--afa-tint-10)" }}>
           <Button variant="tab-display" fullWidth={false} selected={contentMode === "events"} onClick={() => setContentMode("events")} style={{ marginBottom: "-1px" }}>
             {tr.eventsPage.toggleEvents}
           </Button>
@@ -438,7 +438,7 @@ function EventsPageContent() {
             box, so mobile trades it away for the unified bar - flagged as
             an accepted scope-trim in MobileTopBar.tsx's own comment. */}
         {contentMode === "events" && (
-          <div className="hidden lg:block" style={{ marginTop: "24px" }}>
+          <div className="hidden lg:block" style={{ marginTop: "var(--afa-space-6)" }}>
             <BrowseSearchDropdown
               query={search}
               items={filtered}
@@ -449,7 +449,7 @@ function EventsPageContent() {
               renderRow={(e) => (
                 <>
                   <span style={{ fontWeight: 600 }}>{e.title}</span>
-                  <span style={{ opacity: 0.5, marginLeft: "8px" }}>
+                  <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>
                     {new Date(e.date).toLocaleDateString()}{e.venue?.name ? ` · ${e.venue.name}` : ""}
                   </span>
                 </>
@@ -466,7 +466,7 @@ function EventsPageContent() {
         )}
 
         {contentMode === "organisers" ? (
-          <div style={{ marginTop: "32px" }}>
+          <div style={{ marginTop: "var(--afa-space-32px)" }}>
             {/* Session 65 fix: same hero search box position/styling as
                 Events mode - just pointed at organisers.
                 GEN-2609-019 - hidden below `lg`, same reasoning as the
@@ -486,7 +486,7 @@ function EventsPageContent() {
                   onChange={setSearch}
                   placeholder={tr.eventsPage.searchOrganisersPlaceholder}
                   className="afa-events-search-box"
-                  style={{ marginBottom: "24px" }}
+                  style={{ marginBottom: "var(--afa-space-6)" }}
                 />
               </BrowseSearchDropdown>
             </div>
@@ -495,7 +495,7 @@ function EventsPageContent() {
         ) : (
           <>
             {/* UPCOMING / PAST TAB */}
-            <div style={{ display: "flex", gap: "24px", marginTop: "28px" }}>
+            <div style={{ display: "flex", gap: "var(--afa-space-6)", marginTop: "var(--afa-space-28px)" }}>
               {(["upcoming", "past"] as const).map((t) => (
                 <Button
                   key={t}
@@ -521,8 +521,8 @@ function EventsPageContent() {
                 (would need this state bridged back up to a global-header
                 component) - worth a fast-follow, not done here. */}
             <style>{`
-              .events-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
-              .events-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+              .events-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--afa-space-3) var(--afa-space-6); }
+              .events-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--afa-space-3) var(--afa-space-6); }
               @media (max-width: 780px) {
                 .events-filters-row { flex-direction: column; align-items: stretch; }
                 .afa-events-select { width: 100%; box-sizing: border-box; }
@@ -555,8 +555,8 @@ function EventsPageContent() {
               />
             )}
 
-            <div className="afa-desktop-filters" style={{ marginTop: "20px", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "20px" }}>
-              <div className="events-type-row" style={{ marginBottom: "16px" }}>
+            <div className="afa-desktop-filters" style={{ marginTop: "var(--afa-space-5)", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "var(--afa-space-5)" }}>
+              <div className="events-type-row" style={{ marginBottom: "var(--afa-space-4)" }}>
                 <Button
                   variant="text-toggle"
                   fullWidth={false}
@@ -589,7 +589,7 @@ function EventsPageContent() {
                   {cities.map((c) => <option key={c.city} value={c.city}>{c.label}</option>)}
                 </select>
 
-                <div style={{ display: "flex", gap: "16px" }}>
+                <div style={{ display: "flex", gap: "var(--afa-space-4)" }}>
                   {["All", "Free", "Paid"].map((p) => (
                     <Button
                       key={p}
@@ -615,7 +615,7 @@ function EventsPageContent() {
                   <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
                 </select>
 
-                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "3px" }}>
+                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "var(--afa-space-1)", border: "1px solid var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "3px" }}>
                   <Button variant="icon" onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`} style={{ color: undefined }}>
                     <GridViewIcon style={{ width: "16px", height: "16px" }} />
                   </Button>
@@ -626,18 +626,18 @@ function EventsPageContent() {
               </div>
             </div>
 
-            <div style={{ marginTop: "16px", marginBottom: "16px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
+            <div style={{ marginTop: "var(--afa-space-4)", marginBottom: "var(--afa-space-4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
               {!loading && loadFailed ? "\u00A0" : tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
             </div>
 
             {/* EVENTS GRID */}
             {loading ? (
-              <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
+              <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
             ) : loadFailed || filtered.length === 0 ? (
               // A failed load gets the error + Retry here, never the
               // "nothing published" copy - that one is only true after a
               // load that succeeded and returned no events.
-              <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px 20px", textAlign: "center" }}>
+              <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px var(--afa-space-5)", textAlign: "center" }}>
                 <TheaterMark style={{ width: "40px", height: "40px", color: "var(--afa-amber-strong)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
                   {loadFailed ? tr.eventsPage.loadErrorTitle : tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
@@ -661,7 +661,7 @@ function EventsPageContent() {
                     filters, Past tab, or every row too sparse), so the
                     plain grid/list renders on mobile too in that case
                     instead of an empty carousel section. */}
-                <div className={showMobileCarousels ? "lg:hidden flex flex-col" : "hidden"} style={{ gap: "32px" }}>
+                <div className={showMobileCarousels ? "lg:hidden flex flex-col" : "hidden"} style={{ gap: "var(--afa-space-32px)" }}>
                   {carouselRows.map((row) => (
                     <DiscoverCarouselRow key={row.key} title={row.title} events={row.events} navigatingId={navigatingId} onOpen={goToEvent} />
                   ))}
@@ -679,7 +679,7 @@ function EventsPageContent() {
 
                 <div className={showMobileCarousels ? "hidden lg:block" : "block"}>
                   {view === "grid" ? (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "24px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "var(--afa-space-6)" }}>
                       {filtered.map((event) => (
                         <EventCard
                           key={event.id}
@@ -693,7 +693,7 @@ function EventsPageContent() {
                       ))}
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
                       {filtered.map((event) => (
                         <EventCard
                           key={event.id}

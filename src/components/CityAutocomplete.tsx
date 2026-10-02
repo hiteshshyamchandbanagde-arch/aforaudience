@@ -161,7 +161,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
             left: 0,
             fontSize: 'var(--afa-text-small)',
             opacity: 0.5,
-            padding: '4px 2px',
+            padding: 'var(--afa-space-1) var(--afa-space-2px)',
           }}
         >
           Searching...

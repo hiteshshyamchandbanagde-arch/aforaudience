@@ -153,7 +153,7 @@ const kpiCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   borderRadius: 'var(--afa-radius-lg)',
   border: '1px solid var(--afa-tint-08)',
-  padding: '14px 16px',
+  padding: 'var(--afa-space-14px) var(--afa-space-4)',
   flex: '1 1 120px',
 }
 
@@ -167,21 +167,21 @@ const kpiValue: React.CSSProperties = {
 const kpiLabel: React.CSSProperties = {
   fontSize: 'var(--afa-text-micro)',
   color: 'var(--afa-taupe)',
-  marginTop: '2px',
+  marginTop: 'var(--afa-space-2px)',
 }
 
 const chartCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   borderRadius: 'var(--afa-radius-lg)',
   border: '1px solid var(--afa-tint-08)',
-  padding: '18px',
+  padding: 'var(--afa-space-18px)',
 }
 
 const chartTitle: React.CSSProperties = {
   fontSize: 'var(--afa-text-ui)',
   fontWeight: 700,
   color: 'var(--afa-text-primary)',
-  marginBottom: '14px',
+  marginBottom: 'var(--afa-space-14px)',
 }
 
 export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }) {
@@ -218,7 +218,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
 
   return (
     <>
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+      <div style={{ display: 'flex', gap: 'var(--afa-space-10px)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-14px)' }}>
         <div style={kpiCard}>
           <div style={kpiValue}>{kpis.total}</div>
           <div style={kpiLabel}>Total reported</div>
@@ -253,19 +253,19 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '14px',
-          marginBottom: '24px',
+          gap: 'var(--afa-space-14px)',
+          marginBottom: 'var(--afa-space-6)',
         }}
       >
         <div style={chartCard}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-14px)' }}>
             <div style={{ ...chartTitle, marginBottom: 0 }}>
               Opened vs. resolved{' '}
               <span style={{ opacity: 0.5, fontWeight: 400 }}>
                 · last {granularity === 'daily' ? '14 days' : '8 weeks'}
               </span>
             </div>
-            <div style={{ display: 'flex', gap: '4px' }}>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-1)' }}>
               {(['weekly', 'daily'] as const).map((g) => (
                 <Button
                   key={g}
@@ -297,7 +297,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
               </g>
             ))}
           </svg>
-          <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: 'var(--afa-text-micro)' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-micro)' }}>
             <span style={{ color: 'var(--afa-fill-solid)' }}>● Opened</span>
             <span style={{ color: 'var(--afa-sage)' }}>● Resolved</span>
           </div>
@@ -309,7 +309,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
           <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)' }}>No data yet.</p>
         )}
         {categories.map((c) => (
-          <div key={c.category} style={{ marginBottom: '10px' }}>
+          <div key={c.category} style={{ marginBottom: 'var(--afa-space-10px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-micro)', marginBottom: '3px' }}>
               <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
@@ -332,10 +332,10 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
         <div style={chartTitle}>
           Open-item age <span style={{ opacity: 0.5, fontWeight: 400 }}>· {openItems.length} open</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '110px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-2)', height: '110px' }}>
           {ageBuckets.map((b) => (
             <div key={b.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-              <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)', marginBottom: '4px' }}>{b.count}</span>
+              <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)', marginBottom: 'var(--afa-space-1)' }}>{b.count}</span>
               <div
                 style={{
                   width: '100%',

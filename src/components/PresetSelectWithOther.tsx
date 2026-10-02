@@ -56,7 +56,7 @@ export default function PresetSelectWithOther({ value, onChange, presets, placeh
           onChange={(e) => onChange(e.target.value.slice(0, MAX_OTHER_LENGTH))}
           maxLength={MAX_OTHER_LENGTH}
           placeholder={placeholder}
-          style={{ ...inputStyle, marginTop: '8px' }}
+          style={{ ...inputStyle, marginTop: 'var(--afa-space-2)' }}
         />
       )}
     </div>

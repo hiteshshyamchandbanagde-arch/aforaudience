@@ -16,7 +16,7 @@ interface EventData {
 
 function Stars({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   return (
-    <div style={{ display: "flex", gap: "6px" }}>
+    <div style={{ display: "flex", gap: "var(--afa-space-6px)" }}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Button
           key={n}
@@ -117,7 +117,7 @@ export default function RatePromptClientPage({
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav />
-        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
+        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px var(--afa-space-6)", textAlign: "center" }}>
           <p style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
         </div>
       </main>
@@ -128,8 +128,8 @@ export default function RatePromptClientPage({
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav />
-        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px var(--afa-space-6)", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>
             {tr.ratePromptPage.checkInRequired}
           </p>
           <Link href={`/events/${event.id}`} style={{ color: "var(--afa-amber)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}>
@@ -144,33 +144,33 @@ export default function RatePromptClientPage({
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
-      <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px" }}>
-        <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{tr.ratePromptPage.howWasIt}</p>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "32px" }}>{event.title}</h1>
+      <div style={{ maxWidth: "560px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6)" }}>
+        <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--afa-space-6px)" }}>{tr.ratePromptPage.howWasIt}</p>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-32px)" }}>{event.title}</h1>
 
         {!overallSubmitted ? (
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)" }}>
-            <p style={{ fontSize: "var(--afa-text-body-lg)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "var(--afa-space-28px)", marginBottom: "var(--afa-space-6)", border: "1px solid var(--afa-tint-10)" }}>
+            <p style={{ fontSize: "var(--afa-text-body-lg)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>{tr.ratePromptPage.rateOverall}</p>
             <Stars value={overallRating} onChange={setOverallRating} />
             <textarea
               value={overallComment}
               onChange={(e) => setOverallComment(e.target.value)}
               placeholder={tr.ratePromptPage.commentPlaceholder}
-              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
+              style={{ width: "100%", marginTop: "var(--afa-space-4)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
             />
-            {overallError && <p style={{ color: "var(--afa-error-bright)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
+            {overallError && <p style={{ color: "var(--afa-error-bright)", fontSize: "var(--afa-text-ui)", marginTop: "var(--afa-space-2)" }}>{overallError}</p>}
             <Button
               variant="solid"
               size="lg"
               onClick={submitOverall}
               disabled={overallSubmitting}
-              style={{ marginTop: "16px" }}
+              style={{ marginTop: "var(--afa-space-4)" }}
             >
               {overallSubmitting ? tr.ratePromptPage.submitting : tr.ratePromptPage.submitRating}
             </Button>
           </div>
         ) : (
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "20px 28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "var(--afa-space-5) var(--afa-space-28px)", marginBottom: "var(--afa-space-6)", border: "1px solid var(--afa-tint-10)", display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
             <span style={{ fontSize: "var(--afa-text-heading)", color: "var(--afa-amber)" }}>✓</span>
             <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>{tr.ratePromptPage.thanksForRating}</p>
           </div>
@@ -188,20 +188,20 @@ export default function RatePromptClientPage({
         )}
 
         {showPerformers && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)" }}>
             <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.55 }}>
               {tr.ratePromptPage.performersHint}
             </p>
             {event.lineup.map((p) => {
               const rated = ratedIds.includes(p.id)
               return (
-                <div key={p.id} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "16px 20px", border: "1px solid var(--afa-tint-10)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+                <div key={p.id} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "var(--afa-space-4) var(--afa-space-5)", border: "1px solid var(--afa-tint-10)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "var(--afa-space-4)" }}>
                   <span style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
                   {rated ? (
                     <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>
                   ) : (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div style={{ display: "flex", gap: "2px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)" }}>
+                      <div style={{ display: "flex", gap: "var(--afa-space-2px)" }}>
                         {[1, 2, 3, 4, 5].map((n) => (
                           <Button
                             key={n}
@@ -232,7 +232,7 @@ export default function RatePromptClientPage({
           </div>
         )}
 
-        <div style={{ marginTop: "32px", textAlign: "center" }}>
+        <div style={{ marginTop: "var(--afa-space-32px)", textAlign: "center" }}>
           <Link href={`/events/${event.id}`} style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
             {tr.ratePromptPage.backToEvent}
           </Link>

@@ -38,15 +38,15 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
   }
 
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>
         Share Poster
       </h3>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={title}
-        style={{ width: '100%', maxWidth: '260px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)', display: 'block', marginBottom: '14px' }}
+        style={{ width: '100%', maxWidth: '260px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)', display: 'block', marginBottom: 'var(--afa-space-14px)' }}
       />
       <Button
         variant="primary"
@@ -58,7 +58,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
       >
         {sharing ? 'Preparing...' : 'Share / Download'}
       </Button>
-      {error && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: '8px' }}>{error}</p>}
+      {error && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-2)' }}>{error}</p>}
     </div>
   )
 }

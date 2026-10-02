@@ -22,10 +22,10 @@ export default function StubRow({ cells, style }: { cells: StubCell[]; style?: R
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 12,
+        gap: 'var(--afa-space-3)',
         borderRadius: 'var(--afa-radius-md)',
         background: 'var(--afa-surface-inverse)',
-        padding: '8px 12px',
+        padding: 'var(--afa-space-2) var(--afa-space-3)',
         ...style,
       }}
     >
@@ -52,7 +52,7 @@ export default function StubRow({ cells, style }: { cells: StubCell[]; style?: R
           </p>
           <p
             style={{
-              margin: '2px 0 0',
+              margin: 'var(--afa-space-2px) 0 0',
               fontFamily: 'var(--font-mono)',
               fontSize: 'var(--afa-text-micro)',
               color: 'var(--afa-text-secondary)',

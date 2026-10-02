@@ -82,9 +82,9 @@ export default function OrganiserDashboard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
-            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '24px' }}>Apply to become an Organiser from your profile to start creating events.</p>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>You're not registered as an Organiser</h1>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6)' }}>Apply to become an Organiser from your profile to start creating events.</p>
             <BackLink href="/" label="Back to Home" />
           </div>
         </main>
@@ -99,9 +99,9 @@ export default function OrganiserDashboard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: '8px' }}>⏳</div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: '12px' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}>⏳</div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>
               {orgStatus.orgName ? `${orgStatus.orgName} is` : 'Your Organiser account is'} pending approval
             </h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -119,30 +119,30 @@ export default function OrganiserDashboard() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--afa-space-32px)', flexWrap: 'wrap', gap: 'var(--afa-space-4)' }}>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Your Events
               </h1>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>
               {!!orgStatus?.walletBalance && orgStatus.walletBalance > 0 && (
-                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: '6px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
                   💰 Wallet balance: ₹{orgStatus.walletBalance.toLocaleString('en-IN')} <span style={{ fontWeight: 400, opacity: 0.8 }}>(from cancelled Buy-in slots kept as credit)</span>
                 </p>
               )}
               {!orgStatus?.payoutAccountLinked ? (
                 orgStatus?.directPayoutsEnabled ? (
-                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '6px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-6px)' }}>
                     <Link href="/dashboard/organiser/payouts" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Set up direct payouts →</Link>
                   </p>
                 ) : null
               ) : orgStatus.payoutAccountStatus !== 'activated' ? (
-                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: '6px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
                   ⏳ Payout account linked, not yet activated — <Link href="/dashboard/organiser/payouts" style={{ color: 'inherit' }}>check status</Link>
                 </p>
               ) : (
-                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-sage)', fontWeight: 600, marginTop: '6px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-sage)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
                   ✓ Direct payouts active
                 </p>
               )}
@@ -154,19 +154,19 @@ export default function OrganiserDashboard() {
           </div>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
           )}
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No events yet</p>
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Create your first event to start booking venues and artists</p>
+            <div style={{ textAlign: 'center', padding: '64px var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>No events yet</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>Create your first event to start booking venues and artists</p>
               <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/events/create">
                 Create Event
               </Button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--afa-space-5)' }}>
               {events.map((event) => {
                 const pendingApplications = event.applications.filter((a) => a.status === 'PENDING').length
                 const statusStyle = STATUS_STYLE[event.status] || STATUS_STYLE.DRAFT
@@ -174,19 +174,19 @@ export default function OrganiserDashboard() {
                   <div
                     key={event.id}
                     onClick={() => router.push(`/dashboard/organiser/events/${event.id}`)}
-                    style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '24px', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
+                    style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-14px)', gap: 'var(--afa-space-10px)' }}>
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'No venue booked'}
                         </p>
                       </div>
                       <Badge tone={statusStyle}>{statusStyle.label}</Badge>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px', marginBottom: '18px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                       <span><strong>{event.totalSeats}</strong> seats</span>
                       <span><strong>{event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}</strong></span>
                       {pendingApplications > 0 && (
@@ -194,7 +194,7 @@ export default function OrganiserDashboard() {
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
                         onClick={(e) => e.stopPropagation()}

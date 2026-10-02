@@ -176,22 +176,22 @@ export default function AdminArtistsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 96px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>
           {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
           <div className="lg:hidden">
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
             Artist Roster
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '680px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', maxWidth: '680px' }}>
             Rising and Featured are fully automatic — thresholds live at{' '}
             <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Platform Settings</Link>.
             Headliner is the one manual call here — deliberately not a formula. Organiser ratings are private everywhere except this page, where they're shown to inform your decision.
           </p>
 
-          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: '10px', marginBottom: '12px' }}>
+          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-3)' }}>
             <SearchInputBox
               value={search}
               onChange={setSearch}
@@ -201,7 +201,7 @@ export default function AdminArtistsPage() {
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
@@ -218,7 +218,7 @@ export default function AdminArtistsPage() {
             </Button>
           </form>
 
-          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap', padding: '0 4px' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-4)', flexWrap: 'wrap', padding: '0 var(--afa-space-1)' }}>
             {sortButton('name', 'Name')}
             {sortButton('gigsPerformed', 'Gigs')}
             {sortButton('hypeScore', 'Hype Score')}
@@ -228,9 +228,9 @@ export default function AdminArtistsPage() {
             {sortButton('featuredOrganiserCount', 'Featured Progress')}
           </div>
 
-          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error}</div>}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
             {sorted.length === 0 && !loading && (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No artists match.</p>
             )}
@@ -240,29 +240,29 @@ export default function AdminArtistsPage() {
                 <div
                   key={a.id}
                   style={{
-                    background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
+                    background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)',
                     border: a.isSceneStatusHeadliner ? '1px solid var(--afa-amber)' : '1px solid var(--afa-tint-08)',
                   }}
                 >
-                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '12px' }}>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: 'var(--afa-space-3)' }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
                       <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: a.avatar ? `url(${a.avatar}) center/cover` : 'var(--afa-surface-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-primary)', fontWeight: 700, flexShrink: 0 }}>
                         {!a.avatar && a.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)' }}>
                           {a.name}
                           <span style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--afa-radius-pill)', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                             {tier.label}
                           </span>
                         </p>
-                        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '2px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>
                           {timeInScene(a.firstGigDate)} in the scene
                         </p>
                       </div>
                     </div>
 
-                    <div className="lg:items-end" style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
+                    <div className="lg:items-end" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
                       {a.isSceneStatusHeadliner ? (
                         <Button
                           variant="outline-neutral"
@@ -274,12 +274,12 @@ export default function AdminArtistsPage() {
                           Remove Headliner
                         </Button>
                       ) : (
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', alignItems: 'center' }}>
                           <input
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px 10px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                            style={{ padding: '7px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                           />
                           <Button variant="solid" size="md" fullWidth={false} onClick={() => handleHeadlinerToggle(a)} disabled={actioningId === a.id}>
                             ★ Grant Headliner
@@ -298,12 +298,12 @@ export default function AdminArtistsPage() {
                   </div>
 
                   {expandedNote === a.id && a.headlinerNote && (
-                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'var(--afa-amber-wash)', borderRadius: 'var(--afa-radius-sm)' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-2) var(--afa-space-10px)', background: 'var(--afa-amber-wash)', borderRadius: 'var(--afa-radius-sm)' }}>
                       &quot;{a.headlinerNote}&quot;
                     </p>
                   )}
 
-                  <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--afa-tint-06)' }}>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-28px)', flexWrap: 'wrap', marginTop: 'var(--afa-space-14px)', paddingTop: 'var(--afa-space-14px)', borderTop: '1px solid var(--afa-tint-06)' }}>
                     <Stat label="Gigs Performed" value={a.gigsPerformed} />
                     <Stat
                       label="Hype Score"

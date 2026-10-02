@@ -13,7 +13,7 @@ import GenrePicker from '@/components/GenrePicker'
 
 const inputStyle = {
   width: '100%',
-  padding: '10px 12px',
+  padding: 'var(--afa-space-10px) var(--afa-space-3)',
   borderRadius: 'var(--afa-radius-sm)',
   border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
@@ -25,7 +25,7 @@ const labelStyle = {
   display: 'block',
   fontSize: 'var(--afa-text-ui)',
   fontWeight: 600,
-  marginBottom: '6px',
+  marginBottom: 'var(--afa-space-6px)',
   color: 'var(--afa-text-primary)',
 }
 
@@ -194,18 +194,18 @@ export default function EditArtistProfilePage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             Edit Your Profile
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             This is what organisers see when you apply to their events.
           </p>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
-            <div style={{ marginBottom: '18px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Profile Picture</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
@@ -217,26 +217,26 @@ export default function EditArtistProfilePage() {
               </div>
               <details>
                 <summary style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
-                <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={{ ...inputStyle, marginTop: '8px' }} />
+                <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={{ ...inputStyle, marginTop: 'var(--afa-space-2)' }} />
               </details>
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Bio</label>
               <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Tell organisers about your act" style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Genres</label>
               <GenrePicker value={genre} onChange={setGenre} />
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Style Tags <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
               <input type="text" value={styleTagInput} onChange={(e) => setStyleTagInput(e.target.value)} placeholder="e.g., Observational, High-energy" style={inputStyle} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)' }}>
               <div>
                 <label style={labelStyle}>Instagram</label>
                 <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/..." style={inputStyle} />
@@ -250,35 +250,35 @@ export default function EditArtistProfilePage() {
 
           {/* Artist Background - a richer, entirely optional storytelling
               section beyond the short bio above. Nothing here is required. */}
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               Your Background
             </h2>
-            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
               All optional - share as much or as little of your story as you want.
             </p>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Tagline <span style={{ fontWeight: 400, opacity: 0.6 }}>(one line, shown prominently)</span></label>
               <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={200} placeholder="e.g., Turning everyday chaos into comedy" style={inputStyle} />
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Full Biography <span style={{ fontWeight: 400, opacity: 0.6 }}>(as long as you&apos;d like)</span></label>
               <textarea value={fullBiography} onChange={(e) => setFullBiography(e.target.value)} rows={5} placeholder="The complete story, beyond the short bio above" style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Your Journey</label>
               <textarea value={journey} onChange={(e) => setJourney(e.target.value)} rows={5} placeholder="How you got started, key moments along the way" style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Influences <span style={{ fontWeight: 400, opacity: 0.6 }}>(who inspired you)</span></label>
               <textarea value={influences} onChange={(e) => setInfluences(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Thanks <span style={{ fontWeight: 400, opacity: 0.6 }}>(anyone you&apos;d like to acknowledge)</span></label>
               <textarea value={acknowledgments} onChange={(e) => setAcknowledgments(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
@@ -293,9 +293,9 @@ export default function EditArtistProfilePage() {
               artist can show they perform beyond Pune/India. Purely
               informational - not tied to AFA's booking flow, since these
               shows aren't happening through the platform. */}
-          <div style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: '24px', border: '1px solid var(--afa-tint-08)', marginBottom: '20px' }}>
+          <div style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
             <label style={labelStyle}>Tour</label>
-            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               Show where else you're performing — city, country, and an optional date or link. Shown on your public profile.
             </p>
             {tourStops.map((stop) => (
@@ -304,9 +304,9 @@ export default function EditArtistProfilePage() {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                  gap: '8px',
-                  marginBottom: '10px',
-                  padding: '12px',
+                  gap: 'var(--afa-space-2)',
+                  marginBottom: 'var(--afa-space-10px)',
+                  padding: 'var(--afa-space-3)',
                   border: '1px solid var(--afa-tint-08)',
                   borderRadius: 'var(--afa-radius-md)',
                   alignItems: 'start',
@@ -331,13 +331,13 @@ export default function EditArtistProfilePage() {
               size="md"
               fullWidth={false}
               onClick={addTourStop}
-              style={{ marginTop: '4px' }}
+              style={{ marginTop: 'var(--afa-space-1)' }}
             >
               + Add tour stop
             </Button>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
             <Button
               variant="primary"
               size="lg"

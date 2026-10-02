@@ -99,7 +99,7 @@ export default function AuthPromptSheet({
           maxWidth: "480px",
           background: "var(--afa-surface-raised)",
           borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)",
-          padding: "8px 24px 28px",
+          padding: "var(--afa-space-2) var(--afa-space-6) var(--afa-space-28px)",
           boxShadow: "0 -8px 40px var(--afa-shadow)",
           animation: "authSheetSlideUp 0.22s ease-out",
           maxHeight: "88vh",
@@ -113,11 +113,11 @@ export default function AuthPromptSheet({
         `}</style>
 
         {/* Grab handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "var(--afa-space-10px) 0" }}>
           <div style={{ width: "36px", height: "4px", borderRadius: "var(--afa-radius-xs)", background: "var(--afa-border-resting)" }} />
         </div>
 
-        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <div style={{ textAlign: "center", marginBottom: "var(--afa-space-5)" }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "4px" : 0 }}>
             {title}
           </h2>
@@ -125,12 +125,12 @@ export default function AuthPromptSheet({
         </div>
 
         {error && (
-          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-10px) var(--afa-space-14px)", marginBottom: "var(--afa-space-4)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
             {error}
           </div>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-4)" }}>
           {[
             { label: "Email / Phone / Username / Code", name: "identifier", type: "text", placeholder: "you@example.com" },
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
@@ -151,11 +151,11 @@ export default function AuthPromptSheet({
           ))}
         </div>
 
-        <Button variant="primary" onClick={handleSignIn} disabled={loading} style={{ marginBottom: "12px" }}>
+        <Button variant="primary" onClick={handleSignIn} disabled={loading} style={{ marginBottom: "var(--afa-space-3)" }}>
           {loading ? "Signing in..." : "Sign In & Continue"}
         </Button>
 
-        <div style={{ textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "var(--afa-space-1)" }}>
           New here?{" "}
           <Link href="/register" style={{ color: "var(--afa-amber)", fontWeight: 600, textDecoration: "none" }}>
             Create an account

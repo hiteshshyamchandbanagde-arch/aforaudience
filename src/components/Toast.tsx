@@ -104,7 +104,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
-          gap: 12,
+          gap: 'var(--afa-space-3)',
           maxWidth: 'calc(100vw - 32px)',
           width: 420,
           // The rest of the app sets fontFamily per-page (e.g. `main`'s
@@ -147,13 +147,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'flex-start',
-                gap: 12,
+                gap: 'var(--afa-space-3)',
                 background: 'var(--afa-surface-raised)',
                 color: 'var(--afa-text-primary)',
                 borderRadius: 'var(--afa-radius-lg)',
                 border: '1px solid var(--afa-border-resting)',
                 borderLeft: `4px solid ${accent}`,
-                padding: '14px 16px 16px',
+                padding: 'var(--afa-space-14px) var(--afa-space-4) var(--afa-space-4)',
                 fontSize: 'var(--afa-text-body)',
                 lineHeight: 1.45,
                 boxShadow: '0 10px 30px var(--afa-shadow)',
@@ -190,7 +190,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   color: 'var(--afa-text-secondary)',
                   fontSize: 'var(--afa-text-title)',
                   lineHeight: 1,
-                  padding: 2,
+                  padding: 'var(--afa-space-2px)',
                 }}
               >
                 ×

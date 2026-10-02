@@ -98,7 +98,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
           {typeLabel} · {event.venue ? event.venue.city : tr.eventsPage.venueTBD}
         </div>
-        <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: titleSize, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--afa-text-primary)", marginBottom: "10px" }}>
+        <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: titleSize, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>
           {event.title}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
@@ -156,7 +156,7 @@ export default function Home() {
           brief (out of scope to redesign here), may read as a slightly
           disconnected transition until it's folded into a later pass. */}
       {bentoEvents.length > 0 && (
-        <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "24px 36px 56px" }}>
+        <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "var(--afa-space-6) 36px 56px" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "var(--afa-space-5)" }}>
             <div>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
@@ -181,7 +181,7 @@ export default function Home() {
             )}
           </div>
           {bentoEvents[3] && (
-            <div style={{ marginTop: "12px" }}>
+            <div style={{ marginTop: "var(--afa-space-3)" }}>
               <BentoTile event={bentoEvents[3]} size="strip" />
             </div>
           )}
@@ -201,9 +201,9 @@ export default function Home() {
       <PlatformGrowthStrip />
 
       {/* FOOTER */}
-      <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-primary)", padding: "64px 48px 32px" }}>
+      <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-primary)", padding: "64px var(--afa-space-48px) var(--afa-space-32px)" }}>
         <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "var(--afa-space-48px)", marginBottom: "var(--afa-space-48px)" }}>
             <div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
                 <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
@@ -243,7 +243,7 @@ export default function Home() {
             ].map((col) => (
               <div key={col.title}>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-body)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-5)" }}>{col.title}</div>
-                <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
+                <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
                   {col.links.map((link) => (
                     <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-muted)", textDecoration: "none" }}>{link.label}</Link></li>
                   ))}
@@ -251,7 +251,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid var(--afa-tint-08)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "var(--afa-space-32px)", borderTop: "1px solid var(--afa-tint-08)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             <span>{tr.homePage.footerCopyright}</span>
             <span>{tr.homePage.footerMadeWith}</span>
           </div>

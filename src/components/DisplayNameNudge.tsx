@@ -103,8 +103,8 @@ export default function DisplayNameNudge() {
         borderBottom: '1px solid var(--afa-amber)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '10px 16px',
+        gap: 'var(--afa-space-3)',
+        padding: 'var(--afa-space-10px) var(--afa-space-4)',
         fontSize: 'var(--afa-text-body)',
         lineHeight: 1.4,
       }}
@@ -135,7 +135,7 @@ export default function DisplayNameNudge() {
         aria-label="Dismiss"
         style={{
           color: 'var(--afa-text-primary)',
-          padding: '4px 8px',
+          padding: 'var(--afa-space-1) var(--afa-space-2)',
           fontSize: 'var(--afa-text-lead)',
           opacity: 0.6,
           lineHeight: 1,

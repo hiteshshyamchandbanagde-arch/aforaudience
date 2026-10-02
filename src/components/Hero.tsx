@@ -29,7 +29,7 @@ export default function Hero() {
     >
       <PhotoCrossfadeBackdrop photos={photos} active={active} />
 
-      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100svh", padding: "128px 24px 72px" }}>
+      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100svh", padding: "128px var(--afa-space-6) 72px" }}>
         <div style={{ maxWidth: "760px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-6)" }}>
             <span style={{ position: "relative", display: "flex", width: "8px", height: "8px" }}>
@@ -51,13 +51,13 @@ export default function Hero() {
           </p>
 
           <div style={{ marginTop: "34px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>
-            <Link href="/events" style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px 28px", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}>
+            <Link href="/events" style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-14px) var(--afa-space-28px)", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}>
               {tr.homePage.ctaFindTonightsShow}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
-            <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", color: "var(--afa-text-primary)", padding: "14px 28px", borderRadius: "var(--afa-radius-pill)", border: "1.5px solid var(--afa-tint-20)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 500, textDecoration: "none" }}>
+            <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px) var(--afa-space-28px)", borderRadius: "var(--afa-radius-pill)", border: "1.5px solid var(--afa-tint-20)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 500, textDecoration: "none" }}>
               {tr.homePage.ctaImArtist}
             </Link>
           </div>

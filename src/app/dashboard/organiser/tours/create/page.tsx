@@ -11,14 +11,14 @@ import Button from '@/components/ui/Button'
 
 const inputStyle = {
   width: '100%',
-  padding: '10px 12px',
+  padding: 'var(--afa-space-10px) var(--afa-space-3)',
   borderRadius: 'var(--afa-radius-sm)',
   border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
   fontSize: 'var(--afa-text-body)',
   color: 'var(--afa-text-primary)',
 }
-const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
+const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }
 
 export default function CreateTourPage() {
   const { status } = useSession()
@@ -61,18 +61,18 @@ export default function CreateTourPage() {
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '32px 24px 80px' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) 80px' }}>
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '20px', marginBottom: '8px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-2)' }}>
           Create a Tour
         </h1>
-        <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '28px' }}>
+        <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-28px)' }}>
           Start with the basics. You'll add stops, fixed lineup, and open local slots once the Tour exists.
         </p>
 
-        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '24px', border: '1px solid var(--afa-tint-08)' }}>
-          <div style={{ marginBottom: '20px' }}>
+        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ marginBottom: 'var(--afa-space-5)' }}>
             <label style={labelStyle}>Tour title</label>
             <input
               type="text"
@@ -83,7 +83,7 @@ export default function CreateTourPage() {
               style={inputStyle}
             />
           </div>
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <label style={labelStyle}>Subject (optional)</label>
             <textarea
               value={subject}

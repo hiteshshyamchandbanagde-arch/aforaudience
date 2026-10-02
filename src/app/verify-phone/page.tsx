@@ -14,7 +14,7 @@ import Button from '@/components/ui/Button'
 
 const inputStyle = {
   width: '100%',
-  padding: '14px 16px',
+  padding: 'var(--afa-space-14px) var(--afa-space-4)',
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-border-resting)',
   fontSize: 'var(--afa-text-lead)',
@@ -99,14 +99,14 @@ function VerifyPhoneInner() {
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '440px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+        <div style={{ maxWidth: '440px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             {tr.verifyPhonePage.verifyYourPhoneHeading}
           </h1>
 
           {alreadyVerified ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
               <Link href={next} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
@@ -114,16 +114,16 @@ function VerifyPhoneInner() {
               </Link>
             </div>
           ) : (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-5)' }}>
                 {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
               </p>
 
               {error && (
-                <ErrorBanner style={{ marginBottom: '18px', fontSize: 'var(--afa-text-ui)' }}>{error}</ErrorBanner>
+                <ErrorBanner style={{ marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)' }}>{error}</ErrorBanner>
               )}
               {devOtp && (
-                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-md)', padding: '12px 16px', marginBottom: '18px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) var(--afa-space-4)', marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                   QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
                 </div>
               )}
@@ -148,13 +148,13 @@ function VerifyPhoneInner() {
                     maxLength={6}
                     placeholder={tr.verifyPhonePage.sixDigitCodePlaceholder}
                     onKeyDown={(e) => e.key === 'Enter' && verifyCode()}
-                    style={{ ...inputStyle, marginBottom: '16px' }}
+                    style={{ ...inputStyle, marginBottom: 'var(--afa-space-4)' }}
                   />
                   <Button
                     variant="form-submit"
                     onClick={verifyCode}
                     disabled={submitting}
-                    style={{ opacity: submitting ? 0.6 : 1, marginBottom: '10px' }}
+                    style={{ opacity: submitting ? 0.6 : 1, marginBottom: 'var(--afa-space-10px)' }}
                   >
                     {submitting ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
                   </Button>

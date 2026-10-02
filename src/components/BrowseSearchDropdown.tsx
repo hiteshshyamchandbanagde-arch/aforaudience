@@ -93,7 +93,7 @@ export default function BrowseSearchDropdown<T>({
             ))
           )}
           {items.length > maxVisible && (
-            <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45, padding: "6px 20px 2px", borderTop: "1px solid var(--afa-tint-08)", marginTop: "4px" }}>
+            <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45, padding: "var(--afa-space-6px) var(--afa-space-5) var(--afa-space-2px)", borderTop: "1px solid var(--afa-tint-08)", marginTop: "var(--afa-space-1)" }}>
               +{items.length - maxVisible} more below
             </div>
           )}

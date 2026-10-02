@@ -9,8 +9,8 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import Button, { variantStyle } from '@/components/ui/Button'
 
-const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
+const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }
+const inputStyle = { width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
 
 // Session 62, design.md §9.5. First edit surface for Organiser.orgName/bio -
 // previously these could only be set once, at apply-time. Powers the new
@@ -128,25 +128,25 @@ export default function OrganiserEditPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             Edit Your Profile
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             This is what audience members and artists see on your public Organiser page.
           </p>
 
           {message && (
-            <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
+            <SuccessBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
-            <div style={{ marginBottom: '18px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Profile Picture</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
@@ -158,7 +158,7 @@ export default function OrganiserEditPage() {
               </div>
             </div>
 
-            <div style={{ marginBottom: '18px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
               <label style={labelStyle}>Organisation / Brand Name</label>
               <input type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} maxLength={120} style={inputStyle} />
             </div>

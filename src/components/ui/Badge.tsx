@@ -33,14 +33,14 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    padding: '5px 10px',
+    padding: '5px var(--afa-space-10px)',
     borderRadius: 'var(--afa-radius-pill)',
     whiteSpace: 'nowrap',
   },
   'status-compact': {
     fontSize: 'var(--afa-text-micro)',
     fontWeight: 700,
-    padding: '4px 10px',
+    padding: 'var(--afa-space-1) var(--afa-space-10px)',
     borderRadius: 'var(--afa-radius-pill)',
     whiteSpace: 'nowrap',
   },
@@ -52,7 +52,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   micro: {
     fontSize: 'var(--afa-text-caption)',
     fontWeight: 700,
-    padding: '2px 8px',
+    padding: 'var(--afa-space-2px) var(--afa-space-2)',
     borderRadius: 'var(--afa-radius-pill)',
   },
   // admin/bookings' "FREE" tag - deliberately not folded into `status`/
@@ -62,7 +62,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   tag: {
     fontSize: 'var(--afa-text-micro)',
     fontWeight: 500,
-    padding: '2px 8px',
+    padding: 'var(--afa-space-2px) var(--afa-space-2)',
     borderRadius: 'var(--afa-radius-pill)',
   },
   // artist/events' compensation pill + "Lineup full" pill - identical
@@ -70,7 +70,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   pill: {
     fontSize: 'var(--afa-text-ui)',
     fontWeight: 700,
-    padding: '5px 12px',
+    padding: '5px var(--afa-space-3)',
     borderRadius: 'var(--afa-radius-pill)',
   },
 }
@@ -93,7 +93,7 @@ export default function Badge({
   style?: React.CSSProperties
 }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
       {icon}
       {children}
     </span>

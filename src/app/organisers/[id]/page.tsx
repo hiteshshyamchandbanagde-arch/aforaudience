@@ -328,7 +328,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
       <style>{`
-        .afa-organiser-container { max-width: 1024px; margin: 0 auto; padding: 0 24px 112px; }
+        .afa-organiser-container { max-width: 1024px; margin: 0 auto; padding: 0 var(--afa-space-6) 112px; }
         @media (min-width: 640px) { .afa-organiser-container { padding: 0 40px 112px; } }
         .afa-organiser-avatar { width: 144px; height: 144px; }
         @media (min-width: 768px) { .afa-organiser-avatar { width: 176px; height: 176px; } }

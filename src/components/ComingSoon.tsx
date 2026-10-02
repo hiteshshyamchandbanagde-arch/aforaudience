@@ -22,10 +22,10 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
-          padding: "48px 24px",
+          padding: "var(--afa-space-48px) var(--afa-space-6)",
         }}
       >
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "20px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "var(--afa-space-5)" }}>
           {tr.comingSoon.badge}
         </div>
         <h1 style={{
@@ -33,11 +33,11 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
           fontSize: "36px", // token-ok(font-size-literal): one-off marketing display title on the Coming Soon placeholder (see docs/afa-design-tokens-reference.md, one-off display text)
           fontWeight: 700,
           color: "var(--afa-text-primary)",
-          marginBottom: "16px",
+          marginBottom: "var(--afa-space-4)",
         }}>
           {title}
         </h1>
-        <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
+        <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "var(--afa-space-32px)" }}>
           {description ?? tr.comingSoon.defaultDescription}
         </p>
         <Link
@@ -48,7 +48,7 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
             color: "var(--afa-on-fill-solid)",
             textDecoration: "none",
             background: "var(--afa-fill-solid)",
-            padding: "12px 28px",
+            padding: "var(--afa-space-3) var(--afa-space-28px)",
             borderRadius: "var(--afa-radius-sm)",
           }}
         >

@@ -496,7 +496,7 @@ export default function AdminSettingsPage() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px var(--afa-space-6)', fontFamily: 'var(--font-sans)' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: 560, margin: '0 auto' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
               Admins only
@@ -526,9 +526,9 @@ export default function AdminSettingsPage() {
           color: 'var(--afa-text-primary)',
         }}
       >
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px var(--afa-space-5) 64px' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 64px' }}>
         {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
-        <div className="lg:hidden" style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 6, letterSpacing: '0.04em' }}>
+        <div className="lg:hidden" style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)', letterSpacing: '0.04em' }}>
           <Link href="/dashboard/admin" style={{ color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
             ← Admin
           </Link>{' '}
@@ -538,12 +538,12 @@ export default function AdminSettingsPage() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-2)' }}>
           Platform settings
         </h1>
-        <p style={{ opacity: 0.65, marginBottom: 28, fontSize: 'var(--afa-text-body)', lineHeight: 1.5 }}>
+        <p style={{ opacity: 0.65, marginBottom: 'var(--afa-space-28px)', fontSize: 'var(--afa-text-body)', lineHeight: 1.5 }}>
           Changes here take effect immediately — the next booking anyone starts will use the new values.
         </p>
 
         {loadError && (
-          <ErrorBanner style={{ padding: 'var(--afa-space-3) 14px', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
+          <ErrorBanner style={{ padding: 'var(--afa-space-3) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
         )}
 
         <div
@@ -554,7 +554,7 @@ export default function AdminSettingsPage() {
             padding: 'var(--afa-space-6)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Audience booking fee
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -574,7 +574,7 @@ export default function AdminSettingsPage() {
                   fontWeight: 700,
                   color: 'var(--afa-amber)',
                   letterSpacing: '0.06em',
-                  marginBottom: 6,
+                  marginBottom: 'var(--afa-space-6px)',
                 }}
               >
                 {f.label}
@@ -591,7 +591,7 @@ export default function AdminSettingsPage() {
                   placeholder={f.placeholder}
                   style={{
                     flex: 1,
-                    padding: '10px var(--afa-space-3)',
+                    padding: 'var(--afa-space-10px) var(--afa-space-3)',
                     borderRadius: 'var(--afa-radius-sm)',
                     border: '1px solid var(--afa-border-resting)',
                     fontSize: 'var(--afa-text-body-lg)',
@@ -625,7 +625,7 @@ export default function AdminSettingsPage() {
             marginTop: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Support chat message cap
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -639,7 +639,7 @@ export default function AdminSettingsPage() {
               fontWeight: 700,
               color: 'var(--afa-amber)',
               letterSpacing: '0.06em',
-              marginBottom: 6,
+              marginBottom: 'var(--afa-space-6px)',
             }}
           >
             MAX MESSAGES PER SESSION
@@ -655,7 +655,7 @@ export default function AdminSettingsPage() {
               placeholder="15"
               style={{
                 flex: 1,
-                padding: '10px var(--afa-space-3)',
+                padding: 'var(--afa-space-10px) var(--afa-space-3)',
                 borderRadius: 'var(--afa-radius-sm)',
                 border: '1px solid var(--afa-border-resting)',
                 fontSize: 'var(--afa-text-body-lg)',
@@ -682,14 +682,14 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Scene Status thresholds
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
             Rising and Featured are automatic, computed live on every profile/poster view — changes here take effect immediately, no deploy needed. Headliner isn't configurable here — it's a fully manual, admin-only tag (set per-artist), deliberately not earned via any formula.
           </p>
 
-          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
             RISING — MIN COMPLETED GIGS
           </label>
           <input
@@ -700,10 +700,10 @@ export default function AdminSettingsPage() {
             value={risingMinGigs}
             onChange={(e) => setRisingMinGigs(e.target.value)}
             placeholder="3"
-            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
-          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
             RISING — MIN AVERAGE REVIEW RATING (0–5)
           </label>
           <input
@@ -715,10 +715,10 @@ export default function AdminSettingsPage() {
             value={risingMinAvgRating}
             onChange={(e) => setRisingMinAvgRating(e.target.value)}
             placeholder="4.0"
-            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
-          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
             RISING — MIN VERIFIED ATTENDEES
           </label>
           <input
@@ -729,10 +729,10 @@ export default function AdminSettingsPage() {
             value={risingMinAttendees}
             onChange={(e) => setRisingMinAttendees(e.target.value)}
             placeholder="5"
-            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
-          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
             FEATURED — MIN DISTINCT ORGANISERS WHO VOUCHED
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-3)' }}>
@@ -744,7 +744,7 @@ export default function AdminSettingsPage() {
               value={featuredVouchThreshold}
               onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
               placeholder="5"
-              style={{ flex: 1, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+              style={{ flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
           </div>
           <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
@@ -765,10 +765,10 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Hype Score lookback window
           </h2>
-          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
             ADMIN ROSTER — HYPE SCORE LOOKBACK (RECENT N SCORED SHOWS)
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
@@ -780,7 +780,7 @@ export default function AdminSettingsPage() {
               value={rosterLookback}
               onChange={(e) => setRosterLookback(e.target.value)}
               placeholder="5"
-              style={{ width: 100, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+              style={{ width: 100, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
             <Button variant="solid" size="md" fullWidth={false} onClick={saveRosterLookback} disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}>
               {rosterLookbackSaving ? 'Saving…' : 'Save'}
@@ -800,10 +800,10 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Event-creation forward window
           </h2>
-          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
             EVENT CREATION WINDOW (MONTHS OUT, MAX)
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
@@ -816,7 +816,7 @@ export default function AdminSettingsPage() {
               value={eventWindow}
               onChange={(e) => setEventWindow(e.target.value)}
               placeholder="3"
-              style={{ width: 100, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+              style={{ width: 100, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
             <Button variant="solid" size="md" fullWidth={false} onClick={saveEventWindow} disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}>
               {eventWindowSaving ? 'Saving…' : 'Save'}
@@ -836,14 +836,14 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Direct payouts (Razorpay Route)
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
             Razorpay Route (auto-split payouts) isn't available on the current account tier — confirmed against RBI's 2025 Payment Aggregator Directions, which require ₹40L+ turnover. K2 payouts run on a manual two-step transfer model instead. This is OFF by default so organisers aren't shown a linking flow that can't work. Flip on only if the account tier changes and Route needs re-testing.
           </p>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--afa-space-4)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-4)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={directPayoutsEnabled}
@@ -862,7 +862,7 @@ export default function AdminSettingsPage() {
               fontWeight: 700,
               color: 'var(--afa-amber)',
               letterSpacing: '0.06em',
-              marginBottom: 6,
+              marginBottom: 'var(--afa-space-6px)',
             }}
           >
             AUTO-DISABLE AT (OPTIONAL)
@@ -874,7 +874,7 @@ export default function AdminSettingsPage() {
             disabled={!directPayoutsEnabled}
             style={{
               width: '100%',
-              padding: '10px var(--afa-space-3)',
+              padding: 'var(--afa-space-10px) var(--afa-space-3)',
               borderRadius: 'var(--afa-radius-sm)',
               border: '1px solid var(--afa-border-resting)',
               fontSize: 'var(--afa-text-body-lg)',
@@ -902,7 +902,7 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Audience Choice default weights
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -911,16 +911,16 @@ export default function AdminSettingsPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
-              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>AUDIENCE</label>
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>PANELIST</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>CELEBRITY</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
           </div>
           <p style={{ fontSize: 'var(--afa-text-micro)', color: voteWeightsSum === 100 ? 'var(--afa-text-secondary)' : 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>
@@ -941,7 +941,7 @@ export default function AdminSettingsPage() {
             marginTop: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Display currency rates
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -961,9 +961,9 @@ export default function AdminSettingsPage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
-                    marginBottom: 14,
-                    paddingBottom: 14,
+                    gap: 'var(--afa-space-10px)',
+                    marginBottom: 'var(--afa-space-14px)',
+                    paddingBottom: 'var(--afa-space-14px)',
                     borderBottom: '1px solid var(--afa-tint-06)',
                   }}
                 >
@@ -980,7 +980,7 @@ export default function AdminSettingsPage() {
                     onChange={(e) => setRateInputs((prev) => ({ ...prev, [c.code]: e.target.value }))}
                     style={{
                       width: 110,
-                      padding: 'var(--afa-space-2) 10px',
+                      padding: 'var(--afa-space-2) var(--afa-space-10px)',
                       borderRadius: 'var(--afa-radius-sm)',
                       border: '1px solid var(--afa-border-resting)',
                       fontSize: 'var(--afa-text-body)',
@@ -997,7 +997,7 @@ export default function AdminSettingsPage() {
           )}
         </div>
 
-        <div style={{ marginTop: 32, fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>
+        <div style={{ marginTop: 'var(--afa-space-32px)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>
           <strong style={{ color: 'var(--afa-text-primary)', fontWeight: 700 }}>Current behavior:</strong>{' '}
           {initialPaise === 0 && initialMinPaise === 0
             ? 'No booking fee is charged by default, and audiences can leave it at ₹0. Checkout, ticket PDFs, and email receipts show only the ticket price unless they raise it.'

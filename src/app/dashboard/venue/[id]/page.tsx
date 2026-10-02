@@ -101,8 +101,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Venue not found</div></>)
 
   const sections = venue.seatMap?.sections || []
 
@@ -147,10 +147,10 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Venues" />
 
-          <div style={{ marginTop: '20px' }}>
+          <div style={{ marginTop: 'var(--afa-space-5)' }}>
             <PageHead
               eyebrow="Venue"
               title={venue.name}
@@ -163,34 +163,34 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
           )}
 
-          <Card style={{ padding: '28px', marginBottom: '20px' }}>
+          <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
             <SectionTitle n="01" title="Overview" />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-6)' }}>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Total Capacity</p>
                 <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{venue.capacity} seats</p>
               </div>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Price Range</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Price Range</p>
                 <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                   {minPrice !== null ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : '—'}
                 </p>
               </div>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Acoustic Rating</p>
                 <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Not Rated Yet</p>
               </div>
             </div>
 
             {venue.facilities && venue.facilities.length > 0 && (
-              <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Facilities</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+                <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>Facilities</h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px 12px', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>
+                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>
                       {facility}
                     </span>
                   ))}
@@ -199,7 +199,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </Card>
 
-          <Card style={{ padding: '28px', marginBottom: '20px' }}>
+          <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
             <SectionTitle n="02" title="Seating Sections" />
             <div>
               {venue.seatingMode === 'NUMBERED' ? (
@@ -208,14 +208,14 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                     No seat map built yet — use Seat Map Builder to add zones and seats.
                   </p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                     {numberedZones.map((z) => (
                       <div
                         key={`${z.level}::${z.zoneName}`}
                         style={{
                           display: 'flex',
                           justifyContent: 'space-between',
-                          padding: '12px 16px',
+                          padding: 'var(--afa-space-3) var(--afa-space-4)',
                           background: 'var(--afa-surface-page)',
                           borderRadius: 'var(--afa-radius-md)',
                           fontSize: 'var(--afa-text-body)',
@@ -241,7 +241,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                                 fontWeight: 700,
                                 color: 'var(--afa-amber)',
                                 background: 'var(--afa-amber-tint)',
-                                padding: '3px 8px',
+                                padding: '3px var(--afa-space-2)',
                                 borderRadius: 'var(--afa-radius-xs)',
                                 letterSpacing: '0.02em',
                               }}
@@ -257,14 +257,14 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               ) : sections.length === 0 ? (
                 <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No seating sections defined yet.</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                   {sections.map((s) => (
                     <div
                       key={s.id}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
-                        padding: '12px 16px',
+                        padding: 'var(--afa-space-3) var(--afa-space-4)',
                         background: 'var(--afa-surface-page)',
                         borderRadius: 'var(--afa-radius-md)',
                         fontSize: 'var(--afa-text-body)',
@@ -287,7 +287,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               fontWeight: 700,
                               color: 'var(--afa-amber)',
                               background: 'var(--afa-amber-tint)',
-                              padding: '3px 8px',
+                              padding: '3px var(--afa-space-2)',
                               borderRadius: 'var(--afa-radius-xs)',
                               letterSpacing: '0.02em',
                             }}
@@ -303,16 +303,16 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </Card>
 
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/venue/${venue.id}/edit`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--afa-radius-md)' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
               Edit Venue
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--afa-radius-md)' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
               📊 Revenue
             </Link>

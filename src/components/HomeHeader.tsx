@@ -147,7 +147,7 @@ export default function HomeHeader() {
         }
       `}</style>
 
-      <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", alignItems: "center", gap: "var(--afa-space-6)", padding: "20px 24px" }}>
+      <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", alignItems: "center", gap: "var(--afa-space-6)", padding: "var(--afa-space-5) var(--afa-space-6)" }}>
         <Link href="/" style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-2)", textDecoration: "none", flexShrink: 0 }}>
           <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>
             <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
@@ -158,7 +158,7 @@ export default function HomeHeader() {
           </span>
         </Link>
 
-        <nav className="home-header-desktop" style={{ gap: "28px", alignItems: "center" }}>
+        <nav className="home-header-desktop" style={{ gap: "var(--afa-space-28px)", alignItems: "center" }}>
           {NAV_LINKS.map((l) => (
             <Link key={l.key} href={l.href} style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.7, textDecoration: "none" }}>
               {navLabelFor[l.key]}
@@ -166,7 +166,7 @@ export default function HomeHeader() {
           ))}
         </nav>
 
-        <div className="home-header-desktop" style={{ marginLeft: "auto", alignItems: "center", gap: "10px" }}>
+        <div className="home-header-desktop" style={{ marginLeft: "auto", alignItems: "center", gap: "var(--afa-space-10px)" }}>
           <div style={{ overflow: "hidden", transition: "width 0.25s ease, opacity 0.25s ease", width: searchOpen ? "220px" : 0, opacity: searchOpen ? 1 : 0 }}>
             {searchOpen && <SearchBox />}
           </div>
@@ -189,7 +189,7 @@ export default function HomeHeader() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
+              style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
             >
               {user ? (
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
@@ -207,14 +207,14 @@ export default function HomeHeader() {
             </Button>
 
             {menuOpen && (
-              <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-lg)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px var(--afa-shadow)", padding: "8px 0", zIndex: 20 }}>
+              <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-lg)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px var(--afa-shadow)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
                 {user ? (
                   <>
-                    <div style={{ padding: "6px 16px 10px", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                    <div style={{ padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-10px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                       {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
                     </div>
                     {accountLinks.map((l) => (
-                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
                         {l.label}
                         {l.badge > 0 && (
                           <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>
@@ -223,17 +223,17 @@ export default function HomeHeader() {
                         )}
                       </Link>
                     ))}
-                    <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                    <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                   </>
                 ) : (
                   <>
-                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
                       {t.nav.signIn}
                     </Link>
-                    <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                    <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                   </>
                 )}
-                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 6px", padding: "6px 16px 8px" }}>
+                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
                   {LOCALES.map((l) => (
                     <Button
                       variant="text-toggle"
@@ -248,12 +248,12 @@ export default function HomeHeader() {
                     </Button>
                   ))}
                 </div>
-                <div style={{ padding: "0 12px 4px" }}>
+                <div style={{ padding: "0 var(--afa-space-3) var(--afa-space-1)" }}>
                   <LocationChip />
                 </div>
                 {user && (
                   <>
-                    <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                    <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                     <Button
                       variant="menu-row"
                       onClick={() => { setMenuOpen(false); signOutAndClearCache({ callbackUrl: "/" }) }}
@@ -267,7 +267,7 @@ export default function HomeHeader() {
           </div>
 
           {!user && status !== "loading" && (
-            <Link href="/register" style={{ marginLeft: "var(--afa-space-1)", fontSize: "var(--afa-text-body)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "9px 20px", borderRadius: "var(--afa-radius-pill)", textDecoration: "none" }}>
+            <Link href="/register" style={{ marginLeft: "var(--afa-space-1)", fontSize: "var(--afa-text-body)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "9px var(--afa-space-5)", borderRadius: "var(--afa-radius-pill)", textDecoration: "none" }}>
               {t.nav.signUp}
             </Link>
           )}

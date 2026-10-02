@@ -50,7 +50,7 @@ export default function HelpIcon({ text }: { text: string }) {
             fontSize: 'var(--afa-text-small)',
             fontWeight: 400,
             lineHeight: 1.45,
-            padding: '8px 11px',
+            padding: 'var(--afa-space-2) 11px',
             borderRadius: 'var(--afa-radius-sm)',
             width: '230px',
             zIndex: 30,

@@ -24,22 +24,22 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
   return (
     <main style={{ minHeight: "100vh", background: PAPER, fontFamily: SANS }}>
       <SiteNav />
-      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "48px 24px 96px" }}>
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 96px" }}>
         <Link href="/" style={{ fontSize: "var(--afa-text-body)", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
           ← Back to AforAudience
         </Link>
 
         <div
           style={{
-            marginTop: "24px",
-            marginBottom: "32px",
-            padding: "16px 20px",
+            marginTop: "var(--afa-space-6)",
+            marginBottom: "var(--afa-space-32px)",
+            padding: "var(--afa-space-4) var(--afa-space-5)",
             borderRadius: "var(--afa-radius-lg)",
             background: "var(--afa-amber-tint)",
             border: "1px solid var(--afa-amber)",
           }}
         >
-          <p style={{ fontSize: "var(--afa-text-ui)", fontWeight: 700, color: "var(--afa-amber)", marginBottom: "4px" }}>
+          <p style={{ fontSize: "var(--afa-text-ui)", fontWeight: 700, color: "var(--afa-amber)", marginBottom: "var(--afa-space-1)" }}>
             Draft — pending legal review
           </p>
           <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
@@ -49,7 +49,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
           </p>
         </div>
 
-        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "8px" }}>
+        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "var(--afa-space-2)" }}>
           {title}
         </h1>
         <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
@@ -70,8 +70,8 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
         fontWeight: 700,
         color: INK,
         marginTop: "40px",
-        marginBottom: "14px",
-        paddingBottom: "10px",
+        marginBottom: "var(--afa-space-14px)",
+        paddingBottom: "var(--afa-space-10px)",
         borderBottom: `1px solid ${MIST}`,
         scrollMarginTop: "24px",
       }}
@@ -82,20 +82,20 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
 }
 
 export function P({ children }: { children: React.ReactNode }) {
-  return <p style={{ marginBottom: "16px", opacity: 0.88 }}>{children}</p>
+  return <p style={{ marginBottom: "var(--afa-space-4)", opacity: 0.88 }}>{children}</p>
 }
 
 export function UL({ children }: { children: React.ReactNode }) {
-  return <ul style={{ marginBottom: "16px", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul>
+  return <ul style={{ marginBottom: "var(--afa-space-4)", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul>
 }
 
 export function LI({ children }: { children: React.ReactNode }) {
-  return <li style={{ marginBottom: "8px" }}>{children}</li>
+  return <li style={{ marginBottom: "var(--afa-space-2)" }}>{children}</li>
 }
 
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ background: "var(--afa-amber-tint)", color: "var(--afa-amber)", padding: "1px 6px", borderRadius: "var(--afa-radius-xs)", fontWeight: 600 }}>
+    <span style={{ background: "var(--afa-amber-tint)", color: "var(--afa-amber)", padding: "1px var(--afa-space-6px)", borderRadius: "var(--afa-radius-xs)", fontWeight: 600 }}>
       {children}
     </span>
   )

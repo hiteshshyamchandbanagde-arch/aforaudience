@@ -81,7 +81,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
         {PRESET_FACILITIES.map((facility) => {
           const selected = presetSelected.includes(facility)
           return (
@@ -99,7 +99,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
           )
         })}
       </div>
-      <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
+      <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: 'var(--afa-space-6px)' }}>
         Other <span style={{ fontWeight: 400, opacity: 0.7 }}>(comma separated, optional)</span>
       </label>
       <input
@@ -108,7 +108,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
         placeholder="e.g., Rooftop seating, Valet"
-        style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' }}
+        style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' }}
       />
     </div>
   )

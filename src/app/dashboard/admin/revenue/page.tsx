@@ -106,8 +106,8 @@ export default function AdminRevenueOverviewPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
+  if (error && !data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (!data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></>)
 
   const { totals, organisers, events, timeline, currentFeeSettingRupees } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
@@ -117,13 +117,13 @@ export default function AdminRevenueOverviewPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
           <div className="lg:hidden">
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-5)', flexWrap: 'wrap', gap: 'var(--afa-space-3)' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               Platform Revenue
             </h1>
@@ -132,21 +132,21 @@ export default function AdminRevenueOverviewPage() {
             </span>
           </div>
 
-          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '640px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', maxWidth: '640px' }}>
             Per the "never tax the scene" policy, the platform's only revenue is the audience-side
             booking fee, not organiser gross revenue. Venue rentals and performer fees pass through
             untaxed and don't appear here.
           </p>
 
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <RangePicker value={range} onChange={setRange} />
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
             <SummaryCard label="Platform Revenue" value={money(totals.platformFeeTotal)} sub="booking fee, ours" />
             <SummaryCard label="Ticket Volume" value={money(totals.ticketSubtotalTotal)} sub="goes to organisers" />
             <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} />
@@ -157,11 +157,11 @@ export default function AdminRevenueOverviewPage() {
             {timeline.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No confirmed bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
-                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-1)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -174,8 +174,8 @@ export default function AdminRevenueOverviewPage() {
             {organisers.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]" style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+                <div className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]" style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 var(--afa-space-3)' }}>
                   <span>Organiser</span>
                   <span>Platform Fee</span>
                   <span className="hidden lg:inline">Ticket Volume</span>
@@ -187,7 +187,7 @@ export default function AdminRevenueOverviewPage() {
                     className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]"
                     style={{
                       alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
+                      fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
                       border: '1px solid var(--afa-tint-06)',
                     }}
                   >
@@ -205,8 +205,8 @@ export default function AdminRevenueOverviewPage() {
             {events.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 var(--afa-space-3)' }}>
                   <span>Event</span>
                   <span>Platform Fee</span>
                   <span>Bookings</span>
@@ -216,7 +216,7 @@ export default function AdminRevenueOverviewPage() {
                     key={e.eventId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
+                      fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
                       border: '1px solid var(--afa-tint-06)',
                     }}
                   >
@@ -229,9 +229,9 @@ export default function AdminRevenueOverviewPage() {
             )}
           </Section>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '14px 18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-14px) var(--afa-space-18px)' }}>
             <div>
-              <p style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', marginBottom: '4px' }}>
+              <p style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-1)' }}>
                 Current booking fee
               </p>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>{money(currentFeeSettingRupees)} per confirmed booking</p>
@@ -249,18 +249,18 @@ export default function AdminRevenueOverviewPage() {
 
 function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
-      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+    <div style={{ background: 'var(--afa-surface-page)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)' }}>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '4px' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-1)' }}>{sub}</p>}
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid var(--afa-tint-06)' }}>
-      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
+    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-06)' }}>
+      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>{title}</h2>
       {children}
     </div>
   )

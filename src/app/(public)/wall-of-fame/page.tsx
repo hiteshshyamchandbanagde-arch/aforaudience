@@ -101,7 +101,7 @@ function MonthCardHeader({
           display: "inline-flex",
           background: "var(--afa-scrim)",
           backdropFilter: "blur(4px)",
-          padding: "6px 10px",
+          padding: "var(--afa-space-6px) var(--afa-space-10px)",
           borderRadius: "var(--afa-radius-xs)",
           fontFamily: "var(--font-mono)",
           fontSize: "var(--afa-text-micro)",
@@ -176,9 +176,9 @@ export default function WallOfFamePage() {
       <SiteNav active="wall-of-fame" />
 
       {/* HERO */}
-      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px var(--afa-space-48px)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.1 }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
             {tr.wallOfFamePage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.wallOfFamePage.heroEmphasis}</em>
           </div>
           <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)" }}>
@@ -187,15 +187,15 @@ export default function WallOfFamePage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 24px 80px" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px var(--afa-space-6) 80px" }}>
         {error && (
-          <ErrorBanner style={{ marginBottom: "24px" }}>{error}</ErrorBanner>
+          <ErrorBanner style={{ marginBottom: "var(--afa-space-6)" }}>{error}</ErrorBanner>
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.loading}</div>
+          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.loading}</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--afa-space-6)" }}>
             {/* ARTIST OF THE MONTH */}
             <div
               role={data?.artistOfMonth ? "link" : undefined}
@@ -231,24 +231,24 @@ export default function WallOfFamePage() {
                 photoAlt={data?.artistOfMonth?.name ?? ""}
                 Mark={TrophyMark}
               />
-              <div style={{ padding: "20px 28px" }}>
+              <div style={{ padding: "var(--afa-space-5) var(--afa-space-28px)" }}>
                 {data?.artistOfMonth ? (
                   <>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{data.artistOfMonth.name}</div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginTop: "6px" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginTop: "var(--afa-space-6px)" }}>
                       {stars(data.artistOfMonth.avgRating)} {data.artistOfMonth.avgRating.toFixed(1)} · {data.artistOfMonth.reviewCount}{tr.wallOfFamePage.reviewsSuffix}
                     </div>
                   </>
                 ) : (
                   <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
                 )}
-                <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "12px 0 0" }}>
+                <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "var(--afa-space-3) 0 0" }}>
                   {data?.artistOfMonth
                     ? tr.wallOfFamePage.artistBlurbFilled.replace("{n}", String(data.minReviews))
                     : tr.wallOfFamePage.artistBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
                 </p>
                 {data?.artistOfMonth && (
-                  <span style={{ display: "inline-block", marginTop: "16px", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)" }}>
+                  <span style={{ display: "inline-block", marginTop: "var(--afa-space-4)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)" }}>
                     {tr.wallOfFamePage.viewProfile}
                   </span>
                 )}
@@ -290,24 +290,24 @@ export default function WallOfFamePage() {
                 photoAlt={data?.eventOfMonth?.title ?? ""}
                 Mark={StarMark}
               />
-              <div style={{ padding: "20px 28px" }}>
+              <div style={{ padding: "var(--afa-space-5) var(--afa-space-28px)" }}>
                 {data?.eventOfMonth ? (
                   <>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{data.eventOfMonth.title}</div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginTop: "6px" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginTop: "var(--afa-space-6px)" }}>
                       {stars(data.eventOfMonth.avgRating)} {data.eventOfMonth.avgRating.toFixed(1)} · {data.eventOfMonth.reviewCount}{tr.wallOfFamePage.reviewsSuffix}
                     </div>
                   </>
                 ) : (
                   <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
                 )}
-                <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "12px 0 0" }}>
+                <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "var(--afa-space-3) 0 0" }}>
                   {data?.eventOfMonth
                     ? tr.wallOfFamePage.eventBlurbFilled.replace("{n}", String(data.minReviews))
                     : tr.wallOfFamePage.eventBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
                 </p>
                 {data?.eventOfMonth && (
-                  <span style={{ display: "inline-block", marginTop: "16px", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)" }}>
+                  <span style={{ display: "inline-block", marginTop: "var(--afa-space-4)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)" }}>
                     {tr.wallOfFamePage.viewEvent}
                   </span>
                 )}
@@ -319,16 +319,16 @@ export default function WallOfFamePage() {
         {/* TOP VENUES / TOP ORGANISERS — all-time leaderboard, separate from the monthly awards above */}
         {!loading && data && (data.topVenues.length > 0 || data.topOrganisers.length > 0) && (
           <div style={{ marginTop: "40px" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px", textAlign: "center" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)", textAlign: "center" }}>
               {tr.wallOfFamePage.allTimeLeaderboard}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
-              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topOrganisers)}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--afa-space-6)" }}>
+              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-6) var(--afa-space-28px)" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>{stripLeadingEmoji(tr.wallOfFamePage.topOrganisers)}</div>
                 {data.topOrganisers.length === 0 ? (
                   <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
                     {data.topOrganisers.map((o, i) => {
                       const key = `org:${o.id}`
                       const isNavigatingThis = navigatingKey === key
@@ -350,8 +350,8 @@ export default function WallOfFamePage() {
                             position: "relative",
                             display: "flex",
                             alignItems: "center",
-                            gap: "12px",
-                            padding: "8px 4px",
+                            gap: "var(--afa-space-3)",
+                            padding: "var(--afa-space-2) var(--afa-space-1)",
                             borderRadius: "var(--afa-radius-sm)",
                             borderBottom: i < data.topOrganisers.length - 1 ? "1px solid var(--afa-tint-10)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
@@ -394,12 +394,12 @@ export default function WallOfFamePage() {
                 )}
               </div>
 
-              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topVenues)}</div>
+              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-6) var(--afa-space-28px)" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>{stripLeadingEmoji(tr.wallOfFamePage.topVenues)}</div>
                 {data.topVenues.length === 0 ? (
                   <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
                     {data.topVenues.map((v, i) => {
                       const key = `venue:${v.id}`
                       const isNavigatingThis = navigatingKey === key
@@ -421,8 +421,8 @@ export default function WallOfFamePage() {
                             position: "relative",
                             display: "flex",
                             alignItems: "center",
-                            gap: "12px",
-                            padding: "8px 4px",
+                            gap: "var(--afa-space-3)",
+                            padding: "var(--afa-space-2) var(--afa-space-1)",
                             borderRadius: "var(--afa-radius-sm)",
                             borderBottom: i < data.topVenues.length - 1 ? "1px solid var(--afa-tint-10)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",

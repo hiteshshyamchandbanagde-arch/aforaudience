@@ -165,7 +165,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
         </div>
       )}
       {loading && open && predictions.length === 0 && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: '4px 2px' }}>
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: 'var(--afa-space-1) var(--afa-space-2px)' }}>
           Searching...
         </div>
       )}

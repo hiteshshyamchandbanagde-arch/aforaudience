@@ -111,19 +111,19 @@ export default function MessageThreadPage() {
   return (
     <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
       <SiteNav />
-      <div style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
-        <div style={{ marginBottom: '12px' }}>
+      <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-6) var(--afa-space-4)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
+        <div style={{ marginBottom: 'var(--afa-space-3)' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subheading)', color: 'var(--afa-text-primary)', margin: 0 }}>
             {thread.label ?? tr.messageThreadPage.fallbackTitle}
           </h1>
           {!thread.isActive && (
-            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '4px' }}>
+            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: 'var(--afa-space-1)' }}>
               {tr.messageThreadPage.closedNotice}
             </p>
           )}
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '16px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', paddingBottom: 'var(--afa-space-4)' }}>
           {thread.messages.length === 0 && (
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body)' }}>
               {tr.messageThreadPage.emptyMessages}
@@ -140,14 +140,14 @@ export default function MessageThreadPage() {
                   background: mine ? 'var(--afa-sage)' : 'var(--afa-tint-06)',
                   color: mine ? 'var(--afa-white)' : 'var(--afa-text-primary)',
                   borderRadius: 'var(--afa-radius-lg)',
-                  padding: '8px 12px',
+                  padding: 'var(--afa-space-2) var(--afa-space-3)',
                   fontFamily: 'var(--font-sans)',
                   fontSize: 'var(--afa-text-body)',
                   wordBreak: 'break-word',
                 }}
               >
                 {m.body}
-                <div style={{ fontSize: 'var(--afa-text-caption)', opacity: 0.6, marginTop: '4px' }}>
+                <div style={{ fontSize: 'var(--afa-text-caption)', opacity: 0.6, marginTop: 'var(--afa-space-1)' }}>
                   {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
@@ -157,7 +157,7 @@ export default function MessageThreadPage() {
         </div>
 
         {thread.isActive ? (
-          <div style={{ display: 'flex', gap: '8px', paddingTop: '8px', borderTop: '1px solid var(--afa-tint-10)' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-2)', paddingTop: 'var(--afa-space-2)', borderTop: '1px solid var(--afa-tint-10)' }}>
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value.slice(0, 2000))}
@@ -170,7 +170,7 @@ export default function MessageThreadPage() {
               placeholder={tr.messageThreadPage.inputPlaceholder}
               style={{
                 flex: 1,
-                padding: '10px 12px',
+                padding: 'var(--afa-space-10px) var(--afa-space-3)',
                 borderRadius: 'var(--afa-radius-2xl)',
                 border: '1px solid var(--afa-tint-20)',
                 fontFamily: 'var(--font-sans)',

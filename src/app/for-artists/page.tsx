@@ -9,12 +9,12 @@ import { useLocale } from "@/lib/i18n/translate"
 
 function JourneyStep({ n, title, detail }: { n: number; title: string; detail: string }) {
   return (
-    <div style={{ display: "flex", gap: "24px", padding: "32px 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
+    <div style={{ display: "flex", gap: "var(--afa-space-6)", padding: "var(--afa-space-32px) 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
       <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", border: "1px solid var(--afa-amber-border)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-title)", color: "var(--afa-amber)" }}>
         {n}
       </div>
       <div>
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 600, color: "var(--afa-text-primary)", margin: "0 0 8px" }}>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 600, color: "var(--afa-text-primary)", margin: "0 0 var(--afa-space-2)" }}>
           {title}
         </h3>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "var(--afa-text-soft)", margin: 0, maxWidth: "560px" }}>
@@ -67,7 +67,7 @@ export default function ForArtistsPage() {
           cards/breakdown/tax disclaimer) rather than new stat markup. */}
       <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px 36px 56px" }}>
         <Ledger eyebrow={tr.forArtistsPage.moneyEyebrow} headline={tr.forArtistsPage.moneyHeadline} />
-        <p style={{ marginTop: "28px", maxWidth: "680px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
+        <p style={{ marginTop: "var(--afa-space-28px)", maxWidth: "680px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
           {tr.forArtistsPage.moneyPayoutTiming}
         </p>
       </section>
@@ -79,7 +79,7 @@ export default function ForArtistsPage() {
           isn't alternating with other rooms. */}
       <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)" }}>
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "88px 36px 40px" }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
             {tr.forArtistsPage.journeyEyebrow}
           </div>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 40px" }}>
@@ -95,10 +95,10 @@ export default function ForArtistsPage() {
           verification, rate-setting, cancellation). Proof section
           deliberately omitted, see file-level comment. */}
       <section style={{ maxWidth: "760px", margin: "0 auto", padding: "88px 36px" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
           {tr.forArtistsPage.faqEyebrow}
         </div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 32px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 var(--afa-space-32px)" }}>
           {tr.forArtistsPage.faqHeading}
         </h2>
         <FaqAccordion items={faqs} />
@@ -106,18 +106,18 @@ export default function ForArtistsPage() {
 
       {/* FINAL CTA — registration, role pre-selected. */}
       <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)", padding: "88px 36px", textAlign: "center" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
           {tr.forArtistsPage.finalCtaEyebrow}
         </div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 16px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 500, color: "var(--afa-text-primary)", margin: "0 0 var(--afa-space-4)" }}>
           {tr.forArtistsPage.finalCtaHeading}
         </h2>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "var(--afa-text-soft)", maxWidth: "480px", margin: "0 auto 32px" }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "var(--afa-text-soft)", maxWidth: "480px", margin: "0 auto var(--afa-space-32px)" }}>
           {tr.forArtistsPage.finalCtaSubtitle}
         </p>
         <Link
           href="/register?role=artist"
-          style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "16px 32px", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-4) var(--afa-space-32px)", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}
         >
           {tr.homePage.fourRoomsStageCta}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">

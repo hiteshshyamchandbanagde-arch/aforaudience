@@ -98,8 +98,8 @@ export default function OrganiserSalesOverviewPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
-  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
-  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>No data</div></DashboardShell></>)
+  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
+  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></DashboardShell></>)
 
   const { totals, events, timeline } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
@@ -109,8 +109,8 @@ export default function OrganiserSalesOverviewPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--afa-space-5)', flexWrap: 'wrap', gap: 'var(--afa-space-3)' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               Sales Overview
             </h1>
@@ -119,15 +119,15 @@ export default function OrganiserSalesOverviewPage() {
             </span>
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <RangePicker value={range} onChange={setRange} />
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
             <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} />
             <SummaryCard label="Tickets Sold" value={String(totals.ticketsSold)} />
             <SummaryCard label="Events" value={String(totals.eventsCount)} />
@@ -138,11 +138,11 @@ export default function OrganiserSalesOverviewPage() {
             {timeline.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No confirmed sales in this range.</p>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
-                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -155,8 +155,8 @@ export default function OrganiserSalesOverviewPage() {
             {events.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No events yet.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-muted)', padding: '0 var(--afa-space-3)' }}>
                   <span>Event</span>
                   <span>Revenue</span>
                   <span>Tickets</span>
@@ -168,7 +168,7 @@ export default function OrganiserSalesOverviewPage() {
                     href={`/dashboard/organiser/events/${e.id}/sales?range=${range}`}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
+                      fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
                       border: '1px solid var(--afa-tint-06)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                     }}
                   >
@@ -190,8 +190,8 @@ export default function OrganiserSalesOverviewPage() {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
-      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)' }}>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
     </div>
   )
@@ -199,8 +199,8 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid var(--afa-tint-06)' }}>
-      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-06)' }}>
+      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>{title}</h2>
       {children}
     </div>
   )

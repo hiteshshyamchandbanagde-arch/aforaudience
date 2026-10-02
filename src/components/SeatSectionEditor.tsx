@@ -120,7 +120,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
   // the Figma export's ga-input treatment (GEN-2608-082).
   const inputStyle: CSSProperties = {
     width: "100%",
-    padding: "10px 12px",
+    padding: "var(--afa-space-10px) var(--afa-space-3)",
     borderRadius: "var(--afa-radius-lg)",
     border: "1px solid var(--afa-border-resting)",
     background: "var(--afa-surface-page)",
@@ -132,7 +132,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
 
   return (
     <div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)" }}>
         {sections.length === 0 && (
           <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, fontStyle: "italic" }}>
             No sections yet. Add one to start designing your seating layout — e.g. "VIP Front Row", "General", "Balcony".
@@ -160,9 +160,9 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             style={{
               display: "grid",
               gridTemplateColumns: "2fr 1fr 1fr auto",
-              gap: "10px",
+              gap: "var(--afa-space-10px)",
               alignItems: "center",
-              padding: "12px",
+              padding: "var(--afa-space-3)",
               background: "var(--afa-surface-raised)",
               borderRadius: "var(--afa-radius-md)",
               border: `1px solid ${borderColor}`,
@@ -194,7 +194,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               onChange={(e) => updateSection(section.id, "seats", e.target.value)}
               style={{ ...inputStyle, ...(isPartial && !(Number(section.seats) > 0) ? { border: `1px solid ${borderColor}` } : {}) }}
             />
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-1)" }}>
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-text-primary)", opacity: 0.5, fontSize: "var(--afa-text-body)" }}>₹</span>
                 <input
@@ -234,7 +234,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 color: "var(--afa-text-muted)",
                 fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
-                padding: "8px",
+                padding: "var(--afa-space-2)",
               }}
             >
               ✕
@@ -245,7 +245,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       </div>
 
       {duplicateNames.size > 0 && (
-        <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)", fontWeight: 600 }}>
+        <p style={{ marginTop: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)", fontWeight: 600 }}>
           Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
         </p>
       )}
@@ -256,7 +256,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           return hasSomeContent && isIncompleteSection(s)
         }).length
         return partialCount > 0 ? (
-          <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>
+          <p style={{ marginTop: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>
             {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name, seat count, or price (check "Free" for a free section) — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
           </p>
         ) : null
@@ -268,7 +268,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         type="button"
         onClick={addSection}
         className="ga-add-row"
-        style={{ marginTop: "14px" }}
+        style={{ marginTop: "var(--afa-space-14px)" }}
       >
         <IconSection size={16} /> Add another section
       </Button>
@@ -276,10 +276,10 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       {sections.length > 0 && (
         <div
           style={{
-            marginTop: "16px",
+            marginTop: "var(--afa-space-4)",
             display: "flex",
-            gap: "28px",
-            padding: "14px 18px",
+            gap: "var(--afa-space-28px)",
+            padding: "var(--afa-space-14px) var(--afa-space-18px)",
             background: "var(--afa-surface-page)",
             border: "1px solid var(--afa-fill-tint)",
             borderRadius: "var(--afa-radius-lg)",
@@ -287,14 +287,14 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         >
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
-            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "2px" }}>total seats</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>total seats</div>
           </div>
           <div style={{ width: "1px", background: "var(--afa-tint-12)" }} />
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
               {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}
             </div>
-            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "2px" }}>per-seat range</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>per-seat range</div>
           </div>
         </div>
       )}

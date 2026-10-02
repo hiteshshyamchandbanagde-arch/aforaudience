@@ -118,23 +118,23 @@ export default function VenueOwnerEditPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '680px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
           <div>
             <PageHead eyebrow="Public profile" title="Edit Your Profile" description="This is what people see on your public Venue Owner page." />
           </div>
 
           {message && (
-            <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
+            <SuccessBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
           )}
 
-          <Card style={{ padding: '28px', marginBottom: '20px' }}>
+          <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
             <SectionTitle n="01" title="Basic Info" />
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-5)' }}>
               <Label>Profile Picture</Label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-2)' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />

@@ -23,12 +23,12 @@ export default function VenuesHero({ count }: { count: number }) {
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
         {tr.venuesPage.eyebrowDirectory.replace("{count}", String(count))}
       </span>
-      <h1 style={{ marginTop: "20px", fontFamily: "var(--font-display)", fontSize: "clamp(44px, 7vw, 80px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
+      <h1 style={{ marginTop: "var(--afa-space-5)", fontFamily: "var(--font-display)", fontSize: "clamp(44px, 7vw, 80px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
         {tr.venuesPage.headingPrefix}
         <em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.venuesPage.headingEmphasis}</em>
         {tr.venuesPage.headingSuffix}
       </h1>
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "20px", maxWidth: "420px", lineHeight: 1.6 }}>
+      <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "var(--afa-space-5)", maxWidth: "420px", lineHeight: 1.6 }}>
         {tr.venuesPage.subtitle}
       </p>
     </header>

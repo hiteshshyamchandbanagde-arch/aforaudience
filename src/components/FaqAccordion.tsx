@@ -11,7 +11,7 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
       {items.map((item) => (
         <details
           key={item.q}
-          style={{ borderBottom: "1px solid var(--afa-tint-10)", padding: "20px 0" }}
+          style={{ borderBottom: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-5) 0" }}
         >
           <summary
             style={{
@@ -20,7 +20,7 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "16px",
+              gap: "var(--afa-space-4)",
               fontFamily: "var(--font-display)",
               fontSize: "var(--afa-text-title)",
               fontWeight: 600,
@@ -30,7 +30,7 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
             {item.q}
             <span aria-hidden style={{ flexShrink: 0, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-lead)", color: "var(--afa-amber)" }}>+</span>
           </summary>
-          <p style={{ marginTop: "14px", marginBottom: 0, maxWidth: "640px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
+          <p style={{ marginTop: "var(--afa-space-14px)", marginBottom: 0, maxWidth: "640px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
             {item.a}
           </p>
         </details>

@@ -40,7 +40,7 @@ export default function VenuesViewToggle({
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: "32px", borderBottom: "1px solid var(--afa-border-resting)", marginBottom: "32px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-32px)", borderBottom: "1px solid var(--afa-border-resting)", marginBottom: "var(--afa-space-32px)" }}>
         {tabs.map((t) => {
           const active = view === t.key
           return (
@@ -53,7 +53,7 @@ export default function VenuesViewToggle({
               style={{ marginBottom: "-1px" }}
             >
               {t.label}
-              <span style={{ marginLeft: "8px", verticalAlign: "super", fontSize: "var(--afa-text-micro)", fontWeight: 400, fontFamily: "var(--font-mono)", color: "var(--afa-text-muted)" }}>
+              <span style={{ marginLeft: "var(--afa-space-2)", verticalAlign: "super", fontSize: "var(--afa-text-micro)", fontWeight: 400, fontFamily: "var(--font-mono)", color: "var(--afa-text-muted)" }}>
                 {t.count}
               </span>
             </Button>

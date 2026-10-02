@@ -56,7 +56,7 @@ export default function PlatformGrowthStrip() {
 
   return (
     <section style={{ background: 'var(--afa-surface-inverse)' }}>
-      <div className="growth-strip" style={{ maxWidth: '1360px', margin: '0 auto', padding: '40px 48px' }}>
+      <div className="growth-strip" style={{ maxWidth: '1360px', margin: '0 auto', padding: '40px var(--afa-space-48px)' }}>
         <p className="growth-strip-tagline" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(18px, 2.2vw, 24px)', color: 'var(--afa-cream)', margin: 0, lineHeight: 1.4 }}>
           {tr.homePage.growthTagline}
         </p>
@@ -80,14 +80,14 @@ export default function PlatformGrowthStrip() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 32px;
+          gap: var(--afa-space-32px);
         }
         @media (max-width: 760px) {
           .growth-strip {
             flex-direction: column;
             align-items: flex-start;
           }
-          .growth-strip-stats { gap: 28px; }
+          .growth-strip-stats { gap: var(--afa-space-28px); }
         }
       `}</style>
     </section>

@@ -15,12 +15,12 @@ export default function BackLink({ href, label }: { href: string; label: string 
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '4px',
+        gap: 'var(--afa-space-1)',
         fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
         color: 'var(--afa-fill-solid)',
         textDecoration: 'none',
-        marginBottom: '16px',
+        marginBottom: 'var(--afa-space-4)',
       }}
     >
       ← {label}

@@ -63,11 +63,11 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
   const rangeY = maxY - minY || 1
 
   return (
-    <div style={{ marginTop: '8px', marginBottom: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+    <div style={{ marginTop: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-5)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-2)' }}>
         <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Layout preview</span>
         {levels.length > 1 && (
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-6px)' }}>
             {levels.map((lvl) => (
               <Button
                 variant="toggle-box"
@@ -84,8 +84,8 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
           </div>
         )}
       </div>
-      <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
-        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '1px', borderRadius: 'var(--afa-radius-sm)', padding: '4px 0', marginBottom: '14px' }}>
+      <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-surface-page)', padding: 'var(--afa-space-4)', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '1px', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-1) 0', marginBottom: 'var(--afa-space-14px)' }}>
           STAGE
         </div>
         <div style={{ position: 'relative', width: '100%', height: '160px' }}>
@@ -107,7 +107,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
           ))}
         </div>
       </div>
-      <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '6px' }}>
+      <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
         Read-only preview of the venue's saved layout - colors match the sections priced below.{levels.length > 1 ? ' Switch levels above to see each one.' : ''}
       </p>
     </div>

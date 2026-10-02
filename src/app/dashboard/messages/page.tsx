@@ -75,8 +75,8 @@ export default function MessagesInboxPage() {
       <SiteNav />
       <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '760px', padding: '32px 24px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
+          <div style={{ maxWidth: '760px', padding: 'var(--afa-space-32px) var(--afa-space-6)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6)' }}>
               {tr.messagesInboxPage.heading}
             </h1>
 
@@ -86,7 +86,7 @@ export default function MessagesInboxPage() {
               </p>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
               {threads.map((t) => {
                 const name = t.otherParticipant?.displayName ?? t.otherParticipant?.name ?? tr.messagesInboxPage.unknownParticipant
                 return (
@@ -96,8 +96,8 @@ export default function MessagesInboxPage() {
                     style={{
                       display: 'flex',
                       alignItems: 'flex-start',
-                      gap: '12px',
-                      padding: '16px',
+                      gap: 'var(--afa-space-3)',
+                      padding: 'var(--afa-space-4)',
                       borderRadius: 'var(--afa-radius-lg)',
                       border: t.unread ? '1px solid var(--afa-amber-tint)' : '1px solid var(--afa-tint-06)',
                       background: t.unread ? 'var(--afa-amber-wash)' : 'var(--afa-surface-raised)',
@@ -123,7 +123,7 @@ export default function MessagesInboxPage() {
                       {initials(name)}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-2px)' }}>
                         {/* Type tag: single amber treatment for all 3 context types
                             (BUG-2609-003 / Figma Make review) - differentiated by
                             label text only, not by color. */}
@@ -132,7 +132,7 @@ export default function MessagesInboxPage() {
                             fontSize: 'var(--afa-text-caption)',
                             fontWeight: 500,
                             letterSpacing: '0.04em',
-                            padding: '2px 6px',
+                            padding: 'var(--afa-space-2px) var(--afa-space-6px)',
                             borderRadius: 'var(--afa-radius-xs)',
                             background: 'var(--afa-amber-tint)',
                             color: 'var(--afa-amber)',
@@ -159,7 +159,7 @@ export default function MessagesInboxPage() {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
-                            marginTop: '2px',
+                            marginTop: 'var(--afa-space-2px)',
                           }}
                         >
                           {t.lastMessage.body}

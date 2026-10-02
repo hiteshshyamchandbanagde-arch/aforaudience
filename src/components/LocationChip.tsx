@@ -90,10 +90,10 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
   // size TopBar.tsx's own Figma reference uses for this exact spot.
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
-      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-body-lg)', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid var(--afa-tint-06)', width: '100%', textAlign: 'left' }
+      ? { display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 'var(--afa-space-3) 0', borderBottom: '1px solid var(--afa-tint-06)', width: '100%', textAlign: 'left' }
       : variant === 'topbar'
-      ? { display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: saving ? 0.6 : 1 }
-      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'var(--afa-tint-04)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: 'var(--afa-radius-pill)', opacity: saving ? 0.6 : 1 }
+      ? { display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2px)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: saving ? 0.6 : 1 }
+      : { display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'var(--afa-tint-04)', border: 'none', cursor: 'pointer', padding: 'var(--afa-space-6px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>
@@ -121,7 +121,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             boxShadow: '0 8px 24px var(--afa-border-resting)',
             zIndex: 40,
             width: '240px',
-            padding: '10px',
+            padding: 'var(--afa-space-10px)',
           }}
         >
           <input
@@ -130,11 +130,11 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.location.searchCityPlaceholder}
             autoFocus
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-2)', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredCities.length === 0 ? (
-              <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: '6px 4px' }}>{t.location.noMatchingCities}</div>
+              <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: 'var(--afa-space-6px) var(--afa-space-1)' }}>{t.location.noMatchingCities}</div>
             ) : (
               filteredCities.map((c) => (
                 <Button

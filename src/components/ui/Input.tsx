@@ -25,7 +25,7 @@ const FONT_FAMILY = 'var(--font-sans)'
 export const INPUT_STYLES: Record<InputVariant, React.CSSProperties> = {
   standard: {
     width: '100%',
-    padding: '12px 14px',
+    padding: 'var(--afa-space-3) var(--afa-space-14px)',
     borderRadius: 'var(--afa-radius-md)',
     border: '1.5px solid var(--afa-border-resting)',
     fontSize: 'var(--afa-text-body)',
@@ -36,7 +36,7 @@ export const INPUT_STYLES: Record<InputVariant, React.CSSProperties> = {
     boxSizing: 'border-box',
   },
   compact: {
-    padding: '6px 8px',
+    padding: 'var(--afa-space-6px) var(--afa-space-2)',
     borderRadius: 'var(--afa-radius-xs)',
     border: '1px solid var(--afa-tint-20)',
     fontSize: 'var(--afa-text-body)',

@@ -39,7 +39,7 @@
 // see docs/design.md's own GEN-2609-089 Phase 2 dispatch).
 const fs = require('fs')
 const path = require('path')
-const { parseTokenOk } = require('../check-design-tokens')
+const { parseTokenOk, isExemptFile } = require('../check-design-tokens')
 
 const file = require.main === module ? process.argv[2] : null
 const APPLY = process.argv.includes('--apply')
@@ -966,7 +966,13 @@ function processLine(line, inRawBlock, activeDefs, unresolved) {
       // Bare numeric value (unquoted) - e.g. `fontSize: 14` (JS, always
       // a single token) or `padding: 16px 20px !important;` (raw CSS,
       // may be a multi-value shorthand - see MATCH_RE_CSS's own comment).
-      const migrated = migrateValue(m[3], target.map, target.units, !inRawBlock, target.round)
+      // GEN-2609-107 - a kebab-case property (`margin-top: 14px`) can
+      // only be CSS text: an unquoted JS object key can't contain `-`.
+      // That catches CSS outside a `<style>{`...`}` block too (e.g. the
+      // intro splash's plain <style> inside an HTML string in
+      // layout.tsx), where quoting the var() produced invalid CSS.
+      const cssText = inRawBlock || propRaw.includes('-')
+      const migrated = migrateValue(m[3], target.map, target.units, !cssText, target.round)
       if (migrated === null) continue
       const start = m.index + prefixLen
       const end = start + m[3].length
@@ -974,7 +980,7 @@ function processLine(line, inRawBlock, activeDefs, unresolved) {
       // style object it must become a quoted string to hold var(...);
       // inside a raw <style>{`...`}</style> block it stays unquoted
       // CSS text.
-      const replacement = inRawBlock ? migrated : `'${migrated}'`
+      const replacement = cssText ? migrated : `'${migrated}'`
       edits.push({ start, end, replacement })
     } else if (m[5] !== undefined) {
       // Quoted value - may be a single value or a multi-value shorthand.
@@ -1032,10 +1038,28 @@ function processLine(line, inRawBlock, activeDefs, unresolved) {
   return result
 }
 
+// GEN-2609-107 - files this script must never rewrite: the same set
+// check-design-tokens.js/the ratchet already skip (isExemptFile) -
+// email HTML, the ticket PDF, the manifest and the poster routes, where
+// var(--afa-*) can't render, plus the token sources themselves. The
+// checker skipping them was never enough on its own: this script runs
+// per file, so a whole-tree loop would still have rewritten email.ts's
+// inline styles. Accepts a relative, absolute or backslashed path.
+const REPO_ROOT = path.resolve(__dirname, '..', '..')
+function isMigrationExcluded(f) {
+  const rel = path.relative(REPO_ROOT, path.resolve(REPO_ROOT, f)).split(path.sep).join('/')
+  return isExemptFile(rel.replace(/\\/g, '/'))
+}
+
 function run() {
   const categories = parseCategories(process.argv)
   const activeDefs = buildActiveDefs(categories)
   console.log(`categories: ${categories.join(', ')}`)
+
+  if (isMigrationExcluded(file)) {
+    console.log(`skipped: ${file} is excluded from token migration (var() can't render there, or it is a token source).`)
+    return
+  }
 
   const original = fs.readFileSync(file, 'utf8')
   const lines = original.split('\n')
@@ -1082,6 +1106,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  isMigrationExcluded,
   SPACING_MAP,
   FONT_SIZE_MAP,
   RADIUS_MAP,

@@ -91,8 +91,8 @@ export default function NotificationOptIn() {
         borderBottom: '1px solid var(--afa-tint-10)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '10px 16px',
+        gap: 'var(--afa-space-3)',
+        padding: 'var(--afa-space-10px) var(--afa-space-4)',
         fontSize: 'var(--afa-text-body)',
         lineHeight: 1.4,
       }}
@@ -106,7 +106,7 @@ export default function NotificationOptIn() {
         fullWidth={false}
         onClick={enable}
         disabled={busy}
-        style={{ padding: '6px 14px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, whiteSpace: 'nowrap' }}
+        style={{ padding: 'var(--afa-space-6px) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, whiteSpace: 'nowrap' }}
       >
         {busy ? tr.notificationOptIn.enabling : tr.notificationOptIn.enable}
       </Button>
@@ -118,7 +118,7 @@ export default function NotificationOptIn() {
           color: 'var(--afa-text-secondary)',
           fontSize: 'var(--afa-text-lead)',
           lineHeight: 1,
-          padding: '0 4px',
+          padding: '0 var(--afa-space-1)',
         }}
       >
         ×

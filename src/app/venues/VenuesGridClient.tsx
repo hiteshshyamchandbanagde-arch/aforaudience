@@ -83,9 +83,9 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
   return (
     <div>
       <style>{`
-        .afa-venues-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        .afa-venues-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--afa-space-6); }
         @media (max-width: 700px) {
-          .afa-venues-grid { grid-template-columns: 1fr; gap: 20px; }
+          .afa-venues-grid { grid-template-columns: 1fr; gap: var(--afa-space-5); }
         }
         /* BUG-2608-072 (gap 4) - export uses group-hover:border-amber/60
            on the card border and group-hover:text-amber on the title,
@@ -106,7 +106,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         .afa-city-filter-trigger:hover { border-color: var(--afa-amber-border); }
       `}</style>
 
-      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: "var(--afa-space-3)", flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ flex: "1 1 280px" }}>
           <BrowseSearchDropdown
             query={search}
@@ -118,7 +118,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             renderRow={(v) => (
               <>
                 <span style={{ fontWeight: 600 }}>{v.name}</span>
-                <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
+                <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{v.city}</span>
               </>
             )}
           >
@@ -138,7 +138,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             type="button"
             onClick={() => setCityOpen((o) => !o)}
             className="afa-city-filter-trigger"
-            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 16px", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body-lg)", fontFamily: "var(--font-sans)", textAlign: "left" }}
+            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "var(--afa-space-3)", padding: "var(--afa-space-14px) var(--afa-space-4)", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body-lg)", fontFamily: "var(--font-sans)", textAlign: "left" }}
           >
             <span style={{ opacity: selectedCity === "All Cities" ? 0.65 : 1 }}>
               {selectedCity === "All Cities" ? tr.venuesPage.filterAllCities : cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity}
@@ -146,7 +146,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             <ChevronDownIcon style={{ width: "16px", height: "16px", color: "var(--afa-text-muted)", flexShrink: 0, transition: "transform 0.2s ease", transform: cityOpen ? "rotate(180deg)" : "none" }} />
           </Button>
           {cityOpen && (
-            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px var(--afa-shadow)" }}>
+            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "var(--afa-space-1) 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px var(--afa-shadow)" }}>
               <li>
                 <Button
                   variant="menu-row"
@@ -177,7 +177,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
       {/* Export (VenuesDirectory.tsx line 99-102) shows a live results
           count between the controls and the grid - missing entirely from
           the live build until this audit. */}
-      <div style={{ marginTop: "24px", marginBottom: "24px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+      <div style={{ marginTop: "var(--afa-space-6)", marginBottom: "var(--afa-space-6)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
         {filtered.length} {filtered.length === 1 ? tr.venuesPage.resultsCountSingular : tr.venuesPage.resultsCountPlural}
         {selectedCity !== "All Cities" && tr.venuesPage.resultsCountInCity.replace("{city}", cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity)}
       </div>
@@ -250,17 +250,17 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               </span>
             </div>
 
-            <div style={{ padding: "14px 18px 20px" }}>
-              <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-display)", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "6px" }}>
+            <div style={{ padding: "var(--afa-space-14px) var(--afa-space-18px) var(--afa-space-5)" }}>
+              <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-display)", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "var(--afa-space-6px)" }}>
                 {v.name}
               </h2>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
                 <span>{cityLabel(v.city, v.country)}</span>
                 <span style={{ opacity: 0.5 }}>·</span>
                 <span>{v.capacity.toLocaleString("en-IN")} {tr.venuesPage.seatsLabel}</span>
               </div>
               {v.priceRangeLabel && (
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.55, marginTop: "10px" }}>{v.priceRangeLabel}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.55, marginTop: "var(--afa-space-10px)" }}>{v.priceRangeLabel}</div>
               )}
             </div>
           </div>

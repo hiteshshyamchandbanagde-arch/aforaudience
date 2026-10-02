@@ -97,19 +97,19 @@ function Ballot({
   const label = category === 'AUDIENCE' ? 'Your vote' : category === 'PANELIST' ? 'Your panelist vote' : 'Your celebrity guest vote'
 
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '16px', border: '1px solid var(--afa-tint-08)', marginBottom: '12px' }}>
-      <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
-        {label}{alreadyVoted && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-sage)' }}>✓ Submitted — you can change it until voting closes</span>}
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-3)' }}>
+      <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
+        {label}{alreadyVoted && <span style={{ marginLeft: 'var(--afa-space-2)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-sage)' }}>✓ Submitted — you can change it until voting closes</span>}
       </div>
       {[1, 2, 3].map((rank) => (
-        <div key={rank} style={{ marginBottom: '8px' }}>
-          <label style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.6, display: 'block', marginBottom: '4px' }}>
+        <div key={rank} style={{ marginBottom: 'var(--afa-space-2)' }}>
+          <label style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.6, display: 'block', marginBottom: 'var(--afa-space-1)' }}>
             {rank === 1 ? '1st choice' : rank === 2 ? '2nd choice (optional)' : '3rd choice (optional)'}
           </label>
           <select
             value={picks[rank]}
             onChange={(e) => setPicks((prev) => ({ ...prev, [rank]: e.target.value }))}
-            style={{ width: '100%', padding: '8px 10px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           >
             <option value="">—</option>
             {lineup.map((p) => (
@@ -118,7 +118,7 @@ function Ballot({
           </select>
         </div>
       ))}
-      {error && <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-fill-solid)', marginBottom: '8px' }}>{error}</div>}
+      {error && <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-fill-solid)', marginBottom: 'var(--afa-space-2)' }}>{error}</div>}
       <Button
         variant="primary"
         size="md"
@@ -160,18 +160,18 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
   if (!isCompetitionShow || loading) return null
 
   return (
-    <div style={{ marginTop: '20px' }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+    <div style={{ marginTop: 'var(--afa-space-5)' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>
         🗳️ Audience Choice
       </h3>
 
       {results?.available ? (
         <div>
-          <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '14px' }}>
+          <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-14px)' }}>
             A separate, audience-weighted result — not the organiser's own decision. Blended from Audience/Panelist/Celebrity votes ({results.voterCounts?.AUDIENCE || 0} / {results.voterCounts?.PANELIST || 0} / {results.voterCounts?.CELEBRITY || 0} voters).
           </p>
           {(results.ranking || []).map((r, i) => (
-            <div key={r.performanceId} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '12px 16px', marginBottom: '8px', border: i === 0 ? '1px solid var(--afa-gold)' : '1px solid var(--afa-tint-08)' }}>
+            <div key={r.performanceId} style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-3) var(--afa-space-4)', marginBottom: 'var(--afa-space-2)', border: i === 0 ? '1px solid var(--afa-gold)' : '1px solid var(--afa-tint-08)' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: i === 0 ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: i === 0 ? 1 : 0.4, width: '28px' }}>
                 {i + 1}
               </div>
