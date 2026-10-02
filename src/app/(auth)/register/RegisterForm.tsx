@@ -43,7 +43,7 @@ function EyeIcon({ visible }: { visible: boolean }) {
 function CheckCircleIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "var(--afa-space-1)" }} aria-hidden="true">
-      <circle cx="12" cy="12" r="10" fill="var(--afa-green-dark)" />
+      <circle cx="12" cy="12" r="10" style={{ fill: "var(--afa-green-dark)" }} />
       <path d="M7 12.5l3 3 7-7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   )
