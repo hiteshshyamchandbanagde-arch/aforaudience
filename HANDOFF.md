@@ -1,3 +1,118 @@
+# Session Handoff — 2 Oct 2026, part 33 (CC — GEN-2609-121 + 114 + item 11 colour pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/colour-121-114?expand=1
+- **Base:** `fa47487`. `qa` has since gained `de40653` (docs-only); the dispatch file is unchanged and the branch merges cleanly.
+- **Vercel preview:** READY on the pushed head `8ef0a28` (`dpl_93Qw4Bd1KGMb8wXkMsQx58GLVa9h`).
+- **No DB changes left behind.** The round-trip edit of the three `--afa-selected*` rows was reverted (below). No new strings (no locale work).
+- **Next step (chat):** merge, then GEN-2609-121 and 114 → `BUILD_COMPLETE` / `DEPLOYED_QA`, and note item 11 on BUG-2609-081. Eight flags below.
+
+## Commits (each passes `tsc` on its own)
+| Commit | Item |
+|---|---|
+| `be4f826` | 1. Stage bars and the builder's front tier → `--afa-tint-20`, primary text |
+| `52d2202` | 2. Artist profile: Follow outline, prev/next plain |
+| `ef940c2` | 3. Profile: Save is an outline until the card is dirty |
+| `56bc764` | 4. Amber-direct selected states → `--afa-selected*` |
+| `ba6c6d1` | 5. My Venues: Edit outline |
+| `bfc722a` | 6. Messages: Send primary |
+| `0bccc8a` | 7. Builder: Freeze outline |
+| `306fd27` | 8. Backdrops → `--afa-scrim` |
+| `05504b7` | 9. Sage text → `--afa-sage-bright` |
+| `94ea73b` | 10. SVG `var()` → `style` |
+| `403a6c7` | 11. Seat page: summary (and steppers) in the action row |
+| `8ef0a28` | Token coverage regenerated |
+
+## What was built, where it differs from the dispatch's wording
+- **1:** all four sites. The builder's tier label colour moved from `--afa-cream` to `--afa-text-primary` (near-identical values).
+- **2:** "+ Follow" and "✓ Following" are now the same outline (`outline-neutral`); "+ Follow" has the brighter primary text. Ticket links unchanged (primary).
+- **3 (two dirty cards):** **both are primary.** Each card's Save reads only its own card's dirty state, so two dirty cards show two orange Saves; each reverts on its own successful save. The clean and dirty buttons measure the same (172×58, 70×58, 140×58), so nothing shifts when typing starts.
+- **4:** the named sites, plus the organiser and venue notify-bell "on" state (the artist one already used `SELECTED`). The DashboardShell conversion covers the desktop sidebar link, its dot, and the shell's own mobile bottom bar.
+- **8:** five sites, not four: the three named, `my-feedback`'s detail sheet (the fourth from #708), and the artist dashboard's "navigating" overlay on an application card (a cream wash over a card; every other card spinner already used the scrim).
+- **9:** 18 sites moved, 10 kept (fills, bars, dots, tints, one card border). `outline-success` now has bright text on a base-colour edge, as `outline-error` does. The Feedback trends "Resolved" line and points moved with their legend so the two still match.
+- **10:** re-counted **10**, not 14. All converted; 0 left. The three in the intro splash are raw HTML in a template string, so `fill` went into the `style` attribute text.
+- **11:** the dispatch's list (seat count, fee input, Total, Continue, Razorpay note) is one row. **On the stepper variants the quantity steppers are inside it too.** With only the summary marked, the lifted bubble landed on the "+" stepper at 360 (676 px²); found by the check, fixed before push.
+
+## Sage contrast (WCAG ratio of the text colour on the surface)
+| Site | Surface | Before `#4A6741` | After `#7AA86E` |
+|---|---|---|---|
+| Profile "Visit your Organiser dashboard →" (colour and surface read in the browser) | raised `#1F1F1F` | 2.60 | 6.01 |
+| Organiser dashboard "✓ Direct payouts active" (a card; surface taken from the code, not measured) | raised `#1F1F1F` | 2.60 | 6.01 |
+| A sage line straight on the page background, e.g. check-in "✓ In" (surface taken from the code, not measured) | page `#141414` | 2.90 | 6.71 |
+
+## Item 11 check (production build, signed in, page scrolled top to bottom in 4px steps)
+Overlap in px² between the closed bubble and each target, worst at any scroll position, at 360 / 390 / 412 / 427 / 440.
+
+| Variant | Total | Fee input | Reserve | Any other control | Bubble hidden |
+|---|---|---|---|---|---|
+| Numbered (Jaipur, a seat picked) | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | never |
+| Paid stepper (`qa-demo-event-full-8`, 2 seats) | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | never |
+| Free stepper (`qa-demo-event-full-6`) | n/a | n/a | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 | never |
+
+- At the position where the summary first enters the viewport: 0 on Total and fee input at every width, bubble visible.
+- **No "before" number.** `origin/qa` was not built this session; the "before" is Hitesh's 412 report.
+- On the numbered page the bubble rides up with the row (about 80 positions over the scroll), as on venue edit.
+
+## Admin round-trip (the goal check)
+- **Method:** direct QA `DesignToken` update, against the branch's production build running locally on the QA DB. No rebuild and no restart between steps.
+- **All three rows were changed**, not just `--afa-selected`: the calendar's selected day has no text, so it reads only `-bg` and `-border`.
+  - Test values: `#00E5FF`, `rgba(0, 229, 255, 0.2)`, `rgba(0, 229, 255, 0.8)`.
+- **Result: all four sites picked it up.**
+
+| Site | Before | With test colour | After revert |
+|---|---|---|---|
+| DashboardShell sidebar "Bookings" (text / wash) | `rgb(201,151,58)` / `rgba(201,151,58,0.08)` | `rgb(0,229,255)` / `rgba(0,229,255,0.2)` | as before |
+| MobileTabBar active "Tickets" | `rgb(201,151,58)` | `rgb(0,229,255)` | as before |
+| SiteNav active "Events" | `rgb(201,151,58)` | `rgb(0,229,255)` | as before |
+| Venue calendar selected day (edge / wash) | `rgba(201,151,58,0.4)` / `0.08` | `rgba(0,229,255,0.8)` / `0.2` | as before |
+
+- **Reverted and confirmed:** the rows read `var(--afa-amber)`, `rgba(201, 151, 58, 0.08)`, `rgba(201, 151, 58, 0.4)` again, `locked = false`, `updatedAt` untouched. The running server showed amber again 245s later.
+- **Timing:** a direct SQL change is not instant. The test colour arrived after about 7 minutes (the 300s token cache, then one more request). The editor's own save clears the cache at once; that path was not exercised (no admin login).
+- **Live QA shares that DB.** The rows held the test values from about 18:45 to 18:53 (this machine's clock), so with the cache lag the live site may have shown cyan on the sites `qa` already has on `--afa-selected*` (chips, toggles, selected seats) for some minutes up to about 19:00. Not observed directly.
+
+## Remaining `var(--afa-amber)` after item 4: 267 uses in 83 files, none a selected state
+- **Token plumbing: the default that `--afa-selected` points at** (2): `app/globals.css` L212; `lib/design-tokens.ts` L397.
+- **Hover and keyboard-focus cues** (transient, not an on/selected state) (7): `app/(public)/artists/page.tsx` L155; `app/globals.css` L507, 534, 544; `app/organisers/[id]/page.tsx` L340, 343; `app/venues/VenuesGridClient.tsx` L99.
+- **Count badges** (unread / pending numbers; a notification, not a selection) (9): `app/dashboard/messages/page.tsx` L147; `app/profile/page.tsx` L675, 1089; `components/DashboardShell.tsx` L389, 615; `components/SiteNav.tsx` L489, 494, 499, 600.
+- **Eyebrows and section labels** (small uppercase text) (69): `app/(public)/artists/[id]/ArtistProfileClientPage.tsx` L606; `app/(public)/artists/page.tsx` L222, 453; `app/(public)/events/[id]/EventDetailClientPage.tsx` L90; `app/(public)/events/[id]/seats/SeatSelectionClientPage.tsx` L251; `app/(public)/events/page.tsx` L398; `app/(public)/wall-of-fame/page.tsx` L110, 322; `app/dashboard/admin/design-system/page.tsx` L862; `app/dashboard/admin/settings/page.tsx` L575, 640, 692, 706, 721, 735, 771, 806, 863, 914, 918, 922; `app/dashboard/artist/page.tsx` L304; `app/dashboard/venue/[id]/seat-map/page.tsx` L2263; `app/dashboard/venue/page.tsx` L234; `app/for-artists/page.tsx` L82, 98, 109; `app/organisers/[id]/page.tsx` L125, 190, 212, 258, 264, 271, 374, 424; `app/page.tsx` L90, 98, 162, 245; `app/profile/page.tsx` L654, 745, 801; `app/saved/page.tsx` L59; `app/tickets/page.tsx` L232, 388, 612; `app/venues/VenuesHero.tsx` L23; `app/venues/[id]/VenueDetailClient.tsx` L135; `components/ArtistHero.tsx` L33; `components/ArtistNoPhoto.tsx` L58; `components/ArtistsNearYou.tsx` L88, 154; `components/ContributionMoment.tsx` L62, 97; `components/DashboardShell.tsx` L409; `components/EventCard.tsx` L371; `components/FourRooms.tsx` L80, 179; `components/Hero.tsx` L39; `components/HomeHeader.tsx` L156; `components/Ledger.tsx` L38; `components/MobileEventFilterSheet.tsx` L99, 120, 136, 149; `components/NearYouTabs.tsx` L121; `components/TonightNearYou.tsx` L86; `components/VenueOwnersGridEmbed.tsx` L138; `components/dashboard/VenuePortalUI.tsx` L354.
+- **Headline emphasis word** (italic accent in hero copy) (10): `app/(public)/artists/page.tsx` L187, 227; `app/(public)/events/page.tsx` L405, 407; `app/(public)/organisers/page.tsx` L59; `app/(public)/venue-owners/page.tsx` L56; `app/(public)/wall-of-fame/page.tsx` L182; `app/venues/VenuesHero.tsx` L28; `components/FourRooms.tsx` L185; `components/Hero.tsx` L46.
+- **Inline text links** (24): `app/(auth)/forgot-password/page.tsx` L117; `app/(auth)/login/page.tsx` L377, 385; `app/(auth)/register/RegisterForm.tsx` L722, 723, 729; `app/(auth)/reset-password/page.tsx` L99; `app/(auth)/verify-email/page.tsx` L64; `app/(public)/events/[id]/EventDetailClientPage.tsx` L322, 428; `app/(public)/events/[id]/rate/RatePromptClientPage.tsx` L135; `app/(public)/venue-owners/[id]/page.tsx` L41; `app/dashboard/admin/artists/page.tsx` L190; `app/dashboard/admin/design-system/page.tsx` L416; `app/dashboard/admin/settings/page.tsx` L507, 790; `app/dashboard/audience/page.tsx` L132; `app/dashboard/venue/create/page.tsx` L358; `app/page.tsx` L169; `app/tickets/page.tsx` L484; `app/venues/[id]/VenueDetailClient.tsx` L155; `components/AuthPromptSheet.tsx` L160; `components/SiteNav.tsx` L485, 596 (the Dashboard link's accent when it is **not** the active page; active now reads `--afa-selected`).
+- **Icon accents beside facts** (date, place, capacity, facilities) (18): `app/(public)/artists/[id]/ArtistProfileClientPage.tsx` L561, 573; `app/(public)/artists/page.tsx` L340; `app/(public)/events/[id]/EventDetailClientPage.tsx` L99, 331, 335, 340, 630, 656; `app/dashboard/venue/page.tsx` L263, 271, 279; `app/organisers/[id]/page.tsx` L134, 199, 204, 250; `app/venues/[id]/VenueDetailClient.tsx` L234; `components/mobile/MobileTopBar.tsx` L175.
+- **Status labels and notices** (pending, featured, headliner, waitlisted, frozen, info) (45): `app/(auth)/login/page.tsx` L220; `app/(auth)/register/RegisterForm.tsx` L111, 407; `app/(public)/artists/[id]/ArtistProfileClientPage.tsx` L448, 487, 488; `app/(public)/artists/page.tsx` L34; `app/(public)/events/[id]/rate/RatePromptClientPage.tsx` L174; `app/dashboard/admin/artists/page.tsx` L48, 49, 244; `app/dashboard/admin/bookings/page.tsx` L164; `app/dashboard/admin/design-system/page.tsx` L780, 790; `app/dashboard/admin/diary/page.tsx` L32; `app/dashboard/admin/feedback/page.tsx` L74, 83; `app/dashboard/admin/page.tsx` L262, 271; `app/dashboard/artist/events/page.tsx` L53; `app/dashboard/audience/page.tsx` L36; `app/dashboard/messages/page.tsx` L138; `app/dashboard/organiser/events/[id]/lineup/page.tsx` L140; `app/dashboard/organiser/page.tsx` L130, 141; `app/dashboard/organiser/payouts/page.tsx` L24, 39, 132; `app/dashboard/organiser/tours/[id]/page.tsx` L53; `app/dashboard/venue/[id]/page.tsx` L242, 288; `app/dashboard/venue/[id]/seat-map/page.tsx` L1474; `app/dashboard/venue/bookings/page.tsx` L130; `app/organisers/[id]/page.tsx` L238; `app/profile/page.tsx` L588; `components/DisplayNameNudge.tsx` L103; `components/LegalDocLayout.tsx` L39, 42, 98; `components/SeatSectionEditor.tsx` L156, 259; `components/Toast.tsx` L136; `components/WelcomeSequence.tsx` L208; `lib/statusStyle.ts` L43.
+- **Charts, illustrations, photo duotone, spinners, logo bars** (41): `app/(public)/artists/[id]/ArtistProfileClientPage.tsx` L754; `app/(public)/events/[id]/EventDetailClientPage.tsx` L118, 412; `app/(public)/wall-of-fame/page.tsx` L121; `app/dashboard/admin/design-system/page.tsx` L966, 1010; `app/dashboard/admin/page.tsx` L308, 309, 310, 311, 312, 320, 321, 355, 370, 371; `app/dashboard/admin/revenue/page.tsx` L163; `app/dashboard/venue/sales/page.tsx` L198, 199, 222, 225, 250; `app/layout.tsx` L393, 397; `app/organisers/[id]/page.tsx` L368; `app/tickets/page.tsx` L575; `components/ArtistNoPhoto.tsx` L51; `components/AuthBrandPanel.tsx` L35; `components/ContributionMoment.tsx` L78, 85; `components/EventCard.tsx` L65, 119, 147, 264, 363; `components/FaqAccordion.tsx` L31; `components/FourRooms.tsx` L17; `components/Photo.tsx` L89; `components/SupportWidget.tsx` L53; `components/VenueNoPhoto.tsx` L93.
+- **Button variants that are amber by design** (`outline-accent`, `secondary-reveal`, `text-link`, `link`) (5): `components/ui/Button.tsx` L228, 363, 364, 568, 727.
+- **Rating stars and rank highlights** (a score, not a selection) (7): `app/(public)/events/[id]/EventDetailClientPage.tsx` L524, 589, 607; `app/(public)/events/[id]/rate/RatePromptClientPage.tsx` L28, 212; `components/AudienceChoiceVoting.tsx` L175.
+- **Accent text: prices, amounts, numerals, short notes** (20): `app/(public)/events/[id]/EventDetailClientPage.tsx` L449, 463; `app/(public)/events/[id]/rate/RatePromptClientPage.tsx` L201; `app/(public)/wall-of-fame/page.tsx` L64, 251, 310, 387, 458; `app/dashboard/admin/bookings/page.tsx` L257; `app/dashboard/venue-requests/page.tsx` L172; `app/dashboard/venue/[id]/seat-map/page.tsx` L1437; `app/dashboard/venue/bookings/page.tsx` L257; `app/dashboard/venue/create/page.tsx` L491; `app/dashboard/venue/page.tsx` L288; `app/for-artists/page.tsx` L13; `app/venues/[id]/VenueDetailClient.tsx` L219; `components/FeeSheet.tsx` L95, 107; `components/FourRooms.tsx` L93; `components/dashboard/VenuePortalUI.tsx` L415.
+- **Solid accent fills: chat bubble, avatar initials disc, carousel progress** (7): `app/profile/page.tsx` L699; `components/HomeHeader.tsx` L195; `components/PhotoRotationDots.tsx` L36, 39; `components/SiteNav.tsx` L562; `components/SupportWidget.tsx` L520, 629.
+- **Seat Map Builder tier corner markers** (3): `app/dashboard/venue/[id]/seat-map/page.tsx` L282, 284, 296.
+
+Line numbers are on the branch head. Three of these are judgement calls, see flag 5.
+
+## Verification
+- `tsc` clean on every commit · `next build` passes (116/116 pages).
+- Checker vs `origin/qa`: no new literals. Ratchet: every category ±0 (spacing 257 / 257). Baseline file not touched.
+- Self-tests: 91 / 67 / 5 / 4 / 48.
+- ESLint on the 34 touched files, `origin/qa` vs branch: 110 errors / 35 warnings on both, 0 new. Run before the stepper wrapper was added to item 11 (a `<div>` move in one file); not re-run after.
+- `e2e/smoke.spec.ts` against the local production build: 5 passed, 1 failed (the Jaipur test on `mobile-chrome`: the card is not in the mobile /events list). **Identical against the live QA deployment**, so not from this branch. Desktop Jaipur passes now that the event is in November.
+- Token coverage: 110 keys, 105 site-wide / 5 button-only / 0 unused, no status change. The file was also stale from #718: the `--afa-space-*` counts roughly tripled, which is spacing phase 1, not this branch.
+
+## Screenshots (production build, 390 and 1280; local, in `C:\Users\hites\AforA\colour-121-114-screenshots\`)
+- `seat-stage`, `artist-profile` (signed in = "✓ Following"; `-guest` = "+ Follow"; `-tickets` = the primary ticket link), `profile-save-clean` / `-dirty` / `-two-dirty`, `my-venues`, `messages-send`, `builder-freeze` / `-freeze-unfrozen` / `-canvas` / `-save`, `backdrop` (the auth sheet), `sage-text`.
+- `item11-<variant>-<width>-enter` and `-summary` for 3 variants × 5 widths.
+- `rt-before-*`, `rt-test-*`, `rt-reverted-*` for the round trip (shell nav + calendar at 1280, tab bar at 390, SiteNav at 1280).
+- **Two shots needed a response rewrite in the browser, no DB write:** QA's only numbered-venue map is frozen (so "Freeze this seat map" never shows), and both QA message threads are closed (so the composer never shows). The page's own GET was edited in flight to show those states.
+
+## Flags for chat / Hitesh
+1. **Organiser and venue "+ Follow" are still solid orange.** The dispatch named the artist profile only. Same pattern, two files (`OrganiserFollowButton`, `VenueFollowButton`).
+2. **Profile still shows more than one primary.** With every card clean there is no orange Save, but "Become an Artist" and the two "Apply" buttons stay primary (the decision covered Save only). An audience account sees up to three, plus any dirty Save.
+3. **A single-tier seat map is now all grey in the builder** (QA's Ganesh Open Mic: every seat is the front tier). The front tier (`--afa-tint-20`) and the rear tier (`--afa-border-resting`, 0.15) differ only by the rear's amber corner marker.
+4. **Seen, not changed:** the builder's rear and rooftop tiers use a dark label (`--afa-brown-black`) on a dark fill. Left from the light theme.
+5. **Three on-states left on amber, as judgement calls:** the lineup's "★ Featured" vouch toggle (gold edge, reads as an award), rating stars, and the hero carousel's progress dot. Say if any should move to `--afa-selected*`.
+6. **`HeroRotator`'s cream gradient stays `--afa-tint-30`.** It is a fade over a photo, not a backdrop.
+7. **Token descriptions not updated.** `design-token-meta.ts` and `docs/afa-design-tokens-reference.md` still describe `--afa-tint-30` as "image overlays" and were not reviewed for the new `--afa-selected*` and `--afa-tint-20` sites.
+8. **`next build` ran out of memory on this machine** at "Collecting page data using 11 workers" (twice; under 400 MB free). `CIRCLE_NODE_TOTAL=3 npm run build` drops it to 2 workers and passes. Vercel is unaffected.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 32 (chat — Hitesh click-through results)
 
 - **Resolved today:**
