@@ -1478,8 +1478,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 'Once this layout is finished, freeze it to lock it against accidental edits.'
               )}
             </div>
+            {/* GEN-2609-121 - Save Seat Map is this page's one primary; Freeze is an outline in both states. */}
             <Button
-              variant={seatMapFrozen ? 'outline-neutral' : 'solid'}
+              variant="outline-neutral"
               size="md"
               fullWidth={false}
               onClick={() => toggleFreeze(!seatMapFrozen)}
