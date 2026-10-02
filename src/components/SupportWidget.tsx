@@ -146,11 +146,14 @@ export default function SupportWidget() {
   // BUG-2609-081 - it keeps lifting while the panel is open (the X sat on
   // "Save & Unpublish" because the lift used to stop then). Open, it never
   // hides - the user needs the X - and lifts only as far as leaves the
-  // panel CHAT_PANEL_MIN_HEIGHT.
+  // panel CHAT_PANEL_MIN_HEIGHT. Closed, on a page that cannot scroll, it
+  // also lifts above any other control under its resting spot; open, the
+  // panel covers those controls anyway, so only marked rows move it.
   const restingProbeRef = useRef<HTMLDivElement>(null);
   const excluded = !!pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p));
   const open = panel !== 'closed';
   const clearance = useActionRowClearance(restingProbeRef, !excluded, {
+    avoidControls: !open,
     keepVisible: open,
     headroom: open ? CHAT_PANEL_MIN_HEIGHT + CHAT_PANEL_GAP : 0,
   });
@@ -496,6 +499,7 @@ export default function SupportWidget() {
       <Button
         variant="icon"
         className="afa-support-chat-btn"
+        data-afa-floating=""
         onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
         aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
         title={panel === 'closed' ? 'Chat with us' : 'Close'}
@@ -528,6 +532,7 @@ export default function SupportWidget() {
           className="afa-support-chat-panel"
           role="dialog"
           aria-label="Support"
+          data-afa-floating=""
           style={{
             position: 'fixed',
             right: 20,

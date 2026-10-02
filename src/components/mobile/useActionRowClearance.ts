@@ -10,9 +10,19 @@ import { MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets'
 // just above the row. If lifting would push it under the top bar, it
 // hides until the row scrolls away. No per-page padding.
 export const ACTION_ROW_ATTR = 'data-afa-action-row'
+// BUG-2609-081 - a page whose form scrolls a little at every phone size
+// (login, register) opts in to the short-page rule below with this
+// attribute on its container.
+export const AVOID_CONTROLS_ATTR = 'data-afa-avoid-controls'
+// BUG-2609-081 - floating UI (the chat button and panel, the toast stack)
+// carries this attribute so it is never counted as a control to avoid.
+export const FLOATING_ATTR = 'data-afa-floating'
 
 const GAP = 8 // px between the row's top edge and the lifted button
 export const MIN_TOP = 72 // px; a lifted button above this would sit under MobileTopBar
+
+// BUG-2609-081 rule 4 - what counts as a control on a short page.
+const INTERACTIVE_SELECTOR = 'a[href], button, input, select, textarea, [role=button], [tabindex]:not([tabindex="-1"]), label[for]'
 
 export interface ActionRowClearance {
   bottom: number | null // px from the viewport bottom, or null = resting spot
@@ -23,6 +33,10 @@ export interface ActionRowClearance {
 }
 
 export interface ActionRowClearanceOptions {
+  // Rule 4: on a page that cannot scroll (or one marked
+  // data-afa-avoid-controls), lift above every visible control under the
+  // resting spot, not only marked rows.
+  avoidControls?: boolean
   // Rule 2: never hide. If the lift would leave less than MIN_TOP +
   // `headroom` px above the button, stop there instead.
   keepVisible?: boolean
@@ -54,25 +68,30 @@ function isShortPage(): boolean {
   return document.documentElement.scrollHeight - pad <= largeViewportHeight() + 1
 }
 
+function isVisible(el: Element): boolean {
+  if (typeof el.checkVisibility === 'function') return el.checkVisibility({ checkVisibilityCSS: true })
+  return getComputedStyle(el).visibility !== 'hidden'
+}
+
 // `probeRef` is an invisible element fixed at the button's resting spot
 // (same size and offsets), so the resting rect is measured, not guessed,
 // even while the real button is lifted.
 export function useActionRowClearance(
   probeRef: RefObject<HTMLElement | null>,
   active: boolean,
-  { keepVisible = false, headroom = 0 }: ActionRowClearanceOptions = {},
+  { avoidControls = false, keepVisible = false, headroom = 0 }: ActionRowClearanceOptions = {},
 ): ActionRowClearance {
   const [state, setState] = useState<ActionRowClearance>(RESTING)
   // Options are read through a ref so that changing one (the panel opens)
   // re-measures with the observers already in place. Re-running the effect
   // below would drop the observed rows for a frame and flash the button
   // back to its resting spot.
-  const optionsRef = useRef({ keepVisible, headroom })
+  const optionsRef = useRef({ avoidControls, keepVisible, headroom })
   const remeasureRef = useRef<(() => void) | null>(null)
   useEffect(() => {
-    optionsRef.current = { keepVisible, headroom }
+    optionsRef.current = { avoidControls, keepVisible, headroom }
     remeasureRef.current?.()
-  }, [keepVisible, headroom])
+  }, [avoidControls, keepVisible, headroom])
 
   useEffect(() => {
     if (!active) return
@@ -84,6 +103,7 @@ export function useActionRowClearance(
     // are re-read on resize / mutation and reused on scroll frames.
     let stale = true
     let short = false
+    let avoid = false
 
     const apply = (next: ActionRowClearance) =>
       setState((prev) => (prev.bottom === next.bottom && prev.hidden === next.hidden && prev.scrollable === next.scrollable ? prev : next))
@@ -93,15 +113,28 @@ export function useActionRowClearance(
       if (rescan) scan()
       const probe = probeRef.current
       if (!probe || !mq.matches) return apply(RESTING)
-      const { keepVisible, headroom } = optionsRef.current
+      const { avoidControls, keepVisible, headroom } = optionsRef.current
       if (stale) {
         stale = false
         short = isShortPage()
+        avoid = avoidControls && (short || !!document.querySelector(`[${AVOID_CONTROLS_ATTR}]`))
       }
       const resting: ActionRowClearance = { bottom: null, hidden: false, scrollable: !short }
-      if (visible.size === 0) return apply(resting)
+      if (visible.size === 0 && !avoid) return apply(resting)
       const rest = probe.getBoundingClientRect()
       const rows = [...visible].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
+      // Rule 4. Controls wholly below the resting spot (the tab bar) are
+      // left out: lifting cannot clear them and they are not under it.
+      if (avoid) {
+        for (const el of document.querySelectorAll(INTERACTIVE_SELECTOR)) {
+          if (el.closest(`[${FLOATING_ATTR}]`)) continue
+          const r = el.getBoundingClientRect()
+          if (r.width <= 0 || r.height <= 0 || r.top >= rest.bottom || r.bottom <= 0) continue
+          if (r.left >= rest.right || r.right <= rest.left || !isVisible(el)) continue
+          rows.push(r)
+        }
+      }
+      if (rows.length === 0) return apply(resting)
       const overlaps = (top: number, bottom: number, r: DOMRect) =>
         r.top < bottom + GAP && r.bottom > top - GAP && r.left < rest.right && r.right > rest.left
       // Lift above every row the button would touch; a lifted button can

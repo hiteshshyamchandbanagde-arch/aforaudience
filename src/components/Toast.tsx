@@ -99,6 +99,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div
         ref={stackRef}
         className={atTop ? 'afa-toast-stack afa-toast-stack-top' : 'afa-toast-stack'}
+        data-afa-floating=""
         style={{
           position: 'fixed',
           zIndex: 1000,

@@ -98,7 +98,8 @@ function VerifyPhoneInner() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+      {/* BUG-2609-081 - same opt-in as AuthLayout: a short form the chat button must not sit on. */}
+      <main data-afa-avoid-controls="" style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '440px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             {tr.verifyPhonePage.verifyYourPhoneHeading}
