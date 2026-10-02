@@ -1,3 +1,90 @@
+# Session Handoff — 2 Oct 2026, part 27 (CC — GEN-2609-107 spacing phase 1 pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-107-spacing-p1?expand=1
+- **Base:** `afa2432` (= `origin/qa` at push; qa did not move, dispatch unchanged).
+- **Vercel preview: not checked.** The Vercel connector was disconnected this session; confirm before merging.
+- **No DB changes.** QA's 14 `--afa-space-*` `DesignToken` rows were read and equal `globals.css`, so the SSR token override can't shift anything.
+- **Next step (chat):** merge, then decide phase 2 from the table below.
+
+## Commits
+| Commit | What |
+|---|---|
+| `3462569` | Codemod: skip var()-incompatible files (+ self-test) |
+| `90b51e8` | public — 240 literals |
+| `acf9f87` | Codemod: never quote a var() in CSS text (+ self-test) — see finding 1 |
+| `a0a21c5` | dashboard — 685 literals |
+| `5a1263c` | app-root — 216 literals |
+| `25982cd` | components — 465 literals |
+| `d36eaf6` | Ratchet baseline `spacing-literal` 1864 → 257 |
+
+## Counts
+- **`spacing-literal`: 1863 → 257** (live). The baseline was 1864; #717 had already removed 1, so the baseline drop is 1607 = 1606 converted here + that 1. Every other category is unchanged (all 0).
+- Converted per area: public 240 · dashboard 685 · app-root 216 · components 465 = **1606** (exact matches only, onto the existing 14 tokens; 110 files).
+- Dry run before any change: 1863 counted, 1606 convertible, 257 not.
+
+## Excluded paths (step 2)
+- **The script would have touched them**, so it was fixed first (`3462569`). The dry run would have rewritten `src/lib/email.ts` (21 lines), both poster routes (9 + 11 lines) and `src/app/globals.css` (1 line).
+- `migrate-tokens.js` now skips every `isExemptFile()` path, the same set the checker and ratchet already skip: `email.ts`, `ticket-pdf.ts`, `manifest.ts`, `api/posters/**`, the token sources and tests. Relative, absolute and backslashed paths all count. A self-test is added.
+
+## Finding 1: a real codemod bug, caught before commit
+- The per-site check (below) found `src/app/layout.tsx:393` written as `margin-top: 'var(--afa-space-14px)';`. That line is the intro splash's **plain `<style>` inside an HTML string**, not a `<style>{\`…\`}` block, so the codemod treated it as a JS object and quoted the value. The result is invalid CSS that silently drops the margin.
+- The fix (`acf9f87`): a kebab-case property (`margin-top`) can only be CSS text, since an unquoted JS key can't contain `-`, so it is never quoted and needs a unit. A self-test is added, and the negative control (the old script) produces the quoted form.
+- The three later areas were reset and regenerated with the fixed script; it was the only instance in the tree.
+- `verify-equivalence.js` could not have caught this: its per-site mode covers radius and colour only. **Suggest adding a spacing per-site mode before phase 2** (the scratch check used here resolves each `var(--afa-space-*)` from `globals.css` and compares the line with the qa line; it was negative-controlled).
+
+## Non-matching values (257 left — phase 2 input)
+| Value | Count | Top 3 files |
+|---|---:|---|
+| `40px` | 35 | artists/[id]/ArtistProfileClientPage (5), events/[id]/EventDetailClientPage (4), register/RegisterForm (2) |
+| `80px` | 32 | dashboard/venue/page (3), (public)/artists/page (2), events/[id]/rate/RatePromptClientPage (2) |
+| `5px` | 32 | SiteNav (3), checkout/[bookingId]/page (2), dashboard/admin/feedback/page (2) |
+| `64px` | 20 | events/[id]/EventDetailClientPage (4), organisers/[id]/page (2), events/[id]/seats/SeatSelectionClientPage (1) |
+| `3px` | 18 | organiser/events/[id]/edit/page (3), (public)/artists/page (2), admin/artists/page (2) |
+| `9px` | 17 | dashboard/venue/page (3), HomeHeader (3), SiteNav (3) |
+| `56px` | 16 | organisers/[id]/page (3), (public)/organisers/page (2), (public)/venue-owners/page (2) |
+| `7px` | 12 | venue/[id]/seat-map/page (3), admin/artists/page (1), admin/feedback/page (1) |
+| `36px` | 11 | for-artists/page (4), app/page (2), FourRooms (2) |
+| `22px` | 9 | tours/[slug]/page (1), about/page (1), admin/page (1) |
+| `11px` | 6 | VenuePortalUI (2), profile/page (1), HelpIcon (1) |
+| `96px` | 5 | (public)/events/page (1), admin/artists/page (1), organiser/events/[id]/lineup/page (1) |
+| `88px` | 5 | for-artists/page (4), FourRooms (1) |
+| `34px` | 5 | ArtistHero (1), ArtistsNearYou (1), Hero (1) |
+| `44px` | 4 | register/RegisterForm (2), login/page (1), reset-password/page (1) |
+| `26px` | 4 | admin/page (2), Hero (1), SeatSectionEditor (1) |
+| `72px` | 3 | about/page (1), ArtistHero (1), Hero (1) |
+| `100px` | 2 | tours/[slug]/page (1), organiser/tours/[id]/page (1) |
+| `128px` | 2 | ArtistHero (1), Hero (1) |
+| `60px` | 2 | OrganisersGridEmbed (1), VenueOwnersGridEmbed (1) |
+| `40` (bare) | 1 | WelcomeSequence (1) |
+| `132px` / `120px` / `112px` | 1 each | EventDetailClientPage · admin/design-system/page · organisers/[id]/page |
+| **negative** `-8px` 6 · `-6px` 2 · `-20px` 2 · `-28px` 2 · `-2px` 1 | 13 | NearYouTabs, seat-map, venue/create, … — the codemod never converts negatives, by design |
+
+- 7 values clear 10+ uses: 40 / 80 / 5 / 64 / 3 / 9 / 56 px (+ `7px` at 12). That's 164 of the 257.
+
+## Blind spots (counted, not converted; non-exempt `src/`, bounded grep)
+| Shape | Lines | With a numeric literal | Files | Top files |
+|---|---:|---:|---:|---|
+| Ternary (`marginBottom: x ? 12 : 0`) | 30 | 30 | 21 | EventCard (4), SiteNav (3), organiser/events/[id]/edit (2) |
+| `calc()` | 8 | 6 | 6 | admin/design-system (2), MobileTabBar (2), EventDetailClientPage (1) |
+| Template literal (`` `${n}px` ``) | 2 | 2 | 1 | SeatPicker (2) |
+| JS variable (`padding: chrome.padding`) | 1 | 0 | 1 | ui/Button |
+| Tailwind spacing bracket (`p-[…]`, `gap-[…]`) | 0 | 0 | 0 | — |
+
+## Verification
+- `tsc` clean · `next build` passes (branch, and the qa worktree build).
+- Checker vs `origin/qa`: no new literals. Ratchet: at baseline after the lower.
+- Self-tests: 91 / 67 (was 65; +2 new) / 5 / 4 / 48.
+- `verify-equivalence.js --base=origin/qa` clean after every area commit (0 mismatches, map check 84 entries).
+- Per-site spacing check: 0 mismatches. Lines / `var()` sites per area: public 173 / 236, dashboard 516 / 706, app-root 163 / 214, components 330 / 472.
+- ESLint per-line diff on all 110 touched files: 0 new. Two pre-existing `react/no-unescaped-entities` errors moved only because their line's spacing changed (`organiser/page.tsx`, `venue/page.tsx` h1).
+- **Pixel diff: 0 real changed pixels.**
+  - Setup: production builds against the QA DB, `origin/qa` worktree vs branch, 390 + 1280, splash hidden, animations disabled, timers paused, scrolled viewport shots (93 per run).
+  - Pages: `/`, `/events`, `/events/qa-demo-event-full-6`, `/venues`, `/register`, `/dashboard/organiser` (as Omkar), `/dashboard/admin/design-system` (mocked admin session plus the real QA token rows as fixture).
+  - qa vs branch: 4 px, all `/register` @390 at (375,28)/(376,28). That same 2-pixel header spot also differs between two runs of the identical qa build (22 px qa-vs-qa), so it is noise.
+  - The chat bubble was masked in all runs: its icon animates and differed between identical qa runs. So its own spacing is not pixel-verified; it is covered by the per-site check.
+
+---
+
 # Session Handoff — 1 Oct 2026, part 26 (chat — #717 merged)
 
 - **#717** (BUG-2609-088 SW + BUG-2609-077 /events) was squash-merged at pinned head `8307e16`, giving `qa` @ `ef891e2`.
