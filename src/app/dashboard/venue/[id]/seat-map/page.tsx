@@ -266,7 +266,8 @@ const inputStyle = {
 
 // GEN-2608-082 - replaces the old 6-hue TIER_COLORS with the approved,
 // verified color system from the Figma export's src/lib/seating.ts
-// SECTION_PALETTE: orange stays the dominant/primary tier fill, amber is
+// SECTION_PALETTE: the front tier is neutral (GEN-2609-121 - solid orange
+// is for actions), orange tints mark the middle/upper tiers, amber is
 // reserved for a small accent role (never a large solid fill - see
 // seating-visual-polish.md Problem 2), and every step beyond the 4 locked
 // brand colors is an opacity/saturation derivative, never a new hue.
@@ -276,7 +277,7 @@ const inputStyle = {
 // rather than wrapping back to full-strength colors, so a 6th+ zone still
 // reads as visually subordinate to the first five.
 const SECTION_TIER_FILLS: { fill: string; marker: string | null; labelDark: boolean }[] = [
-  { fill: 'var(--afa-fill-solid)', marker: null, labelDark: false }, // Front - full-saturation orange
+  { fill: 'var(--afa-tint-20)', marker: null, labelDark: false }, // Front - neutral (GEN-2609-121: a tier is a label, not an action)
   { fill: fillSolidTint(0.48), marker: null, labelDark: false }, // Middle - muted orange
   { fill: 'var(--afa-border-resting)', marker: 'var(--afa-amber)', labelDark: true }, // Rear - neutral + amber marker
   { fill: fillSolidTint(0.24), marker: null, labelDark: false }, // Upper - fainter orange
@@ -1820,13 +1821,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         </div>
                         <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-10px) 0' }}>
                           <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
-                            <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: 'var(--afa-space-6px) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                            <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: 'var(--afa-space-6px) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)', background: 'var(--afa-tint-20)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                               Stage
                             </div>
                             {wizardPreviewSeats.map((s, i) => {
                               const tf = tierFill(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel))))
                               return (
-                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: 'var(--afa-radius-sm)', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)', fontSize: 'var(--afa-text-caption)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: 'var(--afa-radius-sm)', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-text-primary)', fontSize: 'var(--afa-text-caption)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {s.row}{s.number}
                                 </div>
                               )
@@ -2005,7 +2006,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     style={{
                       position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
                       width: '60%', padding: 'var(--afa-space-2) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)',
-                      background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-micro)', fontWeight: 700,
+                      background: 'var(--afa-tint-20)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-micro)', fontWeight: 700,
                       letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
                     }}
                   >
@@ -2046,7 +2047,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         opacity: selectedId === s.clientId ? 1 : 0.85,
                         outline: selectedId === s.clientId ? `2px solid ${SELECTED}` : 'none',
                         outlineOffset: '2px',
-                        color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)',
+                        color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-text-primary)',
                         fontSize: 'var(--afa-text-caption)',
                         display: 'flex',
                         alignItems: 'center',
