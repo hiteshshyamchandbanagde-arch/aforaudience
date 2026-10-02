@@ -73,6 +73,13 @@ export async function resolveDesignColor(key: string): Promise<string> {
 
 export { toPdfRgb }
 
+// The browser-chrome colours: the manifest's theme_color / background_color
+// and the theme-color meta read this one function, so they can't drift.
+export async function appChromeColors(): Promise<{ theme: string; background: string }> {
+  const c = await resolveDesignColors(["--afa-fill-solid", "--afa-surface-page"] as const)
+  return { theme: c["--afa-fill-solid"], background: c["--afa-surface-page"] }
+}
+
 // This Next version (16.2.9) changed revalidateTag's contract from the
 // training-data version - see node_modules/next/dist/docs/.../
 // revalidateTag.md, AGENTS.md's own "read the docs before writing code"
