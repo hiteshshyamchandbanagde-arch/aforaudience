@@ -194,7 +194,7 @@ export default function OrganiserDashboard() {
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
+                    <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
                         onClick={(e) => e.stopPropagation()}

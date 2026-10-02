@@ -337,7 +337,7 @@ export default function EditArtistProfilePage() {
             </Button>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
+          <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
             <Button
               variant="primary"
               size="lg"

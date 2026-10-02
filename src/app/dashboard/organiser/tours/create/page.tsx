@@ -95,6 +95,7 @@ export default function CreateTourPage() {
             />
           </div>
           <Button
+            data-afa-action-row
             variant="primary"
             size="lg"
             fullWidth={false}

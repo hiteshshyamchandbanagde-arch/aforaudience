@@ -170,6 +170,7 @@ export default function OrganiserEditPage() {
           </div>
 
           <Button
+            data-afa-action-row
             variant="primary"
             size="lg"
             fullWidth={false}

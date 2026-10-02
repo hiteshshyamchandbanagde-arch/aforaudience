@@ -402,13 +402,17 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 </div>
               )}
 
-              <Button variant="primary" onClick={handleBookClick} disabled={reserving || status === "loading"}>
-                <TicketIcon style={{ width: "18px", height: "18px" }} />
-                {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}
-              </Button>
+              {/* BUG-2609-081 - one action row: the Reserve button and the
+                  payment note under it, so the chat button clears both. */}
+              <div data-afa-action-row>
+                <Button variant="primary" onClick={handleBookClick} disabled={reserving || status === "loading"}>
+                  <TicketIcon style={{ width: "18px", height: "18px" }} />
+                  {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}
+                </Button>
 
-              <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
-                {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
+                <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
+                  {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
+                </div>
               </div>
             </>
           )}

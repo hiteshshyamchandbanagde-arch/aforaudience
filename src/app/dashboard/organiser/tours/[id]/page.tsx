@@ -349,6 +349,7 @@ export default function TourDetailPage() {
               </div>
             </div>
             <Button
+              data-afa-action-row
               variant="primary"
               size="lg"
               fullWidth={false}
