@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import { ABOVE_CHAT_BUTTON_MOBILE, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
-import { useActionRowClearance } from '@/components/mobile/useActionRowClearance';
+import { useActionRowClearance, useChatButtonLifted } from '@/components/mobile/useActionRowClearance';
 
 /**
  * Global toast/snackbar. Fixed-position, so it's visible regardless of
@@ -56,7 +56,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setStackHeight(stackRef.current?.offsetHeight ?? 0);
   }, [toasts]);
   const clearance = useActionRowClearance(probeRef, toasts.length > 0);
-  const atTop = clearance.bottom !== null || clearance.hidden;
+  // BUG-2609-081 - a lifted chat button sits in this stack's resting
+  // band, so the stack goes to the top then too.
+  const chatButtonLifted = useChatButtonLifted();
+  const atTop = clearance.bottom !== null || clearance.hidden || chatButtonLifted;
 
   const showToast = useCallback((message: string, kind: ToastKind = 'error') => {
     const id = Date.now() + Math.random();
@@ -99,6 +102,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div
         ref={stackRef}
         className={atTop ? 'afa-toast-stack afa-toast-stack-top' : 'afa-toast-stack'}
+        data-afa-floating=""
         style={{
           position: 'fixed',
           zIndex: 1000,

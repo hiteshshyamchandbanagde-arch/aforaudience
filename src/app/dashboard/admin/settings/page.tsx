@@ -611,7 +611,7 @@ export default function AdminSettingsPage() {
             Absolute ceiling (code-level, requires a deploy to change): ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
           </p>
 
-          <Button variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || !isDirty || !isValid}>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || !isDirty || !isValid}>
             {saving ? 'Saving…' : 'Save'}
           </Button>
         </div>
@@ -668,7 +668,7 @@ export default function AdminSettingsPage() {
             Maximum: {maxChatCap}. A new browser session (new tab, cleared storage, or a different device) gets a fresh count — this is a soft cost guard, not a hard security boundary.
           </p>
 
-          <Button variant="solid" size="lg" fullWidth={false} onClick={saveChatCap} disabled={chatSaving || !isChatCapDirty || !isChatCapValid}>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveChatCap} disabled={chatSaving || !isChatCapDirty || !isChatCapValid}>
             {chatSaving ? 'Saving…' : 'Save'}
           </Button>
         </div>
@@ -751,7 +751,7 @@ export default function AdminSettingsPage() {
             Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
           </p>
 
-          <Button variant="solid" size="lg" fullWidth={false} onClick={saveSceneStatusThresholds} disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveSceneStatusThresholds} disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}>
             {sceneStatusSaving ? 'Saving…' : 'Save'}
           </Button>
         </div>
@@ -782,7 +782,7 @@ export default function AdminSettingsPage() {
               placeholder="5"
               style={{ width: 100, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
-            <Button variant="solid" size="md" fullWidth={false} onClick={saveRosterLookback} disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}>
+            <Button data-afa-action-row variant="solid" size="md" fullWidth={false} onClick={saveRosterLookback} disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}>
               {rosterLookbackSaving ? 'Saving…' : 'Save'}
             </Button>
           </div>
@@ -818,7 +818,7 @@ export default function AdminSettingsPage() {
               placeholder="3"
               style={{ width: 100, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
-            <Button variant="solid" size="md" fullWidth={false} onClick={saveEventWindow} disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}>
+            <Button data-afa-action-row variant="solid" size="md" fullWidth={false} onClick={saveEventWindow} disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}>
               {eventWindowSaving ? 'Saving…' : 'Save'}
             </Button>
           </div>
@@ -888,7 +888,7 @@ export default function AdminSettingsPage() {
             Lazy-checked on read, no cron job — leave blank for no auto-expiry. If set, this flips back to disabled on its own past that time, without needing to remember to uncheck it.
           </p>
 
-          <Button variant="solid" size="lg" fullWidth={false} onClick={saveDirectPayouts} disabled={directPayoutsSaving || !isDirectPayoutsDirty}>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveDirectPayouts} disabled={directPayoutsSaving || !isDirectPayoutsDirty}>
             {directPayoutsSaving ? 'Saving…' : 'Save'}
           </Button>
         </div>
@@ -927,7 +927,7 @@ export default function AdminSettingsPage() {
             Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
           </p>
 
-          <Button variant="solid" size="lg" fullWidth={false} onClick={saveVoteWeightDefaults} disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveVoteWeightDefaults} disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}>
             {voteWeightsSaving ? 'Saving…' : 'Save'}
           </Button>
         </div>
@@ -988,7 +988,7 @@ export default function AdminSettingsPage() {
                       color: 'var(--afa-text-primary)',
                     }}
                   />
-                  <Button variant="solid" size="sm" fullWidth={false} onClick={() => saveCurrencyRate(c.code)} disabled={savingCode === c.code || !isDirtyRow || !isValidRow}>
+                  <Button data-afa-action-row variant="solid" size="sm" fullWidth={false} onClick={() => saveCurrencyRate(c.code)} disabled={savingCode === c.code || !isDirtyRow || !isValidRow}>
                     {savingCode === c.code ? 'Saving…' : 'Save'}
                   </Button>
                 </div>

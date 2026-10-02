@@ -303,7 +303,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </Card>
 
-          <div style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
+          <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/venue/${venue.id}/edit`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}

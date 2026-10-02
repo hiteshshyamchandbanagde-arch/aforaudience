@@ -349,7 +349,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length > 0 && (
-            <div style={{ position: 'sticky', bottom: '24px', marginTop: 'var(--afa-space-6)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
+            <div data-afa-action-row style={{ position: 'sticky', bottom: '24px', marginTop: 'var(--afa-space-6)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
               <Button
                 variant="primary"
                 size="lg"

@@ -579,7 +579,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           reserves its own space via the `.afa-mobile-tab-bar-active` body
           class instead (see that file), so adding pb-20 here too would
           double the reserved space into a visible empty gap. */}
-      <div className={`flex-1 min-w-0 lg:pb-0${hideMobileBarForUnifiedTabBar ? '' : ' pb-20'}`}>{children}</div>
+      <div className={`flex-1 min-w-0 lg:pb-0${hideMobileBarForUnifiedTabBar ? '' : ' pb-20 afa-shell-bar-clearance'}`}>{children}</div>
 
       {/* Mobile bottom tab bar.
           GEN-2609-013 - suppressed on /tickets and /profile now that

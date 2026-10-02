@@ -287,7 +287,7 @@ export default function VenueDashboard() {
 
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-amber)', marginTop: 'var(--afa-space-14px)', marginBottom: 0 }}>{rateLabel(venue)}</p>
 
-                  <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-4)' }} onClick={(e) => e.stopPropagation()}>
+                  <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-4)' }} onClick={(e) => e.stopPropagation()}>
                     <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
                       View
                     </Link>

@@ -489,7 +489,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
+          <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/organiser/events/${event.id}/edit`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}

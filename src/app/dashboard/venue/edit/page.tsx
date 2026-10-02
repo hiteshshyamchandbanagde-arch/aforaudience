@@ -153,6 +153,7 @@ export default function VenueOwnerEditPage() {
           </Card>
 
           <Button
+            data-afa-action-row
             variant="solid"
             size="lg"
             fullWidth={false}

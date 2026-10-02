@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Button, { variantStyle } from '@/components/ui/Button';
 import { CheckIcon } from '@/components/icons/EventIcons';
-import { CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
-import { useActionRowClearance } from '@/components/mobile/useActionRowClearance';
+import { ABOVE_CHAT_BUTTON_MOBILE, CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, CHAT_PANEL_GAP, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
+import { MIN_TOP, setChatButtonLifted, useActionRowClearance } from '@/components/mobile/useActionRowClearance';
 
 /**
  * Floating support widget: chat first, feedback-form fallback.
@@ -111,8 +111,16 @@ const MAX_ATTACHMENT_BYTES = 1_000_000; // matches server's ~1.4MB data-URL cap 
 // original flat offsets, since there's no tab bar there to clear.
 // BUG-2609-072 - the offsets now live in mobile/chromeOffsets.ts, shared
 // with Toast.tsx, which stacks above this button on mobile.
-const CHAT_PANEL_MOBILE_BOTTOM = `calc(${CHAT_BUTTON_MOBILE_BOTTOM} + ${CHAT_BUTTON_SIZE}px + 12px)`; // clears the 56px button + the same 12px gap it always opened with
+const CHAT_PANEL_MOBILE_BOTTOM = ABOVE_CHAT_BUTTON_MOBILE; // clears the 56px button + the same 12px gap it always opened with
 const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} - 52px)`; // same 52px top clearance the old bottom:88/maxHeight pairing reserved
+// BUG-2609-081 - the least panel height worth lifting for. An open button
+// lifts above an action row only while this much panel still fits between
+// it and the top bar; past that it stops and the row sits under the panel.
+const CHAT_PANEL_MIN_HEIGHT = 320;
+// BUG-2609-081 - set on <body> while the button renders on a page that
+// scrolls, to reserve room after the page's last content (see the style
+// block below).
+const BUBBLE_ACTIVE_CLASS = 'afa-support-bubble-active';
 
 // Shared shape for every text input/textarea/select in this widget (same
 // spirit as dashboard/venue/[id]/edit/page.tsx's own local `inputStyle`).
@@ -135,9 +143,34 @@ export default function SupportWidget() {
   const [panel, setPanel] = useState<Panel>('closed');
   // BUG-2609-068 - the closed bubble lifts above (or hides behind) a
   // bottom action row on mobile instead of covering it.
+  // BUG-2609-081 - it keeps lifting while the panel is open (the X sat on
+  // "Save & Unpublish" because the lift used to stop then). Open, it never
+  // hides - the user needs the X - and lifts only as far as leaves the
+  // panel CHAT_PANEL_MIN_HEIGHT. Closed, on a page that cannot scroll, it
+  // also lifts above any other control under its resting spot; open, the
+  // panel covers those controls anyway, so only marked rows move it.
   const restingProbeRef = useRef<HTMLDivElement>(null);
   const excluded = !!pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p));
-  const clearance = useActionRowClearance(restingProbeRef, panel === 'closed' && !excluded);
+  const open = panel !== 'closed';
+  const clearance = useActionRowClearance(restingProbeRef, !excluded, {
+    avoidControls: !open,
+    keepVisible: open,
+    headroom: open ? CHAT_PANEL_MIN_HEIGHT + CHAT_PANEL_GAP : 0,
+  });
+  const lifted = !excluded && (clearance.bottom !== null || clearance.hidden);
+  useEffect(() => {
+    setChatButtonLifted(lifted);
+    return () => setChatButtonLifted(false);
+  }, [lifted]);
+  // BUG-2609-081 - every page that scrolls reserves room after its last
+  // content, so the last controls can always scroll clear of the button.
+  // A page that fits the viewport gets none (it would only make it
+  // scroll); there the button lifts instead.
+  const reserve = !excluded && clearance.scrollable;
+  useEffect(() => {
+    document.body.classList.toggle(BUBBLE_ACTIVE_CLASS, reserve);
+    return () => document.body.classList.remove(BUBBLE_ACTIVE_CLASS);
+  }, [reserve]);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -454,6 +487,12 @@ export default function SupportWidget() {
         @media (max-width: ${MOBILE_BREAKPOINT_MAX}px) {
           .afa-support-chat-btn { bottom: ${CHAT_BUTTON_MOBILE_BOTTOM}; }
           .afa-support-chat-panel { bottom: ${CHAT_PANEL_MOBILE_BOTTOM}; max-height: ${CHAT_PANEL_MOBILE_MAX_HEIGHT}; }
+          /* BUG-2609-081 - room after the page's last content: the tab
+             bar's height (globals.css reserves only that), the button
+             and the gap above it. This replaces the tab-bar rule and
+             DashboardShell's own bar padding, it does not add to them. */
+          body.${BUBBLE_ACTIVE_CLASS} { padding-bottom: ${ABOVE_CHAT_BUTTON_MOBILE}; }
+          body.${BUBBLE_ACTIVE_CLASS} .afa-shell-bar-clearance { padding-bottom: 0; }
         }
       `}</style>
       <div
@@ -465,6 +504,7 @@ export default function SupportWidget() {
       <Button
         variant="icon"
         className="afa-support-chat-btn"
+        data-afa-floating=""
         onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
         aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
         title={panel === 'closed' ? 'Chat with us' : 'Close'}
@@ -497,10 +537,18 @@ export default function SupportWidget() {
           className="afa-support-chat-panel"
           role="dialog"
           aria-label="Support"
+          data-afa-floating=""
           style={{
             position: 'fixed',
             right: 20,
             zIndex: 45,
+            // BUG-2609-081 - above the lifted button, not the resting spot.
+            ...(clearance.bottom !== null
+              ? {
+                  bottom: clearance.bottom + CHAT_BUTTON_SIZE + CHAT_PANEL_GAP,
+                  maxHeight: `calc(100vh - ${clearance.bottom + CHAT_BUTTON_SIZE + CHAT_PANEL_GAP + MIN_TOP}px)`,
+                }
+              : null),
             width: 340,
             maxWidth: 'calc(100vw - 40px)',
             height: 460,
