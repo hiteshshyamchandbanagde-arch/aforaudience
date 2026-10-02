@@ -1,3 +1,143 @@
+# Session Handoff — 3 Oct 2026, part 35 (CC — GEN-2609-119 downloads + G + H pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/downloads-119?expand=1
+- **Base:** `3a3e49c` (= `origin/qa` at push; `qa` did not move, dispatch unchanged).
+- **Vercel preview:** READY on the pushed head `52accfa` (`dpl_8VVyfU2L5goWVoFbggbKTPV4WJ55`).
+- **No DB changes left behind.** The two-token round trip was reverted (below). QA was **not** reseeded. No new strings (no locale work).
+- **Next step (chat):** merge, then GEN-2609-119 → `BUILD_COMPLETE` / `DEPLOYED_QA`. **One decision needs a look first:** the email and the ticket PDF stay light, so they follow `--afa-fill-solid` but not `--afa-surface-page` (flag 1).
+
+## Commits (each passes `tsc` on its own)
+| Commit | Part |
+|---|---|
+| `4ac88b8` | A. One resolver + self-tests |
+| `b9bdfc3` | B. Share posters |
+| `c25f5ac` | C. Ticket email |
+| `a93614c` | D. Ticket PDF |
+| `d531897` | E. Manifest and theme colour |
+| `a0c6f8f` | F. Exemptions |
+| `4376385` | G. #720 follow-ups |
+| `6646001` | H. Seed hygiene |
+| `52accfa` | Token coverage regenerated |
+
+## A. Resolver
+- `resolveDesignColors(keys)` and `resolveDesignColor(key)` are in `design-tokens.server.ts`, on the existing cached read. No new cache.
+- **The logic itself is in `design-tokens.ts`** (`resolveColorValue`, `toPdfRgb`), because the self-tests run without Prisma and can't import the server file.
+- **`toPdfRgb` returns `{ r, g, b, opacity }` in 0..1, not a pdf-lib object.** `ticket-pdf.ts` passes them to pdf-lib's `rgb()`. This keeps pdf-lib out of the root layout's imports.
+- Order: saved value, then default; `var()` chains to depth 8. A cycle, an over-long chain, a dangling ref or a non-colour value falls back to the defaults alone. A key no table knows gives `#000000`.
+- Self-tests: 10 new (58 total in `design-tokens.test.ts`).
+
+## B-E. What each download reads now
+| Download | Before | After (token, default value) |
+|---|---|---|
+| Poster background | `#1A0A1A` | `--afa-surface-page` `#141414` |
+| Poster title, names, "Book Your Spot" | `#F7F3EE` | `--afa-text-primary` `#F5F5F0` |
+| Poster date and venue | `#F7F3EE` at 0.85 | `--afa-text-soft` (0.8) |
+| Poster "Lineup coming soon", URL | `#F7F3EE` at 0.55 / 0.5 | `--afa-text-muted` (0.5) |
+| Poster eyebrow, avatar ring, initials disc | `#C8441A` | `--afa-fill-solid` `#FF5A36` |
+| Poster initial on the disc | `#F7F3EE` | `--afa-on-fill-solid` `#1A1000` |
+| Poster "Lineup" label, headliner names | `#C9973A` | `--afa-amber` (same value) |
+| Poster divider | `rgba(247,243,238,0.2)` | `--afa-tint-20` |
+| Poster env pill | QA `#C8441A` / `#F7F3EE`; other `#E4DDD2` / `#0E0C0A` | as `EnvBadge.tsx`: QA `--afa-fill-solid` / `--afa-cream`; other `--afa-tint-08` / `--afa-text-secondary` |
+| Email text | `#0E0C0A` | `--afa-ink` (same value) |
+| Email details card | `#F7F3EE` | `--afa-cream` (same value) |
+| Email labels (WHEN, SEATS, ...) | `#C8441A` | `--afa-fill-solid` `#FF5A36` |
+| Email notes | `#8a827a` | `--afa-taupe` (same value) |
+| Email total divider | `rgba(245,245,240,0.08)` | `--afa-tint-08` (same value) |
+| PDF text | `#0E0C0A` | `--afa-ink` (same value) |
+| PDF paper | `#F7F3EE` | `--afa-cream` (same value) |
+| PDF labels, underline, footer slogan | `#C8441A` | `--afa-fill-solid` `#FF5A36` |
+| PDF quiet text | warm grey `#66615C` | `--afa-ink` at 0.62 opacity (same look) |
+| PDF hairlines | `#E8E2D9` | `--afa-ink` at 0.064 opacity (same look) |
+| Manifest `theme_color` | `#FF5A36` literal | `--afa-fill-solid` |
+| Manifest `background_color` | `#F7F3EE` | `--afa-surface-page` `#141414` |
+| `theme-color` meta | `#FF5A36` literal | `--afa-fill-solid`, via `generateViewport` |
+
+- **Visible change at default values:** poster and document accents move from terracotta `#C8441A` to the app's orange `#FF5A36`; the poster background from plum-black to the page grey. Everything else is the same value or within 0.05 alpha.
+- **Email:** `emailColors()` is the single helper. `renderTicketEmailHtml()` is split out of the send, so the HTML can be rendered without sending. Only the ticket email has colours; the three plain-text mails have none.
+- **Manifest and meta** both read `appChromeColors()`, so they can't drift. The manifest has `revalidate = 300`; the build lists it as static with a 5-minute revalidate. No other route changed between static and dynamic (222 routes compared against the previous build).
+- **PDF:** the unused `sage` entry is gone.
+
+## Logo and QR literals kept (each has a `token-ok`)
+| Where | Value | What |
+|---|---|---|
+| `lib/poster-colors.ts` | `#0E0C0A` | logo tile |
+| `lib/poster-colors.ts` | `#C8441A`, `#C9973A`, `#F7F3EE` | the three logo bars (tile and faint watermark) |
+| `lib/poster-colors.ts` | `#F7F3EE` | "AforAudience" wordmark |
+| `lib/poster-colors.ts` | `#1A0A1A` on `#F7F3EE` | QR modules, ground and plate |
+| `lib/email.ts` | `#C8441A` | the wordmark's "A" |
+| `lib/ticket-pdf.ts` | `#C8441A` | the wordmark's "A" |
+| `lib/ticket-pdf.ts` | `#0E0C0A` on `#F7F3EE` | QR |
+
+- 11 colour literals, plus one `token-ok(rgb-rgba-literal)` on the pdf-lib `rgb(p.r, p.g, p.b)` call, which the rule reads as a literal. 12 `token-ok` lines in all.
+- **The QRs are not pure black on white** as the dispatch describes: they were, and stay, near-black on the cream plate. Left as they were, now fixed and independent of the paper token.
+
+## Poster `Cache-Control`
+- Both routes already send **`no-store`** (measured on the built app). ImageResponse's 1-year default was overridden when the posters were written. Nothing to change: an admin edit shows on the next poster request, within the token window.
+
+## F. Exemption-list changes
+- **Removed from the whole-file list:** `src/lib/email.ts`, `src/lib/ticket-pdf.ts`, `src/app/manifest.ts`, and the `src/app/api/posters/` prefix. The colour rules now check all of them, and `lib/poster-colors.ts`.
+- **New, narrower `isSizingExemptFile`:** `email.ts` and the poster routes skip only the non-colour rules (17 + 9 + 9 font sizes, 19 × 3 spacings, radii, one font family each). These are px for an email client and a 1080px canvas; they can't be tokens.
+- `ticket-pdf.ts` and `manifest.ts` have no exemption of any kind.
+- **Codemod:** `migrate-tokens.js` has its own never-rewrite list (`isMigrationExcludedFile`): `email.ts`, `ticket-pdf.ts`, `manifest.ts`, `poster-colors.ts`, the poster routes, plus the token sources.
+- Ratchet: every category ±0 with the files now counted. Checker tests: 91 → 96 (the four GEN-2609-094 "skips" tests became "is an offense" tests).
+- **Fixed on the way:** `scripts/dev/count-file.js` threw on every run since #715 (it imported the removed `tokenOkReason`).
+
+## Admin round-trip on downloads (2 Oct, IST)
+- **Method:** direct QA `DesignToken` update, against the branch's production build running locally on the QA DB, no restart. The admin "Refresh site cache" was not used (no admin login); the 300s token cache did the refresh.
+- **Test values:** `--afa-fill-solid` `#00C2FF`, `--afa-surface-page` `#3B0764`.
+
+| Download | Before | With test colours | After revert |
+|---|---|---|---|
+| Organiser poster PNG | grey page, orange eyebrow and QA pill | purple page, cyan eyebrow and pill; logo, QR unchanged | byte-identical to before |
+| Artist poster PNG | grey page, orange eyebrow and avatar ring | purple page, cyan eyebrow and ring; logo, QR unchanged | byte-identical to before |
+| Ticket email HTML (rendered to a file, not sent) | labels `rgb(255,90,54)` | labels `rgb(0,194,255)`; "A" stays `rgb(200,68,26)`; card and text unchanged | byte-identical to before |
+| Ticket PDF, AFA-DGHJ-PFFM (from the real route, not emailed) | 10 fills at `1, 0.353, 0.212` | the same 10 at `0, 0.761, 1`; "A", paper, ink unchanged | fills identical to before |
+| `/manifest.webmanifest` | `#FF5A36` / `#141414` | `#00C2FF` / `#3B0764` | byte-identical to before |
+| `theme-color` meta (`/events`) | `#FF5A36` | `#00C2FF` | `#FF5A36` |
+
+- **Times:** rows changed 19:37:06. The running build showed them at 19:39:34. Captures 19:39:41 to 19:40:02. **Rows reverted 19:40:16** (3 min 10 s in the DB). The build showed the originals again at 19:44:51.
+- **Revert confirmed, and re-checked on 3 Oct:** `--afa-fill-solid` `#FF5A36`, `--afa-surface-page` `#141414`, both `locked = true`, `updatedAt` untouched (`2026-09-26 00:14:25.742`). The three `--afa-selected*` rows are also still at their originals.
+- **Live QA shares the DB**, so it could have shown a purple page and cyan buttons for some minutes between about 19:37 and 19:46. Not observed directly.
+- **How each was produced:**
+  - Posters, manifest and meta: plain requests to the built app.
+  - PDF: the real `/api/bookings/<id>/ticket` route, signed in as the booking's owner. AFA-DGHJ-PFFM sits on the `atul.audience` QA account.
+  - Email: `renderTicketEmailHtml()` called from a script with that booking's details. Its colours came from the same `resolveColorValue`, fed the token values read from the DB at each step, **not** through the server's cached read (nothing renders the email without sending it, and local has no Resend key).
+- **The meta on a static page lags one request:** the first request after the cache expires serves the old page and regenerates it. `/events` showed the new colour on the next request.
+
+## G. #720 follow-ups
+1. **Organiser and venue "+ Follow"** are `outline-neutral` in both states, primary text when not following. That includes the venue page's sidebar "Follow this venue".
+2. **Profile:** "Become an Artist" and both "Apply" are outlines in the Save pill shape, with primary text. Measured: **0 primaries with every card clean, 1 with one dirty card.**
+3. **On-states:** the lineup "★ Featured" toggle (text, wash, edge) and the hero carousel's active dot read `--afa-selected*`. Rating stars untouched.
+4. **`design-token-meta.ts`:** `usedFor` updated for 16 tokens (the three `--afa-selected*`, `--afa-scrim`, `--afa-sage-bright`, `--afa-fill-solid`, and the tokens the downloads now read). `afa-design-tokens-reference.md` updated to match, with a new "Downloads follow the tokens" paragraph and the Follow-button section corrected.
+- Screenshots at 390 and 1280: `g1-organiser-follow`, `g1-venue-follow`, `g2-profile-cta-clean` / `-one-dirty`, `g3-featured-toggle`, `g3-carousel-dot`.
+- **Two G3 shots needed a response rewrite in the browser, no DB write:** no QA performer is vouched (so no "★ Featured" on-state), and no upcoming QA event has a poster image (so the carousel dots never render in QA).
+
+## H. Seed hygiene (`scripts/qa-seed.ts` only; nothing run)
+- `qa-demo-venue-omkar-1` and `qa-demo-venue-partial-1`: `state: "Maharashtra"`, `country: "India"` on create **and** update.
+- `qa-jaipur-event-0001`: dated now + 30 days on create **and** update. **Root cause of the drift:** the date was create-only (now + 21), so every reseed after the first left the old date.
+- **No e2e helper changed.** `e2e/helpers` only drive the browser and never set a date; the specs find the event by title.
+
+## Verification
+- `tsc` clean on every commit · `next build` passes (116/116 pages, `CIRCLE_NODE_TOTAL=3`).
+- Checker vs `origin/qa`: no new literals. Ratchet: every category ±0 (spacing 257 / 257). Baseline file not touched.
+- Self-tests: 96 / 67 / 5 / 4 / 58.
+- ESLint on the 23 touched files, `origin/qa` vs branch: 27 errors / 4 warnings on both, 0 new.
+- `e2e/smoke.spec.ts` against the local production build: 5 passed, 1 failed (Jaipur on `mobile-chrome`, the card is not in the mobile /events list). Same as part 33, where it also failed against live QA. Not investigated.
+- The build that was tested is commit `6646001` (part H). The head adds only the coverage data file.
+- Token coverage: 110 keys, 105 site-wide / 5 button-only / 0 unused. Its method counts `var(KEY)` only, so the downloads' reads by key are not in it.
+- Evidence files (33): `C:\Users\hites\AforA\downloads-119-evidence\` (local, outside the repo).
+
+## Flags for chat / Hitesh
+1. **The email and the ticket PDF do not follow `--afa-surface-page`.** They are light documents (dark text on cream), and the dispatch's verify step expects every download to show both test colours. I kept them light: a full-page dark PDF prints badly, and a dark email was never decided. They read `--afa-ink` and `--afa-cream` instead, which the admin can edit. If they should go dark, it is a palette change in `emailColorsFrom` and `ticketPdfColorsFrom`.
+2. **`--afa-ink` and `--afa-cream` now have a second job.** In the editor they are "Backdrop glow" and "Cream text"; editing either also changes the ticket's text or paper. The descriptions say so. Dedicated document tokens would separate them.
+3. **Orange labels on cream are low contrast.** `#FF5A36` on `#F7F3EE` is 2.81:1; the old terracotta was 4.42:1. These are the 10px email labels and the 8pt PDF labels. The QA pill on posters (cream on orange) is the same 2.81:1. A darker document accent would need its own token.
+4. **The email's total divider is invisible, as before:** `--afa-tint-08` is a dark-theme tint and sits on the cream card. Value unchanged.
+5. **The wordmark on posters is fixed cream.** If an admin makes the page surface light, the wordmark and the cream logo bar disappear into it. That follows "logos fixed by design"; no guard exists.
+6. **`design-tokens.test.ts` is not in CI.** The workflow runs the checker, ticket-code and username tests only, so the 10 resolver tests run locally.
+7. **Seen, not changed:** the lineup page's rows overflow at 390 (the artist name is pushed out of view); its "Send to all" and "Save Lineup" are both solid orange.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 34 (chat — #720 merged; 119 dispatch written)
 
 - **#720** (GEN-2609-121 + 114 + 081 item 11) was squash-merged at pinned head `8ef0a28`, giving `qa` @ `6e220fa`. CI green; branch deleted.
