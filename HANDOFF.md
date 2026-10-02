@@ -1,3 +1,15 @@
+# Session Handoff — 2 Oct 2026, part 29 (chat — goal plan; colour dispatch written)
+
+- Hitesh agreed the plan (2 Oct):
+  1. Finish the central-control goal tickets back to back: 081 (CC running), then **GEN-2609-121 + 114 (one dispatch)**, then GEN-2609-119 (downloads follow tokens), then Hitesh's click-through 11-12 as the goal proof.
+  2. One session to bulk-clear the IN_TEST/BUILD_COMPLETE pile (27 + 12) from a chat-prepared confirm list.
+  3. The medium-bug bundle (065, 071, 078, 080, 083, 084, 087), then Marathi (120).
+- **New dispatch:** `docs/cc-dispatches/cc-prompt-colour-121-114.md`. It must start after 081 merges, and includes an admin `--afa-selected` round-trip proof. 114 item (4), poster-less card colour, is pending Hitesh; it stays grey meanwhile.
+- **GEN-2609-049 (fonts) status unclear:** the ratchet shows 0 hardcoded font-family, but `src` still has 5 Archivo and 6 Georgia mentions. Chat to verify before deciding whether it's a goal item.
+- Target for goal completion: about 9-10 Oct at the current pace.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 28 (chat — #718 merged; 081 dispatch written)
 
 - **#718** (GEN-2609-107 spacing phase 1) was squash-merged at pinned head `d36eaf6`, giving `qa` @ `25fc597`.
