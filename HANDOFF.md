@@ -16,6 +16,11 @@
   - Items 12-13 (admin colour edit and revert; Admin Settings) after the colour merge.
   - Revoke the 1 Oct PAT.
 - Pile now: 20 `IN_TEST`, 6 `BUILD_COMPLETE`, 7 `BUILD_QUEUE`.
+- **Later, Hitesh delegated the pending decisions to chat** (see `design.md` "Decisions 2 Oct"):
+  - grey cards;
+  - FEAT-2608-030 closed;
+  - offline tickets to be built (BUG-2610-001 → `BUILD_QUEUE`);
+  - the Pune venues fixed in QA (all 9 now India).
 
 ---
 

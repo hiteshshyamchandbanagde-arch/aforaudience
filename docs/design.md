@@ -8205,3 +8205,12 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
 - **BUG-2609-081 (revised later on 29 Sep by Hitesh): keep the chat bubble on mobile, on every page.** It must never cover a control, via four rules: every bottom action row is marked `data-afa-action-row`; the bubble keeps lifting while its panel is open; every page reserves bottom clearance after its last content; and on short pages it lifts above any control it would overlap at rest. BUG-2609-068 folds into this.
   - **Confirmed 1 Oct (Hitesh):** keep the floating bubble with the lift-and-space fix above. **Not** docked into the tab-bar strip (the "dock it" alternative is closed).
 - **GEN-2609-120:** add Marathi (`mr`) before the Pune launch, scoped together with the Indic font gap.
+
+
+## Decisions 2 Oct (chat, under Hitesh's delegation: "as a collaborator go ahead")
+
+- **Poster-less event cards stay grey** (`--afa-surface-raised`), so they follow admin colour edits. GEN-2609-114 item (4) is closed.
+- **FEAT-2608-030** (dedicated UI/UX polish pass) is closed as superseded by the central-control programme.
+- **BUG-2610-001, offline tickets:** build it properly, sequenced after 121/114 and 119. No interim copy change, since production is frozen.
+- **Duplicate "Pune" city:** the 2 seed venues with no country were set to India / Maharashtra in QA. The seed script must set them (noted on BUG-2608-050).
+- **BUG-2608-030** stays IN_TEST: 100-seat picking worked with zoom, but the 600-seat case can't be re-tested in QA.
