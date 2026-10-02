@@ -41,6 +41,12 @@
    - Fills and backgrounds keep `--afa-sage` / `--afa-sage-tint`.
    - Report before/after contrast for 3 representative sites.
 10. **SVG presentation attributes:** the 10 `fill="var(...)"` / `stroke="var(...)"` / `stopColor="var(...)"` sites → `style={{ fill: 'var(...)' }}` etc. (presentation attributes don't reliably resolve `var()`). Re-count first; the #708 closeout said 14.
+## Small add-on (BUG-2609-081 follow-up, from Hitesh's 2 Oct click-through)
+11. **Seat page price summary is under the chat bubble.** On `/events/[id]/seats` at 412, the closed bubble sits on the **Total** amount (it reads "₹1,…"). It also sits right next to the booking-fee input.
+   - Mark the whole price summary block as one action row: seat count, booking-fee input, Total, Continue to Checkout and the Razorpay note.
+   - Do the same on the GA stepper variant of the page.
+   - Verify 0px² overlap with the Total and the fee input at 360-440, scrolled to where the summary first enters the viewport.
+
 - **Not in scope:** 114 item (4), the grey vs warm-brown poster-less event cards. That's pending Hitesh; leave them grey (`--afa-surface-raised`).
 
 ## Verify
