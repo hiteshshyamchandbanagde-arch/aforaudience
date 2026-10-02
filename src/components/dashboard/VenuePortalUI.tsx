@@ -392,7 +392,7 @@ export function Stat({ label, value, delta }: { label: string; value: string; de
       </p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-display)', lineHeight: 1, color: 'var(--afa-text-primary)', margin: 'var(--afa-space-3) 0 0' }}>{value}</p>
       {delta ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage)', margin: 'var(--afa-space-2) 0 0' }}>▲ {delta}</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage-bright)', margin: 'var(--afa-space-2) 0 0' }}>▲ {delta}</p>
       ) : null}
     </Card>
   )

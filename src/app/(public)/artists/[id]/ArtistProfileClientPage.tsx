@@ -689,7 +689,7 @@ export default function ArtistProfilePage({
                             {stop.tour && ` · Part of ${stop.tour.title}`}
                           </div>
                         </div>
-                        <span style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-sage)", whiteSpace: "nowrap" }}>Book on AFA →</span>
+                        <span style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-sage-bright)", whiteSpace: "nowrap" }}>Book on AFA →</span>
                       </Link>
                     ))}
                   </div>
@@ -815,7 +815,7 @@ export default function ArtistProfilePage({
                   </>
                 )}
                 {inviteResult && (
-                  <p style={{ fontSize: "var(--afa-text-small)", marginTop: "var(--afa-space-10px)", color: inviteResult.ok ? "var(--afa-sage)" : "var(--afa-fill-solid)" }}>
+                  <p style={{ fontSize: "var(--afa-text-small)", marginTop: "var(--afa-space-10px)", color: inviteResult.ok ? "var(--afa-sage-bright)" : "var(--afa-fill-solid)" }}>
                     {inviteResult.message}
                   </p>
                 )}

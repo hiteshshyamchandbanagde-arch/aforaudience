@@ -249,7 +249,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           </h1>
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{eventTitle}</p>
           {counts && (
-            <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage)', marginBottom: 'var(--afa-space-6)' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', marginBottom: 'var(--afa-space-6)' }}>
               {counts.checkedIn} of {counts.total} checked in
             </p>
           )}
@@ -375,7 +375,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-mono)' }}>{a.ticketCode}</p>
                                 )}
                               </div>
-                              <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>
+                              <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage-bright)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>
                                 {a.checkedInAt ? '✓ In' : 'Pending'}
                               </span>
                             </div>
@@ -399,7 +399,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                       {c.seatLabel && <span style={{ opacity: 0.6 }}> · {c.seatLabel}</span>}
                                     </span>
                                     {c.checkedInAt ? (
-                                      <span style={{ fontWeight: 600, color: 'var(--afa-sage)' }}>✓ In</span>
+                                      <span style={{ fontWeight: 600, color: 'var(--afa-sage-bright)' }}>✓ In</span>
                                     ) : (
                                       <Button
                                         variant="primary"

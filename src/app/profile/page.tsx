@@ -589,7 +589,7 @@ function ProfileContent() {
     }
     if (roleStatus.isActive) {
       return (
-        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage)', textDecoration: 'none' }}>
+        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', textDecoration: 'none' }}>
           {tr.profilePage.visitDashboardTemplate.replace('{label}', label)}
         </Link>
       )

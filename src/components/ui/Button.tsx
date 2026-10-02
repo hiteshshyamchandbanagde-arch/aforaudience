@@ -410,7 +410,9 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         gap: 'var(--afa-space-6px)',
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
-        color: 'var(--afa-sage)',
+        // GEN-2609-114 - bright text on the dark surface, base-colour edge: the
+        // same split `outline-error` uses.
+        color: 'var(--afa-sage-bright)',
         border: '1px solid var(--afa-sage)',
         padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',
