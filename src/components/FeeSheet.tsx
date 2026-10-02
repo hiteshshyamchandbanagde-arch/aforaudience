@@ -49,16 +49,16 @@ export function FeeSheet({
           borderTopLeftRadius: 'var(--afa-radius-2xl)',
           borderTopRightRadius: 'var(--afa-radius-2xl)',
           background: 'var(--afa-surface-raised)',
-          paddingBottom: 32,
+          paddingBottom: 'var(--afa-space-32px)',
           maxWidth: 560,
           width: '100%',
           margin: '0 auto',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 'var(--afa-space-3)' }}>
           <div style={{ height: 4, width: 40, borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-border-resting)' }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-4) var(--afa-space-5) var(--afa-space-1)' }}>
           <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subheading)', fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
             Fee breakdown
           </h2>
@@ -66,15 +66,15 @@ export function FeeSheet({
             ×
           </Button>
         </div>
-        <p style={{ padding: '4px 20px 0', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+        <p style={{ padding: 'var(--afa-space-1) var(--afa-space-5) 0', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
           On a {formatDisplayMoney(ticketFaceValue, currency)} ticket, here&rsquo;s exactly where the money goes.
         </p>
 
-        <div style={{ margin: '20px 20px 0', overflow: 'hidden', borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)' }}>
+        <div style={{ margin: 'var(--afa-space-5) var(--afa-space-5) 0', overflow: 'hidden', borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)' }}>
           <div
             style={{
-              display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16,
-              background: 'var(--afa-surface-page)', padding: '10px 16px',
+              display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 'var(--afa-space-4)',
+              background: 'var(--afa-surface-page)', padding: 'var(--afa-space-10px) var(--afa-space-4)',
               fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase',
               letterSpacing: '0.1em', color: 'var(--afa-text-muted)',
             }}
@@ -87,7 +87,7 @@ export function FeeSheet({
             <div
               key={r.label}
               style={{
-                display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16, padding: '12px 16px',
+                display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-3) var(--afa-space-4)',
                 borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
               }}
             >
@@ -100,14 +100,14 @@ export function FeeSheet({
 
         <div
           style={{
-            margin: '16px 20px 0', padding: '16px', borderRadius: 'var(--afa-radius-xl)',
+            margin: 'var(--afa-space-4) var(--afa-space-5) 0', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-xl)',
             border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)',
           }}
         >
           <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-amber)' }}>
             Artist &amp; venue share: 100% · ₹0 commission
           </p>
-          <p style={{ margin: '6px 0 0', fontSize: 'var(--afa-text-ui)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+          <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-ui)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
             We keep the lights on through venue subscriptions and optional artist promotions — never by taxing your
             ticket.
           </p>

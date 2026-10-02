@@ -121,8 +121,8 @@ export default function MobileTopBar() {
         // bar now plays SiteNav's header role on mobile.
         top: 'var(--nudge-stack-height, 0px)',
         zIndex: 100,
-        gap: '10px',
-        padding: '10px 14px',
+        gap: 'var(--afa-space-10px)',
+        padding: 'var(--afa-space-10px) var(--afa-space-14px)',
         background: 'var(--afa-scrim-strong)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--afa-tint-08)',
@@ -201,7 +201,7 @@ export default function MobileTopBar() {
               border: '1px solid var(--afa-tint-10)',
               borderRadius: 'var(--afa-radius-lg)',
               boxShadow: '0 8px 24px var(--afa-shadow)',
-              padding: '6px',
+              padding: 'var(--afa-space-6px)',
               minWidth: '150px',
               zIndex: 20,
             }}

@@ -115,15 +115,15 @@ export default function NearYouTabs() {
   const loading = isEvents ? events === null : artists === null
 
   return (
-    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-cream)', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
+    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px var(--afa-space-6)', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-cream)', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--afa-space-3)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.nearYouHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-amber)', letterSpacing: '0.1em' }}>
           {isEvents ? tr.homePage.tonightRailLive : tr.homePage.artistsRailBadge}
         </span>
       </div>
 
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid var(--afa-border-resting)' }}>
+      <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-14px)', paddingBottom: 'var(--afa-space-3)', borderBottom: '1px solid var(--afa-border-resting)' }}>
         <Button
           variant="tab"
           size="sm"
@@ -145,7 +145,7 @@ export default function NearYouTabs() {
       </div>
 
       {loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
           {[0, 1, 2].map((i) => (
             <div
               key={i}
@@ -173,7 +173,7 @@ export default function NearYouTabs() {
       {isEvents && events !== null && events.length > 0 && (
         <>
           {!eventsCity && (
-            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-3)', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.tonightRailCityFallbackNote}
             </p>
           )}
@@ -181,7 +181,7 @@ export default function NearYouTabs() {
             <Link
               key={ev.id}
               href={`/events/${ev.id}`}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-10px)', padding: '11px var(--afa-space-2)', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
@@ -200,7 +200,7 @@ export default function NearYouTabs() {
       {!isEvents && artists !== null && artists.length > 0 && (
         <>
           {!artistsCity && (
-            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-3)', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.artistsRailCityFallbackNote}
             </p>
           )}
@@ -208,7 +208,7 @@ export default function NearYouTabs() {
             <Link
               key={a.id}
               href={`/artists/${a.id}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', padding: '9px var(--afa-space-2)', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >

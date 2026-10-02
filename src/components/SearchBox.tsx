@@ -64,7 +64,7 @@ export default function SearchBox() {
         placeholder={t.search.placeholder}
         className="afa-search-input"
         style={{
-          width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "var(--afa-radius-pill)",
+          width: "100%", maxWidth: "220px", padding: "var(--afa-space-2) var(--afa-space-14px)", borderRadius: "var(--afa-radius-pill)",
           border: "1.5px solid var(--afa-border-resting)", fontSize: "var(--afa-text-ui)",
           background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box",
         }}
@@ -77,40 +77,40 @@ export default function SearchBox() {
           padding: hasResults || loading ? "10px 0" : "16px",
         }}>
           {loading ? (
-            <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, padding: "6px 16px" }}>{t.search.searching}</div>
+            <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, padding: "var(--afa-space-6px) var(--afa-space-4)" }}>{t.search.searching}</div>
           ) : !hasResults ? (
             <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{t.search.noResultsFor.replace("{query}", query)}</div>
           ) : (
             <>
               {results.events.length > 0 && (
-                <div style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.events}</div>
+                <div style={{ marginBottom: "var(--afa-space-6px)" }}>
+                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "var(--afa-space-1) var(--afa-space-4)" }}>{t.nav.events}</div>
                   {results.events.map((e) => (
                     <Button variant="menu-row" key={e.id} onClick={() => go(`/events/${e.id}`)}>
                       <span style={{ fontWeight: 600 }}>{e.title}</span>
-                      <span style={{ opacity: 0.5, marginLeft: "8px" }}>{new Date(e.date).toLocaleDateString()}{e.city ? ` · ${e.city}` : ""}</span>
+                      <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{new Date(e.date).toLocaleDateString()}{e.city ? ` · ${e.city}` : ""}</span>
                     </Button>
                   ))}
                 </div>
               )}
               {results.artists.length > 0 && (
-                <div style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.artists}</div>
+                <div style={{ marginBottom: "var(--afa-space-6px)" }}>
+                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "var(--afa-space-1) var(--afa-space-4)" }}>{t.nav.artists}</div>
                   {results.artists.map((a) => (
                     <Button variant="menu-row" key={a.id} onClick={() => go(`/artists/${a.id}`)}>
                       <span style={{ fontWeight: 600 }}>{a.name}</span>
-                      {a.genre && <span style={{ opacity: 0.5, marginLeft: "8px" }}>{a.genre}</span>}
+                      {a.genre && <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{a.genre}</span>}
                     </Button>
                   ))}
                 </div>
               )}
               {results.venues.length > 0 && (
                 <div>
-                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.venues}</div>
+                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "var(--afa-space-1) var(--afa-space-4)" }}>{t.nav.venues}</div>
                   {results.venues.map((v) => (
                     <Button variant="menu-row" key={v.id} onClick={() => go(`/venues/${v.id}`)}>
                       <span style={{ fontWeight: 600 }}>{v.name}</span>
-                      <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
+                      <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{v.city}</span>
                     </Button>
                   ))}
                 </div>

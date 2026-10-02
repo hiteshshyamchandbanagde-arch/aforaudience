@@ -15,7 +15,7 @@ export function ErrorBanner({ children, style }: { children: ReactNode; style?: 
   return (
     <div
       style={{
-        padding: '14px 16px',
+        padding: 'var(--afa-space-14px) var(--afa-space-4)',
         background: 'var(--afa-error-tint)',
         border: '1px solid var(--afa-error-edge)',
         borderRadius: 'var(--afa-radius-md)',
@@ -33,7 +33,7 @@ export function SuccessBanner({ children, style }: { children: ReactNode; style?
   return (
     <div
       style={{
-        padding: '14px 16px',
+        padding: 'var(--afa-space-14px) var(--afa-space-4)',
         background: 'var(--afa-sage-tint)',
         border: '1px solid var(--afa-sage-tint)',
         borderRadius: 'var(--afa-radius-md)',

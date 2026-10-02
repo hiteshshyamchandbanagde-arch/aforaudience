@@ -217,7 +217,7 @@ export function StatusPill({ tone, children }: { tone: StatusPillTone; children:
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
-        padding: '5px 10px',
+        padding: '5px var(--afa-space-10px)',
         borderRadius: 'var(--afa-radius-pill)',
         lineHeight: 1,
         background: t.bg,
@@ -298,11 +298,11 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
         borderRadius: 'var(--afa-radius-lg)',
         border: '1px solid var(--afa-tint-08)',
         background: 'var(--afa-surface-raised)',
-        padding: '80px 24px',
+        padding: '80px var(--afa-space-6)',
         textAlign: 'center',
       }}
     >
-      <div style={{ color: 'var(--afa-amber-strong)', marginBottom: '24px' }}>{icon}</div>
+      <div style={{ color: 'var(--afa-amber-strong)', marginBottom: 'var(--afa-space-6)' }}>{icon}</div>
       <p
         style={{
           fontFamily: 'var(--font-mono)',
@@ -314,7 +314,7 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
       >
         {caption}
       </p>
-      {action ? <div style={{ marginTop: '28px' }}>{action}</div> : null}
+      {action ? <div style={{ marginTop: 'var(--afa-space-28px)' }}>{action}</div> : null}
     </div>
   )
 }
@@ -337,13 +337,13 @@ export function PageHead({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
+        gap: 'var(--afa-space-5)',
         borderBottom: '1px solid var(--afa-tint-08)',
-        paddingBottom: '28px',
-        marginBottom: '32px',
+        paddingBottom: 'var(--afa-space-28px)',
+        marginBottom: 'var(--afa-space-32px)',
       }}
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'var(--afa-space-5)' }}>
         <div>
           <p
             style={{
@@ -352,7 +352,7 @@ export function PageHead({
               textTransform: 'uppercase',
               letterSpacing: '0.16em',
               color: 'var(--afa-amber)',
-              marginBottom: '8px',
+              marginBottom: 'var(--afa-space-2)',
             }}
           >
             {eyebrow}
@@ -371,12 +371,12 @@ export function PageHead({
             {title}
           </h1>
           {description ? (
-            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginTop: '10px', marginBottom: 0, maxWidth: '520px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-10px)', marginBottom: 0, maxWidth: '520px' }}>
               {description}
             </p>
           ) : null}
         </div>
-        {children ? <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>{children}</div> : null}
+        {children ? <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--afa-space-3)' }}>{children}</div> : null}
       </div>
     </div>
   )
@@ -386,13 +386,13 @@ export function PageHead({
 
 export function Stat({ label, value, delta }: { label: string; value: string; delta?: string }) {
   return (
-    <Card style={{ padding: '20px' }}>
+    <Card style={{ padding: 'var(--afa-space-5)' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
         {label}
       </p>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-display)', lineHeight: 1, color: 'var(--afa-text-primary)', margin: '12px 0 0' }}>{value}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-display)', lineHeight: 1, color: 'var(--afa-text-primary)', margin: 'var(--afa-space-3) 0 0' }}>{value}</p>
       {delta ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage)', margin: '8px 0 0' }}>▲ {delta}</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage)', margin: 'var(--afa-space-2) 0 0' }}>▲ {delta}</p>
       ) : null}
     </Card>
   )
@@ -406,10 +406,10 @@ export function SectionTitle({ n, title }: { n: string; title: string }) {
       style={{
         display: 'flex',
         alignItems: 'baseline',
-        gap: '12px',
+        gap: 'var(--afa-space-3)',
         borderBottom: '1px solid var(--afa-tint-08)',
-        paddingBottom: '12px',
-        marginBottom: '20px',
+        paddingBottom: 'var(--afa-space-3)',
+        marginBottom: 'var(--afa-space-5)',
       }}
     >
       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-amber)' }}>{n}</span>
@@ -428,12 +428,12 @@ export const primaryLinkStyle: CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: 'var(--afa-space-2)',
   borderRadius: 'var(--afa-radius-md)',
   fontFamily: 'var(--font-sans)',
   fontSize: 'var(--afa-text-body)',
   fontWeight: 600,
-  padding: '11px 20px',
+  padding: '11px var(--afa-space-5)',
   background: 'var(--afa-fill-solid)',
   color: 'var(--afa-on-fill-solid)',
   textDecoration: 'none',
@@ -444,12 +444,12 @@ export const outlineLinkStyle: CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: 'var(--afa-space-2)',
   borderRadius: 'var(--afa-radius-md)',
   fontFamily: 'var(--font-sans)',
   fontSize: 'var(--afa-text-body)',
   fontWeight: 600,
-  padding: '11px 20px',
+  padding: '11px var(--afa-space-5)',
   background: 'transparent',
   color: 'var(--afa-text-primary)',
   textDecoration: 'none',
@@ -460,10 +460,10 @@ export const navPillStyle: CSSProperties = {
   position: 'relative',
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: 'var(--afa-space-2)',
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-tint-08)',
-  padding: '9px 14px',
+  padding: '9px var(--afa-space-14px)',
   fontFamily: 'var(--font-sans)',
   fontSize: 'var(--afa-text-ui)',
   color: 'var(--afa-text-secondary)',
@@ -483,7 +483,7 @@ export function NavBadge({ children }: { children: ReactNode }) {
         fontSize: 'var(--afa-text-micro)',
         fontWeight: 600,
         borderRadius: 'var(--afa-radius-pill)',
-        padding: '2px 7px',
+        padding: 'var(--afa-space-2px) 7px',
         lineHeight: 1.4,
       }}
     >
@@ -496,7 +496,7 @@ export function NavBadge({ children }: { children: ReactNode }) {
 
 export function Label({ children }: { children: ReactNode }) {
   return (
-    <label style={{ display: 'block', marginBottom: '8px', fontSize: 'var(--afa-text-ui)', fontWeight: 500, color: 'var(--afa-text-secondary)' }}>
+    <label style={{ display: 'block', marginBottom: 'var(--afa-space-2)', fontSize: 'var(--afa-text-ui)', fontWeight: 500, color: 'var(--afa-text-secondary)' }}>
       {children}
     </label>
   )
@@ -507,7 +507,7 @@ const fieldStyle: CSSProperties = {
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-tint-08)',
   background: 'var(--afa-surface-inverse)',
-  padding: '10px 14px',
+  padding: 'var(--afa-space-10px) var(--afa-space-14px)',
   fontSize: 'var(--afa-text-body)',
   fontFamily: 'var(--font-sans)',
   color: 'var(--afa-text-primary)',

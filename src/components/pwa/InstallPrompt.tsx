@@ -119,16 +119,16 @@ export default function InstallPrompt() {
         color: 'var(--afa-on-fill-solid)',
         borderRadius: 'var(--afa-radius-xl)',
         boxShadow: '0 10px 30px var(--afa-shadow)',
-        padding: 16,
+        padding: 'var(--afa-space-4)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
+        gap: 'var(--afa-space-3)',
         maxWidth: 480,
         margin: '0 auto',
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div id="pwa-install-title" style={{ fontWeight: 700, fontSize: 'var(--afa-text-body-lg)', marginBottom: 2 }}>
+        <div id="pwa-install-title" style={{ fontWeight: 700, fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-2px)' }}>
           Install AforAudience
         </div>
         <div style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.75, lineHeight: 1.4 }}>
@@ -142,7 +142,7 @@ export default function InstallPrompt() {
         aria-label="Dismiss install prompt"
         style={{
           color: 'var(--afa-on-fill-solid)',
-          padding: '8px 12px',
+          padding: 'var(--afa-space-2) var(--afa-space-3)',
           fontSize: 'var(--afa-text-body)',
           opacity: 0.7,
         }}

@@ -55,21 +55,21 @@ function ContributionBody({
 }: Omit<ContributionMomentProps, 'onViewTicket'>) {
   return (
     <>
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 'var(--afa-space-5)' }}>
         <CloseButton onClose={onClose} />
       </div>
 
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', marginBottom: 8 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-2)' }}>
         CONFIRMED
       </div>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 900, color: 'var(--afa-text-primary)', margin: 0, lineHeight: 1.05 }}>
         You&rsquo;re going.
       </h1>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-secondary)', marginTop: 8 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2)' }}>
         {seatSummary} · {venueLabel}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', margin: 'var(--afa-space-32px) 0' }}>
         <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
           <div
             className="afa-seal-ring-mount"
@@ -93,8 +93,8 @@ function ContributionBody({
         </div>
       </div>
 
-      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-xl)', padding: 16 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)', marginBottom: 8 }}>
+      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-xl)', padding: 'var(--afa-space-4)' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-2)' }}>
           YOUR CONTRIBUTION
         </div>
         <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-primary)' }}>
@@ -111,7 +111,7 @@ function ContributionBody({
 // 11-locale dictionary (see build report's flagged i18n scope call).
 function EmailedTicketNote() {
   return (
-    <p style={{ margin: '12px 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)', textAlign: 'center' }}>
+    <p style={{ margin: 'var(--afa-space-3) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)', textAlign: 'center' }}>
       We&rsquo;ve also emailed the ticket to you. Show the QR at the door — screen or print is fine.
     </p>
   )
@@ -155,12 +155,12 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           position: 'fixed', inset: 0, zIndex: 1000,
           background: 'var(--afa-surface-page)',
           flexDirection: 'column',
-          padding: '24px 20px calc(24px + env(safe-area-inset-bottom))',
+          padding: 'var(--afa-space-6) var(--afa-space-5) calc(24px + env(safe-area-inset-bottom))',
           overflowY: 'auto',
         }}
       >
         <ContributionBody {...props} />
-        <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+        <div style={{ marginTop: 'auto', paddingTop: 'var(--afa-space-6)' }}>
           <ViewTicketButton onViewTicket={props.onViewTicket} />
           <EmailedTicketNote />
         </div>
@@ -179,13 +179,13 @@ export default function ContributionMoment(props: ContributionMomentProps) {
         <div
           className="cm-modal-mount"
           style={{
-            position: 'relative', width: '100%', maxWidth: 440, margin: '0 20px',
+            position: 'relative', width: '100%', maxWidth: 440, margin: '0 var(--afa-space-5)',
             background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-2xl)',
-            padding: '24px 24px 28px', boxShadow: '0 20px 60px var(--afa-shadow)',
+            padding: 'var(--afa-space-6) var(--afa-space-6) var(--afa-space-28px)', boxShadow: '0 20px 60px var(--afa-shadow)',
           }}
         >
           <ContributionBody {...props} />
-          <div style={{ marginTop: 24 }}>
+          <div style={{ marginTop: 'var(--afa-space-6)' }}>
             <ViewTicketButton onViewTicket={props.onViewTicket} />
             <EmailedTicketNote />
           </div>

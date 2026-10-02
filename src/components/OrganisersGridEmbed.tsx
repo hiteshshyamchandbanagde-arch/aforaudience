@@ -99,8 +99,8 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
     })
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
-  if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
+  if (loading) return <div style={{ textAlign: "center", padding: "60px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
+  if (error) return <div style={{ padding: "var(--afa-space-14px) var(--afa-space-4)", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
   if (organisers.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
@@ -132,12 +132,12 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           value={internalSearch}
           onChange={(e) => setInternalSearch(e.target.value)}
           placeholder={tr.organisersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "var(--afa-space-10px) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", marginBottom: "var(--afa-space-5)", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--afa-space-5)" }}>
       {filtered.map((org) => {
         const isNavigatingThis = navigatingId === org.id
         return (
@@ -168,7 +168,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
                 <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
               </div>
             )}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-10px)" }}>
               <div style={{ position: "relative", width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                 {org.user.avatar && !isPlaceholderImageUrl(org.user.avatar) ? (
                   <Photo src={org.user.avatar} alt={org.orgName} />
@@ -178,7 +178,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
               </div>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{org.orgName}</h2>
             </div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", marginBottom: "var(--afa-space-10px)", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
               {org.bio || tr.organisersEmbed.noBioYet}
             </p>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>

@@ -20,8 +20,8 @@ export default function EnvBadge() {
       aria-label={`Environment: ${label}`}
       style={{
         display: "inline-block",
-        marginLeft: "8px",
-        padding: "2px 8px",
+        marginLeft: "var(--afa-space-2)",
+        padding: "var(--afa-space-2px) var(--afa-space-2)",
         fontSize: "var(--afa-text-micro)",
         fontWeight: 600,
         letterSpacing: "0.02em",

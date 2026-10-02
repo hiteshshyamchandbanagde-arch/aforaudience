@@ -59,8 +59,8 @@ export default function PhoneVerifyNudge() {
         borderBottom: '1px solid var(--afa-error-edge)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '10px 16px',
+        gap: 'var(--afa-space-3)',
+        padding: 'var(--afa-space-10px) var(--afa-space-4)',
         fontSize: 'var(--afa-text-body)',
         lineHeight: 1.4,
       }}

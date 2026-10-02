@@ -378,7 +378,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
         color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
         opacity: active ? 1 : 0.75,
         fontWeight: active ? 600 : 400,
-        ...(compact ? { fontSize: 'var(--afa-text-ui)', paddingTop: 8, paddingBottom: 8 } : {}),
+        ...(compact ? { fontSize: 'var(--afa-text-ui)', paddingTop: 'var(--afa-space-2)', paddingBottom: 'var(--afa-space-2)' } : {}),
       }}
     >
       <Icon name={icon} size={compact ? 14 : 16} />
@@ -386,7 +386,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
       {badge && badge > 0 ? (
         <span
           className="ml-auto"
-          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: '2px 7px', lineHeight: 1.3 }}
+          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3 }}
         >
           {badge}
         </span>

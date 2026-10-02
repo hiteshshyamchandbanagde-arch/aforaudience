@@ -146,7 +146,7 @@ export default function WelcomeSequence() {
         alignItems: 'center',
         justifyContent: 'center',
         overflowY: 'auto',
-        padding: 24,
+        padding: 'var(--afa-space-6)',
       }}
     >
       <div
@@ -163,10 +163,10 @@ export default function WelcomeSequence() {
       >
         {step === 1 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 12 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>
               {tr.welcomeSequence.step1Heading}
             </h1>
-            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 28 }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 'var(--afa-space-28px)' }}>
               {tr.welcomeSequence.step1Subtitle}
             </p>
             <Button variant="primary" onClick={() => setStep(2)}>
@@ -177,12 +177,12 @@ export default function WelcomeSequence() {
 
         {step === 2 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 8 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
               {tr.welcomeSequence.step2Heading}
             </h1>
             {user.isVerified ? (
               <>
-                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
                   {tr.verifyPhonePage.alreadyVerifiedMessage}
                 </p>
                 <Button variant="primary" onClick={() => setStep(3)}>
@@ -191,7 +191,7 @@ export default function WelcomeSequence() {
               </>
             ) : !user.phone ? (
               <>
-                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
                   {tr.welcomeSequence.noPhoneOnFileMessage}
                 </p>
                 <Button variant="primary" onClick={() => setStep(3)}>
@@ -200,12 +200,12 @@ export default function WelcomeSequence() {
               </>
             ) : (
               <>
-                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
                   {tr.welcomeSequence.step2Intro}
                 </p>
-                {otp.error && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 16 }}>{otp.error}</p>}
+                {otp.error && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{otp.error}</p>}
                 {otp.devOtp && (
-                  <div style={{ background: 'var(--afa-amber-wash)', border: '1px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', marginBottom: 16, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                  <div style={{ background: 'var(--afa-amber-wash)', border: '1px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', marginBottom: 'var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                     QA Mode — dev OTP: <strong>{otp.devOtp}</strong>
                   </div>
                 )}
@@ -217,7 +217,7 @@ export default function WelcomeSequence() {
                   onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
                   style={{
                     width: '100%',
-                    padding: '12px 16px',
+                    padding: 'var(--afa-space-3) var(--afa-space-4)',
                     borderRadius: 'var(--afa-radius-md)',
                     border: '1px solid var(--afa-border-resting)',
                     fontSize: 'var(--afa-text-lead)',
@@ -225,7 +225,7 @@ export default function WelcomeSequence() {
                     textAlign: 'center',
                     color: 'var(--afa-text-primary)',
                     background: 'var(--afa-surface-page)',
-                    marginBottom: 16,
+                    marginBottom: 'var(--afa-space-4)',
                   }}
                 />
                 <Button variant="primary" onClick={handleVerify} disabled={otp.submitting || otpCode.length !== 6}>
@@ -248,10 +248,10 @@ export default function WelcomeSequence() {
 
         {step === 3 && (
           <>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--afa-space-4)' }}>
               <BellIcon style={{ width: 32, height: 32, color: 'var(--afa-text-primary)' }} />
             </div>
-            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 'var(--afa-space-6)' }}>
               {tr.notificationOptIn.message}
             </p>
             <Button variant="primary" onClick={handleEnablePush} disabled={pushBusy}>
@@ -265,7 +265,7 @@ export default function WelcomeSequence() {
 
         {step === 4 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 24 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6)' }}>
               {tr.welcomeSequence.step4Heading}
             </h1>
             <Button

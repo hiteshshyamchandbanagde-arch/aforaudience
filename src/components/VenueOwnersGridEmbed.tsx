@@ -61,8 +61,8 @@ export default function VenueOwnersGridEmbed() {
     })
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersEmbed.loading}</div>
-  if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
+  if (loading) return <div style={{ textAlign: "center", padding: "60px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersEmbed.loading}</div>
+  if (error) return <div style={{ padding: "var(--afa-space-14px) var(--afa-space-4)", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
   if (owners.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueOwnersEmbed.emptyNone}</p>
 
   const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))
@@ -84,14 +84,14 @@ export default function VenueOwnersGridEmbed() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={tr.venueOwnersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "var(--afa-space-10px) var(--afa-space-14px)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", marginBottom: "var(--afa-space-5)", boxSizing: "border-box", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
 
       <style>{`
-        .afa-owners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .afa-owners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--afa-space-5); }
         @media (max-width: 700px) {
-          .afa-owners-grid { grid-template-columns: 1fr; gap: 16px; }
+          .afa-owners-grid { grid-template-columns: 1fr; gap: var(--afa-space-4); }
         }
         /* BUG-2608-073 (gap 4) - inline styles can't express :hover at
            all, which is why the live card never showed a hover border
@@ -124,7 +124,7 @@ export default function VenueOwnersGridEmbed() {
             style={{
               position: "relative",
               background: "var(--afa-surface-raised)",
-              padding: "24px",
+              padding: "var(--afa-space-6)",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
@@ -138,8 +138,8 @@ export default function VenueOwnersGridEmbed() {
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
               {tr.venueOwnersEmbed.ownerLabel}
             </span>
-            <h2 style={{ marginTop: "10px", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", lineHeight: 1.2, color: "var(--afa-cream)" }}>{displayName}</h2>
-            <div style={{ marginTop: "20px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+            <h2 style={{ marginTop: "var(--afa-space-10px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", lineHeight: 1.2, color: "var(--afa-cream)" }}>{displayName}</h2>
+            <div style={{ marginTop: "var(--afa-space-5)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersEmbed.venueSingular : tr.venueOwnersEmbed.venuePlural}
             </div>
           </div>

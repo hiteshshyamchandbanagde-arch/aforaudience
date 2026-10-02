@@ -423,9 +423,9 @@ export default function MobileTabBar() {
           backdropFilter: 'blur(12px)',
           borderTop: '1px solid var(--afa-tint-08)',
           zIndex: 40,
-          paddingLeft: 8,
-          paddingRight: 8,
-          paddingTop: 8,
+          paddingLeft: 'var(--afa-space-2)',
+          paddingRight: 'var(--afa-space-2)',
+          paddingTop: 'var(--afa-space-2)',
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
       >

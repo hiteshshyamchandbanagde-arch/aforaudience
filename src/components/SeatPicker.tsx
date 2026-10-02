@@ -269,11 +269,11 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
         <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
           Tap a seat to select it. Max {maxSeatsPerBooking} per booking. Pinch or use +/- to zoom in for easier tapping.
         </div>
-        <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 'var(--afa-space-1)', flexShrink: 0 }}>
           <Button
             variant="icon"
             type="button"
@@ -309,17 +309,17 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
       </div>
       {zonePrices.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
           {zonePrices.map(({ zone, price }) => (
-            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', padding: '4px 10px', borderRadius: 'var(--afa-radius-pill)' }}>
-              <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: colorForZone(zone, zoneOrder), marginRight: '6px' }} />
+            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)' }}>
+              <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: colorForZone(zone, zoneOrder), marginRight: 'var(--afa-space-6px)' }} />
               {zone} — {price ? `₹${price}` : 'not on sale'}
             </span>
           ))}
         </div>
       )}
       {levels.length > 1 && (
-        <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-10px)' }}>
           {levels.map((lvl) => (
             <Button
               variant="toggle-box"
@@ -371,7 +371,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         <div
           style={{
             position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
-            width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)',
+            width: '60%', padding: 'var(--afa-space-6px) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)',
             background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-caption)', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
           }}
@@ -452,7 +452,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         })}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
+      <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-10px)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
         {/* BUG-2609-075 (legend part) - each swatch is drawn the way that
             seat state renders on the canvas above. Available seats take
             their zone's colour, so its swatch shows the zones in play. */}

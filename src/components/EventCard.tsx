@@ -115,7 +115,7 @@ export const TYPE_META: Record<string, { emoji: string; color: string; label: st
 // detail hero and directory filter row use it bare.
 export function EventTypeBadge({ type, typeLabel, size = 16, style }: { type: string; typeLabel: string; size?: number; style?: React.CSSProperties }) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-secondary)", ...style }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-secondary)", ...style }}>
       <EventTypeIcon type={type} style={{ width: size, height: size, color: "var(--afa-amber)" }} />
       {typeLabel}
     </span>
@@ -144,7 +144,7 @@ export function IllustratedEventFallback({ type, typeLabel, hideCaption = false 
         <line x1="0" y1="118" x2="200" y2="118" />
         <line x1="100" y1="0" x2="100" y2="250" />
       </svg>
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", color: "var(--afa-amber)" }}>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", color: "var(--afa-amber)" }}>
         <EventTypeIcon type={type} style={{ width: "44px", height: "44px", opacity: 0.9 }} />
         {!hideCaption && (
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", opacity: 0.7 }}>
@@ -190,7 +190,7 @@ export function SeatStateDot({ totalSeats, availableSeats, showCount = false }: 
   const status = getAvailabilityStatus(totalSeats, availableSeats)
   const color = status === "filling-fast" ? "var(--afa-fill-solid)" : status === "sold-out" ? "var(--afa-text-muted)" : "var(--afa-text-secondary)"
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "var(--afa-text-ui)", color }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color }}>
       <span style={{ position: "relative", display: "inline-flex", width: "8px", height: "8px", flexShrink: 0 }}>
         {status === "filling-fast" && (
           <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "var(--afa-fill-solid)", opacity: 0.6, animation: "afa-ping 1.6s cubic-bezier(0,0,0.2,1) infinite" }} />
@@ -265,7 +265,7 @@ export function EventCard({
 
       <div className="afa-event-card-poster" style={{ position: "relative", overflow: "hidden", borderRadius: "var(--afa-radius-xs)", flexShrink: 0 }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} />
-        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "var(--afa-scrim)", backdropFilter: "blur(4px)", padding: "6px 10px", borderRadius: "var(--afa-radius-xs)" }}>
+        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "var(--afa-scrim)", backdropFilter: "blur(4px)", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "var(--afa-radius-xs)" }}>
           <EventTypeBadge type={event.type} typeLabel={typeLabel} size={14} />
         </span>
         <span style={{ position: "absolute", right: "12px", top: "12px" }}>
@@ -273,26 +273,26 @@ export function EventCard({
         </span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, gap: "16px", padding: view === "grid" ? "20px" : 0 }}>
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, gap: "var(--afa-space-4)", padding: view === "grid" ? "20px" : 0 }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: view === "grid" ? "24px" : "22px", lineHeight: 1.2, color: "var(--afa-cream)", margin: 0 }}>
           {event.title}
         </h3>
 
-        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "6px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
+        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "var(--afa-space-6px)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
             <CalendarIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
             <span>{new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</span>
-            <ClockIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0, marginLeft: "4px" }} />
+            <ClockIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0, marginLeft: "var(--afa-space-1)" }} />
             <span>{event.startTime}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
             <PinIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {event.venue ? `${event.venue.name}, ${event.venue.city}` : tr.eventsPage.venueTBD}
             </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "12px", marginTop: "6px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "var(--afa-space-3)", marginTop: "var(--afa-space-6px)" }}>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-soft)" }}>{priceLabel}</span>
             {tab === "past" ? (
               <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)" }}>{tr.eventsPage.ended}</span>
@@ -349,12 +349,12 @@ export function EventRow({
         position: "relative",
         display: "flex",
         alignItems: "stretch",
-        gap: "14px",
+        gap: "var(--afa-space-14px)",
         overflow: "hidden",
         background: "var(--afa-surface-raised)",
         border: "1px solid var(--afa-tint-08)",
         borderRadius: "var(--afa-radius-lg)",
-        padding: "10px",
+        padding: "var(--afa-space-10px)",
         cursor: disabled ? "default" : "pointer",
         opacity: disabled && !isNavigating ? 0.5 : 1,
         transition: "opacity 0.15s ease",
@@ -366,15 +366,15 @@ export function EventRow({
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} hideCaption />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, minWidth: 0, padding: "2px 0" }}>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, minWidth: 0, padding: "var(--afa-space-2px) 0" }}>
         <div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
             {typeLabel}
           </div>
-          <h3 style={{ marginTop: "4px", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <h3 style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {event.title}
           </h3>
-          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "6px", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>
+          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>
             <ClockIcon style={{ width: "12px", height: "12px", flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}, {event.startTime}
