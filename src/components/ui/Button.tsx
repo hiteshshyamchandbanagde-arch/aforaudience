@@ -371,9 +371,10 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         textDecoration: 'none',
       }
     case 'success':
-      // GEN-2609-109 - positive/approve actions, 5 `bare` sites (admin
+      // GEN-2609-109 - positive/approve actions, 4 sites (admin
       // feedback Approve, organiser Approve application, artist Accept tour
-      // invite, organiser Publish Stop, messages Send). `solid`'s ember
+      // invite, organiser Publish Stop; messages Send moved to `solid` in
+      // GEN-2609-121, sending is that page's one action). `solid`'s ember
       // fill reads as "the page's main CTA", not "approve", so these were
       // always a different colour family - see `outline-error`'s note on
       // GEN-2609-076 deliberately not folding them in. Text is
