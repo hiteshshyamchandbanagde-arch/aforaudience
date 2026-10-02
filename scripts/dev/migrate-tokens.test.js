@@ -36,6 +36,7 @@ const {
   canonColor,
   colorContext,
   resolveColor,
+  isMigrationExcluded,
 } = require('./migrate-tokens')
 
 let passed = 0
@@ -464,6 +465,26 @@ t('GEN-2609-113: a literal var() fallback is dropped, not tokenised into var(--x
   assert.equal(processLine(line, false, DEFAULT_DEFS), "        background: mine ? 'var(--afa-sage)' : 'var(--afa-tint-06)',")
   const unmapped = "  color: 'var(--afa-error, #b3261e)',"
   assert.equal(processLine(unmapped, false, DEFAULT_DEFS), "  color: 'var(--afa-error)',")
+})
+
+t('GEN-2609-107: var()-incompatible files and token sources are never migrated', () => {
+  const path = require('node:path')
+  for (const f of [
+    'src/lib/email.ts',
+    'src/lib/ticket-pdf.ts',
+    'src/app/manifest.ts',
+    'src/app/api/posters/artist/[performanceId]/route.tsx',
+    'src/app/api/posters/organiser/[eventId]/route.tsx',
+    'src/app/globals.css',
+    'src/lib/design-tokens.ts',
+  ]) {
+    assert.equal(isMigrationExcluded(f), true, f)
+    assert.equal(isMigrationExcluded(path.resolve(__dirname, '..', '..', f)), true, `absolute ${f}`)
+    assert.equal(isMigrationExcluded(f.split('/').join('\\')), true, `backslashed ${f}`)
+  }
+  for (const f of ['src/app/(public)/events/page.tsx', 'src/components/SiteNav.tsx', 'src/lib/email-preview.tsx']) {
+    assert.equal(isMigrationExcluded(f), false, f)
+  }
 })
 
 console.log(`\n${passed} passed, ${failed} failed.`)
