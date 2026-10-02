@@ -26,6 +26,10 @@ import {
   SNAPSHOT_REASON_MAX,
   rangeFor,
   rgbToHex,
+  resolveColorValue,
+  toPdfRgb,
+  COLOR_RESOLVE_MAX_DEPTH,
+  UNRESOLVED_COLOR,
   tokenValueError,
   type TokenType,
 } from '../src/lib/design-tokens'
@@ -404,6 +408,78 @@ test('snapshot note: reason required, a string, at most 200 chars', () => {
     assert.equal(snapshotNote(bad), null, String(bad))
   }
   assert.equal(snapshotNote('x'.repeat(SNAPSHOT_REASON_MAX)), `Snapshot: ${'x'.repeat(SNAPSHOT_REASON_MAX)}`)
+})
+
+// --- J. colour resolver for downloads (GEN-2609-119) ------------------------------
+
+test('resolve: a saved concrete value wins over the default', () => {
+  assert.equal(resolveColorValue({ '--afa-fill-solid': '#00E5FF' }, '--afa-fill-solid'), '#00E5FF')
+  assert.equal(resolveColorValue({ '--afa-text-muted': 'rgba(1, 2, 3, 0.4)' }, '--afa-text-muted'), 'rgba(1, 2, 3, 0.4)')
+})
+
+test('resolve: a key with no saved row falls back to its default', () => {
+  assert.equal(resolveColorValue({}, '--afa-fill-solid'), DEFAULT_TOKEN_VALUES['--afa-fill-solid'])
+  assert.equal(resolveColorValue({ '--afa-amber': '#111111' }, '--afa-surface-page'), DEFAULT_TOKEN_VALUES['--afa-surface-page'])
+})
+
+test('resolve: var() chains are followed, through saved values and defaults', () => {
+  // default chain: --afa-selected -> var(--afa-amber) -> #C9973A
+  assert.equal(resolveColorValue({}, '--afa-selected'), DEFAULT_TOKEN_VALUES['--afa-amber'])
+  // the saved amber is what the default var() lands on
+  assert.equal(resolveColorValue({ '--afa-amber': '#123456' }, '--afa-selected'), '#123456')
+  // three saved hops
+  const values = { '--afa-selected': 'var(--afa-fill-solid)', '--afa-fill-solid': 'var(--afa-amber)', '--afa-amber': 'var(--afa-sage)', '--afa-sage': '#0A0B0C' }
+  assert.equal(resolveColorValue(values, '--afa-selected'), '#0A0B0C')
+})
+
+test('resolve: a cycle falls back to the defaults, never loops', () => {
+  const values = { '--afa-fill-solid': 'var(--afa-amber)', '--afa-amber': 'var(--afa-fill-solid)' }
+  assert.equal(resolveColorValue(values, '--afa-fill-solid'), DEFAULT_TOKEN_VALUES['--afa-fill-solid'])
+  assert.equal(resolveColorValue({ '--afa-amber': 'var(--afa-amber)' }, '--afa-amber'), DEFAULT_TOKEN_VALUES['--afa-amber'])
+})
+
+test('resolve: a chain past the depth limit falls back to the defaults', () => {
+  const values: Record<string, string> = {}
+  for (let i = 0; i <= COLOR_RESOLVE_MAX_DEPTH + 1; i++) values[`--x-${i}`] = `var(--x-${i + 1})`
+  values[`--x-${COLOR_RESOLVE_MAX_DEPTH + 2}`] = '#ABCDEF'
+  values['--afa-fill-solid'] = 'var(--x-0)'
+  assert.equal(resolveColorValue(values, '--afa-fill-solid'), DEFAULT_TOKEN_VALUES['--afa-fill-solid'])
+  // one hop inside the limit still resolves
+  assert.equal(resolveColorValue({ ...values, '--afa-fill-solid': `var(--x-${COLOR_RESOLVE_MAX_DEPTH + 2})` }, '--afa-fill-solid'), '#ABCDEF')
+})
+
+test('resolve: a dangling ref or a non-colour value falls back to the default', () => {
+  assert.equal(resolveColorValue({ '--afa-fill-solid': 'var(--afa-gone)' }, '--afa-fill-solid'), DEFAULT_TOKEN_VALUES['--afa-fill-solid'])
+  assert.equal(resolveColorValue({ '--afa-fill-solid': '12px' }, '--afa-fill-solid'), DEFAULT_TOKEN_VALUES['--afa-fill-solid'])
+  assert.equal(resolveColorValue({ '--afa-fill-solid': '' }, '--afa-fill-solid'), DEFAULT_TOKEN_VALUES['--afa-fill-solid'])
+})
+
+test('resolve: a key no table knows gives the unresolved colour', () => {
+  assert.equal(resolveColorValue({}, '--afa-not-a-token'), UNRESOLVED_COLOR)
+  // a non-colour token is not a colour either
+  assert.equal(resolveColorValue({}, '--afa-space-4'), UNRESOLVED_COLOR)
+})
+
+test('resolve: every default colour token resolves to a parseable colour', () => {
+  for (const key of Object.keys(TOKEN_META)) {
+    if (!TOKEN_META[key].section) continue
+    const v = resolveColorValue({}, key)
+    assert.ok(parseCssColor(v), `${key} -> ${v}`)
+    assert.ok(!v.startsWith('var('), key)
+  }
+})
+
+test('toPdfRgb: hex, short hex, rgb() and rgba() become 0..1 channels plus opacity', () => {
+  assert.deepEqual(toPdfRgb('#FF0080'), { r: 1, g: 0, b: 128 / 255, opacity: 1 })
+  assert.deepEqual(toPdfRgb('#fff'), { r: 1, g: 1, b: 1, opacity: 1 })
+  assert.deepEqual(toPdfRgb('rgb(255, 90, 54)'), { r: 1, g: 90 / 255, b: 54 / 255, opacity: 1 })
+  assert.deepEqual(toPdfRgb('rgba(245, 245, 240, 0.5)'), { r: 245 / 255, g: 245 / 255, b: 240 / 255, opacity: 0.5 })
+  assert.deepEqual(toPdfRgb('rgba(0, 0, 0, 0)'), { r: 0, g: 0, b: 0, opacity: 0 })
+})
+
+test('toPdfRgb: an unparseable value gives the unresolved colour, not NaN', () => {
+  assert.deepEqual(toPdfRgb('var(--afa-amber)'), toPdfRgb(UNRESOLVED_COLOR))
+  assert.deepEqual(toPdfRgb('nonsense'), { r: 0, g: 0, b: 0, opacity: 1 })
 })
 
 console.log(`\n${passed} passed`)

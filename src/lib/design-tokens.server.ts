@@ -1,6 +1,6 @@
 import { unstable_cache, revalidateTag } from "next/cache"
 import prisma from "@/lib/prisma"
-import { DESIGN_TOKEN_CACHE_TAG, toDTO, type DesignTokenDTO } from "@/lib/design-tokens"
+import { DESIGN_TOKEN_CACHE_TAG, isValidTokenValue, resolveColorValue, toDTO, toPdfRgb, type DesignTokenDTO } from "@/lib/design-tokens"
 
 // GEN-2609-075 - the DB-touching half of the design-tokens system.
 // Split out of design-tokens.ts specifically so that file stays safe
@@ -49,6 +49,29 @@ export async function getDesignTokensSafe(): Promise<DesignTokenDTO[]> {
     return []
   }
 }
+
+// GEN-2609-119 - concrete colours for what users receive or download
+// (share posters, emails, the ticket PDF, the manifest, the theme-color
+// meta), none of which can render var(). Same cached read as the layout,
+// so the tag and the 300s revalidate above are the freshness contract
+// here too: an editor save shows on the next request, a direct DB change
+// within the revalidate window. `resolveDesignColors` does one token
+// read for the whole batch.
+export async function resolveDesignColors<K extends string>(keys: readonly K[]): Promise<Record<K, string>> {
+  const values: Record<string, string> = {}
+  for (const t of await getDesignTokensSafe()) {
+    if (t.type === "color" && isValidTokenValue(t.type, t.value)) values[t.key] = t.value
+  }
+  const out = {} as Record<K, string>
+  for (const key of keys) out[key] = resolveColorValue(values, key)
+  return out
+}
+
+export async function resolveDesignColor(key: string): Promise<string> {
+  return (await resolveDesignColors([key]))[key]
+}
+
+export { toPdfRgb }
 
 // This Next version (16.2.9) changed revalidateTag's contract from the
 // training-data version - see node_modules/next/dist/docs/.../
