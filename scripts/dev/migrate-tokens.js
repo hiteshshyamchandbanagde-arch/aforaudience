@@ -39,7 +39,7 @@
 // see docs/design.md's own GEN-2609-089 Phase 2 dispatch).
 const fs = require('fs')
 const path = require('path')
-const { parseTokenOk, isExemptFile } = require('../check-design-tokens')
+const { parseTokenOk, isMigrationExcludedFile } = require('../check-design-tokens')
 
 const file = require.main === module ? process.argv[2] : null
 const APPLY = process.argv.includes('--apply')
@@ -1038,17 +1038,19 @@ function processLine(line, inRawBlock, activeDefs, unresolved) {
   return result
 }
 
-// GEN-2609-107 - files this script must never rewrite: the same set
-// check-design-tokens.js/the ratchet already skip (isExemptFile) -
-// email HTML, the ticket PDF, the manifest and the poster routes, where
+// GEN-2609-107 - files this script must never rewrite: email HTML, the
+// ticket PDF, the manifest, the poster routes and their palette, where
 // var(--afa-*) can't render, plus the token sources themselves. The
 // checker skipping them was never enough on its own: this script runs
 // per file, so a whole-tree loop would still have rewritten email.ts's
-// inline styles. Accepts a relative, absolute or backslashed path.
+// inline styles. GEN-2609-119 - the checker now checks those files'
+// colours, so the list is its own (isMigrationExcludedFile), no longer
+// "whatever the checker skips". Accepts a relative, absolute or
+// backslashed path.
 const REPO_ROOT = path.resolve(__dirname, '..', '..')
 function isMigrationExcluded(f) {
   const rel = path.relative(REPO_ROOT, path.resolve(REPO_ROOT, f)).split(path.sep).join('/')
-  return isExemptFile(rel.replace(/\\/g, '/'))
+  return isMigrationExcludedFile(rel.replace(/\\/g, '/'))
 }
 
 function run() {

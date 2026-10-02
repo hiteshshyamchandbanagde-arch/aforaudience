@@ -36,7 +36,7 @@ import { resolveDesignColors, toPdfRgb } from "@/lib/design-tokens.server"
 type Paint = { color: RGB; opacity: number }
 function paint(value: string, alpha = 1): Paint {
   const p = toPdfRgb(value)
-  return { color: rgb(p.r, p.g, p.b), opacity: p.opacity * alpha }
+  return { color: rgb(p.r, p.g, p.b), opacity: p.opacity * alpha } // token-ok(rgb-rgba-literal): pdf-lib's rgb() constructor on resolved channels, not a colour literal
 }
 
 // Quieter text and the hairlines are the ink at a lower opacity, so they

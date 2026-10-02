@@ -20,6 +20,8 @@ const assert = require('node:assert/strict')
 const {
   RULES,
   isExemptFile,
+  isSizingExemptFile,
+  isMigrationExcludedFile,
   shouldFlag,
   parseTokenOk,
   stripLineComments,
@@ -377,43 +379,96 @@ t('findOffenses: exempt files (globals.css-equivalent path) are skipped entirely
   const { offenses } = findOffenses(diff)
   assert.equal(offenses.length, 0, 'the exempt token-definition file should never be scanned')
 })
-t('GEN-2609-094: email.ts, ticket-pdf.ts and manifest.ts are exempt - var() cannot resolve in any of them', () => {
-  assert.equal(isExemptFile('src/lib/email.ts'), true)
-  assert.equal(isExemptFile('src/lib/ticket-pdf.ts'), true)
-  assert.equal(isExemptFile('src/app/manifest.ts'), true)
+t('GEN-2609-119: email.ts, ticket-pdf.ts, manifest.ts and the poster routes are no longer exempt files', () => {
+  for (const f of ['src/lib/email.ts', 'src/lib/ticket-pdf.ts', 'src/app/manifest.ts', 'src/lib/poster-colors.ts', 'src/app/api/posters/organiser/[eventId]/route.tsx', 'src/app/api/posters/artist/[performanceId]/route.tsx']) {
+    assert.equal(isExemptFile(f), false, f)
+  }
 })
-t('GEN-2609-094: findOffenses skips a new hex literal added to email.ts', () => {
+t('GEN-2609-119: a new hex literal in email.ts is an offense', () => {
   const diff = [
     'diff --git a/src/lib/email.ts b/src/lib/email.ts',
     '--- a/src/lib/email.ts',
     '+++ b/src/lib/email.ts',
     '@@ -0,0 +1,1 @@',
-    '+          <div style="color: #C8441A;">',
+    '+          <div style="color: #ABCDE4;">',
   ].join('\n')
   const { offenses } = findOffenses(diff)
-  assert.equal(offenses.length, 0, 'email HTML literals are the intended value, not hardcoding debt')
+  assert.deepEqual(offenses.map((o) => o.rule), ['hex-color-literal'])
 })
-t('GEN-2609-094: findOffenses skips a new rgb() literal added to ticket-pdf.ts', () => {
+t('GEN-2609-119: a new rgb() literal in ticket-pdf.ts is an offense', () => {
   const diff = [
     'diff --git a/src/lib/ticket-pdf.ts b/src/lib/ticket-pdf.ts',
     '--- a/src/lib/ticket-pdf.ts',
     '+++ b/src/lib/ticket-pdf.ts',
     '@@ -0,0 +1,1 @@',
-    '+  ink: rgb(0.055, 0.047, 0.039), // #0E0C0A',
+    '+  ink: rgb(0.1234, 0.4567, 0.7891),',
   ].join('\n')
   const { offenses } = findOffenses(diff)
-  assert.equal(offenses.length, 0, 'pdf-lib rgb() calls have no CSS engine to resolve var() against')
+  assert.deepEqual(offenses.map((o) => o.rule), ['rgb-rgba-literal'])
 })
-t('GEN-2609-094: findOffenses skips a new hex literal added to manifest.ts', () => {
+t('GEN-2609-119: a new hex literal in manifest.ts is an offense', () => {
   const diff = [
     'diff --git a/src/app/manifest.ts b/src/app/manifest.ts',
     '--- a/src/app/manifest.ts',
     '+++ b/src/app/manifest.ts',
     '@@ -0,0 +1,1 @@',
-    "+    theme_color: '#FF5A36',",
+    "+    theme_color: '#ABCDE5',",
   ].join('\n')
   const { offenses } = findOffenses(diff)
-  assert.equal(offenses.length, 0, 'the web manifest is static JSON, not CSS-aware (BUG-2609-015)')
+  assert.deepEqual(offenses.map((o) => o.rule), ['hex-color-literal'])
+})
+t('GEN-2609-119: a new hex literal in a poster route is an offense', () => {
+  const diff = [
+    'diff --git a/src/app/api/posters/organiser/[eventId]/route.tsx b/src/app/api/posters/organiser/[eventId]/route.tsx',
+    '--- a/src/app/api/posters/organiser/[eventId]/route.tsx',
+    '+++ b/src/app/api/posters/organiser/[eventId]/route.tsx',
+    '@@ -0,0 +1,1 @@',
+    "+          background: '#ABCDE6',",
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.deepEqual(offenses.map((o) => o.rule), ['hex-color-literal'])
+})
+t('GEN-2609-119: a logo literal carrying token-ok passes and is listed', () => {
+  const diff = [
+    'diff --git a/src/lib/poster-colors.ts b/src/lib/poster-colors.ts',
+    '--- a/src/lib/poster-colors.ts',
+    '+++ b/src/lib/poster-colors.ts',
+    '@@ -0,0 +1,1 @@',
+    "+  tile: '#ABCDE7', // token-ok(hex-color-literal): logo, fixed by design",
+  ].join('\n')
+  const { offenses, tokenOkUses } = findOffenses(diff)
+  assert.equal(offenses.length, 0)
+  assert.equal(tokenOkUses.length, 1)
+})
+t('GEN-2609-119: px sizes stay allowed in email.ts and the poster routes, where var() cannot render', () => {
+  assert.equal(isSizingExemptFile('src/lib/email.ts'), true)
+  assert.equal(isSizingExemptFile('src/app/api/posters/artist/[performanceId]/route.tsx'), true)
+  assert.equal(isSizingExemptFile('src/lib/ticket-pdf.ts'), false)
+  assert.equal(isSizingExemptFile('src/app/manifest.ts'), false)
+  for (const [file, line] of [
+    ['src/lib/email.ts', '+          <div style="font-size: 4217px; padding: 4219px 0; border-radius: 4223px;">'],
+    ['src/app/api/posters/organiser/[eventId]/route.tsx', "+        <div style={{ fontSize: '4217px', padding: '4219px', borderRadius: '4223px', fontFamily: 'Poster Serif Unique' }}>"],
+  ]) {
+    const diff = ['diff --git a/' + file + ' b/' + file, '--- a/' + file, '+++ b/' + file, '@@ -0,0 +1,1 @@', line].join('\n')
+    assert.equal(findOffenses(diff).offenses.length, 0, file)
+  }
+})
+t('GEN-2609-119: the same px sizes are still offenses in an ordinary file', () => {
+  const diff = [
+    'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
+    '--- a/src/app/foo.tsx',
+    '+++ b/src/app/foo.tsx',
+    '@@ -0,0 +1,1 @@',
+    "+        <div style={{ fontSize: '4217px', padding: '4219px', borderRadius: '4223px' }}>",
+  ].join('\n')
+  const rules = findOffenses(diff).offenses.map((o) => o.rule).sort()
+  assert.deepEqual(rules, ['font-size-literal', 'radius-literal', 'spacing-literal'])
+})
+t('GEN-2609-119: the codemod still never rewrites a surface where var() cannot render', () => {
+  for (const f of ['src/lib/email.ts', 'src/lib/ticket-pdf.ts', 'src/app/manifest.ts', 'src/lib/poster-colors.ts', 'src/app/api/posters/artist/[performanceId]/route.tsx', 'src/app/globals.css', 'src/lib/design-tokens.ts']) {
+    assert.equal(isMigrationExcludedFile(f), true, f)
+  }
+  assert.equal(isMigrationExcludedFile('src/components/SiteNav.tsx'), false)
 })
 
 // ---------------------------------------------------------------------
