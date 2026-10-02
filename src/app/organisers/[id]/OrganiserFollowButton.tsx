@@ -71,13 +71,16 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
       <style>{`.afa-organiser-follow-cta:hover { filter: brightness(1.1); }`}</style>
+      {/* GEN-2609-119 (G1) - Follow is a secondary action: an outline in both
+          states, as on the artist profile (GEN-2609-121). */}
       <Button
-        variant={following ? "outline-neutral" : "solid"}
+        variant="outline-neutral"
         size="md"
         fullWidth={false}
         onClick={toggleFollow}
         disabled={busy}
         className="afa-organiser-follow-cta"
+        style={following ? undefined : { color: "var(--afa-text-primary)" }}
       >
         {following ? tr.followButton.following : tr.followButton.follow}
       </Button>

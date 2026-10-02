@@ -118,7 +118,7 @@ function SortableRow({
       </div>
 
       <Button
-        // bare-reason: on-state is the Featured scene-status gold/amber pair, a status mark rather than a selection; toggle-pill's fill-solid tint would read as 'selected'
+        // bare-reason: compact star toggle sized to the lineup row (micro type, 5px padding) with a star glyph that changes with the state; toggle-pill is the larger filter pill. Its on-state reads --afa-selected* (GEN-2609-119 G3)
         variant="bare"
         onClick={() => onFeaturedToggle(item.id)}
         title={
@@ -135,9 +135,9 @@ function SortableRow({
           fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
           whiteSpace: 'nowrap',
-          border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid var(--afa-border-resting)',
-          background: item.isFeaturedVouch ? 'var(--afa-amber-tint)' : 'transparent',
-          color: item.isFeaturedVouch ? 'var(--afa-amber)' : 'var(--afa-text-muted)',
+          border: item.isFeaturedVouch ? '1px solid var(--afa-selected-border)' : '1px solid var(--afa-border-resting)',
+          background: item.isFeaturedVouch ? 'var(--afa-selected-bg)' : 'transparent',
+          color: item.isFeaturedVouch ? 'var(--afa-selected)' : 'var(--afa-text-muted)',
         }}
       >
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}

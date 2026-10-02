@@ -7,14 +7,14 @@ Sourced from the shipped codebase only (`src/`), as of qa @ 1524eab. No aspirati
 Defined in [globals.css](../src/app/globals.css#L51). Current default theme is **Theme Phase 2c**, a dark stage-lit reskin (Hitesh's call, "the new default, not opt-in") — these are live values, not a light-theme legacy:
 
 ```css
---afa-surface-page:    #141414;   /* page background */
+--afa-surface-page:    #141414;   /* page background; also share posters and the manifest's splash background (GEN-2609-119) */
 --afa-surface-raised:  #1F1F1F;   /* elevated panel — cards, chips, fallback panels */
 --afa-surface-inverse: #0A0A0A;   /* deliberately deeper band — footer, ticker, splash, nav-scrim */
 
---afa-cream:           #F7F3EE;   /* primary text-on-dark color, NOT a light background anymore */
+--afa-cream:           #F7F3EE;   /* primary text-on-dark color, NOT a light background anymore in the app; the paper of the ticket PDF and the email details card (GEN-2609-119) */
 --afa-amber:           #C9973A;   /* accent — eyebrows, icons, hover states, badges */
 
---afa-fill-solid:      #FF5A36;   /* the ONE primary action per screen (Book, Pay, Publish, Save) - never a selected state (GEN-2609-118) */
+--afa-fill-solid:      #FF5A36;   /* the ONE primary action per screen (Book, Pay, Publish, Save) - never a selected state (GEN-2609-118); also the theme colour and the accent on posters, emails and the ticket PDF (GEN-2609-119) */
 --afa-on-fill-solid:   var(--afa-brown-black);  /* text color on top of fill-solid */
 
 --afa-text-primary:    #F5F5F0;
@@ -121,9 +121,9 @@ FROM "DesignToken";
 
 /* selected / active state (GEN-2609-118) - own family, admin-editable,
    defaults equal the amber values. Tinted, never a solid fill. */
---afa-selected:        var(--afa-amber);            /* selected text, icon, box border, tab underline */
---afa-selected-bg:     rgba(201, 151, 58, 0.08);    /* tint behind a selected chip / box / row / card / seat */
---afa-selected-border: rgba(201, 151, 58, 0.4);     /* translucent edge of a selected pill */
+--afa-selected:        var(--afa-amber);            /* selected text, icon, box border, tab underline; active nav tab, sidebar link, drawer row; Featured toggle; carousel dot */
+--afa-selected-bg:     rgba(201, 151, 58, 0.08);    /* tint behind a selected chip / box / row / card / seat; active sidebar link and drawer row; selected calendar day */
+--afa-selected-border: rgba(201, 151, 58, 0.4);     /* translucent edge of a selected pill, the selected calendar day, the Featured toggle, a highlighted profile card */
 --afa-error-tint:   rgba(179, 38, 30, 0.1);    /* 0.08-0.15 */
 --afa-error-edge:   rgba(179, 38, 30, 0.3);    /* 0.30, 0.40 */
 --afa-sage-tint:    rgba(74, 103, 65, 0.12);
@@ -133,11 +133,13 @@ FROM "DesignToken";
 
 /* dark overlays + shadows */
 --afa-shadow:       rgba(0, 0, 0, 0.3);        /* box/text shadows up to 0.5 */
---afa-scrim:        rgba(10, 10, 10, 0.7);     /* black/ink overlays 0.4-0.7 */
+--afa-scrim:        rgba(10, 10, 10, 0.7);     /* black/ink overlays 0.4-0.7; every dialog and sheet backdrop (GEN-2609-114) */
 --afa-scrim-strong: rgba(10, 10, 10, 0.9);     /* 0.85-0.95 */
 ```
 
-**Error text:** plain `--afa-error` as *text* on a dark surface is 2.5-2.8:1; error text uses `--afa-error-bright` (5.7-6.4:1). `--afa-error` stays for fills, borders and icons. **Gold text:** `STATUS_TONE.gold` text is now `--afa-amber` (4.88:1 on its own tint; `--afa-gold` was 2.55:1).
+**Error text:** plain `--afa-error` as *text* on a dark surface is 2.5-2.8:1; error text uses `--afa-error-bright` (5.7-6.4:1). `--afa-error` stays for fills, borders and icons. **Gold text:** `STATUS_TONE.gold` text is now `--afa-amber` (4.88:1 on its own tint; `--afa-gold` was 2.55:1). **Sage text:** the same split (GEN-2609-114): `--afa-sage` as text on a dark surface is 2.6-2.9:1, so success text uses `--afa-sage-bright` (6.0-6.7:1); `--afa-sage` stays for fills, bars, dots and the outline success button's edge.
+
+**Downloads follow the tokens (GEN-2609-119).** Share posters, the ticket email, the ticket PDF, the web manifest and the `theme-color` meta can't render `var()`, so they read concrete values from `resolveDesignColors()` in `src/lib/design-tokens.server.ts` (the same cached, tagged read the layout uses; `var()` chains are followed, a missing or broken row falls back to the default). Posters use the page surface, the text ladder, `--afa-fill-solid`, `--afa-amber` and `--afa-tint-20`. The email and the PDF stay light documents: `--afa-ink` text on `--afa-cream`, labels in `--afa-fill-solid`. The manifest's `theme_color` and the meta are `--afa-fill-solid`; its `background_color` is `--afa-surface-page`. **Fixed by design, never tokens:** the logo (poster tile `#0E0C0A`, bars `#C8441A` / `#C9973A` / `#F7F3EE`, wordmark `#F7F3EE`, and the "A" `#C8441A` in the email and PDF) and the QR codes (`#1A0A1A` on `#F7F3EE` on posters, `#0E0C0A` on `#F7F3EE` on the ticket). Each carries a `token-ok`.
 
 **Admin-controlled runtime layer (GEN-2609-075, 19 Sep).** Every token in this section, plus `--font-display`/`--font-ui`/`--font-sans`/`--font-mono`, is now also a row in the `DesignToken` table (`aforaudience-qa`) and editable at `/dashboard/admin/design-system` — an admin change is cached (tag `"design-tokens"`) and takes effect on the next page load, no deploy, falling back to the static values in this file/`globals.css` if the DB is empty or unreachable. `globals.css` stays the authoritative *default* (and the only thing that matters for a fresh environment before the table is seeded); the DB is a runtime override layer on top of it, not a replacement. 5 tokens (`--afa-surface-page`, `--afa-surface-raised`, `--afa-amber`, `--afa-fill-solid`, `--afa-on-fill-solid`) are "locked" in the admin UI — still editable, gated behind a confirm dialog — unrelated to this section's own CI-enforced locked-palette rule below, which keeps blocking raw literals in application *code* regardless of what the DB holds. Full reasoning in `docs/design.md`'s `GEN-2609-075` entry.
 
@@ -147,7 +149,7 @@ FROM "DesignToken";
 
 - Card resting border: `1px solid rgba(245,245,240,0.1)` ([VenuesGridClient.tsx:94](../src/app/venues/VenuesGridClient.tsx#L94))
 - Card hover border: `rgba(201,151,58,0.6)` (amber, same rule)
-- Button border: `1.5px solid rgba(201,151,58,0.5)` (Get Directions) or `1.5px solid var(--afa-fill-solid)` (Follow, when active)
+- Button border: `1.5px solid rgba(201,151,58,0.5)` (Get Directions); Follow is the `outline-neutral` Button (`1px solid var(--afa-border-resting)`) in both states
 - Divider rule (footer of event card): `1px solid rgba(245,245,240,0.1)`
 
 **Enforcement (GEN-2609-052, 13 Sep):** the locked-palette rule above is now checked in CI, not just documented. `scripts/check-design-tokens.js` (run from `.github/workflows/design-tokens.yml` on every PR into `qa`/`main`) fails the build on any *added or changed* line in `src/**/*.ts(x)` containing a raw hex literal, a raw `rgb()`/`rgba()` literal, or a hardcoded `font-family` not using `var(--font-*)`. It's diff-only against the PR's base branch — the hand-authored border `rgba()` values documented just above are pre-existing and untouched by this check, but a *new* hand-authored border literal added from here on will now fail CI; route new border colors through a `--afa-*` token (or `var(--afa-amber)` / `rgba(201,151,58, α)` reference, not a fresh literal) instead. Exempt: `globals.css` itself, `src/lib/statusStyle.ts` (the tone source-of-truth), `src/app/api/posters/**` (Section 8.1's non-UI exception), and test files. See `docs/design.md`'s GEN-2609-052 entry for the full rationale and verification. **Per-line exemption (GEN-2609-117):** a genuinely exempt literal (a fixed third-party brand colour, a one-off display size) ends its line with `// token-ok(<rule>[,<rule>]): <reason>`, or `{/* token-ok(<rule>): <reason> */}` on a raw JSX markup line. `<rule>` is a checker rule name (`hex-color-literal`, `rgb-rgba-literal`, `font-size-literal`, `spacing-literal`, `radius-literal`, `hardcoded-font-family`, `raw-button`, `bare-button`), and only the named rules are exempt on that line; every other literal on it still counts. The unscoped `// token-ok: <reason>` form and unknown rule names fail both the checker and the ratchet. Every use is printed with its rule(s) on every run.
@@ -200,12 +202,12 @@ Every one of these is a real, already-documented difference (the radius split is
 **Follow / Get Directions chrome** (BUG-2608-076 — the pattern both were normalized to):
 ```css
 padding: 10px 20px;
-border: 1.5px solid rgba(201,151,58,0.5);   /* or var(--afa-fill-solid) when Follow is active */
+border: 1.5px solid rgba(201,151,58,0.5);   /* Get Directions; Follow is now the outline-neutral Button, see below */
 font-size: 13px;
 font-weight: 600;
 /* no border-radius — sharp corners */
 ```
-Follow button toggles fill: unfollowed = solid `background: var(--afa-fill-solid)`, `color: var(--afa-on-fill-solid)`, `border: none`; followed = `background: transparent`, `border: 1.5px solid var(--afa-fill-solid)`, `color: var(--afa-fill-solid)` ([VenueFollowButton.tsx:101-110](../src/app/venues/[id]/VenueFollowButton.tsx#L101)).
+Follow buttons (artist, organiser, venue) are a secondary action and never solid orange (GEN-2609-121, GEN-2609-119): `outline-neutral` in both states, with `--afa-text-primary` text for "+ Follow" and the default secondary text for "Following". The notify bell beside it shows its on-state with `--afa-selected` / `--afa-selected-bg`.
 
 **`.afa-cta-solid`** (Artists pages — [ArtistProfileClientPage.tsx](../src/app/(public)/artists/[id]/ArtistProfileClientPage.tsx#L602)): solid-fill button/link variant.
 ```css

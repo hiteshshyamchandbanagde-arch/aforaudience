@@ -130,6 +130,15 @@ const saveButtonProps = (dirty: boolean) =>
         style: { padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-title)', fontWeight: 700 },
       }
 
+// GEN-2609-119 (G2) - the role-application buttons ("Become an Artist",
+// "Apply") are outlines in the same pill shape, with primary text so they
+// still read as the card's call to action. The page's one primary is a
+// card Save while that card is dirty.
+const roleCtaProps = {
+  variant: 'outline-neutral' as const,
+  style: { ...saveButtonProps(false).style, color: 'var(--afa-text-primary)' },
+}
+
 // Recessed field look (Figma Make profile-page redesign, 5 Sep 2026 - see
 // docs/design.md) - inputs sit a shade darker than the card so they read as
 // wells instead of blending into the card body. Same border/radius as
@@ -990,7 +999,7 @@ function ProfileContent() {
                 <div style={{ marginBottom: 'var(--afa-space-3)' }}>
                   <GenrePicker value={genre} onChange={setGenre} size="lg" />
                 </div>
-                <Button data-afa-action-row variant="primary" fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
+                <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
                   {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
                 </Button>
               </>
@@ -1017,7 +1026,7 @@ function ProfileContent() {
                   placeholder={tr.profilePage.orgNamePlaceholder}
                   style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)' }}
                 />
-                <Button data-afa-action-row variant="primary" fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
+                <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
                   {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
                 </Button>
               </>
@@ -1036,7 +1045,7 @@ function ProfileContent() {
             {venueStatus?.hasProfile ? (
               renderRoleStatus(venueStatus, 'venue', tr.profilePage.roleLabelVenue)
             ) : (
-              <Button data-afa-action-row variant="primary" fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
+              <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
                 {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
               </Button>
             )}
