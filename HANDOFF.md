@@ -1,3 +1,111 @@
+# Session Handoff — 2 Oct 2026, part 30 (CC — BUG-2609-081 + 068 chat bubble pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/bubble-081?expand=1
+- **Base:** `34f2dcb`. `qa` has since gained `96a96c2` (part 29, docs-only); the bubble dispatch is unchanged and the branch merges cleanly.
+- **Vercel preview:** READY on the pushed head `15cfbb0` (`dpl_5Kzbjhu32YgKnMH8uemL2vsBRgUD`).
+- **No DB changes.** No new strings (no locale work).
+- **Next step (chat):** merge, then BUG-2609-081 and 068 → BUILD_COMPLETE / DEPLOYED_QA. Four decisions below need an answer.
+- **Unchanged, as asked:** the bubble's look, the chat, and desktop (check g: 0 pixels).
+
+## Commits (each passes `tsc` on its own)
+| Commit | What |
+|---|---|
+| `9d468b1` | Rule 1: marked rows |
+| `3f9c3ad` | Rule 2: keeps lifting while the panel is open |
+| `df741a4` | Rule 3: bottom clearance |
+| `fc4a98b` | Rule 4: short pages lift above any control |
+| `15cfbb0` | Toasts move to the top while the bubble is lifted (found by check f) |
+
+## Rule 1: pages audited
+62 pages loaded at 390 on the production build as Omkar / Vinayak / Hrithik / signed out. Result on every one: 0 px² overlap with any control when scrolled to the bottom, and 0 px² over any marked row at any scroll position.
+
+- **Venue edit at 412:** the existing mark does cover Save Changes / Save & Unpublish / Cancel. It failed only because the lift stopped while the panel was open (rule 2). No change to the mark.
+- **Needed a mark (new):**
+  - Seat page `/events/[id]/seats`: Reserve button + the Razorpay note, wrapped in one row.
+  - Organiser event detail: the Edit Event / Lineup / Check-In / Sales / Publish row.
+  - Organiser dashboard: every card's View / Edit row.
+  - My Venues: every card's View / Edit / seat-map row.
+  - Venue detail: Edit Venue / Revenue / Publish row.
+  - Event edit: Save / Save as Draft / Cancel row.
+  - Lineup: the sticky Save Lineup row.
+  - Tour create (Create Tour); tour detail (Save Stop as Draft).
+  - Artist, organiser and venue-owner profile edit: Save Profile.
+  - Rate page: Submit rating.
+  - Admin settings: the 8 Save buttons. **Not checked live** (no admin login here); same attribute as the rest.
+- **Already marked, still fine:** venue create, event create, profile (Save ×3, Apply ×3), seat-map builder Save, checkout Pay (route is excluded, bubble never renders).
+- **Opted in instead of marked** (`data-afa-avoid-controls`, see rule 4): login, register, forgot-password, reset-password, verify-email (one attribute on `AuthLayout`), and verify-phone.
+- **No mark needed** (no bottom action row; rule 3 clears the page end): `/`, events list + detail, artists list + detail, organisers list + detail, venue-owners list + detail, venues list + detail, wall-of-fame, tour public page, about, for-artists, blog, careers, privacy, terms, livestreams, tickets, saved, my-feedback, audience dashboard, organiser sales / payouts / tours list / check-in / event sales, venue-requests, venue bookings / sales, artist dashboard / events / corporate-inquiries.
+- **Not marked, same shape as the card lists** (controls mid-list, can pass under the bubble while scrolling): artist events "Apply to Perform", venue-requests "Send quote", venue bookings calendar days. See decision 3.
+- **Not audited:** `/dashboard/admin/*` (no admin login), `/dashboard/messages/*` and `/checkout/*` (excluded routes), `/dev/razorpay-test`.
+
+## Rule 2: what happens when the button would hide
+- The hook now runs whenever the widget renders, open or closed.
+- **Open, the button never hides.** It lifts above the row as long as the panel keeps at least 320px between the button and the 72px top line. Past that it stops there: button top at 404px, panel 72–392px, and the row sits under the panel.
+- Closed, nothing changed: it still hides when it has no room.
+- Measured with a marked row forced to 700px tall at 390: closed = hidden; open = button 404–460, panel 72–392 (320px tall). At 440 with a 300px row there is room, so open = lifted clear, panel 407px tall.
+- The panel is anchored to the lifted button (button bottom + 56 + 12) and its max-height is recomputed from that.
+- While open, only marked rows move the button. The rule 4 "any control" lift is closed-only, because the open panel covers those controls anyway and dodging them only shrank the panel.
+
+## Rule 3: clearance value
+- **`padding-bottom: 140px + safe-area`** on `<body>` (mobile only), = `ABOVE_CHAT_BUTTON_MOBILE` in `chromeOffsets.ts`: 64px tab bar + safe area + 8px + 56px button + 12px gap. The 12 is now the constant `CHAT_PANEL_GAP`; no number is typed twice.
+- Mechanism: `SupportWidget` toggles `afa-support-bubble-active` on `<body>`; the rule lives in the widget's own style block so it can use the constants.
+- It **replaces**, not adds to, the tab-bar padding (64 → 140) and `DashboardShell`'s own-bar padding (80 → 140, the shell's `pb-20` is zeroed while the class is on). Measured: tab-bar pages +76px, shell pages +60px, other pages +140px.
+- Checkout and messages are excluded routes, so the class is never set there. Seat-map builder has no pinned bar; it gets the plain 140.
+- A page whose content fits the viewport gets no reservation.
+
+## Rule 4: as built, and where the dispatch's premise was off
+- Built as written: when the page cannot scroll, every visible control under the closed bubble's resting spot counts for the lift. Checked on the tour public page (the one page of 62 that truly cannot scroll) with a control injected under the bubble: lifts 52px at all five widths, drops back when the page is made long, lifts again when short.
+- **/login and /register are not short pages.** On `origin/qa` at 390×844 /register scrolls 243px and /login 59px, at every tested width. The top bar (59px) sits above a `min-height: 100vh` form, so almost every page in the app scrolls by at least that much. As written, rule 4 would never fire on the two pages it names.
+- So those pages opt in: with `data-afa-avoid-controls` on the page, the "any control" lift applies even though the page scrolls.
+
+## Checks (a)–(h)
+Overlap = intersection area in px² between the bubble and any control. Widths 360 / 390 / 412 / 427 / 440. After = production build of the branch. Before = `origin/qa`: production build for (c), (g) and the /register scroll; dev server for the rest.
+
+| Check | Before (`origin/qa`) | After (branch) |
+|---|---|---|
+| **(a)** Venue edit, bottom, closed | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 |
+| **(a)** Venue edit, bottom, **open** | 0 / **1301** / **278** / **470** / **364** (Save & Unpublish; Cancel at 427) | 0 / 0 / 0 / 0 / 0 |
+| **(a)** Venue edit, open, worst at any scroll position | 0 / 1301 / 278 / 470 / 364 | 0 / 0 / 0 / 0 / 0 |
+| **(b)** /register at rest | **975 / 947 / 713 / 778 / 719** (password field + show/hide; Create Account at 412+) | 0 / 0 / 0 / 0 / 0 |
+| **(b)** /login at rest | 0 / 63 / 0 / 0 / 0 ("Create one free") | 0 / 0 / 0 / 0 / 0 |
+| **(c)** Seat page, numbered (Jaipur, D5–D8 picked): Reserve, worst while scrolling | **1932 / 1908 / 1833 / 1812 / 1772** | 0 / 0 / 0 / 0 / 0 |
+| **(c)** Same: Reserve at page bottom | 0 / 438 / 442 / 447 / 442 | 0 / 0 / 0 / 0 / 0 |
+| **(c)** Same: Razorpay note text, worst | 69 / 334 / 169 / 57 / 0 | 0 / 0 / 0 / 0 / 0 |
+| **(c)** Seat page, general admission | 0 at all widths (the row never reaches the bubble) | 0 |
+| **(d)** Organiser dashboard, bottom | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 |
+| **(d)** Organiser dashboard, at rest | 403 / 0 / 0 / 1067 / 216 (a card's Edit) | 0 / 0 / 0 / 0 / 0 |
+| **(d)** My Venues, bottom | 0 / 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 / 0 |
+| **(d)** My Venues, at rest | 0 / 0 / 574 / 1225 / 1116 (second card's Edit) | 0 / 0 / 0 / 0 / 0 |
+| **(e)** /profile, bottom | **1792 / 1792 / 0 / 1722 / 1701** (My Feedback row) | 0 / 0 / 0 / 0 / 0 |
+| **(f)** Toast vs bubble, toast vs action row (event create, empty Publish) | 0 with the row in view and at page top; **2408–2520** at one scroll position in between (bubble lifted into the toast's band) | 0 in all three |
+| **(g)** Desktop 1280, 9 pages × top / bottom / panel open = 27 shots | n/a | **0 pixels differ.** Two runs of `origin/qa` against each other: 0. Bubble and panel rects identical. |
+| **(h)** /events, scrolled top to bottom | 1 position at every width | 1 position at every width, never hidden |
+| **(h)** /register at 390, scrolled top to bottom in 4px steps | 0 position changes, worst overlap 1127 | 35 changes, 0 jumps between visible spots, hides once for 64px, worst overlap 0 |
+
+- **/register at 390 in detail (after):** at rest the bubble sits above the first field (top 204). Scroll 0–132px: it rides up with the form to the 72px line. 136–196px: hidden. 200–383px: back at its resting spot (716) to the bottom. Two visible events: it disappears, then reappears.
+- **/register at rest per width:** bubble top 600 at 360; 204 at 390 / 412 / 427 / 440.
+- **(c) method:** QA has no upcoming numbered event. The Jaipur event is past, so the test reaches the seat page by client-side navigation with the event date rewritten in the page payload. No DB write.
+- **(g) pages:** venue edit, register, login, seat page, organiser dashboard, My Venues, profile, events, event create.
+
+## Verification
+- `tsc` clean on every commit · `next build` passes (branch, and `origin/qa` in a worktree).
+- Checker vs `origin/qa`: no new literals. Ratchet: every category ±0 (spacing 257 / 257). Baseline file not touched.
+- Self-tests: 91 / 67 / 5 / 4 / 48.
+- ESLint, `origin/qa` vs branch on the 21 touched files: same count in every file, 0 new.
+- `e2e/smoke.spec.ts` against the local production build: 4 passed, 2 failed (the "Jaipur Mic Gala 100" test, both viewports). **Identical on the `origin/qa` build**: the event is past. Test-data drift, as in part 25.
+
+## Decisions for chat / Hitesh
+1. **/register hides the bubble for 64px of scroll** (at 390). The fields are too tightly stacked for it to fit anywhere in its column. The alternative is to leave it at the resting spot over a field for that stretch. Hiding is what the lift already did when out of room, so that is what shipped.
+2. **Rule 4 fires on almost no page as written**, because of the 59px top-bar scroll. Auth pages and verify-phone are covered by the opt-in. Widening "short" to "scrolls no more than the top bar" would cover pages like a two-card My Venues or an empty /saved, at the cost of the bubble climbing over (or hiding behind) stacked full-width cards. Not done.
+3. **Card marks make the bubble hop.** With every card's action row marked, it lifts and drops once per card while a list scrolls: 14 positions over the last 1200px of the organiser dashboard, 11 on My Venues. That is "near marked rows", so within check (h), but it is visible. The other card lists (artist events, venue-requests, venue bookings calendar) are left unmarked until this is confirmed as wanted.
+4. **Pages whose content fits now scroll further.** Rule 3 reserves on any page that scrolls at all, and nearly all do (point 2). /tickets with few tickets: 123px of scroll before, 199px after.
+
+## Seen, not changed
+- The tab bar measures 68–70px, not the 64px in `chromeOffsets` and `globals.css`, so the bubble rests 2–4px above it rather than 8px.
+- This machine has about 8 GB of RAM. Two `next dev` servers plus Playwright killed one server (Turbopack out of memory); production builds (`next start`) for both trees ran fine.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 29 (chat — goal plan; colour dispatch written)
 
 - Hitesh agreed the plan (2 Oct):
