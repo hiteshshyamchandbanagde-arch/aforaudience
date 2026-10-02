@@ -99,7 +99,7 @@ function Ballot({
   return (
     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-3)' }}>
       <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
-        {label}{alreadyVoted && <span style={{ marginLeft: 'var(--afa-space-2)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-sage)' }}>✓ Submitted — you can change it until voting closes</span>}
+        {label}{alreadyVoted && <span style={{ marginLeft: 'var(--afa-space-2)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-sage-bright)' }}>✓ Submitted — you can change it until voting closes</span>}
       </div>
       {[1, 2, 3].map((rank) => (
         <div key={rank} style={{ marginBottom: 'var(--afa-space-2)' }}>

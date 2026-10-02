@@ -177,7 +177,7 @@ function FeedbackDetailOverlay({
     >
       <div
         onClick={onClose}
-        style={{ position: 'absolute', inset: 0, background: 'var(--afa-tint-30)' }}
+        style={{ position: 'absolute', inset: 0, background: 'var(--afa-scrim)' }}
       />
       <div
         onTouchStart={handleTouchStart}

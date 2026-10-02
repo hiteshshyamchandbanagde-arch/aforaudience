@@ -205,8 +205,8 @@ export default function VenueBookingsPage() {
                     key={i}
                     onClick={() => dayBookings.length > 0 && setSelectedDay(isSelected ? null : key)}
                     style={{
-                      aspectRatio: '1', borderRadius: 'var(--afa-radius-md)', border: isSelected ? '1px solid var(--afa-amber)' : '1px solid var(--afa-tint-08)',
-                      background: isSelected ? 'var(--afa-amber-tint)' : dayBookings.length > 0 ? 'var(--afa-tint-04)' : 'transparent',
+                      aspectRatio: '1', borderRadius: 'var(--afa-radius-md)', border: isSelected ? '1px solid var(--afa-selected-border)' : '1px solid var(--afa-tint-08)',
+                      background: isSelected ? 'var(--afa-selected-bg)' : dayBookings.length > 0 ? 'var(--afa-tint-04)' : 'transparent',
                       cursor: dayBookings.length > 0 ? 'pointer' : 'default',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'var(--afa-space-2px)', padding: 0,
                     }}

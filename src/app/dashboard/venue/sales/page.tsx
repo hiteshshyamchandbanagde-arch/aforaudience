@@ -346,7 +346,7 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
         </p>
       ) : sub ? (

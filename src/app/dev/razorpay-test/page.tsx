@@ -56,7 +56,7 @@ const INK = "var(--afa-text-primary)"
 const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
 const MIST = "var(--afa-tint-12)"
-const SAGE = "var(--afa-sage)"
+const SAGE = "var(--afa-sage-bright)"
 const SERIF = "var(--font-display)"
 const MONO = "var(--font-mono)"
 

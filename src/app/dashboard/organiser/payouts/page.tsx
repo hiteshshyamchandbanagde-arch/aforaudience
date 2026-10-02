@@ -26,7 +26,7 @@ const STATUS_COPY: Record<string, { label: string; color: string; detail: string
   },
   activated: {
     label: 'Activated',
-    color: 'var(--afa-sage)',
+    color: 'var(--afa-sage-bright)',
     detail: 'Your account is ready to receive direct payouts. Future ticket sales will split automatically — the booking fee stays with the platform, your share transfers straight to this account.',
   },
   verification_failed: {

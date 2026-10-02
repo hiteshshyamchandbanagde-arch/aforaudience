@@ -291,7 +291,8 @@ export default function VenueDashboard() {
                     <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
                       View
                     </Link>
-                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-primary" style={{ ...primaryLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
+                    {/* GEN-2609-121 - a secondary action on every card, so the same outline as View. */}
+                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
                       Edit
                     </Link>
                     {venue.seatingMode === 'NUMBERED' && (

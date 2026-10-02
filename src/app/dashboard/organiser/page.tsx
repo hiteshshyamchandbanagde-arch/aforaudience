@@ -142,7 +142,7 @@ export default function OrganiserDashboard() {
                   ⏳ Payout account linked, not yet activated — <Link href="/dashboard/organiser/payouts" style={{ color: 'inherit' }}>check status</Link>
                 </p>
               ) : (
-                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-sage)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-sage-bright)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
                   ✓ Direct payouts active
                 </p>
               )}

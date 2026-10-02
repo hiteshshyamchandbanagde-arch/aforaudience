@@ -393,9 +393,9 @@ export default async function RootLayout({
                   #intro-tagline { font-family: var(--font-display); font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: var(--afa-amber); opacity: 0; margin-top: var(--afa-space-14px); letter-spacing: 0.02em; }
                 </style>
                 <svg viewBox="0 0 64 64">
-                  <rect x="18" y="42" width="14" height="8" fill="var(--afa-cream)" style="animation:intro-bar-in 260ms ease-out 0ms both"></rect>
-                  <rect x="18" y="30" width="20" height="8" fill="var(--afa-amber)" style="animation:intro-bar-in 260ms ease-out 150ms both"></rect>
-                  <rect x="18" y="18" width="28" height="8" fill="var(--afa-brand-mark)" style="animation:intro-bar-in 260ms ease-out 300ms both"></rect>
+                  <rect x="18" y="42" width="14" height="8" style="fill:var(--afa-cream);animation:intro-bar-in 260ms ease-out 0ms both"></rect>
+                  <rect x="18" y="30" width="20" height="8" style="fill:var(--afa-amber);animation:intro-bar-in 260ms ease-out 150ms both"></rect>
+                  <rect x="18" y="18" width="28" height="8" style="fill:var(--afa-brand-mark);animation:intro-bar-in 260ms ease-out 300ms both"></rect>
                 </svg>
                 <div id="intro-wordmark">
                   <span id="intro-letters"></span>

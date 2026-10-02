@@ -180,7 +180,7 @@ export default function MessageThreadPage() {
               }}
             />
             <Button
-              variant="success"
+              variant="solid"
               size="pill-md"
               fullWidth={false}
               onClick={handleSend}

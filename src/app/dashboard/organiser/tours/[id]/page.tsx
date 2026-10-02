@@ -51,7 +51,7 @@ interface ArtistOption { id: string; user: { name: string; displayName: string |
 
 const CONSENT_LABEL: Record<string, { label: string; color: string }> = {
   PENDING: { label: 'Awaiting response', color: 'var(--afa-amber)' },
-  ACCEPTED: { label: 'Accepted', color: 'var(--afa-sage)' },
+  ACCEPTED: { label: 'Accepted', color: 'var(--afa-sage-bright)' },
   DECLINED: { label: 'Declined', color: 'var(--afa-error-bright)' },
 }
 

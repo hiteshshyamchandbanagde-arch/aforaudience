@@ -111,10 +111,24 @@ const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
   borderRadius: 'var(--afa-radius-lg)',
   padding: 'var(--afa-space-28px) var(--afa-space-28px) var(--afa-space-6)',
-  border: active ? '1.5px solid var(--afa-amber)' : '1px solid var(--afa-tint-06)',
-  boxShadow: active ? '0 0 0 4px var(--afa-amber-tint)' : 'none',
+  border: active ? '1.5px solid var(--afa-selected-border)' : '1px solid var(--afa-tint-06)',
+  boxShadow: active ? '0 0 0 4px var(--afa-selected-bg)' : 'none',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
 })
+
+// GEN-2609-121 - a card's Save is an outline, and becomes the primary only
+// while that card has unsaved changes (it reverts once the save lands and the
+// card's initial values catch up). Two dirty cards are both primary: each is
+// the action for its own card. Both states share one footprint - the primary
+// carries a transparent 1px border to match the outline's - so the button
+// does not shift when the first character is typed.
+const saveButtonProps = (dirty: boolean) =>
+  dirty
+    ? { variant: 'primary' as const, style: { border: '1px solid transparent' } }
+    : {
+        variant: 'outline-neutral' as const,
+        style: { padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-title)', fontWeight: 700 },
+      }
 
 // Recessed field look (Figma Make profile-page redesign, 5 Sep 2026 - see
 // docs/design.md) - inputs sit a shade darker than the card so they read as
@@ -264,6 +278,9 @@ function ProfileContent() {
   // there. Reuses /api/feedback/mine (same data as the full page) but
   // only needs counts here, not the full list.
   const [feedbackSummary, setFeedbackSummary] = useState<{ total: number; open: number } | null>(null)
+  const nameDirty = displayName.trim() !== initialDisplayName.trim()
+  const aboutDirty = avatar !== initialAvatar || bio !== initialBio
+  const currencyDirty = displayCurrency !== initialDisplayCurrency
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -572,7 +589,7 @@ function ProfileContent() {
     }
     if (roleStatus.isActive) {
       return (
-        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage)', textDecoration: 'none' }}>
+        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', textDecoration: 'none' }}>
           {tr.profilePage.visitDashboardTemplate.replace('{label}', label)}
         </Link>
       )
@@ -858,11 +875,11 @@ function ProfileContent() {
               }}
             />
             <Button
-              variant="primary"
+              {...saveButtonProps(nameDirty)}
               fullWidth={false}
               data-afa-action-row
               onClick={saveDisplayName}
-              disabled={savingName || displayName.trim() === initialDisplayName.trim()}
+              disabled={savingName || !nameDirty}
             >
               {savingName ? tr.profilePage.savingEllipsis : tr.profilePage.saveDisplayNameBtn}
             </Button>
@@ -899,11 +916,11 @@ function ProfileContent() {
               style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px', lineHeight: 1.6 }}
             />
             <Button
-              variant="primary"
+              {...saveButtonProps(aboutDirty)}
               fullWidth={false}
               data-afa-action-row
               onClick={saveAbout}
-              disabled={savingAbout || (avatar === initialAvatar && bio === initialBio)}
+              disabled={savingAbout || !aboutDirty}
             >
               {savingAbout ? tr.profilePage.savingEllipsis : tr.profilePage.saveBtn}
             </Button>
@@ -944,11 +961,11 @@ function ProfileContent() {
               ))}
             </select>
             <Button
-              variant="primary"
+              {...saveButtonProps(currencyDirty)}
               fullWidth={false}
               data-afa-action-row
               onClick={saveDisplayCurrency}
-              disabled={savingCurrency || displayCurrency === initialDisplayCurrency}
+              disabled={savingCurrency || !currencyDirty}
             >
               {savingCurrency ? tr.profilePage.savingEllipsis : tr.profilePage.saveCurrencyBtn}
             </Button>

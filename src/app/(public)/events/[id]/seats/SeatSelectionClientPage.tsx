@@ -298,113 +298,116 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 </div>
               )}
 
-              {!event.isFree && !isNumbered && (
-                <div style={{ marginBottom: "var(--afa-space-4)" }}>
-                  {event.ticketTiers.length > 0 ? (
-                    event.ticketTiers.map((t) => (
-                      <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
-                        <div>
-                          <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{t.sectionName}</div>
-                          <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)" }}>₹{t.price}</div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
-                          <SeatStepperButton onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} glyph="−" />
-                          <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats[t.sectionName] || 0}</span>
-                          <SeatStepperButton onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} glyph="+" />
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0" }}>
-                      <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.generalAdmission}</div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
-                        <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
-                        <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
-                        <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {event.isFree && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0", marginBottom: "var(--afa-space-2)" }}>
-                  <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsLabel}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
-                    <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
-                    <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
-                    <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
-                  </div>
-                </div>
-              )}
-
-              {/* GEN-2609-010 - price-tier legend, additive/display-only:
-                  reconciliation with Figma v2's SeatMap.tsx found the
-                  NUMBERED path already gets an equivalent color legend for
-                  free (SeatPicker.tsx renders one above its own canvas,
-                  using this same colorForZone helper). The actual gap was
-                  here - the flat tier list had no color coding at all.
-                  Only shown for >1 tier; a single price isn't a "legend". */}
-              {!event.isFree && !isNumbered && event.ticketTiers.length > 1 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginBottom: "var(--afa-space-4)" }}>
-                  {event.ticketTiers.map((t) => (
-                    <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-primary)", background: "var(--afa-tint-08)", padding: "var(--afa-space-1) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)" }}>
-                      <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: colorForZone(t.sectionName, event.ticketTiers.map((tier) => tier.sectionName)), marginRight: "var(--afa-space-6px)" }} />
-                      {t.sectionName} · ₹{t.price}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {bookingError && (
-                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)", marginBottom: "var(--afa-space-3)" }}>{bookingError}</div>
-              )}
-
-              {totalAmount > 0 ? (
-                <div style={{ marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-10px)" }}>
-                    <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                    <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--afa-space-10px)", gap: "var(--afa-space-3)" }}>
-                    <div>
-                      <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
-                      <div style={{ fontSize: "var(--afa-text-caption)", color: "var(--afa-text-muted)", maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-1)", flexShrink: 0 }}>
-                      <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹</span>
-                      <Input
-                        variant="compact"
-                        type="number"
-                        min={minBookingFee}
-                        max={maxBookingFee}
-                        step={1}
-                        value={feeInput}
-                        disabled={defaultBookingFee === null}
-                        onChange={(e) => {
-                          const n = Number(e.target.value)
-                          if (!Number.isFinite(n)) return
-                          setFeeInput(Math.max(minBookingFee, Math.min(Math.round(n), maxBookingFee)))
-                        }}
-                        style={{ width: "64px", textAlign: "right" }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid var(--afa-tint-10)" }}>
-                    <span style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
-                    <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
-                  <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                  <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.freeAmount}</span>
-                </div>
-              )}
-
-              {/* BUG-2609-081 - one action row: the Reserve button and the
-                  payment note under it, so the chat button clears both. */}
+              {/* BUG-2609-081 - one action row: the quantity steppers (when there is
+                  no seat map), the price summary (seat count, booking fee, Total),
+                  the Reserve button and the payment note, so the chat button
+                  clears all of it. With only the summary marked, the lifted
+                  button landed on the "+" stepper at 360. */}
               <div data-afa-action-row>
+                {!event.isFree && !isNumbered && (
+                  <div style={{ marginBottom: "var(--afa-space-4)" }}>
+                    {event.ticketTiers.length > 0 ? (
+                      event.ticketTiers.map((t) => (
+                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
+                          <div>
+                            <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{t.sectionName}</div>
+                            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)" }}>₹{t.price}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
+                            <SeatStepperButton onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} glyph="−" />
+                            <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats[t.sectionName] || 0}</span>
+                            <SeatStepperButton onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} glyph="+" />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0" }}>
+                        <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.generalAdmission}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
+                          <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
+                          <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
+                          <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {event.isFree && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0", marginBottom: "var(--afa-space-2)" }}>
+                    <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsLabel}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
+                      <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
+                      <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
+                      <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
+                    </div>
+                  </div>
+                )}
+
+                {/* GEN-2609-010 - price-tier legend, additive/display-only:
+                    reconciliation with Figma v2's SeatMap.tsx found the
+                    NUMBERED path already gets an equivalent color legend for
+                    free (SeatPicker.tsx renders one above its own canvas,
+                    using this same colorForZone helper). The actual gap was
+                    here - the flat tier list had no color coding at all.
+                    Only shown for >1 tier; a single price isn't a "legend". */}
+                {!event.isFree && !isNumbered && event.ticketTiers.length > 1 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginBottom: "var(--afa-space-4)" }}>
+                    {event.ticketTiers.map((t) => (
+                      <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-primary)", background: "var(--afa-tint-08)", padding: "var(--afa-space-1) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)" }}>
+                        <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: colorForZone(t.sectionName, event.ticketTiers.map((tier) => tier.sectionName)), marginRight: "var(--afa-space-6px)" }} />
+                        {t.sectionName} · ₹{t.price}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {bookingError && (
+                  <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)", marginBottom: "var(--afa-space-3)" }}>{bookingError}</div>
+                )}
+
+                {totalAmount > 0 ? (
+                  <div style={{ marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-10px)" }}>
+                      <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                      <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--afa-space-10px)", gap: "var(--afa-space-3)" }}>
+                      <div>
+                        <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
+                        <div style={{ fontSize: "var(--afa-text-caption)", color: "var(--afa-text-muted)", maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-1)", flexShrink: 0 }}>
+                        <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹</span>
+                        <Input
+                          variant="compact"
+                          type="number"
+                          min={minBookingFee}
+                          max={maxBookingFee}
+                          step={1}
+                          value={feeInput}
+                          disabled={defaultBookingFee === null}
+                          onChange={(e) => {
+                            const n = Number(e.target.value)
+                            if (!Number.isFinite(n)) return
+                            setFeeInput(Math.max(minBookingFee, Math.min(Math.round(n), maxBookingFee)))
+                          }}
+                          style={{ width: "64px", textAlign: "right" }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid var(--afa-tint-10)" }}>
+                      <span style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
+                      <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
+                    <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                    <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.freeAmount}</span>
+                  </div>
+                )}
+
                 <Button variant="primary" onClick={handleBookClick} disabled={reserving || status === "loading"}>
                   <TicketIcon style={{ width: "18px", height: "18px" }} />
                   {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}

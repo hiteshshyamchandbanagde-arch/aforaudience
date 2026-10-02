@@ -50,7 +50,7 @@ type Panel = 'closed' | 'chat' | 'feedback';
 function ChatIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="9" r="9" fill="var(--afa-amber)" opacity="0.18">
+      <circle cx="12" cy="9" r="9" style={{ fill: "var(--afa-amber)" }} opacity="0.18">
         {pulse && (
           <>
             <animate attributeName="opacity" values="0.18;0.32;0.18" dur="2.6s" repeatCount="indefinite" />

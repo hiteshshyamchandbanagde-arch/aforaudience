@@ -283,14 +283,14 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
           <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
             {/* baseline */}
             <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} style={{ stroke: 'var(--afa-border-resting)' }} strokeWidth={1} />
-            <path d={openedPath} fill="none" stroke="var(--afa-fill-solid)" strokeWidth={2} />
-            <path d={resolvedPath} fill="none" stroke="var(--afa-sage)" strokeWidth={2} />
+            <path d={openedPath} fill="none" style={{ stroke: 'var(--afa-fill-solid)' }} strokeWidth={2} />
+            <path d={resolvedPath} fill="none" style={{ stroke: 'var(--afa-sage-bright)' }} strokeWidth={2} />
             {series.map((w, i) => (
               <g key={i}>
-                <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} fill="var(--afa-fill-solid)" />
-                <circle cx={xFor(i)} cy={yFor(w.resolved)} r={2.5} fill="var(--afa-sage)" />
+                <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} style={{ fill: 'var(--afa-fill-solid)' }} />
+                <circle cx={xFor(i)} cy={yFor(w.resolved)} r={2.5} style={{ fill: 'var(--afa-sage-bright)' }} />
                 {(i === 0 || i === series.length - 1 || i === Math.floor(series.length / 2)) && (
-                  <text x={xFor(i)} y={H - 4} fontSize={9} fill="var(--afa-taupe)" textAnchor="middle">
+                  <text x={xFor(i)} y={H - 4} fontSize={9} style={{ fill: 'var(--afa-taupe)' }} textAnchor="middle">
                     {labelFor(w)}
                   </text>
                 )}
@@ -299,7 +299,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
           </svg>
           <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-micro)' }}>
             <span style={{ color: 'var(--afa-fill-solid)' }}>● Opened</span>
-            <span style={{ color: 'var(--afa-sage)' }}>● Resolved</span>
+            <span style={{ color: 'var(--afa-sage-bright)' }}>● Resolved</span>
           </div>
         </div>
 

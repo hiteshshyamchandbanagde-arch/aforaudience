@@ -181,7 +181,7 @@ export default function FeedbackDetailPanel({
       }}
     >
       <style>{`
-        .fb-detail-backdrop { position: absolute; inset: 0; background: var(--afa-tint-30); }
+        .fb-detail-backdrop { position: absolute; inset: 0; background: var(--afa-scrim); }
         .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-surface-raised); box-shadow: -8px 0 24px var(--afa-tint-12); overflow-y: auto; }
         @media (max-width: 780px) {
           .fb-detail-panel { width: 100%; }

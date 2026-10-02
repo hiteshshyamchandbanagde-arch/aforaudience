@@ -371,9 +371,10 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         textDecoration: 'none',
       }
     case 'success':
-      // GEN-2609-109 - positive/approve actions, 5 `bare` sites (admin
+      // GEN-2609-109 - positive/approve actions, 4 sites (admin
       // feedback Approve, organiser Approve application, artist Accept tour
-      // invite, organiser Publish Stop, messages Send). `solid`'s ember
+      // invite, organiser Publish Stop; messages Send moved to `solid` in
+      // GEN-2609-121, sending is that page's one action). `solid`'s ember
       // fill reads as "the page's main CTA", not "approve", so these were
       // always a different colour family - see `outline-error`'s note on
       // GEN-2609-076 deliberately not folding them in. Text is
@@ -409,7 +410,9 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         gap: 'var(--afa-space-6px)',
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
-        color: 'var(--afa-sage)',
+        // GEN-2609-114 - bright text on the dark surface, base-colour edge: the
+        // same split `outline-error` uses.
+        color: 'var(--afa-sage-bright)',
         border: '1px solid var(--afa-sage)',
         padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',
