@@ -1,3 +1,24 @@
+# Session Handoff — 2 Oct 2026, part 32 (chat — Hitesh click-through results)
+
+- **Resolved today:**
+  - From Hitesh's live click-through: BUG-2609-074, 054, 063, 088, 053; FEAT-2608-008; GEN-2609-011, 015, **005** (first full paid booking on QA, Razorpay test card).
+  - Closed by chat after verification: GEN-2609-014, 070, 097, 110, 116; BUG-2609-062.
+  - **QA's Razorpay keys work**; only Hitesh's local `.env.local` keys are dead.
+- **New:**
+  - BUG-2610-003: My Tickets expired reservations; Tier "–" on numbered bookings (`Booking.seats` is `{}`), confirmed on a fresh booking.
+  - BUG-2610-004 (MEDIUM): a hidden active search plus the auto city gives 0 events with no explanation.
+  - Notes on 076 (two primaries on event detail; "one of 4 people" counts seats); 081 (/register floating bubble, Hitesh: keep for now); BUG-2608-050 (e2e Jaipur date).
+- **QA data change:** `qa-jaipur-event-0001` moved to 2026-11-14. It's the only numbered-venue event in QA, so this also unblocks the e2e smoke. Hitesh now holds a CONFIRMED booking on it (F5-F8).
+- **Colour dispatch:** gained item 11 (seat-page price summary under the bubble), `04a243b`. Next CC run.
+- **Pending Hitesh:**
+  - BUG-2608-030: is seat picking comfortable at 412? (answer pending)
+  - Decisions: Pune venue country fix (2 venues missing a country); poster-less card colour; close FEAT-2608-030; offline tickets.
+  - Items 12-13 (admin colour edit and revert; Admin Settings) after the colour merge.
+  - Revoke the 1 Oct PAT.
+- Pile now: 20 `IN_TEST`, 6 `BUILD_COMPLETE`, 7 `BUILD_QUEUE`.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 31 (chat — #719 merged)
 
 - **#719** (BUG-2609-081 + 068, chat bubble) was squash-merged at pinned head `15cfbb0`, giving `qa` @ `cf940bd`.
