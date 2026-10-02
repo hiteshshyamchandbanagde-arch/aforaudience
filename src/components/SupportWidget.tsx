@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Button, { variantStyle } from '@/components/ui/Button';
 import { CheckIcon } from '@/components/icons/EventIcons';
 import { ABOVE_CHAT_BUTTON_MOBILE, CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, CHAT_PANEL_GAP, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
-import { MIN_TOP, useActionRowClearance } from '@/components/mobile/useActionRowClearance';
+import { MIN_TOP, setChatButtonLifted, useActionRowClearance } from '@/components/mobile/useActionRowClearance';
 
 /**
  * Floating support widget: chat first, feedback-form fallback.
@@ -157,6 +157,11 @@ export default function SupportWidget() {
     keepVisible: open,
     headroom: open ? CHAT_PANEL_MIN_HEIGHT + CHAT_PANEL_GAP : 0,
   });
+  const lifted = !excluded && (clearance.bottom !== null || clearance.hidden);
+  useEffect(() => {
+    setChatButtonLifted(lifted);
+    return () => setChatButtonLifted(false);
+  }, [lifted]);
   // BUG-2609-081 - every page that scrolls reserves room after its last
   // content, so the last controls can always scroll clear of the button.
   // A page that fits the viewport gets none (it would only make it

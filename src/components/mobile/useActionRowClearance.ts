@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 import { MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets'
 
 // BUG-2609-068 - a floating button (the support chat bubble) must never
@@ -214,4 +214,23 @@ export function useActionRowClearance(
   }, [active, probeRef])
 
   return active ? state : RESTING
+}
+
+// BUG-2609-081 - the toast stack rests directly above the chat button's
+// resting spot, so when the button lifts it moves into the toasts' band.
+// The button publishes whether it is away from its resting spot; the
+// toast stack reads it and moves to the top.
+let chatButtonLifted = false
+const liftListeners = new Set<() => void>()
+export function setChatButtonLifted(lifted: boolean) {
+  if (chatButtonLifted === lifted) return
+  chatButtonLifted = lifted
+  for (const l of liftListeners) l()
+}
+function subscribeLift(listener: () => void) {
+  liftListeners.add(listener)
+  return () => { liftListeners.delete(listener) }
+}
+export function useChatButtonLifted(): boolean {
+  return useSyncExternalStore(subscribeLift, () => chatButtonLifted, () => false)
 }
