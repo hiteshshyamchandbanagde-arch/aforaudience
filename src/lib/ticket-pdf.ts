@@ -1,13 +1,14 @@
-import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont } from "pdf-lib"
+import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, type RGB } from "pdf-lib"
 import QRCode from "qrcode"
+import { resolveDesignColors, toPdfRgb } from "@/lib/design-tokens.server"
 
 // ---------------------------------------------------------------------------
 // Ticket PDF generator.
 //
 // Design brief: editorial / theater-program feel, not utility / boarding-pass.
 // A first ticket is a memorable moment for the audience — the PDF should
-// feel like a keepsake. Playfair-esque serif for headings, warm Paper
-// background, Ember accents, generous whitespace.
+// feel like a keepsake. Playfair-esque serif for headings, warm paper
+// background, accent-coloured labels, generous whitespace.
 //
 // Fonts: pdf-lib only ships with the 14 standard PDF fonts (Helvetica,
 // Times-Roman, Courier + bold/italic variants). No Playfair Display
@@ -27,15 +28,45 @@ import QRCode from "qrcode"
 // with ellipsis rather than overflowing).
 // ---------------------------------------------------------------------------
 
-// AforAudience palette, expressed as pdf-lib rgb() values (0..1).
-const COLOR = {
-  ink: rgb(0.055, 0.047, 0.039),   // #0E0C0A — primary text
-  paper: rgb(0.969, 0.953, 0.933), // #F7F3EE — page background
-  ember: rgb(0.784, 0.267, 0.102), // #C8441A — brand accent
-  mist: rgb(0.910, 0.886, 0.851),  // #E8E2D9 — divider
-  sage: rgb(0.290, 0.404, 0.255),  // #4A6741 — confirmed pill
-  bodyMuted: rgb(0.4, 0.38, 0.36), // slightly warm grey
-} as const
+// GEN-2609-119 - the palette comes from the design tokens, resolved when
+// the PDF is generated (pdf-lib has no CSS engine, so no var()). The
+// ticket stays a light, printable page: ink on a cream paper, with the
+// labels and rules in the primary action colour. Each entry is a pdf-lib
+// colour plus an opacity, spread straight into a draw call.
+type Paint = { color: RGB; opacity: number }
+function paint(value: string, alpha = 1): Paint {
+  const p = toPdfRgb(value)
+  return { color: rgb(p.r, p.g, p.b), opacity: p.opacity * alpha }
+}
+
+// Quieter text and the hairlines are the ink at a lower opacity, so they
+// follow an ink edit instead of needing colours of their own. On the
+// default cream these land on the old warm grey and divider.
+const MUTED_ALPHA = 0.62
+const HAIRLINE_ALPHA = 0.064
+
+// The coloured "A" of the wordmark is the logo and keeps its own value.
+const LOGO_A = "#C8441A" // token-ok(hex-color-literal): logo, fixed by design
+// The QR keeps fixed dark modules on a light ground, whatever the paper
+// becomes, so it always scans.
+const QR_DARK = "#0E0C0A" // token-ok(hex-color-literal): QR modules, fixed so the code always scans
+const QR_LIGHT = "#F7F3EE" // token-ok(hex-color-literal): QR ground, fixed so the code always scans
+
+export const TICKET_PDF_TOKENS = ["--afa-ink", "--afa-cream", "--afa-fill-solid"] as const
+export function ticketPdfColorsFrom(c: Record<(typeof TICKET_PDF_TOKENS)[number], string>) {
+  return {
+    ink: paint(c["--afa-ink"]),
+    paper: paint(c["--afa-cream"]),
+    accent: paint(c["--afa-fill-solid"]),
+    bodyMuted: paint(c["--afa-ink"], MUTED_ALPHA),
+    hairline: paint(c["--afa-ink"], HAIRLINE_ALPHA),
+    logoA: paint(LOGO_A),
+  }
+}
+export type TicketPdfColors = ReturnType<typeof ticketPdfColorsFrom>
+export async function loadTicketPdfColors(): Promise<TicketPdfColors> {
+  return ticketPdfColorsFrom(await resolveDesignColors(TICKET_PDF_TOKENS))
+}
 
 const PAGE_W = 595 // A4 portrait in points
 const PAGE_H = 842
@@ -69,7 +100,10 @@ export type TicketData = {
   companions?: { name: string; status: 'PENDING' | 'ACCEPTED' | 'DECLINED' }[]
 }
 
-export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
+// `colors` is for callers that already hold a resolved palette; left
+// out, the tokens are read here.
+export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors): Promise<Uint8Array> {
+  const COLOR = colors ?? (await loadTicketPdfColors())
   const doc = await PDFDocument.create()
   doc.setTitle(`AforAudience — ${t.eventTitle}`)
   doc.setAuthor("AforAudience")
@@ -82,7 +116,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: 0,
     width: PAGE_W,
     height: PAGE_H,
-    color: COLOR.paper,
+    ...COLOR.paper,
   })
 
   const serif = await doc.embedFont(StandardFonts.TimesRoman)
@@ -101,14 +135,14 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: cursorY,
     size: 28,
     font: serifBold,
-    color: COLOR.ember,
+    ...COLOR.logoA,
   })
   page.drawText("forAudience", {
     x: marginX + serifBold.widthOfTextAtSize("A", 28) + 2,
     y: cursorY,
     size: 22,
     font: serifBold,
-    color: COLOR.ink,
+    ...COLOR.ink,
   })
 
   // Tagline, right-aligned
@@ -120,11 +154,11 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: cursorY + 8,
     size: taglineSize,
     font: sans,
-    color: COLOR.bodyMuted,
+    ...COLOR.bodyMuted,
   })
 
   cursorY -= 20
-  drawHairline(page, marginX, cursorY, PAGE_W - marginX * 2)
+  drawHairline(page, COLOR, marginX, cursorY, PAGE_W - marginX * 2)
 
   // ── "Admit One/N" section ─────────────────────────────────────────────
   // BUG-2608-031 - this used to hardcode "ADMIT ONE" regardless of how
@@ -143,12 +177,12 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: cursorY,
     size: 10,
     font: sansBold,
-    color: COLOR.ember,
+    ...COLOR.accent,
     // pdf-lib doesn't do letter-spacing natively; workaround via manual
     // char-by-char draw isn't worth it for one line.
   })
   cursorY -= 4
-  drawUnderline(page, marginX, cursorY, sansBold.widthOfTextAtSize(admitText, 10))
+  drawUnderline(page, COLOR, marginX, cursorY, sansBold.widthOfTextAtSize(admitText, 10))
 
   // ── Event title (may wrap) ────────────────────────────────────────────
   cursorY -= 46
@@ -161,7 +195,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
       y: cursorY,
       size: titleSize,
       font: serifBold,
-      color: COLOR.ink,
+      ...COLOR.ink,
     })
     cursorY -= titleSize + 4
   }
@@ -174,7 +208,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: cursorY,
     size: 13,
     font: serif,
-    color: COLOR.bodyMuted,
+    ...COLOR.bodyMuted,
   })
   cursorY -= 18
   const timeStr = `${t.eventStartTime} — ${t.eventEndTime}`
@@ -183,7 +217,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: cursorY,
     size: 13,
     font: serif,
-    color: COLOR.bodyMuted,
+    ...COLOR.bodyMuted,
   })
   if (t.venueName) {
     cursorY -= 18
@@ -193,7 +227,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
       y: cursorY,
       size: 12,
       font: sans,
-      color: COLOR.bodyMuted,
+      ...COLOR.bodyMuted,
     })
   }
 
@@ -206,8 +240,8 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     width: 320, // rendered at 320 for crisp print; drawn much smaller
     margin: 1,
     color: {
-      dark: "#0E0C0A",
-      light: "#F7F3EE",
+      dark: QR_DARK,
+      light: QR_LIGHT,
     },
   })
   const qrImage = await doc.embedPng(qrPngBytes)
@@ -228,18 +262,18 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: qrY - 14,
     size: 9,
     font: sans,
-    color: COLOR.bodyMuted,
+    ...COLOR.bodyMuted,
   })
 
   // ── Divider ───────────────────────────────────────────────────────────
   cursorY -= 36
-  drawHairline(page, marginX, cursorY, PAGE_W - marginX * 2)
+  drawHairline(page, COLOR, marginX, cursorY, PAGE_W - marginX * 2)
 
   // ── Details grid: attendee / seats / amount / booking id ──────────────
   cursorY -= 30
   const col1X = marginX
   const col2X = marginX + 200
-  drawDetail(page, sansBold, sans, col1X, cursorY, "ATTENDEE", t.attendeeName)
+  drawDetail(page, COLOR, sansBold, sans, col1X, cursorY, "ATTENDEE", t.attendeeName)
 
   // Amount displayed on the ticket. When a booking fee was applied,
   // break it out honestly so the attendee sees where the money went.
@@ -247,6 +281,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   if (t.bookingFeeAmount > 0) {
     drawDetail(
       page,
+      COLOR,
       sansBold,
       sans,
       col2X,
@@ -257,6 +292,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   } else {
     drawDetail(
       page,
+      COLOR,
       sansBold,
       sans,
       col2X,
@@ -273,10 +309,11 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
         .filter(([, q]) => Number(q) > 0)
         .map(([s, q]) => `${s} x ${q}`)
         .join(", ")
-  drawDetail(page, sansBold, sans, col1X, cursorY, "SEATS", seatSummary || "General")
+  drawDetail(page, COLOR, sansBold, sans, col1X, cursorY, "SEATS", seatSummary || "General")
   if (t.bookingFeeAmount > 0) {
     drawDetail(
       page,
+      COLOR,
       sansBold,
       sans,
       col2X,
@@ -285,7 +322,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
       `INR ${t.bookingFeeAmount.toLocaleString("en-IN")}`
     )
   } else {
-    drawDetail(page, sansBold, sans, col2X, cursorY, "PURCHASED",
+    drawDetail(page, COLOR, sansBold, sans, col2X, cursorY, "PURCHASED",
       formatDate(t.purchasedAt)
     )
   }
@@ -296,6 +333,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   if (t.bookingFeeAmount > 0) {
     drawDetail(
       page,
+      COLOR,
       sansBold,
       sans,
       col1X,
@@ -303,13 +341,13 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
       "TOTAL PAID",
       `INR ${t.totalAmount.toLocaleString("en-IN")}`
     )
-    drawDetail(page, sansBold, sans, col2X, cursorY, "PURCHASED",
+    drawDetail(page, COLOR, sansBold, sans, col2X, cursorY, "PURCHASED",
       formatDate(t.purchasedAt)
     )
     cursorY -= 54
   }
 
-  drawDetail(page, sansBold, sans, col1X, cursorY, "TICKET REF", t.ticketCode ?? t.bookingId, t.ticketCode ? 13 : 9)
+  drawDetail(page, COLOR, sansBold, sans, col1X, cursorY, "TICKET REF", t.ticketCode ?? t.bookingId, t.ticketCode ? 13 : 9)
 
   // ── Going with (companion tags), if any ─────────────────────────────
   // Only PENDING/ACCEPTED shown - a DECLINED tag means that person isn't
@@ -325,7 +363,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
       y: cursorY + 14,
       size: 8,
       font: sansBold,
-      color: COLOR.ember,
+      ...COLOR.accent,
     })
     const goingWithValue = goingWith
       .map((c) => `${c.name} ${c.status === "PENDING" ? "(pending)" : "(confirmed)"}`)
@@ -338,7 +376,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
         y: gwy,
         size: 11,
         font: sans,
-        color: COLOR.ink,
+        ...COLOR.ink,
       })
       gwy -= 15
     }
@@ -346,7 +384,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
 
   // ── Bottom band: house rules / footer ─────────────────────────────────
   const footerY = 90
-  drawHairline(page, marginX, footerY + 46, PAGE_W - marginX * 2)
+  drawHairline(page, COLOR, marginX, footerY + 46, PAGE_W - marginX * 2)
 
   const rulesLines = [
     "Present this ticket at the venue. Screen or print is fine.",
@@ -360,7 +398,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
       y: ry,
       size: 9,
       font: sans,
-      color: COLOR.bodyMuted,
+      ...COLOR.bodyMuted,
     })
     ry -= 12
   }
@@ -371,7 +409,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: 40,
     size: 9,
     font: sans,
-    color: COLOR.bodyMuted,
+    ...COLOR.bodyMuted,
   })
   const rightSlug = "Where art finds its crowd."
   const rightSlugWidth = serif.widthOfTextAtSize(rightSlug, 10)
@@ -380,7 +418,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     y: 40,
     size: 10,
     font: serif,
-    color: COLOR.ember,
+    ...COLOR.accent,
   })
 
   return await doc.save()
@@ -388,28 +426,29 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
 
 // ── helpers ─────────────────────────────────────────────────────────────
 
-function drawHairline(page: PDFPage, x: number, y: number, w: number) {
+function drawHairline(page: PDFPage, COLOR: TicketPdfColors, x: number, y: number, w: number) {
   page.drawRectangle({
     x,
     y,
     width: w,
     height: 0.6,
-    color: COLOR.mist,
+    ...COLOR.hairline,
   })
 }
 
-function drawUnderline(page: PDFPage, x: number, y: number, w: number) {
+function drawUnderline(page: PDFPage, COLOR: TicketPdfColors, x: number, y: number, w: number) {
   page.drawRectangle({
     x,
     y,
     width: w,
     height: 1.4,
-    color: COLOR.ember,
+    ...COLOR.accent,
   })
 }
 
 function drawDetail(
   page: PDFPage,
+  COLOR: TicketPdfColors,
   labelFont: PDFFont,
   valueFont: PDFFont,
   x: number,
@@ -423,14 +462,14 @@ function drawDetail(
     y: y + 20,
     size: 8,
     font: labelFont,
-    color: COLOR.ember,
+    ...COLOR.accent,
   })
   page.drawText(truncate(value, valueFont, valueSize, 240), {
     x,
     y,
     size: valueSize,
     font: valueFont,
-    color: COLOR.ink,
+    ...COLOR.ink,
   })
 }
 
