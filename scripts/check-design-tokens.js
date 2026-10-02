@@ -566,44 +566,59 @@ function shouldFlag(rule, literals, isKnownInBaseFn) {
 // globals.css at runtime). Same exemption rationale as globals.css
 // itself: this is where these literals are SUPPOSED to live, not a new
 // gap in the checker.
-// GEN-2609-094 - 3 files where `var(--afa-*)` structurally cannot
-// resolve, found by the GEN-2609-093 audit (docs/token-migration-status.md
-// Section 3): CSS custom properties never reach these rendering paths, so
-// a literal here isn't hardcoding-debt the same way a JSX inline style is
-// - it's the only value that could ever work.
-//   - src/lib/email.ts - HTML strings sent through Resend
-//     (`resend.emails.send({ html: \`...\` })`); CSS custom properties are
-//     unsupported by most email clients (Outlook especially). Also the
-//     concrete reason this exemption matters beyond tidiness: 23 of this
-//     file's literals were already "script-convertible" per
-//     migrate-tokens.js's own maps - a naive whole-tree
-//     `--categories=all --apply` run would have "successfully" rewritten
-//     them into var() references that silently render as nothing in
-//     every transactional email.
-//   - src/lib/ticket-pdf.ts - PDF generation via pdf-lib's `rgb()`, a
-//     separate rendering pipeline with no CSS engine at all.
-//   - src/app/manifest.ts - the web app manifest is static JSON
-//     (`MetadataRoute.Manifest`), not CSS-aware; its own header comment
-//     already documents this from BUG-2609-015 ("CSS variable strings
-//     here were silently ignored by the browser"), but the exemption was
-//     never added here, leaving it silently exposed to a future
-//     colour-category migration batch.
+// GEN-2609-119 - the surfaces where `var(--afa-*)` structurally cannot
+// resolve (email HTML, the ticket PDF, the manifest, the poster images)
+// were exempt from every rule here (GEN-2609-094). They now read their
+// colours from the design tokens through a server-side resolver
+// (src/lib/design-tokens.server.ts), so they are checked like any other
+// file for the colour rules: a new hex or rgb() literal in one of them
+// is debt again, unless it carries a token-ok (the logo, the QR).
+//
+// Two narrower lists replace the old whole-file exemption:
+//   - isSizingExemptFile: email.ts and the poster routes still carry
+//     literal px sizes, spacing, radii and font families, and always
+//     will - an email client and Satori's 1080px canvas have no CSS
+//     custom properties to read. Only the non-colour rules skip them.
+//     ticket-pdf.ts and manifest.ts have no such literals and get no
+//     exemption at all.
+//   - isMigrationExcludedFile: migrate-tokens.js must still never
+//     rewrite any of them into var() references, which would render as
+//     nothing (the concrete risk GEN-2609-094 recorded for email.ts).
 const EXEMPT_FILES = new Set([
   'src/app/globals.css',
   'src/lib/statusStyle.ts',
   'src/lib/design-tokens.ts',
-  'src/lib/email.ts',
-  'src/lib/ticket-pdf.ts',
-  'src/app/manifest.ts',
 ])
 
 function isExemptFile(file) {
   if (EXEMPT_FILES.has(file)) return true
-  // Server-rendered OG/poster canvas images - not UI, already documented
-  // as its own exception in docs/afa-design-tokens-reference.md Section 8.1.
-  if (file.startsWith('src/app/api/posters/')) return true
   if (/\.test\.tsx?$/.test(file)) return true
   return false
+}
+
+const COLOUR_RULE_NAMES = new Set(['hex-color-literal', 'rgb-rgba-literal'])
+
+function isSizingExemptFile(file) {
+  return file === 'src/lib/email.ts' || file.startsWith('src/app/api/posters/')
+}
+
+const NO_VAR_FILES = new Set([
+  'src/lib/email.ts',
+  'src/lib/ticket-pdf.ts',
+  'src/app/manifest.ts',
+  'src/lib/poster-colors.ts',
+])
+
+function isMigrationExcludedFile(file) {
+  return isExemptFile(file) || NO_VAR_FILES.has(file) || file.startsWith('src/app/api/posters/')
+}
+
+// Every non-colour rule skips the sizing-exempt files, on top of any
+// file exemption of its own (raw-button's Button.tsx).
+for (const rule of RULES) {
+  if (COLOUR_RULE_NAMES.has(rule.name)) continue
+  const own = rule.isExemptFile
+  rule.isExemptFile = (file) => isSizingExemptFile(file) || (!!own && own(file))
 }
 
 function isCheckedFile(file) {
@@ -810,6 +825,8 @@ module.exports = {
   RULES,
   isCheckedFile,
   isExemptFile,
+  isSizingExemptFile,
+  isMigrationExcludedFile,
   EXEMPT_FILES,
   isKnownLiteralInBase,
   shouldFlag,

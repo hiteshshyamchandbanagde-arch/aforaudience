@@ -33,10 +33,10 @@ export default function PhotoRotationDots({
           style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "var(--afa-radius-pill)", overflow: "hidden", padding: 0, transition: "width 0.3s ease", background: "var(--afa-tint-20)" }}
         >
           {i === active && !reduced && !paused && (
-            <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)", transformOrigin: "left", animation: `heroDrawLine ${ROTATE_MS}ms linear` }} />
+            <span style={{ position: "absolute", inset: 0, background: "var(--afa-selected)", transformOrigin: "left", animation: `heroDrawLine ${ROTATE_MS}ms linear` }} />
           )}
           {i === active && (reduced || paused) && (
-            <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)" }} />
+            <span style={{ position: "absolute", inset: 0, background: "var(--afa-selected)" }} />
           )}
         </Button>
       ))}

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "../fonts/fallbacks.css";
 import "./globals.css";
-import { getDesignTokensSafe } from "@/lib/design-tokens.server";
+import { appChromeColors, getDesignTokensSafe } from "@/lib/design-tokens.server";
 import { buildDesignTokenCss } from "@/lib/design-tokens";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
@@ -261,24 +261,20 @@ export const metadata: Metadata = {
 // fix's CSS media query never activated on a real phone: the query checks
 // against the browser's reported viewport width, which stays fake-desktop-
 // sized without this tag, regardless of the phone's actual screen size.
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  // Match the manifest's theme_color so the browser chrome (Android
-  // address bar, iOS status bar in standalone) tints correctly.
-  // GEN-2609-094 (BUG-2609-056) - this was `"var(--afa-fill-solid)"`
-  // from GEN-2609-067 onward, but a Viewport export renders straight
-  // into `<meta name="theme-color" content="...">` - a meta tag's
-  // `content` attribute is never a CSS context, so the browser can't
-  // resolve a CSS custom property there and silently ignored it,
-  // falling back to default chrome tinting instead of the brand color.
-  // Resolved hex instead, matching --afa-fill-solid's own value in
-  // globals.css/design-tokens.ts and manifest.ts's own hardcoded
-  // theme_color - all 3 must stay in sync by hand (see docs/design.md's
-  // GEN-2609-094 entry for the known limitation: this won't follow an
-  // admin's live change to --afa-fill-solid the way most tokens do).
-  themeColor: "#FF5A36", // token-ok(hex-color-literal): meta content attribute, not a CSS context - var() cannot resolve here; must equal manifest.ts's theme_color
-};
+// GEN-2609-119 - the theme colour (Android address bar, iOS status bar in
+// standalone) follows the admin's --afa-fill-solid. A meta tag's content
+// is not a CSS context, so var() can't work there (GEN-2609-094); the
+// token is resolved to a concrete value here instead, from the same
+// cached read the layout already makes. manifest.ts reads the same
+// appChromeColors(), so the two can't drift.
+export async function generateViewport(): Promise<Viewport> {
+  const { theme } = await appChromeColors();
+  return {
+    width: "device-width",
+    initialScale: 1,
+    themeColor: theme,
+  };
+}
 
 export default async function RootLayout({
   children,

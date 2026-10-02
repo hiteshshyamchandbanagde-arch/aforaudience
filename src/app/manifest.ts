@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { appChromeColors } from '@/lib/design-tokens.server';
 
 // Web app manifest — drives "Add to Home Screen" on Android/Chrome
 // and is the source-of-truth PWABuilder reads to generate the TWA APK
@@ -12,7 +13,13 @@ import type { MetadataRoute } from 'next';
 //              generator script (scripts/gen-pwa-icons.py) reserves
 //              a 10% safe-zone on each side for maskable variants.
 
-export default function manifest(): MetadataRoute.Manifest {
+// GEN-2609-119 - a manifest route is cached by default, which would
+// freeze the colours at build time. Regenerate it on the same clock as
+// the token cache; an editor save also clears it through the tag.
+export const revalidate = 300;
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const chrome = await appChromeColors();
   return {
     id: '/',
     name: 'AforAudience — Where Art Finds Its Crowd',
@@ -23,17 +30,16 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    // BUG-2609-015: manifests are static JSON, not CSS-aware - CSS
-    // variable strings here were silently ignored by the browser (both
-    // properties). Resolved hex values, not CSS var references
-    // (src/app/globals.css: --afa-cream, --afa-fill-solid).
-    // GEN-2609-067 - theme_color retargeted from the legacy
-    // --afa-terracotta's hex to --afa-fill-solid's, matching
-    // layout.tsx's viewport.themeColor (the two must stay in sync -
-    // this is the pairing that was flagged as a coupled invariant since
-    // GEN-2609-063, now resolved by updating both sides together).
-    background_color: '#F7F3EE',
-    theme_color: '#FF5A36',
+    // BUG-2609-015: a manifest is JSON, not CSS-aware - CSS variable
+    // strings here were silently ignored by the browser. GEN-2609-119:
+    // both colours are the admin's tokens resolved to concrete values:
+    // theme_color is --afa-fill-solid (the same value layout.tsx's
+    // theme-color meta gets) and background_color, the install splash,
+    // is --afa-surface-page - the app is dark, so the splash is too
+    // (decided 2 Oct; it was the legacy cream). An installed PWA keeps
+    // its own copy of the manifest; that is the browser's behaviour.
+    background_color: chrome.background,
+    theme_color: chrome.theme,
     lang: 'en-IN',
     dir: 'ltr',
     categories: ['entertainment', 'events', 'music', 'social'],

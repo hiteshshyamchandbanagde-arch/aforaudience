@@ -550,6 +550,49 @@ export function resolveTokenValue(values: Record<string, string>, key: string): 
   return ref ? values[ref[1]] ?? raw : raw
 }
 
+// GEN-2609-119 - concrete colours for surfaces where var() can't render
+// (poster images, email HTML, the ticket PDF, the manifest, the
+// theme-color meta). `values` holds saved values by key; a key it lacks
+// falls back to DEFAULT_TOKEN_VALUES. var(--x) chains are followed to a
+// #hex / rgb() / rgba(). A chain that loops, runs past the depth limit,
+// dangles or ends in something that isn't a colour is retried on the
+// defaults alone, so one bad saved row can't blank a poster. A key no
+// table knows resolves to UNRESOLVED_COLOR.
+export const COLOR_RESOLVE_MAX_DEPTH = 8
+export const UNRESOLVED_COLOR = "#000000"
+const ANY_VAR_REF = /^var\((--[a-z0-9-]+)\)$/
+
+function followColorChain(lookup: (key: string) => string | undefined, key: string): string | null {
+  const seen = new Set<string>()
+  let current = key
+  for (let depth = 0; depth <= COLOR_RESOLVE_MAX_DEPTH; depth++) {
+    if (seen.has(current)) return null
+    seen.add(current)
+    const raw = lookup(current)?.trim()
+    if (!raw) return null
+    const ref = raw.match(ANY_VAR_REF)
+    if (!ref) return parseCssColor(raw) ? raw : null
+    current = ref[1]
+  }
+  return null
+}
+
+export function resolveColorValue(values: Record<string, string>, key: string): string {
+  return (
+    followColorChain((k) => values[k] ?? DEFAULT_TOKEN_VALUES[k], key) ??
+    followColorChain((k) => DEFAULT_TOKEN_VALUES[k], key) ??
+    UNRESOLVED_COLOR
+  )
+}
+
+// pdf-lib takes rgb(r, g, b) with each channel in 0..1 and opacity as a
+// separate draw option; this returns both from a resolved CSS colour.
+export type PdfRgb = { r: number; g: number; b: number; opacity: number }
+export function toPdfRgb(value: string): PdfRgb {
+  const [r, g, b, a] = parseCssColor(value) ?? parseCssColor(UNRESOLVED_COLOR)!
+  return { r: r / 255, g: g / 255, b: b / 255, opacity: a }
+}
+
 // GEN-2609-108 - every text/surface pair the site uses at rest. `over`
 // is the surface a translucent `bg` sits on. `large`: text that only
 // ever renders large (>= 24px, or >= 18.66px bold) - 3:1 instead of 4.5:1.

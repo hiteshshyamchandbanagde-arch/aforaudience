@@ -95,13 +95,16 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
       <style>{`.afa-follow-cta:hover { filter: brightness(1.1); }`}</style>
+      {/* GEN-2609-119 (G1) - Follow is a secondary action: an outline in both
+          states, as on the artist profile (GEN-2609-121). */}
       <Button
-        variant={following ? "outline-neutral" : "solid"}
+        variant="outline-neutral"
         size="md"
         fullWidth={false}
         onClick={toggleFollow}
         disabled={busy}
         className="afa-follow-cta"
+        style={following ? undefined : { color: "var(--afa-text-primary)" }}
       >
         {following ? tr.venueDetailPage.following : tr.venueDetailPage.follow}
       </Button>
@@ -147,11 +150,12 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
     <div style={{ marginTop: "var(--afa-space-5)" }}>
       <style>{`.afa-follow-cta-sidebar:hover { filter: brightness(1.1); }`}</style>
       <Button
-        variant={following ? "outline-neutral" : "solid"}
+        variant="outline-neutral"
         size="lg"
         onClick={toggleFollow}
         disabled={busy}
         className="afa-follow-cta-sidebar"
+        style={following ? undefined : { color: "var(--afa-text-primary)" }}
       >
         {!following && <PlusIcon style={{ width: "16px", height: "16px" }} />}
         {following ? tr.venueDetailPage.followingThisVenue : tr.venueDetailPage.followThisVenue}

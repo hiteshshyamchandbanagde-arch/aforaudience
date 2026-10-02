@@ -486,6 +486,7 @@ t('GEN-2609-107: var()-incompatible files and token sources are never migrated',
     'src/app/manifest.ts',
     'src/app/api/posters/artist/[performanceId]/route.tsx',
     'src/app/api/posters/organiser/[eventId]/route.tsx',
+    'src/lib/poster-colors.ts',
     'src/app/globals.css',
     'src/lib/design-tokens.ts',
   ]) {

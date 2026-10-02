@@ -27,10 +27,10 @@ export type TokenMeta = { label: string; usedFor: string; section?: ColorSection
 
 export const TOKEN_META: Record<string, TokenMeta> = {
   // --- Surfaces
-  "--afa-surface-page": { section: "surfaces", label: "Page background", usedFor: "the base background behind every page" },
+  "--afa-surface-page": { section: "surfaces", label: "Page background", usedFor: "the base background behind every page; also the background of share posters and the installed app's splash screen" },
   "--afa-surface-raised": { section: "surfaces", label: "Raised surface", usedFor: "cards, panels, dialogs, inputs" },
   "--afa-surface-inverse": { section: "surfaces", label: "Deepest background", usedFor: "avatar circles, hero and image backdrops" },
-  "--afa-ink": { section: "surfaces", label: "Backdrop glow", usedFor: "the radial-gradient centre on the Four Rooms and photo backdrops" },
+  "--afa-ink": { section: "surfaces", label: "Backdrop glow", usedFor: "the radial-gradient centre on the Four Rooms and photo backdrops; also the text on ticket emails and the ticket PDF" },
   "--afa-brown-black": { section: "surfaces", label: "Placeholder: brown", usedFor: "event-card placeholder background; also the primary-button text colour" },
   "--afa-green-black": { section: "surfaces", label: "Placeholder: green", usedFor: "event-card placeholder background (Open Mic)" },
   "--afa-maroon-black": { section: "surfaces", label: "Placeholder: maroon", usedFor: "event-card placeholder background" },
@@ -43,25 +43,25 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-text-secondary": { section: "text", label: "Secondary text", usedFor: "descriptions, supporting lines, inactive tabs" },
   "--afa-text-muted": { section: "text", label: "Muted text", usedFor: "timestamps, helper text, empty states" },
   "--afa-text-on-image": { section: "text", label: "Text on photo", usedFor: "subtitles over hero photos (Organisers, Venue Owners, Wall of Fame)" },
-  "--afa-cream": { section: "text", label: "Cream text", usedFor: "text on coloured fills (success button, critical badges, seat-map markers)" },
+  "--afa-cream": { section: "text", label: "Cream text", usedFor: "text on coloured fills (success button, critical badges, seat-map markers); also the paper of the ticket PDF and the details card in ticket emails" },
   "--afa-white": { section: "text", label: "White", usedFor: "text in your own message bubbles" },
 
   // --- Brand & actions
-  "--afa-amber": { section: "brand", label: "Amber accent", usedFor: "links, highlights, active nav, focus accents" },
-  "--afa-fill-solid": { section: "brand", label: "Primary button fill", usedFor: "the one primary action per screen (Book, Pay, Publish, Save). Not used for selected states" },
-  "--afa-on-fill-solid": { section: "brand", label: "Primary button text", usedFor: "text and icons on the primary button fill" },
+  "--afa-amber": { section: "brand", label: "Amber accent", usedFor: "links, eyebrows, icons, highlights and focus accents; the lineup label and headliner names on share posters" },
+  "--afa-fill-solid": { section: "brand", label: "Primary button fill", usedFor: "the one primary action per screen (Book, Pay, Publish, Save). Not used for selected states. Also the browser theme colour, and the accent on share posters, ticket emails and the ticket PDF" },
+  "--afa-on-fill-solid": { section: "brand", label: "Primary button text", usedFor: "text and icons on the primary button fill; the initial on an artist poster with no photo" },
   "--afa-brand-mark": { section: "brand", label: "Logo \"A\"", usedFor: "the coloured A in the AforAudience wordmark" },
   "--afa-peach": { section: "brand", label: "Peach", usedFor: "the eyebrow label on the home hero rotator" },
   "--afa-social-blue": { section: "brand", label: "Verified-badge blue", usedFor: "the verified tick on artist profiles" },
 
   // --- Selected state (GEN-2609-118)
-  "--afa-selected": { section: "selection", label: "Selected text", usedFor: "text, icons and the solid border of selected chips, toggle boxes, tabs, seats and period pickers" },
-  "--afa-selected-bg": { section: "selection", label: "Selected background", usedFor: "the faint tint behind a selected chip, toggle box, menu row, card or seat" },
-  "--afa-selected-border": { section: "selection", label: "Selected border", usedFor: "the translucent border of a selected pill (filters, facilities, username chips)" },
+  "--afa-selected": { section: "selection", label: "Selected text", usedFor: "text, icons and the solid border of selected chips, toggle boxes, tabs, seats and period pickers; the active nav tab, sidebar link and drawer row; the Featured toggle and the hero carousel's active dot" },
+  "--afa-selected-bg": { section: "selection", label: "Selected background", usedFor: "the faint tint behind a selected chip, toggle box, menu row, card or seat; the active sidebar link and drawer row; the selected calendar day" },
+  "--afa-selected-border": { section: "selection", label: "Selected border", usedFor: "the translucent border of a selected pill (filters, facilities, username chips), the selected calendar day, the Featured toggle and a highlighted profile card" },
 
   // --- Status tones
   "--afa-sage": { section: "status", label: "Success green", usedFor: "success button fill, confirmed borders" },
-  "--afa-sage-bright": { section: "status", label: "Success text", usedFor: "success badge and status text on dark" },
+  "--afa-sage-bright": { section: "status", label: "Success text", usedFor: "success badges, status lines and confirmations on dark; the text of the outline success button" },
   "--afa-error": { section: "status", label: "Error red", usedFor: "error fills and borders, offline banner, critical-priority badges" },
   "--afa-error-bright": { section: "status", label: "Error text", usedFor: "error messages and error badge text on dark" },
   "--afa-gold": { section: "status", label: "Featured gold", usedFor: "featured-card and top-rank borders" },
@@ -73,7 +73,7 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-blue": { section: "status", label: "In-progress blue", usedFor: "In Progress status on the admin diary" },
   "--afa-orange-dark": { section: "status", label: "High-priority orange", usedFor: "High priority on admin feedback" },
   "--afa-gray-taupe": { section: "status", label: "Refunded grey", usedFor: "Refunded status on venue bookings" },
-  "--afa-taupe": { section: "status", label: "Quiet label taupe", usedFor: "small meta labels on admin feedback (\"via chatbot\")" },
+  "--afa-taupe": { section: "status", label: "Quiet label taupe", usedFor: "small meta labels on admin feedback (\"via chatbot\"); quiet notes in ticket emails" },
   "--afa-brown-gold": { section: "status", label: "Warning note", usedFor: "a warning note on the organiser event edit page" },
 
   // --- Seat map
@@ -85,13 +85,13 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-border-resting": { section: "tints", label: "Default border", usedFor: "card, input and divider borders" },
   "--afa-tint-04": { section: "tints", label: "Faint tint (4%)", usedFor: "muted rows, faint dividers" },
   "--afa-tint-06": { section: "tints", label: "Light tint (6%)", usedFor: "list dividers, neutral badges" },
-  "--afa-tint-08": { section: "tints", label: "Tint (8%)", usedFor: "hover fills, neutral chips, soft borders" },
+  "--afa-tint-08": { section: "tints", label: "Tint (8%)", usedFor: "hover fills, neutral chips, soft borders; the total divider in ticket emails" },
   "--afa-tint-10": { section: "tints", label: "Tint (10%)", usedFor: "hover fills, borders" },
   "--afa-tint-12": { section: "tints", label: "Tint (12%)", usedFor: "form-input borders" },
-  "--afa-tint-20": { section: "tints", label: "Tint (20%)", usedFor: "inactive dots and stars, stronger borders" },
-  "--afa-tint-30": { section: "tints", label: "Tint (30%)", usedFor: "disabled fills, image overlays" },
+  "--afa-tint-20": { section: "tints", label: "Tint (20%)", usedFor: "inactive dots and stars, stronger borders; seat-map stage bars and the builder's front tier; the divider on share posters" },
+  "--afa-tint-30": { section: "tints", label: "Tint (30%)", usedFor: "disabled fills, the fade over the home hero photo" },
   "--afa-amber-wash": { section: "tints", label: "Amber wash", usedFor: "unread rows, highlighted notes" },
-  "--afa-amber-tint": { section: "tints", label: "Amber tint", usedFor: "amber badges, selected chips" },
+  "--afa-amber-tint": { section: "tints", label: "Amber tint", usedFor: "amber badges and notices" },
   "--afa-amber-border": { section: "tints", label: "Amber border", usedFor: "highlighted card and chip borders" },
   "--afa-amber-strong": { section: "tints", label: "Amber (strong)", usedFor: "hover borders on organiser cards, theatre mark" },
   "--afa-error-tint": { section: "tints", label: "Error tint", usedFor: "error notice and badge backgrounds" },
@@ -104,7 +104,7 @@ export const TOKEN_META: Record<string, TokenMeta> = {
 
   // --- Overlays & shadows
   "--afa-shadow": { section: "overlays", label: "Shadow", usedFor: "drop shadows on menus, sheets and cards" },
-  "--afa-scrim": { section: "overlays", label: "Dialog backdrop", usedFor: "the dim layer behind dialogs and sheets" },
+  "--afa-scrim": { section: "overlays", label: "Dialog backdrop", usedFor: "the dim layer behind dialogs and sheets, and over a card while it opens" },
   "--afa-scrim-strong": { section: "overlays", label: "Strong backdrop", usedFor: "photo fades and full-screen overlays" },
 
   // --- Font roles

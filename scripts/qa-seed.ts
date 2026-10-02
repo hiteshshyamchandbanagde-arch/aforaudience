@@ -67,6 +67,9 @@ async function hashPassword(pw: string): Promise<string> {
   return hash
 }
 
+// How far ahead of the seed run "Jaipur Mic Gala 100" is dated.
+const JAIPUR_EVENT_DAYS_AHEAD = 30
+
 function daysFromNow(days: number): Date {
   const d = new Date()
   d.setDate(d.getDate() + days)
@@ -680,9 +683,16 @@ async function seedE2eFixtures(prisma: PrismaClient) {
     }
   }
 
+  // BUG-2608-050 - the date is relative to the run on update as well as
+  // on create. It was create-only (now + 21 days), so every reseed after
+  // the first left the old date in place and the event drifted into the
+  // past; this is QA's only numbered-venue event, and the e2e specs that
+  // open it from /events then found no card. A reseed moves it, so don't
+  // reseed while a real booking on it still matters.
+  const jaipurEventDate = daysFromNow(JAIPUR_EVENT_DAYS_AHEAD)
   await prisma.event.upsert({
     where: { id: jaipurEventId },
-    update: { title: "Jaipur Mic Gala 100", status: EventStatus.APPROVED },
+    update: { title: "Jaipur Mic Gala 100", status: EventStatus.APPROVED, date: jaipurEventDate },
     create: {
       id: jaipurEventId,
       organiserId: "qa-organiser-01",
@@ -691,7 +701,7 @@ async function seedE2eFixtures(prisma: PrismaClient) {
       description: "A 100-seat numbered-venue mic night in Jaipur.",
       type: EventType.LINEUP,
       status: EventStatus.APPROVED,
-      date: daysFromNow(21),
+      date: jaipurEventDate,
       startTime: "18:30",
       endTime: "21:00",
       isFree: false,
@@ -1087,15 +1097,21 @@ async function seedDemoPersonas(
     update: {},
     create: { id: omkarVenueOwnerRoleId, userId: omkarId, isApproved: true },
   })
+  // BUG-2608-050 - country and state are set on create and on update. With
+  // no country this venue was a second "Pune" in the city list, next to
+  // the six India / Maharashtra ones; chat fixed the QA row by hand on
+  // 2 Oct, and a reseed must not bring the duplicate back.
   await prisma.venue.upsert({
     where: { id: "qa-demo-venue-omkar-1" },
-    update: {},
+    update: { state: "Maharashtra", country: "India" },
     create: {
       id: "qa-demo-venue-omkar-1",
       ownerId: omkarVenueOwnerRoleId,
       name: "Omkar's Loft Space",
       address: "Koregaon Park",
       city: "Pune",
+      state: "Maharashtra",
+      country: "India",
       capacity: 45,
       photos: [],
       facilities: [],
@@ -1480,15 +1496,20 @@ async function seedDemoPersonas(
   })
   // Thin fields only - no photos, no rate configured, and (deliberately,
   // per the brief) no VenueAvailability rows created for it anywhere below.
+  // BUG-2608-050 - country and state on create and update, as for
+  // qa-demo-venue-omkar-1 above (the other venue behind the duplicate
+  // "Pune"). Still thin: they are location, not profile detail.
   await prisma.venue.upsert({
     where: { id: "qa-demo-venue-partial-1" },
-    update: {},
+    update: { state: "Maharashtra", country: "India" },
     create: {
       id: "qa-demo-venue-partial-1",
       ownerId: vijayRoleId,
       name: "Kothrud Backyard",
       address: "Kothrud",
       city: "Pune",
+      state: "Maharashtra",
+      country: "India",
       capacity: 30,
       photos: [],
       facilities: [],
