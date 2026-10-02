@@ -17,6 +17,9 @@ export const MIN_TOP = 72 // px; a lifted button above this would sit under Mobi
 export interface ActionRowClearance {
   bottom: number | null // px from the viewport bottom, or null = resting spot
   hidden: boolean
+  // BUG-2609-081 rule 3 - true once the page is known to be taller than
+  // the viewport, i.e. it needs (and can use) reserved space at its end.
+  scrollable: boolean
 }
 
 export interface ActionRowClearanceOptions {
@@ -26,7 +29,30 @@ export interface ActionRowClearanceOptions {
   headroom?: number
 }
 
-const RESTING: ActionRowClearance = { bottom: null, hidden: false }
+const RESTING: ActionRowClearance = { bottom: null, hidden: false, scrollable: false }
+
+// 100vh in px. On a phone it is the viewport with the browser bars
+// retracted, which is taller than innerHeight while they show - so a
+// `min-height: 100vh` page scrolls by the bar's height there and would
+// never read as short from innerHeight alone.
+let vhProbe: HTMLDivElement | null = null
+function largeViewportHeight(): number {
+  if (!vhProbe || !vhProbe.isConnected) {
+    vhProbe = document.createElement('div')
+    vhProbe.setAttribute('aria-hidden', 'true')
+    vhProbe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;visibility:hidden;pointer-events:none'
+    document.body.appendChild(vhProbe)
+  }
+  return Math.max(window.innerHeight, vhProbe.offsetHeight)
+}
+
+// The page's own content fits the viewport. Body padding is left out: it
+// is space reserved for fixed chrome (the tab bar, the chat button), not
+// content, and counting it would make the answer depend on rule 3.
+function isShortPage(): boolean {
+  const pad = parseFloat(getComputedStyle(document.body).paddingBottom) || 0
+  return document.documentElement.scrollHeight - pad <= largeViewportHeight() + 1
+}
 
 // `probeRef` is an invisible element fixed at the button's resting spot
 // (same size and offsets), so the resting rect is measured, not guessed,
@@ -54,9 +80,13 @@ export function useActionRowClearance(
     const visible = new Set<Element>()
     let raf = 0
     let rescan = true
+    // Page-level facts only change with layout, not with scroll, so they
+    // are re-read on resize / mutation and reused on scroll frames.
+    let stale = true
+    let short = false
 
     const apply = (next: ActionRowClearance) =>
-      setState((prev) => (prev.bottom === next.bottom && prev.hidden === next.hidden ? prev : next))
+      setState((prev) => (prev.bottom === next.bottom && prev.hidden === next.hidden && prev.scrollable === next.scrollable ? prev : next))
 
     const measure = () => {
       raf = 0
@@ -64,7 +94,12 @@ export function useActionRowClearance(
       const probe = probeRef.current
       if (!probe || !mq.matches) return apply(RESTING)
       const { keepVisible, headroom } = optionsRef.current
-      if (visible.size === 0) return apply(RESTING)
+      if (stale) {
+        stale = false
+        short = isShortPage()
+      }
+      const resting: ActionRowClearance = { bottom: null, hidden: false, scrollable: !short }
+      if (visible.size === 0) return apply(resting)
       const rest = probe.getBoundingClientRect()
       const rows = [...visible].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
       const overlaps = (top: number, bottom: number, r: DOMRect) =>
@@ -82,20 +117,24 @@ export function useActionRowClearance(
         top = bottom - rest.height
         lifted = true
       }
-      if (!lifted) return apply(RESTING)
+      if (!lifted) return apply(resting)
       const minTop = MIN_TOP + headroom
       if (top < minTop) {
-        if (!keepVisible) return apply({ bottom: null, hidden: true })
+        if (!keepVisible) return apply({ ...resting, hidden: true })
         // Rule 2: stay on screen as high as the headroom allows, never
         // below the resting spot.
         top = Math.min(minTop, rest.top)
         bottom = top + rest.height
-        if (top === rest.top) return apply(RESTING)
+        if (top === rest.top) return apply(resting)
       }
-      apply({ bottom: Math.round(window.innerHeight - bottom), hidden: false })
+      apply({ ...resting, bottom: Math.round(window.innerHeight - bottom) })
     }
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(measure)
+    }
+    const relayout = () => {
+      stale = true
+      schedule()
     }
 
     const io = new IntersectionObserver((entries) => {
@@ -116,23 +155,28 @@ export function useActionRowClearance(
     // at most once a frame.
     const mo = new MutationObserver(() => {
       rescan = true
-      schedule()
+      relayout()
     })
     mo.observe(document.body, { childList: true, subtree: true })
-    remeasureRef.current = schedule
+    // A short page turns long when content grows without a DOM change the
+    // observer above sees (an image loads, a section expands).
+    const ro = new ResizeObserver(relayout)
+    ro.observe(document.body)
+    remeasureRef.current = relayout
     schedule()
 
     window.addEventListener('scroll', schedule, { passive: true, capture: true })
-    window.addEventListener('resize', schedule, { passive: true })
-    mq.addEventListener('change', schedule)
+    window.addEventListener('resize', relayout, { passive: true })
+    mq.addEventListener('change', relayout)
     return () => {
       if (raf) cancelAnimationFrame(raf)
       remeasureRef.current = null
       io.disconnect()
       mo.disconnect()
+      ro.disconnect()
       window.removeEventListener('scroll', schedule, { capture: true })
-      window.removeEventListener('resize', schedule)
-      mq.removeEventListener('change', schedule)
+      window.removeEventListener('resize', relayout)
+      mq.removeEventListener('change', relayout)
     }
   }, [active, probeRef])
 

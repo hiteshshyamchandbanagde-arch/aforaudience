@@ -117,6 +117,10 @@ const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} -
 // lifts above an action row only while this much panel still fits between
 // it and the top bar; past that it stops and the row sits under the panel.
 const CHAT_PANEL_MIN_HEIGHT = 320;
+// BUG-2609-081 - set on <body> while the button renders on a page that
+// scrolls, to reserve room after the page's last content (see the style
+// block below).
+const BUBBLE_ACTIVE_CLASS = 'afa-support-bubble-active';
 
 // Shared shape for every text input/textarea/select in this widget (same
 // spirit as dashboard/venue/[id]/edit/page.tsx's own local `inputStyle`).
@@ -150,6 +154,15 @@ export default function SupportWidget() {
     keepVisible: open,
     headroom: open ? CHAT_PANEL_MIN_HEIGHT + CHAT_PANEL_GAP : 0,
   });
+  // BUG-2609-081 - every page that scrolls reserves room after its last
+  // content, so the last controls can always scroll clear of the button.
+  // A page that fits the viewport gets none (it would only make it
+  // scroll); there the button lifts instead.
+  const reserve = !excluded && clearance.scrollable;
+  useEffect(() => {
+    document.body.classList.toggle(BUBBLE_ACTIVE_CLASS, reserve);
+    return () => document.body.classList.remove(BUBBLE_ACTIVE_CLASS);
+  }, [reserve]);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -466,6 +479,12 @@ export default function SupportWidget() {
         @media (max-width: ${MOBILE_BREAKPOINT_MAX}px) {
           .afa-support-chat-btn { bottom: ${CHAT_BUTTON_MOBILE_BOTTOM}; }
           .afa-support-chat-panel { bottom: ${CHAT_PANEL_MOBILE_BOTTOM}; max-height: ${CHAT_PANEL_MOBILE_MAX_HEIGHT}; }
+          /* BUG-2609-081 - room after the page's last content: the tab
+             bar's height (globals.css reserves only that), the button
+             and the gap above it. This replaces the tab-bar rule and
+             DashboardShell's own bar padding, it does not add to them. */
+          body.${BUBBLE_ACTIVE_CLASS} { padding-bottom: ${ABOVE_CHAT_BUTTON_MOBILE}; }
+          body.${BUBBLE_ACTIVE_CLASS} .afa-shell-bar-clearance { padding-bottom: 0; }
         }
       `}</style>
       <div
