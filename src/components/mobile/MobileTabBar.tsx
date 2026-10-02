@@ -437,7 +437,7 @@ export default function MobileTabBar() {
               href={item.href}
               replace={item.nav === 'replace'}
               className="relative flex flex-1 flex-col items-center gap-1 py-1.5"
-              style={{ color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.55 }}
+              style={{ color: active ? 'var(--afa-selected)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.55 }}
             >
               <span style={{ position: 'relative', display: 'inline-flex' }}>
                 <item.Icon style={{ width: 22, height: 22 }} filled={item.id === 'saved' && active} />
@@ -484,7 +484,7 @@ export default function MobileTabBar() {
             type="button"
             onClick={() => setMoreOpen(true)}
             className="flex flex-1 flex-col items-center gap-1 py-1.5"
-            style={{ color: moreActive ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55 }}
+            style={{ color: moreActive ? 'var(--afa-selected)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55 }}
           >
             <DashboardIcon name="more" size={22} />
             <span
@@ -529,8 +529,8 @@ export default function MobileTabBar() {
                   onClick={() => setMoreOpen(false)}
                   className="flex items-center gap-3 rounded-lg px-3 py-3"
                   style={{
-                    color: item.id === activeId ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
-                    background: item.id === activeId ? 'var(--afa-amber-tint)' : 'transparent',
+                    color: item.id === activeId ? 'var(--afa-selected)' : 'var(--afa-text-primary)',
+                    background: item.id === activeId ? 'var(--afa-selected-bg)' : 'transparent',
                     fontWeight: item.id === activeId ? 600 : 400,
                     textDecoration: 'none',
                   }}

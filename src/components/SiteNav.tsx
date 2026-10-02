@@ -423,7 +423,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             page variant's collapsed profile-menu dropdown (GEN-2608-015). */}
         <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
-            <Link key={l.key} href={l.href} style={{ fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
+            <Link key={l.key} href={l.href} style={{ fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-selected)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
             </Link>
           ))}
@@ -482,7 +482,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       aria-label={l.label}
                       aria-current={l.isActive ? "page" : undefined}
                       className="sitenav-icon-link"
-                      style={{ color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-amber-tint)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "var(--afa-radius-md)" }}
+                      style={{ color: l.isActive ? "var(--afa-selected)" : l.accent ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-selected-bg)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "var(--afa-radius-md)" }}
                     >
                       <NavIcon navKey={l.key} />
                       {l.key === "dashboard" && pendingCount > 0 && (
@@ -593,7 +593,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                             href={l.href}
                             onClick={() => setMenuOpen(false)}
                             aria-current={l.isActive ? "page" : undefined}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-amber-wash)" : "transparent", textDecoration: "none" }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.isActive ? "var(--afa-selected)" : l.accent ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-selected-bg)" : "transparent", textDecoration: "none" }}
                           >
                             {l.label}
                             {l.badge > 0 && (

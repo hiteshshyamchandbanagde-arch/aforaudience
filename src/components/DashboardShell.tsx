@@ -374,8 +374,8 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
       href={href}
       className={compact ? 'flex items-center gap-3 rounded-lg px-3 text-left transition-colors' : 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors'}
       style={{
-        background: active ? 'var(--afa-amber-tint)' : 'transparent',
-        color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
+        background: active ? 'var(--afa-selected-bg)' : 'transparent',
+        color: active ? 'var(--afa-selected)' : 'var(--afa-text-primary)',
         opacity: active ? 1 : 0.75,
         fontWeight: active ? 600 : 400,
         ...(compact ? { fontSize: 'var(--afa-text-ui)', paddingTop: 'var(--afa-space-2)', paddingBottom: 'var(--afa-space-2)' } : {}),
@@ -391,7 +391,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
           {badge}
         </span>
       ) : (
-        active && <span className="ml-auto h-1 w-1 rounded-full" style={{ background: 'var(--afa-amber)' }} />
+        active && <span className="ml-auto h-1 w-1 rounded-full" style={{ background: 'var(--afa-selected)' }} />
       )}
     </Link>
   )
@@ -602,7 +602,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
-                style={{ color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.7 }}
+                style={{ color: active ? 'var(--afa-selected)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.7 }}
               >
                 <span style={{ position: 'relative', display: 'inline-flex' }}>
                   <Icon name={item.icon} size={20} />

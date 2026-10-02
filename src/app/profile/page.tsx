@@ -111,8 +111,8 @@ const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
   borderRadius: 'var(--afa-radius-lg)',
   padding: 'var(--afa-space-28px) var(--afa-space-28px) var(--afa-space-6)',
-  border: active ? '1.5px solid var(--afa-amber)' : '1px solid var(--afa-tint-06)',
-  boxShadow: active ? '0 0 0 4px var(--afa-amber-tint)' : 'none',
+  border: active ? '1.5px solid var(--afa-selected-border)' : '1px solid var(--afa-tint-06)',
+  boxShadow: active ? '0 0 0 4px var(--afa-selected-bg)' : 'none',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
 })
 

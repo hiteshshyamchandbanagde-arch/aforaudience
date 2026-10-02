@@ -93,13 +93,13 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
             height: "34px",
             borderRadius: "50%",
             border: "1.5px solid var(--afa-tint-20)",
-            background: notifyEnabled ? "var(--afa-amber-tint)" : "transparent",
+            background: notifyEnabled ? "var(--afa-selected-bg)" : "transparent",
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}
         >
           {notifyEnabled ? (
-            <BellIcon style={{ width: "15px", height: "15px", color: "var(--afa-amber)" }} />
+            <BellIcon style={{ width: "15px", height: "15px", color: "var(--afa-selected)" }} />
           ) : (
             <BellOffIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }} />
           )}
