@@ -216,10 +216,10 @@ export default function RazorpayTestPage() {
             letterSpacing: "0.24em",
             textTransform: "uppercase",
             color: EMBER,
-            marginBottom: "16px",
+            marginBottom: "var(--afa-space-4)",
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "var(--afa-space-3)",
           }}
         >
           <span aria-hidden style={{ display: "inline-block", width: "32px", height: "1px", background: EMBER }} />
@@ -232,12 +232,12 @@ export default function RazorpayTestPage() {
             fontWeight: 700,
             lineHeight: 1.15,
             letterSpacing: "-0.02em",
-            marginBottom: "16px",
+            marginBottom: "var(--afa-space-4)",
           }}
         >
           Razorpay — Checkpoint 1
         </h1>
-        <p style={{ fontFamily: SERIF, fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: INK, opacity: 0.75, marginBottom: "32px" }}>
+        <p style={{ fontFamily: SERIF, fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: INK, opacity: 0.75, marginBottom: "var(--afa-space-32px)" }}>
           End-to-end sanity test. Click the button, complete a Razorpay test
           payment, and confirm the round trip works: create-order → Checkout
           modal → verify signature. No real money, no database writes yet.
@@ -245,32 +245,32 @@ export default function RazorpayTestPage() {
 
         <div
           style={{
-            padding: "20px 24px",
+            padding: "var(--afa-space-5) var(--afa-space-6)",
             background: "var(--afa-surface-raised)",
             border: `1px solid ${MIST}`,
             borderRadius: "var(--afa-radius-lg)",
-            marginBottom: "32px",
+            marginBottom: "var(--afa-space-32px)",
             fontFamily: MONO,
             fontSize: "var(--afa-text-ui)",
             lineHeight: 1.7,
             color: INK,
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: "8px", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "var(--afa-text-micro)", color: EMBER }}>
+          <div style={{ fontWeight: 700, marginBottom: "var(--afa-space-2)", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "var(--afa-text-micro)", color: EMBER }}>
             Test card values (Razorpay India)
           </div>
           Card: 5267 3181 8797 5449<br />
           CVV: any 3 digits (e.g. 123)<br />
           Expiry: any future date (e.g. 12/30)<br />
           OTP if prompted: 1234
-          <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: `1px dashed ${MIST}`, opacity: 0.75 }}>
+          <div style={{ marginTop: "var(--afa-space-14px)", paddingTop: "var(--afa-space-3)", borderTop: `1px dashed ${MIST}`, opacity: 0.75 }}>
             Global test cards (like 4111 1111 1111 1111) are rejected as
             &quot;international not supported&quot; on India accounts. If the
             card above fails too, pick <strong>Netbanking</strong> in the
             modal, choose any bank, then click <strong>Success</strong> on
             the simulated bank page — it almost always works.
           </div>
-          <div style={{ marginTop: "10px", opacity: 0.6, fontSize: "var(--afa-text-small)" }}>
+          <div style={{ marginTop: "var(--afa-space-10px)", opacity: 0.6, fontSize: "var(--afa-text-small)" }}>
             Note: Razorpay Test sends a real SMS OTP for card-save
             tokenization, not for the payment itself. Safe to ignore or
             enter — no real money moves in Test Mode.
@@ -280,8 +280,8 @@ export default function RazorpayTestPage() {
         {sessionStatus === "loading" ? (
           <p style={{ fontFamily: SERIF, opacity: 0.6 }}>Loading session…</p>
         ) : !session?.user ? (
-          <div style={{ marginBottom: "24px" }}>
-            <p style={{ fontFamily: SERIF, marginBottom: "16px" }}>
+          <div style={{ marginBottom: "var(--afa-space-6)" }}>
+            <p style={{ fontFamily: SERIF, marginBottom: "var(--afa-space-4)" }}>
               You need to be signed in to run this test — the API endpoints
               require an authenticated session.
             </p>
@@ -302,13 +302,13 @@ export default function RazorpayTestPage() {
                 fontSize: "var(--afa-text-ui)",
                 color: INK,
                 opacity: 0.6,
-                marginBottom: "16px",
+                marginBottom: "var(--afa-space-4)",
               }}
             >
               Signed in as {session.user.name ?? session.user.email ?? "user"}.
             </div>
 
-            <div style={{ marginBottom: "24px" }}>
+            <div style={{ marginBottom: "var(--afa-space-6)" }}>
               <label
                 style={{
                   display: "block",
@@ -318,7 +318,7 @@ export default function RazorpayTestPage() {
                   textTransform: "uppercase",
                   color: INK,
                   opacity: 0.7,
-                  marginBottom: "8px",
+                  marginBottom: "var(--afa-space-2)",
                 }}
               >
                 Amount (in paise — 100 = ₹1)
@@ -332,7 +332,7 @@ export default function RazorpayTestPage() {
                 style={{
                   fontFamily: MONO,
                   fontSize: "var(--afa-text-title)",
-                  padding: "10px 14px",
+                  padding: "var(--afa-space-10px) var(--afa-space-14px)",
                   border: `1px solid ${MIST}`,
                   borderRadius: "var(--afa-radius-sm)",
                   width: "200px",
@@ -362,8 +362,8 @@ export default function RazorpayTestPage() {
         {/* Status readout — telemetry for the tester */}
         <div
           style={{
-            marginTop: "48px",
-            padding: "20px 24px",
+            marginTop: "var(--afa-space-48px)",
+            padding: "var(--afa-space-5) var(--afa-space-6)",
             background: "var(--afa-surface-raised)",
             border: `1px solid ${MIST}`,
             borderRadius: "var(--afa-radius-lg)",
@@ -375,7 +375,7 @@ export default function RazorpayTestPage() {
           <div
             style={{
               fontWeight: 700,
-              marginBottom: "12px",
+              marginBottom: "var(--afa-space-3)",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               fontSize: "var(--afa-text-micro)",

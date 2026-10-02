@@ -58,7 +58,7 @@ function VerifyEmailContent() {
         )}
         {status === "ok" && (
           <>
-            <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+            <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
               {tr.verifyEmailPage.emailVerifiedBanner}
             </div>
             <Link href="/" style={{ color: "var(--afa-amber)", fontWeight: 500, fontSize: "var(--afa-text-body)" }}>

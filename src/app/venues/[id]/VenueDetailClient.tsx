@@ -61,7 +61,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav backHref="/venues" backLabel={tr.nav.backToVenues} />
-        <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px", color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.notFound}</div>
+        <div style={{ maxWidth: "760px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6)", color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.notFound}</div>
       </main>
     )
   }
@@ -100,8 +100,8 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
         /* BUG-2608-072 (gap 5) - single column below 1024px, sidebar
            content appearing after main content, matching the export's
            lg:grid-cols-[1fr_320px] breakpoint exactly. */
-        .afa-venue-page-container { max-width: 1240px; margin: 0 auto; padding: 48px 24px; }
-        @media (min-width: 768px) { .afa-venue-page-container { padding: 48px 40px; } }
+        .afa-venue-page-container { max-width: 1240px; margin: 0 auto; padding: var(--afa-space-48px) var(--afa-space-6); }
+        @media (min-width: 768px) { .afa-venue-page-container { padding: var(--afa-space-48px) 40px; } }
         .afa-venue-content-grid { display: grid; grid-template-columns: 1fr; gap: 40px; }
         .afa-venue-facilities { display: grid; grid-template-columns: 1fr; gap: 0; }
         @media (min-width: 1024px) {
@@ -115,7 +115,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
            (VenueDetail.tsx line 67-78): main photo spans 2 cols/2 rows
            always, up to 4 square thumbnails fill the rest. 2 cols on
            mobile, 4 cols x 2 rows once the extra thumbnail columns fit. */
-        .afa-venue-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .afa-venue-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--afa-space-3); }
         .afa-venue-gallery-main { position: relative; grid-column: span 2; grid-row: span 2; aspect-ratio: 4 / 3; overflow: hidden; }
         .afa-venue-gallery-thumb { position: relative; aspect-ratio: 1 / 1; overflow: hidden; }
         @media (min-width: 768px) {
@@ -130,19 +130,19 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             actions on the right, level with the title block, not stacked
             below the address. flex-wrap so it still stacks cleanly on
             narrow viewports instead of forcing the row. */}
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", marginBottom: "28px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--afa-space-5)", marginBottom: "var(--afa-space-28px)" }}>
           <div>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
               {venue.city}{venue.state ? `, ${venue.state}` : ""} · {tierLabel}
             </span>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)", marginTop: "16px", marginBottom: "6px" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)", marginTop: "var(--afa-space-4)", marginBottom: "var(--afa-space-6px)" }}>
               {venue.name}
             </h1>
             <p style={{ maxWidth: "448px", fontSize: "var(--afa-text-title)", lineHeight: 1.4, color: "var(--afa-text-primary)", opacity: 0.6 }}>
               {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ""}
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", flexShrink: 0 }}>
             <VenueFollowHeaderButton state={follow} />
             {/* BUG-2608-076 - this was a bare text link (no border/padding/
                 button shape at all). Figma export gives Get Directions the
@@ -152,7 +152,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
               href={venue.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", border: "1.5px solid var(--afa-amber-border)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", padding: "var(--afa-space-10px) var(--afa-space-5)", border: "1.5px solid var(--afa-amber-border)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
             >
               <DirectionsIcon style={{ width: "14px", height: "14px" }} />
               {tr.venueDetailPage.getDirections}
@@ -161,7 +161,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
         </div>
 
         {showGallery ? (
-          <div className="afa-venue-gallery" style={{ marginBottom: "8px" }}>
+          <div className="afa-venue-gallery" style={{ marginBottom: "var(--afa-space-2)" }}>
             <div className="afa-venue-gallery-main">
               <Photo src={realPhotos[0]} alt={venue.name} onError={() => setMainPhotoFailed(true)} />
             </div>
@@ -172,12 +172,12 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             ))}
           </div>
         ) : (
-          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 7", overflow: "hidden", marginBottom: "8px" }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 7", overflow: "hidden", marginBottom: "var(--afa-space-2)" }}>
             <VenueNoPhoto capacity={venue.capacity} seed={venue.id} size="hero" />
           </div>
         )}
         {!showGallery && (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.03em", color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", marginBottom: "24px" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.03em", color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", marginBottom: "var(--afa-space-6)" }}>
             {noPhotosCaption}
           </p>
         )}
@@ -186,37 +186,37 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           {/* main column */}
           <div>
             <section>
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "var(--afa-space-3)" }}>
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.seatingHeading}</h2>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                   {venue.sections.length} {tr.venueDetailPage.sectionsLabel}
                 </span>
               </div>
               {venue.sections.length === 0 ? (
-                <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "16px" }}>{tr.venueDetailPage.seatingComingSoon}</p>
+                <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "var(--afa-space-4)" }}>{tr.venueDetailPage.seatingComingSoon}</p>
               ) : (
-                <table style={{ width: "100%", marginTop: "8px", borderCollapse: "collapse" }}>
+                <table style={{ width: "100%", marginTop: "var(--afa-space-2)", borderCollapse: "collapse" }}>
                   <thead>
                     <tr>
-                      <th style={{ padding: "12px 0", textAlign: "left", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.sectionColumnLabel}</th>
-                      <th style={{ padding: "12px 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.seatsColumnLabel}</th>
-                      <th style={{ padding: "12px 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.priceColumnLabel}</th>
+                      <th style={{ padding: "var(--afa-space-3) 0", textAlign: "left", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.sectionColumnLabel}</th>
+                      <th style={{ padding: "var(--afa-space-3) 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.seatsColumnLabel}</th>
+                      <th style={{ padding: "var(--afa-space-3) 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.priceColumnLabel}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {venue.sections.map((s) => (
                       <tr key={s.id} style={{ borderTop: "1px solid var(--afa-tint-08)" }}>
-                        <td style={{ padding: "14px 0", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)" }}>{s.name}</td>
-                        <td style={{ padding: "14px 0", textAlign: "right", color: "var(--afa-text-primary)", opacity: 0.7, fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>{s.seats.toLocaleString("en-IN")}</td>
-                        <td style={{ padding: "14px 0", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)" }}>₹{s.price.toLocaleString("en-IN")}</td>
+                        <td style={{ padding: "var(--afa-space-14px) 0", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)" }}>{s.name}</td>
+                        <td style={{ padding: "var(--afa-space-14px) 0", textAlign: "right", color: "var(--afa-text-primary)", opacity: 0.7, fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>{s.seats.toLocaleString("en-IN")}</td>
+                        <td style={{ padding: "var(--afa-space-14px) 0", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)" }}>₹{s.price.toLocaleString("en-IN")}</td>
                       </tr>
                     ))}
                     <tr style={{ borderTop: "1px solid var(--afa-border-resting)" }}>
-                      <td style={{ paddingTop: "14px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.totalLabel}</td>
-                      <td style={{ paddingTop: "14px", textAlign: "right", fontWeight: 700, color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>
+                      <td style={{ paddingTop: "var(--afa-space-14px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.totalLabel}</td>
+                      <td style={{ paddingTop: "var(--afa-space-14px)", textAlign: "right", fontWeight: 700, color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>
                         {venue.sections.reduce((sum, s) => sum + s.seats, 0).toLocaleString("en-IN")}
                       </td>
-                      <td style={{ paddingTop: "14px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--afa-amber)", fontSize: "var(--afa-text-body)" }}>
+                      <td style={{ paddingTop: "var(--afa-space-14px)", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--afa-amber)", fontSize: "var(--afa-text-body)" }}>
                         {totalPriceRange}
                       </td>
                     </tr>
@@ -227,10 +227,10 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
 
             {venue.facilities && venue.facilities.length > 0 && (
               <section style={{ marginTop: "56px" }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "12px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "var(--afa-space-3)" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
                 <div className="afa-venue-facilities">
                   {venue.facilities.map((facility) => (
-                    <div key={facility} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 0", borderTop: "1px solid var(--afa-tint-08)" }}>
+                    <div key={facility} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", padding: "var(--afa-space-14px) 0", borderTop: "1px solid var(--afa-tint-08)" }}>
                       <FacilityIcon label={facility} style={{ width: "18px", height: "18px", color: "var(--afa-amber)", flexShrink: 0 }} />
                       <span style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)" }}>{facility}</span>
                     </div>
@@ -243,21 +243,21 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           {/* sidebar */}
           <aside className="afa-venue-sidebar">
             <div style={{ borderTop: "1px solid var(--afa-border-resting)", borderBottom: "1px solid var(--afa-border-resting)" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "18px 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
-                <CapacityIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "2px", flexShrink: 0 }} />
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--afa-space-3)", padding: "var(--afa-space-18px) 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
+                <CapacityIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "var(--afa-space-2px)", flexShrink: 0 }} />
                 <div>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "var(--afa-space-1)" }}>{tr.venueDetailPage.totalCapacity}</p>
                   <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", lineHeight: 1, color: "var(--afa-text-primary)" }}>{venue.capacity.toLocaleString("en-IN")}</p>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "18px 0" }}>
-                <AcousticIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "2px", flexShrink: 0 }} />
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--afa-space-3)", padding: "var(--afa-space-18px) 0" }}>
+                <AcousticIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "var(--afa-space-2px)", flexShrink: 0 }} />
                 <div>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "var(--afa-space-1)" }}>{tr.venueDetailPage.acousticRating}</p>
                   {venue.acousticRating != null ? (
                     <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", lineHeight: 1, color: "var(--afa-text-primary)" }}>
                       {venue.acousticRating.toFixed(1)}
-                      <span style={{ marginLeft: "4px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, verticalAlign: "top" }}>/5</span>
+                      <span style={{ marginLeft: "var(--afa-space-1)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, verticalAlign: "top" }}>/5</span>
                     </p>
                   ) : (
                     <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueDetailPage.notRatedYet}</p>

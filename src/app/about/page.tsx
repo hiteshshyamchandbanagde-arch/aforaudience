@@ -65,10 +65,10 @@ function ActLabel({ num, label }: { num: string; label: string }) {
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: EMBER,
-        marginBottom: "20px",
+        marginBottom: "var(--afa-space-5)",
         display: "flex",
         alignItems: "center",
-        gap: "14px",
+        gap: "var(--afa-space-14px)",
       }}
     >
       <span>{num}</span>
@@ -92,7 +92,7 @@ function PullQuote({ children }: { children: React.ReactNode }) {
         letterSpacing: "-0.01em",
         borderLeft: `2px solid ${EMBER}`,
         paddingLeft: "clamp(20px, 3vw, 32px)",
-        margin: "48px 0",
+        margin: "var(--afa-space-48px) 0",
       }}
     >
       {children}
@@ -111,7 +111,7 @@ function ActTitle({ children }: { children: React.ReactNode }) {
         lineHeight: 1.15,
         letterSpacing: "-0.02em",
         color: INK,
-        marginBottom: "32px",
+        marginBottom: "var(--afa-space-32px)",
       }}
     >
       {children}
@@ -130,8 +130,8 @@ function Sub({ children }: { children: React.ReactNode }) {
         lineHeight: 1.25,
         letterSpacing: "-0.01em",
         color: INK,
-        marginTop: "48px",
-        marginBottom: "20px",
+        marginTop: "var(--afa-space-48px)",
+        marginBottom: "var(--afa-space-5)",
       }}
     >
       {children}
@@ -192,10 +192,10 @@ export default function AboutPage() {
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: EMBER,
-            marginBottom: "28px",
+            marginBottom: "var(--afa-space-28px)",
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "var(--afa-space-3)",
           }}
         >
           <span aria-hidden style={{ display: "inline-block", width: "32px", height: "1px", background: EMBER }} />
@@ -209,7 +209,7 @@ export default function AboutPage() {
             lineHeight: 1.05,
             letterSpacing: "-0.025em",
             color: INK,
-            marginBottom: "24px",
+            marginBottom: "var(--afa-space-6)",
           }}
         >
           We built this because <I>live art in India</I> deserved a home.
@@ -396,7 +396,7 @@ export default function AboutPage() {
             style={{
               listStyle: "none",
               padding: 0,
-              margin: "32px 0",
+              margin: "var(--afa-space-32px) 0",
               counterReset: "patron",
             }}
           >
@@ -432,7 +432,7 @@ export default function AboutPage() {
                   display: "grid",
                   gridTemplateColumns: "48px 1fr",
                   gap: "clamp(12px, 2vw, 20px)",
-                  padding: "24px 0",
+                  padding: "var(--afa-space-6) 0",
                   borderBottom: `1px solid ${MIST}`,
                 }}
               >
@@ -445,7 +445,7 @@ export default function AboutPage() {
                     color: EMBER,
                     lineHeight: 1,
                     letterSpacing: "-0.02em",
-                    paddingTop: "6px",
+                    paddingTop: "var(--afa-space-6px)",
                   }}
                 >
                   {String(idx + 1).padStart(2, "0")}
@@ -457,7 +457,7 @@ export default function AboutPage() {
                       fontSize: "clamp(18px, 1.6vw, 21px)",
                       fontWeight: 700,
                       color: INK,
-                      marginBottom: "8px",
+                      marginBottom: "var(--afa-space-2)",
                       lineHeight: 1.4,
                     }}
                   >
@@ -491,7 +491,7 @@ export default function AboutPage() {
           <ActLabel num="V" label="What we ask of you" />
           <ActTitle>The whole deal, in four lines.</ActTitle>
 
-          <div style={{ margin: "40px 0 32px" }}>
+          <div style={{ margin: "40px 0 var(--afa-space-32px)" }}>
             {[
               { role: "an artist", ask: "bring your craft. We will bring the audience." },
               { role: "an organiser", ask: "run the shows you have been dreaming of. We will bring the tools." },
@@ -505,7 +505,7 @@ export default function AboutPage() {
                   fontSize: "clamp(17px, 1.5vw, 20px)",
                   lineHeight: 1.7,
                   color: INK,
-                  marginBottom: "20px",
+                  marginBottom: "var(--afa-space-5)",
                   paddingLeft: "clamp(16px, 2vw, 24px)",
                   borderLeft: `2px solid ${MIST}`,
                 }}
@@ -547,7 +547,7 @@ export default function AboutPage() {
           <div
             style={{
               marginTop: "72px",
-              paddingTop: "48px",
+              paddingTop: "var(--afa-space-48px)",
               borderTop: `1px solid ${MIST}`,
               textAlign: "center",
             }}
@@ -560,7 +560,7 @@ export default function AboutPage() {
                 lineHeight: 1.2,
                 color: EMBER,
                 letterSpacing: "-0.01em",
-                marginBottom: "20px",
+                marginBottom: "var(--afa-space-5)",
               }}
             >
               Where art finds its crowd.
@@ -584,7 +584,7 @@ export default function AboutPage() {
             style={{
               marginTop: "64px",
               display: "flex",
-              gap: "12px",
+              gap: "var(--afa-space-3)",
               justifyContent: "center",
               flexWrap: "wrap",
             }}
@@ -597,7 +597,7 @@ export default function AboutPage() {
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
-                padding: "14px 28px",
+                padding: "var(--afa-space-14px) var(--afa-space-28px)",
                 borderRadius: "var(--afa-radius-sm)",
                 textDecoration: "none",
               }}
@@ -612,7 +612,7 @@ export default function AboutPage() {
                 fontWeight: 600,
                 color: INK,
                 background: "transparent",
-                padding: "14px 28px",
+                padding: "var(--afa-space-14px) var(--afa-space-28px)",
                 borderRadius: "var(--afa-radius-sm)",
                 textDecoration: "none",
                 border: `1.5px solid ${INK}`,

@@ -69,7 +69,7 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
   if (!loaded) return null
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
       <style>{`.afa-organiser-follow-cta:hover { filter: brightness(1.1); }`}</style>
       <Button
         variant={following ? "outline-neutral" : "solid"}

@@ -93,7 +93,7 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
   if (!loaded) return null
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
       <style>{`.afa-follow-cta:hover { filter: brightness(1.1); }`}</style>
       <Button
         variant={following ? "outline-neutral" : "solid"}
@@ -144,7 +144,7 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
   if (!loaded) return null
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div style={{ marginTop: "var(--afa-space-5)" }}>
       <style>{`.afa-follow-cta-sidebar:hover { filter: brightness(1.1); }`}</style>
       <Button
         variant={following ? "outline-neutral" : "solid"}
@@ -156,7 +156,7 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
         {!following && <PlusIcon style={{ width: "16px", height: "16px" }} />}
         {following ? tr.venueDetailPage.followingThisVenue : tr.venueDetailPage.followThisVenue}
       </Button>
-      <p style={{ marginTop: "10px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+      <p style={{ marginTop: "var(--afa-space-10px)", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
         {tr.venueDetailPage.followCaption}
       </p>
     </div>

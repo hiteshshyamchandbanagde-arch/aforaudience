@@ -55,32 +55,32 @@ export default function SavedPage() {
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 24px 96px' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--afa-amber)', marginBottom: 6 }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-6px)' }}>
             {events.length} event{events.length === 1 ? '' : 's'} wishlisted
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 800, color: 'var(--afa-text-primary)', marginBottom: 24 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 800, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6)' }}>
             Saved
           </h1>
 
           {error && (
-            <p style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{error}</p>
+            <p style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-body)', marginBottom: 'var(--afa-space-5)' }}>{error}</p>
           )}
 
           {events.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '64px 20px 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '64px var(--afa-space-5) 0' }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-muted)' }}>
                 <HeartIcon style={{ width: 26, height: 26 }} />
               </div>
-              <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+              <p style={{ marginTop: 'var(--afa-space-4)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                 No saves yet
               </p>
-              <p style={{ marginTop: 4, maxWidth: 260, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+              <p style={{ marginTop: 'var(--afa-space-1)', maxWidth: 260, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
                 Tap the heart on any event in Discover to keep it here for later.
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-3)' }}>
               {events.map((event) => (
                 <EventRow
                   key={event.id}

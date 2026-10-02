@@ -60,32 +60,32 @@ export default function ForgotPasswordPage() {
         <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_var(--afa-shadow)]">
           {submitted ? (
             <div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
                 {tr.forgotPasswordPage.checkYourEmailHeading}
               </h2>
               <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.7, lineHeight: 1.6 }}>
                 {tr.forgotPasswordPage.ifAccountExistsPrefix} <strong>{email}</strong>{tr.forgotPasswordPage.ifAccountExistsSuffix}
               </p>
-              <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, lineHeight: 1.6, marginTop: "16px" }}>
+              <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, lineHeight: 1.6, marginTop: "var(--afa-space-4)" }}>
                 {tr.forgotPasswordPage.didntGetAnything}
               </p>
             </div>
           ) : (
             <div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
                 {tr.forgotPasswordPage.forgotPasswordHeading}
               </h2>
-              <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "20px" }}>
+              <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "var(--afa-space-5)" }}>
                 {tr.forgotPasswordPage.enterEmailIntro}
               </p>
 
               {error && (
-                <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+                <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
                   {error}
                 </div>
               )}
 
-              <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "var(--afa-space-6px)" }}>
                 {tr.registerPage.emailLabel}
               </label>
               <input
@@ -98,14 +98,14 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setEmailInvalid(false) }}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
 
               <Button
                 variant="form-submit"
                 onClick={handleSubmit}
                 disabled={loading}
-                style={{ marginTop: "20px" }}
+                style={{ marginTop: "var(--afa-space-5)" }}
               >
                 {loading ? tr.loginPage.sendingEllipsis : tr.forgotPasswordPage.sendResetLinkButton}
               </Button>
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "var(--afa-text-body)" }}>
+        <p style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-body)" }}>
           <Link href="/login" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
             {tr.forgotPasswordPage.backToSignIn}
           </Link>
