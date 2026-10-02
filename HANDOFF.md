@@ -1,3 +1,30 @@
+# Session Handoff — 2 Oct 2026, part 36 (chat — #721 merged; central-control goal build-complete)
+
+- **#721** (GEN-2609-119 + #720 follow-ups + seed hygiene) was squash-merged at pinned head `52accfa`, giving `qa` @ `b27a5aa`.
+  - CI green; branch deleted.
+  - QA deploy `dpl_BDoUoEco8djymwEtF1qzo6sGoqhK` READY; 0 runtime errors.
+  - Chat confirmed in the QA DB: `--afa-fill-solid` `#FF5A36` and `--afa-surface-page` `#141414` restored (locked, `updatedAt` untouched); both Pune demo venues are India / Maharashtra.
+- **Decided by chat under delegation:**
+  - The ticket email and PDF stay light documents (ink/cream); they follow `--afa-fill-solid`, not the page surface.
+  - Poster accents moving from terracotta to the app orange is accepted, as consistency with the app is the goal.
+- **GEN-2610-001 (LOW)** logged:
+  1. Small orange text on cream is 2.81:1, so it moves to ink.
+  2. `design-tokens.test.ts` goes into CI.
+  3. e2e Jaipur mobile; check whether it picks Hitesh's booked seats F5-F8.
+- **Central-control goal: all build tickets merged** (121, 114, 119 → `BUILD_COMPLETE` / `DEPLOYED_QA`). Remaining: **Hitesh's goal proof.**
+  - Admin → Design System: edit an unlocked colour (e.g. `--afa-selected`), confirm the nav highlights change with no redeploy, then revert.
+  - Locked colours (`--afa-fill-solid`, page surface) need unlocking first; leave them.
+  - Admin Settings Save buttons on a narrow window.
+- **Next CC candidates after the proof:**
+  - the medium-bug bundle (065, 071, 078, 080, 083, 084, 087) plus BUG-2610-004 (search + city);
+  - BUG-2610-003;
+  - GEN-2610-001;
+  - spacing phase 2;
+  - offline tickets (BUG-2610-001);
+  - Marathi (GEN-2609-120).
+
+---
+
 # Session Handoff — 3 Oct 2026, part 35 (CC — GEN-2609-119 downloads + G + H pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/downloads-119?expand=1
