@@ -1,3 +1,26 @@
+# Session Handoff — 2 Oct 2026, part 34 (chat — #720 merged; 119 dispatch written)
+
+- **#720** (GEN-2609-121 + 114 + 081 item 11) was squash-merged at pinned head `8ef0a28`, giving `qa` @ `6e220fa`. CI green; branch deleted.
+- Chat review:
+  - Nav/sidebar/drawer/tab-bar active states now read `--afa-selected*` (admin-editable; `--afa-amber` is locked).
+  - Messages Send moved from `success` to `solid`.
+  - The `outline-success` text is now `--afa-sage-bright`.
+  - No new literals.
+  - **QA DB:** the three `--afa-selected*` rows match their originals exactly (values and `updatedAt`) after CC's round-trip.
+- Chat decisions on CC's flags (Hitesh delegated, 2 Oct):
+  - Organiser/venue Follow → outline.
+  - Profile role-application CTAs → outline.
+  - Featured toggle and carousel dot → `--afa-selected`.
+  - Rating stars stay amber (data).
+  - A single-tier builder map in neutral grey is accepted (the audience picker still shows tier colour).
+  - All folded into the 119 dispatch, part G.
+- **New dispatch:** `docs/cc-dispatches/cc-prompt-downloads-119.md`, the last central-control goal ticket. Posters, email, ticket PDF, manifest and theme colour follow tokens via one resolver, plus G (follow-ups) and H (seed hygiene; no reseed, since Hitesh holds a real booking on Jaipur).
+  - Decided: the manifest `background_color` becomes `--afa-surface-page`, not the cream.
+- 121 and 114 → `BUILD_COMPLETE` / `DEPLOYED_QA`; 119 → `BUILD_QUEUE`.
+- **After 119 merges:** Hitesh's items 12-13 (admin colour edit and revert, now including a poster or email; Admin Settings Save) are the goal proof.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 33 (CC — GEN-2609-121 + 114 + item 11 colour pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/colour-121-114?expand=1
