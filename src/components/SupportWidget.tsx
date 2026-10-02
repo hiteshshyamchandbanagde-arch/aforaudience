@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Button, { variantStyle } from '@/components/ui/Button';
 import { CheckIcon } from '@/components/icons/EventIcons';
-import { CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
-import { useActionRowClearance } from '@/components/mobile/useActionRowClearance';
+import { ABOVE_CHAT_BUTTON_MOBILE, CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, CHAT_PANEL_GAP, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
+import { MIN_TOP, useActionRowClearance } from '@/components/mobile/useActionRowClearance';
 
 /**
  * Floating support widget: chat first, feedback-form fallback.
@@ -111,8 +111,12 @@ const MAX_ATTACHMENT_BYTES = 1_000_000; // matches server's ~1.4MB data-URL cap 
 // original flat offsets, since there's no tab bar there to clear.
 // BUG-2609-072 - the offsets now live in mobile/chromeOffsets.ts, shared
 // with Toast.tsx, which stacks above this button on mobile.
-const CHAT_PANEL_MOBILE_BOTTOM = `calc(${CHAT_BUTTON_MOBILE_BOTTOM} + ${CHAT_BUTTON_SIZE}px + 12px)`; // clears the 56px button + the same 12px gap it always opened with
+const CHAT_PANEL_MOBILE_BOTTOM = ABOVE_CHAT_BUTTON_MOBILE; // clears the 56px button + the same 12px gap it always opened with
 const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} - 52px)`; // same 52px top clearance the old bottom:88/maxHeight pairing reserved
+// BUG-2609-081 - the least panel height worth lifting for. An open button
+// lifts above an action row only while this much panel still fits between
+// it and the top bar; past that it stops and the row sits under the panel.
+const CHAT_PANEL_MIN_HEIGHT = 320;
 
 // Shared shape for every text input/textarea/select in this widget (same
 // spirit as dashboard/venue/[id]/edit/page.tsx's own local `inputStyle`).
@@ -135,9 +139,17 @@ export default function SupportWidget() {
   const [panel, setPanel] = useState<Panel>('closed');
   // BUG-2609-068 - the closed bubble lifts above (or hides behind) a
   // bottom action row on mobile instead of covering it.
+  // BUG-2609-081 - it keeps lifting while the panel is open (the X sat on
+  // "Save & Unpublish" because the lift used to stop then). Open, it never
+  // hides - the user needs the X - and lifts only as far as leaves the
+  // panel CHAT_PANEL_MIN_HEIGHT.
   const restingProbeRef = useRef<HTMLDivElement>(null);
   const excluded = !!pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p));
-  const clearance = useActionRowClearance(restingProbeRef, panel === 'closed' && !excluded);
+  const open = panel !== 'closed';
+  const clearance = useActionRowClearance(restingProbeRef, !excluded, {
+    keepVisible: open,
+    headroom: open ? CHAT_PANEL_MIN_HEIGHT + CHAT_PANEL_GAP : 0,
+  });
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -501,6 +513,13 @@ export default function SupportWidget() {
             position: 'fixed',
             right: 20,
             zIndex: 45,
+            // BUG-2609-081 - above the lifted button, not the resting spot.
+            ...(clearance.bottom !== null
+              ? {
+                  bottom: clearance.bottom + CHAT_BUTTON_SIZE + CHAT_PANEL_GAP,
+                  maxHeight: `calc(100vh - ${clearance.bottom + CHAT_BUTTON_SIZE + CHAT_PANEL_GAP + MIN_TOP}px)`,
+                }
+              : null),
             width: 340,
             maxWidth: 'calc(100vw - 40px)',
             height: 460,

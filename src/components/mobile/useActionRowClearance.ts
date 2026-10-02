@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets'
 
 // BUG-2609-068 - a floating button (the support chat bubble) must never
@@ -12,11 +12,18 @@ import { MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets'
 export const ACTION_ROW_ATTR = 'data-afa-action-row'
 
 const GAP = 8 // px between the row's top edge and the lifted button
-const MIN_TOP = 72 // px; a lifted button above this would sit under MobileTopBar
+export const MIN_TOP = 72 // px; a lifted button above this would sit under MobileTopBar
 
 export interface ActionRowClearance {
   bottom: number | null // px from the viewport bottom, or null = resting spot
   hidden: boolean
+}
+
+export interface ActionRowClearanceOptions {
+  // Rule 2: never hide. If the lift would leave less than MIN_TOP +
+  // `headroom` px above the button, stop there instead.
+  keepVisible?: boolean
+  headroom?: number
 }
 
 const RESTING: ActionRowClearance = { bottom: null, hidden: false }
@@ -24,8 +31,22 @@ const RESTING: ActionRowClearance = { bottom: null, hidden: false }
 // `probeRef` is an invisible element fixed at the button's resting spot
 // (same size and offsets), so the resting rect is measured, not guessed,
 // even while the real button is lifted.
-export function useActionRowClearance(probeRef: RefObject<HTMLElement | null>, active: boolean): ActionRowClearance {
+export function useActionRowClearance(
+  probeRef: RefObject<HTMLElement | null>,
+  active: boolean,
+  { keepVisible = false, headroom = 0 }: ActionRowClearanceOptions = {},
+): ActionRowClearance {
   const [state, setState] = useState<ActionRowClearance>(RESTING)
+  // Options are read through a ref so that changing one (the panel opens)
+  // re-measures with the observers already in place. Re-running the effect
+  // below would drop the observed rows for a frame and flash the button
+  // back to its resting spot.
+  const optionsRef = useRef({ keepVisible, headroom })
+  const remeasureRef = useRef<(() => void) | null>(null)
+  useEffect(() => {
+    optionsRef.current = { keepVisible, headroom }
+    remeasureRef.current?.()
+  }, [keepVisible, headroom])
 
   useEffect(() => {
     if (!active) return
@@ -41,7 +62,9 @@ export function useActionRowClearance(probeRef: RefObject<HTMLElement | null>, a
       raf = 0
       if (rescan) scan()
       const probe = probeRef.current
-      if (!probe || !mq.matches || visible.size === 0) return apply(RESTING)
+      if (!probe || !mq.matches) return apply(RESTING)
+      const { keepVisible, headroom } = optionsRef.current
+      if (visible.size === 0) return apply(RESTING)
       const rest = probe.getBoundingClientRect()
       const rows = [...visible].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
       const overlaps = (top: number, bottom: number, r: DOMRect) =>
@@ -60,7 +83,15 @@ export function useActionRowClearance(probeRef: RefObject<HTMLElement | null>, a
         lifted = true
       }
       if (!lifted) return apply(RESTING)
-      if (top < MIN_TOP) return apply({ bottom: null, hidden: true })
+      const minTop = MIN_TOP + headroom
+      if (top < minTop) {
+        if (!keepVisible) return apply({ bottom: null, hidden: true })
+        // Rule 2: stay on screen as high as the headroom allows, never
+        // below the resting spot.
+        top = Math.min(minTop, rest.top)
+        bottom = top + rest.height
+        if (top === rest.top) return apply(RESTING)
+      }
       apply({ bottom: Math.round(window.innerHeight - bottom), hidden: false })
     }
     const schedule = () => {
@@ -88,6 +119,7 @@ export function useActionRowClearance(probeRef: RefObject<HTMLElement | null>, a
       schedule()
     })
     mo.observe(document.body, { childList: true, subtree: true })
+    remeasureRef.current = schedule
     schedule()
 
     window.addEventListener('scroll', schedule, { passive: true, capture: true })
@@ -95,6 +127,7 @@ export function useActionRowClearance(probeRef: RefObject<HTMLElement | null>, a
     mq.addEventListener('change', schedule)
     return () => {
       if (raf) cancelAnimationFrame(raf)
+      remeasureRef.current = null
       io.disconnect()
       mo.disconnect()
       window.removeEventListener('scroll', schedule, { capture: true })
