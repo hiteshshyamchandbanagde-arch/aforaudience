@@ -275,8 +275,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        .afa-event-detail-container { max-width: 1152px; margin: 0 auto; padding: 40px 24px 112px; }
-        @media (min-width: 640px) { .afa-event-detail-container { padding: 40px 32px 112px; } }
+        .afa-event-detail-container { max-width: 1152px; margin: 0 auto; padding: 40px var(--afa-space-6) 112px; }
+        @media (min-width: 640px) { .afa-event-detail-container { padding: 40px var(--afa-space-32px) 112px; } }
         .afa-event-hero-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-32px); }
         @media (min-width: 1024px) { .afa-event-hero-grid { grid-template-columns: minmax(0, 0.9fr) 1.1fr; gap: var(--afa-space-48px); } }
         .afa-event-hero-poster { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--afa-radius-xs); }
