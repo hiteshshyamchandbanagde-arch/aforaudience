@@ -1,3 +1,24 @@
+# Session Handoff — 2 Oct 2026, part 28 (chat — #718 merged; 081 dispatch written)
+
+- **#718** (GEN-2609-107 spacing phase 1) was squash-merged at pinned head `d36eaf6`, giving `qa` @ `25fc597`.
+  - CI green; the Vercel preview was READY on `d36eaf6` (checked by chat, since CC's connector was down).
+  - Branch deleted. Baseline `spacing-literal: 257` verified on `qa`. QA deploy `dpl_ohuDwnT5gQisJTRBovBRLdXbk9fH` READY; 0 runtime errors.
+- **Chat's independent check:**
+  - All 1182 changed `src` lines map back to identical px values (14 tokens: `--afa-space-1..6` and `-2px/6px/10px/14px/18px/28px/32px/48px`).
+  - Kebab-case CSS-in-string sites are unquoted (`#intro-tagline` OK).
+  - Zero files using ImageResponse/email/satori were touched.
+- GEN-2609-107 stays `BUILD_QUEUE` for phase 2. The phase 2 inputs are in part 27 and appended to its Feedback message. **Precondition:** add a spacing per-site check to `verify-equivalence.js`.
+- **New dispatch:** `docs/cc-dispatches/cc-prompt-bubble-081.md` (BUG-2609-081 + 068). It implements Hitesh's four rules.
+  - Root cause of the 29 Sep venue-edit failure found: `SupportWidget.tsx` L140 runs the lift only while `panel === 'closed'`.
+- **Next CC:** BUG-2609-081, then GEN-2609-121, then 082-087 / 119 / 120, then spacing phase 2.
+- **Corrected click-through remainder (from part 22):**
+  - 2: /register in incognito.
+  - 8: venue create (covered by 081).
+  - 11-12: admin design-system token edit + revert. GEN-2609-118 stays BUILD_COMPLETE until 11 passes.
+- Still on Hitesh: rotate the Razorpay + Google Places keys; revoke the 1 Oct PAT (still live on 2 Oct); retest 088/077; decide BUG-2610-001 (offline tickets).
+
+---
+
 # Session Handoff — 2 Oct 2026, part 27 (CC — GEN-2609-107 spacing phase 1 pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-107-spacing-p1?expand=1
