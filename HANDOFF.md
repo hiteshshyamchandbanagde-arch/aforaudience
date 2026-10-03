@@ -1,3 +1,25 @@
+# Session Handoff — 3 Oct 2026, part 44 (chat — #725 close-out A + #726 shared e2e queue merged; dispatch B1 on autopilot)
+
+- **#725** (close-out A, built by the autopilot, run `37122249601`) squash-merged at `924e8ac`, giving `6236d33`. Contents:
+  - `e2e/design-system-goal.spec.ts`: a per-run temp admin (`e2e.admin.<run>@example.com`, random password, QA-host guard `nqiyrypmjtogoocerxtu`, deleted in teardown, never touches Hitesh's account) edits `--afa-selected` through Admin → Design System and asserts it site-wide with no redeploy, then reverts; teardown restores from the recorded value.
+  - Admin Settings Save check.
+  - BUG-2610-006 badge; BUG-2610-007 (`history.replaceState`, since `trailingSlash: true`).
+  - `scripts/dev/delete-leftover-e2e-users.ts`.
+  - Chat audit: no skip, only or fixme; 0 removed `expect`s.
+  - Autopilot gap: CC hit its turn cap before writing the status file/handoff and before part 4 (preview skip by ancestry), which chat did in #726.
+- **Overlap failure, root cause found and fixed:** `#725`'s QA run and PR #726's preview run overlapped (13:11-13:23 UTC) and both failed only `waitlist-wallet-credit` (shared fixture event). Re-run alone, the QA run on `6236d33` passed **65/0/0/0**.
+- **#726** (`e56cb50`): `e2e.yml` and `e2e-preview.yml` now share one concurrency group, `e2e-qa-shared-fixtures`, with `cancel-in-progress: false`. Runs wait; GitHub keeps only the newest pending run, so chat re-runs a cancelled middle one. The preview step also skips commits already contained in `qa` (full-history checkout, `merge-base --is-ancestor`). Its preview run: 64 passed, 1 flaky (`design-system-goal.spec.ts:107`, browser error, passed on retry; first flake in 3 runs). **If it flakes again: fix or quarantine with a ticket (T2).** Token verified restored to `var(--afa-amber)`.
+- **Feedback:** BUG-2610-006/007 → `BUILD_COMPLETE`/`DEPLOYED_QA`. Goal tickets (GEN-2609-114/118/119/121, BUG-2609-055) are resolved once the goal test passes on the **nightly** (T5): first nightly 4 Oct 02:00 UTC.
+- **Dispatch B1** `docs/cc-dispatches/cc-prompt-retest-tests-b1.md` (branch `test/retest-backlog-b1`), on the autopilot:
+  - ticket IDs in test titles (`[BUG-…]`);
+  - `ci-summary` emits `TICKETS PASSED:` / failed annotation lines, which is the machine link for T5;
+  - `docs/test-coverage-map.md` for all 38 BUILD_COMPLETE/IN_TEST tickets;
+  - up to 10 new tests, 077 first;
+  - the status file is written first and updated per push (the turn-cap lesson from A).
+- **Autopilot lesson:** keep dispatches about ≤150 turns; the workflow cap is `--max-turns 400`.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 43 (chat — CC autopilot live; dispatch A running on it)
 
 - **CC autopilot (#724, `3c44fb6`):** `.github/workflows/cc-autopilot.yml`. `workflow_dispatch` only, with input `dispatch` (validated path under `docs/cc-dispatches/`). It runs `anthropics/claude-code-action@v1` with `--model opus --max-turns 400` on Hitesh's Claude subscription (secret `CLAUDE_CODE_OAUTH_TOKEN`), with DATABASE_URL/E2E_DATABASE_URL set to QA. CC pushes the dispatch branch (plus a docs-only HANDOFF commit to qa), and never opens PRs or merges. The final step turns `cc-autopilot-status.md` into annotations (`RESULT: PUSHED|PARTIAL|FAILED`), which chat reads through the API. Merged through PR with all checks green (T2).
