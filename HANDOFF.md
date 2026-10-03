@@ -9,6 +9,7 @@
 - **Pending Hitesh:**
   - Add the repo secret **`E2E_DATABASE_URL`** (QA Postgres URL) under Settings → Secrets and variables → Actions. Until it exists, the waitlist/wallet spec doesn't run in CI and each run leaves 2 `e2e.*@example.com` accounts in QA.
   - Goal proof; Admin Settings Save check; revoke 1 Oct PAT.
+- **First post-merge runs (`98b3b54`):** `E2E (QA)` **58 passed, 0 failed, 0 flaky, 7m01s**, the first green QA run since 26 Jul. `e2e-preview` on the same commit also ran (it wasn't the tip any more, because chat pushed pt42 a minute after the merge), so the two runs overlapped on shared fixtures, and `competition-show.spec.ts:99` flaked in its cleanup step. **Fix for a later dispatch:** `e2e-preview` should skip any commit already contained in `qa` (an ancestor of the tip), not only the tip itself. Until then, chat waits for the QA run to start before pushing docs.
 - **Housekeeping for a later dispatch:** delete the leftover `e2e.*@example.com` accounts in QA (3 older plus 2 per CI run until the secret exists) using the spec's own cleanup helper, not raw SQL.
 
 ---
