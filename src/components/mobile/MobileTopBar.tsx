@@ -143,7 +143,6 @@ export default function MobileTopBar() {
           type="search"
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
-          onFocus={handleOpenFilters}
           onKeyDown={handleSearchSubmit}
           placeholder={t.search.mobileTopBarPlaceholder}
           style={{

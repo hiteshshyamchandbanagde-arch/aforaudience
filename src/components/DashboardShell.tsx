@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useLocale } from '@/lib/i18n/translate'
 import { useHeldRoles } from '@/components/HeldRolesContext'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 
 // Shared shell for the Audience-tier dashboard pages (Dashboard/My
 // Activity, Messages, Tickets). Desktop: persistent 220px left sidebar,
@@ -434,6 +435,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const held = useHeldRoles()
   const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending, adminFeedbackPending, adminBookingsErrored } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+  useModalSheet(drawerOpen, drawerRef, () => setDrawerOpen(false), { label: 'My Roles' })
   const badgeFor = (key?: BadgeKey): number | undefined =>
     key === 'venueBookings' ? venueBookingsPending
       : key === 'flexRequests' ? flexRequestsPending
@@ -643,6 +646,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <div className="lg:hidden fixed inset-0" style={{ zIndex: 50 }}>
           <div className="absolute inset-0" style={{ background: 'var(--afa-scrim)' }} onClick={() => setDrawerOpen(false)} />
           <div
+            ref={drawerRef}
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >

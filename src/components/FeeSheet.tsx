@@ -1,7 +1,9 @@
 'use client'
 
+import { useRef } from 'react'
 import { formatDisplayMoney, type DisplayCurrency } from '@/lib/money-display'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 
 // Mobile Redesign Phase 3 (GEN-2609-005) - ported from the Figma Make
 // export's FeeSheet.tsx. That mock hardcoded every row to a static ₹500
@@ -25,6 +27,8 @@ export function FeeSheet({
   currency: DisplayCurrency | null
   onClose: () => void
 }) {
+  const sheetRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, sheetRef, onClose)
   const zero = formatDisplayMoney(0, currency)
   const rows: { label: string; hint?: string; you: string; afa: string }[] = [
     { label: 'Ticket face value', you: formatDisplayMoney(ticketFaceValue, currency), afa: zero },
@@ -43,6 +47,7 @@ export function FeeSheet({
         {null}
       </Button>
       <div
+        ref={sheetRef}
         style={{
           position: 'relative',
           borderTop: '1px solid var(--afa-tint-10)',

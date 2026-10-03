@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
+import { useModalSheet } from '@/lib/use-modal-sheet';
 
 /**
  * "Add to Home Screen" prompt.
@@ -37,6 +38,7 @@ const DISMISS_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -103,10 +105,15 @@ export default function InstallPrompt() {
     }
   };
 
+  // A banner, not a modal: the page stays usable, so focus is never
+  // moved or trapped. Esc dismisses it while focus is inside.
+  useModalSheet(visible, bannerRef, onDismiss, { modal: false });
+
   if (!visible) return null;
 
   return (
     <div
+      ref={bannerRef}
       role="dialog"
       aria-labelledby="pwa-install-title"
       style={{

@@ -1,8 +1,10 @@
 "use client"
+import { useRef } from "react"
 import { TYPE_META } from "@/components/EventCard"
 import { EventTypeIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
+import { useModalSheet } from "@/lib/use-modal-sheet"
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - mobile-only bottom sheet for
 // /events' filters (type/city/price/sort), replacing the desktop inline
@@ -62,6 +64,8 @@ export default function MobileEventFilterSheet({
   onReset: () => void
 }) {
   const { t: tr } = useLocale()
+  const sheetRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, sheetRef, onClose)
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
@@ -74,6 +78,7 @@ export default function MobileEventFilterSheet({
         {null}
       </Button>
       <div
+        ref={sheetRef}
         className="afa-sheet-mount no-scrollbar"
         style={{
           position: "relative",

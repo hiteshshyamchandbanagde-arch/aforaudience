@@ -1,8 +1,9 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import PresetSelectWithOther from "./PresetSelectWithOther"
 import CityAutocomplete from "./CityAutocomplete"
 import Button from "@/components/ui/Button"
+import { useModalSheet } from "@/lib/use-modal-sheet"
 import Input, { INPUT_STYLES } from "@/components/ui/Input"
 
 type CorporateInquiryModalProps = {
@@ -122,6 +123,11 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  const sheetRef = useRef<HTMLDivElement>(null)
+  // onClose, not handleClose (declared below the early return): Esc
+  // closes and keeps what was typed, the buttons close and reset.
+  useModalSheet(open, sheetRef, onClose)
+
   if (!open) return null
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -167,10 +173,10 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
   }
 
   return (
-    <div role="dialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <div onClick={handleClose} style={{ position: "absolute", inset: 0, background: "var(--afa-scrim)" }} />
 
-      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)", padding: "var(--afa-space-2) var(--afa-space-6) var(--afa-space-28px)", boxShadow: "0 -8px 40px var(--afa-shadow)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
+      <div ref={sheetRef} style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)", padding: "var(--afa-space-2) var(--afa-space-6) var(--afa-space-28px)", boxShadow: "0 -8px 40px var(--afa-shadow)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "var(--afa-space-6px) 0" }}>
           <div style={{ width: "36px", height: "4px", borderRadius: "var(--afa-radius-xs)", background: "var(--afa-border-resting)" }} />
         </div>

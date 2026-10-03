@@ -1,11 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useState, type TouchEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 import { useLocale } from '@/lib/i18n/translate'
 import type { Dictionary } from '@/lib/i18n/translate'
 import { STATUS_TONE, type StatusToneStyle } from '@/lib/statusStyle'
@@ -121,6 +122,9 @@ function FeedbackDetailOverlay({
   const hasPrev = index > 0
   const hasNext = index < items.length - 1
   const [navGuard, setNavGuard] = useState(false)
+  // Esc is handled by this overlay's own key handler below.
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, panelRef, undefined, { label: 'Feedback details' })
 
   useEffect(() => {
     setNavGuard(false)
@@ -172,14 +176,13 @@ function FeedbackDetailOverlay({
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', justifyContent: 'flex-end' }}
-      role="dialog"
-      aria-modal="true"
     >
       <div
         onClick={onClose}
         style={{ position: 'absolute', inset: 0, background: 'var(--afa-scrim)' }}
       />
       <div
+        ref={panelRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         style={{

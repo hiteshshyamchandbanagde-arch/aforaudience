@@ -1,9 +1,10 @@
 "use client"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
+import { useModalSheet } from "@/lib/use-modal-sheet"
 
 type AuthPromptSheetProps = {
   open: boolean
@@ -36,6 +37,8 @@ export default function AuthPromptSheet({
   const [form, setForm] = useState({ identifier: "", password: "" })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const sheetRef = useRef<HTMLDivElement>(null)
+  useModalSheet(open, sheetRef, onClose)
 
   if (!open) return null
 
@@ -75,8 +78,6 @@ export default function AuthPromptSheet({
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
       style={{
         position: "fixed",
         inset: 0,
@@ -93,6 +94,7 @@ export default function AuthPromptSheet({
       />
 
       <div
+        ref={sheetRef}
         style={{
           position: "relative",
           width: "100%",

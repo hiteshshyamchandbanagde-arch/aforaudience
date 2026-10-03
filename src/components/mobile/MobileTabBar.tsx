@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -18,6 +18,7 @@ import {
 import { PinIcon, TrophyIcon } from '@/components/icons/EventIcons'
 import { useBadgeCounts, getShellDashboardLink, Icon as DashboardIcon, type IconName } from '@/components/DashboardShell'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 
 // Mobile Nav v3, Phase B (GEN-2609-019) - this is Phase 1's
 // (GEN-2609-003) static 4-item MobileTabBar evolved in place into a
@@ -223,6 +224,8 @@ export default function MobileTabBar() {
   const { t } = useLocale()
   const { unreadCount, flexRequestsPending, venueBookingsPending } = useBadgeCounts()
   const [moreOpen, setMoreOpen] = useState(false)
+  const moreSheetRef = useRef<HTMLDivElement>(null)
+  useModalSheet(moreOpen, moreSheetRef, () => setMoreOpen(false), { label: 'More' })
 
   const role = (session?.user as { role?: string } | undefined)?.role
   const barState = deriveBarState(rawPathname, role)
@@ -506,6 +509,7 @@ export default function MobileTabBar() {
         <div className="lg:hidden fixed inset-0" style={{ zIndex: 50 }}>
           <div className="absolute inset-0" style={{ background: 'var(--afa-scrim)' }} onClick={() => setMoreOpen(false)} />
           <div
+            ref={moreSheetRef}
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
           >

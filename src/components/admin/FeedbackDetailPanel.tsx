@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, type TouchEvent } from 'react'
+import { useEffect, useRef, useState, type TouchEvent } from 'react'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 
 // Admin Dashboard v1 detail panel (design.md §9.1).
 //
@@ -96,6 +97,9 @@ export default function FeedbackDetailPanel({
   position?: { index: number; total: number } | null
 }) {
   const [expandedImage, setExpandedImage] = useState(false)
+  // Esc is handled by this panel's own key handler below.
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, panelRef, undefined, { label: 'Feedback details' })
   // Set when a REJECTED/REOPENED click is pending a note - shows the
   // inline textarea + confirm/cancel instead of applying immediately,
   // since those two transitions require justification (Hitesh's design).
@@ -188,7 +192,7 @@ export default function FeedbackDetailPanel({
         }
       `}</style>
       <div className="fb-detail-backdrop" onClick={onClose} />
-      <div className="fb-detail-panel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <div ref={panelRef} className="fb-detail-panel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <div style={{ padding: 'var(--afa-space-5) var(--afa-space-5) var(--afa-space-32px)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-4)' }}>
             <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>

@@ -11,6 +11,7 @@ import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
 import { fillSolidTint, SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLockGlyph } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
 //
@@ -2223,6 +2224,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 // not a standalone route). Content/copy kept exact - only the container
 // changed (a slide-over here, a full page there).
 function TerminologyPanel({ onClose }: { onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, panelRef, onClose, { label: 'Terminology' })
   const rows: { glyph: React.ReactNode; term: string; def: string; why: string }[] = [
     {
       glyph: <IconSection size={18} />,
@@ -2255,6 +2258,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
       style={{ position: 'fixed', inset: 0, background: 'var(--afa-scrim)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}
     >
       <div
+        ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         className="afa-glow-amber"
         style={{ width: '100%', maxWidth: '440px', height: '100%', overflowY: 'auto', padding: 'var(--afa-space-28px) var(--afa-space-6)', borderLeft: '1px solid var(--afa-tint-10)' }}

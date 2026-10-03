@@ -1,6 +1,8 @@
 'use client'
 
+import { useRef } from 'react'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 
 // The "contribution moment" - shown right after a user's seats are
 // confirmed (free/no-payment booking, or a paid booking's payment
@@ -126,6 +128,11 @@ function ViewTicketButton({ onViewTicket }: { onViewTicket: () => void }) {
 }
 
 export default function ContributionMoment(props: ContributionMomentProps) {
+  // Two CSS-switched layouts; the hook skips whichever is display:none.
+  const mobileRef = useRef<HTMLDivElement>(null)
+  const desktopRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, mobileRef, props.onClose)
+  useModalSheet(true, desktopRef, props.onClose)
   return (
     <>
       <style>{`
@@ -148,9 +155,8 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           the mockup - a plain top-to-bottom stack left it floating with
           empty space beneath it instead of anchored like the reference. */}
       <div
+        ref={mobileRef}
         className="cm-mobile afa-sheet-mount"
-        role="dialog"
-        aria-modal="true"
         style={{
           position: 'fixed', inset: 0, zIndex: 1000,
           background: 'var(--afa-surface-page)',
@@ -177,6 +183,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           {null}
         </Button>
         <div
+          ref={desktopRef}
           className="cm-modal-mount"
           style={{
             position: 'relative', width: '100%', maxWidth: 440, margin: '0 var(--afa-space-5)',
