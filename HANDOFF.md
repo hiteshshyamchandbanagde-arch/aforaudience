@@ -1,3 +1,95 @@
+# Session Handoff — 3 Oct 2026, part 38 (CC — MEDIUM bug bundle 2 pushed, NOT merged)
+
+- **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/medium-bug-bundle-2610?expand=1
+- **Base:** `fcb466f` (= `origin/qa` at push; `qa` did not move, dispatch unchanged). Fresh CC conversation.
+- **Vercel preview:** READY on the pushed head `a5b8106` (`dpl_FyB21bcPRiYRCaFbTuAhSQM3wEkM`).
+- **No DB changes.** No schema change, no rows written, QA not reseeded. The chip checks ran as a guest (cookie only); Atul's saved city was not changed.
+- **Next step (chat):** merge; 065, 071, 078, 083, 084, 087, 2610-004 and 082 → `BUILD_COMPLETE`. **080 did not reproduce** on current qa: no code change, close as fixed by #717.
+- **Three things to look at before merging:** flags 1, 2 and 3 below.
+
+## Commits (each passes `tsc` on its own)
+| Commit | Bug |
+|---|---|
+| `7a69217` | 065 focus hook |
+| `7f29986` | 071 date formatter + checker rule |
+| `536f5bb` | 078 chip change reaches the page |
+| `57e9834` | 083 half-hour billing + warning |
+| `470c478` | 084 one tab-bar route source |
+| `7bcbe42` | 087 revenue by event date |
+| `48d5b4b` | 2610-004 search + city |
+| `d0a1408` | 082 plurals |
+| `6457e0b` | 078 chip no longer navigates home (found while reproducing) |
+| `87b8ff8` | 084 route self-tests + CI step |
+| `a5b8106` | 083 spacing under the note |
+
+## Per bug
+Live = Playwright on `next build` + `next start` of the branch against the QA DB, real logins; "before" = `origin/qa` built the same way.
+
+**065 — sheets don't trap focus.** Cause: every sheet is hand-rolled and none managed focus. Fix: `src/lib/use-modal-sheet.ts` (focus in, Tab/Shift+Tab trapped, Esc, focus back, role + `aria-modal` + name). Live at 390, 22/22: filter sheet (guest), organiser More sheet (Omkar), fee sheet on /profile (Atul): focus inside on open, 20 Tab and 8 Shift+Tab never leave, Esc closes, focus returns to the trigger. Before: focus stayed on the trigger and reached the sheet after 9 Tab presses. Not opened live: auth prompt, corporate inquiry, contribution moment, both feedback panels, terminology panel, confirm dialog, install prompt (same hook, type-checked only).
+
+| Sheet | Hook |
+|---|---|
+| `MobileEventFilterSheet` | yes |
+| `FeeSheet` | yes |
+| `AuthPromptSheet` | yes |
+| `MobileTabBar` More sheet | yes |
+| `DashboardShell` "My Roles" drawer | yes (now a fallback only, see 084) |
+| `CorporateInquiryModal` | yes; Esc closes and keeps what was typed |
+| `ContributionMoment` (mobile sheet + desktop modal) | yes, both |
+| `my-feedback` detail overlay, admin `FeedbackDetailPanel` | yes; their own Esc/arrow handlers kept |
+| Seat-map `TerminologyPanel`, design-system `ConfirmDialog` | yes |
+| `InstallPrompt` | name + Esc only: it is a banner over a usable page, so focus is not moved or trapped |
+| `WelcomeSequence` | no: full-page first-run takeover with nothing behind it to reach; not in the dispatch list |
+| `SupportWidget` chat panel | no: non-modal by design |
+| Language pickers (MobileTopBar, SiteNav), SiteNav account menu, LocationChip list, /venues city list | no: dropdowns, not modals; none has Esc-to-close today |
+
+**071 — dates follow the browser.** Cause: 18 calls with no locale, no `timeZone` anywhere. Fix: `src/lib/format-date.ts`; 57 call sites converted (56 by a reviewed codemod, 1 by hand); checker rule `locale-date-call` (ratchet baseline 0). Live: Omkar's dashboard with browser `en-US` + New York zone reads "1 Oct 2026", "25 Oct 2026"; before it read "9/30/2026", "10/24/2026" (also a day early, the zone bug). Self-tests run under `TZ=America/New_York` in CI.
+- Styles added beyond the dispatch's six: `longWithYear`, `month`, `monthYearShort`, `monthYear`.
+- Digits are forced Latin in every locale (Bengali would otherwise use Bengali digits next to Latin rupee amounts).
+- Left alone: `api/wall-of-fame` month label (already pinned to UTC to match its UTC month bucket).
+- Not converted: `getDate()`/`getDay()`/`toDateString()` logic next to the labels (day number on the artist and organiser date tiles, Today/Tomorrow, the bookings calendar grid) still uses the device zone. Same answer for anyone in India.
+- Dashboard pages now pass the UI locale, so a Hindi user sees a Hindi month inside English dashboard copy.
+
+**078 — /venues city ≠ chip.** Reproduce on current qa at 390: **page and chip agree on a single load**, signed in as Atul (both Jaipur) and signed out (Set location / All Cities). The original report is consistent with a stale cached payload. Two real gaps found: (1) a chip change never reached the page; (2) **on mobile the chip was inside the logo link, so tapping it went to the homepage.** Fix: `afa:location-changed` from LocationChip, listened to by `/venues`, `/events` and other chips; chip moved out of the link. Event names now in `src/lib/app-events.ts`. Live (guest, 390): /venues → Jaipur (1 space) → Pune (9 spaces), /events → Jaipur, no reload, still on the page. Not verified: the signed-in write path (same POST, not run to avoid changing Atul's city).
+
+**080 — top bar missing after resize.** **Does not reproduce on current qa.** 18 checks, guest and Atul, `/events`, `/`, `/venues`: 1440 → 412 without reload shows the mobile top bar (logo, search, chip, filter icon on /events) and hides the desktop header; 412 → 1440 and load-at-412-then-grow both switch back. Same on the branch. No code change.
+
+**083 — unrounded hours.** Cause: pages priced `mins / 60` exactly, server recorded `Math.round`. Fix: `src/lib/venue-billing.ts` used by create, edit and both routes. Live (Omkar, 390, create): 23:55 → 14:53 at Koregaon Park Lounge reads "₹2500/hr × 15 hr (14 h 58 m, billed as 15 hr)", ₹37,500, with the note "This event runs 14 h 58 m and ends the next day. Check AM/PM."; 19:00 → 21:05 is 2.5 hr, ₹6,250, no note. Before: "× 14.966666666666667 hr", ₹37,417, no note. Not verified live: the edit page (same code) and the two server routes (no booking was created or confirmed).
+
+**084 — wrong tab bar.** Cause: two hand-kept route lists. Fix: `src/components/mobile/tabBarRoutes.ts` is the one source. Live (Omkar, 390): event detail shows one bar, the organiser one, My Events active; before it was Dashboard / My Tickets / Messages / Profile / More. Save Changes on event edit and the action row on detail sit above the bar; tour create keeps the organiser bar. `/dashboard/messages/<id>` shows no bar, as before.
+- All 30 `<DashboardShell>` pages are mapped; **none falls back to the legacy bar.** Newly mapped: organiser event detail (ORGANISER, My Events), `/dashboard/audience` (primary bar, nothing active), `/dashboard/admin/design-system` (ADMIN, nothing active). A self-test fails if a new shell page is added without a mapping.
+- Pages that do not use the shell now get a bar where they had none: event edit / lineup / check-in / sales, tour detail / create, venue detail / edit / seat map / sales.
+- `/dashboard/venue-requests` for a role that is neither organiser nor venue owner now shows the primary bar (was no bar).
+- Not verified live: the lineup page's sticky Save row (the event had no performers, so the row did not render; it is lifted by `--afa-tab-bar-clearance`), the seat-map builder, and the venue-owner prefix pages.
+
+**087 — Bookings vs Sales.** Cause: Bookings by `fromDate`, both sales routes by `createdAt`. Fix: both routes use `fromDate` over the whole India-time calendar period; Bookings' month check is India time; both labelled "by event date". Live (Vinayak, 412): Bookings This month ₹37,417 and Sales Month ₹37,417. Before: ₹37,417 vs ₹0. Range picker on one line (button height 51 → 32), no page overflow. Per-venue sales route changed the same way, not opened live.
+- **Admin `revenue-overview`: `createdAt`** for both the range filter and the buckets. Not changed.
+
+**2610-004 — hidden search + auto city.** Cause as in the dispatch. Live (Atul, 412), 14/14: `/` → "rajapalayam" + Enter → the input shows it, city is All Cities, Rajapalayam Comedy Jam is found; clearing the input removes `?search=`; Pune + "rajapalayam" gives "No events matching ‘rajapalayam’ in Pune" with Search all cities and Clear search; Search all cities finds it. Before: empty input, Jaipur applied, "0 events" / "No events found".
+
+**082 — plurals.** `src/lib/i18n/plural.ts`. /events kicker, results header and filter-sheet button; venue sales "1 booking"; seat and section counts on event create/edit and the seat-map builder. Live: "1 event happening near you", "SHOWING 1 EVENT", "1 booking".
+- Seen, not fixed: `ContributionMoment` "one of {n} people"; venue sales "View all {n} venues" (only shown above 5). Not swept repo-wide.
+
+## Verification
+- `tsc` clean on every commit · `next build` passes at the head (`CIRCLE_NODE_TOTAL=3`).
+- Checker vs `origin/qa`: no new literals. Ratchet: all 9 categories ±0 (spacing 257 / 257; new `locale-date-call` 0 / 0, added to the baseline file by hand).
+- Self-tests: 103 / 67 / 5 / 4, plus new format-date 12, venue-billing 11, sales-range 10, tab-bar-routes 8 (all four added to the CI workflow).
+- ESLint on the 79 touched files, `origin/qa` vs branch: 196 problems on both, 0 new.
+- Live checks: 82, all pass on the final build. `e2e` suite not run.
+- New strings: 10 keys × 11 locales (`common.byEventDate`, six `eventsPage.empty*`, three `*One` plurals). **The 10 non-English translations are mine and unreviewed by a native speaker.** 083's note and hours text are English-only, as the dashboard create/edit pages are.
+- Screenshots (29, before/after): `C:\Users\hites\AforA\medium-bug-bundle-2610-screenshots\` (local, outside the repo).
+
+## Flags for chat / Hitesh
+1. **065 changes how the /events filter sheet opens on mobile.** Focusing the top-bar search input used to open it; with the sheet taking focus, the input could no longer be typed in, so only the filter icon opens it now. Typing in the input searches as before.
+2. **083: the duration columns are `Int`.** `VenueBooking.durationHours` and `VenueBookingRequest.durationHours` cannot hold 2.5, so a half-hour is recorded rounded up (3). The amount carries the exact price. A decimal or minutes column is the real fix and needs a schema change. Also: the server still takes the amount the client sends; it does not recompute it.
+3. **087 changes what a range means on venue Sales.** By event date, "Month" is the whole calendar month, so it includes confirmed events later this month, and the delta compares with the whole previous month (it was "same number of days so far"). Organiser ticket sales and admin revenue are still by `createdAt`.
+4. **087: the existing QA booking stays ₹37,417** (not touched, per the dispatch); the same times now quote ₹37,500.
+5. **084: the admin design-system page has no bar item** on mobile (nothing highlighted, not in the More sheet). One line to add if wanted.
+6. **065: the admin feedback panel's arrow keys** still page through items while typing in its note box. Seen, not changed.
+7. **071: the native date input** shows the browser's own format (10/22/2026 in an en-US browser). That is the browser control, not app text.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 37 (chat — stale 099 re-run; medium-bug bundle 2 dispatch written)
 
 - **Stale CC run again (no harm):** CC re-ran the old GEN-2609-099 prompt on base `af757e3` (22 Sep) and reported branch `chore/gen-2609-099-tint-tokens` pushed. It is **not on the remote** (only `main` + `qa`); QA `DesignToken` `--afa-tint-08`/`--afa-tint-10` still 1 row each, `updatedAt` 26 Sep. 099 shipped as #697. Hitesh to delete the local branch and start CC from a fresh conversation. The new dispatch hard-stops if base < `f3aef9a`.
