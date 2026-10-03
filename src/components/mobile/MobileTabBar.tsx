@@ -19,6 +19,7 @@ import { PinIcon, TrophyIcon } from '@/components/icons/EventIcons'
 import { useBadgeCounts, getShellDashboardLink, Icon as DashboardIcon, type IconName } from '@/components/DashboardShell'
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
+import { deriveBarState, type RoleBarKind } from './tabBarRoutes'
 
 // Mobile Nav v3, Phase B (GEN-2609-019) - this is Phase 1's
 // (GEN-2609-003) static 4-item MobileTabBar evolved in place into a
@@ -46,7 +47,7 @@ import { useModalSheet } from '@/lib/use-modal-sheet'
 // no Admin persona in QA seed data to verify it against) adds
 // role-specific Dashboard bars for Artist/Organiser/Venue Owner,
 // reached via the Discover-sub "Dashboard" item's placeholder landing
-// from Phase B. `deriveBarState` below is no longer a pure function of
+// from Phase B. `deriveBarState` (./tabBarRoutes) is not a pure function of
 // pathname ALONE - /dashboard/venue-requests is one shared page (gated
 // by `callerSide` inside that page itself, see its own comment) used by
 // both Organiser and Venue Owner, so which role's bar renders there
@@ -68,119 +69,8 @@ import { useModalSheet } from '@/lib/use-modal-sheet'
 // data behind it, shipped as specified so there's something real to
 // react to, most likely item to need correction once Hitesh has
 // actually used it for a few days.
-type PrimaryTab = 'messages' | 'tickets' | 'saved' | 'profile'
-type DiscoverSub = 'events' | 'artists' | 'venues' | 'wall-of-fame'
-type RoleBarKind = 'ARTIST' | 'ORGANISER' | 'VENUE_OWNER' | 'ADMIN'
-
-type BarState =
-  | { kind: 'primary'; active: PrimaryTab | null }
-  | { kind: 'discover'; active: DiscoverSub }
-  | { kind: 'role'; role: RoleBarKind; active: string | null }
-  | { kind: 'hidden' }
-
-// Route (+ role, for the one shared route) -> bar state. Exact-match
-// only (same as the Phase 1/B bar this extends) - dynamic/pushed routes
-// like /events/[id] deliberately fall through to 'hidden', same as
-// before. The deeper single-purpose tool pages this phase's own dispatch
-// explicitly leaves alone (/dashboard/organiser/events/[id]/*,
-// /dashboard/organiser/tours/[id], /dashboard/organiser/tours/create,
-// /dashboard/venue/[id]/*) aren't listed below either, for the same
-// reason - they don't use DashboardShell at all today, so there's
-// nothing for this bar to take over there.
-function deriveBarState(pathname: string | null, role: string | undefined): BarState {
-  const p = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
-  switch (p) {
-    case '/':
-      return { kind: 'primary', active: null }
-    case '/dashboard/messages':
-      return { kind: 'primary', active: 'messages' }
-    case '/tickets':
-      return { kind: 'primary', active: 'tickets' }
-    case '/saved':
-      return { kind: 'primary', active: 'saved' }
-    case '/profile':
-      return { kind: 'primary', active: 'profile' }
-    case '/events':
-      return { kind: 'discover', active: 'events' }
-    case '/artists':
-      return { kind: 'discover', active: 'artists' }
-    case '/venues':
-      return { kind: 'discover', active: 'venues' }
-    case '/wall-of-fame':
-      return { kind: 'discover', active: 'wall-of-fame' }
-
-    // Artist - base /dashboard/artist overview isn't any of the 3 bar
-    // items' own href (none of them point there, same as none of
-    // ORGANISER/VENUE_OWNER's items point at a bare "overview" route
-    // either) - bar shows, nothing highlighted, same treatment as '/'.
-    case '/dashboard/artist':
-      return { kind: 'role', role: 'ARTIST', active: null }
-    case '/dashboard/artist/events':
-      return { kind: 'role', role: 'ARTIST', active: 'my-events' }
-    case '/dashboard/artist/edit':
-      return { kind: 'role', role: 'ARTIST', active: 'edit-profile' }
-    case '/dashboard/artist/corporate-inquiries':
-      return { kind: 'role', role: 'ARTIST', active: 'inquiries' }
-
-    case '/dashboard/organiser':
-      return { kind: 'role', role: 'ORGANISER', active: 'my-events' }
-    case '/dashboard/organiser/events/create':
-      return { kind: 'role', role: 'ORGANISER', active: 'create' }
-    case '/dashboard/organiser/sales':
-      return { kind: 'role', role: 'ORGANISER', active: 'sales' }
-    case '/dashboard/organiser/payouts':
-      return { kind: 'role', role: 'ORGANISER', active: 'payouts' }
-    case '/dashboard/organiser/tours':
-      return { kind: 'role', role: 'ORGANISER', active: 'tours' }
-    case '/dashboard/organiser/edit':
-      return { kind: 'role', role: 'ORGANISER', active: 'edit-profile' }
-
-    case '/dashboard/venue':
-      return { kind: 'role', role: 'VENUE_OWNER', active: 'my-venues' }
-    case '/dashboard/venue/bookings':
-      return { kind: 'role', role: 'VENUE_OWNER', active: 'bookings' }
-    case '/dashboard/venue/sales':
-      return { kind: 'role', role: 'VENUE_OWNER', active: 'sales' }
-    case '/dashboard/venue/create':
-      return { kind: 'role', role: 'VENUE_OWNER', active: 'register-venue' }
-    case '/dashboard/venue/edit':
-      return { kind: 'role', role: 'VENUE_OWNER', active: 'account-settings' }
-
-    // Shared route - the page itself resolves `callerSide` from
-    // session.user.role (src/app/dashboard/venue-requests/page.tsx),
-    // reused here rather than building new role-detection. A signed-in
-    // user with neither role hitting this URL directly (shouldn't
-    // happen - the page's own gating gives them an empty view, not a
-    // redirect) gets no bar rather than a guessed-wrong one.
-    case '/dashboard/venue-requests':
-      if (role === 'ORGANISER') return { kind: 'role', role: 'ORGANISER', active: 'requests' }
-      if (role === 'VENUE_OWNER') return { kind: 'role', role: 'VENUE_OWNER', active: 'requests' }
-      return { kind: 'hidden' }
-
-    // Admin - unlike the other 3 roles' base route, "Overview" is a real
-    // bar item pointing at this exact URL (not just an unhighlighted
-    // landing state), so it gets its own active id instead of null.
-    case '/dashboard/admin':
-      return { kind: 'role', role: 'ADMIN', active: 'overview' }
-    case '/dashboard/admin/bookings':
-      return { kind: 'role', role: 'ADMIN', active: 'bookings' }
-    case '/dashboard/admin/revenue':
-      return { kind: 'role', role: 'ADMIN', active: 'revenue' }
-    case '/dashboard/admin/users':
-      return { kind: 'role', role: 'ADMIN', active: 'users' }
-    case '/dashboard/admin/artists':
-      return { kind: 'role', role: 'ADMIN', active: 'artists' }
-    case '/dashboard/admin/diary':
-      return { kind: 'role', role: 'ADMIN', active: 'diary' }
-    case '/dashboard/admin/feedback':
-      return { kind: 'role', role: 'ADMIN', active: 'feedback' }
-    case '/dashboard/admin/settings':
-      return { kind: 'role', role: 'ADMIN', active: 'settings' }
-
-    default:
-      return { kind: 'hidden' }
-  }
-}
+// Which bar a route gets (deriveBarState) lives in ./tabBarRoutes, shared
+// with DashboardShell so the two can never disagree (BUG-2609-084).
 
 type ItemDef = {
   id: string
@@ -313,7 +203,7 @@ export default function MobileTabBar() {
     // landing on /dashboard/audience-style routes per Phase B's own
     // comment) - getShellDashboardLink already resolves to each role's
     // real base dashboard route (/dashboard/artist, /dashboard/organiser,
-    // /dashboard/venue), which deriveBarState above now recognizes as
+    // /dashboard/venue), which deriveBarState recognizes as
     // that role's own bar state instead of falling through to hidden.
     // Always push - a real descent, and native back from anywhere inside
     // the resulting role bar should return to whichever Discover sub-item
