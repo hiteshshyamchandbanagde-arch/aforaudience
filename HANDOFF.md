@@ -1,3 +1,24 @@
+# Session Handoff — 3 Oct 2026, part 37 (chat — stale 099 re-run; medium-bug bundle 2 dispatch written)
+
+- **Stale CC run again (no harm):** CC re-ran the old GEN-2609-099 prompt on base `af757e3` (22 Sep) and reported branch `chore/gen-2609-099-tint-tokens` pushed. It is **not on the remote** (only `main` + `qa`); QA `DesignToken` `--afa-tint-08`/`--afa-tint-10` still 1 row each, `updatedAt` 26 Sep. 099 shipped as #697. Hitesh to delete the local branch and start CC from a fresh conversation. The new dispatch hard-stops if base < `f3aef9a`.
+- **Central-control goal:** unchanged since pt36, build-complete; still waiting on Hitesh's goal proof (Admin → Design System edit `--afa-selected`, check site-wide, revert) and the Admin Settings Save check at narrow width.
+- **New dispatch:** `docs/cc-dispatches/cc-prompt-medium-bug-bundle-2-065-071-078-080-083-084-087-2610-004.md`, branch `fix/medium-bug-bundle-2610`. BUG-2609-082 (LOW, plurals) folded in as adjacent. All 9 → `BUILD_QUEUE`.
+- **Chat findings while scoping (verified in code/DB):**
+  - **083 ↔ 087 are the same booking:** ₹37,417 = ₹2500 × 14.9667 hr. Create/edit price exact fractional hours; server (`api/events` ~L445, `api/venue-bookings/[id]` ~L116) uses `Math.round(mins/60)`, so the shown price and the snapshot disagree.
+  - **084:** `MobileTabBar.deriveBarState` is exact-match only → `hidden` on `/dashboard/organiser/events/[id]` → `DashboardShell` shows its legacy bar. The "doesn't use DashboardShell" comment is stale.
+  - **071:** no `timeZone` anywhere in `src`; server-rendered dates use UTC. Current QA Event.date values sit at 00:00/01:44/01:45/13:00 UTC, so no day flips today, but the formatter pins `Asia/Kolkata`.
+  - **078/080:** both seen 28 Sep, before #717 (SW fix). Same resolver on page and chip; both bars pure-CSS gated. CC reproduces first. The real 078 gap: a chip change never reaches `/venues`/`/events` until reload.
+  - **087:** Bookings counts by `fromDate`, Sales (`sales-overview`) by `createdAt`.
+- **Decided by chat under delegation (Hitesh can veto):**
+  - 083: bill venue hours in half-hours rounded up, one shared helper for client and server; non-blocking warning for events crossing midnight or > 8 h.
+  - 084: no DashboardShell page shows the legacy mobile bar; prefix rules for organiser event/tour detail and venue detail.
+  - 087: revenue by event date on both pages, labelled.
+  - 2610-004: a `?search=` search is not narrowed by the auto-detected city.
+  - 065: one shared focus hook, not a Radix migration.
+- **Hitesh:** revoke the 1 Oct PAT (3 Oct PAT is live in chat); goal proof; Admin Settings Save check; delete local stale branch.
+
+---
+
 # Session Handoff — 2 Oct 2026, part 36 (chat — #721 merged; central-control goal build-complete)
 
 - **#721** (GEN-2609-119 + #720 follow-ups + seed hygiene) was squash-merged at pinned head `52accfa`, giving `qa` @ `b27a5aa`.
