@@ -60,6 +60,10 @@ jobs:
           TZ: America/New_York
         run: npx --yes tsx@^4.23.1 scripts/format-date.test.ts
 
+      # BUG-2609-083 - venue hire: half-hour billing and the long-event warning.
+      - name: Venue-billing self-tests
+        run: npx --yes tsx@^4.23.1 scripts/venue-billing.test.ts
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}

@@ -13,6 +13,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
+import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 
 interface SeatSection {
   id?: string
@@ -298,23 +299,19 @@ export default function CreateEventPage() {
   const eventDayOfWeek = formData.date ? DAY_NAMES[new Date(formData.date + 'T00:00:00').getDay()] : null
   const dayOverride = selectedVenue?.dayRates?.find((d) => d.dayOfWeek === eventDayOfWeek)
 
-  const durationHours = (() => {
-    if (!formData.startTime || !formData.endTime) return null
-    const [sh, sm] = formData.startTime.split(':').map(Number)
-    const [eh, em] = formData.endTime.split(':').map(Number)
-    let mins = (eh * 60 + em) - (sh * 60 + sm)
-    if (mins <= 0) mins += 24 * 60 // crosses midnight
-    return mins / 60
-  })()
+  // BUG-2609-083 - length and billed hours come from one shared helper
+  // (src/lib/venue-billing.ts), the same one the server records with.
+  const eventLength = billableHours(formData.startTime, formData.endTime)
+  const timeWarning = eventLength ? longEventWarning(eventLength) : null
 
   let suggestedAmount: number | null = null
   let suggestedAmountNote = ''
   if (selectedVenue?.rateType === 'HOURLY') {
     const rate = dayOverride?.hourlyRate || selectedVenue.hourlyRate
-    if (rate && durationHours) {
-      const billedHours = Math.max(durationHours, selectedVenue.minDurationHours || 0)
-      suggestedAmount = Math.round(rate * billedHours)
-      suggestedAmountNote = `₹${rate}/hr × ${billedHours} hr${selectedVenue.minDurationHours && billedHours > durationHours ? ` (min ${selectedVenue.minDurationHours}hr)` : ''}${dayOverride?.hourlyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()} rate` : ''}`
+    if (rate && eventLength) {
+      const hire = billableHours(formData.startTime, formData.endTime, selectedVenue.minDurationHours) ?? eventLength
+      suggestedAmount = hourlyTotal(rate, hire.billedHours)
+      suggestedAmountNote = `${hourlyNote(rate, hire, selectedVenue.minDurationHours)}${dayOverride?.hourlyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()} rate` : ''}`
     }
   } else if (selectedVenue?.rateType === 'DAILY') {
     const rate = dayOverride?.dailyRate || selectedVenue.dailyRate
@@ -614,6 +611,11 @@ export default function CreateEventPage() {
                   <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} style={inputStyle} required />
                 </div>
               </div>
+              {timeWarning && (
+                <p role="status" style={{ margin: 0, padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5 }}>
+                  {timeWarning}
+                </p>
+              )}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)' }}>
                 <div>
