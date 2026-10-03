@@ -35,6 +35,7 @@ Read each ticket's message from the Feedback table (`E2E_DATABASE_URL`, read-onl
 Each new test must pass on the branch. Where the fix exists on `origin/qa`, it passes there too; that's fine, these are retests, not regression proofs.
 
 ## Verify
+- **Your local runs must use `--grep-invert @needs-db`.** The autopilot is outside the shared CI queue (`e2e-qa-shared-fixtures`), and the `@needs-db` specs mutate shared QA fixtures (waitlist event, design tokens); CI runs them in the queue. New tests must not need DB writes; read-only `SELECT`s are fine.
 - The full suite against QA once with `--reporter=line`, plus the new tests twice. Report the duration.
 - tsc; checker and ratchet unchanged; unit self-tests.
 
