@@ -1,3 +1,18 @@
+# Session Handoff — 3 Oct 2026, part 42 (chat — #723 e2e repair merged; Testing Rule now fully in force)
+
+- **#723** (e2e repair + preview gate) squash-merged at pinned head `691cb24`, giving `qa` @ `98b3b54`. Branch deleted. Required checks on the head, all green: `e2e-preview` (57 passed, 1 flaky, 3 skipped, 5m47s), `design-tokens`, Vercel.
+- **Chat review (T2):** no `src/` changes. Every removed test title was re-indented, renamed or moved; `numbered-seat-booking.spec.ts` was folded into `registration.spec.ts` with a stronger checkout assertion (exact seat + price); the only dropped test was an empty `test.skip` Razorpay placeholder. Quarantines: exactly 2 `test.fixme`, each now ticketed. Annotations are readable through the API, so the chat-side failure view works.
+- **Tickets logged:** **BUG-2610-006** (MEDIUM, Competition badge missing on listing cards since #514; fixme in `competition-show.spec.ts`); **BUG-2610-007** (MEDIUM, clearing `/events` search doesn't remove `?search=` from the URL, the last part of BUG-2610-004; fixme in `events-search.spec.ts`). The next dispatch that touches either spec adds the ticket ID to the `test.fixme` title.
+- **Testing Rule transition is over:** the e2e gate (T2) now applies to every merge. Required check names: `e2e-preview`, `design-tokens`.
+- **Default branch is `qa`** (switched by Hitesh 3 Oct after chat confirmed Vercel Production Branch = `main`; `main` still `4caeffd`, no prod deploy). The nightly should fire at 02:00 UTC; chat verifies next session.
+- **Flaky to watch:** `language-rollout.spec.ts:131` "proper nouns…" on desktop (depends on the Jaipur Mic Gala 100 fixture). If it flakes on 2+ runs: quarantine + ticket (T2).
+- **Pending Hitesh:**
+  - Add the repo secret **`E2E_DATABASE_URL`** (QA Postgres URL) under Settings → Secrets and variables → Actions. Until it exists, the waitlist/wallet spec doesn't run in CI and each run leaves 2 `e2e.*@example.com` accounts in QA.
+  - Goal proof; Admin Settings Save check; revoke 1 Oct PAT.
+- **Housekeeping for a later dispatch:** delete the leftover `e2e.*@example.com` accounts in QA (3 older plus 2 per CI run until the secret exists) using the spec's own cleanup helper, not raw SQL.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 41 (CC — e2e suite repaired and gated, pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/e2e-repair?expand=1
