@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/test";
+import { JAIPUR_EVENT_TITLE, openEventFromListing } from "./helpers/events";
 
 /**
  * No-auth smoke tests. These need no test account and no OTP, so they're
@@ -15,28 +16,19 @@ test("homepage loads and shows persona value props", async ({ page }) => {
 
 test("events listing renders at least one published event", async ({ page }) => {
   await page.goto("/events");
-  // Loose check on purpose: exact card markup will change as the UI evolves.
-  // This just confirms the page renders a real list, not an empty/error state.
   await expect(page.locator("body")).not.toContainText(/something went wrong/i);
+  // A real list, not an empty or error state: at least one event card is
+  // on the page. Every card is a link holding the event title as an h3.
+  await expect(page.getByRole("link").filter({ has: page.getByRole("heading", { level: 3 }) }).first()).toBeVisible();
 });
 
-test("Jaipur Mic Gala 100 event detail page loads with seat picker", async ({ page }) => {
-  await page.goto("/events");
-  // The whole card is now a single role="link" element whose accessible
-  // name is the full card text (title, price, "View Event", etc.) - the
-  // current click-guard card pattern (PR #261/#312), not the older "only a
-  // nested View Event link is clickable" DOM from 23 Jul.
-  //
-  // Don't match on "view event" text: every card ends with those words, so
-  // a name regex of /view event/i matches all 8 cards at once and
-  // Playwright correctly refuses to click an ambiguous target (confirmed
-  // via a real CI trace, 13 Aug: locator resolved to 8 elements). Match on
-  // the unique title instead and click the card directly - there's no
-  // separate nested link to find.
-  const card = page.getByRole("link", { name: /Jaipur Mic Gala 100/i });
-  await card.click();
-  // Require an actual id segment after /events/ - the loose /\/events\//
-  // regex matches the listing page too and would false-pass even with no
-  // navigation at all.
-  await expect(page).toHaveURL(/\/events\/[^/?]+\/?($|\?)/, { timeout: 10_000 });
+test("Jaipur Mic Gala 100 event detail page loads and offers seat selection", async ({ page, isMobile }) => {
+  await openEventFromListing(page, JAIPUR_EVENT_TITLE, isMobile);
+  await expect(page.getByRole("heading", { level: 1, name: JAIPUR_EVENT_TITLE })).toBeVisible();
+  // Numbered event: the seat map lives on its own page, linked from here
+  // (the seat picker itself is exercised in registration.spec.ts).
+  await expect(page.getByRole("link", { name: /select tickets/i }).first()).toHaveAttribute(
+    "href",
+    /\/events\/[^/]+\/seats\/?$/
+  );
 });

@@ -1,15 +1,12 @@
-import { test, expect } from "@playwright/test";
-import {
-  registerTestArtist,
-  loginFixtureOrganiser,
-  FIXTURE_EVENT_ID,
-  FIXTURE_EVENT_TITLE,
-} from "./helpers/roles";
+import type { Browser, Page } from "@playwright/test";
+import { test, expect, AFTER_WRITE, gotoDashboard } from "./helpers/test";
+import { FIXTURE_EVENT_ID, FIXTURE_EVENT_TITLE, resetWaitlistFixture } from "./helpers/roles";
+import { authFile, type PersonaKey } from "./helpers/personas";
+import { markFirstVisitDone } from "./helpers/first-visit";
 
 /**
  * Real target: the full chain fixed in PR #183 (waitlist fullness / wallet
- * race guards) but never click-tested live end to end, per every handoff
- * since (see HANDOFF_16.md "Testing pass residue"):
+ * race guards):
  *
  *   Artist A applies (Buy-in) -> Organiser approves -> Artist B applies
  *   (event is now full -> WAITLISTED) -> Artist A cancels (>=24h before
@@ -20,26 +17,7 @@ import {
  *
  * Runs against a fixed, reusable fixture (one Organiser + one BUY_IN,
  * maxPerformers:1 event + one VenueBooking with a real ₹199 platform fee -
- * see helpers/roles.ts FIXTURE_ORGANISER/FIXTURE_EVENT_ID), seeded once
- * directly via SQL, same reasoning as numbered-seat-booking.spec.ts reusing
- * "Jaipur Mic Gala 100" instead of building a fresh venue+event per run.
- * Fresh Artist accounts are still created for real, every run.
- *
- * NOT YET IN THE AUTO-RUN CADENCE. This is new - deliberately left off the
- * push/nightly workflow (see e2e-waitlist-wallet.yml, workflow_dispatch
- * only) until a first real run has been watched end to end. Promote it to
- * e2e.yml's regular triggers once confirmed stable.
- *
- * KNOWN NON-IDEMPOTENCY, worth reading before re-running: the fixture
- * VenueBooking's platformFeeAmount only ever goes down (there's no code
- * path that replenishes it) - so the "platform fee remaining: ₹199 ->
- * gone" assertion is only meaningful on the FIRST successful run. Every
- * run after that will find the fee already at ₹0 (Organiser wallet keeps
- * accumulating credit with nothing left to apply it to) and that specific
- * assertion will fail, even though cancel/waitlist-promote/refund->wallet-
- * credit all still genuinely re-verify each time. Reset by re-running the
- * platformFeeAmount:199 SQL seed (see HANDOFF, 23 Jul) if a clean second
- * pass through the fee-application step specifically is needed.
+ * see helpers/roles.ts), seeded by scripts/qa-seed.ts.
  *
  * A note on why maxPerformers:1 specifically: the isWaitlisted check in
  * POST /api/applications counts *approved Performances*, not pending
@@ -47,137 +25,163 @@ import {
  * application has actually been Approved (creating a real Performance),
  * not merely submitted. The ordering below (A applies -> A approved -> B
  * applies) is load-bearing, not incidental.
+ *
+ * 3 Oct 2026 - made repeatable. It used to register two brand-new Artist
+ * accounts on every run and never removed them, and it could only pass
+ * once per reseed: the ₹199 platform fee only ever goes down, so the last
+ * step failed on every run after the first. Now:
+ *   - Artist A is Hrithik and Artist B is Shahrukh (QA personas, sessions
+ *     saved by global-setup.ts); no accounts are created.
+ *   - The fixture is put back to its seeded state before and after the run
+ *     (resetWaitlistFixture: applications, slots, the fee, the wallet). The
+ *     app has no way to undo those, so that goes to the QA database.
+ * Hence the @needs-db tag: playwright.config.ts leaves this spec out, with
+ * a warning, on a machine that has no QA database URL (E2E_DATABASE_URL).
  */
 
-test("artist cancellation promotes the waitlist and the freed Buy-in amount becomes usable wallet credit", async ({
-  browser,
-}) => {
-  // Three independent identities in flight at once (two Artists + one
-  // Organiser) - separate browser contexts so logging in as one never
-  // clobbers another's session, unlike reusing a single `page`.
-  const artistAContext = await browser.newContext();
-  const artistBContext = await browser.newContext();
-  const organiserContext = await browser.newContext();
-  const artistAPage = await artistAContext.newPage();
-  const artistBPage = await artistBContext.newPage();
-  const organiserPage = await organiserContext.newPage();
+async function openAs(browser: Browser, persona: PersonaKey, baseURL: string | undefined): Promise<Page> {
+  // Three identities in flight at once - separate browser contexts so one
+  // session never clobbers another.
+  const context = await browser.newContext({ baseURL, storageState: authFile(persona) });
+  await markFirstVisitDone(context);
+  const page = await context.newPage();
+  page.setDefaultTimeout(15_000);
+  page.setDefaultNavigationTimeout(15_000);
+  return page;
+}
 
-  try {
-    await test.step("Artist A registers and applies to the fixture event", async () => {
-      await registerTestArtist(artistAPage);
-      await artistAPage.goto("/dashboard/artist/events");
-      const card = artistAPage
-        .locator("div")
-        .filter({ hasText: FIXTURE_EVENT_TITLE })
-        .last();
-      // The compensation badge (compensationBadge() in
-      // dashboard/artist/events/page.tsx) must be visible BEFORE the
-      // Apply click - this is the actual product requirement (Hitesh,
-      // 23 Jul): an artist must know what they'd owe/earn before
-      // applying, not just after. Fixture event is Buy-in/₹300.
-      await expect(card.getByText(/buy-in required: ₹300/i)).toBeVisible({
-        timeout: 15_000,
+/**
+ * The fixture event's card on the artist's "Browse Events" page: the nearest
+ * block around the event title that also holds its compensation badge, so
+ * the badge, the status and the apply button are all looked for inside the
+ * same card and never in a neighbour's.
+ */
+function fixtureCard(page: Page) {
+  return page
+    .getByRole("heading", { level: 3, name: FIXTURE_EVENT_TITLE })
+    .locator('xpath=ancestor::div[contains(., "Buy-in required")][1]');
+}
+
+/**
+ * Opens the artist's "Browse Events" page with every city showing.
+ *
+ * The page first lists everything, then narrows itself to the artist's own
+ * city once its city list and /api/user/location have both answered
+ * (Hrithik: Ballari; the fixture event is in Bengaluru), so the card would
+ * vanish under a click made too early. Let the page finish its own
+ * requests, then choose "All Cities" until the card stays.
+ */
+async function openBrowseEvents(page: Page) {
+  await gotoDashboard(page, "/dashboard/artist/events");
+  await page.waitForLoadState("networkidle");
+  await expect(async () => {
+    await page.getByRole("main").getByRole("combobox").selectOption({ label: "All Cities" });
+    await expect(fixtureCard(page)).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 15_000 });
+}
+
+test.describe("@needs-db waitlist and wallet credit", () => {
+  test.beforeEach(async () => {
+    await resetWaitlistFixture();
+  });
+
+  test.afterEach(async () => {
+    await resetWaitlistFixture();
+  });
+
+  test("artist cancellation promotes the waitlist and the freed Buy-in amount becomes usable wallet credit", async ({
+    browser,
+    baseURL,
+  }) => {
+    // Three people, twelve page loads and seven writes, on a QA where a
+    // server-rendered page takes 3-6 s: honestly longer than the 60 s
+    // default. Each single wait still fails in 10-15 s.
+    test.setTimeout(240_000);
+
+    const artistAPage = await openAs(browser, "hrithik", baseURL);
+    const artistBPage = await openAs(browser, "shahrukh", baseURL);
+    const organiserPage = await openAs(browser, "fixtureOrganiser", baseURL);
+
+    try {
+      await test.step("Artist A applies to the fixture event", async () => {
+        await openBrowseEvents(artistAPage);
+        const card = fixtureCard(artistAPage);
+        // The compensation badge must be visible BEFORE the Apply click -
+        // this is the actual product requirement (Hitesh, 23 Jul): an
+        // artist must know what they'd owe/earn before applying, not just
+        // after. Fixture event is Buy-in/₹300.
+        await expect(card.getByText(/buy-in required: ₹300/i)).toBeVisible();
+        await card.getByRole("button", { name: /^apply to perform$/i }).click();
+        await expect(card.getByText(/pending/i)).toBeVisible(AFTER_WRITE);
       });
-      await card.getByRole("button", { name: /apply to perform|join waitlist/i }).click();
-      await expect(card.getByText(/pending/i)).toBeVisible({ timeout: 15_000 });
-    });
 
-    await test.step("Organiser approves Artist A as a Buy-in performer (₹300, matching the event default)", async () => {
-      await loginFixtureOrganiser(organiserPage);
-      await organiserPage.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}`);
-      // Compensation defaults to Free client-side if no button is
-      // clicked (see reviewApplication in page.tsx) - Buy-in must be
-      // selected explicitly or this silently approves as Free instead
-      // and the whole downstream refund/wallet chain never triggers.
-      await organiserPage.getByRole("button", { name: /^buy-in$/i }).first().click();
-      await organiserPage.getByPlaceholder(/₹ amount/i).first().fill("300");
-      await organiserPage.getByRole("button", { name: /^approve$/i }).first().click();
-      await expect(organiserPage.getByText(/application approved/i)).toBeVisible({
-        timeout: 15_000,
+      await test.step("Organiser approves Artist A under the event's declared terms (Buy-in ₹300)", async () => {
+        await gotoDashboard(organiserPage, `/dashboard/organiser/events/${FIXTURE_EVENT_ID}`);
+        // The organiser no longer picks the terms per approval (that choice,
+        // and its Free-by-default trap, is gone): approving locks in the
+        // terms the event declared. Check they are the Buy-in the rest of
+        // this flow depends on before approving.
+        await expect(organiserPage.getByText("Buy-in — ₹300", { exact: true })).toBeVisible();
+        await organiserPage.getByRole("button", { name: /^approve$/i }).first().click();
+        await expect(organiserPage.getByText(/application approved/i)).toBeVisible(AFTER_WRITE);
       });
-    });
 
-    await test.step("Artist B registers and applies - lineup is now full, so B is waitlisted", async () => {
-      await registerTestArtist(artistBPage);
-      await artistBPage.goto("/dashboard/artist/events");
-      const card = artistBPage
-        .locator("div")
-        .filter({ hasText: FIXTURE_EVENT_TITLE })
-        .last();
-      // Same badge check as Artist A - B applies while the lineup is
-      // already full, so this also confirms the badge (and thus the
-      // payment terms) is shown even on a "waitlist only" card, not
-      // just the normal-capacity case.
-      await expect(card.getByText(/buy-in required: ₹300/i)).toBeVisible({
-        timeout: 15_000,
+      await test.step("Artist B applies - lineup is now full, so B is waitlisted", async () => {
+        await openBrowseEvents(artistBPage);
+        const card = fixtureCard(artistBPage);
+        // Same badge check as Artist A - B applies while the lineup is
+        // already full, so this also confirms the badge (and thus the
+        // payment terms) is shown even on a "waitlist only" card.
+        await expect(card.getByText(/buy-in required: ₹300/i)).toBeVisible();
+        await card.getByRole("button", { name: /^join waitlist$/i }).click();
+        await expect(card.getByRole("button", { name: /^join waitlist$/i })).toBeHidden(AFTER_WRITE);
+        await expect(card.getByText(/waitlist/i).first()).toBeVisible();
       });
-      await card.getByRole("button", { name: /join waitlist|apply to perform/i }).click();
-      await expect(card.getByText(/waitlist/i)).toBeVisible({ timeout: 15_000 });
-    });
 
-    await test.step("Artist A cancels - B should be auto-promoted off the waitlist", async () => {
-      await artistAPage.goto("/dashboard/artist");
-      // cancelPerformance() gates on window.confirm() - the handler must
-      // be registered before the click that triggers it, or Playwright's
-      // default (auto-dismiss) fires instead and nothing actually cancels.
-      artistAPage.once("dialog", (dialog) => dialog.accept());
-      await artistAPage.getByRole("button", { name: /^cancel$/i }).first().click();
-      // Page refetches its own profile after a successful cancel (see
-      // artist/page.tsx) - the Cancel button for this slot disappears
-      // because the performance no longer shows up as upcoming/active.
-      await expect(artistAPage.getByRole("button", { name: /^cancel$/i })).toHaveCount(
-        0,
-        { timeout: 15_000 }
-      );
-    });
+      await test.step("Artist A cancels - B should be auto-promoted off the waitlist", async () => {
+        await gotoDashboard(artistAPage, "/dashboard/artist");
+        // cancelPerformance() gates on window.confirm() - the handler must
+        // be registered before the click that triggers it, or Playwright's
+        // default (auto-dismiss) fires instead and nothing actually cancels.
+        artistAPage.once("dialog", (dialog) => dialog.accept());
+        // The upcoming-performance row: a block holding the event title and
+        // a Cancel button and no section heading. (The title also appears
+        // under "My Applications", and the artist has other slots with
+        // their own Cancel buttons - a looser match could cancel a real one.)
+        const slot = artistAPage
+          .locator("div")
+          .filter({ has: artistAPage.getByText(FIXTURE_EVENT_TITLE, { exact: true }) })
+          .filter({ has: artistAPage.getByRole("button", { name: /^cancel$/i }) })
+          .filter({ hasNot: artistAPage.getByRole("heading") })
+          .last();
+        await expect(slot.getByRole("button")).toHaveCount(1);
+        await slot.getByRole("button", { name: /^cancel$/i }).click();
+        // The page refetches after a successful cancel and the slot leaves
+        // the upcoming list.
+        await expect(slot).toBeHidden(AFTER_WRITE);
+      });
 
-    await test.step("Organiser sees the cancelled Buy-in slot as Refunded, converts it to wallet credit", async () => {
-      await organiserPage.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}`);
-      await expect(
-        organiserPage.getByText(/marked as refunded to the artist/i)
-      ).toBeVisible({ timeout: 15_000 });
-      await organiserPage
-        .getByRole("button", { name: /keep as wallet credit instead/i })
-        .click();
-      await expect(
-        organiserPage.getByText(/kept as wallet credit instead of a refund/i)
-      ).toBeVisible({ timeout: 15_000 });
-      await expect(organiserPage.getByText(/kept as wallet credit$/i)).toBeVisible();
-    });
+      await test.step("Organiser sees the cancelled Buy-in slot as Refunded, converts it to wallet credit", async () => {
+        await gotoDashboard(organiserPage, `/dashboard/organiser/events/${FIXTURE_EVENT_ID}`);
+        await expect(organiserPage.getByText(/marked as refunded to the artist/i)).toBeVisible();
+        await organiserPage.getByRole("button", { name: /keep as wallet credit instead/i }).click();
+        await expect(organiserPage.getByText(/kept as wallet credit instead of a refund/i)).toBeVisible(AFTER_WRITE);
+        await expect(organiserPage.getByText(/kept as wallet credit$/i)).toBeVisible();
+      });
 
-    await test.step("Organiser applies the new wallet balance to the venue booking's platform fee", async () => {
-      await expect(
-        organiserPage.getByText(/platform fee remaining: ₹199/i)
-      ).toBeVisible({ timeout: 15_000 });
-      await organiserPage
-        .getByRole("button", { name: /apply wallet credit/i })
-        .click();
-      // ₹300 credited vs a ₹199 fee - applied is capped at the fee
-      // (min(remainingFee, walletBalance) per apply-wallet/route.ts), so
-      // the fee line should disappear/zero out, not just shrink.
-      await expect(
-        organiserPage.getByText(/platform fee remaining: ₹199/i)
-      ).not.toBeVisible({ timeout: 15_000 });
-    });
-    await test.step("Cleanup: Artist B also cancels, returning the fixture event to zero occupancy for the next run", async () => {
-      // FIXTURE_EVENT_ID has maxPerformers:1. Without this, B's promoted
-      // slot would permanently occupy that one seat after the first real
-      // run, and every subsequent run's "Artist A" would be waitlisted
-      // immediately instead of approved - breaking the ordering this
-      // spec depends on (see the maxPerformers:1 note in the file header).
-      // B's promoted performance also inherited BUY_IN/₹300 from the
-      // event default, so this cancellation is real, not a no-op.
-      await artistBPage.goto("/dashboard/artist");
-      artistBPage.once("dialog", (dialog) => dialog.accept());
-      await artistBPage.getByRole("button", { name: /^cancel$/i }).first().click();
-      await expect(artistBPage.getByRole("button", { name: /^cancel$/i })).toHaveCount(
-        0,
-        { timeout: 15_000 }
-      );
-    });
-  } finally {
-    await artistAContext.close();
-    await artistBContext.close();
-    await organiserContext.close();
-  }
+      await test.step("Organiser applies the new wallet balance to the venue booking's platform fee", async () => {
+        await expect(organiserPage.getByText(/platform fee remaining: ₹199/i)).toBeVisible();
+        await organiserPage.getByRole("button", { name: /apply wallet credit/i }).click();
+        // ₹300 credited vs a ₹199 fee - applied is capped at the fee
+        // (min(remainingFee, walletBalance) per apply-wallet/route.ts), so
+        // the fee line should disappear/zero out, not just shrink.
+        await expect(organiserPage.getByText(/₹199 wallet credit applied/i)).toBeVisible(AFTER_WRITE);
+        await expect(organiserPage.getByText(/platform fee remaining: ₹199/i)).toBeHidden();
+      });
+    } finally {
+      await artistAPage.context().close();
+      await artistBPage.context().close();
+      await organiserPage.context().close();
+    }
+  });
 });

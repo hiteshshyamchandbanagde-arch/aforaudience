@@ -1,8 +1,10 @@
-import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { test, expect } from "./helpers/test";
+import { JAIPUR_EVENT_TITLE } from "./helpers/events";
 
 /**
  * GEN-2608-XXX (language rollout verification). No-auth tests, run against
- * the public homepage/events pages where SiteNav's language picker lives.
+ * the public homepage/events pages.
  *
  * Scope is deliberately mechanical, not linguistic - this catches "the
  * picker is wired correctly and nothing visibly breaks" across all 11
@@ -16,6 +18,24 @@ import { test, expect } from "@playwright/test";
  * Locale list intentionally NOT imported from src/lib/i18n/locales.ts -
  * duplicating it here means a future language addition has to update this
  * spec deliberately too, rather than silently inheriting untested coverage.
+ *
+ * 3 Oct 2026 - rewritten for where the picker lives now. This spec used to
+ * click a nav button whose text was the locale code ("EN"). That button is
+ * gone, so every test waited out its full timeout: 15 tests x 60 s was the
+ * bulk of the CI runs that were killed at the job limit. Today there are
+ * two pickers, and they are different components:
+ *   - desktop: inside the account menu (HomeHeader on "/", SiteNav
+ *     elsewhere), one button per locale labelled with its code;
+ *   - mobile: the top bar's globe button (MobileTopBar), one row per locale
+ *     labelled with its native name.
+ * So the spec now runs on both projects (it was desktop-only, on the
+ * grounds that nothing in it depended on the viewport; the picker now does).
+ * What changed in the assertions, and why:
+ *   - "the toggle shows the new locale code" is dropped: neither picker
+ *     shows the active locale as text any more (the selected option is
+ *     marked by colour only).
+ *   - added in its place: the choice is saved under the app's own storage
+ *     key, which is what the reload test depends on.
  */
 
 const LOCALES: { id: string; nativeLabel: string }[] = [
@@ -32,30 +52,24 @@ const LOCALES: { id: string; nativeLabel: string }[] = [
   { id: "es", nativeLabel: "Español" },
 ];
 
-// The picker toggle button's accessible name is t.languagePicker.label,
-// which is itself translated per-locale - so it can't be used as a
-// stable cross-locale selector. Its visible text content is always the
-// current locale's 2-letter uppercase code (EN, HI, DE...) regardless of
-// language though, so match on that instead of role+name.
-function langToggle(page: import("@playwright/test").Page, currentLocaleId: string) {
-  return page.getByText(currentLocaleId.toUpperCase(), { exact: true });
-}
+// src/lib/i18n/translate.tsx STORAGE_KEY.
+const LOCALE_STORAGE_KEY = "afa-locale";
 
-// SiteNav renders the language picker twice - once as the desktop
-// dropdown's list of buttons, and again inside the mobile drawer's own
-// toggle, which shows the CURRENTLY active locale's nativeLabel as plain
-// text (a <span>, not a button) summarizing the current selection. That
-// second element isn't hidden from the DOM at desktop viewport widths
-// (CSS-only responsive hiding), so a plain getByText match on a locale's
-// nativeLabel can resolve to both - and specifically collides for "en"
-// alone, since every test starts on the default English locale, so the
-// mobile summary span reads "English" at the exact moment this tries to
-// click the (different) dropdown item also reading "English". Scoping to
-// role=button excludes that summary span, which is a <span> with no
-// button role, without needing to touch SiteNav.tsx itself for a
-// test-only ambiguity.
-function langOption(page: import("@playwright/test").Page, nativeLabel: string) {
-  return page.getByRole("button", { name: nativeLabel, exact: true });
+/**
+ * Picks a locale the way a visitor does. A fresh context always starts in
+ * English, so the picker's own (translated) label is still "Language" /
+ * the account menu is still found by its role when this runs.
+ */
+async function switchLocale(page: Page, isMobile: boolean, locale: { id: string; nativeLabel: string }) {
+  if (isMobile) {
+    await page.getByRole("banner").getByRole("button", { name: "Language", exact: true }).click();
+    await page.getByRole("banner").getByRole("button", { name: locale.nativeLabel, exact: true }).click();
+  } else {
+    // The account-menu trigger: unnamed on the homepage header, "Account
+    // menu" in SiteNav; aria-haspopup="menu" on both.
+    await page.locator('button[aria-haspopup="menu"]').click();
+    await page.getByRole("menu").getByRole("button", { name: locale.id.toUpperCase(), exact: true }).click();
+  }
 }
 
 // A translation dictionary with a missing key falls back to rendering the
@@ -66,61 +80,38 @@ function langOption(page: import("@playwright/test").Page, nativeLabel: string) 
 const RAW_KEY_LEAK = /\b[a-z]+\.[a-zA-Z]+\b/;
 
 // Locales that also get the reload-persistence check, which adds a real
-// page reload + wait per locale on top of the switch check every locale
-// already gets. Trimmed after the first CI run of the full 11-locale
-// version (session 70 continuation) hit the job's 20-minute timeout and
-// got cancelled before producing a report - couldn't tell from that
-// alone whether this spec was the cause or the pre-existing flaky
-// competition-show/waitlist-wallet specs were, so cutting this spec's
-// own unambiguous cost first rather than guessing blind. One Indic
-// script (Tamil), one Latin-script addition (German), one already-
-// shipped baseline (Hindi) - representative spread, not exhaustive.
+// page reload per locale on top of the switch check every locale already
+// gets. One Indic script (Tamil), one Latin-script addition (German), one
+// already-shipped baseline (Hindi) - representative spread, not exhaustive.
 const RELOAD_CHECK_LOCALES = new Set(["hi", "de", "ta"]);
 
-// playwright.config.ts runs every spec on both chromium-desktop and
-// mobile-chrome, serially (workers: 1, fullyParallel: false - QA is a
-// single shared env/DB). This spec asserts attribute values and text
-// presence only, nothing viewport-dependent - real layout/overflow
-// checking is explicitly out of scope (see file header), so running it
-// twice would double CI time for zero extra signal. Scoped to desktop
-// only; this decision is what actually got the full suite back inside
-// the job's 20-minute budget after the first attempt (all 11 locales x
-// both projects) timed out and got cancelled without producing a report.
-test.beforeEach(async ({}, testInfo) => {
-  test.skip(
-    testInfo.project.name !== "chromium-desktop",
-    "Attribute/text checks only, not viewport-dependent - see file header."
-  );
-});
+for (const locale of LOCALES) {
+  const { id } = locale;
 
-for (const { id, nativeLabel } of LOCALES) {
-  test(`language switcher: ${id} - nav updates and lang attribute is set`, async ({ page }) => {
+  test(`language switcher: ${id} - nav updates and lang attribute is set`, async ({ page, isMobile }) => {
     await page.goto("/");
 
     // Fresh page always starts on English (localStorage-backed, no saved
-    // preference in a clean Playwright context) - open the picker and
-    // switch to this locale.
-    await langToggle(page, "en").click();
-    await langOption(page, nativeLabel).click();
+    // preference in a clean Playwright context).
+    await switchLocale(page, isMobile, locale);
 
     // translate.tsx sets document.documentElement.lang on every locale
     // change - the one structural signal that's identical in shape
     // regardless of which language is active, so check it first.
     await expect(page.locator("html")).toHaveAttribute("lang", id);
 
-    // Toggle button's own visible text should now show the new code.
-    await expect(langToggle(page, id)).toBeVisible();
+    // The choice is saved for the next visit.
+    expect(await page.evaluate((key) => window.localStorage.getItem(key), LOCALE_STORAGE_KEY)).toBe(id);
 
-    // No raw key fallback visible anywhere in the nav chrome.
-    const navText = await page.locator("body").innerText();
-    expect(navText).not.toMatch(RAW_KEY_LEAK);
+    // No raw key fallback visible anywhere on the page.
+    const bodyText = await page.locator("body").innerText();
+    expect(bodyText).not.toMatch(RAW_KEY_LEAK);
   });
 
   if (RELOAD_CHECK_LOCALES.has(id)) {
-    test(`language switcher: ${id} - persists across reload`, async ({ page }) => {
+    test(`language switcher: ${id} - persists across reload`, async ({ page, isMobile }) => {
       await page.goto("/");
-      await langToggle(page, "en").click();
-      await langOption(page, nativeLabel).click();
+      await switchLocale(page, isMobile, locale);
       await expect(page.locator("html")).toHaveAttribute("lang", id);
 
       await page.reload();
@@ -132,20 +123,23 @@ for (const { id, nativeLabel } of LOCALES) {
       // asserting immediately post-reload, instead of treating that
       // flash as a failure - it isn't one, it's a documented, accepted
       // limitation.
-      await expect(page.locator("html")).toHaveAttribute("lang", id, { timeout: 5_000 });
+      await expect(page.locator("html")).toHaveAttribute("lang", id);
     });
   }
 }
 
-test("proper nouns and currency stay in English/INR regardless of active language", async ({ page }) => {
+test("proper nouns and currency stay in English/INR regardless of active language", async ({ page, isMobile }) => {
   // Product principle (userMemories i18n section): city/place names and
   // currency figures are never translated, even though nav chrome is.
   await page.goto("/");
-  await langToggle(page, "en").click();
-  await langOption(page, "Deutsch").click();
+  await switchLocale(page, isMobile, { id: "de", nativeLabel: "Deutsch" });
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
 
-  await page.goto("/events");
+  // Search for the event so the same list shows on both viewports (mobile
+  // otherwise opens on carousels of a few events each). A ?search= is not
+  // narrowed by the detected city (BUG-2610-004).
+  await page.goto(`/events?search=${encodeURIComponent(JAIPUR_EVENT_TITLE)}`);
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
   // Jaipur Mic Gala 100 is a stable QA fixture (also used in
   // smoke.spec.ts) for the proper-noun check - city names are never
   // translated regardless of locale.
@@ -153,15 +147,10 @@ test("proper nouns and currency stay in English/INR regardless of active languag
   await expect(card).toBeVisible();
   await expect(card).toContainText("Jaipur");
 
-  // Currency check is intentionally NOT scoped to that same card - it's
-  // one of the pre-existing QA fixtures with legacy bad price data
-  // (null ticketPrice, predating GEN-2608-040's publish-time validation
-  // fix - PR #452 confirmed this exact gap and left existing bad data
-  // as-is, only blocking new occurrences), so it renders "-" instead of
-  // a price and isn't a reliable source for this assertion. Checking
-  // page-wide instead: some event in the full listing will always have
-  // a real ticket price, and this is what actually matters - that the
-  // ₹ symbol survives translation somewhere on the page, not that one
-  // specific fixture happens to carry a price today.
-  await expect(page.locator("body")).toContainText("₹");
+  // Currency: the ₹ symbol survives translation. Checked on the homepage,
+  // which lists priced events ("from ₹511"); the Jaipur card itself shows
+  // no price (tiered seating), and a search result page holds only it.
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  await expect(page.locator("main")).toContainText("₹");
 });

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { hasQaDatabase } from "./e2e/helpers/qa-db";
 
 /**
  * AforAudience E2E config.
@@ -17,16 +18,49 @@ const baseURL =
   process.env.PLAYWRIGHT_BASE_URL ??
   "https://aforaudience-git-qa-hitesh-shyamchand-bangade-s-projects.vercel.app";
 
+const isCI = !!process.env.CI;
+
+// Specs tagged @needs-db put a fixture back through the QA database
+// (e2e/helpers/qa-db.ts). Where there is no database URL they are left out;
+// global-setup.ts says so with a warning, so it is never silent.
+const needsDb = /@needs-db/;
+
+// Flows that are about data and rules, not layout: three people and a chain
+// of saves on one shared fixture. A second pass at phone width would repeat
+// the same server logic for minutes and write to the fixture twice.
+const desktopOnly = ["**/waitlist-wallet-credit.spec.ts", "**/competition-show.spec.ts"];
+
 export default defineConfig({
   testDir: "./e2e",
+  // Warm-up request + one login per persona, saved to e2e/.auth (see the file).
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: false, // QA is a single shared environment/DB — avoid racing bookings against each other
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  forbidOnly: isCI,
+  retries: isCI ? 1 : 0,
   workers: 1,
-  reporter: [["html", { open: "never" }], ["list"]],
-  timeout: 60_000, // generous: first request of a run can hit a cold Vercel function + Supabase pool wake-up
+  grepInvert: hasQaDatabase() ? undefined : needsDb,
+  // A broken deploy fails most tests the same way: stop after 10 instead of
+  // grinding through the rest. The reporters below still write their output.
+  maxFailures: isCI ? 10 : 0,
+  // `github` turns each failure into a check-run annotation naming the test
+  // (readable through the GitHub API without the logs or artifacts); `json`
+  // feeds e2e/ci-summary.mjs, which adds the one-line pass/fail count.
+  reporter: [
+    ...(isCI ? ([["github"]] as const) : []),
+    ["list"],
+    ["html", { open: "never" }],
+    ["json", { outputFile: "test-results/results.json" }],
+  ],
+  // A whole test may take 60 s (multi-step flows on a cold function), but a
+  // single missing element must fail in 10-15 s, not hang until the test
+  // timeout: that hang, on every test of a stale spec, is what pushed CI
+  // past its job limit with no report written (3 Oct 2026 diagnosis).
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
   use: {
     baseURL,
+    actionTimeout: 15_000,
+    navigationTimeout: 15_000,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -42,6 +76,7 @@ export default defineConfig({
       // this project mirrors that, since several fixed layout bugs
       // (SeatPicker, sticky nudge banners) have only shown up at narrow widths.
       use: { ...devices["Pixel 7"] },
+      testIgnore: desktopOnly,
     },
   ],
 });
