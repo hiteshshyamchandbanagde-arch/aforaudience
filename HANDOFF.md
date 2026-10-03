@@ -1,3 +1,20 @@
+# Session Handoff — 3 Oct 2026, part 43 (chat — CC autopilot live; dispatch A running on it)
+
+- **CC autopilot (#724, `3c44fb6`):** `.github/workflows/cc-autopilot.yml`. `workflow_dispatch` only, with input `dispatch` (validated path under `docs/cc-dispatches/`). It runs `anthropics/claude-code-action@v1` with `--model opus --max-turns 400` on Hitesh's Claude subscription (secret `CLAUDE_CODE_OAUTH_TOKEN`), with DATABASE_URL/E2E_DATABASE_URL set to QA. CC pushes the dispatch branch (plus a docs-only HANDOFF commit to qa), and never opens PRs or merges. The final step turns `cc-autopilot-status.md` into annotations (`RESULT: PUSHED|PARTIAL|FAILED`), which chat reads through the API. Merged through PR with all checks green (T2).
+- **How chat runs a dispatch now:** commit it to qa → `POST /actions/workflows/373887614/dispatches {"ref":"qa","inputs":{"dispatch":"<path>"}}` → when Hitesh next messages, read the run's annotations → open the PR with the PAT (so design-tokens and e2e-preview run) → review → merge.
+- **Setup done by Hitesh (3 Oct):** Claude GitHub app installed on `aforaudience` only; secrets `CLAUDE_CODE_OAUTH_TOKEN` and `E2E_DATABASE_URL`. Default branch is `qa`.
+- **Dispatch A** `docs/cc-dispatches/cc-prompt-close-out-a.md` (branch `fix/close-out-a`), autopilot run `37122249601`, started 12:14 UTC:
+  - goal proof as a test, using a **temporary per-run admin** (the only real QA admin is Hitesh's own account, which must never be used);
+  - Admin Settings Save check;
+  - BUG-2610-006 badge;
+  - BUG-2610-007 (lead: `trailingSlash: true` vs `router.replace("/events")`);
+  - preview-skip by ancestry;
+  - deleting leftover e2e accounts.
+- **Caveat:** autopilot usage counts against Hitesh's Claude Pro limits (5-hour session cap). A long dispatch may end PARTIAL; re-run it to continue.
+- **Hitesh's own `~/.claude/settings.json`** has an over-broad allow rule (`Bash(rm -f *.png … *)`), which Claude Code warns about. Tidy it some time; it doesn't affect the autopilot.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 42 (chat — #723 e2e repair merged; Testing Rule now fully in force)
 
 - **#723** (e2e repair + preview gate) squash-merged at pinned head `691cb24`, giving `qa` @ `98b3b54`. Branch deleted. Required checks on the head, all green: `e2e-preview` (57 passed, 1 flaky, 3 skipped, 5m47s), `design-tokens`, Vercel.
