@@ -6,7 +6,7 @@ import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import Ledger from "@/components/Ledger";
-import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
+import { TYPE_META, LineupChips, CompetitionBadge, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
 
@@ -98,6 +98,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
           {typeLabel} · {event.venue ? event.venue.city : tr.eventsPage.venueTBD}
         </div>
+        {event.isCompetitionShow && <CompetitionBadge style={{ marginBottom: "var(--afa-space-2)" }} />}
         <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: titleSize, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>
           {event.title}
         </div>

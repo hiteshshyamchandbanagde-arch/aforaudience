@@ -157,6 +157,37 @@ export function IllustratedEventFallback({ type, typeLabel, hideCaption = false 
   )
 }
 
+// BUG-2610-006 - the "🏆 Competition" mark for Competition Show events,
+// lost from the listing card in the #514 rebuild. Same quiet mono chip as
+// the type badge (scrim + blur when it sits on a poster), in amber so it
+// reads as the one highlighted fact on the card. Shared by EventCard,
+// EventRow and the homepage bento tile so the three can't drift.
+export function CompetitionBadge({ onPoster = false, style }: { onPoster?: boolean; style?: React.CSSProperties }) {
+  const { t: tr } = useLocale()
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "var(--afa-space-1)",
+        fontFamily: "var(--font-mono)",
+        fontSize: "var(--afa-text-micro)",
+        textTransform: "uppercase",
+        letterSpacing: "0.14em",
+        color: "var(--afa-amber)",
+        whiteSpace: "nowrap",
+        ...(onPoster
+          ? { background: "var(--afa-scrim)", backdropFilter: "blur(4px)", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "var(--afa-radius-xs)", maxWidth: "calc(100% - 24px)" }
+          : {}),
+        ...style,
+      }}
+    >
+      <span aria-hidden="true">🏆</span>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{tr.eventsPage.competitionBadge}</span>
+    </span>
+  )
+}
+
 // Real photo (Photo.tsx's already-verified amber/sepia duotone) or the
 // illustrated fallback - shared by the card poster and the detail-page
 // hero. Deliberately NOT the export's own `.duotone` CSS (mix-blend-mode:
@@ -272,6 +303,7 @@ export function EventCard({
         <span style={{ position: "absolute", right: "12px", top: "12px" }}>
           <EventSaveHeartButton eventId={event.id} />
         </span>
+        {event.isCompetitionShow && <CompetitionBadge onPoster style={{ position: "absolute", left: "12px", bottom: "12px" }} />}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, gap: "var(--afa-space-4)", padding: view === "grid" ? "20px" : 0 }}>
@@ -369,8 +401,9 @@ export function EventRow({
 
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, minWidth: 0, padding: "var(--afa-space-2px) 0" }}>
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
             {typeLabel}
+            {event.isCompetitionShow && <CompetitionBadge style={{ fontSize: "var(--afa-text-caption)", letterSpacing: "0.13em" }} />}
           </div>
           <h3 style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {event.title}

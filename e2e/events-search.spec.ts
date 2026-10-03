@@ -8,8 +8,7 @@ import { authFile } from "./helpers/personas";
  * applied on top, so a search for an event in another city found nothing
  * ("0 events" for "rajapalayam" with Jaipur applied). Since #722 the box
  * shows the search, a search is not narrowed by the auto-applied city, and
- * clearing the box is meant to clear the URL (that last part does not work
- * on the deployed QA - see the quarantined test at the bottom).
+ * clearing the box clears the URL (BUG-2610-007, the test at the bottom).
  *
  * As Atul, whose saved city is Jaipur; the event searched for is in
  * Byasanagar. Read-only (his city is not changed).
@@ -51,16 +50,14 @@ test("a ?search= arrival shows in the search box and searches every city", async
   await expect(page.getByRole("link").filter({ has: page.getByRole("heading", { level: 3 }) }).nth(1)).toBeVisible();
 });
 
-// QUARANTINED (docs/testing-rules.md T2) - real app bug, found 3 Oct 2026 by
-// the e2e repair; ticket number to be assigned by chat (see that handoff).
-// On the deployed QA, clearing the box does NOT remove ?search= from the
-// address (so a reload or a shared link brings the search back). #722
-// added `router.replace("/events")` for this and it passed on a local
-// build, but on Vercel, after a hard load of /events/?search=x, no router
-// navigation to /events changes the address at all (not this replace, not
-// router.push, not the Events nav link); other paths and a query added
-// client-side behave. Kept runnable so it goes green when that is fixed.
-test.fixme("clearing the search box removes ?search= from the address", async ({ page, isMobile }) => {
+// BUG-2610-007 - clearing the box left ?search= in the address (so a
+// reload or a shared link brought the search back). /events is a static
+// route, and after a hard load of /events/?search=x the router kept the
+// query on every navigation to the bare path (#722's
+// router.replace("/events") and "/events/" alike). Clearing the box now
+// drops the param with the native History API. Quarantined from #723
+// until this fix.
+test("BUG-2610-007: clearing the search box removes ?search= from the address", async ({ page, isMobile }) => {
   await page.goto(`/events?search=${SEARCH}`);
   const box = searchBox(page, isMobile);
   await expect(box).toHaveValue(SEARCH);
