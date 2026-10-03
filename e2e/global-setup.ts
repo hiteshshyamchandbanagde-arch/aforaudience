@@ -2,6 +2,7 @@ import fs from "fs";
 import { request, type FullConfig } from "@playwright/test";
 import { AUTH_DIR, PERSONAS, authFile, type PersonaKey } from "./helpers/personas";
 import { hasQaDatabase, warn } from "./helpers/qa-db";
+import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/temp-admin";
 
 /**
  * Runs once before the suite.
@@ -15,6 +16,10 @@ import { hasQaDatabase, warn } from "./helpers/qa-db";
  *    endpoint the login form posts to) and its session is saved to
  *    e2e/.auth/<persona>.json for specs to reuse. The login form itself
  *    is covered by login-code-case.spec.ts.
+ * 3. Temp admin (QA database only): a throwaway ADMIN for this run, signed
+ *    in once and saved to e2e/.auth/temp-admin.json; its password is
+ *    random and lives only in memory (helpers/temp-admin.ts).
+ *    global-teardown.ts deletes it.
  */
 const WARM_UP_BUDGET_MS = 60_000;
 
@@ -42,18 +47,32 @@ export default async function globalSetup(config: FullConfig) {
   if (!hasQaDatabase()) {
     warn(
       "e2e setup",
-      "E2E_DATABASE_URL is not set: specs tagged @needs-db (waitlist-wallet-credit) are NOT run, and accounts registered by registration.spec.ts are not deleted."
+      "E2E_DATABASE_URL is not set: specs tagged @needs-db (waitlist-wallet-credit, design-system-goal) are NOT run, and accounts registered by registration.spec.ts are not deleted."
     );
   }
 
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   for (const key of Object.keys(PERSONAS) as PersonaKey[]) {
-    await signIn(baseURL, key);
+    await signIn(baseURL, PERSONAS[key], authFile(key));
+  }
+
+  if (hasQaDatabase()) {
+    const { run, password } = await createTempAdmin();
+    try {
+      await signIn(baseURL, { label: "E2E temp admin", identifier: run.email, password }, ADMIN_AUTH_FILE);
+    } catch (err) {
+      // A failed setup may not reach global teardown: remove it here.
+      await deleteTempAdmin(run);
+      throw err;
+    }
   }
 }
 
-async function signIn(baseURL: string, key: PersonaKey) {
-  const persona = PERSONAS[key];
+async function signIn(
+  baseURL: string,
+  persona: { label: string; identifier: string; password: string },
+  stateFile: string
+) {
   const ctx = await request.newContext({ baseURL });
   try {
     // next.config has trailingSlash: true - ask for the slashed paths so a
@@ -78,7 +97,7 @@ async function signIn(baseURL: string, key: PersonaKey) {
       throw new Error("the credentials were not accepted (no session after sign-in)");
     }
 
-    await ctx.storageState({ path: authFile(key) });
+    await ctx.storageState({ path: stateFile });
     console.log(`[e2e setup] signed in ${persona.label}`);
   } catch (err) {
     throw new Error(

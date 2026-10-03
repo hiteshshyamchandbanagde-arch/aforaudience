@@ -28,6 +28,11 @@ tests interactively and seeing exactly which selector matched.
 1. **Global setup** (`global-setup.ts`): one warm-up request (60 s budget; if
    the site is down the run stops there with one message), then one login
    per QA persona, saved to `e2e/.auth/<persona>.json` (git-ignored).
+   With `E2E_DATABASE_URL` it also creates the run's temp admin,
+   `e2e.admin.<run-id>@example.com`, with a random in-memory password
+   (`helpers/temp-admin.ts`); **global teardown** (`global-teardown.ts`)
+   deletes it and anything it wrote. Hitesh's real ADMIN account is never
+   used.
 2. **Two projects**: `chromium-desktop` and `mobile-chrome` (Pixel 7).
    `*.mobile.spec.ts` runs on the phone project only; the two long
    data-flow specs (`waitlist-wallet-credit`, `competition-show`) run on
@@ -81,11 +86,12 @@ stay in QA.
 | `registration.spec.ts` | new account | intro splash, register, dev OTP, sign in, welcome sequence, seat picker, checkout (stops before Razorpay) |
 | `login-code-case.spec.ts` | fixture Organiser | login form; AFA code accepted in any case |
 | `language-rollout.spec.ts` | guest | 11 locales through both language pickers, persistence, proper nouns and ₹ |
-| `competition-show.spec.ts` | fixture Organiser | competition toggle and prizes: save, public page (restores the fixture) |
+| `competition-show.spec.ts` | fixture Organiser | competition toggle and prizes: save, public page; BUG-2610-006 listing-card badge (restores the fixture) |
 | `waitlist-wallet-credit.spec.ts` `@needs-db` | Hrithik, Shahrukh, fixture Organiser | apply, approve, waitlist, cancel, refund to wallet credit, apply to platform fee |
 | `filter-sheet-focus.mobile.spec.ts` | guest | BUG-2609-065 focus trap in the filter sheet |
 | `organiser-tab-bar.mobile.spec.ts` | Omkar | BUG-2609-084 organiser bottom bar on event detail |
 | `organiser-events.spec.ts` | Omkar | BUG-2609-071 dates in India time; BUG-2609-083 half-hour billing and long-event note |
 | `location-chip.spec.ts` | guest | BUG-2609-078 chip change relists `/venues` |
 | `venue-revenue.spec.ts` | Vinayak | BUG-2609-087 Bookings and Sales month totals agree |
-| `events-search.spec.ts` | Atul | BUG-2610-004 `?search=` shown and searched in every city |
+| `events-search.spec.ts` | Atul | BUG-2610-004 `?search=` shown and searched in every city; BUG-2610-007 clearing the box clears the address |
+| `design-system-goal.spec.ts` `@needs-db` | temp admin, guest, Atul | the central-control goal: a Design System save reaches `/`, `/events/`, `/venues/` with no redeploy, manifest/theme-color/poster follow their own tokens, reverted; Admin Settings Save buttons at 390 and 1440 |

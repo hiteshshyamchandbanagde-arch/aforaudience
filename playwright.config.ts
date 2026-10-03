@@ -28,7 +28,9 @@ const needsDb = /@needs-db/;
 // Flows that are about data and rules, not layout: three people and a chain
 // of saves on one shared fixture. A second pass at phone width would repeat
 // the same server logic for minutes and write to the fixture twice.
-const desktopOnly = ["**/waitlist-wallet-credit.spec.ts", "**/competition-show.spec.ts"];
+// design-system-goal edits a site-wide token and sets its own 390 and 1440
+// viewports, so a second project pass would only repeat the edit.
+const desktopOnly = ["**/waitlist-wallet-credit.spec.ts", "**/competition-show.spec.ts", "**/design-system-goal.spec.ts"];
 
 // *.mobile.spec.ts: things that only exist at phone width (the filter sheet,
 // the bottom tab bar). The desktop project leaves them out.
@@ -38,6 +40,9 @@ export default defineConfig({
   testDir: "./e2e",
   // Warm-up request + one login per persona, saved to e2e/.auth (see the file).
   globalSetup: "./e2e/global-setup.ts",
+  // Deletes the run's temp admin (and puts the goal test's token back if
+  // the spec could not); see e2e/helpers/temp-admin.ts.
+  globalTeardown: "./e2e/global-teardown.ts",
   fullyParallel: false, // QA is a single shared environment/DB — avoid racing bookings against each other
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
