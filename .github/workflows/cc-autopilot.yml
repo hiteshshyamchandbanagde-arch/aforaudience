@@ -1,0 +1,113 @@
+# CC autopilot: runs a CC dispatch on a GitHub runner instead of Hitesh's laptop.
+#
+# Started ONLY by workflow_dispatch (chat via API, or Hitesh from the Actions tab),
+# naming a dispatch file under docs/cc-dispatches/. Never triggered by issues,
+# comments, PRs or any outside input.
+#
+# CC builds on the branch the dispatch names and pushes it. It does NOT open or
+# merge PRs: chat opens the PR with its own token (so the design-tokens and
+# e2e-preview checks run) and merges under docs/testing-rules.md.
+#
+# Status for chat: chat can't read Actions logs (blocked host) but can read
+# check-run annotations, so the final step turns cc-autopilot-status.md into
+# ::notice:: / ::error:: annotations.
+name: CC autopilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      dispatch:
+        description: "Dispatch file, e.g. docs/cc-dispatches/cc-prompt-close-out.md"
+        required: true
+        type: string
+
+concurrency:
+  group: cc-autopilot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
+  actions: read
+  id-token: write
+
+jobs:
+  run-dispatch:
+    if: github.ref == 'refs/heads/qa'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      DISPATCH: ${{ inputs.dispatch }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: qa
+          fetch-depth: 0
+
+      - name: Validate dispatch path
+        run: |
+          if ! [[ "$DISPATCH" =~ ^docs/cc-dispatches/[A-Za-z0-9._-]+\.md$ ]]; then
+            echo "::error::Invalid dispatch path: $DISPATCH"; exit 1
+          fi
+          test -f "$DISPATCH" || { echo "::error::Dispatch file not found on qa: $DISPATCH"; exit 1; }
+          echo "::notice::Running dispatch $DISPATCH on qa @ $(git rev-parse --short HEAD)"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Git identity
+        run: |
+          git config user.name "Claude (CC autopilot)"
+          git config user.email "cc-autopilot@aforaudience.local"
+
+      - name: Run CC on the dispatch
+        id: cc
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        env:
+          DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --model opus
+            --max-turns 400
+            --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,TodoWrite,WebFetch"
+          prompt: |
+            You are CC (Claude Code) for AforAudience, running unattended on a GitHub Actions runner.
+            Nobody can answer questions during this run. Where the dispatch says "stop and report", do that in the status file and end the run.
+
+            1. Read AGENTS.md, docs/testing-rules.md (it always applies), and the dispatch file named in the env var DISPATCH (path under docs/cc-dispatches/). Execute that dispatch exactly.
+            2. The checkout is qa. Follow the dispatch's base check, branch name and commit plan. Push only the dispatch's branch, plus a docs-only HANDOFF.md commit to qa if the dispatch asks for a handoff (rebase on origin/qa first; HANDOFF.md only). Never push code to qa or main, never merge, never open PRs, never touch production or Vercel settings.
+            3. Environment: DATABASE_URL and E2E_DATABASE_URL point at the QA database. Use QA personas only (e2e/helpers/roles.ts). There is no browser for you to watch: Playwright runs headless, and screenshots go under test-results/ and are described in the handoff.
+            4. If a step is impossible in CI (missing env var, a service unreachable, anything that needs Hitesh), do every other part you can, then report exactly what's missing.
+            5. LAST ACTION, always, even on failure: write cc-autopilot-status.md in the repo root (do not commit it), with:
+               line 1: RESULT: PUSHED <branch> <short-sha> | PARTIAL <branch> <short-sha> | FAILED
+               line 2: one-sentence summary
+               then up to 15 short lines: test results, what's not done, what needs Hitesh or chat.
+
+      - name: Report status to chat (annotations)
+        if: always()
+        run: |
+          if [ -f cc-autopilot-status.md ]; then
+            first=$(head -n1 cc-autopilot-status.md)
+            body=$(tail -n +2 cc-autopilot-status.md | head -n 16 | tr '\n' ' / ' | cut -c1-900)
+            case "$first" in
+              "RESULT: PUSHED"*) echo "::notice::$first — $body" ;;
+              *)                 echo "::error::$first — $body" ;;
+            esac
+          else
+            echo "::error::RESULT: FAILED — CC ended without writing cc-autopilot-status.md (step outcome: ${{ steps.cc.outcome }}). Likely a usage limit, auth problem or timeout."
+          fi
+          if [ "${{ steps.cc.outcome }}" != "success" ]; then
+            echo "::warning::claude-code-action step outcome: ${{ steps.cc.outcome }}"
+          fi
