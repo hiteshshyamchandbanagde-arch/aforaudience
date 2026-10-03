@@ -23,9 +23,15 @@ on:
 
 # One run per ref. A newer push makes the older run pointless, so it is
 # cancelled; the nightly is never cancelled and never cancels anything.
+# ONE queue for every e2e run (e2e.yml and e2e-preview.yml share it): all runs
+# use the same QA database fixtures (waitlist/wallet event, design tokens), so
+# two runs at once corrupt each other (3 Oct: #725's QA run and PR #726's preview
+# run both failed waitlist-wallet-credit while overlapping). Runs wait, never cancel
+# a running one. GitHub keeps only the NEWEST pending run per group, so if three
+# queue up the middle one is cancelled: chat re-runs it before merging (T2).
 concurrency:
-  group: e2e-qa-${{ github.event_name == 'schedule' && 'nightly' || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'schedule' }}
+  group: e2e-qa-shared-fixtures
+  cancel-in-progress: false
 
 permissions:
   contents: read
