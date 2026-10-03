@@ -11,6 +11,7 @@ import SearchInputBox from "@/components/SearchInputBox"
 import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
 import { LOCATION_CHANGED_EVENT, MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, MOBILE_SEARCH_SYNC_EVENT, type LocationChangedDetail } from "@/lib/app-events"
 import { useLocale } from "@/lib/i18n/translate"
+import { countText } from "@/lib/i18n/plural"
 import { formatDate } from "@/lib/format-date"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
@@ -452,7 +453,7 @@ function EventsPageContent() {
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {contentMode === "organisers"
               ? tr.eventsPage.heroSubtitleOrganisers
-              : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
+              : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast)}
           </span>
           <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
             {contentMode === "organisers" ? (
@@ -681,7 +682,7 @@ function EventsPageContent() {
             </div>
 
             <div style={{ marginTop: "var(--afa-space-4)", marginBottom: "var(--afa-space-4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
-              {!loading && loadFailed ? "\u00A0" : tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
+              {!loading && loadFailed ? "\u00A0" : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
             </div>
 
             {/* EVENTS GRID */}

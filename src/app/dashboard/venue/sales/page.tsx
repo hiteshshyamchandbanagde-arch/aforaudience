@@ -15,6 +15,7 @@ import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/Ve
 import Button from '@/components/ui/Button'
 import { calendarDate, formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { countNoun } from '@/lib/i18n/plural'
 
 interface VenueRow {
   id: string
@@ -330,7 +331,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{money(o.revenue)}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{o.bookings} bookings</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{countNoun(o.bookings, 'booking')}</span>
                   </div>
                 ))}
               </div>

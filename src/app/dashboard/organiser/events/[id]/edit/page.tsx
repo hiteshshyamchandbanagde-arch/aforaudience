@@ -14,6 +14,7 @@ import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
+import { countNoun } from '@/lib/i18n/plural'
 
 interface SeatSection {
   id?: string
@@ -1064,7 +1065,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                               )}
                               {s.name}
                             </div>
-                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{s.seats} seats</div>
+                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{countNoun(Number(s.seats) || 0, 'seat')}</div>
                           </div>
                           {!isFree ? (
                             <input
@@ -1083,7 +1084,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   ))}
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-14px)' }}>
-                    Total capacity: {venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0)} seats across {venueSections.length} section{venueSections.length === 1 ? '' : 's'}
+                    Total capacity: {countNoun(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0), 'seat')} across {countNoun(venueSections.length, 'section')}
                   </p>
                 </div>
               ) : (
@@ -1165,7 +1166,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 <select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
                   <option value="">No venue selected</option>
                   {venues.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name} — {v.city} ({v.capacity} seats)</option>
+                    <option key={v.id} value={v.id}>{v.name} — {v.city} ({countNoun(v.capacity, 'seat')})</option>
                   ))}
                 </select>
               </div>

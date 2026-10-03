@@ -12,6 +12,7 @@ import { fillSolidTint, SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLockGlyph } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
+import { countNoun } from '@/lib/i18n/plural'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
 //
@@ -908,7 +909,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       return
     }
     setSeats((prev) => [...prev, ...generated.map((s) => ({ ...s, clientId: makeClientId() }))])
-    showToast(`Generated ${generated.length} seats.`, 'success')
+    showToast(`Generated ${countNoun(generated.length, 'seat')}.`, 'success')
   }
 
   const resetLayout = () => {
@@ -1819,7 +1820,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           comment above. Purely visual, never committed. */}
                       <div style={{ marginBottom: 'var(--afa-space-14px)' }}>
                         <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                          Live preview — {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows
+                          Live preview — {countNoun(wizardPreviewSeats.length, 'seat')} across {countNoun(gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0), 'row')}
                         </div>
                         <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-10px) 0' }}>
                           <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>

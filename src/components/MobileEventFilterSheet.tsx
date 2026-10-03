@@ -3,6 +3,7 @@ import { useRef } from "react"
 import { TYPE_META } from "@/components/EventCard"
 import { EventTypeIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
+import { countText } from "@/lib/i18n/plural"
 import Button from "@/components/ui/Button"
 import { useModalSheet } from "@/lib/use-modal-sheet"
 
@@ -63,7 +64,7 @@ export default function MobileEventFilterSheet({
   onSelectSort: (s: SortOption) => void
   onReset: () => void
 }) {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const sheetRef = useRef<HTMLDivElement>(null)
   useModalSheet(true, sheetRef, onClose)
 
@@ -179,7 +180,7 @@ export default function MobileEventFilterSheet({
             {tr.eventsPage.filterSheetReset}
           </Button>
           <Button type="button" variant="primary" fullWidth={false} onClick={onClose} style={{ flex: 1 }}>
-            {tr.eventsPage.showingCount.replace("{n}", String(resultCount))}
+            {countText(locale, resultCount, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
           </Button>
         </div>
       </div>
