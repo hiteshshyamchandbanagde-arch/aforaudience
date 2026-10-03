@@ -13,6 +13,7 @@ const en = {
     nounVenues: "venues",
     nounOrganisers: "organisers",
     nounVenueOwners: "venue owners",
+    byEventDate: "by event date",
   },
   nav: {
     events: "Events",

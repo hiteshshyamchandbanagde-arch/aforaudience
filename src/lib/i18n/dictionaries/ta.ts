@@ -14,6 +14,7 @@ const ta: Dictionary = {
     nounVenues: "இடங்கள்",
     nounOrganisers: "நிர்வாகிகள்",
     nounVenueOwners: "இட உரிமையாளர்கள்",
+    byEventDate: "நிகழ்வு தேதியின்படி",
   },
   nav: {
     events: "நிகழ்வுகள்",

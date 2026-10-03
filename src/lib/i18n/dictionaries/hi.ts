@@ -13,6 +13,7 @@ const hi: Dictionary = {
     nounVenues: "स्थल",
     nounOrganisers: "आयोजक",
     nounVenueOwners: "स्थल मालिक",
+    byEventDate: "इवेंट की तारीख़ के अनुसार",
   },
   nav: {
     events: "इवेंट्स",

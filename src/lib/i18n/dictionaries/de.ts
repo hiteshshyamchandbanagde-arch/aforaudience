@@ -23,6 +23,7 @@ const de: Dictionary = {
     nounVenues: "Veranstaltungsorte",
     nounOrganisers: "Veranstalter",
     nounVenueOwners: "Standortbesitzer",
+    byEventDate: "nach Veranstaltungsdatum",
   },
   nav: {
     events: "Events",

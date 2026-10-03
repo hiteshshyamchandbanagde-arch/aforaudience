@@ -14,6 +14,7 @@ const ml: Dictionary = {
     nounVenues: "വേദികൾ",
     nounOrganisers: "സംഘാടകർ",
     nounVenueOwners: "വേദി ഉടമകൾ",
+    byEventDate: "ഇവന്റ് തീയതി പ്രകാരം",
   },
   nav: {
     events: "ഇവന്റുകൾ",

@@ -18,6 +18,7 @@ const es: Dictionary = {
     nounVenues: "recintos",
     nounOrganisers: "organizadores",
     nounVenueOwners: "propietarios de recintos",
+    byEventDate: "por fecha del evento",
   },
   nav: {
     events: "Eventos",

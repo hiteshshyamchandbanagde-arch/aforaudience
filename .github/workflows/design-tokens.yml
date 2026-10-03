@@ -64,6 +64,12 @@ jobs:
       - name: Venue-billing self-tests
         run: npx --yes tsx@^4.23.1 scripts/venue-billing.test.ts
 
+      # BUG-2609-087 - venue revenue ranges by event date, India-time periods.
+      - name: Sales-range self-tests
+        env:
+          TZ: America/New_York
+        run: npx --yes tsx@^4.23.1 scripts/sales-range.test.ts
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}

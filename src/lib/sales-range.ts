@@ -70,6 +70,64 @@ export function getPreviousRangeBounds(range: SalesRange, now: Date = new Date()
   return { start: new Date(rangeStart.getTime() - durationMs), end: rangeStart }
 }
 
+// BUG-2609-087 - venue revenue is counted by EVENT date (the booking's
+// fromDate), not by when the booking was made, so a range there is the
+// whole calendar period in India time: "month" is 1st to last, and it
+// includes confirmed events later this month. (Ticket sales above stay
+// "made in this window so far", by createdAt.)
+const IST_OFFSET_MS = 330 * 60_000
+
+// [start, end) of the calendar week (Monday start), month, quarter or
+// year that `now` falls in, in India time. null for 'all'.
+export function getCalendarRangeBounds(range: SalesRange, now: Date = new Date()): { start: Date; end: Date } | null {
+  if (range === 'all') return null
+  // India wall-clock time, read through the UTC getters.
+  const wall = new Date(now.getTime() + IST_OFFSET_MS)
+  const y = wall.getUTCFullYear()
+  const m = wall.getUTCMonth()
+  const d = wall.getUTCDate()
+  let start: number
+  let end: number
+  if (range === 'week') {
+    const day = wall.getUTCDay() // 0 = Sunday
+    const monday = d - (day === 0 ? 6 : day - 1)
+    start = Date.UTC(y, m, monday)
+    end = Date.UTC(y, m, monday + 7)
+  } else if (range === 'month') {
+    start = Date.UTC(y, m, 1)
+    end = Date.UTC(y, m + 1, 1)
+  } else if (range === 'quarter') {
+    const q = Math.floor(m / 3) * 3
+    start = Date.UTC(y, q, 1)
+    end = Date.UTC(y, q + 3, 1)
+  } else {
+    start = Date.UTC(y, 0, 1)
+    end = Date.UTC(y + 1, 0, 1)
+  }
+  return { start: new Date(start - IST_OFFSET_MS), end: new Date(end - IST_OFFSET_MS) }
+}
+
+// The whole calendar period before the current one (last week, last
+// month...), for the delta on a by-event-date figure. null for 'all'.
+export function getPreviousCalendarRangeBounds(range: SalesRange, now: Date = new Date()): { start: Date; end: Date } | null {
+  const current = getCalendarRangeBounds(range, now)
+  if (!current) return null
+  return getCalendarRangeBounds(range, new Date(current.start.getTime() - 1))
+}
+
+// bucketKeyFor's India-time twin, for an event date: "YYYY-MM" (year /
+// all), a Monday-anchored "YYYY-MM-DD" (quarter), or a daily
+// "YYYY-MM-DD" (week / month).
+export function eventDateBucketKey(range: SalesRange, date: Date): string {
+  const wall = new Date(date.getTime() + IST_OFFSET_MS)
+  if (range === 'year' || range === 'all') return wall.toISOString().slice(0, 7)
+  if (range === 'quarter') {
+    const day = wall.getUTCDay()
+    wall.setUTCDate(wall.getUTCDate() - (day === 0 ? 6 : day - 1))
+  }
+  return wall.toISOString().slice(0, 10)
+}
+
 // Bucket granularity for timeline charts scales with range so a Year
 // view isn't 365 one-pixel bars.
 export function bucketKeyFor(range: SalesRange, date: Date): string {

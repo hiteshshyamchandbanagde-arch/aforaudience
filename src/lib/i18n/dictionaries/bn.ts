@@ -14,6 +14,7 @@ const bn: Dictionary = {
     nounVenues: "ভেন্যু",
     nounOrganisers: "আয়োজক",
     nounVenueOwners: "ভেন্যু মালিক",
+    byEventDate: "ইভেন্টের তারিখ অনুযায়ী",
   },
   nav: {
     events: "ইভেন্ট",

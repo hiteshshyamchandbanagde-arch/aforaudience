@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { parseRange, getRangeStart, getPreviousRangeBounds, bucketKeyFor } from '@/lib/sales-range'
+import { parseRange, getCalendarRangeBounds, getPreviousCalendarRangeBounds, eventDateBucketKey } from '@/lib/sales-range'
 
 function avgBookingValue(grossRevenue: number, confirmedBookingsCount: number) {
   return confirmedBookingsCount > 0 ? grossRevenue / confirmedBookingsCount : 0
@@ -23,6 +23,11 @@ function avgBookingValue(grossRevenue: number, confirmedBookingsCount: number) {
 // Per the fifth amendment ("never tax the scene"), venue rentals carry
 // no platform cut — VenueBooking.amount IS the owner's revenue, no
 // subtotal/fee split needed here (unlike the ticket-sales overview).
+//
+// BUG-2609-087 - `range` is by EVENT date (VenueBooking.fromDate), the
+// same basis as /dashboard/venue/bookings, and covers the whole calendar
+// period in India time. It used to be by createdAt, so a booking made on
+// 29 Sep for 1 Oct counted in September here and October there.
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -56,7 +61,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const range = parseRange(searchParams.get('range'))
     const now = new Date()
-    const rangeStart = getRangeStart(range, now)
+    const bounds = getCalendarRangeBounds(range, now)
 
     const venues = await prisma.venue.findMany({
       where: { ownerId: venueOwnerId },
@@ -69,10 +74,10 @@ export async function GET(req: Request) {
           where: {
             venueId: { in: venueIds },
             status: 'CONFIRMED',
-            ...(rangeStart ? { createdAt: { gte: rangeStart } } : {}),
+            ...(bounds ? { fromDate: { gte: bounds.start, lt: bounds.end } } : {}),
           },
           include: { organiser: { select: { id: true, orgName: true } } },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { fromDate: 'desc' },
         })
       : []
 
@@ -93,7 +98,7 @@ export async function GET(req: Request) {
 
       grossRevenue += b.amount
 
-      const key = bucketKeyFor(range, b.createdAt)
+      const key = eventDateBucketKey(range, b.fromDate)
       timelineMap[key] = (timelineMap[key] || 0) + b.amount
     }
 
@@ -117,10 +122,11 @@ export async function GET(req: Request) {
       .map(([date, revenue]) => ({ date, revenue }))
 
     // BUG-2608-086: previous-period comparison for the stat card deltas.
-    // 'all' has no bounded previous period (getPreviousRangeBounds
-    // returns null) - previousTotals stays zeroed, and the frontend's
-    // zero-guard already skips rendering a delta in that case.
-    const previousBounds = getPreviousRangeBounds(range, now)
+    // 'all' has no bounded previous period (null) - previousTotals stays
+    // zeroed, and the frontend's zero-guard already skips rendering a
+    // delta in that case. By event date, so it is the whole previous
+    // calendar period (last month vs this month).
+    const previousBounds = getPreviousCalendarRangeBounds(range, now)
     let previousGrossRevenue = 0
     let previousConfirmedBookingsCount = 0
     if (previousBounds && venueIds.length) {
@@ -128,7 +134,7 @@ export async function GET(req: Request) {
         where: {
           venueId: { in: venueIds },
           status: 'CONFIRMED',
-          createdAt: { gte: previousBounds.start, lt: previousBounds.end },
+          fromDate: { gte: previousBounds.start, lt: previousBounds.end },
         },
         _sum: { amount: true },
         _count: true,

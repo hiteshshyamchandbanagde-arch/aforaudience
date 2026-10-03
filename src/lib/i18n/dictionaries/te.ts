@@ -14,6 +14,7 @@ const te: Dictionary = {
     nounVenues: "వేదికలు",
     nounOrganisers: "నిర్వాహకులు",
     nounVenueOwners: "వేదిక యజమానులు",
+    byEventDate: "ఈవెంట్ తేదీ ప్రకారం",
   },
   nav: {
     events: "ఈవెంట్‌లు",

@@ -14,6 +14,7 @@ const kn: Dictionary = {
     nounVenues: "ಸ್ಥಳಗಳು",
     nounOrganisers: "ಆಯೋಜಕರು",
     nounVenueOwners: "ಸ್ಥಳ ಮಾಲೀಕರು",
+    byEventDate: "ಈವೆಂಟ್ ದಿನಾಂಕದ ಪ್ರಕಾರ",
   },
   nav: {
     events: "ಈವೆಂಟ್‌ಗಳು",

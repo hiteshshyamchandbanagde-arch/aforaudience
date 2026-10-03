@@ -105,7 +105,7 @@ function delta(current: number, previous: number): number | null {
 }
 
 export default function VenueOwnerSalesOverviewPage() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [range, setRange] = useState('all')
@@ -183,7 +183,7 @@ export default function VenueOwnerSalesOverviewPage() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
-            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} />
+            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} />
             <StatCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
             <StatCard label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
             <StatCard label="Venues" value={String(totals.venuesCount)} sub="no platform cut on rentals" />
@@ -348,13 +348,14 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
     <Card style={{ padding: 'var(--afa-space-18px)' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
-      {delta != null ? (
+      {delta != null && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
         </p>
-      ) : sub ? (
+      )}
+      {sub && (
         <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>{sub}</p>
-      ) : null}
+      )}
     </Card>
   )
 }

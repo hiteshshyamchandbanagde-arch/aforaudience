@@ -14,6 +14,7 @@ const gu: Dictionary = {
     nounVenues: "સ્થળો",
     nounOrganisers: "આયોજકો",
     nounVenueOwners: "સ્થળ માલિકો",
+    byEventDate: "ઇવેન્ટની તારીખ મુજબ",
   },
   nav: {
     events: "ઇવેન્ટ્સ",

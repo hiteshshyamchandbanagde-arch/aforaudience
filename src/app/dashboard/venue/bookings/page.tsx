@@ -10,7 +10,7 @@ import MessageButton from '@/components/MessageButton'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
-import { calendarDate, formatDate } from '@/lib/format-date'
+import { calendarDate, formatDate, istMonthKey } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 
 interface BookingRequest {
@@ -33,7 +33,7 @@ const STATUS_TONE: Record<string, StatusPillTone> = {
 }
 
 export default function VenueBookingsPage() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [bookings, setBookings] = useState<BookingRequest[]>([])
@@ -101,12 +101,11 @@ export default function VenueBookingsPage() {
   // pays), not netted against the platform's flat booking fee - that's a
   // separate, smaller number this view isn't trying to reconcile against.
   const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
-  const now = new Date()
+  // BUG-2609-087 - by event date, and the month is India's: the device
+  // zone would flip it at 5:30 am on the 1st for a UTC browser.
+  const thisMonth = istMonthKey(new Date())
   const thisMonthRevenue = confirmed
-    .filter((b) => {
-      const d = new Date(b.fromDate)
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    })
+    .filter((b) => istMonthKey(b.fromDate) === thisMonth)
     .reduce((sum, b) => sum + b.amount, 0)
   const totalRevenue = confirmed.reduce((sum, b) => sum + b.amount, 0)
   const pendingValue = pending.reduce((sum, b) => sum + b.amount, 0)
@@ -157,13 +156,14 @@ export default function VenueBookingsPage() {
           {/* F3 - Revenue summary */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
             {[
-              { label: 'This month', value: thisMonthRevenue },
-              { label: 'Total confirmed', value: totalRevenue },
-              { label: 'Pending value', value: pendingValue },
+              { label: 'This month', value: thisMonthRevenue, sub: tr.common.byEventDate },
+              { label: 'Total confirmed', value: totalRevenue, sub: null },
+              { label: 'Pending value', value: pendingValue, sub: null },
             ].map((s) => (
               <Card key={s.label} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{s.label}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
+                {s.sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>{s.sub}</p>}
               </Card>
             ))}
           </div>

@@ -60,7 +60,7 @@ function shortDate(iso: string, locale: string) {
 }
 
 function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -146,8 +146,8 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Summary cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub="this range, no platform cut" />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} sub="this range" />
+            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub={`${tr.common.byEventDate}, no platform cut`} />
+            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} sub={tr.common.byEventDate} />
             <SummaryCard label="Upcoming / Completed (all-time)" value={`${totals.upcomingCount} / ${totals.completedCount}`} />
             <SummaryCard
               label="Pending (awaiting confirmation)"
