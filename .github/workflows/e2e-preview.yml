@@ -35,16 +35,21 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.deployment.sha }}
+          fetch-depth: 0
 
       # The qa branch's own deployments are "Preview" to Vercel too. Those
       # are tested by e2e.yml (push to qa); running both would put two
       # suites on the shared fixtures at once.
-      - name: Is this the tip of qa?
+      # Skip any commit already CONTAINED in qa, not only its tip: a merge
+      # commit stops being the tip as soon as anything (e.g. a docs-only
+      # handoff) lands on top, and must still not be tested twice at once.
+      - name: Is this commit already in qa?
         id: target
         run: |
-          qa_tip="$(git ls-remote origin refs/heads/qa | cut -f1)"
-          if [ "$qa_tip" = "${{ github.event.deployment.sha }}" ]; then
-            echo "::notice title=e2e-preview::This commit is the tip of qa - covered by the e2e-qa check; nothing run here."
+          sha="${{ github.event.deployment.sha }}"
+          git fetch --quiet --no-tags origin +refs/heads/qa:refs/remotes/origin/qa
+          if git merge-base --is-ancestor "$sha" refs/remotes/origin/qa 2>/dev/null; then
+            echo "::notice title=e2e-preview::This commit is already in qa - covered by the e2e-qa check; nothing run here."
             echo "run=false" >> "$GITHUB_OUTPUT"
           else
             echo "Testing $PLAYWRIGHT_BASE_URL"
