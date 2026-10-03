@@ -142,9 +142,23 @@ function EventsPageContent() {
     if (urlSearch) setSearch(urlSearch)
     else if (search === prevUrlSearch) setSearch("")
   }
+  // BUG-2610-007 - the param is dropped with the native History API, not
+  // router.replace("/events"). /events is a static (prerendered) route;
+  // after a hard load of /events/?search=x the router keeps the current
+  // query on any navigation to the same bare path (replace("/events"),
+  // replace("/events/") and the Events nav link all left ?search= in the
+  // address on a production build). replaceState is synced with
+  // useSearchParams (node_modules/next/dist/docs, "Native History API"),
+  // and it removes only `search`, so any other param stays.
+  const dropSearchParam = () => {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has("search")) return
+    url.searchParams.delete("search")
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`)
+  }
   const applySearch = (value: string) => {
     setSearch(value)
-    if (value.trim() === "" && urlSearch) router.replace("/events", { scroll: false })
+    if (value.trim() === "" && urlSearch) dropSearchParam()
   }
   // A search that came in the URL is a deliberate search, so it is not
   // narrowed by the auto-detected city (see the location effect below).
@@ -178,7 +192,7 @@ function EventsPageContent() {
       const detail = (e as CustomEvent<{ query: string }>).detail
       if (!detail) return
       setSearch(detail.query)
-      if (detail.query.trim() === "" && urlSearch) router.replace("/events", { scroll: false })
+      if (detail.query.trim() === "" && urlSearch) dropSearchParam()
     }
     const handleOpenFilters = () => setMobileFilterSheetOpen(true)
     window.addEventListener(MOBILE_SEARCH_EVENT, handleSearch)
@@ -187,7 +201,7 @@ function EventsPageContent() {
       window.removeEventListener(MOBILE_SEARCH_EVENT, handleSearch)
       window.removeEventListener(MOBILE_SEARCH_OPEN_FILTERS_EVENT, handleOpenFilters)
     }
-  }, [urlSearch, router])
+  }, [urlSearch])
   // The top bar's input mirrors this page's search (BUG-2610-004).
   useEffect(() => {
     window.dispatchEvent(new CustomEvent(MOBILE_SEARCH_SYNC_EVENT, { detail: { query: search } }))
