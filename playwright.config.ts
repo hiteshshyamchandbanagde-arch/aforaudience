@@ -30,6 +30,10 @@ const needsDb = /@needs-db/;
 // the same server logic for minutes and write to the fixture twice.
 const desktopOnly = ["**/waitlist-wallet-credit.spec.ts", "**/competition-show.spec.ts"];
 
+// *.mobile.spec.ts: things that only exist at phone width (the filter sheet,
+// the bottom tab bar). The desktop project leaves them out.
+const mobileOnly = "**/*.mobile.spec.ts";
+
 export default defineConfig({
   testDir: "./e2e",
   // Warm-up request + one login per persona, saved to e2e/.auth (see the file).
@@ -69,6 +73,7 @@ export default defineConfig({
     {
       name: "chromium-desktop",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: mobileOnly,
     },
     {
       name: "mobile-chrome",
