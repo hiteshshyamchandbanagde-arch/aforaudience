@@ -1,3 +1,12 @@
+# Session Handoff — 3 Oct 2026, part 40 (chat — Testing Rule adopted; e2e repair dispatch written)
+
+- **Standing Testing Rule adopted (Hitesh, 3 Oct):** `docs/testing-rules.md` (T1-T7), `design.md` §9.0 rule 6, `AGENTS.md` pointer, chat memory. Old "fails twice → Hitesh runs manually" rule replaced by fix-or-quarantine-with-ticket.
+- **e2e diagnosis (chat, GitHub API/DB/code):** 1 green run ever (26 Jul), 413 failures; every run since mid-Sep killed at the 20-min job limit in the test step, so no report was ever written. The nightly never fired (`schedule` only runs from the default branch, `main`). Every docs-only push queues a run. Ruled out: Vercel protection (off), login/register selectors (still match), QA reachability (e2e registrations last succeeded 25 Sep). Specs are stale (Jul-Aug). Chat can't read Actions logs or artifacts (blocked host), but can read check-run annotations, so the `github` reporter is required.
+- **Dispatch:** `docs/cc-dispatches/cc-prompt-e2e-repair.md`, branch `chore/e2e-repair`. Diagnose-first table → fail-fast config + global warm-up → per-persona `storageState` with first-visit flags pre-set → repair/retire the 6 specs (with reasons) → re-create the #722 checks as permanent specs → docs `paths-ignore`, per-PR `deployment_status` gate on the preview, nightly → prove green ×2 locally + CI, under 12 min, plus a deliberate red run.
+- **Pending Hitesh:** OK to change the GitHub default branch `main` → `qa` (repo setting only; makes the nightly fire and PRs default to `qa`; Vercel production stays on `main`; no deploy). Also: goal proof, Admin Settings Save check, revoke 1 Oct PAT.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 39 (chat — #722 merged)
 
 - **#722** (medium bug bundle 2) squash-merged at pinned head `a5b8106`, giving `qa` @ `93a8707`. CI green (design-tokens). Branch deleted. QA deploy `dpl_7QfBmUxeLjDVbha7G4ckntBMVxVk` READY.
