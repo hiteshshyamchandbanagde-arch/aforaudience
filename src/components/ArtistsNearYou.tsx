@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useLocale } from '@/lib/i18n/translate'
+import { formatDate } from '@/lib/format-date'
 
 // The dark "artists near you" rail — pairs with TonightNearYou in the
 // homepage hero row (GEN-2608-032, replaces the static HeroRotator "For
@@ -31,14 +32,14 @@ const TYPE_LABEL: Record<EventType, string> = {
   LINEUP: 'Lineup',
 }
 
-function formatEventDate(iso: string, startTime: string): string {
+function formatEventDate(iso: string, startTime: string, locale: string): string {
   const d = new Date(iso)
   const today = new Date()
   const isToday = d.toDateString() === today.toDateString()
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
   const isTomorrow = d.toDateString() === tomorrow.toDateString()
-  const dayLabel = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
+  const dayLabel = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : formatDate(d, 'withWeekday', locale)
   return `${dayLabel} · ${startTime}`
 }
 
@@ -47,7 +48,7 @@ function initials(name: string): string {
 }
 
 export default function ArtistsNearYou() {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const [artists, setArtists] = useState<NearbyArtist[] | null>(null)
   const [matchedCity, setMatchedCity] = useState<string | null>(null)
 
@@ -139,7 +140,7 @@ export default function ArtistsNearYou() {
                 <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                {formatEventDate(a.eventDate, a.eventStartTime)}
+                {formatEventDate(a.eventDate, a.eventStartTime, locale)}
               </div>
             </Link>
           ))}

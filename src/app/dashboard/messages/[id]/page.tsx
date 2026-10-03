@@ -8,6 +8,7 @@ import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
 import { useToast } from '@/components/Toast'
 import { useLocale } from '@/lib/i18n/translate'
+import { formatDate } from '@/lib/format-date'
 
 interface Message {
   id: string
@@ -28,7 +29,7 @@ interface ThreadData {
 const POLL_MS = 15000
 
 export default function MessageThreadPage() {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const params = useParams()
@@ -148,7 +149,7 @@ export default function MessageThreadPage() {
               >
                 {m.body}
                 <div style={{ fontSize: 'var(--afa-text-caption)', opacity: 0.6, marginTop: 'var(--afa-space-1)' }}>
-                  {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {formatDate(m.createdAt, 'time', locale)}
                 </div>
               </div>
             )

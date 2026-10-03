@@ -10,6 +10,8 @@ import MessageButton from '@/components/MessageButton'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
+import { calendarDate, formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface BookingRequest {
   id: string
@@ -31,6 +33,7 @@ const STATUS_TONE: Record<string, StatusPillTone> = {
 }
 
 export default function VenueBookingsPage() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [bookings, setBookings] = useState<BookingRequest[]>([])
@@ -176,7 +179,7 @@ export default function VenueBookingsPage() {
                 ←
               </SharedButton>
               <p style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
-                {calendarMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+                {formatDate(calendarDate(calendarMonth.getFullYear(), calendarMonth.getMonth()), 'monthYear', locale)}
               </p>
               <SharedButton
                 variant="icon"
@@ -257,8 +260,8 @@ export default function VenueBookingsPage() {
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>₹{b.amount}</span>
                     </div>
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-4)' }}>
-                      📅 {new Date(b.fromDate).toLocaleDateString()}
-                      {b.fromDate !== b.toDate && ` – ${new Date(b.toDate).toLocaleDateString()}`}
+                      📅 {formatDate(b.fromDate, 'medium', locale)}
+                      {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
                     </p>
                     <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                       <Button onClick={() => respond(b.id, 'CONFIRMED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>

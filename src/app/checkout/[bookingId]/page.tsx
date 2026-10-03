@@ -16,6 +16,7 @@ import { FeeSheet } from '@/components/FeeSheet'
 import ContributionMoment from '@/components/ContributionMoment'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { formatDate } from '@/lib/format-date'
 
 // Checkout page — order summary + Pay button.
 //
@@ -79,7 +80,7 @@ export default function CheckoutPage() {
   const bookingId = params?.bookingId
   const router = useRouter()
   const { data: session, status: authStatus } = useSession()
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
 
   const [state, setState] = useState<BookingState | null>(null)
   const [loading, setLoading] = useState(true)
@@ -540,11 +541,7 @@ export default function CheckoutPage() {
             {state.booking.event.title}
           </div>
           <div style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
-            {new Date(state.booking.event.date).toLocaleDateString(undefined, {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-            })}{' '}
+            {formatDate(state.booking.event.date, 'long', locale)}{' '}
             · {formatEventTimeRange(state.booking.event.startTime, state.booking.event.endTime)}
             {state.booking.event.venue && (
               <>

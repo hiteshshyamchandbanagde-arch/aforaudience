@@ -11,6 +11,7 @@ import SearchInputBox from "@/components/SearchInputBox"
 import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
 import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from "@/components/mobile/MobileTopBar"
 import { useLocale } from "@/lib/i18n/translate"
+import { formatDate } from "@/lib/format-date"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
 // so the hero search (lifted up here, session 65) can type its dropdown
@@ -92,7 +93,7 @@ function DiscoverCarouselRow({
 function EventsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
 
@@ -450,7 +451,7 @@ function EventsPageContent() {
                 <>
                   <span style={{ fontWeight: 600 }}>{e.title}</span>
                   <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>
-                    {new Date(e.date).toLocaleDateString()}{e.venue?.name ? ` · ${e.venue.name}` : ""}
+                    {formatDate(e.date, 'medium', locale)}{e.venue?.name ? ` · ${e.venue.name}` : ""}
                   </span>
                 </>
               )}

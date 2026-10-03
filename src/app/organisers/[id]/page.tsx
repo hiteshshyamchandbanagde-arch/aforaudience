@@ -11,6 +11,7 @@ import { CalendarIcon, ClockIcon, PinIcon } from "@/components/icons/EventIcons"
 import { ArrowIcon } from "@/components/icons/ArtistIcons"
 import { RouteIcon } from "@/components/icons/OrganiserIcons"
 import { useLocale, type Dictionary } from "@/lib/i18n/translate"
+import { formatDate } from "@/lib/format-date"
 
 // Full rebuild (this session) against the approved Figma Make export
 // ("Organiser Profile Page Design") - replaces the old white "Events by
@@ -104,10 +105,10 @@ function tourCities(stops: OrganiserTourStop[]): string[] {
   return Array.from(seen)
 }
 
-function formatTourWindow(stops: OrganiserTourStop[]): string {
+function formatTourWindow(stops: OrganiserTourStop[], locale: string): string {
   if (stops.length === 0) return ""
   const dates = stops.map((s) => new Date(s.date)).sort((a, b) => a.getTime() - b.getTime())
-  const fmt = (d: Date) => d.toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+  const fmt = (d: Date) => formatDate(d, 'monthYearShort', locale)
   const first = fmt(dates[0])
   const last = fmt(dates[dates.length - 1])
   return first === last ? first : `${first} — ${last}`
@@ -151,8 +152,9 @@ function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: strin
 // middle-click-new-tab keep working - the guard only intercepts plain
 // left-clicks via the modifier/button check below.
 function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: OrganiserEvent; tr: Dictionary; navigatingId: string | null; onNavigate: (id: string) => void }) {
+  const { locale } = useLocale()
   const d = new Date(event.date)
-  const month = d.toLocaleDateString("en-IN", { month: "short" }).toUpperCase()
+  const month = formatDate(d, 'month', locale).toUpperCase()
   const day = d.getDate()
   const isNavigatingThis = navigatingId === event.id
   return (
@@ -242,7 +244,8 @@ function TourStatusBadge({ status, tr }: { status: string; tr: Dictionary }) {
 
 function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
   const cities = tourCities(tour.stops)
-  const windowLabel = formatTourWindow(tour.stops)
+  const { locale } = useLocale()
+  const windowLabel = formatTourWindow(tour.stops, locale)
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-5)", background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-6)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--afa-space-4)" }}>

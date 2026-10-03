@@ -5,6 +5,7 @@ import { loadPosterFonts } from '@/lib/poster-fonts'
 import { loadPosterColors, POSTER_LOGO, POSTER_QR } from '@/lib/poster-colors'
 import { getSceneStatusBatch } from '@/lib/scene-status'
 import QRCode from 'qrcode'
+import { formatDate } from '@/lib/format-date'
 
 export const runtime = 'nodejs'
 
@@ -83,7 +84,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
 
   const url = publicEventUrl(event.id)
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 260, color: { dark: POSTER_QR.dark, light: POSTER_QR.light } })
-  const dateStr = new Date(event.date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateStr = formatDate(event.date, 'long')
 
   const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL
   const isQA = envLabel?.toLowerCase().includes('qa') ?? false

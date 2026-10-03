@@ -52,6 +52,14 @@ jobs:
       - name: Ticket-code + username self-tests
         run: npx --yes tsx@^4.23.1 scripts/ticket-code.test.ts && npx --yes tsx@^4.23.1 scripts/username.test.ts
 
+      # BUG-2609-071 - the shared date formatter (India time, UI locale).
+      # TZ is set to a non-India zone on purpose: the output must not
+      # depend on the machine's zone.
+      - name: Date-formatter self-tests
+        env:
+          TZ: America/New_York
+        run: npx --yes tsx@^4.23.1 scripts/format-date.test.ts
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}

@@ -801,5 +801,40 @@ t('bare-button (diff): context lines keep new-file line numbers right', () => {
   assert.equal(offenses[0].line, 3)
 })
 
+// BUG-2609-071 - locale-date-call
+const dateRule = RULES.find((r) => r.name === 'locale-date-call')
+t('locale-date-call: flags toLocaleDateString with and without arguments', () => {
+  assert.ok(dateRule.test('  {new Date(e.date).toLocaleDateString()}'))
+  assert.ok(dateRule.test("  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })"))
+  assert.ok(dateRule.test('  d.toLocaleDateString(undefined, { day: "numeric" })'))
+})
+t('locale-date-call: flags toLocaleTimeString and a bare toLocaleString()', () => {
+  assert.ok(dateRule.test("  new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit' })"))
+  assert.ok(dateRule.test('  {new Date(v.createdAt).toLocaleString()}'))
+  assert.ok(dateRule.test('  {new Date(v.createdAt).toLocaleString( )}'))
+})
+t('locale-date-call: rupee amounts via toLocaleString(locale) are not flagged', () => {
+  assert.ok(!dateRule.test("  <span>₹{o.amount.toLocaleString('en-IN')}</span>"))
+  assert.ok(!dateRule.test("  const money = (n) => n.toLocaleString('en-IN', { maximumFractionDigits: 0 })"))
+})
+t('locale-date-call: formatDate() and comments are not flagged', () => {
+  assert.ok(!dateRule.test("  {formatDate(event.date, 'medium', locale)}"))
+  assert.ok(!dateRule.test('  // was new Date(x).toLocaleDateString()'))
+})
+t('locale-date-call: counts each call on a line', () => {
+  assert.equal(dateRule.extract('a.toLocaleDateString() + b.toLocaleTimeString()').length, 2)
+})
+t('locale-date-call: only format-date.ts is exempt, posters and email are not', () => {
+  assert.ok(dateRule.isExemptFile('src/lib/format-date.ts'))
+  assert.ok(!dateRule.isExemptFile('src/lib/email.ts'))
+  assert.ok(!dateRule.isExemptFile('src/app/api/posters/artist/[performanceId]/route.tsx'))
+})
+t('locale-date-call (diff): a new call is an offense even if the same text exists in the base', () => {
+  const diff = oneFileDiff(['+  {new Date(e.date).toLocaleDateString()}'])
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].rule, 'locale-date-call')
+})
+
 console.log(`\n${passed} passed, ${failed} failed.`)
 if (failed > 0) process.exit(1)

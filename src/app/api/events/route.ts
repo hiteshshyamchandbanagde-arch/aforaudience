@@ -9,6 +9,7 @@ import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings } from '@/lib/platform-settings'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 import { recomputeTourStatus } from '@/lib/tours'
+import { formatDate } from '@/lib/format-date'
 
 export async function GET(req: Request) {
   try {
@@ -464,7 +465,7 @@ export async function POST(req: Request) {
           () =>
             sendPushToUser(venue.owner.userId, {
               title: 'New venue booking request',
-              body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+              body: `${venue.name} has a new booking request for ${formatDate(date, 'medium')}.`,
               url: '/dashboard/venue-requests',
             }),
           'venue-booking-request'
@@ -488,7 +489,7 @@ export async function POST(req: Request) {
           () =>
             sendPushToUser(venue.owner.userId, {
               title: 'New venue booking request',
-              body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+              body: `${venue.name} has a new booking request for ${formatDate(date, 'medium')}.`,
               url: '/dashboard/venue-requests',
             }),
           'venue-booking-request'

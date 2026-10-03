@@ -14,6 +14,8 @@ import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { CheckSealIcon, RepeatIcon } from "@/components/icons/ArtistIcons"
 import { BellIcon, BellOffIcon } from "@/components/icons/VenueIcons"
 import type { SceneStatusTier } from "@/lib/scene-status"
+import { formatDate } from "@/lib/format-date"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface Performance {
   id: string
@@ -75,6 +77,7 @@ export default function ArtistProfilePage({
   sceneStatus?: SceneStatusTier | null
   realTourStops?: { id: string; title: string; date: string; startTime: string; venue: { name: string; city: string } | null; tour: { title: string; slug: string } | null }[]
 }) {
+  const { locale } = useLocale()
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   // BUG-2608-079 - a dead portrait URL previously left Photo rendering a
   // broken hero image instead of falling back to ArtistNoPhoto.
@@ -603,7 +606,7 @@ export default function ArtistProfilePage({
                   <div key={p.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "var(--afa-space-4)", padding: "var(--afa-space-4) 0", borderTop: "1px solid var(--afa-tint-10)" }}>
                     <div style={{ textAlign: "center", width: "48px" }}>
                       <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-display)", lineHeight: 1, color: "var(--afa-text-primary)" }}>{eventDate.getDate()}</div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{eventDate.toLocaleDateString("en-IN", { month: "short" })}</div>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{formatDate(eventDate, 'month', locale)}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.title}</div>
@@ -685,7 +688,7 @@ export default function ArtistProfilePage({
                             {stop.title}{stop.venue && ` — ${stop.venue.city}`}
                           </div>
                           <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.55 }}>
-                            {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            {formatDate(stop.date, 'medium', locale)}
                             {stop.tour && ` · Part of ${stop.tour.title}`}
                           </div>
                         </div>
@@ -713,7 +716,7 @@ export default function ArtistProfilePage({
                           <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
                           {stop.date && (
                             <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.55 }}>
-                              {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                              {formatDate(stop.date, 'medium', locale)}
                             </div>
                           )}
                         </div>
@@ -754,7 +757,7 @@ export default function ArtistProfilePage({
                       <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-amber)" : "var(--afa-tint-20)" }} />
                       <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-14px) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
                         <div style={{ fontWeight: 600, fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-1)" }}>{p.event.title}</div>
-                        <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
+                        <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {formatDate(p.event.date, 'medium', locale)}</div>
                       </div>
                     </div>
                   ))}
@@ -800,7 +803,7 @@ export default function ArtistProfilePage({
                       <option value="" style={{ color: "black" }}>Select an event...</option>
                       {invitableEvents.map((e) => (
                         <option key={e.id} value={e.id} style={{ color: "black" }}>
-                          {e.title} · {new Date(e.date).toLocaleDateString()}
+                          {e.title} · {formatDate(e.date, 'medium', locale)}
                         </option>
                       ))}
                     </select>

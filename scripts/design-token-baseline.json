@@ -8,6 +8,7 @@
     "spacing-literal": 257,
     "radius-literal": 0,
     "raw-button": 0,
-    "bare-button": 0
+    "bare-button": 0,
+    "locale-date-call": 0
   }
 }

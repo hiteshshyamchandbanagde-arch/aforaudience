@@ -13,6 +13,7 @@ import { FacilityIcon } from "@/components/icons/VenueIcons"
 import { formatEventTimeRange } from "@/lib/eventTime"
 import { useLocale } from "@/lib/i18n/translate"
 import { EVENT_TERMS_CHECKLIST, REFUND_POLICY_LINK } from "@/lib/event-terms"
+import { formatDate } from "@/lib/format-date"
 
 interface Review {
   id: string
@@ -132,7 +133,7 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
 }
 
 export default function EventDetailPage({ event, canReview }: { event: EventData | null; canReview: boolean }) {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const router = useRouter()
   const { data: session, status } = useSession()
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({})
@@ -329,7 +330,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <div style={{ marginTop: "var(--afa-space-28px)", display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-soft)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
                 <CalendarIcon style={{ width: "18px", height: "18px", flexShrink: 0, color: "var(--afa-amber)" }} />
-                <span>{new Date(event.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
+                <span>{formatDate(event.date, 'longWithYear', locale)}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
                 <ClockIcon style={{ width: "18px", height: "18px", flexShrink: 0, color: "var(--afa-amber)" }} />

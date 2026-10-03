@@ -14,6 +14,7 @@ import { CONTRAST_PAIRS, composeRgba, planRestore, restoreContrastFailures, type
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
+import { formatDate } from '@/lib/format-date'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -505,7 +506,7 @@ export default function AdminDesignSystemPage() {
                             <div>
                               <div style={{ color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>{v.note || 'Update'}</div>
                               <div style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>
-                                {new Date(v.createdAt).toLocaleString()}
+                                {formatDate(v.createdAt, 'dateTime')}
                                 {v.creatorLabel && <> · by {v.creatorLabel}</>}
                               </div>
                             </div>

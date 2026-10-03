@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import { calendarDate, formatDate } from '@/lib/format-date'
 
 // Admin Dashboard v1 trend charts (design.md §9.1).
 //
@@ -48,7 +49,7 @@ function startOfWeek(d: Date): Date {
 }
 
 function weekLabel(d: Date): string {
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  return formatDate(calendarDate(d.getFullYear(), d.getMonth(), d.getDate()), 'short')
 }
 
 function buildWeeklySeries(items: TrendFeedbackItem[], weeks = 8) {
@@ -82,7 +83,7 @@ function startOfDay(d: Date): Date {
 }
 
 function dayLabel(d: Date): string {
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  return formatDate(calendarDate(d.getFullYear(), d.getMonth(), d.getDate()), 'short')
 }
 
 function buildDailySeries(items: TrendFeedbackItem[], days = 14) {

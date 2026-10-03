@@ -13,6 +13,8 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
+import { calendarDate, formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface VenueRow {
   id: string
@@ -75,13 +77,13 @@ function compactMoney(n: number) {
 // bucketKeyFor() produces "YYYY-MM" (year/all ranges), a Monday-anchored
 // "YYYY-MM-DD" (quarter), or a daily "YYYY-MM-DD" (week/month) - format
 // each into a short axis label rather than showing the raw ISO key.
-function formatBucketLabel(key: string) {
+function formatBucketLabel(key: string, locale: string) {
   if (key.length === 7) {
     const [y, m] = key.split('-')
-    return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })
+    return formatDate(calendarDate(Number(y), Number(m) - 1), 'monthYearShort', locale)
   }
   const d = new Date(key)
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  return formatDate(d, 'short', locale)
 }
 
 function timeAgo(iso: string) {
@@ -103,6 +105,7 @@ function delta(current: number, previous: number): number | null {
 }
 
 export default function VenueOwnerSalesOverviewPage() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [range, setRange] = useState('all')
@@ -202,7 +205,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} vertical={false} />
                     <XAxis
                       dataKey="date"
-                      tickFormatter={formatBucketLabel}
+                      tickFormatter={(key: string) => formatBucketLabel(key, locale)}
                       tickLine={false}
                       axisLine={false}
                       tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
@@ -218,7 +221,7 @@ export default function VenueOwnerSalesOverviewPage() {
                       cursor={{ style: { stroke: 'var(--afa-amber-border)' }, strokeDasharray: '3 3' }}
                       contentStyle={{ background: 'var(--afa-surface-inverse)', border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                       labelStyle={{ color: 'var(--afa-text-muted)' }}
-                      labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label) : String(label ?? ''))}
+                      labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label, locale) : String(label ?? ''))}
                       itemStyle={{ color: 'var(--afa-amber)' }}
                       formatter={(v: any) => [money(Number(v)), 'Revenue']}
                     />

@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { fillSolidTint, STATUS_TONE } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface Inquiry {
   id: string
@@ -37,6 +39,7 @@ const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color:
 // (Mark Contacted / Close), everything past that (negotiation, contract,
 // payment) happens off-platform.
 export default function CorporateInquiriesPage() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
@@ -111,7 +114,7 @@ export default function CorporateInquiriesPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
-                        <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{formatDate(inq.createdAt, 'medium', locale)}</div>
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>
                     </div>
@@ -120,7 +123,7 @@ export default function CorporateInquiriesPage() {
                       <div><strong>Contact:</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-fill-solid)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
                       {inq.eventType && <div><strong>Event type:</strong> {inq.eventType}</div>}
                       {inq.city && <div><strong>City:</strong> {inq.city}</div>}
-                      {inq.preferredDate && <div><strong>Preferred date:</strong> {new Date(inq.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>}
+                      {inq.preferredDate && <div><strong>Preferred date:</strong> {formatDate(inq.preferredDate, 'medium', locale)}</div>}
                       {inq.budgetRange && <div><strong>Budget:</strong> {inq.budgetRange}</div>}
                     </div>
 

@@ -8,6 +8,8 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface TimelinePoint {
   date: string
@@ -53,11 +55,12 @@ function timeAgo(iso: string) {
   return `${hrs}h ago`
 }
 
-function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+function shortDate(iso: string, locale: string) {
+  return formatDate(iso, 'short', locale)
 }
 
 function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
+  const { locale } = useLocale()
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -182,7 +185,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                   <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--afa-space-1)', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-10px) var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
                     <span style={{ color: 'var(--afa-text-secondary)' }}>{b.eventTitle || 'No linked event'}</span>
-                    <span style={{ color: 'var(--afa-text-secondary)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{shortDate(b.fromDate, locale)} – {shortDate(b.toDate, locale)}</span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
                     <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt)}</span>
                   </div>

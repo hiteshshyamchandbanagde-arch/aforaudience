@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type TouchEvent } from 'react'
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
+import { formatDate } from '@/lib/format-date'
 
 // Admin Dashboard v1 detail panel (design.md §9.1).
 //
@@ -61,7 +62,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 function fmtDateTime(d: string | null) {
   if (!d) return '—'
-  return new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+  return formatDate(d, 'dateTime')
 }
 
 function labelize(v: string) {

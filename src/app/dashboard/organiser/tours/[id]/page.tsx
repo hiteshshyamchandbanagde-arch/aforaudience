@@ -9,6 +9,8 @@ import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 const inputStyle = {
   width: '100%',
@@ -56,6 +58,7 @@ const CONSENT_LABEL: Record<string, { label: string; color: string }> = {
 }
 
 export default function TourDetailPage() {
+  const { locale } = useLocale()
   const { status } = useSession()
   const router = useRouter()
   const params = useParams()
@@ -379,7 +382,7 @@ export default function TourDetailPage() {
                     <div>
                       <h3 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        {new Date(stop.date).toLocaleDateString()} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : 'No venue'}
+                        {formatDate(stop.date, 'medium', locale)} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : 'No venue'}
                       </p>
                     </div>
                     <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).bg, color: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).color }}>
@@ -435,7 +438,7 @@ export default function TourDetailPage() {
                   {stop.openSlotCount ? (
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
                       {stop.openSlotCount} open slot{stop.openSlotCount > 1 ? 's' : ''} · {stop.slotDuration}min each
-                      {stop.applicationDeadline && ` · applications close ${new Date(stop.applicationDeadline).toLocaleDateString()}`}
+                      {stop.applicationDeadline && ` · applications close ${formatDate(stop.applicationDeadline, 'medium', locale)}`}
                     </p>
                   ) : null}
 

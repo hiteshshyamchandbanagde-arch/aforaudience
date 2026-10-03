@@ -13,6 +13,8 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface Application {
   id: string
@@ -88,6 +90,7 @@ function describeDefaultCompensation(event: EventDetail): string {
 }
 
 export default function OrganiserEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { locale } = useLocale()
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -266,7 +269,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 {event.title}
               </h1>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                {new Date(event.date).toLocaleDateString()} · {formatEventTimeRange(event.startTime, event.endTime)}
+                {formatDate(event.date, 'medium', locale)} · {formatEventTimeRange(event.startTime, event.endTime)}
               </p>
             </div>
             <span
@@ -405,7 +408,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         {p.artist.stageName || p.artist.user.displayName || p.artist.user.name}
                       </span>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                        Cancelled {new Date(p.cancelledAt as string).toLocaleDateString()}
+                        Cancelled {formatDate(p.cancelledAt as string, 'medium', locale)}
                       </span>
                     </div>
                     {p.compensationType === 'BUY_IN' && p.buyInAmount && (

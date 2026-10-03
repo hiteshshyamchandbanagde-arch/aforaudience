@@ -17,6 +17,7 @@ import { STATUS_TONE, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import StubRow from '@/components/ui/StubRow'
+import { formatDate } from '@/lib/format-date'
 
 // Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
 // than the Figma mock's decorative QrIcon glyph. Encodes the raw
@@ -254,7 +255,7 @@ function PerfDivider() {
 export default function MyTicketsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const [bookings, setBookings] = useState<BookingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -413,7 +414,7 @@ export default function MyTicketsPage() {
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
                       .replace('{event}', t.booking.event.title)
-                      .replace('{date}', new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }))}
+                      .replace('{date}', formatDate(t.booking.event.date, 'short', locale))}
                   </p>
                   <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                     <Button
@@ -462,7 +463,7 @@ export default function MyTicketsPage() {
                     </Badge>
                   </div>
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 var(--afa-space-10px)' }}>
-                    {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {t.booking.event.startTime}
+                    {formatDate(t.booking.event.date, 'medium', locale)} · {t.booking.event.startTime}
                     {t.booking.event.venue && <> · {t.booking.event.venue.name}, {t.booking.event.venue.city}</>}
                   </p>
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0 }}>
@@ -627,7 +628,7 @@ export default function MyTicketsPage() {
                   <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 'var(--afa-space-4)', rowGap: 'var(--afa-space-1)', padding: 'var(--afa-space-10px) var(--afa-space-14px) 0' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)' }}>
                       <CalendarIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
-                      {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {b.event.startTime}
+                      {formatDate(b.event.date, 'short', locale)} · {b.event.startTime}
                     </span>
                     {b.event.venue && (
                       <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

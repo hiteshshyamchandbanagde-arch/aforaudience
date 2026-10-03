@@ -9,6 +9,8 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface Offer {
   id: string
@@ -37,6 +39,7 @@ const STATUS_STYLE: Record<string, { tone: StatusPillTone; label: string }> = {
 }
 
 export default function VenueRequestsPage() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [requests, setRequests] = useState<RequestItem[]>([])
@@ -154,7 +157,7 @@ export default function VenueRequestsPage() {
                         {r.event?.title || 'Untitled event'}
                       </p>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', margin: 'var(--afa-space-2px) 0 0' }}>
-                        {r.venue.name}, {r.venue.city} · {new Date(r.requestedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {r.durationHours}hr
+                        {r.venue.name}, {r.venue.city} · {formatDate(r.requestedDate, 'medium', locale)} · {r.durationHours}hr
                         {callerSide === 'VENUE_OWNER' && <> · {r.organiser.orgName} ({r.organiser.user.email})</>}
                       </p>
                     </div>
