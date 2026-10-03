@@ -18,7 +18,7 @@ function statValue(page: Page, label: string) {
   return page.getByRole("main").getByText(label, { exact: true }).locator("xpath=following-sibling::p[1]");
 }
 
-test("venue Bookings 'This month' and Sales 'Month' show the same revenue, both by event date", async ({ page }) => {
+test("[BUG-2609-087] venue Bookings 'This month' and Sales 'Month' show the same revenue, both by event date", async ({ page }) => {
   await gotoDashboard(page, "/dashboard/venue/bookings");
   const thisMonth = statValue(page, "This month");
   await expect(thisMonth).toHaveText(/^₹[\d,]+$/);

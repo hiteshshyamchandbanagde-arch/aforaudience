@@ -7,14 +7,14 @@ import { authFile } from "./helpers/personas";
 
 test.use({ storageState: authFile("omkar") });
 
-test.describe("BUG-2609-071 dates do not follow the browser", () => {
+test.describe("[BUG-2609-071] dates do not follow the browser", () => {
   // A visitor whose browser is set to US English in New York. Before the
   // fix the dashboard printed "10/24/2026" for an event on 25 Oct: US
   // month-first order, and a day early (no time zone was pinned anywhere).
   // src/lib/format-date.ts now formats every date in India time.
   test.use({ locale: "en-US", timezoneId: "America/New_York" });
 
-  test("organiser dashboard dates are day-first, in India time, whatever the browser's locale and zone", async ({
+  test("[BUG-2609-071] organiser dashboard dates are day-first, in India time, whatever the browser's locale and zone", async ({
     page,
   }) => {
     await gotoDashboard(page, "/dashboard/organiser");
@@ -57,8 +57,8 @@ test.describe("BUG-2609-071 dates do not follow the browser", () => {
   });
 });
 
-test.describe("BUG-2609-083 venue hours are billed in half-hours and a very long event is questioned", () => {
-  test("create page: an overnight 14 h 58 m event is billed as 15 hr and warned about; 2 h 5 m is 2.5 hr with no warning", async ({
+test.describe("[BUG-2609-083] venue hours are billed in half-hours and a very long event is questioned", () => {
+  test("[BUG-2609-083] create page: an overnight 14 h 58 m event is billed as 15 hr and warned about; 2 h 5 m is 2.5 hr with no warning", async ({
     page,
   }) => {
     await gotoDashboard(page, "/dashboard/organiser/events/create");

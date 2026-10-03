@@ -142,7 +142,7 @@ test("competition show: toggle and prizes survive a save and show on the public 
 // while EventCard still received `isCompetitionShow` and all 11
 // dictionaries still carried `competitionBadge`. Quarantined from #723
 // until the badge was back (CompetitionBadge in EventCard.tsx).
-test("BUG-2610-006: competition show: the listing card shows the Competition badge", async ({ page }) => {
+test("[BUG-2610-006] competition show: the listing card shows the Competition badge", async ({ page }) => {
   test.setTimeout(FLOW_TIMEOUT_MS);
 
   try {

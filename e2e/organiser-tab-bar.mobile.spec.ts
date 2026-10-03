@@ -15,7 +15,7 @@ test.use({ storageState: authFile("omkar") });
 // One of Omkar's seeded events (scripts/qa-seed.ts, "full" organiser).
 const EVENT_ID = "qa-demo-event-full-9";
 
-test("organiser event detail shows one bottom bar, the organiser's, with My Events active", async ({ page }) => {
+test("[BUG-2609-084] organiser event detail shows one bottom bar, the organiser's, with My Events active", async ({ page }) => {
   await gotoDashboard(page, `/dashboard/organiser/events/${EVENT_ID}`);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 

@@ -10,7 +10,7 @@ import { test, expect } from "./helpers/test";
  * which the desktop project leaves out - see playwright.config.ts).
  */
 
-test("events filter sheet: focus moves in, Tab and Shift+Tab stay in, Esc closes and returns focus", async ({
+test("[BUG-2609-065] events filter sheet: focus moves in, Tab and Shift+Tab stay in, Esc closes and returns focus", async ({
   page,
 }) => {
   await page.goto("/events");
@@ -48,7 +48,7 @@ test("events filter sheet: focus moves in, Tab and Shift+Tab stay in, Esc closes
   await expect(trigger).toBeFocused();
 });
 
-test("events search box: typing in it does not open the filter sheet", async ({ page }) => {
+test("[BUG-2609-065] events search box: typing in it does not open the filter sheet", async ({ page }) => {
   // Before #722 focusing the top-bar search opened the sheet; with the sheet
   // now taking focus, that would make the box impossible to type in. Only
   // the filter icon opens it.

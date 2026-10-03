@@ -4,6 +4,11 @@
 // `if: always()`, so the counts are readable through the GitHub API even
 // when the logs and artifacts are not.
 //
+// It also lists the tickets the run verified (docs/testing-rules.md T5): a
+// spec that verifies a ticket carries its ID in square brackets in its
+// title, e.g. test("[BUG-2609-077] ...") (docs/test-coverage-map.md). A
+// ticket passed when every test carrying it passed; it failed when any did.
+//
 // Never changes the job's result: the Playwright step already decides that.
 import fs from "node:fs";
 
@@ -22,7 +27,7 @@ if (!fs.existsSync(file)) {
   process.exit(0);
 }
 
-const { stats = {}, errors = [] } = JSON.parse(fs.readFileSync(file, "utf8"));
+const { stats = {}, errors = [], suites = [] } = JSON.parse(fs.readFileSync(file, "utf8"));
 const passed = stats.expected ?? 0;
 const failed = stats.unexpected ?? 0;
 const flaky = stats.flaky ?? 0;
@@ -37,4 +42,38 @@ if (errors.length > 0 && passed + failed + flaky === 0) {
   emit("error", `no tests ran - ${first}`);
 } else {
   emit(failed > 0 ? "error" : flaky > 0 ? "warning" : "notice", line);
+}
+
+// Ticket IDs in brackets anywhere in a test's full title (file, describe, test).
+const TICKET = /\[((?:BUG|FEAT|GEN)-\d{4}-\d{3})\]/g;
+
+/** Every test result in the report, with its full title. */
+function* testsIn(suite, titles = []) {
+  const path = [...titles, suite.title];
+  for (const spec of suite.specs ?? []) {
+    for (const t of spec.tests ?? []) yield { title: [...path, spec.title].join(" "), status: t.status };
+  }
+  for (const child of suite.suites ?? []) yield* testsIn(child, path);
+}
+
+// expected/flaky passed (flaky on a retry); unexpected failed; skipped did not run.
+const tickets = new Map();
+for (const suite of suites) {
+  for (const { title, status } of testsIn(suite)) {
+    for (const [, id] of title.matchAll(TICKET)) {
+      const t = tickets.get(id) ?? { ran: 0, failed: 0 };
+      if (status === "unexpected") t.failed++;
+      if (status !== "skipped") t.ran++;
+      tickets.set(id, t);
+    }
+  }
+}
+const ids = [...tickets.keys()].sort();
+const passedIds = ids.filter((id) => tickets.get(id).failed === 0 && tickets.get(id).ran > 0);
+const failedIds = ids.filter((id) => tickets.get(id).failed > 0);
+const notRunIds = ids.filter((id) => tickets.get(id).ran === 0);
+if (ids.length > 0) {
+  emit("notice", `TICKETS PASSED: ${passedIds.join(", ") || "none"}`);
+  emit(failedIds.length > 0 ? "error" : "notice", `TICKETS FAILED: ${failedIds.join(", ") || "none"}`);
+  if (notRunIds.length > 0) emit("notice", `TICKETS NOT RUN (skipped or left out): ${notRunIds.join(", ")}`);
 }

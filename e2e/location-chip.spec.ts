@@ -32,7 +32,7 @@ async function chooseCity(page: Page, isMobile: boolean, city: string) {
   await cityOption.click();
 }
 
-test("changing the location chip on /venues relists the venues at once, without leaving the page", async ({
+test("[BUG-2609-078] changing the location chip on /venues relists the venues at once, without leaving the page", async ({
   page,
   isMobile,
 }) => {

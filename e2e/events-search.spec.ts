@@ -25,7 +25,7 @@ function searchBox(page: Page, isMobile: boolean) {
     : page.getByRole("main").getByPlaceholder("Search events, venues...");
 }
 
-test("a ?search= arrival shows in the search box and searches every city", async ({ page, isMobile }) => {
+test("[BUG-2610-004] a ?search= arrival shows in the search box and searches every city", async ({ page, isMobile }) => {
   await page.goto(`/events?search=${SEARCH}`);
 
   const box = searchBox(page, isMobile);
@@ -57,7 +57,7 @@ test("a ?search= arrival shows in the search box and searches every city", async
 // router.replace("/events") and "/events/" alike). Clearing the box now
 // drops the param with the native History API. Quarantined from #723
 // until this fix.
-test("BUG-2610-007: clearing the search box removes ?search= from the address", async ({ page, isMobile }) => {
+test("[BUG-2610-004] [BUG-2610-007] clearing the search box removes ?search= from the address", async ({ page, isMobile }) => {
   await page.goto(`/events?search=${SEARCH}`);
   const box = searchBox(page, isMobile);
   await expect(box).toHaveValue(SEARCH);
