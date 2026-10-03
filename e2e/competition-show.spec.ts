@@ -31,8 +31,8 @@ import { authFile } from "./helpers/personas";
  * free-text fields and the upload inputs are gone, so those steps had
  * nothing left to test and waited out the timeout. What remains - the
  * toggle, the prizes and the public section - is kept with its original
- * assertions. The listing badge step is split into its own test at the
- * bottom, quarantined: the badge itself is missing from the app. Inviting a panelist is NOT covered here: it
+ * assertions. The listing badge step is its own test at the bottom
+ * (BUG-2610-006). Inviting a panelist is NOT covered here: it
  * writes an invitation onto another account, so it needs its own spec with
  * its own cleanup.
  *
@@ -136,15 +136,13 @@ test("competition show: toggle and prizes survive a save and show on the public 
   });
 });
 
-// QUARANTINED (docs/testing-rules.md T2) - real app bug, found 3 Oct 2026 by
-// the e2e repair; ticket number to be assigned by chat (see that handoff).
-// The listing card no longer shows the Competition badge. The Events
-// directory rebuild (#514, 20 Aug) dropped the
-// `{event.isCompetitionShow && 🏆 {tr.eventsPage.competitionBadge}}` block:
-// EventCard still receives `isCompetitionShow` and all 11 dictionaries still
-// carry `competitionBadge`, but nothing renders it. This is the original
-// spec's last step, kept runnable so it goes green when the badge is back.
-test.fixme("competition show: the listing card shows the Competition badge", async ({ page }) => {
+// BUG-2610-006 - the listing card had lost its Competition badge: the
+// Events directory rebuild (#514, 20 Aug) dropped the
+// `{event.isCompetitionShow && 🏆 {tr.eventsPage.competitionBadge}}` block,
+// while EventCard still received `isCompetitionShow` and all 11
+// dictionaries still carried `competitionBadge`. Quarantined from #723
+// until the badge was back (CompetitionBadge in EventCard.tsx).
+test("BUG-2610-006: competition show: the listing card shows the Competition badge", async ({ page }) => {
   test.setTimeout(FLOW_TIMEOUT_MS);
 
   try {
