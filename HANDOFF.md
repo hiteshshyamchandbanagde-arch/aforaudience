@@ -1,3 +1,21 @@
+# Session Handoff — 3 Oct 2026, part 39 (chat — #722 merged)
+
+- **#722** (medium bug bundle 2) squash-merged at pinned head `a5b8106`, giving `qa` @ `93a8707`. CI green (design-tokens). Branch deleted. QA deploy `dpl_7QfBmUxeLjDVbha7G4ckntBMVxVk` READY.
+- **Feedback:** 065, 071, 078, 082, 083, 084, 087, BUG-2610-004 → `BUILD_COMPLETE` / `DEPLOYED_QA`. **080 → `RESOLVED`** (not reproduced in 18 resize checks on current qa; fixed by #717).
+- **Chat review before merge:** billing helper, both server duration routes, date formatter (IST, `-u-nu-latn`), sales-overview by `fromDate` read in the diff. No money is derived from `durationHours`, so CC's flag 2 is display-only.
+- **CC's four flags, accepted by chat:**
+  1. Focusing the `/events` mobile search no longer opens the filter sheet; only the filter icon does. Correct behaviour.
+  2. Duration columns are `Int` (2.5 hr recorded as 3) → logged **BUG-2610-005 (LOW)**, needs a schema change.
+  3. Venue Sales "Month" is now the whole calendar month by event date, delta vs whole previous month. Matches Bookings; intended.
+  4. 10 new strings in 11 locales unreviewed by native speakers. Fold into the Marathi/translation pass (GEN-2609-120).
+- **Logged:** **GEN-2610-002 (LOW)**: admin `revenue-overview` still counts by `createdAt`; venue pages now count by event date.
+- **Extra fix in #722:** the mobile location chip sat inside the logo link (tap went home).
+- **Hitesh to retest on QA (390/412):** filter sheet keyboard focus; organiser event detail tab bar (Omkar); Vinayak Bookings vs Sales both ₹37,417 for October; `/` search "rajapalayam" → found, clearable; change location chip on `/venues`.
+- **Still pending Hitesh:** central-control goal proof; Admin Settings Save check; revoke 1 Oct PAT.
+- **Next CC candidates:** BUG-2610-003 (ticket tier "–"); GEN-2610-001 (email/PDF contrast + tests in CI); spacing phase 2; offline tickets (BUG-2610-001); Marathi (GEN-2609-120); then BUG-2610-005, GEN-2610-002.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 38 (CC — MEDIUM bug bundle 2 pushed, NOT merged)
 
 - **Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/medium-bug-bundle-2610?expand=1
