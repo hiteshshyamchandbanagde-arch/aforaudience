@@ -16,6 +16,9 @@ import { markFirstVisitDone } from "./helpers/first-visit";
  * reference is the bar a guest sees on / (/saved sends a guest to sign in): at 390 x 844, /tickets/ and
  * /profile/ show that bar, item for item, and only that bar, signed out
  * and signed in as Atul. Read-only.
+ *
+ * GEN-2609-017 put the same bar on / too (the homepage stays the phone's
+ * landing page): the reference read from / is that bar.
  */
 
 test.use({ viewport: PHONE });
@@ -45,7 +48,7 @@ async function onlyBar(page: Page, path: string) {
   return bar;
 }
 
-test("[GEN-2609-013] /tickets/ and /profile/ show the unified bottom tab bar, signed out and signed in", async ({ page, browser }) => {
+test("[GEN-2609-013] [GEN-2609-017] /tickets/ and /profile/ show the unified bottom tab bar, signed out and signed in", async ({ page, browser }) => {
   const reference = await onlyBar(page, "/");
   expect(reference.length, "the bar on / has tabs").toBeGreaterThanOrEqual(4);
   expect(reference.join(" | "), "the bar on / is the unified one").toMatch(/tickets -> \/tickets.*profile -> \/profile/);
