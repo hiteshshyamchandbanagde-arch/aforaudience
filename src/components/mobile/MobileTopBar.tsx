@@ -143,12 +143,17 @@ export default function MobileTopBar() {
         borderBottom: '1px solid var(--afa-tint-08)',
       }}
     >
-      <Link href="/" style={{ flexShrink: 0, lineHeight: 1, textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
-          <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
-        </span>
+      {/* BUG-2609-078 - the chip sits under the logo, not inside its link:
+          as a child of the <Link> every tap on the chip (and on a city in
+          its list) also followed the link to the homepage. */}
+      <div style={{ flexShrink: 0, lineHeight: 1 }}>
+        <Link href="/" style={{ display: 'block', textDecoration: 'none' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
+          </span>
+        </Link>
         <LocationChip variant="topbar" />
-      </Link>
+      </div>
 
       <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
         <TopBarSearchIcon
