@@ -717,7 +717,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
               {timeWarning && (
-                <p role="status" style={{ margin: 0, padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5 }}>
+                <p role="status" style={{ margin: '0 0 var(--afa-space-18px)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5 }}>
                   {timeWarning}
                 </p>
               )}
