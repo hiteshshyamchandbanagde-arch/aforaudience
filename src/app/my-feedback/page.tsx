@@ -1,14 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useState, type TouchEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 import { useLocale } from '@/lib/i18n/translate'
 import type { Dictionary } from '@/lib/i18n/translate'
 import { STATUS_TONE, type StatusToneStyle } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
 
 type FeedbackCategory = 'BUG' | 'FEATURE_IDEA' | 'QUESTION' | 'GENERAL' | 'OTHER'
 type FeedbackStatus =
@@ -84,18 +86,6 @@ function statusStyleFor(tr: Dictionary, item: FeedbackItem): { label: string } &
   return { label: tr.myFeedbackPage.statusFixedTesting, ...STATUS_TONE.sage }
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-function formatDateTime(iso: string | null): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
-}
 
 // BUG-2608-019: this page rendered each row as a plain non-interactive
 // div - there was nothing to click, and the swipe/arrow prev-next pattern
@@ -121,6 +111,10 @@ function FeedbackDetailOverlay({
   const hasPrev = index > 0
   const hasNext = index < items.length - 1
   const [navGuard, setNavGuard] = useState(false)
+  const { locale } = useLocale()
+  // Esc is handled by this overlay's own key handler below.
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, panelRef, undefined, { label: 'Feedback details' })
 
   useEffect(() => {
     setNavGuard(false)
@@ -172,14 +166,13 @@ function FeedbackDetailOverlay({
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', justifyContent: 'flex-end' }}
-      role="dialog"
-      aria-modal="true"
     >
       <div
         onClick={onClose}
         style={{ position: 'absolute', inset: 0, background: 'var(--afa-scrim)' }}
       />
       <div
+        ref={panelRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         style={{
@@ -207,7 +200,7 @@ function FeedbackDetailOverlay({
         </div>
 
         <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-          {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
+          {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt, 'medium', locale)}
           {item.displayId && <> · {item.displayId}</>}
         </div>
 
@@ -241,7 +234,7 @@ function FeedbackDetailOverlay({
 
         {item.resolvedAt && (
           <div style={{ marginTop: 'var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
-            {tr.myFeedbackPage.resolvedTemplate.replace('{date}', formatDateTime(item.resolvedAt))}
+            {tr.myFeedbackPage.resolvedTemplate.replace('{date}', formatDate(item.resolvedAt, 'dateTime', locale) || '—')}
           </div>
         )}
 
@@ -273,7 +266,7 @@ function FeedbackDetailOverlay({
 }
 
 export default function MyFeedbackPage() {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const { status: sessionStatus } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<FeedbackItem[] | null>(null)
@@ -371,7 +364,7 @@ export default function MyFeedbackPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)' }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                        {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
+                        {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt, 'medium', locale)}
                         {item.displayId && <> · {item.displayId}</>}
                       </div>
                       <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>

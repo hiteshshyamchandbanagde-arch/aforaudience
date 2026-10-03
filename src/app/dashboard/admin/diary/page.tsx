@@ -7,6 +7,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
 
 // /dashboard/admin/diary — Admin Diary
 //
@@ -213,7 +214,7 @@ export default function AdminDiaryPage() {
                     </Button>
                   ))}
                   <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, marginLeft: 'auto' }}>
-                    Updated {new Date(entry.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    Updated {formatDate(entry.updatedAt, 'medium')}
                   </span>
                 </div>
               </div>

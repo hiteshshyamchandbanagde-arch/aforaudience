@@ -4,6 +4,7 @@ import { formatSeatLabels } from "@/lib/seat-labels"
 import { sendTicketEmail } from "@/lib/email"
 import { sendPushToUser } from "@/lib/push"
 import { ensureTicketCode } from "@/lib/assign-ticket-code"
+import { formatDate } from "@/lib/format-date"
 
 // ---------------------------------------------------------------------------
 // Ticket delivery orchestrator.
@@ -201,12 +202,7 @@ async function recordFailure(bookingId: string, reason: string): Promise<void> {
 }
 
 function formatDateHuman(d: Date, startTime: string): string {
-  return `${d.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })} at ${startTime}`
+  return `${formatDate(d, 'longWithYear')} at ${startTime}`
 }
 
 /**

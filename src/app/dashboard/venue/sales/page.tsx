@@ -13,6 +13,9 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
+import { calendarDate, formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
+import { countNoun } from '@/lib/i18n/plural'
 
 interface VenueRow {
   id: string
@@ -75,13 +78,13 @@ function compactMoney(n: number) {
 // bucketKeyFor() produces "YYYY-MM" (year/all ranges), a Monday-anchored
 // "YYYY-MM-DD" (quarter), or a daily "YYYY-MM-DD" (week/month) - format
 // each into a short axis label rather than showing the raw ISO key.
-function formatBucketLabel(key: string) {
+function formatBucketLabel(key: string, locale: string) {
   if (key.length === 7) {
     const [y, m] = key.split('-')
-    return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })
+    return formatDate(calendarDate(Number(y), Number(m) - 1), 'monthYearShort', locale)
   }
   const d = new Date(key)
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  return formatDate(d, 'short', locale)
 }
 
 function timeAgo(iso: string) {
@@ -103,6 +106,7 @@ function delta(current: number, previous: number): number | null {
 }
 
 export default function VenueOwnerSalesOverviewPage() {
+  const { locale, t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [range, setRange] = useState('all')
@@ -180,7 +184,7 @@ export default function VenueOwnerSalesOverviewPage() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
-            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} />
+            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} />
             <StatCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
             <StatCard label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
             <StatCard label="Venues" value={String(totals.venuesCount)} sub="no platform cut on rentals" />
@@ -202,7 +206,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} vertical={false} />
                     <XAxis
                       dataKey="date"
-                      tickFormatter={formatBucketLabel}
+                      tickFormatter={(key: string) => formatBucketLabel(key, locale)}
                       tickLine={false}
                       axisLine={false}
                       tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
@@ -218,7 +222,7 @@ export default function VenueOwnerSalesOverviewPage() {
                       cursor={{ style: { stroke: 'var(--afa-amber-border)' }, strokeDasharray: '3 3' }}
                       contentStyle={{ background: 'var(--afa-surface-inverse)', border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                       labelStyle={{ color: 'var(--afa-text-muted)' }}
-                      labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label) : String(label ?? ''))}
+                      labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label, locale) : String(label ?? ''))}
                       itemStyle={{ color: 'var(--afa-amber)' }}
                       formatter={(v: any) => [money(Number(v)), 'Revenue']}
                     />
@@ -327,7 +331,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{money(o.revenue)}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{o.bookings} bookings</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{countNoun(o.bookings, 'booking')}</span>
                   </div>
                 ))}
               </div>
@@ -345,13 +349,14 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
     <Card style={{ padding: 'var(--afa-space-18px)' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
-      {delta != null ? (
+      {delta != null && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
         </p>
-      ) : sub ? (
+      )}
+      {sub && (
         <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>{sub}</p>
-      ) : null}
+      )}
     </Card>
   )
 }

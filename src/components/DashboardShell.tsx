@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useLocale } from '@/lib/i18n/translate'
 import { useHeldRoles } from '@/components/HeldRolesContext'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
+import { unifiedTabBarShows } from '@/components/mobile/tabBarRoutes'
 
 // Shared shell for the Audience-tier dashboard pages (Dashboard/My
 // Activity, Messages, Tickets). Desktop: persistent 220px left sidebar,
@@ -434,6 +436,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const held = useHeldRoles()
   const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending, adminFeedbackPending, adminBookingsErrored } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+  useModalSheet(drawerOpen, drawerRef, () => setDrawerOpen(false), { label: 'My Roles' })
   const badgeFor = (key?: BadgeKey): number | undefined =>
     key === 'venueBookings' ? venueBookingsPending
       : key === 'flexRequests' ? flexRequestsPending
@@ -478,79 +482,19 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const activeId = resolveActiveId(pathname, allEntries)
   const isActive = (id: string) => id === activeId
 
-  // GEN-2609-013 - /tickets and /profile now get MobileTabBar.tsx's
-  // unified bar for every user, signed in or not (that file's own
-  // comment has the full decision history). Rendering this component's
-  // own mobile bottom bar there too would stack two fixed bottom bars,
-  // so it's suppressed on exactly these routes - every other
-  // /dashboard/* route is untouched. Normalized the same way
-  // MobileTabBar.tsx normalizes its own pathname (next.config.ts's
-  // trailingSlash: true means usePathname() returns "/tickets/", not
-  // "/tickets") rather than reusing the bare `pathname` above, which only
-  // needs prefix-matching for resolveActiveId and tolerates the trailing
-  // slash there as a side effect, not by an explicit check.
+  // MobileTabBar.tsx's unified bar owns the bottom of the screen on
+  // mobile (GEN-2609-013 for /tickets and /profile, GEN-2609-019 for
+  // messages and the four role dashboards). Rendering this component's
+  // own bottom bar there too would stack two fixed bars, so it is
+  // suppressed wherever that one shows.
   //
-  // GEN-2609-019 Phase B - /dashboard/messages added to this list.
-  // MobileTabBar.tsx's morphing primary bar now includes a Messages tab
-  // routed at /dashboard/messages, so this component's own mobile bar
-  // needs to stay off that one route too, same reasoning as /tickets and
-  // /profile.
-  //
-  // GEN-2609-019 Phase C - every Artist/Organiser/Venue Owner route now
-  // covered by MobileTabBar.tsx's new role-specific bars added here too.
-  // Found live (not in code review): before this list was extended,
-  // Hrithik's Artist dashboard rendered BOTH this component's old topNav
-  // bar AND MobileTabBar.tsx's bar stacked at once, duplicating Messages/
-  // Tickets/Profile between them - the exact bug this list exists to
-  // prevent, just not yet applied to the new routes. /dashboard/venue-
-  // requests is shared between Organiser and Venue Owner (see this file's
-  // own ROLE_SECTIONS comment) - covered either way, so it only needs one
-  // entry here regardless of which role is signed in.
-  // Admin follow-up (GEN-2609-019, also closes BUG-2609-008) - the 8
-  // /dashboard/admin/* routes below, added for consistency with every
-  // other role now covered. Unlike the 3 roles above, this isn't fixing
-  // an active double-bar bug: no admin page has ever rendered this
-  // component (see dashboard/layout.tsx's own comment - that's the
-  // actual substance of BUG-2609-008), so there was no old bar here to
-  // stack against MobileTabBar.tsx's new one. Listed anyway so this
-  // table stays the single source of truth for "does the unified tab
-  // bar own this route" across all 4 roles, not 3.
-  // The deeper single-purpose tool pages (event edit/checkin/lineup/
-  // sales, tour create, venue seat-map builder, etc.) don't use this
-  // component at all today, so they need no entry here - there is
-  // nothing for them to suppress.
-  const MOBILE_TAB_BAR_ROUTES = [
-    '/tickets',
-    '/profile',
-    '/dashboard/messages',
-    '/dashboard/artist',
-    '/dashboard/artist/events',
-    '/dashboard/artist/edit',
-    '/dashboard/artist/corporate-inquiries',
-    '/dashboard/organiser',
-    '/dashboard/organiser/events/create',
-    '/dashboard/organiser/sales',
-    '/dashboard/organiser/payouts',
-    '/dashboard/organiser/tours',
-    '/dashboard/organiser/edit',
-    '/dashboard/venue',
-    '/dashboard/venue/bookings',
-    '/dashboard/venue/sales',
-    '/dashboard/venue/create',
-    '/dashboard/venue/edit',
-    '/dashboard/venue-requests',
-    '/dashboard/admin',
-    '/dashboard/admin/bookings',
-    '/dashboard/admin/revenue',
-    '/dashboard/admin/users',
-    '/dashboard/admin/artists',
-    '/dashboard/admin/diary',
-    '/dashboard/admin/feedback',
-    '/dashboard/admin/settings',
-    '/dashboard/admin/design-system',
-  ]
-  const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
-  const hideMobileBarForUnifiedTabBar = !!normalizedPathname && MOBILE_TAB_BAR_ROUTES.includes(normalizedPathname)
+  // BUG-2609-084 - the route list that used to live here is gone: it and
+  // MobileTabBar's own switch were two hand-kept copies, and a route in
+  // neither (the organiser event detail page) got this component's bar
+  // instead of the organiser one. Both now ask tabBarRoutes.ts. Every
+  // page that renders this shell is mapped there, so this bar is only a
+  // fallback for a future page that is added without a mapping.
+  const hideMobileBarForUnifiedTabBar = unifiedTabBarShows(pathname, (session?.user as { role?: string } | undefined)?.role)
 
   return (
     <div className="lg:flex" style={{ background: 'var(--afa-surface-page)' }}>
@@ -643,6 +587,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <div className="lg:hidden fixed inset-0" style={{ zIndex: 50 }}>
           <div className="absolute inset-0" style={{ background: 'var(--afa-scrim)' }} onClick={() => setDrawerOpen(false)} />
           <div
+            ref={drawerRef}
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >

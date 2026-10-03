@@ -11,6 +11,7 @@ import LocationChip from '@/components/LocationChip'
 import { FilterSlidersIcon } from '@/components/icons/EventIcons'
 import { TopBarSearchIcon, TopBarGlobeIcon } from '@/components/icons/MobileTopBarIcons'
 import Button from '@/components/ui/Button'
+import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, MOBILE_SEARCH_SYNC_EVENT } from '@/lib/app-events'
 
 // Mobile Nav v3, Phase A (GEN-2609-019) - global mobile top bar, ported
 // from the Figma Make "AFA Mobile App v3" export's TopBar.tsx (structure,
@@ -45,8 +46,9 @@ import Button from '@/components/ui/Button'
 //    scope-trim: the hero search's BrowseSearchDropdown autocomplete
 //    doesn't follow into this bar - out of scope for Phase A, worth a
 //    fast-follow if it's missed.
-export const MOBILE_SEARCH_EVENT = 'afa:mobile-search'
-export const MOBILE_SEARCH_OPEN_FILTERS_EVENT = 'afa:mobile-search-open-filters'
+// The event names live in src/lib/app-events.ts (LocationChip, which
+// this file imports, needs one too); re-exported for existing importers.
+export { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT }
 
 export default function MobileTopBar() {
   const pathname = usePathname()
@@ -76,6 +78,19 @@ export default function MobileTopBar() {
   useEffect(() => {
     setQuery('')
   }, [normalizedPathname])
+
+  // BUG-2610-004 - /events reports its active search (on mount, from
+  // ?search=, and whenever it changes), so this input always shows it
+  // and can clear it. The page's effects run after the reset above, so
+  // a search carried in the URL survives arriving on the route.
+  useEffect(() => {
+    const onSync = (e: Event) => {
+      const detail = (e as CustomEvent<{ query: string }>).detail
+      if (detail) setQuery(detail.query)
+    }
+    window.addEventListener(MOBILE_SEARCH_SYNC_EVENT, onSync)
+    return () => window.removeEventListener(MOBILE_SEARCH_SYNC_EVENT, onSync)
+  }, [])
 
   const handleQueryChange = (value: string) => {
     setQuery(value)
@@ -128,12 +143,17 @@ export default function MobileTopBar() {
         borderBottom: '1px solid var(--afa-tint-08)',
       }}
     >
-      <Link href="/" style={{ flexShrink: 0, lineHeight: 1, textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
-          <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
-        </span>
+      {/* BUG-2609-078 - the chip sits under the logo, not inside its link:
+          as a child of the <Link> every tap on the chip (and on a city in
+          its list) also followed the link to the homepage. */}
+      <div style={{ flexShrink: 0, lineHeight: 1 }}>
+        <Link href="/" style={{ display: 'block', textDecoration: 'none' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
+          </span>
+        </Link>
         <LocationChip variant="topbar" />
-      </Link>
+      </div>
 
       <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
         <TopBarSearchIcon
@@ -143,7 +163,6 @@ export default function MobileTopBar() {
           type="search"
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
-          onFocus={handleOpenFilters}
           onKeyDown={handleSearchSubmit}
           placeholder={t.search.mobileTopBarPlaceholder}
           style={{

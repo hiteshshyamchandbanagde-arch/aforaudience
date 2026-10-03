@@ -6,6 +6,7 @@ import Photo from "@/components/Photo"
 import { EventTypeIcon, CalendarIcon, ClockIcon, PinIcon } from "@/components/icons/EventIcons"
 import { EventSaveHeartButton } from "@/components/EventSaveButton"
 import SpinnerOverlay from "@/components/SpinnerOverlay"
+import { formatDate } from "@/lib/format-date"
 
 export interface EventItem {
   id: string
@@ -229,7 +230,7 @@ export function EventCard({
   disabled: boolean
   onOpen: () => void
 }) {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
   const typeLabel = tr.eventTypes[typeKey]
   const priceLabel = event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"
@@ -281,7 +282,7 @@ export function EventCard({
         <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "var(--afa-space-6px)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
             <CalendarIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
-            <span>{new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</span>
+            <span>{formatDate(event.date, 'short', locale)}</span>
             <ClockIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0, marginLeft: "var(--afa-space-1)" }} />
             <span>{event.startTime}</span>
           </div>
@@ -327,7 +328,7 @@ export function EventRow({
   onOpen: () => void
   onSaveToggled?: (saved: boolean) => void
 }) {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
   const typeLabel = tr.eventTypes[typeKey]
   const priceLabel = event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `from ₹${event.ticketPrice}` : "—"
@@ -377,7 +378,7 @@ export function EventRow({
           <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>
             <ClockIcon style={{ width: "12px", height: "12px", flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}, {event.startTime}
+              {formatDate(event.date, 'short', locale)}, {event.startTime}
               {event.venue && ` · ${event.venue.city}`}
             </span>
           </div>

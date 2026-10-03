@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
+import { formatDate } from "@/lib/format-date"
 
 interface SearchResults {
   events: { id: string; title: string; date: string; city: string | null }[]
@@ -14,7 +15,7 @@ const EMPTY: SearchResults = { events: [], artists: [], venues: [] }
 
 export default function SearchBox() {
   const router = useRouter()
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResults>(EMPTY)
@@ -88,7 +89,7 @@ export default function SearchBox() {
                   {results.events.map((e) => (
                     <Button variant="menu-row" key={e.id} onClick={() => go(`/events/${e.id}`)}>
                       <span style={{ fontWeight: 600 }}>{e.title}</span>
-                      <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{new Date(e.date).toLocaleDateString()}{e.city ? ` · ${e.city}` : ""}</span>
+                      <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{formatDate(e.date, 'medium', locale)}{e.city ? ` · ${e.city}` : ""}</span>
                     </Button>
                   ))}
                 </div>

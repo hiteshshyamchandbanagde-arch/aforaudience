@@ -4,6 +4,7 @@ import { publicEventUrl } from '@/lib/poster-url'
 import { loadPosterFonts } from '@/lib/poster-fonts'
 import { loadPosterColors, POSTER_LOGO, POSTER_QR } from '@/lib/poster-colors'
 import QRCode from 'qrcode'
+import { formatDate } from '@/lib/format-date'
 
 export const runtime = 'nodejs'
 
@@ -37,7 +38,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
   const artistName = performance.artist.user.displayName || performance.artist.user.name
   const url = publicEventUrl(performance.event.id)
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 240, color: { dark: POSTER_QR.dark, light: POSTER_QR.light } })
-  const dateStr = new Date(performance.event.date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateStr = formatDate(performance.event.date, 'long')
 
   const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL
   const isQA = envLabel?.toLowerCase().includes('qa') ?? false

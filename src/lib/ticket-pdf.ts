@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, type RGB } from "pdf-lib"
 import QRCode from "qrcode"
 import { resolveDesignColors, toPdfRgb } from "@/lib/design-tokens.server"
+import { formatDate } from "@/lib/format-date"
 
 // ---------------------------------------------------------------------------
 // Ticket PDF generator.
@@ -202,7 +203,7 @@ export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors)
 
   // ── Event date/time/venue (all italic-ish via serif regular) ──────────
   cursorY -= 12
-  const dateStr = formatDate(t.eventDate)
+  const dateStr = formatDate(t.eventDate, 'longWithYear')
   page.drawText(dateStr, {
     x: marginX,
     y: cursorY,
@@ -323,7 +324,7 @@ export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors)
     )
   } else {
     drawDetail(page, COLOR, sansBold, sans, col2X, cursorY, "PURCHASED",
-      formatDate(t.purchasedAt)
+      formatDate(t.purchasedAt, 'longWithYear')
     )
   }
   cursorY -= 54
@@ -342,7 +343,7 @@ export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors)
       `INR ${t.totalAmount.toLocaleString("en-IN")}`
     )
     drawDetail(page, COLOR, sansBold, sans, col2X, cursorY, "PURCHASED",
-      formatDate(t.purchasedAt)
+      formatDate(t.purchasedAt, 'longWithYear')
     )
     cursorY -= 54
   }
@@ -513,11 +514,3 @@ function truncate(text: string, font: PDFFont, size: number, maxWidth: number): 
   return s + "…"
 }
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-}

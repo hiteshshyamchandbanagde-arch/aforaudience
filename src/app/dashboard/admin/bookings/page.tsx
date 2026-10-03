@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import DashboardShell from '@/components/DashboardShell'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
 
 // /dashboard/admin/bookings
 //
@@ -152,11 +153,6 @@ export default function AdminBookingsPage() {
   }
 
   const formatMoney = (rupees: number) => `₹${rupees.toLocaleString('en-IN')}`
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString('en-IN', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    })
 
   const rowState = (b: BookingItem): { label: string; color: string } => {
     if (b.deliveredAt) return { label: 'Delivered', color: 'var(--afa-green-deep)' }
@@ -231,10 +227,10 @@ export default function AdminBookingsPage() {
                       </div>
                       <div className="text-left lg:text-right" style={{ fontSize: 'var(--afa-text-ui)', flexShrink: 0 }}>
                         <div style={{ fontWeight: 600, color: s.color }}>{s.label}</div>
-                        <div style={{ color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{formatDate(b.createdAt)}</div>
+                        <div style={{ color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{formatDate(b.createdAt, 'dateTime')}</div>
                         {isDelivered && b.deliveredAt ? (
                           <div style={{ color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)', fontSize: 'var(--afa-text-small)' }}>
-                            Delivered {formatDate(b.deliveredAt)}
+                            Delivered {formatDate(b.deliveredAt, 'dateTime')}
                           </div>
                         ) : null}
                       </div>

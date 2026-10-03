@@ -621,6 +621,10 @@ select:-webkit-autofill {
 @media (max-width: 1023px) {
   body.afa-mobile-tab-bar-active {
     padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    /* BUG-2609-084 - for anything pinned to the viewport bottom (a sticky
+       action row): add this to its offset so the bar never covers it.
+       Unset (0px fallback) on desktop and on routes with no bar. */
+    --afa-tab-bar-clearance: calc(64px + env(safe-area-inset-bottom));
   }
 }
 

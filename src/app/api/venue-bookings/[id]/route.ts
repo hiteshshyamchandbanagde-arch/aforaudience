@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { billableHours, wholeBilledHours } from '@/lib/venue-billing'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -109,11 +110,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         })
         if (event) {
           if (booking.venue.rateType === 'HOURLY') {
-            const [sh, sm] = String(event.startTime).split(':').map(Number)
-            const [eh, em] = String(event.endTime).split(':').map(Number)
-            let mins = (eh * 60 + em) - (sh * 60 + sm)
-            if (mins <= 0) mins += 24 * 60
-            snapshotData.durationHours = Math.round(mins / 60)
+            // BUG-2609-083 - the hours the organiser was quoted (half-hours
+            // rounded up, venue minimum applied); whole-number column, so a
+            // half-hour is recorded rounded up.
+            const hire = billableHours(String(event.startTime), String(event.endTime), booking.venue.minDurationHours)
+            if (hire) snapshotData.durationHours = wholeBilledHours(hire.billedHours)
           } else {
             // DAILY: fromDate/toDate span. Same-day is 1, multi-day
             // rentals count inclusive days.

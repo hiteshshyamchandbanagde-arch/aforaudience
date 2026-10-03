@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -9,10 +9,12 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
 import { CONTRAST_PAIRS, composeRgba, planRestore, restoreContrastFailures, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
+import { formatDate } from '@/lib/format-date'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -504,7 +506,7 @@ export default function AdminDesignSystemPage() {
                             <div>
                               <div style={{ color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>{v.note || 'Update'}</div>
                               <div style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>
-                                {new Date(v.createdAt).toLocaleString()}
+                                {formatDate(v.createdAt, 'dateTime')}
                                 {v.creatorLabel && <> · by {v.creatorLabel}</>}
                               </div>
                             </div>
@@ -1107,9 +1109,11 @@ function ContrastFailureList({ failures }: { failures: ContrastFailure[] }) {
 }
 
 function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { title: string; body: React.ReactNode; confirmLabel: string; onConfirm: () => void; onCancel: () => void }) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, dialogRef, onCancel)
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'var(--afa-scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--afa-space-5)' }}>
-      <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 'var(--afa-space-6)', maxWidth: 440, width: '100%' }}>
+      <div ref={dialogRef} style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 'var(--afa-space-6)', maxWidth: 440, width: '100%' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>{title}</h3>
         {/* div, not p: body may be a ReactNode with block content (RestorePreview's list) */}
         <div style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 'var(--afa-space-5)' }}>{body}</div>

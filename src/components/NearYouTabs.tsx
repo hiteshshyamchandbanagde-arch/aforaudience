@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useLocale } from '@/lib/i18n/translate'
 import Button from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
 
 // GEN-2608-032 (session 3rd iteration): combines what were two separate
 // hero cards (TonightNearYou + ArtistsNearYou) into one tabbed panel per
@@ -45,14 +46,14 @@ const TYPE_LABEL: Record<EventType, string> = {
   LINEUP: 'Lineup',
 }
 
-function formatEventDate(iso: string, startTime: string): string {
+function formatEventDate(iso: string, startTime: string, locale: string): string {
   const d = new Date(iso)
   const today = new Date()
   const isToday = d.toDateString() === today.toDateString()
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
   const isTomorrow = d.toDateString() === tomorrow.toDateString()
-  const dayLabel = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
+  const dayLabel = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : formatDate(d, 'withWeekday', locale)
   return `${dayLabel} · ${startTime}`
 }
 
@@ -61,7 +62,7 @@ function initials(name: string): string {
 }
 
 export default function NearYouTabs() {
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const [tab, setTab] = useState<'events' | 'artists'>('events')
 
   const [events, setEvents] = useState<UpcomingEvent[] | null>(null)
@@ -190,7 +191,7 @@ export default function NearYouTabs() {
                 <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                {formatEventDate(ev.date, ev.startTime)}
+                {formatEventDate(ev.date, ev.startTime, locale)}
               </div>
             </Link>
           ))}
@@ -225,7 +226,7 @@ export default function NearYouTabs() {
                 <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                {formatEventDate(a.eventDate, a.eventStartTime)}
+                {formatEventDate(a.eventDate, a.eventStartTime, locale)}
               </div>
             </Link>
           ))}

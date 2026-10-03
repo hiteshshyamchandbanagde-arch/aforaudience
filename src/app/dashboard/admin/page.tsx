@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import SiteNav from '@/components/SiteNav'
 import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
+import { formatDate } from '@/lib/format-date'
 
 // /dashboard/admin — Command Center (design.md §9.6, session 47)
 //
@@ -40,7 +41,7 @@ function formatINR(rupees: number) {
 }
 
 function dayLabel(iso: string) {
-  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  return formatDate(iso, 'short')
 }
 
 // --- Minimal line icons (18x18, stroke-only, one weight) ------------------

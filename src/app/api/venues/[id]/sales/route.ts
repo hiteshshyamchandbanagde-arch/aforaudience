@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { parseRange, getRangeStart, bucketKeyFor } from '@/lib/sales-range'
+import { parseRange, getCalendarRangeBounds, eventDateBucketKey } from '@/lib/sales-range'
 
 // GET /api/venues/[id]/sales?range=week|month|quarter|year|all — revenue
 // dashboard for a Venue Owner (or Admin), same shape/intent as the
@@ -15,8 +15,9 @@ import { parseRange, getRangeStart, bucketKeyFor } from '@/lib/sales-range'
 // endpoint: no subtotal/fee split, just CONFIRMED booking amounts.
 //
 // `range` scopes revenue/timeline/recent-bookings/confirmed-count to
-// "bookings made in this window" (createdAt) — same convention as the
-// per-event ticket-sales endpoint. Upcoming/completed counts and pending
+// "events dated in this period" (fromDate, whole calendar period in India
+// time) - BUG-2609-087, the same basis as the bookings page and the
+// revenue overview. Upcoming/completed counts and pending
 // (awaiting confirmation) bookings stay all-time/current-state: whether
 // a booking's *event dates* are upcoming or past, and what's currently
 // awaiting confirmation, aren't "per period" figures.
@@ -49,13 +50,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const { searchParams } = new URL(req.url)
     const range = parseRange(searchParams.get('range'))
     const now = new Date()
-    const rangeStart = getRangeStart(range, now)
+    const bounds = getCalendarRangeBounds(range, now)
 
     const [allConfirmed, pending] = await Promise.all([
       prisma.venueBooking.findMany({
         where: { venueId, status: 'CONFIRMED' },
         include: { organiser: { select: { orgName: true } } },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { fromDate: 'desc' },
       }),
       prisma.venueBooking.findMany({
         where: { venueId, status: 'PENDING' },
@@ -69,7 +70,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const completedCount = allConfirmed.filter((b) => b.toDate < now).length
 
     // Range-scoped: revenue, timeline, recent bookings, confirmed count.
-    const inRange = rangeStart ? allConfirmed.filter((b) => b.createdAt >= rangeStart) : allConfirmed
+    const inRange = bounds ? allConfirmed.filter((b) => b.fromDate >= bounds.start && b.fromDate < bounds.end) : allConfirmed
     const grossRevenue = inRange.reduce((sum, b) => sum + b.amount, 0)
 
     const pendingValue = pending.reduce((sum, b) => sum + b.amount, 0)
@@ -84,7 +85,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     const timelineMap: Record<string, number> = {}
     for (const b of inRange) {
-      const key = bucketKeyFor(range, b.createdAt)
+      const key = eventDateBucketKey(range, b.fromDate)
       timelineMap[key] = (timelineMap[key] || 0) + b.amount
     }
     const timeline = Object.entries(timelineMap)

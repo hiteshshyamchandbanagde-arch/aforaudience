@@ -9,6 +9,8 @@ import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings } from '@/lib/platform-settings'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 import { recomputeTourStatus } from '@/lib/tours'
+import { formatDate } from '@/lib/format-date'
+import { billableHours, wholeBilledHours } from '@/lib/venue-billing'
 
 export async function GET(req: Request) {
   try {
@@ -438,11 +440,10 @@ export async function POST(req: Request) {
       }
 
       if (venue.rateType === 'FLEXIBLE') {
-        const [sh, sm] = String(startTime).split(':').map(Number)
-        const [eh, em] = String(endTime).split(':').map(Number)
-        let mins = (eh * 60 + em) - (sh * 60 + sm)
-        if (mins <= 0) mins += 24 * 60
-        const durationHours = Math.round(mins / 60)
+        // BUG-2609-083 - same half-hour rule the create page shows; the
+        // column is a whole number, so a half-hour is recorded rounded up.
+        const hire = billableHours(String(startTime), String(endTime))
+        const durationHours = hire ? wholeBilledHours(hire.billedHours) : 0
 
         const request = await prisma.venueBookingRequest.create({
           data: {
@@ -464,7 +465,7 @@ export async function POST(req: Request) {
           () =>
             sendPushToUser(venue.owner.userId, {
               title: 'New venue booking request',
-              body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+              body: `${venue.name} has a new booking request for ${formatDate(date, 'medium')}.`,
               url: '/dashboard/venue-requests',
             }),
           'venue-booking-request'
@@ -488,7 +489,7 @@ export async function POST(req: Request) {
           () =>
             sendPushToUser(venue.owner.userId, {
               title: 'New venue booking request',
-              body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+              body: `${venue.name} has a new booking request for ${formatDate(date, 'medium')}.`,
               url: '/dashboard/venue-requests',
             }),
           'venue-booking-request'

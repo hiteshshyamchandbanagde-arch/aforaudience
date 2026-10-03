@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { cityLabel } from '@/lib/country-codes'
 import { useLocale } from '@/lib/i18n/translate'
 import Button from '@/components/ui/Button'
+import { LOCATION_CHANGED_EVENT, type LocationChangedDetail } from '@/lib/app-events'
 
 interface LocationState {
   city: string | null
@@ -42,6 +43,17 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
     return () => { cancelled = true }
   }, [])
 
+  // A page can show two chips (SiteNav's and the mobile top bar's, one
+  // hidden by CSS); a change made in one shows in the other.
+  useEffect(() => {
+    const onChanged = (e: Event) => {
+      const detail = (e as CustomEvent<LocationChangedDetail>).detail
+      if (detail?.city) setLocation({ city: detail.city, lat: null, lng: null, country: detail.country })
+    }
+    window.addEventListener(LOCATION_CHANGED_EVENT, onChanged)
+    return () => window.removeEventListener(LOCATION_CHANGED_EVENT, onChanged)
+  }, [])
+
   useEffect(() => {
     if (!open || cities.length > 0) return
     fetch('/api/venues/cities')
@@ -72,7 +84,13 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ city: option.city, lat: null, lng: null, country: option.country }),
       })
-      if (!res.ok) setLocation(previous)
+      if (!res.ok) {
+        setLocation(previous)
+        return
+      }
+      // BUG-2609-078 - tell the page (and any other chip) once the choice
+      // is saved, so /venues and /events switch city without a reload.
+      window.dispatchEvent(new CustomEvent<LocationChangedDetail>(LOCATION_CHANGED_EVENT, { detail: { city: option.city, country: option.country } }))
     } catch {
       setLocation(previous)
     } finally {

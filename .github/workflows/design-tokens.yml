@@ -52,6 +52,29 @@ jobs:
       - name: Ticket-code + username self-tests
         run: npx --yes tsx@^4.23.1 scripts/ticket-code.test.ts && npx --yes tsx@^4.23.1 scripts/username.test.ts
 
+      # BUG-2609-071 - the shared date formatter (India time, UI locale).
+      # TZ is set to a non-India zone on purpose: the output must not
+      # depend on the machine's zone.
+      - name: Date-formatter self-tests
+        env:
+          TZ: America/New_York
+        run: npx --yes tsx@^4.23.1 scripts/format-date.test.ts
+
+      # BUG-2609-083 - venue hire: half-hour billing and the long-event warning.
+      - name: Venue-billing self-tests
+        run: npx --yes tsx@^4.23.1 scripts/venue-billing.test.ts
+
+      # BUG-2609-087 - venue revenue ranges by event date, India-time periods.
+      - name: Sales-range self-tests
+        env:
+          TZ: America/New_York
+        run: npx --yes tsx@^4.23.1 scripts/sales-range.test.ts
+
+      # BUG-2609-084 - which mobile bottom bar a route gets; fails if a page
+      # that renders DashboardShell has no mapping.
+      - name: Tab-bar route self-tests
+        run: npx --yes tsx@^4.23.1 scripts/tab-bar-routes.test.ts
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}

@@ -9,8 +9,10 @@ import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
 import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
 import SearchInputBox from "@/components/SearchInputBox"
 import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
-import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from "@/components/mobile/MobileTopBar"
+import { LOCATION_CHANGED_EVENT, MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, MOBILE_SEARCH_SYNC_EVENT, type LocationChangedDetail } from "@/lib/app-events"
 import { useLocale } from "@/lib/i18n/translate"
+import { countText } from "@/lib/i18n/plural"
+import { formatDate } from "@/lib/format-date"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
 // so the hero search (lifted up here, session 65) can type its dropdown
@@ -92,7 +94,7 @@ function DiscoverCarouselRow({
 function EventsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { t: tr } = useLocale()
+  const { t: tr, locale } = useLocale()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
 
@@ -127,7 +129,26 @@ function EventsPageContent() {
   const [loadFailed, setLoadFailed] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
 
-  const [search, setSearch] = useState(() => searchParams.get("search") ?? "")
+  // BUG-2610-004 - the search can arrive in the URL (?search=, from the
+  // top-bar search on another page). The URL and the state are kept in
+  // step: a new ?search= replaces the search; the param going away (the
+  // Discover tab, back) clears a search that still equals it; and
+  // clearing the search drops the param (applySearch below).
+  const urlSearch = searchParams.get("search") ?? ""
+  const [search, setSearch] = useState(urlSearch)
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch)
+  if (urlSearch !== prevUrlSearch) {
+    setPrevUrlSearch(urlSearch)
+    if (urlSearch) setSearch(urlSearch)
+    else if (search === prevUrlSearch) setSearch("")
+  }
+  const applySearch = (value: string) => {
+    setSearch(value)
+    if (value.trim() === "" && urlSearch) router.replace("/events", { scroll: false })
+  }
+  // A search that came in the URL is a deliberate search, so it is not
+  // narrowed by the auto-detected city (see the location effect below).
+  const [arrivedWithSearch] = useState(urlSearch !== "")
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [selectedCity, setSelectedCity] = useState("All Cities")
   const [priceFilter, setPriceFilter] = useState("All")
@@ -155,7 +176,9 @@ function EventsPageContent() {
   useEffect(() => {
     const handleSearch = (e: Event) => {
       const detail = (e as CustomEvent<{ query: string }>).detail
-      if (detail) setSearch(detail.query)
+      if (!detail) return
+      setSearch(detail.query)
+      if (detail.query.trim() === "" && urlSearch) router.replace("/events", { scroll: false })
     }
     const handleOpenFilters = () => setMobileFilterSheetOpen(true)
     window.addEventListener(MOBILE_SEARCH_EVENT, handleSearch)
@@ -164,7 +187,11 @@ function EventsPageContent() {
       window.removeEventListener(MOBILE_SEARCH_EVENT, handleSearch)
       window.removeEventListener(MOBILE_SEARCH_OPEN_FILTERS_EVENT, handleOpenFilters)
     }
-  }, [])
+  }, [urlSearch, router])
+  // The top bar's input mirrors this page's search (BUG-2610-004).
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(MOBILE_SEARCH_SYNC_EVENT, { detail: { query: search } }))
+  }, [search])
   // GEN-2609-012 - mobile Discover defaults to the carousel-grouped
   // browse model; "See all events" (or picking any filter/search, see
   // hasActiveFilters below) switches to the same filtered grid/list
@@ -208,6 +235,7 @@ function EventsPageContent() {
     if (cityAutoAppliedRef.current) return
     if (cities.length === 0) return
     cityAutoAppliedRef.current = true
+    if (arrivedWithSearch) return
     fetch("/api/user/location")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -217,6 +245,19 @@ function EventsPageContent() {
       })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cities])
+
+  // BUG-2609-078 - a change on the location chip reaches this page too.
+  // Before the city list has loaded, the auto-apply effect above reads
+  // the saved location itself, so there is nothing to do here yet.
+  useEffect(() => {
+    const onLocationChanged = (e: Event) => {
+      const city = (e as CustomEvent<LocationChangedDetail>).detail?.city
+      if (!city || cities.length === 0) return
+      setSelectedCity(cities.some((c) => c.city === city) ? city : "All Cities")
+    }
+    window.addEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
+    return () => window.removeEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
   }, [cities])
 
   // BUG-2609-077 - the initial "All Cities" load and the load for the
@@ -305,6 +346,20 @@ function EventsPageContent() {
     const bookedRatio = (e: EventItem) => (e.totalSeats > 0 ? (e.totalSeats - e.availableSeats) / e.totalSeats : 0)
     filtered.sort((a, b) => bookedRatio(b) - bookedRatio(a))
   }
+
+  // BUG-2610-004 - when nothing matches and a search and/or a city is
+  // applied, the empty state names them (a hidden search plus the
+  // auto-applied city used to read as a bare "No events found").
+  const activeQuery = search.trim()
+  const activeCity = selectedCity !== "All Cities" ? selectedCity : null
+  const emptyNamedTitle =
+    activeQuery && activeCity
+      ? tr.eventsPage.emptySearchInCity.replace("{query}", activeQuery).replace("{city}", activeCity)
+      : activeQuery
+      ? tr.eventsPage.emptySearch.replace("{query}", activeQuery)
+      : activeCity
+      ? tr.eventsPage.emptyInCity.replace("{city}", activeCity)
+      : null
 
   // Same `search` box drives both modes (session 65 fix) - the hero
   // search is now shared rather than two visually-different boxes for
@@ -398,7 +453,7 @@ function EventsPageContent() {
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {contentMode === "organisers"
               ? tr.eventsPage.heroSubtitleOrganisers
-              : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
+              : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast)}
           </span>
           <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
             {contentMode === "organisers" ? (
@@ -450,14 +505,14 @@ function EventsPageContent() {
                 <>
                   <span style={{ fontWeight: 600 }}>{e.title}</span>
                   <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>
-                    {new Date(e.date).toLocaleDateString()}{e.venue?.name ? ` · ${e.venue.name}` : ""}
+                    {formatDate(e.date, 'medium', locale)}{e.venue?.name ? ` · ${e.venue.name}` : ""}
                   </span>
                 </>
               )}
             >
               <SearchInputBox
                 value={search}
-                onChange={setSearch}
+                onChange={applySearch}
                 placeholder={tr.eventsPage.searchEventsPlaceholder}
                 className="afa-events-search-box"
               />
@@ -483,7 +538,7 @@ function EventsPageContent() {
               >
                 <SearchInputBox
                   value={search}
-                  onChange={setSearch}
+                  onChange={applySearch}
                   placeholder={tr.eventsPage.searchOrganisersPlaceholder}
                   className="afa-events-search-box"
                   style={{ marginBottom: "var(--afa-space-6)" }}
@@ -627,7 +682,7 @@ function EventsPageContent() {
             </div>
 
             <div style={{ marginTop: "var(--afa-space-4)", marginBottom: "var(--afa-space-4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
-              {!loading && loadFailed ? "\u00A0" : tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
+              {!loading && loadFailed ? "\u00A0" : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
             </div>
 
             {/* EVENTS GRID */}
@@ -640,11 +695,25 @@ function EventsPageContent() {
               <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px var(--afa-space-5)", textAlign: "center" }}>
                 <TheaterMark style={{ width: "40px", height: "40px", color: "var(--afa-amber-strong)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
-                  {loadFailed ? tr.eventsPage.loadErrorTitle : tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
+                  {loadFailed ? tr.eventsPage.loadErrorTitle : emptyNamedTitle ?? (tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle)}
                 </p>
                 <p style={{ maxWidth: "360px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", margin: 0 }}>
-                  {loadFailed ? tr.eventsPage.loadErrorSub : tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
+                  {loadFailed ? tr.eventsPage.loadErrorSub : emptyNamedTitle ? tr.eventsPage.emptyNoneFoundSub : tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
                 </p>
+                {!loadFailed && emptyNamedTitle && (
+                  <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "var(--afa-space-3)" }}>
+                    {activeCity && (
+                      <Button variant="outline-accent" size="pill-md" fullWidth={false} type="button" onClick={() => setSelectedCity("All Cities")}>
+                        {activeQuery ? tr.eventsPage.emptySearchAllCities : tr.eventsPage.emptyShowAllCities}
+                      </Button>
+                    )}
+                    {activeQuery && (
+                      <Button variant="outline-neutral" size="pill-md" fullWidth={false} type="button" onClick={() => applySearch("")}>
+                        {tr.eventsPage.emptyClearSearch}
+                      </Button>
+                    )}
+                  </div>
+                )}
                 {loadFailed && (
                   <Button variant="outline-accent" size="pill-md" fullWidth={false} onClick={() => setReloadKey((k) => k + 1)}>
                     {tr.eventsPage.retry}

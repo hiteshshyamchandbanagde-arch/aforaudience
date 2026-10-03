@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { formatDate } from '@/lib/format-date'
 
 // Tour by Organiser (12 Aug) - public landing page. Server component,
 // direct prisma read (same pattern as the artist profile page) rather
@@ -85,7 +86,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
                   )}
                 </div>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: 'var(--afa-space-10px)' }}>
-                  {new Date(stop.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {stop.startTime}
+                  {formatDate(stop.date, 'medium')} · {stop.startTime}
                   {stop.venue && ` · ${stop.venue.name}, ${stop.venue.city}`}
                 </p>
                 {stop.lineup.length > 0 && (

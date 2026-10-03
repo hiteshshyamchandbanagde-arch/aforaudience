@@ -11,6 +11,8 @@ import DashboardShell from '@/components/DashboardShell'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface EventItem {
   id: string
@@ -55,6 +57,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
 }
 
 export default function BrowseEventsToApplyPage() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
@@ -229,7 +232,7 @@ export default function BrowseEventsToApplyPage() {
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>
-                          {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
+                          {formatDate(event.date, 'medium', locale)} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>

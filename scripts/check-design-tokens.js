@@ -95,6 +95,11 @@ function stripLineComments(line) {
     .replace(/(^|[^:])\/\/.*$/, '$1')
 }
 
+const LOCALE_DATE_RULE = 'locale-date-call'
+const LOCALE_DATE_SRC = String.raw`\.toLocale(?:Date|Time)String\(|\.toLocaleString\(\s*\)`
+const LOCALE_DATE_RE = new RegExp(LOCALE_DATE_SRC)
+const LOCALE_DATE_RE_G = new RegExp(LOCALE_DATE_SRC, 'g')
+
 const RAW_BUTTON_JSX_RE = /<button(?=[\s>/]|$)/
 const BARE_BUTTON_SRC = String.raw`\bvariant=(?:"bare"|'bare'|\{\s*(["'\x60])bare\1\s*\})`
 const BARE_BUTTON_RE = new RegExp(BARE_BUTTON_SRC)
@@ -423,6 +428,21 @@ const RULES = [
     skipRelocatedCheck: true,
     countBased: true,
   },
+  // BUG-2609-071 - not a design-token literal, but the same kind of
+  // "one source, no local copies" rule, so it rides on this checker and
+  // its ratchet: dates and times are formatted only by
+  // src/lib/format-date.ts (UI locale, unambiguous styles, India time).
+  // Flags toLocaleDateString( and toLocaleTimeString( anywhere else, and
+  // toLocaleString() with no arguments (the browser-locale form).
+  // toLocaleString('en-IN') on a number, for rupee amounts, is fine and
+  // not matched.
+  {
+    name: LOCALE_DATE_RULE,
+    test: (line) => LOCALE_DATE_RE.test(stripLineComments(line)),
+    extract: (line) => stripLineComments(line).match(LOCALE_DATE_RE_G) || [],
+    isExemptFile: (file) => file === 'src/lib/format-date.ts',
+    skipRelocatedCheck: true,
+  },
 ]
 
 // GEN-2609-078 - per-line escape hatch for genuinely-exempt literals
@@ -614,9 +634,10 @@ function isMigrationExcludedFile(file) {
 }
 
 // Every non-colour rule skips the sizing-exempt files, on top of any
-// file exemption of its own (raw-button's Button.tsx).
+// file exemption of its own (raw-button's Button.tsx). The date rule is
+// not about sizing, so it still runs on email.ts and the posters.
 for (const rule of RULES) {
-  if (COLOUR_RULE_NAMES.has(rule.name)) continue
+  if (COLOUR_RULE_NAMES.has(rule.name) || rule.name === LOCALE_DATE_RULE) continue
   const own = rule.isExemptFile
   rule.isExemptFile = (file) => isSizingExemptFile(file) || (!!own && own(file))
 }
@@ -812,6 +833,7 @@ function main() {
     if (o.message) console.error(`    ${o.message}`)
   }
   console.error('\nUse the --afa-* / --font-* tokens from src/app/globals.css instead of literal values.')
+  console.error('For [locale-date-call]: format dates and times with formatDate() from src/lib/format-date.ts.')
   console.error(`Genuinely exempt (e.g. a fixed third-party brand color)? End the line with ${TOKEN_OK_SYNTAX}, naming only the rule(s) the reason covers.`)
   console.error('See docs/afa-design-tokens-reference.md Section 1 and docs/design.md.')
   process.exit(1)

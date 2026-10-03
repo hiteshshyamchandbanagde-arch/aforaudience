@@ -11,6 +11,7 @@ import FeedbackDetailPanel, { type FeedbackDetailItem } from '@/components/admin
 import BrandLoader from '@/components/BrandLoader'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
 
 // /dashboard/admin/feedback — Admin Dashboard v1 (design.md §9.1)
 //
@@ -114,7 +115,7 @@ function timeAgo(iso: string) {
   if (hrs < 24) return `${hrs}h ago`
   const days = Math.floor(hrs / 24)
   if (days < 30) return `${days}d ago`
-  return new Date(iso).toLocaleDateString('en-IN', { dateStyle: 'medium' })
+  return formatDate(iso, 'medium')
 }
 
 // BUG-2609-045 (button consolidation, phase 1) - byte-identical

@@ -12,6 +12,8 @@ import { ErrorBanner } from '@/components/ErrorBanner'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface EventItem {
   id: string
@@ -35,6 +37,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
 }
 
 export default function OrganiserDashboard() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
@@ -180,7 +183,7 @@ export default function OrganiserDashboard() {
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>
-                          {new Date(event.date).toLocaleDateString()} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'No venue booked'}
+                          {formatDate(event.date, 'medium', locale)} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'No venue booked'}
                         </p>
                       </div>
                       <Badge tone={statusStyle}>{statusStyle.label}</Badge>

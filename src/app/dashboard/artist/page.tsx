@@ -9,6 +9,8 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { fillSolidTint, FILL_SOLID_TINT, STATUS_TONE } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface Application {
   id: string
@@ -90,6 +92,7 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
 }
 
 export default function ArtistDashboard() {
+  const { locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -312,7 +315,7 @@ export default function ArtistDashboard() {
                   {inv.tour.stops.length > 0 && (
                     <ul style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8, marginBottom: 'var(--afa-space-14px)', paddingLeft: 'var(--afa-space-18px)' }}>
                       {inv.tour.stops.map((s) => (
-                        <li key={s.id}>{s.title} — {new Date(s.date).toLocaleDateString()}{s.venue ? `, ${s.venue.city}` : ''}</li>
+                        <li key={s.id}>{s.title} — {formatDate(s.date, 'medium', locale)}{s.venue ? `, ${s.venue.city}` : ''}</li>
                       ))}
                     </ul>
                   )}
@@ -452,7 +455,7 @@ export default function ArtistDashboard() {
                         <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5, marginBottom: 'var(--afa-space-6px)' }}>{r.comment}</p>
                       )}
                       <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
-                        {r.user.displayName || r.user.name} · {new Date(r.createdAt).toLocaleDateString()}
+                        {r.user.displayName || r.user.name} · {formatDate(r.createdAt, 'medium', locale)}
                       </p>
 
                       {reply ? (
@@ -516,7 +519,7 @@ export default function ArtistDashboard() {
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', fontWeight: 500 }}>{label}</span>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginLeft: 'auto' }}>
-                        since {new Date(f.createdAt).toLocaleDateString()}
+                        since {formatDate(f.createdAt, 'medium', locale)}
                       </span>
                     </div>
                   )
@@ -539,7 +542,7 @@ export default function ArtistDashboard() {
                     <div>
                       <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        {new Date(p.event.date).toLocaleDateString()} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
+                        {formatDate(p.event.date, 'medium', locale)} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
                       </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
@@ -637,7 +640,7 @@ export default function ArtistDashboard() {
                         </span>
                       </div>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        {new Date(app.event.date).toLocaleDateString()} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : 'Venue TBD'} · by {app.event.organiser.orgName}
+                        {formatDate(app.event.date, 'medium', locale)} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : 'Venue TBD'} · by {app.event.organiser.orgName}
                       </p>
                     </div>
                   )

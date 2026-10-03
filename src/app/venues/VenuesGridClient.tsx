@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/i18n/translate"
 import { ArrowUpRightIcon, ChevronDownIcon } from "@/components/icons/VenueIcons"
 import SearchInputBox from "@/components/SearchInputBox"
 import SpinnerOverlay from "@/components/SpinnerOverlay"
+import { LOCATION_CHANGED_EVENT, type LocationChangedDetail } from "@/lib/app-events"
 
 interface VenueItem {
   id: string
@@ -51,6 +52,20 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
   )
   const [cityOpen, setCityOpen] = useState(false)
   const cityRef = useRef<HTMLDivElement>(null)
+
+  // BUG-2609-078 - the server picks the starting city from the saved
+  // location; a change on the location chip after that arrives here.
+  // A city with no venues falls back to All Cities, as on first load.
+  useEffect(() => {
+    const onLocationChanged = (e: Event) => {
+      const city = (e as CustomEvent<LocationChangedDetail>).detail?.city
+      if (!city) return
+      setSelectedCity(venues.some((v) => v.city === city) ? city : "All Cities")
+      setCityOpen(false)
+    }
+    window.addEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
+    return () => window.removeEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
+  }, [venues])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
