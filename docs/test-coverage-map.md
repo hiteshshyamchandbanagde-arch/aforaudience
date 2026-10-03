@@ -58,7 +58,7 @@ e2e queue), never in a local or autopilot run.
 | GEN-2609-008 | untested | | Batch 2: Profile hub at 390 lists the Create and Money & account rows and opens the fee sheet. HUMAN: look |
 | GEN-2609-010 | tested | `seat-legend.spec.ts` › `[GEN-2609-010] Jaipur Mic Gala 100 seat map shows a price-tier legend matching its tiers` | |
 | GEN-2609-012 | tested | `discover-carousels.mobile.spec.ts` › `[GEN-2609-012] Discover: every carousel on QA holds at least 3 events`; `[GEN-2609-012] Discover: a row under 3 events is not drawn; all-sparse falls back to the list` | |
-| GEN-2609-013 | tested | `unified-tab-bar.mobile.spec.ts` › `[GEN-2609-013] [GEN-2609-017] /tickets/ and /profile/ show the unified bottom tab bar, signed out and signed in` | Reference bar is `/`'s: `/events` now has its own Discover bar (tabBarRoutes.ts) |
+| GEN-2609-013 | tested | `unified-tab-bar.mobile.spec.ts` › `[GEN-2609-013] [GEN-2609-017] signed in, /tickets/ and /profile/ show the same bottom tab bar a visitor sees on /` | Signed in (Atul), the case the ticket fixed. Signed out is not testable: /tickets and /profile send a visitor to /login once the session loads. Reference bar is `/`'s: `/events` now has its own Discover bar (tabBarRoutes.ts) |
 | GEN-2609-017 | tested | `unified-tab-bar.mobile.spec.ts` (same test) | Asserts exactly one bar on `/`, the unified one |
 | GEN-2609-113 | untested | | Mostly a literal-to-token sweep, which the design-token ratchet guards. Batch 2: gold and error tone text on their tints ≥ 4.5 (the gold PENDING badge is already ≥ 4.5 in contrast.spec.ts) |
 | GEN-2609-115 | untested | | Batch 2, `@needs-db`: a design-token restore runs the contrast check; the form-submit button text contrast on the auth pages |

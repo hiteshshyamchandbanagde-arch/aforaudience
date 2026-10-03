@@ -103,7 +103,7 @@ stay in QA.
 | `chat-bubble.mobile.spec.ts` | Omkar, Atul, Vinayak | BUG-2609-068/081 the chat button covers no bottom action on 6 pages at 390 |
 | `fonts.spec.ts` | guest, Vinayak, Omkar | BUG-2609-055 no text in a browser-default font on 7 pages |
 | `plurals.spec.ts` | guest, Vinayak | BUG-2609-082 "1 event" / "2 events" on /events, venue Sales counts |
-| `unified-tab-bar.mobile.spec.ts` | guest, Atul | GEN-2609-013/017 one unified bottom bar on /, /tickets, /profile |
+| `unified-tab-bar.mobile.spec.ts` | guest, Atul | GEN-2609-013/017 the bar on / is the one Atul gets on /tickets, /profile |
 | `artist-tour.mobile.spec.ts` | Hrithik | BUG-2608-049 Tour fields fit at 390 (row added, never saved) |
 | `contrast.spec.ts` | Omkar | BUG-2609-050 special-notes badge contrast, all three statuses |
 | `seat-legend.spec.ts` | guest | GEN-2609-010 price-tier legend on Jaipur Mic Gala 100 |
