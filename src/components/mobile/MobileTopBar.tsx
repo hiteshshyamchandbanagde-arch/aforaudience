@@ -11,6 +11,7 @@ import LocationChip from '@/components/LocationChip'
 import { FilterSlidersIcon } from '@/components/icons/EventIcons'
 import { TopBarSearchIcon, TopBarGlobeIcon } from '@/components/icons/MobileTopBarIcons'
 import Button from '@/components/ui/Button'
+import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from '@/lib/app-events'
 
 // Mobile Nav v3, Phase A (GEN-2609-019) - global mobile top bar, ported
 // from the Figma Make "AFA Mobile App v3" export's TopBar.tsx (structure,
@@ -45,8 +46,9 @@ import Button from '@/components/ui/Button'
 //    scope-trim: the hero search's BrowseSearchDropdown autocomplete
 //    doesn't follow into this bar - out of scope for Phase A, worth a
 //    fast-follow if it's missed.
-export const MOBILE_SEARCH_EVENT = 'afa:mobile-search'
-export const MOBILE_SEARCH_OPEN_FILTERS_EVENT = 'afa:mobile-search-open-filters'
+// The event names live in src/lib/app-events.ts (LocationChip, which
+// this file imports, needs one too); re-exported for existing importers.
+export { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT }
 
 export default function MobileTopBar() {
   const pathname = usePathname()

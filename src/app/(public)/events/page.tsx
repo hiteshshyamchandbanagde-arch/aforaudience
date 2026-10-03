@@ -9,7 +9,7 @@ import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
 import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
 import SearchInputBox from "@/components/SearchInputBox"
 import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
-import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from "@/components/mobile/MobileTopBar"
+import { LOCATION_CHANGED_EVENT, MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, type LocationChangedDetail } from "@/lib/app-events"
 import { useLocale } from "@/lib/i18n/translate"
 import { formatDate } from "@/lib/format-date"
 
@@ -218,6 +218,19 @@ function EventsPageContent() {
       })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cities])
+
+  // BUG-2609-078 - a change on the location chip reaches this page too.
+  // Before the city list has loaded, the auto-apply effect above reads
+  // the saved location itself, so there is nothing to do here yet.
+  useEffect(() => {
+    const onLocationChanged = (e: Event) => {
+      const city = (e as CustomEvent<LocationChangedDetail>).detail?.city
+      if (!city || cities.length === 0) return
+      setSelectedCity(cities.some((c) => c.city === city) ? city : "All Cities")
+    }
+    window.addEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
+    return () => window.removeEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
   }, [cities])
 
   // BUG-2609-077 - the initial "All Cities" load and the load for the
