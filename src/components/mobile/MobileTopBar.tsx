@@ -11,7 +11,7 @@ import LocationChip from '@/components/LocationChip'
 import { FilterSlidersIcon } from '@/components/icons/EventIcons'
 import { TopBarSearchIcon, TopBarGlobeIcon } from '@/components/icons/MobileTopBarIcons'
 import Button from '@/components/ui/Button'
-import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from '@/lib/app-events'
+import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, MOBILE_SEARCH_SYNC_EVENT } from '@/lib/app-events'
 
 // Mobile Nav v3, Phase A (GEN-2609-019) - global mobile top bar, ported
 // from the Figma Make "AFA Mobile App v3" export's TopBar.tsx (structure,
@@ -78,6 +78,19 @@ export default function MobileTopBar() {
   useEffect(() => {
     setQuery('')
   }, [normalizedPathname])
+
+  // BUG-2610-004 - /events reports its active search (on mount, from
+  // ?search=, and whenever it changes), so this input always shows it
+  // and can clear it. The page's effects run after the reset above, so
+  // a search carried in the URL survives arriving on the route.
+  useEffect(() => {
+    const onSync = (e: Event) => {
+      const detail = (e as CustomEvent<{ query: string }>).detail
+      if (detail) setQuery(detail.query)
+    }
+    window.addEventListener(MOBILE_SEARCH_SYNC_EVENT, onSync)
+    return () => window.removeEventListener(MOBILE_SEARCH_SYNC_EVENT, onSync)
+  }, [])
 
   const handleQueryChange = (value: string) => {
     setQuery(value)
