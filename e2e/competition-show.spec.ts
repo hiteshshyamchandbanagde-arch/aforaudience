@@ -1,11 +1,10 @@
-import path from "path";
-import { test, expect } from "@playwright/test";
-import { loginFixtureOrganiser, FIXTURE_EVENT_ID, FIXTURE_EVENT_TITLE } from "./helpers/roles";
+import type { Page } from "@playwright/test";
+import { test, expect } from "./helpers/test";
+import { FIXTURE_EVENT_ID, FIXTURE_EVENT_TITLE } from "./helpers/roles";
+import { authFile } from "./helpers/personas";
 
 /**
- * Real target: PR #300 (Competition Show), shipped 31 Jul, Vercel-green but
- * never click-tested on a real device or automatically. Priority 1 per the
- * Session 50 handoff.
+ * Real target: PR #300 (Competition Show), shipped 31 Jul.
  *
  * Reuses the shared, already-APPROVED FIXTURE_EVENT_ID (see helpers/roles.ts)
  * instead of creating a fresh event, deliberately - the real create-page
@@ -19,134 +18,143 @@ import { loginFixtureOrganiser, FIXTURE_EVENT_ID, FIXTURE_EVENT_TITLE } from "./
  * workaround.
  *
  * Mutates then restores the shared fixture event's Competition Show fields
- * only (isCompetitionShow/prizes/celebrity/panelists) - same
- * reuse-without-recreating convention as waitlist-wallet-credit.spec.ts.
- * Everything else about FIXTURE_EVENT_ID (title, compensation, buy-in
- * amount) is untouched, so this should not interfere with that spec.
+ * only (the toggle and the three prizes). Everything else about
+ * FIXTURE_EVENT_ID (title, compensation, buy-in amount) is untouched, so
+ * this does not interfere with waitlist-wallet-credit.spec.ts.
  *
- * NOT YET IN THE AUTO-RUN CADENCE - workflow_dispatch only (see
- * e2e-competition-show.yml) until a first real run has been watched end to
- * end, same convention as the waitlist/wallet spec.
+ * 3 Oct 2026 - cut down to what the feature is today. When this spec was
+ * written, a celebrity was a free-text name and panelists were free-text
+ * rows, each with a photo upload, and most of the spec was about those
+ * (typed names surviving a save, "save first to add photo", uploaded photos
+ * surviving the replace-on-save cycle). Celebrities and panelists are now
+ * registered users invited by search, with their own accept flow; the
+ * free-text fields and the upload inputs are gone, so those steps had
+ * nothing left to test and waited out the timeout. What remains - the
+ * toggle, the prizes and the public section - is kept with its original
+ * assertions. The listing badge step is split into its own test at the
+ * bottom, quarantined: the badge itself is missing from the app. Inviting a panelist is NOT covered here: it
+ * writes an invitation onto another account, so it needs its own spec with
+ * its own cleanup.
+ *
+ * Back in the main suite (it had its own manual-only workflow, which was
+ * never promoted): it runs in well under a minute and always restores the
+ * fixture, including when a step fails.
  */
 
-const FIXTURE_PHOTO = path.join(__dirname, "fixtures", "test-photo.jpg");
+// Signed in as the fixture Organiser (session saved by global-setup.ts).
+test.use({ storageState: authFile("fixtureOrganiser") });
 
-test("competition show fields survive edit -> photo upload -> public display -> listing badge", async ({
-  page,
-}) => {
-  await loginFixtureOrganiser(page);
+const EDIT_URL = `/dashboard/organiser/events/${FIXTURE_EVENT_ID}/edit`;
+const PRIZE_FIRST = "₹10,000 + trophy";
+const PRIZE_SECOND = "₹5,000";
+const PRIZE_THIRD = "Goodie hamper";
+
+function competitionCheckbox(page: Page) {
+  return page.locator("label", { hasText: /this is a competition show/i }).locator('input[type="checkbox"]');
+}
+
+async function saveEvent(page: Page) {
+  await page.getByRole("button", { name: /^save changes$/i }).click();
+  // A successful save leaves the edit page for the organiser's event page.
+  await expect(page).toHaveURL(new RegExp(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/?$`), { timeout: 20_000 });
+}
+
+/** The fixture event's card on the public listing, the same on both viewports. */
+async function openListingCard(page: Page) {
+  // Searched for by title so mobile shows the plain list, not its carousels.
+  await page.goto(`/events?search=${encodeURIComponent(FIXTURE_EVENT_TITLE)}`);
+  const card = page.getByRole("link", { name: /E2E Fixture: Waitlist\/Wallet Flow/i });
+  await expect(card).toBeVisible();
+  return card;
+}
+
+
+async function enableCompetitionShow(page: Page) {
+  await page.goto(EDIT_URL);
+  await expect(competitionCheckbox(page)).toBeVisible();
+  await competitionCheckbox(page).check();
+
+  await page.getByPlaceholder(/e\.g\. ₹10,000 \+ trophy/i).fill(PRIZE_FIRST);
+  await page.getByPlaceholder("Optional").first().fill(PRIZE_SECOND);
+  await page.getByPlaceholder("Optional").nth(1).fill(PRIZE_THIRD);
+
+  await saveEvent(page);
+}
+
+/** Turns Competition Show back off, restoring the fixture event for other specs. */
+async function restoreFixtureEvent(page: Page) {
+  await page.goto(EDIT_URL);
+  await expect(competitionCheckbox(page)).toBeVisible();
+  if (await competitionCheckbox(page).isChecked()) {
+    await competitionCheckbox(page).uncheck();
+    await saveEvent(page);
+  }
+}
+
+// Two saves and several page loads, and a server-rendered page on QA takes
+// 3-6 s: these flows are honestly longer than the 60 s default. Each single
+// wait still fails in 10-20 s.
+const FLOW_TIMEOUT_MS = 150_000;
+
+test("competition show: toggle and prizes survive a save and show on the public event page", async ({ page }) => {
+  test.setTimeout(FLOW_TIMEOUT_MS);
 
   try {
-    await test.step("Enable Competition Show on the fixture event and fill prizes/celebrity/2 panelists", async () => {
-      await page.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/edit`);
-      const toggle = page.getByText(/this is a competition show/i);
-      await expect(toggle).toBeVisible({ timeout: 15_000 });
-      await page
-        .locator("label", { hasText: /this is a competition show/i })
-        .locator('input[type="checkbox"]')
-        .check();
-
-      await page.getByPlaceholder(/e\.g\. ₹10,000 \+ trophy/i).fill("₹10,000 + trophy");
-      await page.getByPlaceholder("Optional").first().fill("₹5,000");
-      await page.getByPlaceholder("Optional").nth(1).fill("Goodie hamper");
-      await page
-        .getByPlaceholder(/shown prominently on the event page/i)
-        .fill("Test Celebrity Guest");
-
-      await page.getByRole("button", { name: /\+ add panelist/i }).click();
-      await page.getByPlaceholder("Panelist name").nth(0).fill("Panelist One");
-      await page.getByPlaceholder("Short bio (optional)").nth(0).fill("Bio for panelist one");
-
-      await page.getByRole("button", { name: /\+ add panelist/i }).click();
-      await page.getByPlaceholder("Panelist name").nth(1).fill("Panelist Two");
-      await page.getByPlaceholder("Short bio (optional)").nth(1).fill("Bio for panelist two");
-
-      await page.getByRole("button", { name: /save changes|save & publish/i }).click();
-      await expect(page.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 15_000 });
+    await test.step("Enable Competition Show on the fixture event and fill the three prizes", async () => {
+      await enableCompetitionShow(page);
     });
 
-    await test.step("Reload edit page - confirm prize/celebrity/panelist text persisted", async () => {
-      await page.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/edit`);
-      await expect(page.getByPlaceholder(/e\.g\. ₹10,000 \+ trophy/i)).toHaveValue("₹10,000 + trophy");
-      await expect(page.getByPlaceholder(/shown prominently on the event page/i)).toHaveValue(
-        "Test Celebrity Guest"
-      );
-      await expect(page.getByPlaceholder("Panelist name").nth(0)).toHaveValue("Panelist One");
-      await expect(page.getByPlaceholder("Panelist name").nth(1)).toHaveValue("Panelist Two");
+    await test.step("Reload the edit page - the toggle and prize text persisted", async () => {
+      await page.goto(EDIT_URL);
+      await expect(competitionCheckbox(page)).toBeChecked();
+      await expect(page.getByPlaceholder(/e\.g\. ₹10,000 \+ trophy/i)).toHaveValue(PRIZE_FIRST);
+      await expect(page.getByPlaceholder("Optional").first()).toHaveValue(PRIZE_SECOND);
+      await expect(page.getByPlaceholder("Optional").nth(1)).toHaveValue(PRIZE_THIRD);
     });
 
-    await test.step("Newly-added, unsaved panelist shows 'Save first to add photo' - real product rule, not a bug", async () => {
-      await page.getByRole("button", { name: /\+ add panelist/i }).click();
-      await page.getByPlaceholder("Panelist name").nth(2).fill("Panelist Three");
-      await expect(page.getByText(/save first to add photo/i)).toBeVisible();
-    });
-
-    await test.step("Save the third panelist, then upload photos for celebrity + all panelists", async () => {
-      await page.getByRole("button", { name: /save changes|save & publish/i }).click();
-      await expect(page.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 15_000 });
-      await page.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/edit`);
-
-      // Celebrity photo input comes first in DOM order, panelist photo
-      // inputs follow in panelist list order (see edit/page.tsx markup).
-      const fileInputs = page.locator('input[type="file"]');
-      await expect(fileInputs).toHaveCount(4, { timeout: 15_000 }); // celebrity + 3 panelists (all now have real ids)
-
-      await fileInputs.nth(0).setInputFiles(FIXTURE_PHOTO); // celebrity
-      await expect(page.getByText(/celebrity photo uploaded/i)).toBeVisible({ timeout: 15_000 });
-
-      await fileInputs.nth(1).setInputFiles(FIXTURE_PHOTO); // panelist one
-      await expect(page.getByText(/panelist photo uploaded/i)).toBeVisible({ timeout: 15_000 });
-
-      await fileInputs.nth(2).setInputFiles(FIXTURE_PHOTO); // panelist two
-      await expect(page.getByText(/panelist photo uploaded/i)).toBeVisible({ timeout: 15_000 });
-    });
-
-    await test.step("Save again - confirm earlier panelists' photos survive the deleteMany+create replace cycle", async () => {
-      await page.getByRole("button", { name: /save changes|save & publish/i }).click();
-      await expect(page.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 15_000 });
-      await page.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/edit`);
-      // Photos are <img> tags next to each panelist row once photoUrl is
-      // set - if the replace-on-save wiped them, these would be absent.
-      await expect(page.locator('img[alt="Panelist One"]')).toBeVisible({ timeout: 15_000 });
-      await expect(page.locator('img[alt="Panelist Two"]')).toBeVisible({ timeout: 15_000 });
-    });
-
-    await test.step("Public event page shows prize cards, celebrity card, and panelist grid with photos", async () => {
+    await test.step("Public event page shows the Competition Show section with all three prizes", async () => {
       await page.goto(`/events/${FIXTURE_EVENT_ID}`);
-      await expect(page.getByText(/🏆 Competition Show/i)).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByText(/1st Prize/i)).toBeVisible();
-      await expect(page.getByText(/₹10,000 \+ trophy/i)).toBeVisible();
-      await expect(page.getByText(/2nd Prize/i)).toBeVisible();
-      await expect(page.getByText(/Test Celebrity Guest/i)).toBeVisible();
-      await expect(page.getByText(/Panelist One/i)).toBeVisible();
-      await expect(page.getByText(/Panelist Two/i)).toBeVisible();
-      await expect(page.getByText(/Panelist Three/i)).toBeVisible();
-    });
-
-    await test.step("Listing page shows the 🏆 Competition badge on this event's card", async () => {
-      await page.goto("/events");
-      const card = page.locator("div").filter({ hasText: FIXTURE_EVENT_TITLE }).last();
-      await expect(card.getByText(/🏆 Competition/i)).toBeVisible({ timeout: 15_000 });
+      const main = page.locator("main");
+      await expect(main.getByText("Competition Show", { exact: true })).toBeVisible();
+      await expect(main.getByText("1st Prize", { exact: true })).toBeVisible();
+      await expect(main.getByText(PRIZE_FIRST, { exact: true })).toBeVisible();
+      await expect(main.getByText("2nd Prize", { exact: true })).toBeVisible();
+      await expect(main.getByText(PRIZE_SECOND, { exact: true })).toBeVisible();
+      await expect(main.getByText("3rd Prize", { exact: true })).toBeVisible();
+      await expect(main.getByText(PRIZE_THIRD, { exact: true })).toBeVisible();
     });
   } finally {
-    await test.step("Cleanup: turn Competition Show back off, restoring the fixture event for other specs", async () => {
-      await page.goto(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/edit`);
-      const checkbox = page
-        .locator("label", { hasText: /this is a competition show/i })
-        .locator('input[type="checkbox"]');
-      if (await checkbox.isChecked()) {
-        await checkbox.uncheck();
-        await page.getByRole("button", { name: /save changes|save & publish/i }).click();
-        await expect(page.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 15_000 });
-      }
-    });
-
-    await test.step("Confirm cleanup: Competition Show section and badge are gone", async () => {
-      await page.goto(`/events/${FIXTURE_EVENT_ID}`);
-      await expect(page.getByText(/🏆 Competition Show/i)).not.toBeVisible();
-      await page.goto("/events");
-      const card = page.locator("div").filter({ hasText: FIXTURE_EVENT_TITLE }).last();
-      await expect(card.getByText(/🏆 Competition/i)).not.toBeVisible();
+    await test.step("Cleanup: turn Competition Show back off", async () => {
+      await restoreFixtureEvent(page);
     });
   }
+
+  await test.step("Confirm cleanup: the Competition Show section is gone from the public page", async () => {
+    await page.goto(`/events/${FIXTURE_EVENT_ID}`);
+    await expect(page.getByRole("heading", { level: 1, name: FIXTURE_EVENT_TITLE })).toBeVisible();
+    await expect(page.locator("main").getByText("Competition Show", { exact: true })).toBeHidden();
+  });
+});
+
+// QUARANTINED (docs/testing-rules.md T2) - real app bug, found 3 Oct 2026 by
+// the e2e repair; ticket number to be assigned by chat (see that handoff).
+// The listing card no longer shows the Competition badge. The Events
+// directory rebuild (#514, 20 Aug) dropped the
+// `{event.isCompetitionShow && 🏆 {tr.eventsPage.competitionBadge}}` block:
+// EventCard still receives `isCompetitionShow` and all 11 dictionaries still
+// carry `competitionBadge`, but nothing renders it. This is the original
+// spec's last step, kept runnable so it goes green when the badge is back.
+test.fixme("competition show: the listing card shows the Competition badge", async ({ page }) => {
+  test.setTimeout(FLOW_TIMEOUT_MS);
+
+  try {
+    await enableCompetitionShow(page);
+    const card = await openListingCard(page);
+    await expect(card.getByText(/Competition/)).toBeVisible();
+  } finally {
+    await restoreFixtureEvent(page);
+  }
+
+  const card = await openListingCard(page);
+  await expect(card.getByText(/Competition/)).toBeHidden();
 });

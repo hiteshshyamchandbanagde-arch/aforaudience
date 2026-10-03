@@ -1,0 +1,91 @@
+import fs from "fs";
+import { request, type FullConfig } from "@playwright/test";
+import { AUTH_DIR, PERSONAS, authFile, type PersonaKey } from "./helpers/personas";
+import { hasQaDatabase, warn } from "./helpers/qa-db";
+
+/**
+ * Runs once before the suite.
+ *
+ * 1. Warm-up: one request to the base URL with a 60 s budget. The first
+ *    request of a run can hit a cold Vercel function and a sleeping
+ *    Supabase pool; paying for that here keeps it out of the first test.
+ *    If the site is down, the whole run fails in about a minute with one
+ *    clear message instead of timing out test by test.
+ * 2. Shared logins: each persona signs in once (the same credentials
+ *    endpoint the login form posts to) and its session is saved to
+ *    e2e/.auth/<persona>.json for specs to reuse. The login form itself
+ *    is covered by login-code-case.spec.ts.
+ */
+const WARM_UP_BUDGET_MS = 60_000;
+
+export default async function globalSetup(config: FullConfig) {
+  const baseURL = config.projects[0]?.use?.baseURL;
+  if (!baseURL) throw new Error("[e2e setup] No baseURL configured.");
+
+  const warmUp = await request.newContext({ baseURL });
+  try {
+    const started = Date.now();
+    const res = await warmUp.get("/", { timeout: WARM_UP_BUDGET_MS });
+    if (!res.ok()) {
+      throw new Error(`HTTP ${res.status()} ${res.statusText()}`);
+    }
+    console.log(`[e2e setup] ${baseURL} answered in ${Date.now() - started} ms`);
+  } catch (err) {
+    throw new Error(
+      `[e2e setup] The site under test is not reachable: ${baseURL} (${(err as Error).message}). ` +
+        `No tests were run.`
+    );
+  } finally {
+    await warmUp.dispose();
+  }
+
+  if (!hasQaDatabase()) {
+    warn(
+      "e2e setup",
+      "E2E_DATABASE_URL is not set: specs tagged @needs-db (waitlist-wallet-credit) are NOT run, and accounts registered by registration.spec.ts are not deleted."
+    );
+  }
+
+  fs.mkdirSync(AUTH_DIR, { recursive: true });
+  for (const key of Object.keys(PERSONAS) as PersonaKey[]) {
+    await signIn(baseURL, key);
+  }
+}
+
+async function signIn(baseURL: string, key: PersonaKey) {
+  const persona = PERSONAS[key];
+  const ctx = await request.newContext({ baseURL });
+  try {
+    // next.config has trailingSlash: true - ask for the slashed paths so a
+    // POST is never turned into a redirect.
+    const csrfRes = await ctx.get("/api/auth/csrf/");
+    const { csrfToken } = (await csrfRes.json()) as { csrfToken?: string };
+    if (!csrfToken) throw new Error(`no CSRF token (HTTP ${csrfRes.status()})`);
+
+    await ctx.post("/api/auth/callback/credentials/", {
+      form: {
+        csrfToken,
+        identifier: persona.identifier,
+        password: persona.password,
+        callbackUrl: baseURL,
+        json: "true",
+      },
+    });
+
+    const sessionRes = await ctx.get("/api/auth/session/");
+    const session = (await sessionRes.json()) as { user?: { email?: string } };
+    if (!session?.user) {
+      throw new Error("the credentials were not accepted (no session after sign-in)");
+    }
+
+    await ctx.storageState({ path: authFile(key) });
+    console.log(`[e2e setup] signed in ${persona.label}`);
+  } catch (err) {
+    throw new Error(
+      `[e2e setup] Could not sign in ${persona.label} <${persona.identifier}> at ${baseURL}: ` +
+        `${(err as Error).message}. No tests were run.`
+    );
+  } finally {
+    await ctx.dispose();
+  }
+}

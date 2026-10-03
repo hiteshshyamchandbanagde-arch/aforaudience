@@ -44,9 +44,13 @@ export async function registerTestAudience(page: Page) {
   const code = devOtpText.trim();
   expect(code).toMatch(/^\d{6}$/);
 
-  // The OTP input has no name/id in the source (a bare styled <input>) -
-  // it's the only text input visible on this stage, so target it directly.
-  const otpInput = page.locator("input").first();
+  // The OTP input has no name/id in the source. It used to be matched as
+  // "the first input on the page"; since the mobile top bar (Mobile Nav v3)
+  // that is the top bar's search box - hidden on desktop, so the fill hung
+  // for the whole test timeout, and visible on mobile, so the code was typed
+  // into the search (3 Oct 2026 diagnosis). autocomplete="one-time-code" is
+  // on this input alone.
+  const otpInput = page.locator('input[autocomplete="one-time-code"]');
   await otpInput.fill(code);
   await page.getByRole("button", { name: /verify/i }).click();
 
@@ -70,4 +74,22 @@ export async function loginTestAudience(
   await page.getByPlaceholder(/you@example\.com, phone, username, or AFA code/i).fill(identifier);
   await page.getByPlaceholder(/your password/i).fill(password);
   await page.getByRole("button", { name: /^sign in$/i }).click();
+  await expectSignedIn(page);
+}
+
+/**
+ * Passes once the browser really holds a session. The suite used to check
+ * the URL after sign-in with a pattern that also matched /login/ itself
+ * (any URL ending in a slash), so it passed before the sign-in had finished
+ * and the next page load raced it back to the login page.
+ */
+export async function expectSignedIn(page: Page) {
+  await expect(page).not.toHaveURL(/\/login/,{ timeout: 15_000 });
+  await expect
+    .poll(async () => {
+      const res = await page.request.get("/api/auth/session/");
+      const session = (await res.json()) as { user?: unknown };
+      return Boolean(session?.user);
+    })
+    .toBe(true);
 }
