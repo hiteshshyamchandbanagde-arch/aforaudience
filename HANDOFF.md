@@ -1,3 +1,18 @@
+# Session Handoff — 4 Oct 2026, part 47 (chat — session end; D partial, E running, F queued next)
+
+- **qa @ `dfcd0ab`.** The central-control UI/UX goal is CLOSED (pt46).
+- **Dispatch D** (BUG-2610-011, goal-test flake), autopilot run `37196150113` = **PARTIAL**, branch `test/goal-flake-d` @ `bfc1ed4`, **not merged**.
+  - Cause 1 fixed: another run's teardown restored `--afa-selected` mid-test; fixed with a cross-run Postgres advisory lock (`lockGoalToken`, released in `finally`) plus a lock test.
+  - e2e-preview on `bfc1ed4`: **161 passed / 0 failed / 0 flaky**.
+  - Cause 2 not root-caused: `context.close()` throws "Target page, context or browser has been closed" (seen locally only).
+  - **Next:** merge `bfc1ed4` (cause 1 is real and proven), keep BUG-2610-011 open for cause 2 with a follow-up dispatch, or re-run D for cause 2 first.
+- **Dispatch E** (GEN-2610-001, email/PDF contrast + resolver tests in CI + Jaipur available-seat pick), autopilot run `37198355253`, **running**, branch `fix/email-pdf-contrast-e`.
+- **Dispatch F** (GEN-2609-107, spacing phase 2, zero visual change, spacing hidden from admin), file committed and **not yet queued**. Queue it only when nothing is pending: GitHub keeps one pending autopilot run and cancels the older one.
+- **Open:** BUG-2610-010 (nightly never fires); HUMAN-only GEN-2608-041 (translations) and BUG-2608-030 (600-seat tapping, real phone).
+- **Session start for chat:** read pt46-47; check autopilot runs (workflow `373887614`) and their RESULT annotations; open PRs with the PAT so design-tokens and e2e-preview run; merge only on green at the pinned head (Testing Rule).
+
+---
+
 # Session Handoff — 4 Oct 2026, part 46 (chat — CENTRAL-CONTROL UI/UX GOAL CLOSED)
 
 - **The central-control goal is closed, 4 Oct.** All five goal tickets are RESOLVED by passing tests on a full QA run:
