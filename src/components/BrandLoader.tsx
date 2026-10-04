@@ -10,7 +10,7 @@
 // loading in" repeatedly rather than a generic spinner shape.
 export default function BrandLoader({ label = 'Loading...' }: { label?: string }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'var(--afa-space-4)', padding: '64px var(--afa-space-32px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-64px) var(--afa-space-32px)' }}>
       <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="64" height="64" rx="16" fill="#0E0C0A" />{/* token-ok(hex-color-literal): pixel copy of src/app/icon.svg; logo colours must not follow palette edits */}
         <path d="M18 18h28v8H18z" fill="#C8441A">{/* token-ok(hex-color-literal): pixel copy of src/app/icon.svg; logo colours must not follow palette edits */}

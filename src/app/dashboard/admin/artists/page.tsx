@@ -176,7 +176,7 @@ export default function AdminArtistsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
           {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
           <div className="lg:hidden">
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
@@ -252,7 +252,7 @@ export default function AdminArtistsPage() {
                       <div>
                         <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)' }}>
                           {a.name}
-                          <span style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--afa-radius-pill)', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                          <span style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--afa-radius-pill)', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>{/* token-ok(spacing-literal): 3px/9px odd value, no exact token (GEN-2609-107) */}
                             {tier.label}
                           </span>
                         </p>
@@ -279,7 +279,7 @@ export default function AdminArtistsPage() {
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                            style={{ padding: '7px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
                           />
                           <Button variant="solid" size="md" fullWidth={false} onClick={() => handleHeadlinerToggle(a)} disabled={actioningId === a.id}>
                             ★ Grant Headliner
@@ -341,7 +341,7 @@ function Stat({ label, value, sub }: { label: string; value: string | number; su
   return (
     <div>
       <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
+      <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
         {label}{sub && <span style={{ opacity: 0.7, textTransform: 'none', letterSpacing: 0 }}> · {sub}</span>}
       </div>
     </div>

@@ -85,7 +85,7 @@ export default function OrganiserDashboard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>You're not registered as an Organiser</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6)' }}>Apply to become an Organiser from your profile to start creating events.</p>
             <BackLink href="/" label="Back to Home" />
@@ -102,7 +102,7 @@ export default function OrganiserDashboard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}>⏳</div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>
               {orgStatus.orgName ? `${orgStatus.orgName} is` : 'Your Organiser account is'} pending approval
@@ -161,7 +161,7 @@ export default function OrganiserDashboard() {
           )}
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>No events yet</p>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>Create your first event to start booking venues and artists</p>
               <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/events/create">
@@ -201,7 +201,7 @@ export default function OrganiserDashboard() {
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
                       >
                         View
                       </Link>
@@ -209,7 +209,7 @@ export default function OrganiserDashboard() {
                         href={`/dashboard/organiser/events/${event.id}/edit`}
                         onClick={(e) => e.stopPropagation()}
                         // GEN-2609-118 - a secondary action beside View, so the same outline; orange is for a screen's one primary action.
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
                       >
                         Edit
                       </Link>

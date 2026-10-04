@@ -24,7 +24,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
   return (
     <main style={{ minHeight: "100vh", background: PAPER, fontFamily: SANS }}>
       <SiteNav />
-      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 96px" }}>
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 96px" }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
         <Link href="/" style={{ fontSize: "var(--afa-text-body)", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
           ← Back to AforAudience
         </Link>
@@ -52,7 +52,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
         <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "var(--afa-space-2)" }}>
           {title}
         </h1>
-        <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
+        <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "var(--afa-space-40px)" }}>Last updated: {lastUpdated}</p>
 
         <div style={{ fontSize: "var(--afa-text-title)", lineHeight: 1.75, color: INK }}>{children}</div>
       </div>
@@ -69,7 +69,7 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
         fontSize: "var(--afa-text-subheading)",
         fontWeight: 700,
         color: INK,
-        marginTop: "40px",
+        marginTop: "var(--afa-space-40px)",
         marginBottom: "var(--afa-space-14px)",
         paddingBottom: "var(--afa-space-10px)",
         borderBottom: `1px solid ${MIST}`,
@@ -86,7 +86,7 @@ export function P({ children }: { children: React.ReactNode }) {
 }
 
 export function UL({ children }: { children: React.ReactNode }) {
-  return <ul style={{ marginBottom: "var(--afa-space-4)", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul>
+  return <ul style={{ marginBottom: "var(--afa-space-4)", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul> // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
 }
 
 export function LI({ children }: { children: React.ReactNode }) {

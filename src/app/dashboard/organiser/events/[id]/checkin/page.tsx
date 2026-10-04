@@ -218,7 +218,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           onClick={() => setLastResult(null)}
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-            padding: 'var(--afa-space-18px) var(--afa-space-5)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
+            padding: 'var(--afa-space-18px) var(--afa-space-5)', paddingTop: 'calc(var(--afa-space-18px) + env(safe-area-inset-top, 0px))',
             background: lastResult.ok ? 'var(--afa-forest)' : 'var(--afa-error)',
             color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px var(--afa-shadow)',
             cursor: 'pointer',
@@ -241,7 +241,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       )}
 
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '560px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 64px' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
           <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
 
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-1)' }}>

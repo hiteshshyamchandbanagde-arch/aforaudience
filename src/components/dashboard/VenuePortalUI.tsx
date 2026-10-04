@@ -217,7 +217,7 @@ export function StatusPill({ tone, children }: { tone: StatusPillTone; children:
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
-        padding: '5px var(--afa-space-10px)',
+        padding: '5px var(--afa-space-10px)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
         borderRadius: 'var(--afa-radius-pill)',
         lineHeight: 1,
         background: t.bg,
@@ -298,7 +298,7 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
         borderRadius: 'var(--afa-radius-lg)',
         border: '1px solid var(--afa-tint-08)',
         background: 'var(--afa-surface-raised)',
-        padding: '80px var(--afa-space-6)',
+        padding: 'var(--afa-space-80px) var(--afa-space-6)',
         textAlign: 'center',
       }}
     >
@@ -433,7 +433,7 @@ export const primaryLinkStyle: CSSProperties = {
   fontFamily: 'var(--font-sans)',
   fontSize: 'var(--afa-text-body)',
   fontWeight: 600,
-  padding: '11px var(--afa-space-5)',
+  padding: '11px var(--afa-space-5)', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
   background: 'var(--afa-fill-solid)',
   color: 'var(--afa-on-fill-solid)',
   textDecoration: 'none',
@@ -449,7 +449,7 @@ export const outlineLinkStyle: CSSProperties = {
   fontFamily: 'var(--font-sans)',
   fontSize: 'var(--afa-text-body)',
   fontWeight: 600,
-  padding: '11px var(--afa-space-5)',
+  padding: '11px var(--afa-space-5)', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
   background: 'transparent',
   color: 'var(--afa-text-primary)',
   textDecoration: 'none',
@@ -463,7 +463,7 @@ export const navPillStyle: CSSProperties = {
   gap: 'var(--afa-space-2)',
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-tint-08)',
-  padding: '9px var(--afa-space-14px)',
+  padding: '9px var(--afa-space-14px)', // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
   fontFamily: 'var(--font-sans)',
   fontSize: 'var(--afa-text-ui)',
   color: 'var(--afa-text-secondary)',
@@ -483,7 +483,7 @@ export function NavBadge({ children }: { children: ReactNode }) {
         fontSize: 'var(--afa-text-micro)',
         fontWeight: 600,
         borderRadius: 'var(--afa-radius-pill)',
-        padding: 'var(--afa-space-2px) 7px',
+        padding: 'var(--afa-space-2px) 7px', // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
         lineHeight: 1.4,
       }}
     >

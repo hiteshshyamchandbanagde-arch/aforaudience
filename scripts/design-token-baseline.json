@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-02T06:58:45.764Z",
+  "generatedAt": "2026-10-04T12:47:36.118Z",
   "counts": {
     "hex-color-literal": 0,
     "rgb-rgba-literal": 0,
     "hardcoded-font-family": 0,
     "font-size-literal": 0,
-    "spacing-literal": 257,
+    "spacing-literal": 0,
     "radius-literal": 0,
     "raw-button": 0,
     "bare-button": 0,

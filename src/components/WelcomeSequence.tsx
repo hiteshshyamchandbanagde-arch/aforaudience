@@ -157,7 +157,7 @@ export default function WelcomeSequence() {
           background: 'var(--afa-surface-raised)',
           borderRadius: 'var(--afa-radius-xl)',
           border: '1px solid var(--afa-tint-08)',
-          padding: 40,
+          padding: 'var(--afa-space-40px)',
           textAlign: 'center',
         }}
       >

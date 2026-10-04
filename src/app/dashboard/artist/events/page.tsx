@@ -217,7 +217,7 @@ export default function BrowseEventsToApplyPage() {
           </select>
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
@@ -227,7 +227,7 @@ export default function BrowseEventsToApplyPage() {
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>
+                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)', gap: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
@@ -258,7 +258,7 @@ export default function BrowseEventsToApplyPage() {
                         dashboard's "Recorded Earnings" section, for
                         consistency. */}
                     {event.defaultCompensationType === 'BUY_IN' && (
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-6px', marginBottom: 'var(--afa-space-3)' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: 'calc(-1 * var(--afa-space-6px))', marginBottom: 'var(--afa-space-3)' }}>
                         Pay directly to the organiser - not yet processed or confirmed by the platform.
                       </p>
                     )}

@@ -247,7 +247,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
   return (
     <>
       <SiteNav backHref={`/events/${event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", maxWidth: "560px", margin: "0 auto", padding: "var(--afa-space-32px) var(--afa-space-5) 64px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", maxWidth: "560px", margin: "0 auto", padding: "var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)" }}>
         <div style={{ marginBottom: "var(--afa-space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
           {tr.eventDetailPage.selectTicketsCta}
         </div>

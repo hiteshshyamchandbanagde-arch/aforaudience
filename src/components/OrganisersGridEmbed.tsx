@@ -99,7 +99,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
     })
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
+  if (loading) return <div style={{ textAlign: "center", padding: "60px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div> // token-ok(spacing-literal): 60px used under 10 times, no exact token (GEN-2609-107)
   if (error) return <div style={{ padding: "var(--afa-space-14px) var(--afa-space-4)", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
   if (organisers.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
@@ -157,7 +157,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
             style={{
               position: "relative",
               background: "var(--afa-surface-raised)",
-              padding: "22px",
+              padding: "22px", // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",

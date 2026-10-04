@@ -93,6 +93,16 @@ FROM "DesignToken";
    10px retired into --afa-radius-lg (10 -> 12px), 12px renamed to lg. */
 ```
 
+**GEN-2609-107 phase 2 (4 Oct) — large spacing values, exact, adopted in the same PR.** The values phase 1 left as literals that recur 10+ times. Exact values: adopting them changes no pixel. **Spacing tokens are not admin knobs** (decision 24 Sep): the spacing group is hidden in `/dashboard/admin/design-system`; the `DesignToken` rows and the runtime injection stay. Odd values (3/5/7/9px …) and anything under 10 uses stay literal with `token-ok(spacing-literal)`; a negative margin with an exact token is written `calc(-1 * var(--afa-space-…))`.
+
+```css
+--afa-space-36px:  36px;   /* 11 sites */
+--afa-space-40px:  40px;   /* 36 sites */
+--afa-space-56px:  56px;   /* 16 sites */
+--afa-space-64px:  64px;   /* 20 sites */
+--afa-space-80px:  80px;   /* 32 sites */
+```
+
 **GEN-2609-099 — general-purpose translucent tints (new tokens, wired on adoption).** The 2 `rgba(245,245,240,*)` alpha values (of `--afa-text-primary`'s own base RGB) that clear `GEN-2609-081`'s 50-occurrence bar — see `docs/design.md`'s `GEN-2609-099` entry for the full occurrence count and the naming rationale (checked real property context: both are border-dominant but genuinely mixed with background usage, not a single role, hence `--afa-tint-*` rather than `--afa-border-*`/`--afa-text-*`). Unlike `GEN-2609-081`'s tokens, these had real, immediate adoption in the same PR that defined them (49 literal sites across 31 files) — not "tokens only":
 
 ```css

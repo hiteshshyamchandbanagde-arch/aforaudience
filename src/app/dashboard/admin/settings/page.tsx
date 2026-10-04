@@ -526,7 +526,7 @@ export default function AdminSettingsPage() {
           color: 'var(--afa-text-primary)',
         }}
       >
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 64px' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
         {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
         <div className="lg:hidden" style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)', letterSpacing: '0.04em' }}>
           <Link href="/dashboard/admin" style={{ color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>

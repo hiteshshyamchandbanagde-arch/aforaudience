@@ -116,7 +116,7 @@ function groupCoverage(tokens: DesignToken[]): CoverageStatus {
 function CoverageBadge({ status }: { status: CoverageStatus }) {
   const meta = COVERAGE_META[status]
   return (
-    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', color: meta.color, background: meta.bg }}>
+    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', color: meta.color, background: meta.bg }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
       {meta.label}
     </span>
   )
@@ -429,7 +429,7 @@ export default function AdminDesignSystemPage() {
     <>
       <SiteNav />
       <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-32px) var(--afa-space-6) 120px', fontFamily: 'var(--font-sans)' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-32px) var(--afa-space-6) 120px', fontFamily: 'var(--font-sans)' }}>{/* token-ok(spacing-literal): 120px used under 10 times, no exact token (GEN-2609-107) */}
           <div style={{ maxWidth: 1040, margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-6)' }}>
               <div>

@@ -455,7 +455,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)' }}>
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
@@ -477,7 +477,7 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: '64px var(--afa-space-32px)', textAlign: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-64px) var(--afa-space-32px)', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-raised)' }}>
                 <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
               </div>
@@ -747,7 +747,7 @@ export default function MyTicketsPage() {
                     )}
 
                     {b.companionTags && b.companionTags.length > 0 && (
-                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0, padding: isGhosted ? '0 14px 14px' : '0 14px 14px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0, padding: isGhosted ? '0 var(--afa-space-14px) var(--afa-space-14px)' : '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                         {tr.ticketsPage.goingWith}{' '}
                         {b.companionTags.map((t, i) => (
                           <span key={t.id}>

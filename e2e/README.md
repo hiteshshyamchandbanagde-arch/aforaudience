@@ -111,6 +111,8 @@ stay in QA.
 | `discover-carousels.mobile.spec.ts` | guest | GEN-2609-012 no carousel under 3 events; all-sparse shows the list |
 | `design-system-goal.spec.ts` `@needs-db` | temp admin, guest, Atul | the central-control goal: a Design System save reaches `/`, `/events/`, `/venues/` with no redeploy, manifest/theme-color/poster follow their own tokens, reverted; Admin Settings Save buttons at 390 and 1440 |
 | `design-system-restore.spec.ts` `@needs-db` | temp admin | GEN-2609-115 a version restore runs the contrast check: passes silently, reports a failing pair; token reverted |
+| `design-system-spacing-hidden.spec.ts` `@needs-db` | temp admin, guest | GEN-2609-107 phase 2: no Spacing group or `--afa-space-*` field in Admin -> Design System at 1440 and 390 (search finds none); the spacing rows and runtime injection stay. Read-only |
+| `visual-equivalence.spec.ts` | guest, Omkar, Atul | Skipped unless `VISUAL_BASE_URL` is set. Full-page 390 + 1440 shots of 10 key pages on `VISUAL_BASE_URL` vs the run's base URL, pixel diff must be 0 above anti-aliasing (GEN-2609-107 phase 2 proof; reusable). `VISUAL_CONTROL_CSS` is the negative control |
 | `auth-submit-contrast.spec.ts` | guest | GEN-2609-115 Sign In / Create Account text contrast ≥ 4.5 |
 | `scrim-backdrops.mobile.spec.ts` | guest, Omkar | GEN-2609-114 filter sheet and More sheet backdrops are `--afa-scrim` |
 | `colour-closeout.spec.ts` | Omkar, Hrithik, Atul, Vinayak | GEN-2609-113 gold/error tone text on its tint ≥ 4.5 (5 places); GEN-2609-114 sage text is `-bright` |

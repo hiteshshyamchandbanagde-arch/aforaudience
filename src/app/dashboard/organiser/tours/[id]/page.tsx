@@ -230,7 +230,7 @@ export default function TourDetailPage() {
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) 100px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) 100px' }}>{/* token-ok(spacing-literal): 100px used under 10 times, no exact token (GEN-2609-107) */}
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
         <div style={{ marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-28px)' }}>
@@ -385,7 +385,7 @@ export default function TourDetailPage() {
                         {formatDate(stop.date, 'medium', locale)} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : 'No venue'}
                       </p>
                     </div>
-                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).bg, color: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).color }}>
+                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).bg, color: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).color }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                       {stop.status === 'APPROVED' ? 'Live' : stop.status.replace('_', ' ')}
                     </span>
                   </div>

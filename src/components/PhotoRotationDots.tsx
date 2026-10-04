@@ -22,7 +22,7 @@ export default function PhotoRotationDots({
 }) {
   if (photos.length < 2) return null
   return (
-    <div style={{ marginTop: "56px", display: "flex", alignItems: "center", gap: "var(--afa-space-10px)" }}>
+    <div style={{ marginTop: "var(--afa-space-56px)", display: "flex", alignItems: "center", gap: "var(--afa-space-10px)" }}>
       {photos.map((photo, i) => (
         <Button
           // bare-reason: carousel progress dot: a 4px bar whose width animates and which holds the progress fill; not a text button

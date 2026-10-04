@@ -715,7 +715,7 @@ export default function SupportWidget() {
           {panel === 'feedback' && (
             <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--afa-space-4)' }}>
               {fbSubmitted ? (
-                <div style={{ textAlign: 'center', padding: '40px var(--afa-space-3)' }}>
+                <div style={{ textAlign: 'center', padding: 'var(--afa-space-40px) var(--afa-space-3)' }}>
                   <CheckIcon style={{ width: 32, height: 32, marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }} />
                   <div style={{ fontWeight: 600, marginBottom: 'var(--afa-space-1)' }}>Thanks — got it.</div>
                   <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>

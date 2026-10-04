@@ -408,7 +408,7 @@ export function EventRow({
           <h3 style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {event.title}
           </h3>
-          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>
+          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
             <ClockIcon style={{ width: "12px", height: "12px", flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {formatDate(event.date, 'short', locale)}, {event.startTime}

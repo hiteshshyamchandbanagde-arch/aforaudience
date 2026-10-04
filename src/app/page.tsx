@@ -81,7 +81,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
             display: "inline-flex",
             background: "var(--afa-scrim)",
             backdropFilter: "blur(4px)",
-            padding: "5px 9px",
+            padding: "5px 9px", // token-ok(spacing-literal): 5px/9px odd value, no exact token (GEN-2609-107)
             borderRadius: "var(--afa-radius-xs)",
             fontFamily: "var(--font-mono)",
             fontSize: "var(--afa-text-caption)",
@@ -157,7 +157,7 @@ export default function Home() {
           brief (out of scope to redesign here), may read as a slightly
           disconnected transition until it's folded into a later pass. */}
       {bentoEvents.length > 0 && (
-        <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "var(--afa-space-6) 36px 56px" }}>
+        <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "var(--afa-space-6) var(--afa-space-36px) var(--afa-space-56px)" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "var(--afa-space-5)" }}>
             <div>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
@@ -193,7 +193,7 @@ export default function Home() {
           src/components/Ledger.tsx (GEN-2608-072) so the Artist landing
           page's expanded "honest money" section reuses the same stat
           cards/breakdown/disclaimer instead of a parallel copy. */}
-      <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "0 36px 56px" }}>
+      <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "0 var(--afa-space-36px) var(--afa-space-56px)" }}>
         <Ledger eyebrow={tr.homePage.feePromiseEyebrow} headline={tr.homePage.feePromiseHeadline} />
       </section>
 
@@ -202,7 +202,7 @@ export default function Home() {
       <PlatformGrowthStrip />
 
       {/* FOOTER */}
-      <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-primary)", padding: "64px var(--afa-space-48px) var(--afa-space-32px)" }}>
+      <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-primary)", padding: "var(--afa-space-64px) var(--afa-space-48px) var(--afa-space-32px)" }}>
         <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "var(--afa-space-48px)", marginBottom: "var(--afa-space-48px)" }}>
             <div>

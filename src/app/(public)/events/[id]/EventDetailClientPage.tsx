@@ -276,19 +276,19 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        .afa-event-detail-container { max-width: 1152px; margin: 0 auto; padding: 40px var(--afa-space-6) 112px; }
-        @media (min-width: 640px) { .afa-event-detail-container { padding: 40px var(--afa-space-32px) 112px; } }
+        .afa-event-detail-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-40px) var(--afa-space-6) 112px; } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
+        @media (min-width: 640px) { .afa-event-detail-container { padding: var(--afa-space-40px) var(--afa-space-32px) 112px; } } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
         .afa-event-hero-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-32px); }
         @media (min-width: 1024px) { .afa-event-hero-grid { grid-template-columns: minmax(0, 0.9fr) 1.1fr; gap: var(--afa-space-48px); } }
         .afa-event-hero-poster { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--afa-radius-xs); }
         @media (min-width: 1024px) { .afa-event-hero-poster-wrap { position: sticky; top: 32px; } }
-        .afa-event-meta-grid { display: grid; grid-template-columns: 1fr; column-gap: 40px; }
+        .afa-event-meta-grid { display: grid; grid-template-columns: 1fr; column-gap: var(--afa-space-40px); }
         @media (min-width: 640px) { .afa-event-meta-grid { grid-template-columns: 1fr 1fr; } }
         @media (min-width: 1024px) { .afa-event-meta-grid { grid-template-columns: repeat(4, 1fr); } }
         .afa-event-lineup-row { display: flex; align-items: center; gap: var(--afa-space-4); padding: var(--afa-space-4) 0; border-top: 1px solid var(--afa-tint-10); }
         .afa-event-prize-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-4); }
         @media (min-width: 640px) { .afa-event-prize-grid { grid-template-columns: repeat(3, 1fr); } }
-        .afa-event-facility-grid { display: grid; grid-template-columns: 1fr; column-gap: 40px; }
+        .afa-event-facility-grid { display: grid; grid-template-columns: 1fr; column-gap: var(--afa-space-40px); }
         @media (min-width: 640px) { .afa-event-facility-grid { grid-template-columns: 1fr 1fr; } }
         @media (min-width: 1024px) { .afa-event-facility-grid { grid-template-columns: repeat(3, 1fr); } }
         .afa-book-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--afa-space-2); width: 100%; background: var(--afa-fill-solid); color: var(--afa-on-fill-solid); padding: var(--afa-space-14px); border-radius: var(--afa-radius-xs); border: none; font-size: var(--afa-text-body); font-weight: 600; cursor: pointer; transition: filter 0.2s ease; }
@@ -298,7 +298,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
            covers the last section's content. Declared after the two
            rules above so it wins the padding-bottom cascade at any width
            under 1024px, including the 640px-and-up range. */
-        @media (max-width: 1023px) { .afa-event-detail-container { padding-bottom: 132px; } }
+        @media (max-width: 1023px) { .afa-event-detail-container { padding-bottom: 132px; } } /* // token-ok(spacing-literal): 132px used under 10 times, no exact token (GEN-2609-107) */
       `}</style>
       <SiteNav backHref="/events" backLabel={tr.nav.backToEvents} />
 
@@ -387,7 +387,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
         {/* THE FINE PRINT */}
         {(event.dresscode || event.vibe || event.ageLimit || event.termsChecklist?.length || (event.specialNotesStatus === 'APPROVED' && event.specialNotes)) && (
-          <section style={{ marginTop: "64px" }}>
+          <section style={{ marginTop: "var(--afa-space-64px)" }}>
             <SectionEyebrow>{tr.eventDetailPage.theFinePrint}</SectionEyebrow>
             <div className="afa-event-meta-grid" style={{ marginTop: "var(--afa-space-4)" }}>
               {event.dresscode && <MetaTile icon={DressCodeIcon} label={tr.eventDetailPage.dressCode} value={event.dresscode} />}
@@ -433,7 +433,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         )}
 
         {/* THE LINEUP */}
-        <section style={{ marginTop: "64px" }}>
+        <section style={{ marginTop: "var(--afa-space-64px)" }}>
           <SectionEyebrow>{tr.eventDetailPage.lineupHeading}</SectionEyebrow>
           {event.lineup.length === 0 ? (
             <p style={{ marginTop: "var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-muted)" }}>{tr.eventDetailPage.lineupNotConfirmed}</p>
@@ -501,7 +501,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
                               </div>
                               {r.reply && (
-                                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", marginTop: "3px", marginLeft: "var(--afa-space-4)", paddingLeft: "var(--afa-space-10px)", borderLeft: "2px solid var(--afa-amber-border)" }}>
+                                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", marginTop: "3px", marginLeft: "var(--afa-space-4)", paddingLeft: "var(--afa-space-10px)", borderLeft: "2px solid var(--afa-amber-border)" }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
                                   <strong>{r.reply.author.displayName || r.reply.author.name}</strong> {tr.eventDetailPage.repliedLabel} {r.reply.text}
                                 </div>
                               )}
@@ -575,7 +575,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         {/* COMPETITION SHOW - prizes, celebrities, panelists, voting.
             Only rendered when the real data has this flag set. */}
         {event.isCompetitionShow && (
-          <section style={{ marginTop: "64px" }}>
+          <section style={{ marginTop: "var(--afa-space-64px)" }}>
             <SectionEyebrow>{tr.eventDetailPage.competitionShow}</SectionEyebrow>
 
             {(event.competitionPrizeFirst || event.competitionPrizeSecond || event.competitionPrizeThird) && (
@@ -649,7 +649,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
         {/* VENUE FACILITIES */}
         {event.venue && event.venue.facilities.length > 0 && (
-          <section style={{ marginTop: "64px" }}>
+          <section style={{ marginTop: "var(--afa-space-64px)" }}>
             <SectionEyebrow>{tr.eventDetailPage.venueDetailsHeading}</SectionEyebrow>
             <div className="afa-event-facility-grid" style={{ marginTop: "var(--afa-space-4)" }}>
               {event.venue.facilities.map((f) => (
@@ -682,7 +682,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             backdropFilter: "blur(12px)",
             borderTop: "1px solid var(--afa-tint-08)",
             padding: "var(--afa-space-3) var(--afa-space-5)",
-            paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
+            paddingBottom: "calc(var(--afa-space-3) + env(safe-area-inset-bottom))",
           }}
         >
           <div style={{ minWidth: 0 }}>

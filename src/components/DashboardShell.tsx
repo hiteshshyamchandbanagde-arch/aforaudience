@@ -388,7 +388,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
       {badge && badge > 0 ? (
         <span
           className="ml-auto"
-          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3 }}
+          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3 }} // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
         >
           {badge}
         </span>
@@ -537,7 +537,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       {!hideMobileBarForUnifiedTabBar && (
         <nav
           className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 py-2"
-          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
+          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingBottom: 'calc(var(--afa-space-2) + env(safe-area-inset-bottom))' }}
         >
           {topNav.map((item) => {
             const active = isActive(`top:${item.href}`)
@@ -556,7 +556,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                       every user whose count is genuinely zero. */}
                   {!!item.badge && item.badge > 0 && (
                     <span
-                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-caption)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
+                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-caption)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }} // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                     >
                       {item.badge}
                     </span>

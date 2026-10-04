@@ -360,7 +360,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     <span
                       style={{
                         fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                        padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)',
+                        padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                         background: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).bg,
                         color: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}
@@ -369,7 +369,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     </span>
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
                       <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-06)' }}>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? '8px' : 0 }}>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? 'var(--afa-space-2)' : 0 }}>
                           Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
                         </p>
                         {walletBalance > 0 && (

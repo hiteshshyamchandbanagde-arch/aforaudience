@@ -780,7 +780,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                             e.target.checked ? [...prev, term.key] : prev.filter((k) => k !== term.key)
                           )
                         }}
-                        style={{ marginTop: '3px' }}
+                        style={{ marginTop: '3px' }} // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                       />
                       <span>{term.label}</span>
                     </label>
@@ -876,7 +876,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         )}
                         <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, flex: 1 }}>{c.name}</span>
                         <span style={{
-                          fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase',
+                          fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                           background: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
                           color: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
@@ -927,7 +927,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           {p.bio && <div style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.6 }}>{p.bio}</div>}
                         </div>
                         <span style={{
-                          fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase',
+                          fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                           background: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
                           color: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
@@ -1050,7 +1050,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} />
                   )}
                   {venueLevels.map((lvl) => (
-                    <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? '10px' : 0 }}>
+                    <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? 'var(--afa-space-10px)' : 0 }}>
                       {venueLevels.length > 1 && (
                         <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-1)' }}>
                           {lvl || 'Main'}
@@ -1161,7 +1161,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 Changing the venue sends a new booking request.
               </p>
 
-              <div style={{ marginBottom: venueId ? '18px' : 0 }}>
+              <div style={{ marginBottom: venueId ? 'var(--afa-space-18px)' : 0 }}>
                 <label style={labelStyle}>Venue</label>
                 <select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
                   <option value="">No venue selected</option>

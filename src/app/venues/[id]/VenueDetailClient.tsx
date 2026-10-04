@@ -101,15 +101,15 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
            content appearing after main content, matching the export's
            lg:grid-cols-[1fr_320px] breakpoint exactly. */
         .afa-venue-page-container { max-width: 1240px; margin: 0 auto; padding: var(--afa-space-48px) var(--afa-space-6); }
-        @media (min-width: 768px) { .afa-venue-page-container { padding: var(--afa-space-48px) 40px; } }
-        .afa-venue-content-grid { display: grid; grid-template-columns: 1fr; gap: 40px; }
+        @media (min-width: 768px) { .afa-venue-page-container { padding: var(--afa-space-48px) var(--afa-space-40px); } }
+        .afa-venue-content-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-40px); }
         .afa-venue-facilities { display: grid; grid-template-columns: 1fr; gap: 0; }
         @media (min-width: 1024px) {
-          .afa-venue-content-grid { grid-template-columns: 1fr 320px; gap: 64px; align-items: start; }
+          .afa-venue-content-grid { grid-template-columns: 1fr 320px; gap: var(--afa-space-64px); align-items: start; }
           .afa-venue-sidebar { position: sticky; top: 40px; }
         }
         @media (min-width: 640px) {
-          .afa-venue-facilities { grid-template-columns: 1fr 1fr; column-gap: 40px; }
+          .afa-venue-facilities { grid-template-columns: 1fr 1fr; column-gap: var(--afa-space-40px); }
         }
         /* Gap 10, full-fidelity audit - export's real multi-photo grid
            (VenueDetail.tsx line 67-78): main photo spans 2 cols/2 rows
@@ -182,7 +182,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           </p>
         )}
 
-        <div className="afa-venue-content-grid" style={{ marginTop: showGallery ? "40px" : "16px" }}>
+        <div className="afa-venue-content-grid" style={{ marginTop: showGallery ? "var(--afa-space-40px)" : "var(--afa-space-4)" }}>
           {/* main column */}
           <div>
             <section>
@@ -226,7 +226,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             </section>
 
             {venue.facilities && venue.facilities.length > 0 && (
-              <section style={{ marginTop: "56px" }}>
+              <section style={{ marginTop: "var(--afa-space-56px)" }}>
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "var(--afa-space-3)" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
                 <div className="afa-venue-facilities">
                   {venue.facilities.map((facility) => (

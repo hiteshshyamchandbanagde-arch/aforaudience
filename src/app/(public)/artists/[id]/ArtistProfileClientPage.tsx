@@ -435,8 +435,8 @@ export default function ArtistProfilePage({
       {/* HERO - split layout: real photo (Photo.tsx duotone) or the
           genre-relevant no-photo fallback on the left, identity + actions
           on the right. Replaces the old small circular avatar treatment. */}
-      <div style={{ padding: "40px var(--afa-space-48px) 0" }}>
-        <div className="artist-hero-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gap: "40px" }}>
+      <div style={{ padding: "var(--afa-space-40px) var(--afa-space-48px) 0" }}>
+        <div className="artist-hero-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gap: "var(--afa-space-40px)" }}>
           <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: "320px", borderRadius: "var(--afa-radius-lg)", overflow: "hidden", border: "1px solid var(--afa-tint-10)" }}>
             {portraitUrl && !portraitFailed ? (
               <Photo src={portraitUrl} alt={displayName} onError={() => setPortraitFailed(true)} />
@@ -554,7 +554,7 @@ export default function ArtistProfilePage({
           the approved spec, replacing the old 4-stat bar (Followers moved
           into the hero above; Total Shows/Upcoming count redistributed as
           footer/header labels below). */}
-      <div className="artist-vouched-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px var(--afa-space-48px) 0", display: "grid", gap: "40px" }}>
+      <div className="artist-vouched-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "var(--afa-space-40px) var(--afa-space-48px) 0", display: "grid", gap: "var(--afa-space-40px)" }}>
         <div>
           <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-secondary)", marginBottom: "var(--afa-space-4)" }}>
             Vouched for by
@@ -623,7 +623,7 @@ export default function ArtistProfilePage({
         </div>
       </div>
 
-      <div className="artist-detail-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px var(--afa-space-48px) var(--afa-space-32px)", display: "grid", gap: "var(--afa-space-32px)" }}>
+      <div className="artist-detail-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "var(--afa-space-40px) var(--afa-space-48px) var(--afa-space-32px)", display: "grid", gap: "var(--afa-space-32px)" }}>
         {/* LEFT */}
         <div>
           <div style={{ display: "flex", gap: "0", marginBottom: "var(--afa-space-32px)", borderBottom: "2px solid var(--afa-tint-10)" }}>
@@ -635,7 +635,7 @@ export default function ArtistProfilePage({
                 fullWidth={false}
                 selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
-                style={{ marginBottom: "-2px" }}
+                style={{ marginBottom: "calc(-1 * var(--afa-space-2px))" }}
               >
                 {TAB_LABEL[tab]}
               </Button>

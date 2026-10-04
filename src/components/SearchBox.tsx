@@ -75,7 +75,7 @@ export default function SearchBox() {
           position: "absolute", top: "calc(100% + 6px)", right: 0, width: "320px",
           background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", boxShadow: "0 8px 30px var(--afa-shadow)",
           border: "1px solid var(--afa-tint-10)", zIndex: 200, maxHeight: "420px", overflowY: "auto",
-          padding: hasResults || loading ? "10px 0" : "16px",
+          padding: hasResults || loading ? "var(--afa-space-10px) 0" : "var(--afa-space-4)",
         }}>
           {loading ? (
             <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, padding: "var(--afa-space-6px) var(--afa-space-4)" }}>{t.search.searching}</div>

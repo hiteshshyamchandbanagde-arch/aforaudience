@@ -123,7 +123,7 @@ export default function VenueRequestsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
             <PageHead
               eyebrow="Flexible-rate negotiations"
@@ -150,7 +150,7 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <Card key={r.id} style={{ padding: '22px var(--afa-space-6)', marginBottom: 'var(--afa-space-4)' }}>
+                <Card key={r.id} style={{ padding: '22px var(--afa-space-6)', marginBottom: 'var(--afa-space-4)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-1)', gap: 'var(--afa-space-10px)' }}>
                     <div>
                       <p style={{ fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>

@@ -26,7 +26,7 @@ function FeeRow({ label, value, accent, muted, bold }: { label: string; value: s
 export default function Ledger({ eyebrow, headline }: { eyebrow: string; headline: ReactNode }) {
   const { t: tr } = useLocale()
   return (
-    <div className="ledger-grid" style={{ gap: "var(--afa-space-32px)", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "36px" }}>
+    <div className="ledger-grid" style={{ gap: "var(--afa-space-32px)", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "var(--afa-space-36px)" }}>
       <style>{`
         .ledger-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
         .ledger-stats { flex-wrap: wrap; }

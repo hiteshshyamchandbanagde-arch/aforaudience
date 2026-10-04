@@ -36,7 +36,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
         <SiteNav />
-        <div style={{ maxWidth: "600px", margin: "0 auto", padding: "80px var(--afa-space-6)", textAlign: "center" }}>
+        <div style={{ maxWidth: "600px", margin: "0 auto", padding: "var(--afa-space-80px) var(--afa-space-6)", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
           <Link href="/venue-owners" style={{ color: "var(--afa-amber)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}>{tr.venueOwnerDetailPage.backToOwners}</Link>
         </div>

@@ -150,7 +150,15 @@ function bareReason(line) {
 // or end-of-line, per the original lookahead) still matches exactly as
 // before - it never fires when there isn't another numeric token
 // immediately available.
-const CSS_PROP_VALUE_RE = /([a-zA-Z-]+)\s*:\s*(?:(-?\d+(?:\.\d+)?(?:px|rem|em|%)?(?:\s+-?\d+(?:\.\d+)?(?:px|rem|em|%)?)*)(?=[,;}\s]|$)|['"`]([^'"`]*)['"`])/g
+//
+// GEN-2609-107 phase 2 - the same branch also stopped at a `var()` part,
+// so once a shorthand's first part became a token, the rest went
+// invisible: `padding: 0 40px 112px;` -> `padding: 0 var(--afa-space-40px) 112px;`
+// stopped counting the 112px without converting it. A bare part may now
+// also be a `var(...)` (or `calc(...)` around one); var() parts are still
+// skipped as literals by extractLengthTokensFromValue().
+const CSS_BARE_PART = String.raw`(?:-?\d+(?:\.\d+)?(?:px|rem|em|%)?|var\([^()]*\)|calc\([^()]*\([^()]*\)[^()]*\))`
+const CSS_PROP_VALUE_RE = new RegExp(String.raw`([a-zA-Z-]+)\s*:\s*(?:(${CSS_BARE_PART}(?:\s+${CSS_BARE_PART})*)(?=[,;}\s]|$)|['"` + '`' + String.raw`]([^'"` + '`' + String.raw`]*)['"` + '`' + String.raw`])`, 'g')
 
 function extractPropValues(line, propNameSet) {
   const found = []

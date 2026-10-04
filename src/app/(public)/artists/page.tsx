@@ -233,7 +233,7 @@ export default function ArtistsPage() {
           </p>
         </div>
 
-        <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid var(--afa-tint-10)", borderBottom: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-5) 0" }}>
+        <div className="afa-artists-stat-row" style={{ marginTop: "var(--afa-space-40px)", borderTop: "1px solid var(--afa-tint-10)", borderBottom: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-5) 0" }}>
           <div style={{ flex: "1 1 280px" }}>
             <BrowseSearchDropdown
               query={search}
@@ -334,9 +334,9 @@ export default function ArtistsPage() {
 
         {/* ARTIST GRID */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5, fontFamily: "var(--font-sans)" }}>{tr.artistsPage.loadingArtists}</div>
+          <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5, fontFamily: "var(--font-sans)" }}>{tr.artistsPage.loadingArtists}</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)" }}>
+          <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)" }}>
             <SearchIcon style={{ width: "32px", height: "32px", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }} />
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetTitle : tr.artistsPage.emptyNoneFoundTitle}
@@ -434,7 +434,7 @@ export default function ArtistsPage() {
                           fontFamily: "var(--font-sans)",
                           fontSize: "var(--afa-text-caption)",
                           fontWeight: 700,
-                          padding: "3px var(--afa-space-10px)",
+                          padding: "3px var(--afa-space-10px)", // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                           borderRadius: "var(--afa-radius-pill)",
                           letterSpacing: "0.03em",
                           textTransform: "uppercase",
@@ -460,7 +460,7 @@ export default function ArtistsPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "var(--afa-space-6px)", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span> // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                       ))}
                     </div>
                   </div>

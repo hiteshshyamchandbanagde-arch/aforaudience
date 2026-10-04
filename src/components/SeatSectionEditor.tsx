@@ -208,13 +208,13 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                   onChange={(e) => updateSection(section.id, "price", e.target.value)}
                   style={{
                     ...inputStyle,
-                    paddingLeft: "26px",
+                    paddingLeft: "26px", // token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107)
                     ...(isFree ? { opacity: 0.5, background: "var(--afa-tint-04)" } : {}),
                     ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}),
                   }}
                 />
               </div>
-              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                 <input
                   type="checkbox"
                   checked={isFree}

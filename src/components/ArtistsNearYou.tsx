@@ -83,7 +83,7 @@ export default function ArtistsNearYou() {
   }, [])
 
   return (
-    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px var(--afa-space-6)', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-cream)', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px var(--afa-space-6)', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-cream)', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>{/* token-ok(spacing-literal): 34px used under 10 times, no exact token (GEN-2609-107) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 'var(--afa-space-4)', paddingBottom: 'var(--afa-space-3)', borderBottom: '1px solid var(--afa-border-resting)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.artistsRailHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-amber)', letterSpacing: '0.1em' }}>{tr.homePage.artistsRailBadge}</span>
@@ -123,7 +123,7 @@ export default function ArtistsNearYou() {
             <Link
               key={a.id}
               href={`/artists/${a.id}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', padding: '9px var(--afa-space-2)', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', padding: '9px var(--afa-space-2)', margin: '0 calc(-1 * var(--afa-space-2))', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >

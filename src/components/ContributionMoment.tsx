@@ -163,7 +163,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           position: 'fixed', inset: 0, zIndex: 1000,
           background: 'var(--afa-surface-page)',
           flexDirection: 'column',
-          padding: 'var(--afa-space-6) var(--afa-space-5) calc(24px + env(safe-area-inset-bottom))',
+          padding: 'var(--afa-space-6) var(--afa-space-5) calc(var(--afa-space-6) + env(safe-area-inset-bottom))',
           overflowY: 'auto',
         }}
       >

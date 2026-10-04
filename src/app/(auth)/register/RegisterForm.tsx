@@ -402,7 +402,7 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "var(--afa-space-40px)", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
             {devOtp && (
               <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-amber)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
@@ -460,7 +460,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div ref={formCardRef} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
+        <div ref={formCardRef} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "var(--afa-space-40px)", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
           {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - new, above Full
               Name per docs/design.md. QST-2607-009 backend is merged so the
               call is wired for real, but it only actually completes once
@@ -634,7 +634,7 @@ export default function RegisterForm() {
                   placeholder={tr.registerPage.minCharsPlaceholder}
                   value={form.password}
                   onChange={handleChange}
-                  style={{ ...inputStyle(), paddingRight: "44px" }}
+                  style={{ ...inputStyle(), paddingRight: "44px" }} // token-ok(spacing-literal): 44px used under 10 times, no exact token (GEN-2609-107)
                 />
                 <Button
                   variant="icon"
@@ -679,7 +679,7 @@ export default function RegisterForm() {
                   placeholder={tr.registerPage.repeatPasswordPlaceholder}
                   value={form.confirm}
                   onChange={handleChange}
-                  style={{ ...inputStyle(), paddingRight: "44px" }}
+                  style={{ ...inputStyle(), paddingRight: "44px" }} // token-ok(spacing-literal): 44px used under 10 times, no exact token (GEN-2609-107)
                 />
                 <Button
                   variant="icon"
@@ -704,7 +704,7 @@ export default function RegisterForm() {
               subtitle above (#415); only renders when a role param was
               recognized. */}
           {intendedRoleLabel && (
-            <p style={{ textAlign: "center", marginTop: "var(--afa-space-5)", marginBottom: "-8px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.65 }}>
+            <p style={{ textAlign: "center", marginTop: "var(--afa-space-5)", marginBottom: "calc(-1 * var(--afa-space-2))", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.65 }}>
               {tr.registerPage.roleConfirmationTemplate.replace('{role}', intendedRoleLabel)}
             </p>
           )}

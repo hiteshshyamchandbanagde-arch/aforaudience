@@ -404,7 +404,7 @@ export default function RazorpayTestPage() {
           )}
         </div>
 
-        <div style={{ marginTop: "40px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", opacity: 0.55 }}>
+        <div style={{ marginTop: "var(--afa-space-40px)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", opacity: 0.55 }}>
           <Link href="/" style={{ color: INK, textDecoration: "underline" }}>
             ← Back home
           </Link>

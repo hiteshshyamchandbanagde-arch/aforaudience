@@ -120,6 +120,9 @@ export const KEY_RANGES: Record<string, TokenRange> = {
   "--afa-text-ui": { min: 11, max: 24 },
   "--afa-text-body": { min: 11, max: 24 },
   "--afa-text-body-lg": { min: 11, max: 24 },
+  // GEN-2609-107 phase 2 - the one spacing token whose default sits
+  // above the group's 64px cap (page-level section padding).
+  "--afa-space-80px": { min: 0, max: 120 },
 }
 
 // The radius scale must stay ordered. The pill is not part of it.
@@ -446,6 +449,11 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-space-28px": "28px",
   "--afa-space-32px": "32px",
   "--afa-space-48px": "48px",
+  "--afa-space-36px": "36px",
+  "--afa-space-40px": "40px",
+  "--afa-space-56px": "56px",
+  "--afa-space-64px": "64px",
+  "--afa-space-80px": "80px",
   "--afa-text-caption": "10px",
   "--afa-text-body-lg": "15px",
   "--afa-text-lead": "18px",

@@ -350,6 +350,16 @@
   --afa-space-28px: 28px;
   --afa-space-32px: 32px;
   --afa-space-48px: 48px;
+  /* GEN-2609-107 phase 2 - the large values left after phase 1 that
+     recur 10+ times (counts on qa at 4 Oct: 36px x11, 40px x36, 56px x16,
+     64px x20, 80px x32). Exact values, so adopting them changes nothing
+     on screen. Spacing tokens are hygiene, not admin knobs: the spacing
+     group is hidden in /dashboard/admin/design-system. */
+  --afa-space-36px: 36px;
+  --afa-space-40px: 40px;
+  --afa-space-56px: 56px;
+  --afa-space-64px: 64px;
+  --afa-space-80px: 80px;
 
   /* GEN-2609-106 - renamed from pixel-named to semantic (formerly
      --afa-text-10px/15px/18px/20px), per Hitesh's font-size-closeout

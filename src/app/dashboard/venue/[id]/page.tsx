@@ -147,7 +147,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <BackLink href="/dashboard/venue" label="Back to Venues" />
 
           <div style={{ marginTop: 'var(--afa-space-5)' }}>
@@ -190,7 +190,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>Facilities</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>
+                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                       {facility}
                     </span>
                   ))}
@@ -241,7 +241,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                                 fontWeight: 700,
                                 color: 'var(--afa-amber)',
                                 background: 'var(--afa-amber-tint)',
-                                padding: '3px var(--afa-space-2)',
+                                padding: '3px var(--afa-space-2)', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                                 borderRadius: 'var(--afa-radius-xs)',
                                 letterSpacing: '0.02em',
                               }}
@@ -287,7 +287,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               fontWeight: 700,
                               color: 'var(--afa-amber)',
                               background: 'var(--afa-amber-tint)',
-                              padding: '3px var(--afa-space-2)',
+                              padding: '3px var(--afa-space-2)', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                               borderRadius: 'var(--afa-radius-xs)',
                               letterSpacing: '0.02em',
                             }}
