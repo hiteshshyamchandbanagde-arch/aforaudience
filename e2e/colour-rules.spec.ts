@@ -61,3 +61,84 @@ test("[BUG-2610-008] /artists: the selected genre's underline is --afa-selected 
   const bg = await underline.evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(bg, `underline ${bg}; --afa-selected ${selectedColour}; --afa-fill-solid ${fillSolid}`).toBe(selectedColour);
 });
+
+test.describe("signed in as Atul", () => {
+  test.use({ storageState: authFile("atul") });
+
+  // scripts/qa-seed.ts: Atul's paid, confirmed booking for Solo Stand-up Showcase.
+  const CONFIRMED_BOOKING = "qa-demo-booking-full-atul-2";
+
+  test("[GEN-2609-118] checkout: the only orange element is the Pay button; 'See fee breakdown' is amber", async ({ page }) => {
+    // Checkout needs a booking that is still pending. Atul's seeded booking is
+    // served to this page as pending, in the browser only: nothing is written,
+    // Razorpay's script is blocked and Pay is never pressed.
+    await page.route("**/checkout.razorpay.com/**", (route) => route.abort());
+    await page.route(new RegExp(`/api/bookings/${CONFIRMED_BOOKING}/?$`), async (route) => {
+      const res = await route.fetch();
+      const body = await res.json();
+      body.booking.status = "PENDING";
+      body.booking.isExpired = false;
+      body.booking.expiresAt = new Date(Date.now() + 10 * 60_000).toISOString();
+      body.payment = { razorpayOrderId: "order_e2e_never_paid", amount: Math.round(body.booking.totalAmount * 100), currency: "INR", status: "CREATED", keyId: "rzp_test_e2e_never_used" };
+      await route.fulfill({ response: res, json: body });
+    });
+    await page.goto(`/checkout/${CONFIRMED_BOOKING}/`);
+    const main = page.locator("main");
+    const pay = main.getByRole("button", { name: /^Pay\b/ });
+    await expect(pay).toBeVisible();
+    const feeLink = main.getByRole("button", { name: /See fee breakdown/ });
+    await expect(feeLink).toBeVisible();
+
+    const fillSolid = await tokenColour(page, "--afa-fill-solid");
+    const amber = await tokenColour(page, "--afa-selected");
+    await expect(feeLink).toHaveCSS("color", amber);
+    const painted = await elementsPainted(main, fillSolid);
+    expect(painted, `elements in ${fillSolid}: ${painted.join(" | ")}`).toHaveLength(1);
+    expect(painted[0]).toMatch(/^bg:<(button|a)> "Pay\b/);
+  });
+
+  test("[GEN-2609-118] booking confirmed ('You're going'): the count circle is amber, not orange; only View My Ticket is orange", async ({ page }) => {
+    await page.goto(`/checkout/${CONFIRMED_BOOKING}/`);
+    const sheet = page.locator(".cm-mobile, .cm-modal-mount").filter({ visible: true });
+    await expect(sheet.getByRole("heading", { name: /You.re going/ })).toBeVisible();
+    const viewTicket = sheet.getByRole("button", { name: "View My Ticket" });
+    await expect(viewTicket).toBeVisible();
+
+    const fillSolid = await tokenColour(page, "--afa-fill-solid");
+    const painted = await elementsPainted(sheet, fillSolid);
+    expect(painted, `elements in ${fillSolid}: ${painted.join(" | ")}`).toHaveLength(1);
+    expect(painted[0]).toMatch(/^bg:<(button|a)> "View My Ticket/);
+
+    // The circle: 140 px round, holding only the supporter count.
+    const circle = sheet.locator("div").filter({ hasText: /^\d+$/ }).last();
+    await expect(circle).toHaveCSS("border-radius", "50%");
+    const { text, back } = await circle.evaluate((el) => {
+      // The circle's own fill composited over the first opaque surface behind it.
+      const parse = (c: string) => (c.match(/[\d.]+/g) || []).map(Number);
+      const over = (top: number[], under: number[]) => {
+        const a = top[3] ?? 1;
+        return [0, 1, 2].map((i) => top[i] * a + under[i] * (1 - a));
+      };
+      const layers: number[][] = [];
+      for (let n: Element | null = el; n; n = n.parentElement) {
+        const c = parse(getComputedStyle(n).backgroundColor);
+        if (c.length && (c[3] ?? 1) > 0) layers.push(c);
+        if (c.length && (c[3] ?? 1) === 1) break;
+      }
+      let back = layers.pop() || [20, 20, 20];
+      while (layers.length) back = over(layers.pop()!, back);
+      const span = el.querySelector("span") || el;
+      return { text: over(parse(getComputedStyle(span).color), back), back };
+    });
+    const lum = (c: number[]) => {
+      const [r, g, b] = c.map((v) => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [hi, lo] = [lum(text), lum(back)].sort((a, b) => b - a);
+    const ratio = (hi + 0.05) / (lo + 0.05);
+    expect(ratio, `count text rgb(${text}) on rgb(${back})`).toBeGreaterThanOrEqual(4.5);
+  });
+});

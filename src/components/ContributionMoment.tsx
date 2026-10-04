@@ -84,11 +84,13 @@ function ContributionBody({
             className="afa-seal-stamp-mount"
             style={{
               width: 140, height: 140, borderRadius: '50%',
-              background: 'var(--afa-fill-solid)', border: '3px solid var(--afa-amber)',
+              // GEN-2609-118: orange is only for an action you tap; this count is
+              // information, so an amber ring on an amber tint, light text on it.
+              background: 'var(--afa-amber-tint)', border: '3px solid var(--afa-amber)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-page-title)', fontWeight: 800, color: 'var(--afa-on-fill-solid)' }}>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-page-title)', fontWeight: 800, color: 'var(--afa-text-primary)' }}>
               {supporterCount}
             </span>
           </div>
