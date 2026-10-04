@@ -542,6 +542,34 @@ export function contrastRatio(fgValue: string, bgValue: string, baseValue?: stri
   return (lighter + 0.05) / (darker + 0.05)
 }
 
+// GEN-2610-001 - the light documents (ticket email, ticket PDF) keep the
+// primary fill for fills, bars and large type, but small text needs
+// 4.5:1 and the fill on cream is 2.81:1. This returns `fgValue` as-is
+// when it already passes on `bgValue`, otherwise the same hue mixed
+// towards black (light ground) or white (dark ground) just far enough to
+// pass, as #hex. Derived from the resolved token, so an admin colour edit
+// still carries through to the tint.
+export const TEXT_CONTRAST_MIN = 4.5
+export function textSafeColor(fgValue: string, bgValue: string, min = TEXT_CONTRAST_MIN): string {
+  const fgRaw = parseCssColor(fgValue)
+  const bg = parseCssColor(bgValue)
+  if (!fgRaw || !bg) return fgValue
+  if ((contrastRatio(fgValue, bgValue) ?? 0) >= min) return fgValue
+  const fg = flattenOnBackground(fgRaw, bg)
+  const towards = relativeLuminance(bg) > 0.18 ? 0 : 255
+  const mix = (t: number) => rgbToHex([0, 1, 2].map((i) => fg[i] + (towards - fg[i]) * t) as [number, number, number, number])
+  const passes = (t: number) => (contrastRatio(mix(t), bgValue) ?? 0) >= min
+  if (!passes(1)) return mix(1)
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2
+    if (passes(mid)) hi = mid
+    else lo = mid
+  }
+  return mix(hi)
+}
+
 // Resolves one level of var(--afa-x) indirection (--afa-on-fill-solid
 // and --afa-selected use it today).
 export function resolveTokenValue(values: Record<string, string>, key: string): string {

@@ -28,6 +28,8 @@ import {
   rgbToHex,
   resolveColorValue,
   toPdfRgb,
+  textSafeColor,
+  TEXT_CONTRAST_MIN,
   COLOR_RESOLVE_MAX_DEPTH,
   UNRESOLVED_COLOR,
   tokenValueError,
@@ -480,6 +482,50 @@ test('toPdfRgb: hex, short hex, rgb() and rgba() become 0..1 channels plus opaci
 test('toPdfRgb: an unparseable value gives the unresolved colour, not NaN', () => {
   assert.deepEqual(toPdfRgb('var(--afa-amber)'), toPdfRgb(UNRESOLVED_COLOR))
   assert.deepEqual(toPdfRgb('nonsense'), { r: 0, g: 0, b: 0, opacity: 1 })
+})
+
+// --- GEN-2610-001 textSafeColor ------------------------------------------
+
+test('textSafeColor: a colour that already passes comes back unchanged', () => {
+  assert.equal(textSafeColor('#0E0C0A', '#F7F3EE'), '#0E0C0A')
+  assert.equal(textSafeColor('rgba(14, 12, 10, 0.62)', '#F7F3EE'), 'rgba(14, 12, 10, 0.62)')
+})
+
+test('textSafeColor: the 2.81:1 fill on cream is darkened to just over 4.5:1 and stays orange', () => {
+  assert.ok(contrastRatio('#FF5A36', '#F7F3EE')! < 3)
+  const out = textSafeColor('#FF5A36', '#F7F3EE')
+  const ratio = contrastRatio(out, '#F7F3EE')!
+  assert.ok(ratio >= TEXT_CONTRAST_MIN && ratio < 4.7, `${out} = ${ratio}`)
+  const [r, g, b] = parseCssColor(out)!
+  assert.ok(r > g && g > b, `${out} lost the hue`)
+})
+
+test('textSafeColor: taupe on cream passes after, and on white too', () => {
+  const out = textSafeColor('#8A827A', '#F7F3EE')
+  assert.ok(contrastRatio(out, '#F7F3EE')! >= TEXT_CONTRAST_MIN)
+  assert.ok(contrastRatio(out, '#FFFFFF')! >= TEXT_CONTRAST_MIN)
+})
+
+test('textSafeColor: on a dark ground it lightens instead', () => {
+  const out = textSafeColor('#5A2A20', '#0E0C0A')
+  assert.ok(contrastRatio(out, '#0E0C0A')! >= TEXT_CONTRAST_MIN)
+  assert.ok(parseCssColor(out)![0] > 0x5a)
+})
+
+test('textSafeColor: a translucent colour is judged as seen, and the result is opaque', () => {
+  const out = textSafeColor('rgba(255, 90, 54, 0.5)', '#F7F3EE')
+  assert.match(out, /^#[0-9A-F]{6}$/)
+  assert.ok(contrastRatio(out, '#F7F3EE')! >= TEXT_CONTRAST_MIN)
+})
+
+test('textSafeColor: a custom minimum, and an unreachable one gives the extreme', () => {
+  assert.ok(contrastRatio(textSafeColor('#FF5A36', '#F7F3EE', 7), '#F7F3EE')! >= 7)
+  assert.equal(textSafeColor('#FF5A36', '#F7F3EE', 30), '#000000')
+})
+
+test('textSafeColor: unparseable input comes back as-is', () => {
+  assert.equal(textSafeColor('var(--afa-amber)', '#F7F3EE'), 'var(--afa-amber)')
+  assert.equal(textSafeColor('#FF5A36', 'nonsense'), '#FF5A36')
 })
 
 console.log(`\n${passed} passed`)
