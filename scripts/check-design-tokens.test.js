@@ -836,5 +836,17 @@ t('locale-date-call (diff): a new call is an offense even if the same text exist
   assert.equal(offenses[0].rule, 'locale-date-call')
 })
 
+t('GEN-2609-107 p2: an unquoted CSS shorthand is still read past a var() part', () => {
+  const rule = ruleByName('spacing-literal')
+  // the 112px went uncounted once the 40px before it became a token
+  assert.deepEqual(rule.extract('  .afa-organiser-container { padding: 0 var(--afa-space-40px) 112px; } }'), ['112px'])
+  assert.deepEqual(rule.extract('  padding: var(--afa-space-1) 9px;'), ['9px'])
+  assert.deepEqual(rule.extract('  .x { margin: 0 calc(-1 * var(--afa-space-2)) 5px; }'), ['5px'])
+  assert.deepEqual(rule.extract('  .x { padding: var(--afa-space-48px) var(--afa-space-40px); }'), [])
+  // JS objects are unchanged
+  assert.deepEqual(rule.extract("  padding: 'var(--afa-space-2) 5px', gap: 9,"), ['5px', '9'])
+  assert.deepEqual(rule.extract("  margin: 'calc(-1 * var(--afa-space-2))',"), [])
+})
+
 console.log(`\n${passed} passed, ${failed} failed.`)
 if (failed > 0) process.exit(1)
