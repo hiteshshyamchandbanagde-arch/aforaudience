@@ -83,11 +83,13 @@ jobs:
             --max-turns 400
             --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,TodoWrite,WebFetch"
           prompt: |
+            Push early: push your branch after your FIRST commit and after every commit after that, so that work survives a crash or a turn cap.
             You are CC (Claude Code) for AforAudience, running unattended on a GitHub Actions runner.
             Nobody can answer questions during this run. Where the dispatch says "stop and report", do that in the status file and end the run.
 
             1. Read AGENTS.md, docs/testing-rules.md (it always applies), and the dispatch file named in the env var DISPATCH (path under docs/cc-dispatches/). Execute that dispatch exactly.
             2. The checkout is qa. Follow the dispatch's base check, branch name and commit plan. Push only the dispatch's branch, plus a docs-only HANDOFF.md commit to qa if the dispatch asks for a handoff (rebase on origin/qa first; HANDOFF.md only). Never push code to qa or main, never merge, never open PRs, never touch production or Vercel settings.
+               If origin/qa moves during the run, REBASE your branch onto it (git rebase origin/qa). NEVER create merge commits and never pull with merge: a merge that brings in qa's own .github/workflows changes makes the push look like a workflow edit, and GitHub rejects it (the app has no workflows permission; this lost B2's work on 4 Oct). Never edit .github/workflows/ yourself. If a push is rejected anyway, write the exact error in the status file and stop.
             3. Environment: DATABASE_URL and E2E_DATABASE_URL point at the QA database. Use QA personas only (e2e/helpers/roles.ts). There is no browser for you to watch: Playwright runs headless, and screenshots go under test-results/ and are described in the handoff.
             4. If a step is impossible in CI (missing env var, a service unreachable, anything that needs Hitesh), do every other part you can, then report exactly what's missing.
             5. LAST ACTION, always, even on failure: write cc-autopilot-status.md in the repo root (do not commit it), with:
