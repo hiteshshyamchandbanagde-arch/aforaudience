@@ -1,3 +1,117 @@
+# Session Handoff — 4 Oct 2026, part 49 (CC — dispatch F, GEN-2609-107 spacing phase 2, pushed, NOT merged)
+
+(Part 48 is at the bottom of this file.)
+
+- **Branch `chore/spacing-p2-f` @ `35a6fba`**, base `origin/qa` `e75ff57` (qa did not move). Compare: https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/spacing-p2-f?expand=1
+- **Zero visual change, measured:** 10 pages × 390 + 1440, origin/qa deploy vs branch deploy (`2606428`, same `src/` as the head): **0 px differ on all 20 pairs** (details below).
+- **Ratchet `spacing-literal` 257 → 0.** 131 literals converted, 135 kept with `token-ok(spacing-literal)`. 9 of these only became visible after the checker fix (`fb01946`).
+- **Overlap with E (#732):** both touch `src/lib/design-tokens.ts`, in different regions. Whichever merges second may need a rebase.
+
+## Commits
+| Commit | What |
+|---|---|
+| `c76f0bf` | Step 1 alone: per-site spacing check in `verify-equivalence.js` (`scripts/dev/spacing-sites.js`) + self-tests. Replayed on the phase 1 merge `25fc597`: 1628 sites / 1182 lines, 0 mismatches. Negative controls caught both injected bugs (the phase 1 quoted var in CSS, a wrong token). |
+| `fb01946` | Checker fix: an unquoted CSS shorthand is read past a `var()` part. Before, `padding: 0 var(--afa-space-40px) 112px;` hid the 112px, so converting a site could drop a literal from the count without converting it. |
+| `5d2cc59` | 5 new tokens + 185 sites converted (exact values only). |
+| `deda4f5` | `token-ok(spacing-literal)` on the 130 lines that keep literals; baseline 257 → 0. |
+| `2606428` | e2e: spacing group hidden from the admin (step 5). |
+| `35a6fba` | e2e: reusable `visual-equivalence.spec.ts` (step 6). |
+
+## Tokens added (exact values; globals.css, design-tokens.ts, design-token-meta.ts, reference doc §1, SPACING_MAP)
+`--afa-space-36px` 36px (11 sites) · `--afa-space-40px` 40px (39) · `--afa-space-56px` 56px (16) · `--afa-space-64px` 64px (20) · `--afa-space-80px` 80px (32).
+- 80px is above the spacing group's 0-64px admin range, so it gets its own `KEY_RANGES` entry of 0-120px. Without it the default would fail validation; tested in `scripts/design-tokens.test.ts`.
+- **Decision for chat to confirm:** the dispatch asks for tokens for "any others ≥ 10" uses but also names 3/5/9px as odd values that stay literal. I followed the explicit names. **5px (32 uses), 3px (18), 9px (18) and 7px (12) stay literal** with token-ok; 36px (11) got a token. If chat wants odd-value tokens, it's a mechanical follow-up: the per-site check and codemod already handle it.
+
+**QA DB (QA only; no Prisma migration, as the dispatch asked).** Run on 4 Oct. All 19 QA `--afa-space-*` rows were then read back and match globals.css.
+```sql
+INSERT INTO "DesignToken" ("key", "value", "group", "type", "locked", "updatedAt") VALUES
+('--afa-space-36px', '36px', 'spacing', 'dimension', false, now()),
+('--afa-space-40px', '40px', 'spacing', 'dimension', false, now()),
+('--afa-space-56px', '56px', 'spacing', 'dimension', false, now()),
+('--afa-space-64px', '64px', 'spacing', 'dimension', false, now()),
+('--afa-space-80px', '80px', 'spacing', 'dimension', false, now())
+ON CONFLICT ("key") DO NOTHING;
+```
+Production would need the same rows before a main release. Without them nothing breaks, because globals.css carries the values; the rows only make them part of the runtime injection.
+
+## Sites converted: 185
+- **118 onto the new tokens:** codemod `migrate-tokens.js --categories=spacing --apply` with the 5 new `SPACING_MAP` entries, plus 4 raw-CSS lines by hand.
+- **13 negative margins**, all with an exact token: `calc(-1 * var(--afa-space-…))`.
+  - -8px ×6 → `space-2`, -6px ×2 → `6px`, -20px ×2 → `space-5`, -28px ×2 → `28px`, -2px ×1 → `2px`.
+- **Hidden sites (54 more sites, on existing tokens):**
+  - Ternaries: 25 lines found; 24 converted (2 partly, see below). The 25th is EventCard `-size * 0.28`, computed at runtime, so there is no literal.
+  - `calc()`: 6 `calc(Npx + env(safe-area-…))` → `calc(var(--afa-space-…) + env(…))`. The design-system page's 2 were already tokens.
+  - Template (2, SeatPicker `-${pct/2}%`): left. They're percentages, not px.
+  - Variable (1, Button `chrome.padding`): left. It already resolves to the `--afa-btn-padding-*` tokens.
+
+## Literals left: 135 visible + 3 in ternaries (130 lines, each with `token-ok(spacing-literal): <value> …, no exact token (GEN-2609-107)`)
+- **Odd values:** 5px ×32, 3px ×18, 9px ×18, 7px ×12, 11px ×6.
+- **Under 10 uses:** 22px ×9, 112px ×6, 96/88/34px ×5, 44/26px ×4, 72px ×3, 100/128/60px ×2, 132/120px ×1.
+- **Ternaries the checker can't see:** MobileTopBar 26/30px and 5px.
+- **Comment form follows context:** `// …` in JS, `{/* … */}` in JSX children, `/* // token-ok(…): … */` inside raw `<style>` CSS text. A `//` there would become CSS text; the shared parser reads all three forms.
+- **Guarded:**
+  - tsc is clean.
+  - ESLint `react/jsx-no-comment-textnodes` on all 57 touched .tsx files: 0. Its negative control fires.
+  - So no comment renders as page text.
+
+## Testing (T7)
+**Tests added:**
+- `scripts/dev/migrate-tokens.test.js`: 5 GEN-2609-107 p2 tests (`checkSpacingLine`).
+  - Exact conversions are equivalences.
+  - Phase 1's quoted var in CSS is a mismatch.
+  - A wrong token, a wrong sign, a unitless quoted value, an extra edit or an undefined token is a mismatch.
+  - token-ok in all 3 forms is an exemption.
+- `scripts/check-design-tokens.test.js`: "an unquoted CSS shorthand is still read past a var() part". **Regression test: FAILS on origin/qa's checker, PASSES on the branch** (run both ways).
+- `scripts/design-tokens.test.ts`: `--afa-space-80px` has its own 0-120px range. **Note: this file is not a step in `design-tokens.yml`.**
+- `e2e/design-system-spacing-hidden.spec.ts` `@needs-db` (temp admin, read-only).
+  - At 1440 and 390: no Spacing heading and no `--afa-space-*` field, and searching `--afa-space-40px` gives "No token matches"; the Radius group is the positive control.
+  - The API still returns all spacing rows, including the 5 new ones.
+  - The runtime `<style>` still sets them; computed `--afa-space-40px` = 40px.
+  - **Passed against QA, 1/1.** It also passes on origin/qa: the editor already hid spacing (GEN-2609-108), so this pins existing behaviour; it isn't a regression test.
+- `e2e/visual-equivalence.spec.ts`: skipped unless `VISUAL_BASE_URL` is set, so normal CI doesn't run it. That is a conditional skip the dispatch asked for, not a committed `test.skip`.
+  - Steady state: animations, transitions and caret off; fonts loaded; scrolled once for lazy images; chat bubble masked.
+  - Pass rule: same size, and no pixel more than 32/255 different on any channel.
+
+**Visual diff:** base = `https://aforaudience-8f9bfiv8c-…vercel.app` (`e75ff57`), head = `https://aforaudience-1g65rtkc3-…vercel.app` (`2606428`).
+| Page | 390 | 1440 |
+|---|---|---|
+| `/` | 390×7658, 0 px | 1440×5121, 0 px |
+| `/events/` | 390×1411, 0 | 1440×3449, 0 |
+| `/events/e2efixtureevt00001/` | 390×1801, 0 | 1440×1129, 0 |
+| `/venues/` | 390×8578, 0 | 1440×3409, 0 |
+| `/artists/` | 390×41754, 0 | 1440×14984, 0 |
+| `/about/` | 390×12950, 0 | 1440×11102, 0 |
+| `/for-artists/` | 390×4596, 0 | 1440×3569, 0 |
+| `/register/` | 390×1332, 0 | 1440×1140, 0 |
+| `/dashboard/organiser/` (Omkar) | 390×3517, 0 | 1440×1529, 0 |
+| `/tickets/` (Atul) | 390×4975, 0 | 1440×2744, 0 |
+- **0 px means byte-identical pixels**, not just 0 above the anti-aliasing tolerance.
+- Screenshots are under `test-results/visual/` on the runner. I checked them by eye: the signed-in pages are the real dashboards, not a login.
+- **Negative control** (`VISUAL_CONTROL_CSS='h1 { margin-left: 1px !important; }'` on head only): `/for-artists/` FAILS (13244 / 17196 px above tolerance). `/register/` has no h1, so it still passes.
+- The chat bubble is masked, so its own spacing isn't pixel-verified. The per-site check covers it.
+
+**Other checks on the head:**
+- `verify-equivalence.js --base=origin/qa` on 86 files: **0 mismatches**.
+  - spacing: 405 equivalent sites; 130 token-ok exemptions.
+  - colour and radius: no changes.
+- Every `design-tokens.yml` step was run locally (that workflow runs only on PRs):
+  - checker tests 104/104; migrate-tokens tests 72/72; ticket-code 5; username 4; format-date 12; venue-billing 11; sales-range 10; tab-bar-routes 8;
+  - design-tokens.test.ts 59;
+  - checker: no new literals; ratchet: all categories at or below baseline.
+- `tsc` clean.
+- Vercel preview of `2606428` READY, so `next build` passes.
+- **CI:** e2e-preview runs go through the shared queue. At handoff time, `c76f0bf` was in progress and `2606428` was pending (https://github.com/hiteshshyamchandbanagde-arch/aforaudience/actions/runs/37203567786). The intermediate ones were cancelled as superseded. **Chat: open the PR so design-tokens runs, and merge on green at the pinned head.**
+
+## Not done / notes
+- `src/lib/design-token-coverage.ts` was not regenerated for the 5 new tokens. It only feeds the admin page's coverage badges, and the spacing group isn't shown there.
+- The checker still can't see literals inside ternaries; they are counted by hand above.
+
+## Human check
+- None for appearance: the pixel diff is 0 on all 20 pairs.
+- Chat only: confirm the odd-value decision above (5/3/9/7px stay literal).
+
+---
+
 # Session Handoff — 4 Oct 2026, part 47 (chat — session end; D partial, E running, F queued next)
 
 - **qa @ `dfcd0ab`.** The central-control UI/UX goal is CLOSED (pt46).
