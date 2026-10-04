@@ -100,7 +100,7 @@ Production would need the same rows before a main release. Without them nothing 
   - checker: no new literals; ratchet: all categories at or below baseline.
 - `tsc` clean.
 - Vercel preview of `2606428` READY, so `next build` passes.
-- **CI:** e2e-preview runs go through the shared queue. At handoff time, `c76f0bf` was in progress and `2606428` was pending (https://github.com/hiteshshyamchandbanagde-arch/aforaudience/actions/runs/37203567786). The intermediate ones were cancelled as superseded. **Chat: open the PR so design-tokens runs, and merge on green at the pinned head.**
+- **CI: e2e-preview on head `35a6fba`: 162 passed / 0 failed / 0 flaky / 20 skipped, `TICKETS FAILED: none`** (https://github.com/hiteshshyamchandbanagde-arch/aforaudience/actions/runs/37204239791). The 20 skipped are `visual-equivalence.spec.ts` (10 tests × 2 projects), skipped with no `VISUAL_BASE_URL` as the dispatch asked. `c76f0bf`'s run was green too; the runs in between were cancelled as superseded. design-tokens runs only on a PR: **chat opens the PR and merges on green at the pinned head.**
 
 ## Not done / notes
 - `src/lib/design-token-coverage.ts` was not regenerated for the 5 new tokens. It only feeds the admin page's coverage badges, and the spacing group isn't shown there.
