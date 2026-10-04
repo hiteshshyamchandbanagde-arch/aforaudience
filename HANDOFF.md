@@ -1,3 +1,23 @@
+# Session Handoff — 4 Oct 2026, part 46 (chat — CENTRAL-CONTROL UI/UX GOAL CLOSED)
+
+- **The central-control goal is closed, 4 Oct.** All five goal tickets are RESOLVED by passing tests on a full QA run:
+  - GEN-2609-114 (scrim backdrops, sage-bright), GEN-2609-118 (orange = action only, amber = selected), GEN-2609-119 (downloads follow tokens), GEN-2609-121 (colour roles per surface), BUG-2609-055 (no default serif).
+  - The goal proof (admin edits a token in Admin → Design System, it reaches every visitor with no redeploy, then is reverted) is a permanent test: `e2e/design-system-goal.spec.ts`. It runs on every merge (and nightly, once BUG-2610-010 is fixed). `--afa-selected` is verified back at `var(--afa-amber)`.
+- **Merged today:**
+  - **#730** (batch C: Hitesh's visual-check fixes: BUG-2610-003/008/009, GEN-2609-118 circle, Free/Download PDF; GEN-2609-121 tests);
+  - **#729** (autopilot: rebase never merge, push after every commit; root cause of B2's lost push: the merge pulled #728's workflow change and the Claude app has no workflows permission);
+  - **#731** (B2: specs for the last 7 tickets; coverage map 0 untested).
+  - QA run on `ee05985`: **160 passed / 0 failed / 0 flaky / 0 skipped**, `TICKETS FAILED: none`.
+- **Resolved today by tests:** BUG-2610-003/008/009, GEN-2609-113/114/115/118/121, GEN-2609-006/007/008, FEAT-2608-047. Earlier by screenshots: GEN-2609-004, FEAT-2608-044/051. Hitesh's account `displayCurrency` = GBP, so £ at checkout is by design.
+- **Awaiting retest: 2, both HUMAN, not blocking:** GEN-2608-041 (te/ta/kn/ml translation quality, needs a reader), BUG-2608-030 (600-seat tapping on a real phone, plus zoom-or-scroll decision).
+- **Open:**
+  - **BUG-2610-011** (MEDIUM): the goal test flaked twice (Save click timeout); **dispatch D** (`cc-prompt-goal-flake-d.md`) is on the autopilot to fix, not quarantine. Note: D runs the `@needs-db` goal spec outside the shared queue; the #731 QA run was green regardless.
+  - **BUG-2610-010** (LOW): the nightly schedule never registers (0 scheduled runs ever); chat starts runs per session meanwhile.
+- **Decided by chat (4 Oct, delegated):** keep the two bottom bars (home/profile vs events/artists); fee link and confirmation circle amber.
+- **Next UI/UX work (beyond the goal):** spacing phase 2 (GEN-2609-107), email/PDF contrast (GEN-2610-001).
+
+---
+
 # Session Handoff — 4 Oct 2026, part 45 (chat — #727 B1 merged; 24 tickets resolved by tests; nightly fix in #728; B2 on autopilot)
 
 - **#727** (retest backlog B1, autopilot run `37127849430`, status `PUSHED 3a387c1`) squash-merged, giving `db4183a`. It adds ticket IDs in test titles, `ci-summary` emitting `TICKETS PASSED/FAILED`, `docs/test-coverage-map.md` (38 tickets: 26 tested, 3 HUMAN, 2 OBSOLETE, 7 untested), and 10 new specs. Chat audit: retitle commit changed titles only; no skip, only or fixme; 0 removed `expect`s; no `src/` changes.
