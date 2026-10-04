@@ -696,7 +696,8 @@ function EventsPageContent() {
             </div>
 
             <div style={{ marginTop: "var(--afa-space-4)", marginBottom: "var(--afa-space-4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
-              {!loading && loadFailed ? "\u00A0" : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
+              {/* BUG-2610-009: no count until this load has answered - "Showing 0 events" while loading read as an empty city. */}
+              {loading || loadFailed ? "\u00A0" : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
             </div>
 
             {/* EVENTS GRID */}

@@ -71,6 +71,34 @@ test("[BUG-2609-077] a slow /api/events shows loading, never 'nothing published'
   expect(await seenNonePublished(), `"${NONE_PUBLISHED}" appeared during a slow load`).toBe(false);
 });
 
+test("[BUG-2610-009] a slow /api/events never shows a '0 events' count before the events arrive", async ({ page }) => {
+  // Watches the whole load, however briefly the count is painted.
+  await page.addInitScript(() => {
+    const w = window as unknown as { __zeroCountSeen?: string };
+    const check = () => {
+      const m = document.body?.innerText.match(/\bshowing 0 events\b|\b0 events\b/i);
+      if (m && !w.__zeroCountSeen) w.__zeroCountSeen = m[0];
+    };
+    new MutationObserver(check).observe(document, { childList: true, subtree: true, characterData: true });
+  });
+  const held: Route[] = [];
+  await page.route(isEventsList, (route) => {
+    held.push(route);
+  });
+  await page.goto("/events/");
+  await expect.poll(() => held.length, { message: "the page asked for /api/events" }).toBeGreaterThan(0);
+  await expect(page.getByText("Loading events", { exact: false }).first()).toBeVisible();
+  await expect(page.getByText(/\bshowing \d+ events?\b/i)).toHaveCount(0);
+
+  await page.unroute(isEventsList);
+  await Promise.all(held.map((route) => route.continue().catch(() => {})));
+  await expect(anyEventCard(page)).toBeVisible();
+  // Once the data is in, the count is back and is not 0.
+  await expect(page.getByText(/\bshowing [1-9]\d* events?\b/i)).toBeVisible();
+  const zeroSeen = await page.evaluate(() => (window as unknown as { __zeroCountSeen?: string }).__zeroCountSeen);
+  expect(zeroSeen, `"${zeroSeen}" was on the page before the events arrived`).toBeUndefined();
+});
+
 test("[BUG-2609-077] a failed /api/events shows an error with Retry, never 'nothing published'; Retry loads the events", async ({
   page,
 }) => {

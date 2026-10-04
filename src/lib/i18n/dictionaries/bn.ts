@@ -644,6 +644,7 @@ const bn: Dictionary = {
     cancelButton: "বাতিল করুন",
     cancellingEllipsis: "বাতিল করা হচ্ছে...",
     messageOrganiser: "আয়োজককে বার্তা পাঠান",
+    downloadPdfShort: "PDF ডাউনলোড",
     cancelTicketButton: "টিকিট বাতিল করুন",
     refundedNoteTemplate: "₹{amount} আপনার মূল পেমেন্ট পদ্ধতিতে ফেরত দেওয়া হয়েছে।",
     cancelledNoRefund: "বাতিল করা হয়েছে - কোনো পরিমাণ ফেরত দেওয়া হয়নি।",

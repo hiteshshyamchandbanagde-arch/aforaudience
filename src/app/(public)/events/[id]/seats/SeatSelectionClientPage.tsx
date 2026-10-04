@@ -404,7 +404,8 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 ) : (
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
                     <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                    <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.freeAmount}</span>
+                    {/* "Free" only for a free event; a paid one with nothing chosen yet has no amount to show. */}
+                    <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{event.isFree ? tr.eventDetailPage.freeAmount : "—"}</span>
                   </div>
                 )}
 

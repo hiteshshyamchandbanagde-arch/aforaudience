@@ -74,6 +74,7 @@ interface BookingItem {
   id: string
   seats: Record<string, number>
   seatLabels?: string[]
+  tierNames?: string[]
   totalAmount: number
   bookingFeeAmount: number
   status: string
@@ -210,7 +211,8 @@ function effectiveStatus(b: BookingItem): string {
 // page. StubRow's own `whiteSpace: nowrap` + ellipsis handles a long
 // multi-tier name list without needing truncation logic here.
 function stubCells(b: BookingItem, tr: Dictionary) {
-  const tierNames = Object.keys(b.seats)
+  // BUG-2610-003 - from the API: section names, or a numbered booking's seat tiers.
+  const tierNames = b.tierNames ?? Object.keys(b.seats)
   const qty = b.seatLabels && b.seatLabels.length > 0 ? b.seatLabels.length : Object.values(b.seats).reduce((sum, n) => sum + n, 0)
   return [
     { label: tr.ticketsPage.stubTierLabel, value: tierNames.length > 0 ? tierNames.join(', ') : '—' },
@@ -684,7 +686,7 @@ export default function MyTicketsPage() {
                                 style={{ flex: '1 1 0', minWidth: 0 }}
                               >
                                 <DownloadIcon style={{ width: 13, height: 13 }} />
-                                {tr.checkoutPage.downloadTicketPdf}
+                                {tr.ticketsPage.downloadPdfShort}
                               </Button>
                               <MessageButton
                                 contextType="BOOKING"

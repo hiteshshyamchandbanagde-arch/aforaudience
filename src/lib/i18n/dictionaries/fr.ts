@@ -649,6 +649,7 @@ const fr: Dictionary = {
     cancelButton: "Annuler",
     cancellingEllipsis: "Annulation en cours...",
     messageOrganiser: "Envoyer un message à l'organisateur",
+    downloadPdfShort: "Télécharger PDF",
     cancelTicketButton: "Annuler le billet",
     refundedNoteTemplate: "₹{amount} remboursés sur votre moyen de paiement d'origine.",
     cancelledNoRefund: "Annulé - aucun montant n'a été remboursé.",

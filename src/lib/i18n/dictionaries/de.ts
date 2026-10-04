@@ -653,6 +653,7 @@ const de: Dictionary = {
     cancelButton: "Stornieren",
     cancellingEllipsis: "Wird storniert...",
     messageOrganiser: "Nachricht an Veranstalter",
+    downloadPdfShort: "PDF herunterladen",
     cancelTicketButton: "Ticket stornieren",
     refundedNoteTemplate: "₹{amount} wurden auf deine ursprüngliche Zahlungsmethode zurückerstattet.",
     cancelledNoRefund: "Storniert - es wurde kein Betrag erstattet.",

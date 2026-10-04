@@ -644,6 +644,7 @@ const te: Dictionary = {
     cancelButton: "రద్దు చేయండి",
     cancellingEllipsis: "రద్దు చేస్తోంది...",
     messageOrganiser: "నిర్వాహకుడికి సందేశం పంపండి",
+    downloadPdfShort: "PDF డౌన్‌లోడ్",
     cancelTicketButton: "టికెట్‌ను రద్దు చేయండి",
     refundedNoteTemplate: "₹{amount} మీ అసలు చెల్లింపు పద్ధతికి రీఫండ్ చేయబడింది.",
     cancelledNoRefund: "రద్దు చేయబడింది - ఏ మొత్తం రీఫండ్ చేయబడలేదు.",

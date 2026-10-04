@@ -671,6 +671,8 @@ const en = {
     cancelButton: "Cancel",
     cancellingEllipsis: "Cancelling...",
     messageOrganiser: "Message Organiser",
+    // dispatch C item 7 - fits the 3-button row on My Tickets at 390 (2 lines max).
+    downloadPdfShort: "Download PDF",
     cancelTicketButton: "Cancel ticket",
     refundedNoteTemplate: "₹{amount} refunded to your original payment method.",
     cancelledNoRefund: "Cancelled - no amount was refunded.",
