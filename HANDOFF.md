@@ -5192,3 +5192,10 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 6+ sessions running.
 5. Merge `GEN-2609-068` (compare URL above), then take the cancelled/refunded-tappability decision and the other still-open items above back to Hitesh.
+
+## Part 48 — 4 Oct, chat
+- D merged: PR #733 squash → qa `5d29a98` (head bfc1ed4 pinned; e2e-preview+design-tokens green). Reviewed timeout raises (180→300s restore spec, 150s lock spec): justified by GOAL_LOCK_WAIT_MS 120s, accepted under T2. Regression test `e2e/goal-token-lock.spec.ts`. BUG-2610-011 stays open: cause 2 (context.close error, local only).
+- E: autopilot finished, PR #732 opened (head 6b2be9d, 2 commits). Code reviewed OK: `textSafeColor()` (binary-search mix toward black/white, 4.5:1), email labels/muted + PDF `accentText`; fills/underline keep raw fill. Tests: 7 `textSafeColor` unit tests, `scripts/document-contrast.test.ts`, `e2e/seat-availability.spec.ts`; `registration.spec.ts` seat pick changed to `pickAvailableSeat` (API-available seats) — stricter, accepted. design-tokens green; e2e-preview was running → merge on green.
+- F triggered: autopilot run 37202683563 on `docs/cc-dispatches/cc-prompt-spacing-p2-f.md` → branch `chore/spacing-p2-f`. Overlap with E: both touch `src/lib/design-tokens.ts` (different regions).
+- Stale: GEN-2609-099 tint-tokens handoff re-pasted; already merged 22 Sep as #697 (`28c5cbf`).
+- Open: BUG-2610-010 nightly never fires. Human-only: GEN-2608-041, BUG-2608-030; plus E Human check = glance at a real ticket email + PDF (orange labels slightly darker).
