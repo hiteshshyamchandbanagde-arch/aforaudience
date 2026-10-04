@@ -32,12 +32,14 @@ const needsDb = /@needs-db/;
 // viewports, so a second project pass would only repeat the edit.
 // design-system-restore saves and restores the same site-wide token, and
 // artist-tour-stop saves Hrithik's profile twice: one pass each.
+// goal-token-lock is a database check with no page at all.
 const desktopOnly = [
   "**/waitlist-wallet-credit.spec.ts",
   "**/competition-show.spec.ts",
   "**/design-system-goal.spec.ts",
   "**/design-system-restore.spec.ts",
   "**/artist-tour-stop.spec.ts",
+  "**/goal-token-lock.spec.ts",
 ];
 
 // *.mobile.spec.ts: things that only exist at phone width (the filter sheet,

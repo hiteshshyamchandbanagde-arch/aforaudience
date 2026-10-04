@@ -3,7 +3,7 @@ import path from "path";
 import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { AUTH_DIR } from "./personas";
-import { withQaDb } from "./qa-db";
+import { connectQaDb, withQaDb } from "./qa-db";
 
 /**
  * A throwaway ADMIN for the specs that need one (design-system-goal.spec.ts).
@@ -27,6 +27,56 @@ export const GOAL_TOKEN = "--afa-selected";
 export const GOAL_TEST_VALUE = "#00E5FF";
 /** design-tokens.ts DEFAULTS, used only if a crashed run left the test value behind with no history to go by. */
 const GOAL_TOKEN_DEFAULT = "var(--afa-amber)";
+
+/**
+ * Every e2e run (CI on qa, each PR preview, a CC autopilot's local suite)
+ * shares the one QA database, so two runs can be on GOAL_TOKEN at once.
+ * Without this lock one run's global teardown, seeing the other run's test
+ * value, put the token back in the DB while that run's goal test still had
+ * it edited: its revert then found nothing to save (BUG-2610-011). Whoever
+ * reads or writes GOAL_TOKEN on purpose (the goal and restore specs, setup
+ * recording the original value, teardown's restore) holds this lock.
+ *
+ * A Postgres transaction-level advisory lock on its own connection: the
+ * QA URL is Supabase's transaction pooler, which pins a backend only for a
+ * transaction, so a session lock would not hold. If the holder crashes,
+ * its connection drops and the lock goes with it.
+ */
+export const GOAL_TOKEN_LOCK = `afa-e2e:${GOAL_TOKEN}`;
+/** Longest wait for another run: its goal or restore spec holds the lock for about a minute. */
+export const GOAL_LOCK_WAIT_MS = 120_000;
+
+/** Takes the GOAL_TOKEN lock, waiting for another run to finish with it. Returns the release. */
+export async function lockGoalToken(maxWaitMs = GOAL_LOCK_WAIT_MS): Promise<() => Promise<void>> {
+  const client = await connectQaDb();
+  const release = async () => {
+    await client.query("ROLLBACK").catch(() => {});
+    await client.end().catch(() => {});
+  };
+  try {
+    await client.query("BEGIN");
+    const deadline = Date.now() + maxWaitMs;
+    for (;;) {
+      const got = await client.query<{ ok: boolean }>(`SELECT pg_try_advisory_xact_lock(hashtext($1)) AS ok`, [GOAL_TOKEN_LOCK]);
+      if (got.rows[0].ok) return release;
+      if (Date.now() > deadline) throw new Error(`[e2e temp admin] Another e2e run held ${GOAL_TOKEN} for over ${maxWaitMs / 1000} s.`);
+      await new Promise((r) => setTimeout(r, 2_000));
+    }
+  } catch (err) {
+    await release();
+    throw err;
+  }
+}
+
+/** Runs `fn` holding the GOAL_TOKEN lock. */
+export async function withGoalTokenLock<T>(fn: () => Promise<T>, maxWaitMs?: number): Promise<T> {
+  const release = await lockGoalToken(maxWaitMs);
+  try {
+    return await fn();
+  } finally {
+    await release();
+  }
+}
 
 export const ADMIN_AUTH_FILE = path.join(AUTH_DIR, "temp-admin.json");
 const RUN_FILE = path.join(AUTH_DIR, "temp-admin-run.json");
@@ -64,7 +114,8 @@ export async function createTempAdmin(): Promise<{ run: TempAdminRun; password: 
   const password = randomBytes(24).toString("base64url");
   const hash = await bcrypt.hash(password, 12);
 
-  const run = await withQaDb(async (client) => {
+  // Under the lock: never record another run's in-flight test value as the original.
+  const run = await withGoalTokenLock(() => withQaDb(async (client) => {
     await client.query(
       // onboardedAt set: an account without it gets the full-screen welcome
       // sequence (WelcomeSequence.tsx) on top of every page.
@@ -90,7 +141,7 @@ export async function createTempAdmin(): Promise<{ run: TempAdminRun; password: 
       originalValue = v.rows[0]?.value && v.rows[0].value.toUpperCase() !== GOAL_TEST_VALUE ? v.rows[0].value : GOAL_TOKEN_DEFAULT;
     }
     return { id, email, tokenKey: GOAL_TOKEN, originalValue, originalUpdatedBy: token.rows[0].updatedBy } satisfies TempAdminRun;
-  });
+  }));
 
   fs.writeFileSync(RUN_FILE, JSON.stringify(run, null, 2));
   return { run, password };
@@ -100,15 +151,18 @@ export async function createTempAdmin(): Promise<{ run: TempAdminRun; password: 
  * Last resort: if GOAL_TOKEN is not back to the value the run started with
  * (the spec's own revert did not happen), put it back straight in the DB.
  * Returns true if it had to; the caller then clears the site's token cache
- * as the admin, before deleteTempAdmin.
+ * as the admin, before deleteTempAdmin. Holds the GOAL_TOKEN lock, so it
+ * never overwrites another run's edit while that run's spec is mid-test.
  */
 export async function restoreGoalToken(run: TempAdminRun): Promise<boolean> {
-  return withQaDb(async (client) => {
-    const current = await client.query<{ value: string }>(`SELECT value FROM "DesignToken" WHERE key = $1`, [run.tokenKey]);
-    if (current.rows[0]?.value === run.originalValue) return false;
-    await client.query(`UPDATE "DesignToken" SET value = $2, "updatedAt" = now() WHERE key = $1`, [run.tokenKey, run.originalValue]);
-    return true;
-  });
+  return withGoalTokenLock(() =>
+    withQaDb(async (client) => {
+      const current = await client.query<{ value: string }>(`SELECT value FROM "DesignToken" WHERE key = $1`, [run.tokenKey]);
+      if (current.rows[0]?.value === run.originalValue) return false;
+      await client.query(`UPDATE "DesignToken" SET value = $2, "updatedAt" = now() WHERE key = $1`, [run.tokenKey, run.originalValue]);
+      return true;
+    })
+  );
 }
 
 /** Deletes the run's admin with what it wrote: its version rows and the token's updatedBy. */
