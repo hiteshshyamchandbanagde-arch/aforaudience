@@ -24,7 +24,7 @@ test("[BUG-2610-003] the Jaipur Mic Gala 100 listing card shows its price from t
   await page.goto(`/events/?search=${encodeURIComponent("Jaipur Mic Gala 100")}`);
   const card = page.getByRole("link").filter({ has: page.getByRole("heading", { level: 3, name: "Jaipur Mic Gala 100" }) }).first();
   await expect(card).toBeVisible({ timeout: 20_000 });
-  await expect(card).toContainText(/(from )?₹250\b/i);
+  await expect(card).toContainText(/(from )?₹250(?!\d)/i);
   await expect(card.getByText(/^—$/)).toHaveCount(0);
 });
 

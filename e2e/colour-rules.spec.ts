@@ -45,6 +45,16 @@ async function elementsPainted(root: Locator, colour: string): Promise<string[]>
   }, colour);
 }
 
+/**
+ * Opens a checkout page and waits out its own loader. Like gotoDashboard
+ * (helpers/test.ts): the booking call is a serverless function that can
+ * be cold, so the loader gets 30 s; everything after keeps the default.
+ */
+async function gotoCheckout(page: Page, bookingId: string) {
+  await page.goto(`/checkout/${bookingId}/`);
+  await expect(page.getByText(/Loading your checkout/)).toHaveCount(0, { timeout: 30_000 });
+}
+
 test.beforeEach(async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
 });
@@ -82,7 +92,7 @@ test.describe("signed in as Atul", () => {
       body.payment = { razorpayOrderId: "order_e2e_never_paid", amount: Math.round(body.booking.totalAmount * 100), currency: "INR", status: "CREATED", keyId: "rzp_test_e2e_never_used" };
       await route.fulfill({ response: res, json: body });
     });
-    await page.goto(`/checkout/${CONFIRMED_BOOKING}/`);
+    await gotoCheckout(page, CONFIRMED_BOOKING);
     const main = page.locator("main");
     const pay = main.getByRole("button", { name: /^Pay\b/ });
     await expect(pay).toBeVisible();
@@ -98,7 +108,7 @@ test.describe("signed in as Atul", () => {
   });
 
   test("[GEN-2609-118] booking confirmed ('You're going'): the count circle is amber, not orange; only View My Ticket is orange", async ({ page }) => {
-    await page.goto(`/checkout/${CONFIRMED_BOOKING}/`);
+    await gotoCheckout(page, CONFIRMED_BOOKING);
     const sheet = page.locator(".cm-mobile, .cm-modal-mount").filter({ visible: true });
     await expect(sheet.getByRole("heading", { name: /You.re going/ })).toBeVisible();
     const viewTicket = sheet.getByRole("button", { name: "View My Ticket" });
