@@ -33,6 +33,7 @@ const needsDb = /@needs-db/;
 // design-system-restore saves and restores the same site-wide token, and
 // artist-tour-stop saves Hrithik's profile twice: one pass each.
 // goal-token-lock is a database check with no page at all.
+// design-system-spacing-hidden sets its own 1440 and 390 viewports.
 const desktopOnly = [
   "**/waitlist-wallet-credit.spec.ts",
   "**/competition-show.spec.ts",
@@ -40,6 +41,7 @@ const desktopOnly = [
   "**/design-system-restore.spec.ts",
   "**/artist-tour-stop.spec.ts",
   "**/goal-token-lock.spec.ts",
+  "**/design-system-spacing-hidden.spec.ts",
 ];
 
 // *.mobile.spec.ts: things that only exist at phone width (the filter sheet,
