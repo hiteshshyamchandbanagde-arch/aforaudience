@@ -1,3 +1,21 @@
+# Session Handoff — 4 Oct 2026, part 45 (chat — #727 B1 merged; 24 tickets resolved by tests; nightly fix in #728; B2 on autopilot)
+
+- **#727** (retest backlog B1, autopilot run `37127849430`, status `PUSHED 3a387c1`) squash-merged, giving `db4183a`. It adds ticket IDs in test titles, `ci-summary` emitting `TICKETS PASSED/FAILED`, `docs/test-coverage-map.md` (38 tickets: 26 tested, 3 HUMAN, 2 OBSOLETE, 7 untested), and 10 new specs. Chat audit: retitle commit changed titles only; no skip, only or fixme; 0 removed `expect`s; no `src/` changes.
+- **QA run on `db4183a`: 111 passed / 0 failed / 0 flaky / 0 skipped (12m33s), `TICKETS FAILED: none`.**
+- **The nightly did NOT fire on 4 Oct:** 0 scheduled runs ever. The config is valid; GitHub drops schedules under load, worst at :00. **Fixed in #728** (cron 01:23 UTC plus backup 04:41 UTC). For T5, chat used the post-merge full QA run on the same code as the nightly-equivalent proof. *T5's wording says "nightly"; chat treats any full e2e run on `qa` as satisfying it. Hitesh can veto.*
+- **Resolved by tests (T5), 24 tickets:**
+  - test-passed (22): BUG-2608-049, BUG-2609-020/050/055/065/068/071/077/078/081/082/083/084/087, BUG-2610-004/006/007, GEN-2609-010/012/013/017/119;
+  - obsolete per the map (2): BUG-2608-050, GEN-2609-003.
+- **Still open:**
+  - tested + HUMAN: GEN-2609-118, GEN-2609-121 (look of stage bars and profile buttons), GEN-2608-041 (translation quality), GEN-2609-004 (Discover/EventDetail look);
+  - HUMAN only: BUG-2608-030 (seat tapping at 600 seats on a real phone, plus a product decision), FEAT-2608-044, FEAT-2608-051;
+  - untested → B2: FEAT-2608-047, GEN-2609-006/007/008/113/114/115.
+- **Central-control goal:** 119 and 055 resolved; it closes when B2's GEN-2609-114 test passes **and** Hitesh glances at 118/121 (or confirms they can close on the test alone).
+- **#728** (open at handoff time): nightly cron off the hour plus a backup slot; `e2e-preview` split into a `target` job (decides skip outside the queue) and the `e2e-preview` job (job-level shared concurrency), so commits already in qa skip instantly with no cancelled-run noise. Its own preview ran target, then e2e-preview, as designed.
+- **Dispatch B2** `docs/cc-dispatches/cc-prompt-retest-tests-b2.md` (branch `test/retest-backlog-b2`) on the autopilot.
+
+---
+
 # Session Handoff — 3 Oct 2026, part 44 (chat — #725 close-out A + #726 shared e2e queue merged; dispatch B1 on autopilot)
 
 - **#725** (close-out A, built by the autopilot, run `37122249601`) squash-merged at `924e8ac`, giving `6236d33`. Contents:
