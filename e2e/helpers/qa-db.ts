@@ -31,8 +31,8 @@ export function hasQaDatabase(): boolean {
   return qaDatabaseUrl() !== null;
 }
 
-/** Runs `fn` inside one transaction on the QA database. Throws if there is no connection string. */
-export async function withQaDb<T>(fn: (client: Client) => Promise<T>): Promise<T> {
+/** An open client on the QA database; the caller ends it. Throws if there is no connection string. */
+export async function connectQaDb(): Promise<Client> {
   const url = qaDatabaseUrl();
   if (!url) throw new Error("[e2e db] No QA database URL (set E2E_DATABASE_URL).");
 
@@ -44,6 +44,12 @@ export async function withQaDb<T>(fn: (client: Client) => Promise<T>): Promise<T
     : `${url}${url.includes("?") ? "&" : "?"}uselibpqcompat=true`;
   const client = new Client({ connectionString, ssl: { rejectUnauthorized: false } });
   await client.connect();
+  return client;
+}
+
+/** Runs `fn` inside one transaction on the QA database. Throws if there is no connection string. */
+export async function withQaDb<T>(fn: (client: Client) => Promise<T>): Promise<T> {
+  const client = await connectQaDb();
   try {
     await client.query("BEGIN");
     const result = await fn(client);

@@ -3,7 +3,7 @@ import { test, expect, AFTER_WRITE, gotoDashboard } from "./helpers/test";
 import { markFirstVisitDone } from "./helpers/first-visit";
 import { authFile } from "./helpers/personas";
 import { FIXTURE_EVENT_ID } from "./helpers/roles";
-import { ADMIN_AUTH_FILE, GOAL_TEST_VALUE, GOAL_TOKEN, readTempAdminRun } from "./helpers/temp-admin";
+import { ADMIN_AUTH_FILE, GOAL_TEST_VALUE, GOAL_TOKEN, lockGoalToken, readTempAdminRun, type TempAdminRun } from "./helpers/temp-admin";
 
 /**
  * The central-control goal (GEN-2609-114/118/119/121, BUG-2609-055): an
@@ -16,7 +16,10 @@ import { ADMIN_AUTH_FILE, GOAL_TEST_VALUE, GOAL_TOKEN, readTempAdminRun } from "
  * checked as a signed-out visitor and as Atul on /, /events/ and /venues/
  * (the custom property and the active nav item it colours), then put back
  * in `finally`. Global teardown puts it back in the DB if this could not.
- * Never a locked token, never confirmLocked.
+ * Never a locked token, never confirmLocked. The whole test holds the
+ * cross-run GOAL_TOKEN lock (helpers/temp-admin.ts): another e2e run on the
+ * shared QA database once put the token back mid-test, and the revert then
+ * found nothing to save (BUG-2610-011).
  *
  * What a download or the browser chrome follows (GEN-2609-119, #721):
  * - manifest theme_color and the theme-color meta: --afa-fill-solid;
@@ -107,101 +110,112 @@ test.describe("@needs-db design system goal", () => {
   test("@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor with no redeploy, then is reverted", async ({ browser }) => {
     // One editor save, six page checks under two sessions, the downloads,
     // then a second save to revert: honestly longer than 60 s on QA. Each
-    // single wait still fails in 10-25 s.
+    // single wait still fails in 10-25 s. Up to GOAL_LOCK_WAIT_MS (120 s)
+    // of that is waiting for another run to finish with the token.
     test.setTimeout(240_000);
 
     const run = readTempAdminRun();
     expect(run, "global-setup.ts created no temp admin (needs E2E_DATABASE_URL on the QA project)").not.toBeNull();
-    const admin = await openContext(browser, ADMIN_AUTH_FILE);
-    const editor = await admin.newPage();
-
-    // 1. The value before the test.
-    const before = await loadTokens(admin);
-    const original = before.raw.get(GOAL_TOKEN);
-    expect(original, `${GOAL_TOKEN} is a token row`).toBeTruthy();
-    expect(
-      original!.toUpperCase(),
-      `${GOAL_TOKEN} already holds the test value: another run is editing it, or a run crashed (teardown restores it)`
-    ).not.toBe(GOAL_TEST_VALUE);
-    expect(original, "the value global-setup recorded for teardown").toBe(run!.originalValue);
-    const originalResolved = before.resolve(GOAL_TOKEN);
-    test.info().annotations.push({ type: "goal token", description: `${GOAL_TOKEN}: ${original} -> ${GOAL_TEST_VALUE} -> ${original}` });
-
+    const unlock = await lockGoalToken();
     try {
-      // 2. Change it through the editor and save.
-      await test.step(`Admin -> Design System: set ${GOAL_TOKEN} to ${GOAL_TEST_VALUE} and save`, async () => {
-        await saveThroughEditor(editor, GOAL_TEST_VALUE);
-      });
-
-      // 3. Everyone gets it, no redeploy.
-      for (const [who, state] of [
-        ["a signed-out visitor", undefined],
-        ["Atul", authFile("atul")],
-      ] as const) {
-        await test.step(`${who}: the new value on ${PAGES.join(", ")} and on the active nav item`, async () => {
-          const context = await openContext(browser, state);
-          const page = await context.newPage();
-          try {
-            for (const path of PAGES) {
-              await expectSelectedOn(page, path, GOAL_TEST_VALUE, who);
-              const navHref = ACTIVE_NAV[path];
-              if (navHref) {
-                const link = page.locator(`.sitenav-desktop a[href="${navHref}"]`);
-                await expect(link, `active nav item ${navHref} on ${path} as ${who}`).toHaveCSS("color", hexToRgb(GOAL_TEST_VALUE));
-              }
-            }
-          } finally {
-            await context.close();
-          }
-        });
-      }
-
-      // 4. Downloads and browser chrome follow their own tokens.
-      await test.step("Manifest, theme-color and share poster follow their own tokens", async () => {
-        const tokens = await loadTokens(admin);
-        const theme = tokens.resolve("--afa-fill-solid").toLowerCase();
-        const background = tokens.resolve("--afa-surface-page").toLowerCase();
-
-        const guest = await openContext(browser, undefined);
-        try {
-          const manifestRes = await guest.request.get("/manifest.webmanifest");
-          expect(manifestRes.ok(), `GET /manifest.webmanifest: HTTP ${manifestRes.status()}`).toBeTruthy();
-          const manifest = (await manifestRes.json()) as { theme_color?: string; background_color?: string };
-          expect(manifest.theme_color?.toLowerCase(), "manifest theme_color = --afa-fill-solid").toBe(theme);
-          expect(manifest.background_color?.toLowerCase(), "manifest background_color = --afa-surface-page").toBe(background);
-
-          const page = await guest.newPage();
-          await page.goto("/");
-          const meta = await page.locator('meta[name="theme-color"]').first().getAttribute("content");
-          expect(meta?.toLowerCase(), "theme-color meta = --afa-fill-solid").toBe(theme);
-
-          const poster = await guest.request.get(`/api/posters/organiser/${FIXTURE_EVENT_ID}/`);
-          expect(poster.status(), "organiser share poster for the fixture event").toBe(200);
-          expect(poster.headers()["content-type"]).toContain("image/png");
-        } finally {
-          await guest.close();
-        }
-      });
+      await editAndCheck(browser, run!);
     } finally {
-      // 5. Revert, through the editor like an admin would.
-      await test.step(`Revert ${GOAL_TOKEN} to ${original}`, async () => {
-        await saveThroughEditor(editor, original!);
+      await unlock();
+    }
+  });
+});
+
+/** The test body, run holding the GOAL_TOKEN lock. */
+async function editAndCheck(browser: Browser, run: TempAdminRun) {
+  const admin = await openContext(browser, ADMIN_AUTH_FILE);
+  const editor = await admin.newPage();
+
+  // 1. The value before the test.
+  const before = await loadTokens(admin);
+  const original = before.raw.get(GOAL_TOKEN);
+  expect(original, `${GOAL_TOKEN} is a token row`).toBeTruthy();
+  expect(
+    original!.toUpperCase(),
+    `${GOAL_TOKEN} already holds the test value: another run is editing it, or a run crashed (teardown restores it)`
+  ).not.toBe(GOAL_TEST_VALUE);
+  expect(original, "the value global-setup recorded for teardown").toBe(run.originalValue);
+  const originalResolved = before.resolve(GOAL_TOKEN);
+  test.info().annotations.push({ type: "goal token", description: `${GOAL_TOKEN}: ${original} -> ${GOAL_TEST_VALUE} -> ${original}` });
+
+  try {
+    // 2. Change it through the editor and save.
+    await test.step(`Admin -> Design System: set ${GOAL_TOKEN} to ${GOAL_TEST_VALUE} and save`, async () => {
+      await saveThroughEditor(editor, GOAL_TEST_VALUE);
+    });
+
+    // 3. Everyone gets it, no redeploy.
+    for (const [who, state] of [
+      ["a signed-out visitor", undefined],
+      ["Atul", authFile("atul")],
+    ] as const) {
+      await test.step(`${who}: the new value on ${PAGES.join(", ")} and on the active nav item`, async () => {
+        const context = await openContext(browser, state);
+        const page = await context.newPage();
+        try {
+          for (const path of PAGES) {
+            await expectSelectedOn(page, path, GOAL_TEST_VALUE, who);
+            const navHref = ACTIVE_NAV[path];
+            if (navHref) {
+              const link = page.locator(`.sitenav-desktop a[href="${navHref}"]`);
+              await expect(link, `active nav item ${navHref} on ${path} as ${who}`).toHaveCSS("color", hexToRgb(GOAL_TEST_VALUE));
+            }
+          }
+        } finally {
+          await context.close();
+        }
       });
     }
 
-    await test.step("Confirm the revert: a signed-out visitor has the original value again", async () => {
-      const after = await loadTokens(admin);
-      expect(after.raw.get(GOAL_TOKEN)).toBe(original);
-      const context = await openContext(browser, undefined);
+    // 4. Downloads and browser chrome follow their own tokens.
+    await test.step("Manifest, theme-color and share poster follow their own tokens", async () => {
+      const tokens = await loadTokens(admin);
+      const theme = tokens.resolve("--afa-fill-solid").toLowerCase();
+      const background = tokens.resolve("--afa-surface-page").toLowerCase();
+
+      const guest = await openContext(browser, undefined);
       try {
-        await expectSelectedOn(await context.newPage(), "/events/", originalResolved, "a signed-out visitor");
+        const manifestRes = await guest.request.get("/manifest.webmanifest");
+        expect(manifestRes.ok(), `GET /manifest.webmanifest: HTTP ${manifestRes.status()}`).toBeTruthy();
+        const manifest = (await manifestRes.json()) as { theme_color?: string; background_color?: string };
+        expect(manifest.theme_color?.toLowerCase(), "manifest theme_color = --afa-fill-solid").toBe(theme);
+        expect(manifest.background_color?.toLowerCase(), "manifest background_color = --afa-surface-page").toBe(background);
+
+        const page = await guest.newPage();
+        await page.goto("/");
+        const meta = await page.locator('meta[name="theme-color"]').first().getAttribute("content");
+        expect(meta?.toLowerCase(), "theme-color meta = --afa-fill-solid").toBe(theme);
+
+        const poster = await guest.request.get(`/api/posters/organiser/${FIXTURE_EVENT_ID}/`);
+        expect(poster.status(), "organiser share poster for the fixture event").toBe(200);
+        expect(poster.headers()["content-type"]).toContain("image/png");
       } finally {
-        await context.close();
+        await guest.close();
       }
     });
-    await admin.close();
+  } finally {
+    // 5. Revert, through the editor like an admin would.
+    await test.step(`Revert ${GOAL_TOKEN} to ${original}`, async () => {
+      await saveThroughEditor(editor, original!);
+    });
+  }
+
+  await test.step("Confirm the revert: a signed-out visitor has the original value again", async () => {
+    const after = await loadTokens(admin);
+    expect(after.raw.get(GOAL_TOKEN)).toBe(original);
+    const context = await openContext(browser, undefined);
+    try {
+      await expectSelectedOn(await context.newPage(), "/events/", originalResolved, "a signed-out visitor");
+    } finally {
+      await context.close();
+    }
   });
-});
+  await admin.close();
+}
 
 /**
  * Admin Settings: every Save button is visible, not covered (the phone tab
