@@ -1,5 +1,6 @@
 import { Resend } from "resend"
 import { resolveDesignColors } from "@/lib/design-tokens.server"
+import { textSafeColor } from "@/lib/design-tokens"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 const FROM = process.env.EMAIL_FROM || "AforAudience <no-reply@aforaudience.com>"
@@ -111,14 +112,20 @@ export type TicketEmailInput = {
 // inlined as concrete values. One helper for every template: the mail is
 // a light document (dark ink on the client's own background, a cream
 // details card), so it reads the ink and cream tokens, not the site's
-// dark page surface. Labels take the primary action colour.
+// dark page surface.
+// GEN-2610-001 - every text colour here is small text (10-15px), so
+// labels and notes go through textSafeColor: the primary fill's orange
+// tint, darkened just enough for 4.5:1 on the cream card (the fill
+// itself is 2.81:1 there), and taupe likewise. Measured on the card, the
+// darker of the two grounds, so they also pass on a white mail client.
 export const EMAIL_TOKENS = ["--afa-ink", "--afa-cream", "--afa-fill-solid", "--afa-taupe", "--afa-tint-08"] as const
 export function emailColorsFrom(c: Record<(typeof EMAIL_TOKENS)[number], string>) {
+  const card = c["--afa-cream"]
   return {
     ink: c["--afa-ink"],
-    card: c["--afa-cream"],
-    accent: c["--afa-fill-solid"],
-    muted: c["--afa-taupe"],
+    card,
+    label: textSafeColor(c["--afa-fill-solid"], card),
+    muted: textSafeColor(c["--afa-taupe"], card),
     rule: c["--afa-tint-08"],
   }
 }
@@ -164,7 +171,7 @@ export async function sendTicketEmail(input: TicketEmailInput) {
 // (and checked) without a mail going out.
 export function renderTicketEmailHtml(input: Omit<TicketEmailInput, "to" | "ticketPdf">, c: EmailColors): string {
   const hasFee = input.bookingFeeAmount > 0
-  const label = `font-size: 10px; font-weight: 700; color: ${c.accent}; letter-spacing: 0.06em; margin-bottom: 4px;`
+  const label = `font-size: 10px; font-weight: 700; color: ${c.label}; letter-spacing: 0.06em; margin-bottom: 4px;`
 
   // When a fee applied, break out the numbers honestly instead of
   // showing a single AMOUNT PAID that hides where the money went.

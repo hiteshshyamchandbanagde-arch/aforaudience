@@ -3,7 +3,7 @@
 // first-visit state pre-set (see helpers/first-visit.ts).
 import { test, expect } from "@playwright/test";
 import { registerTestAudience, loginTestAudience } from "./helpers/auth";
-import { JAIPUR_EVENT_TITLE, openEventFromListing } from "./helpers/events";
+import { JAIPUR_EVENT_TITLE, openEventFromListing, pickAvailableSeat } from "./helpers/events";
 import { deleteRegisteredTestUsers } from "./helpers/cleanup";
 
 /**
@@ -98,17 +98,10 @@ test("new audience member registers, verifies, signs in, passes the welcome sequ
     await page.getByRole("link", { name: /select tickets/i }).first().click();
     await expect(page).toHaveURL(/\/events\/[^/]+\/seats\/?/);
 
-    // SeatPicker has no data-* status attribute - the only real signal is the
-    // title tooltip, which reads "Row X, Seat N — ₹price" for available seats
-    // and "— taken" / "— not on sale" otherwise. Match on that rather than
-    // adding a new attribute to a live money-path component just for testing.
-    const firstFree = page.locator('[title*="₹"]').first();
-    await expect(firstFree).toBeVisible();
-    const title = (await firstFree.getAttribute("title")) ?? "";
-    const parsed = title.match(/^Row (\S+), Seat (\d+) — ₹(\d+)$/);
-    expect(parsed, `seat tooltip "${title}"`).not.toBeNull();
-    await firstFree.click();
-    return { label: `${parsed![1]}${parsed![2]}`, price: Number(parsed![3]) };
+    // GEN-2610-001 item 3 - the seat comes from the seats API's
+    // "available" list, not just the first priced tile on screen, so a seat
+    // someone holds on QA is never picked (see pickAvailableSeat).
+    return await pickAvailableSeat(page);
   });
 
   await test.step("Continue to checkout: seat and amount carried over", async () => {

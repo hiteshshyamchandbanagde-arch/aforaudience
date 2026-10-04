@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, type RGB } from "pdf-lib"
 import QRCode from "qrcode"
 import { resolveDesignColors, toPdfRgb } from "@/lib/design-tokens.server"
+import { textSafeColor } from "@/lib/design-tokens"
 import { formatDate } from "@/lib/format-date"
 
 // ---------------------------------------------------------------------------
@@ -54,11 +55,16 @@ const QR_DARK = "#0E0C0A" // token-ok(hex-color-literal): QR modules, fixed so t
 const QR_LIGHT = "#F7F3EE" // token-ok(hex-color-literal): QR ground, fixed so the code always scans
 
 export const TICKET_PDF_TOKENS = ["--afa-ink", "--afa-cream", "--afa-fill-solid"] as const
+// GEN-2610-001 - `accent` is the primary fill as-is, for the underline
+// only (2.81:1 on cream: fine for a bar, not for text). Every accent
+// label on the ticket is small (8-10pt), so text takes `accentText`: the
+// same orange tint darkened just enough for 4.5:1 on the paper.
 export function ticketPdfColorsFrom(c: Record<(typeof TICKET_PDF_TOKENS)[number], string>) {
   return {
     ink: paint(c["--afa-ink"]),
     paper: paint(c["--afa-cream"]),
     accent: paint(c["--afa-fill-solid"]),
+    accentText: paint(textSafeColor(c["--afa-fill-solid"], c["--afa-cream"])),
     bodyMuted: paint(c["--afa-ink"], MUTED_ALPHA),
     hairline: paint(c["--afa-ink"], HAIRLINE_ALPHA),
     logoA: paint(LOGO_A),
@@ -178,7 +184,7 @@ export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors)
     y: cursorY,
     size: 10,
     font: sansBold,
-    ...COLOR.accent,
+    ...COLOR.accentText,
     // pdf-lib doesn't do letter-spacing natively; workaround via manual
     // char-by-char draw isn't worth it for one line.
   })
@@ -364,7 +370,7 @@ export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors)
       y: cursorY + 14,
       size: 8,
       font: sansBold,
-      ...COLOR.accent,
+      ...COLOR.accentText,
     })
     const goingWithValue = goingWith
       .map((c) => `${c.name} ${c.status === "PENDING" ? "(pending)" : "(confirmed)"}`)
@@ -419,7 +425,7 @@ export async function generateTicketPdf(t: TicketData, colors?: TicketPdfColors)
     y: 40,
     size: 10,
     font: serif,
-    ...COLOR.accent,
+    ...COLOR.accentText,
   })
 
   return await doc.save()
@@ -463,7 +469,7 @@ function drawDetail(
     y: y + 20,
     size: 8,
     font: labelFont,
-    ...COLOR.accent,
+    ...COLOR.accentText,
   })
   page.drawText(truncate(value, valueFont, valueSize, 240), {
     x,
