@@ -644,6 +644,7 @@ const gu: Dictionary = {
     cancelButton: "રદ કરો",
     cancellingEllipsis: "રદ કરી રહ્યું છે...",
     messageOrganiser: "આયોજકને સંદેશ મોકલો",
+    downloadPdfShort: "PDF ડાઉનલોડ",
     cancelTicketButton: "ટિકિટ રદ કરો",
     refundedNoteTemplate: "₹{amount} તમારી મૂળ ચુકવણી પદ્ધતિમાં રિફંડ કરવામાં આવ્યા.",
     cancelledNoRefund: "રદ કરેલ - કોઈ રકમ રિફંડ કરવામાં આવી નથી.",

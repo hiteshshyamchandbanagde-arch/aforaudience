@@ -643,6 +643,7 @@ const hi: Dictionary = {
     cancelButton: "रद्द करें",
     cancellingEllipsis: "रद्द हो रहा है...",
     messageOrganiser: "आयोजक को संदेश भेजें",
+    downloadPdfShort: "PDF डाउनलोड",
     cancelTicketButton: "टिकट रद्द करें",
     refundedNoteTemplate: "₹{amount} आपके मूल भुगतान माध्यम में रिफंड कर दिया गया है।",
     cancelledNoRefund: "रद्द किया गया - कोई राशि रिफंड नहीं हुई।",

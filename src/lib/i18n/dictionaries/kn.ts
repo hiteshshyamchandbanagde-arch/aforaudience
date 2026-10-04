@@ -644,6 +644,7 @@ const kn: Dictionary = {
     cancelButton: "ರದ್ದುಗೊಳಿಸಿ",
     cancellingEllipsis: "ರದ್ದುಗೊಳಿಸುತ್ತಿದೆ...",
     messageOrganiser: "ಆಯೋಜಕರಿಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ",
+    downloadPdfShort: "PDF ಡೌನ್‌ಲೋಡ್",
     cancelTicketButton: "ಟಿಕೆಟ್ ರದ್ದುಗೊಳಿಸಿ",
     refundedNoteTemplate: "₹{amount} ನಿಮ್ಮ ಮೂಲ ಪಾವತಿ ವಿಧಾನಕ್ಕೆ ಮರುಪಾವತಿಸಲಾಗಿದೆ.",
     cancelledNoRefund: "ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ - ಯಾವುದೇ ಮೊತ್ತವನ್ನು ಮರುಪಾವತಿಸಲಾಗಿಲ್ಲ.",

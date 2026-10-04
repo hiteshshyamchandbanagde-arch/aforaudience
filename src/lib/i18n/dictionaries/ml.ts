@@ -644,6 +644,7 @@ const ml: Dictionary = {
     cancelButton: "റദ്ദാക്കുക",
     cancellingEllipsis: "റദ്ദാക്കുന്നു...",
     messageOrganiser: "സംഘാടകന് സന്ദേശം അയയ്ക്കുക",
+    downloadPdfShort: "PDF ഡൗൺലോഡ്",
     cancelTicketButton: "ടിക്കറ്റ് റദ്ദാക്കുക",
     refundedNoteTemplate: "₹{amount} നിങ്ങളുടെ യഥാർത്ഥ പേയ്‌മെന്റ് രീതിയിലേക്ക് റീഫണ്ട് ചെയ്തു.",
     cancelledNoRefund: "റദ്ദാക്കി - ഒരു തുകയും റീഫണ്ട് ചെയ്തിട്ടില്ല.",

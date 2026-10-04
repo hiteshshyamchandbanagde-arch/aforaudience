@@ -644,6 +644,7 @@ const ta: Dictionary = {
     cancelButton: "ரத்து செய்",
     cancellingEllipsis: "ரத்து செய்கிறது...",
     messageOrganiser: "நிர்வாகிக்கு செய்தி அனுப்பு",
+    downloadPdfShort: "PDF பதிவிறக்கம்",
     cancelTicketButton: "டிக்கெட்டை ரத்து செய்",
     refundedNoteTemplate: "₹{amount} உங்கள் அசல் பணம் செலுத்தும் முறைக்குத் திரும்பப் பெறப்பட்டது.",
     cancelledNoRefund: "ரத்து செய்யப்பட்டது - எந்தத் தொகையும் திரும்பப் பெறப்படவில்லை.",

@@ -648,6 +648,7 @@ const es: Dictionary = {
     cancelButton: "Cancelar",
     cancellingEllipsis: "Cancelando...",
     messageOrganiser: "Enviar mensaje al organizador",
+    downloadPdfShort: "Descargar PDF",
     cancelTicketButton: "Cancelar entrada",
     refundedNoteTemplate: "₹{amount} reembolsados a tu método de pago original.",
     cancelledNoRefund: "Cancelado - no se reembolsó ningún importe.",

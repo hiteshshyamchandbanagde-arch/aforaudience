@@ -686,7 +686,7 @@ export default function MyTicketsPage() {
                                 style={{ flex: '1 1 0', minWidth: 0 }}
                               >
                                 <DownloadIcon style={{ width: 13, height: 13 }} />
-                                {tr.checkoutPage.downloadTicketPdf}
+                                {tr.ticketsPage.downloadPdfShort}
                               </Button>
                               <MessageButton
                                 contextType="BOOKING"
