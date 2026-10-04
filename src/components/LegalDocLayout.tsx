@@ -52,7 +52,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
         <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "var(--afa-space-2)" }}>
           {title}
         </h1>
-        <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
+        <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "var(--afa-space-40px)" }}>Last updated: {lastUpdated}</p>
 
         <div style={{ fontSize: "var(--afa-text-title)", lineHeight: 1.75, color: INK }}>{children}</div>
       </div>
@@ -69,7 +69,7 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
         fontSize: "var(--afa-text-subheading)",
         fontWeight: 700,
         color: INK,
-        marginTop: "40px",
+        marginTop: "var(--afa-space-40px)",
         marginBottom: "var(--afa-space-14px)",
         paddingBottom: "var(--afa-space-10px)",
         borderBottom: `1px solid ${MIST}`,

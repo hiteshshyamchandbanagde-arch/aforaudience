@@ -168,7 +168,7 @@ export default function VenueOwnerSalesOverviewPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
             <PageHead
               eyebrow="Analytics"
@@ -265,14 +265,14 @@ export default function VenueOwnerSalesOverviewPage() {
                     fullWidth={false}
                     onClick={() => setShowAllVenues(true)}
                     className="avp-hover-border"
-                    style={{ marginBottom: showAllVenues ? '16px' : 0 }}
+                    style={{ marginBottom: showAllVenues ? 'var(--afa-space-4)' : 0 }}
                   >
                     View all {venues.length} venues
                   </Button>
                 )}
 
                 {(showAllVenues || !hasMoreVenues) && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', marginTop: hasMoreVenues ? '16px' : 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', marginTop: hasMoreVenues ? 'var(--afa-space-4)' : 0 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 var(--afa-space-3)' }}>
                       <span>Venue</span>
                       <span>City</span>
@@ -313,7 +313,7 @@ export default function VenueOwnerSalesOverviewPage() {
 
           {/* Demoted relative to "By venue" - secondary context for a
               venue owner (who they're renting to), not a primary metric. */}
-          <div style={{ padding: 'var(--afa-space-1) var(--afa-space-1) 40px' }}>
+          <div style={{ padding: 'var(--afa-space-1) var(--afa-space-1) var(--afa-space-40px)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-10px)' }}>
               By organiser
             </p>

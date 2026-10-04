@@ -120,7 +120,7 @@ export default function AuthPromptSheet({
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "var(--afa-space-5)" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "4px" : 0 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "var(--afa-space-1)" : 0 }}>
             {title}
           </h2>
           {subtitle && <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.55 }}>{subtitle}</div>}

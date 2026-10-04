@@ -217,7 +217,7 @@ export default function BrowseEventsToApplyPage() {
           </select>
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
@@ -258,7 +258,7 @@ export default function BrowseEventsToApplyPage() {
                         dashboard's "Recorded Earnings" section, for
                         consistency. */}
                     {event.defaultCompensationType === 'BUY_IN' && (
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-6px', marginBottom: 'var(--afa-space-3)' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: 'calc(-1 * var(--afa-space-6px))', marginBottom: 'var(--afa-space-3)' }}>
                         Pay directly to the organiser - not yet processed or confirmed by the platform.
                       </p>
                     )}

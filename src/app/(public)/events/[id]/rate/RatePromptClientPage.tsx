@@ -117,7 +117,7 @@ export default function RatePromptClientPage({
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav />
-        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px var(--afa-space-6)", textAlign: "center" }}>
+        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "var(--afa-space-80px) var(--afa-space-6)", textAlign: "center" }}>
           <p style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
         </div>
       </main>
@@ -128,7 +128,7 @@ export default function RatePromptClientPage({
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav />
-        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px var(--afa-space-6)", textAlign: "center" }}>
+        <div style={{ maxWidth: "500px", margin: "0 auto", padding: "var(--afa-space-80px) var(--afa-space-6)", textAlign: "center" }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>
             {tr.ratePromptPage.checkInRequired}
           </p>

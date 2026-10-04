@@ -162,6 +162,11 @@ export const TOKEN_META: Record<string, TokenMeta> = {
   "--afa-space-28px": { label: "Space 28", usedFor: "section spacing" },
   "--afa-space-32px": { label: "Space 32", usedFor: "section spacing" },
   "--afa-space-48px": { label: "Space 48", usedFor: "page-level spacing" },
+  "--afa-space-36px": { label: "Space 36", usedFor: "section spacing" },
+  "--afa-space-40px": { label: "Space 40", usedFor: "section spacing" },
+  "--afa-space-56px": { label: "Space 56", usedFor: "page-level spacing" },
+  "--afa-space-64px": { label: "Space 64", usedFor: "page-level spacing" },
+  "--afa-space-80px": { label: "Space 80", usedFor: "page-level spacing" },
 }
 
 export function tokenMeta(key: string): TokenMeta {

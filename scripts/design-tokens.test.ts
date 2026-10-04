@@ -139,6 +139,13 @@ test('spacing 0-64px', () => {
   assert.notEqual(tokenValueError('--afa-space-4', 'dimension', '65px'), null)
 })
 
+test('GEN-2609-107 p2: --afa-space-80px has its own 0-120px range', () => {
+  assert.equal(tokenValueError('--afa-space-80px', 'dimension', '80px'), null)
+  assert.equal(tokenValueError('--afa-space-80px', 'dimension', '120px'), null)
+  assert.equal(tokenValueError('--afa-space-80px', 'dimension', '121px'), 'Must be between 0px and 120px.')
+  assert.equal(tokenValueError('--afa-space-64px', 'dimension', '65px'), 'Must be between 0px and 64px.')
+})
+
 test('button padding 0-64px per part', () => {
   assert.equal(tokenValueError('--afa-btn-padding-md', 'dimension-shorthand', '0px 64px'), null)
   assert.equal(tokenValueError('--afa-btn-padding-md', 'dimension-shorthand', '65px 10px'), 'Must be between 0px and 64px.')

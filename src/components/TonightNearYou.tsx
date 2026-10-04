@@ -121,7 +121,7 @@ export default function TonightNearYou() {
             <Link
               key={ev.id}
               href={`/events/${ev.id}`}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-10px)', padding: '11px var(--afa-space-2)', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-10px)', padding: '11px var(--afa-space-2)', margin: '0 calc(-1 * var(--afa-space-2))', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >

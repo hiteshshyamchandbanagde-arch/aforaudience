@@ -147,7 +147,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <BackLink href="/dashboard/venue" label="Back to Venues" />
 
           <div style={{ marginTop: 'var(--afa-space-5)' }}>

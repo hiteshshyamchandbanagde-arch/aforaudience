@@ -454,7 +454,7 @@ export default function ArtistDashboard() {
                       {r.comment && (
                         <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5, marginBottom: 'var(--afa-space-6px)' }}>{r.comment}</p>
                       )}
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: reply ? 'var(--afa-space-10px)' : 0 }}>
                         {r.user.displayName || r.user.name} · {formatDate(r.createdAt, 'medium', locale)}
                       </p>
 

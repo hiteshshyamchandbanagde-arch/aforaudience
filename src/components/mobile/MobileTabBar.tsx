@@ -319,7 +319,7 @@ export default function MobileTabBar() {
           paddingLeft: 'var(--afa-space-2)',
           paddingRight: 'var(--afa-space-2)',
           paddingTop: 'var(--afa-space-2)',
-          paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
+          paddingBottom: 'calc(var(--afa-space-2) + env(safe-area-inset-bottom))',
         }}
       >
         {items.map((item) => {
@@ -401,7 +401,7 @@ export default function MobileTabBar() {
           <div
             ref={moreSheetRef}
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
-            style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+            style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(var(--afa-space-4) + env(safe-area-inset-bottom))' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--afa-tint-08)' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>More</span>

@@ -56,12 +56,12 @@ export default function PlatformGrowthStrip() {
 
   return (
     <section style={{ background: 'var(--afa-surface-inverse)' }}>
-      <div className="growth-strip" style={{ maxWidth: '1360px', margin: '0 auto', padding: '40px var(--afa-space-48px)' }}>
+      <div className="growth-strip" style={{ maxWidth: '1360px', margin: '0 auto', padding: 'var(--afa-space-40px) var(--afa-space-48px)' }}>
         <p className="growth-strip-tagline" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(18px, 2.2vw, 24px)', color: 'var(--afa-cream)', margin: 0, lineHeight: 1.4 }}>
           {tr.homePage.growthTagline}
         </p>
         {statItems.length > 0 && (
-          <div className="growth-strip-stats" style={{ display: 'flex', gap: '36px', flexShrink: 0 }}>
+          <div className="growth-strip-stats" style={{ display: 'flex', gap: 'var(--afa-space-36px)', flexShrink: 0 }}>
             {statItems.map((s) => (
               <div key={s.label}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-display)', fontWeight: 700, color: 'var(--afa-cream)' }}>

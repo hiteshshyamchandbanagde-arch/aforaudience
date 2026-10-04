@@ -50,7 +50,7 @@ export default function VenueOwnersPage() {
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
 
-      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px var(--afa-space-48px)" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-48px)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
             {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
@@ -73,7 +73,7 @@ export default function VenueOwnersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.venueOwnersPage.searchPlaceholder}
-              style={{ width: "100%", padding: "var(--afa-space-18px) 56px var(--afa-space-18px) var(--afa-space-5)", borderRadius: "var(--afa-radius-lg)", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "var(--afa-space-18px) var(--afa-space-56px) var(--afa-space-18px) var(--afa-space-5)", borderRadius: "var(--afa-radius-lg)", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "var(--afa-text-subtitle)" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -86,9 +86,9 @@ export default function VenueOwnersPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
+          <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)" }}>
+          <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>
               {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetTitle : tr.venueOwnersPage.emptyNoneFoundTitle}
             </div>

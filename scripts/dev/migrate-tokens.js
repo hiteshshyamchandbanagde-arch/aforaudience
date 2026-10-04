@@ -175,6 +175,12 @@ const SPACING_MAP = {
   28: '--afa-space-28px',
   32: '--afa-space-32px',
   48: '--afa-space-48px',
+  // GEN-2609-107 phase 2 - exact large values (10+ uses each)
+  36: '--afa-space-36px',
+  40: '--afa-space-40px',
+  56: '--afa-space-56px',
+  64: '--afa-space-64px',
+  80: '--afa-space-80px',
 }
 // GEN-2609-106 - font-size closeout, per Hitesh's delegated decision
 // ("go ahead with your planning"): renamed the 4 pixel-named keys to

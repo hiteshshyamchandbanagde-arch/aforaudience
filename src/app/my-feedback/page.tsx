@@ -319,7 +319,7 @@ export default function MyFeedbackPage() {
   return (
     <div style={{ background: 'var(--afa-surface-raised)', minHeight: '100vh' }}>
       <SiteNav variant="page" />
-      <main style={{ maxWidth: '720px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 64px' }}>
+      <main style={{ maxWidth: '720px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-1)', color: 'var(--afa-text-primary)' }}>
           {tr.myFeedbackPage.heading}
         </h1>

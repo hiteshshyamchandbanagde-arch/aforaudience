@@ -181,7 +181,7 @@ export default function AdminDiaryPage() {
                   borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : 'none',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)', marginBottom: entry.notes ? '6px' : '0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)', marginBottom: entry.notes ? 'var(--afa-space-6px)' : '0' }}>
                   <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
                   <Badge variant="status-compact" tone={meta} style={{ fontWeight: 600, flexShrink: 0 }}>
                     {meta.label}
@@ -222,7 +222,7 @@ export default function AdminDiaryPage() {
           })}
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: 'var(--afa-space-48px) var(--afa-space-5) 40px', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
+        <div style={{ textAlign: 'center', padding: 'var(--afa-space-48px) var(--afa-space-5) var(--afa-space-40px)', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
           No diary entries yet. Add the first one on the left.
         </div>
       )}
@@ -234,7 +234,7 @@ export default function AdminDiaryPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
-      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 80px' }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-80px)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-6px)' }}>
           Admin Diary
         </h1>

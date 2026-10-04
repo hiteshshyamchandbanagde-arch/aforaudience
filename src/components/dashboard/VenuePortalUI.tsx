@@ -298,7 +298,7 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
         borderRadius: 'var(--afa-radius-lg)',
         border: '1px solid var(--afa-tint-08)',
         background: 'var(--afa-surface-raised)',
-        padding: '80px var(--afa-space-6)',
+        padding: 'var(--afa-space-80px) var(--afa-space-6)',
         textAlign: 'center',
       }}
     >

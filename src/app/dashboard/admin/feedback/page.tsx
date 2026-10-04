@@ -493,7 +493,7 @@ function AdminFeedbackBoard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>
               Admin access only
             </h1>
@@ -544,7 +544,7 @@ function AdminFeedbackBoard() {
         {item.title || item.message.slice(0, 80)}
       </div>
       {item.pageUrl && (
-        <div style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: showMobileDropdown ? '8px' : 0 }}>
+        <div style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: showMobileDropdown ? 'var(--afa-space-2)' : 0 }}>
           {item.pageUrl}
         </div>
       )}

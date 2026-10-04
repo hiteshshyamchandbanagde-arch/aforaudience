@@ -189,7 +189,7 @@ export default function HomeHeader() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
+              style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "var(--afa-space-1) var(--afa-space-10px) var(--afa-space-1) var(--afa-space-1)" : "var(--afa-space-2) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
             >
               {user ? (
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>

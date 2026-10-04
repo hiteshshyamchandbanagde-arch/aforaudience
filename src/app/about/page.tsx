@@ -45,7 +45,7 @@ function Ornament() {
         fontSize: "var(--afa-text-subtitle)",
         letterSpacing: "0.6em",
         paddingLeft: "0.6em",
-        margin: "56px 0",
+        margin: "var(--afa-space-56px) 0",
       }}
     >
       · · ·
@@ -279,7 +279,7 @@ export default function AboutPage() {
               fontSize: "var(--afa-text-title)",
               color: INK,
               opacity: 0.55,
-              marginTop: "40px",
+              marginTop: "var(--afa-space-40px)",
             }}
           >
             — The Founder
@@ -491,7 +491,7 @@ export default function AboutPage() {
           <ActLabel num="V" label="What we ask of you" />
           <ActTitle>The whole deal, in four lines.</ActTitle>
 
-          <div style={{ margin: "40px 0 var(--afa-space-32px)" }}>
+          <div style={{ margin: "var(--afa-space-40px) 0 var(--afa-space-32px)" }}>
             {[
               { role: "an artist", ask: "bring your craft. We will bring the audience." },
               { role: "an organiser", ask: "run the shows you have been dreaming of. We will bring the tools." },
@@ -582,7 +582,7 @@ export default function AboutPage() {
           {/* Quiet CTAs so a moved reader has somewhere to go */}
           <div
             style={{
-              marginTop: "64px",
+              marginTop: "var(--afa-space-64px)",
               display: "flex",
               gap: "var(--afa-space-3)",
               justifyContent: "center",

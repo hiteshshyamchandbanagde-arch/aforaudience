@@ -1431,7 +1431,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             fork as the Register Venue wizard's Seating & Pricing step -
             reuses the same .afa-glow-orange pattern already established
             there and on the Guided Setup panel below. */}
-        <div className="afa-glow-orange" style={{ padding: 'var(--afa-space-5)', margin: 'var(--afa-space-10px) -20px var(--afa-space-5)', borderRadius: 'var(--afa-radius-lg)' }}>
+        <div className="afa-glow-orange" style={{ padding: 'var(--afa-space-5)', margin: 'var(--afa-space-10px) calc(-1 * var(--afa-space-5)) var(--afa-space-5)', borderRadius: 'var(--afa-radius-lg)' }}>
           <h1 style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, margin: '0 0 var(--afa-space-1)', color: 'var(--afa-text-primary)' }}>Seat Map Builder</h1>
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: 'var(--afa-space-6px)' }}>
             General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.
@@ -1550,7 +1550,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         )}
 
         {seatingMode === 'NUMBERED' && effectivePath === 'choose' && !isMobile && (
-          <div className="afa-glow-orange" style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap', maxWidth: '780px', padding: 'var(--afa-space-5)', margin: '0 -20px', borderRadius: 'var(--afa-radius-lg)' }}>
+          <div className="afa-glow-orange" style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap', maxWidth: '780px', padding: 'var(--afa-space-5)', margin: '0 calc(-1 * var(--afa-space-5))', borderRadius: 'var(--afa-radius-lg)' }}>
             <Button
               variant="card"
               fullWidth={false}
@@ -1656,7 +1656,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
                     </Button>
                   </div>
-                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '-6px', marginBottom: 'var(--afa-space-3)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'calc(-1 * var(--afa-space-6px))', marginBottom: 'var(--afa-space-3)' }}>
                     {manualPlacement
                       ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
                       : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}

@@ -150,7 +150,7 @@ export default function VenueDashboard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>You're not registered as a Venue Owner</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6)' }}>Apply to list your venue from your profile to start managing bookings.</p>
             <BackLink href="/" label="Back to Home" />
@@ -167,7 +167,7 @@ export default function VenueDashboard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}>⏳</div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>Your Venue Owner account is pending approval</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -185,7 +185,7 @@ export default function VenueDashboard() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1120px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
+        <div style={{ maxWidth: '1120px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           {/* BUG-2609-010: Account Settings/Revenue Overview/Booking
               Requests/Flexible Requests are all now sidebar entries
               (DashboardShell's VENUE_OWNER ROLE_SECTIONS); Register Venue

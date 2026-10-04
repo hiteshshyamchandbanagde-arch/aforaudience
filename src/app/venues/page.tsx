@@ -95,7 +95,7 @@ export default async function VenuesPage() {
     <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
       <style>{`
         .afa-venues-page-container { max-width: 1240px; margin: 0 auto; padding: var(--afa-space-48px) var(--afa-space-6); }
-        @media (min-width: 768px) { .afa-venues-page-container { padding: var(--afa-space-48px) 40px; } }
+        @media (min-width: 768px) { .afa-venues-page-container { padding: var(--afa-space-48px) var(--afa-space-40px); } }
       `}</style>
       <SiteNav active="venues" />
       <div className="afa-venues-page-container">

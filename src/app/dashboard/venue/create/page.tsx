@@ -272,7 +272,7 @@ export default function CreateVenuePage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '780px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
+        <div style={{ maxWidth: '780px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
             <PageHead eyebrow="New listing" title="Register Venue" description="Add your space, design its seating layout, and set your prices per section." />
           </div>
@@ -390,7 +390,7 @@ export default function CreateVenuePage() {
             {/* Rental rate - what an Organiser pays to book this venue, separate from audience ticket prices */}
             <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
               <SectionTitle n="02" title="Rental Rate" />
-              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: '-8px', marginBottom: 'var(--afa-space-18px)' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'calc(-1 * var(--afa-space-2))', marginBottom: 'var(--afa-space-18px)' }}>
                 What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
               </p>
 
@@ -443,7 +443,7 @@ export default function CreateVenuePage() {
 
               {rateType !== 'FLEXIBLE' && (
                 <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-08)' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? 'var(--afa-space-14px)' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
                   </label>
@@ -484,7 +484,7 @@ export default function CreateVenuePage() {
                   Pricing fork (GEN-2608-082). Negative side/bottom margin
                   bleeds it to the card's own edges; top stays flush under
                   SectionTitle. */}
-              <div className="afa-glow-orange" style={{ margin: '0 -28px -28px', padding: 'var(--afa-space-1) var(--afa-space-28px) var(--afa-space-28px)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-lg) var(--afa-radius-lg)' }}>
+              <div className="afa-glow-orange" style={{ margin: '0 calc(-1 * var(--afa-space-28px)) calc(-1 * var(--afa-space-28px))', padding: 'var(--afa-space-1) var(--afa-space-28px) var(--afa-space-28px)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-lg) var(--afa-radius-lg)' }}>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-2px)' }}>
                   How is this venue's seating arranged? Pick how your audience will choose where to sit.
                 </p>

@@ -408,7 +408,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         }
       `}</style>
 
-      <div className="sitenav-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "18px 24px" : "16px 24px" }}>
+      <div className="sitenav-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "var(--afa-space-18px) var(--afa-space-6)" : "var(--afa-space-4) var(--afa-space-6)" }}>
         <Link
           href="/"
           className="sitenav-logo"
@@ -421,7 +421,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         {/* Desktop: primary links always render the same way; the account
             area below branches on isHome (untouched legacy row) vs the
             page variant's collapsed profile-menu dropdown (GEN-2608-015). */}
-        <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
+        <div className="sitenav-desktop" style={{ gap: isHome ? "var(--afa-space-32px)" : "var(--afa-space-6)", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
             <Link key={l.key} href={l.href} style={{ fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-selected)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
@@ -556,7 +556,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   aria-label="Account menu"
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
+                  style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "var(--afa-space-1) var(--afa-space-10px) var(--afa-space-1) var(--afa-space-1)" : "var(--afa-space-2) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
                 >
                   {user ? (
                     <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>

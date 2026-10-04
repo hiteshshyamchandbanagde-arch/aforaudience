@@ -427,8 +427,8 @@ function EventsPageContent() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: 56px var(--afa-space-6) 112px; }
-        @media (min-width: 640px) { .afa-events-page-container { padding: 80px var(--afa-space-32px) 112px; } }
+        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-56px) var(--afa-space-6) 112px; }
+        @media (min-width: 640px) { .afa-events-page-container { padding: var(--afa-space-80px) var(--afa-space-32px) 112px; } }
         .afa-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease, opacity 0.15s ease; }
         .afa-event-card:hover { border-color: var(--afa-amber-border); }
         .afa-event-card-grid .afa-event-card-poster { aspect-ratio: 4 / 5; }
@@ -488,7 +488,7 @@ function EventsPageContent() {
             deliberately not a new top-level nav route. Underline-tab
             treatment (not pills) matching the Venues/Owners toggle
             convention elsewhere in the app. */}
-        <div style={{ display: "flex", gap: "var(--afa-space-32px)", marginTop: "40px", borderBottom: "1px solid var(--afa-tint-10)" }}>
+        <div style={{ display: "flex", gap: "var(--afa-space-32px)", marginTop: "var(--afa-space-40px)", borderBottom: "1px solid var(--afa-tint-10)" }}>
           <Button variant="tab-display" fullWidth={false} selected={contentMode === "events"} onClick={() => setContentMode("events")} style={{ marginBottom: "-1px" }}>
             {tr.eventsPage.toggleEvents}
           </Button>
@@ -702,7 +702,7 @@ function EventsPageContent() {
 
             {/* EVENTS GRID */}
             {loading ? (
-              <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
+              <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
             ) : loadFailed || filtered.length === 0 ? (
               // A failed load gets the error + Retry here, never the
               // "nothing published" copy - that one is only true after a

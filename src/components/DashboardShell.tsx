@@ -537,7 +537,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       {!hideMobileBarForUnifiedTabBar && (
         <nav
           className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 py-2"
-          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
+          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingBottom: 'calc(var(--afa-space-2) + env(safe-area-inset-bottom))' }}
         >
           {topNav.map((item) => {
             const active = isActive(`top:${item.href}`)

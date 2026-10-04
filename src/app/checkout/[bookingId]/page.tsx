@@ -687,7 +687,7 @@ export default function CheckoutPage() {
           </label>
 
           {companionTags.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)', marginBottom: companionConsent ? 12 : 0 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)', marginBottom: companionConsent ? 'var(--afa-space-3)' : 0 }}>
               {companionTags.map((t) => (
                 <span
                   key={t.id}

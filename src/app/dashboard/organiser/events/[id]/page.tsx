@@ -369,7 +369,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     </span>
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
                       <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-06)' }}>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? '8px' : 0 }}>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? 'var(--afa-space-2)' : 0 }}>
                           Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
                         </p>
                         {walletBalance > 0 && (

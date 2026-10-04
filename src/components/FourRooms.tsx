@@ -76,7 +76,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
         </div>
       </div>
 
-      <div className="four-rooms-copy" style={{ background: "var(--afa-surface-inverse)", padding: "56px var(--afa-space-28px)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      <div className="four-rooms-copy" style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-28px)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
           {personaLabel}
         </div>
@@ -100,7 +100,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
 
         <Link
           href={room.href}
-          style={{ marginTop: "36px", alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-3) var(--afa-space-6)", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", fontWeight: 700, textDecoration: "none" }}
+          style={{ marginTop: "var(--afa-space-36px)", alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-3) var(--afa-space-6)", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", fontWeight: 700, textDecoration: "none" }}
         >
           {room.cta}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -175,7 +175,7 @@ export default function FourRooms() {
 
   return (
     <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)" }}>
-      <div style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px 36px 40px" }}>
+      <div style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-40px)" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-6)" }}>
           {tr.homePage.fourRoomsEyebrow}
         </div>

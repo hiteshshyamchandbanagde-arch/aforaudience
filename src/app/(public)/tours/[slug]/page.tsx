@@ -36,7 +36,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
     return (
       <>
         <SiteNav />
-        <main style={{ maxWidth: '700px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+        <main style={{ maxWidth: '700px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
           <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)' }}>This Tour isn't available.</p>
         </main>
       </>
@@ -66,7 +66,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         )}
 
         {tour.stops.length === 0 ? (
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '40px var(--afa-space-6)', textAlign: 'center', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-40px) var(--afa-space-6)', textAlign: 'center', border: '1px solid var(--afa-tint-08)' }}>
             <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No stops are open for booking yet - check back soon.</p>
           </div>
         ) : (

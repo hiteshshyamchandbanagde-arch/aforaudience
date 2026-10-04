@@ -176,7 +176,7 @@ export default function WallOfFamePage() {
       <SiteNav active="wall-of-fame" />
 
       {/* HERO */}
-      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px var(--afa-space-48px)" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-48px)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
             {tr.wallOfFamePage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.wallOfFamePage.heroEmphasis}</em>
@@ -187,13 +187,13 @@ export default function WallOfFamePage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px var(--afa-space-6) 80px" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "var(--afa-space-40px) var(--afa-space-6) var(--afa-space-80px)" }}>
         {error && (
           <ErrorBanner style={{ marginBottom: "var(--afa-space-6)" }}>{error}</ErrorBanner>
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.loading}</div>
+          <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.loading}</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--afa-space-6)" }}>
             {/* ARTIST OF THE MONTH */}
@@ -318,7 +318,7 @@ export default function WallOfFamePage() {
 
         {/* TOP VENUES / TOP ORGANISERS — all-time leaderboard, separate from the monthly awards above */}
         {!loading && data && (data.topVenues.length > 0 || data.topOrganisers.length > 0) && (
-          <div style={{ marginTop: "40px" }}>
+          <div style={{ marginTop: "var(--afa-space-40px)" }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)", textAlign: "center" }}>
               {tr.wallOfFamePage.allTimeLeaderboard}
             </div>

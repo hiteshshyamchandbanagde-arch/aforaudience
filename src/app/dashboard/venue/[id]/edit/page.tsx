@@ -410,7 +410,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
               {rateType !== 'FLEXIBLE' && (
                 <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-06)' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? 'var(--afa-space-14px)' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
                   </label>

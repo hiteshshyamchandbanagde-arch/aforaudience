@@ -131,7 +131,7 @@ function SectionHeader({ eyebrow, count }: { eyebrow: string; count: number }) {
 
 function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", background: "var(--afa-surface-raised)", padding: "56px var(--afa-space-6)", textAlign: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-56px) var(--afa-space-6)", textAlign: "center" }}>
       <span style={{ color: "var(--afa-amber)" }}>{icon}</span>
       <div>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{title}</h3>
@@ -332,10 +332,10 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
       <style>{`
         .afa-organiser-container { max-width: 1024px; margin: 0 auto; padding: 0 var(--afa-space-6) 112px; }
-        @media (min-width: 640px) { .afa-organiser-container { padding: 0 40px 112px; } }
+        @media (min-width: 640px) { .afa-organiser-container { padding: 0 var(--afa-space-40px) 112px; } }
         .afa-organiser-avatar { width: 144px; height: 144px; }
         @media (min-width: 768px) { .afa-organiser-avatar { width: 176px; height: 176px; } }
-        .afa-organiser-hero { display: grid; grid-template-columns: 1fr; gap: 40px; }
+        .afa-organiser-hero { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-40px); }
         @media (min-width: 768px) { .afa-organiser-hero { grid-template-columns: auto 1fr; align-items: start; gap: var(--afa-space-48px); } }
         .afa-organiser-tours-grid { display: grid; grid-template-columns: 1fr; }
         @media (min-width: 768px) { .afa-organiser-tours-grid { grid-template-columns: 1fr 1fr; } }
@@ -363,7 +363,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
           <span style={{ color: "var(--afa-text-secondary)" }}>{tr.organiserDetailPage.breadcrumbProfile}</span>
         </nav>
 
-        <header className="afa-organiser-hero" style={{ borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "56px" }}>
+        <header className="afa-organiser-hero" style={{ borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "var(--afa-space-56px)" }}>
           <div className="afa-organiser-avatar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", overflow: "hidden" }}>
             {showAvatarPhoto ? (
               <Photo src={organiser.user.avatar} alt={organiser.orgName} />
@@ -399,7 +399,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
           </div>
         </header>
 
-        <section style={{ paddingTop: "64px" }}>
+        <section style={{ paddingTop: "var(--afa-space-64px)" }}>
           <SectionHeader eyebrow={tr.organiserDetailPage.upcomingEventsHeading} count={upcoming.length} />
           <div style={{ marginTop: "var(--afa-space-6)", display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
             {upcoming.length > 0 ? (
@@ -409,7 +409,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
             )}
           </div>
 
-          <div style={{ marginTop: "56px" }}>
+          <div style={{ marginTop: "var(--afa-space-56px)" }}>
             <SectionHeader eyebrow={tr.organiserDetailPage.pastEventsHeading} count={past.length} />
             <div style={{ marginTop: "var(--afa-space-6)", display: "flex", flexDirection: "column", gap: "var(--afa-space-4)", opacity: past.length > 0 ? 0.85 : 1 }}>
               {past.length > 0 ? (
@@ -433,7 +433,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
           </div>
         </section>
 
-        <section style={{ paddingTop: "64px" }}>
+        <section style={{ paddingTop: "var(--afa-space-64px)" }}>
           <SectionHeader eyebrow={tr.organiserDetailPage.toursHeading} count={organiser.tours.length} />
           <div className="afa-organiser-tours-grid" style={{ marginTop: "var(--afa-space-6)", gap: "var(--afa-space-4)" }}>
             {visibleTours.length > 0 ? (

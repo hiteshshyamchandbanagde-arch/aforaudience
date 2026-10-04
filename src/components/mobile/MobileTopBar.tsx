@@ -168,7 +168,7 @@ export default function MobileTopBar() {
           style={{
             width: '100%',
             boxSizing: 'border-box',
-            padding: onEventsRoute ? '8px 30px 8px 26px' : '8px 8px 8px 26px',
+            padding: onEventsRoute ? 'var(--afa-space-2) 30px var(--afa-space-2) 26px' : 'var(--afa-space-2) var(--afa-space-2) var(--afa-space-2) 26px',
             borderRadius: 'var(--afa-radius-pill)',
             border: '1px solid var(--afa-tint-12)',
             background: 'var(--afa-surface-raised)',
@@ -239,7 +239,7 @@ export default function MobileTopBar() {
         )}
       </div>
 
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? '8px' : '5px' }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? 'var(--afa-space-2)' : '5px' }}>
         {status === 'loading' ? null : user ? (
           <Button
             // bare-reason: must match the Sign in / Register <Link>s it swaps with in the same top-bar slot (mono caption type); those are links, not Buttons
