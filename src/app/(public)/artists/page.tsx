@@ -285,7 +285,7 @@ export default function ArtistsPage() {
             >
               {g === "All" ? tr.artistsPage.filterAll : g}
               {selectedGenre === g && (
-                <span style={{ position: "absolute", left: 0, bottom: 0, height: "1px", width: "100%", background: "var(--afa-fill-solid)" }} />
+                <span style={{ position: "absolute", left: 0, bottom: 0, height: "1px", width: "100%", background: "var(--afa-selected)" }} />
               )}
             </Button>
           ))}
