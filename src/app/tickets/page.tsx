@@ -20,11 +20,10 @@ import StubRow from '@/components/ui/StubRow'
 import { formatDate } from '@/lib/format-date'
 
 // BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
-// Organiser / Cancel ticket): each label on one line, each button grows
-// from its own width and the row wraps when the next one doesn't fit.
-// minHeight is the 44px tap target, built from the space scale.
+// Organiser / Cancel ticket): full-width buttons stacked under the QR,
+// each label on one line. minHeight is the 44px tap target, built from
+// the space scale.
 const ACTION_STYLE: React.CSSProperties = {
-  flex: '1 1 auto',
   whiteSpace: 'nowrap',
   minHeight: 'calc(var(--afa-space-40px) + var(--afa-space-1))',
 }
@@ -683,16 +682,13 @@ export default function MyTicketsPage() {
                             )}
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                           {/* BUG-2610-012 - the actions used to share the narrow
                               column beside the QR (about 70px each at 390, and the
                               2-up desktop grid is narrower still), so every label
                               wrapped to two lines and spilled past its border. They
-                              now take the card's full width under the QR; each label
-                              stays on one line (nowrap) and each button grows from
-                              its own width (flex 1 1 auto), wrapping to a new row
-                              only when the next one doesn't fit. ACTION_STYLE keeps each
-                              at least 44px tall. */}
+                              now stack at the card's full width under the QR, one
+                              line each, 44px tall (ACTION_STYLE). */}
                           <Button
                             variant="outline-neutral"
                             size="sm"
