@@ -9,7 +9,7 @@ from each run's report, so the nightly result can be read per ticket.
 Status column: **tested** (spec and title below), **tested + HUMAN** (the
 spec covers what a machine can judge; the HUMAN part stays open for
 Hitesh), **HUMAN** (a machine can't judge it), **OBSOLETE** (superseded),
-**untested** (no test yet: batch 2).
+**untested** (no test yet).
 
 The 38 tickets are the ones in `BUILD_COMPLETE` / `IN_TEST` on 3 Oct 2026
 (dispatch B1). Specs marked `@needs-db` run in CI only (inside the shared
@@ -36,8 +36,8 @@ e2e queue), never in a local or autopilot run.
 | BUG-2610-003 | tested | `ticket-tier.spec.ts` › `[BUG-2610-003] the Jaipur Mic Gala 100 listing card shows its price from the tier, not '—'`; `[BUG-2610-003] My Tickets: a numbered-seat booking's card shows its tier name, not '—'`; unit: `scripts/booking-tiers.test.ts` | Dispatch C. Tier and price resolved at read time; no booking rows rewritten |
 | BUG-2610-008 | tested | `colour-rules.spec.ts` › `[BUG-2610-008] /artists: the selected genre's underline is --afa-selected (amber), not the CTA orange` | Dispatch C |
 | BUG-2610-009 | tested | `events-load.spec.ts` › `[BUG-2610-009] a slow /api/events never shows a '0 events' count before the events arrive` | Dispatch C |
-| FEAT-2608-047 | untested | | Batch 2: add a tour stop as Hrithik, save, see it on the public profile, remove it (restores his profile) |
-| GEN-2609-114 | untested | | The goal spec does not assert 114's rules. Batch 2: modal backdrops use `--afa-scrim`; sage text on dark is the -bright variant (contrast ≥ 4.5) |
+| FEAT-2608-047 | tested | `artist-tour-stop.spec.ts` › `[FEAT-2608-047] a tour stop in another country, saved in the editor, is shown on the public profile; removed again` | Batch 2 (4 Oct). Hrithik, desktop only; his profile is compared field by field and put back in `finally` |
+| GEN-2609-114 | tested | `scrim-backdrops.mobile.spec.ts` › `[GEN-2609-114] events filter sheet: the backdrop is --afa-scrim`, `[GEN-2609-114] dashboard tab bar More sheet: the backdrop is --afa-scrim`; `colour-closeout.spec.ts` › `[GEN-2609-114] profile: 'Visit your Organiser dashboard' is --afa-sage-bright, …`, `[GEN-2609-114] venue bookings: the outline 'Message Organiser' button's text is --afa-sage-bright, …` | Batch 2 (4 Oct). Closes the goal spec's gap: backdrops = the token's computed value; sage text = -bright, contrast ≥ 4.5 at 390/1440 |
 | GEN-2609-118 | tested | `design-system-goal.spec.ts` › `@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor …`; `colour-rules.spec.ts` › `[GEN-2609-118] checkout: the only orange element is the Pay button; 'See fee breakdown' is amber`, `[GEN-2609-118] booking confirmed ('You're going'): the count circle is amber, not orange; only View My Ticket is orange` | Dispatch C (4 Oct): the sweep's remaining look-and-feel check is now these colour assertions (390/1440). Orange = an action you tap, only |
 | GEN-2609-119 | tested | `design-system-goal.spec.ts` (same test) | Manifest, theme-color and share poster follow their tokens. The ticket PDF and emails have no test-safe endpoint (the spec says so) |
 | GEN-2609-121 | tested | `design-system-goal.spec.ts` (same test); `colour-rules.spec.ts` › `[GEN-2609-121] artist profile (Hrithik): each show's ticket link is the orange primary; '+ Follow' is an outline; prev/next arrows are not filled`, `[GEN-2609-121] a message thread's Send button is the orange primary` | Dispatch C (4 Oct): the two parts Hitesh had not seen (artist profile, Messages Send) are now tests |
@@ -56,27 +56,36 @@ e2e queue), never in a local or autopilot run.
 | GEN-2608-041 | tested + HUMAN | `language-rollout.spec.ts` › `[GEN-2608-041] language switcher: te/ta/kn/ml - …` | HUMAN: translation quality |
 | GEN-2609-003 | OBSOLETE | | Phase 1 nav shell and fonts, superseded: the tab bar by GEN-2609-013/-017 and BUG-2609-084 (all tested), the fonts by the later font migration (layout.tsx) |
 | GEN-2609-004 | tested + HUMAN | `smoke.spec.ts` › `[GEN-2609-004] Jaipur Mic Gala 100 event detail page loads and offers seat selection` | Asserts the seat picker is its own `/events/<id>/seats` route. HUMAN: the Discover/EventDetail restyle |
-| GEN-2609-006 | untested | | Batch 2: My Tickets cards show a QR that encodes the bookingId, and each status keeps its actions (needs a persona with bookings). HUMAN: poster-card look |
-| GEN-2609-007 | untested | | Batch 2: save an event (heart), it appears on /saved, unsave (restores) |
-| GEN-2609-008 | untested | | Batch 2: Profile hub at 390 lists the Create and Money & account rows and opens the fee sheet. HUMAN: look |
+| GEN-2609-006 | tested + HUMAN | `ticket-qr.spec.ts` › `[GEN-2609-006] My Tickets: each confirmed card's QR encodes its bookingId; each status keeps its actions` | Batch 2 (4 Oct). Atul's 10 confirmed cards: the QR image's pixels, sampled per module, are exactly the symbol for that card's bookingId. CONFIRMED / PENDING (served unexpired in the browser) / EXPIRED / CANCELLED actions. HUMAN: poster-card look |
+| GEN-2609-007 | tested | `saved-events.spec.ts` › `[GEN-2609-007] save an event with the heart, see it on /saved, unsave it there` | Batch 2 (4 Oct). Atul, 390/1440; his saved list is put back in `finally` |
+| GEN-2609-008 | tested + HUMAN | `profile-hub.mobile.spec.ts` › `[GEN-2609-008] profile hub at 390: Create and Money & account rows; Fee breakdown opens the fee sheet` | Batch 2 (4 Oct). The fee sheet's focus trap reuses 065's check (`helpers/focus.ts`). HUMAN: look |
 | GEN-2609-010 | tested | `seat-legend.spec.ts` › `[GEN-2609-010] Jaipur Mic Gala 100 seat map shows a price-tier legend matching its tiers` | |
 | GEN-2609-012 | tested | `discover-carousels.mobile.spec.ts` › `[GEN-2609-012] Discover: every carousel on QA holds at least 3 events`; `[GEN-2609-012] Discover: a row under 3 events is not drawn; all-sparse falls back to the list` | |
 | GEN-2609-013 | tested | `unified-tab-bar.mobile.spec.ts` › `[GEN-2609-013] [GEN-2609-017] signed in, /tickets/ and /profile/ show the same bottom tab bar a visitor sees on /` | Signed in (Atul), the case the ticket fixed. Signed out is not testable: /tickets and /profile send a visitor to /login once the session loads. Reference bar is `/`'s: `/events` now has its own Discover bar (tabBarRoutes.ts) |
 | GEN-2609-017 | tested | `unified-tab-bar.mobile.spec.ts` (same test) | Asserts exactly one bar on `/`, the unified one |
-| GEN-2609-113 | untested | | Mostly a literal-to-token sweep, which the design-token ratchet guards. Batch 2: gold and error tone text on their tints ≥ 4.5 (the gold PENDING badge is already ≥ 4.5 in contrast.spec.ts) |
-| GEN-2609-115 | untested | | Batch 2, `@needs-db`: a design-token restore runs the contrast check; the form-submit button text contrast on the auth pages |
+| GEN-2609-113 | tested | `colour-closeout.spec.ts` › 5 tests `[GEN-2609-113] …` (organiser Draft badge, artist pending / rejected application badges, 'Buy-in required', My Tickets Reserved badge) | Batch 2 (4 Oct). Gold = --afa-amber on --afa-amber-tint, error = --afa-error-bright on --afa-error-tint, contrast ≥ 4.5 at 390/1440. The literal-to-token sweep itself is guarded by the ratchet |
+| GEN-2609-115 | tested | `design-system-restore.spec.ts` › `@needs-db [GEN-2609-115] a design-token restore runs the contrast check and reports it; the token ends as it started`; `auth-submit-contrast.spec.ts` › `[GEN-2609-115] /login/: the 'Sign In' submit button's text …`, `[GEN-2609-115] /register/: the 'Create Account' …` | Batch 2 (4 Oct). The restore test needs the run's temp admin, so CI only (not yet run at push) |
 
-## Counts (3 Oct 2026, batch 1)
+## Counts (4 Oct 2026, after batch 2)
 
 | | Tickets |
 |---|---|
-| tested (incl. tested + HUMAN) | 26 |
+| tested (incl. tested + HUMAN) | 36 |
 | HUMAN only | 3 (BUG-2608-030, FEAT-2608-044, FEAT-2608-051) |
 | OBSOLETE | 2 (BUG-2608-050, GEN-2609-003) |
-| untested (batch 2) | 7 (FEAT-2608-047, GEN-2609-006, GEN-2609-007, GEN-2609-008, GEN-2609-113, GEN-2609-114, GEN-2609-115) |
+| untested | 0 |
 
-Of the 26 tested, 2 also have a HUMAN item open (GEN-2608-041,
-GEN-2609-004), so they stay open until Hitesh confirms (T5).
+41 rows: B1's 38 tickets plus dispatch C's BUG-2610-003, BUG-2610-008
+and BUG-2610-009. Of the 36 tested, 4 also have a HUMAN item open
+(GEN-2608-041, GEN-2609-004, GEN-2609-006, GEN-2609-008), so they stay
+open until Hitesh confirms (T5).
+
+Batch 2 (dispatch B2, 4 Oct) moved the last 7 untested tickets:
+FEAT-2608-047, GEN-2609-007, GEN-2609-113, GEN-2609-114 and
+GEN-2609-115 to **tested**; GEN-2609-006 and GEN-2609-008 to **tested +
+HUMAN**. GEN-2609-115's restore test is `@needs-db` (CI only).
+
+Batch 1 (3 Oct): 26 tested, 3 HUMAN only, 2 OBSOLETE, 7 untested.
 GEN-2609-118 and GEN-2609-121 moved to **tested** on 4 Oct (dispatch C:
 `colour-rules.spec.ts` replaces their manual look-and-feel checks).
 

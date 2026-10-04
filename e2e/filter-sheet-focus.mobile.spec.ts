@@ -1,4 +1,5 @@
 import { test, expect } from "./helpers/test";
+import { expectFocusTrapped } from "./helpers/focus";
 
 /**
  * BUG-2609-065 - sheets did not keep keyboard focus inside themselves: on
@@ -19,29 +20,8 @@ test("[BUG-2609-065] events filter sheet: focus moves in, Tab and Shift+Tab stay
 
   const sheet = page.getByRole("dialog", { name: "Filter events" });
   await expect(sheet).toBeVisible();
-  await expect(sheet).toHaveAttribute("aria-modal", "true");
-
-  const focusIsInsideSheet = () =>
-    page.evaluate(() => {
-      const dialog = document.querySelector('[role="dialog"]');
-      return !!dialog && dialog.contains(document.activeElement) && document.activeElement !== document.body;
-    });
-
-  // Focus is inside as soon as the sheet opens, not left on the trigger.
-  await expect.poll(focusIsInsideSheet).toBe(true);
-
-  // More presses than the sheet has controls, so the wrap-around at both
-  // ends is crossed in each direction.
-  const controls = await sheet.getByRole("button").count();
-  expect(controls).toBeGreaterThan(5);
-  for (let i = 0; i < controls + 3; i++) {
-    await page.keyboard.press("Tab");
-    expect(await focusIsInsideSheet(), `Tab press ${i + 1} left the sheet`).toBe(true);
-  }
-  for (let i = 0; i < controls + 3; i++) {
-    await page.keyboard.press("Shift+Tab");
-    expect(await focusIsInsideSheet(), `Shift+Tab press ${i + 1} left the sheet`).toBe(true);
-  }
+  // More than 5 controls (expectFocusTrapped presses past all of them).
+  await expectFocusTrapped(page, sheet, 6);
 
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();

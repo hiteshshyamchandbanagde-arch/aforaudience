@@ -110,3 +110,11 @@ stay in QA.
 | `role-menu-ssr.spec.ts` | Omkar, Atul | BUG-2609-020 role menu and held roles in the first server response |
 | `discover-carousels.mobile.spec.ts` | guest | GEN-2609-012 no carousel under 3 events; all-sparse shows the list |
 | `design-system-goal.spec.ts` `@needs-db` | temp admin, guest, Atul | the central-control goal: a Design System save reaches `/`, `/events/`, `/venues/` with no redeploy, manifest/theme-color/poster follow their own tokens, reverted; Admin Settings Save buttons at 390 and 1440 |
+| `design-system-restore.spec.ts` `@needs-db` | temp admin | GEN-2609-115 a version restore runs the contrast check: passes silently, reports a failing pair; token reverted |
+| `auth-submit-contrast.spec.ts` | guest | GEN-2609-115 Sign In / Create Account text contrast ≥ 4.5 |
+| `scrim-backdrops.mobile.spec.ts` | guest, Omkar | GEN-2609-114 filter sheet and More sheet backdrops are `--afa-scrim` |
+| `colour-closeout.spec.ts` | Omkar, Hrithik, Atul, Vinayak | GEN-2609-113 gold/error tone text on its tint ≥ 4.5 (5 places); GEN-2609-114 sage text is `-bright` |
+| `saved-events.spec.ts` | Atul | GEN-2609-007 heart saves, `/saved` lists, unsave (restored) |
+| `profile-hub.mobile.spec.ts` | Atul | GEN-2609-008 Profile hub rows at 390; fee sheet traps focus |
+| `ticket-qr.spec.ts` | Atul | GEN-2609-006 each confirmed card's QR is its bookingId; actions per status |
+| `artist-tour-stop.spec.ts` | Hrithik | FEAT-2608-047 tour stop abroad reaches the public profile; removed (restored) |
