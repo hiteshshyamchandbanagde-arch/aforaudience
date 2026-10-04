@@ -60,6 +60,11 @@ stay in QA.
 
 ## Writing a spec
 
+- A test that verifies a ticket puts its ID in square brackets in the
+  title: `test("[BUG-2609-077] ...")` (several IDs allowed). The CI
+  summary lists the tickets whose tests passed and failed; the map is
+  `docs/test-coverage-map.md`.
+
 - Import `test` and `expect` from `./helpers/test`, not from
   `@playwright/test`: it starts every page with the first-visit state
   settled (intro splash, install banner, nudges; `helpers/first-visit.ts`).
@@ -94,4 +99,14 @@ stay in QA.
 | `location-chip.spec.ts` | guest | BUG-2609-078 chip change relists `/venues` |
 | `venue-revenue.spec.ts` | Vinayak | BUG-2609-087 Bookings and Sales month totals agree |
 | `events-search.spec.ts` | Atul | BUG-2610-004 `?search=` shown and searched in every city; BUG-2610-007 clearing the box clears the address |
+| `events-load.spec.ts` | guest | BUG-2609-077 normal, slow and failed `/api/events` never show "No events published yet" |
+| `chat-bubble.mobile.spec.ts` | Omkar, Atul, Vinayak | BUG-2609-068/081 the chat button covers no bottom action on 6 pages at 390 |
+| `fonts.spec.ts` | guest, Vinayak, Omkar | BUG-2609-055 no text in a browser-default font on 7 pages |
+| `plurals.spec.ts` | guest, Vinayak | BUG-2609-082 "1 event" / "2 events" on /events, venue Sales counts |
+| `unified-tab-bar.mobile.spec.ts` | guest, Atul | GEN-2609-013/017 the bar on / is the one Atul gets on /tickets, /profile |
+| `artist-tour.mobile.spec.ts` | Hrithik | BUG-2608-049 Tour fields fit at 390 (row added, never saved) |
+| `contrast.spec.ts` | Omkar | BUG-2609-050 special-notes badge contrast, all three statuses |
+| `seat-legend.spec.ts` | guest | GEN-2609-010 price-tier legend on Jaipur Mic Gala 100 |
+| `role-menu-ssr.spec.ts` | Omkar, Atul | BUG-2609-020 role menu and held roles in the first server response |
+| `discover-carousels.mobile.spec.ts` | guest | GEN-2609-012 no carousel under 3 events; all-sparse shows the list |
 | `design-system-goal.spec.ts` `@needs-db` | temp admin, guest, Atul | the central-control goal: a Design System save reaches `/`, `/events/`, `/venues/` with no redeploy, manifest/theme-color/poster follow their own tokens, reverted; Admin Settings Save buttons at 390 and 1440 |

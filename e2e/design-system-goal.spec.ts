@@ -104,7 +104,7 @@ async function expectSelectedOn(page: Page, path: string, expected: string, who:
 }
 
 test.describe("@needs-db design system goal", () => {
-  test("@needs-db an admin's token save reaches every visitor with no redeploy, then is reverted", async ({ browser }) => {
+  test("@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor with no redeploy, then is reverted", async ({ browser }) => {
     // One editor save, six page checks under two sessions, the downloads,
     // then a second save to revert: honestly longer than 60 s on QA. Each
     // single wait still fails in 10-25 s.
@@ -216,7 +216,7 @@ for (const [label, viewport, phone] of [
   ["390 x 844", PHONE, true],
   ["1440 x 900", DESKTOP, false],
 ] as const) {
-  test(`@needs-db admin settings: Save buttons visible, uncovered and clickable at ${label}`, async ({ browser }) => {
+  test(`@needs-db [BUG-2609-081] admin settings: Save buttons visible, uncovered and clickable at ${label}`, async ({ browser }) => {
     const context = await openContext(browser, ADMIN_AUTH_FILE, viewport, phone);
     const page = await context.newPage();
     try {

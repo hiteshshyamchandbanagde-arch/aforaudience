@@ -85,10 +85,14 @@ const RAW_KEY_LEAK = /\b[a-z]+\.[a-zA-Z]+\b/;
 // already-shipped baseline (Hindi) - representative spread, not exhaustive.
 const RELOAD_CHECK_LOCALES = new Set(["hi", "de", "ta"]);
 
+// GEN-2608-041 added these four (Telugu, Tamil, Kannada, Malayalam).
+const SOUTH_INDIAN_LOCALES = new Set(["te", "ta", "kn", "ml"]);
+
 for (const locale of LOCALES) {
   const { id } = locale;
+  const ticket = SOUTH_INDIAN_LOCALES.has(id) ? "[GEN-2608-041] " : "";
 
-  test(`language switcher: ${id} - nav updates and lang attribute is set`, async ({ page, isMobile }) => {
+  test(`${ticket}language switcher: ${id} - nav updates and lang attribute is set`, async ({ page, isMobile }) => {
     await page.goto("/");
 
     // Fresh page always starts on English (localStorage-backed, no saved
@@ -109,7 +113,7 @@ for (const locale of LOCALES) {
   });
 
   if (RELOAD_CHECK_LOCALES.has(id)) {
-    test(`language switcher: ${id} - persists across reload`, async ({ page, isMobile }) => {
+    test(`${ticket}language switcher: ${id} - persists across reload`, async ({ page, isMobile }) => {
       await page.goto("/");
       await switchLocale(page, isMobile, locale);
       await expect(page.locator("html")).toHaveAttribute("lang", id);

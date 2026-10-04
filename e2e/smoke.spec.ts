@@ -22,7 +22,7 @@ test("events listing renders at least one published event", async ({ page }) => 
   await expect(page.getByRole("link").filter({ has: page.getByRole("heading", { level: 3 }) }).first()).toBeVisible();
 });
 
-test("Jaipur Mic Gala 100 event detail page loads and offers seat selection", async ({ page, isMobile }) => {
+test("[GEN-2609-004] Jaipur Mic Gala 100 event detail page loads and offers seat selection", async ({ page, isMobile }) => {
   await openEventFromListing(page, JAIPUR_EVENT_TITLE, isMobile);
   await expect(page.getByRole("heading", { level: 1, name: JAIPUR_EVENT_TITLE })).toBeVisible();
   // Numbered event: the seat map lives on its own page, linked from here
