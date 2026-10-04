@@ -499,5 +499,51 @@ t('GEN-2609-107: var()-incompatible files and token sources are never migrated',
   }
 })
 
+// ---------------------------------------------------------------------
+// GEN-2609-107 phase 2 - verify-equivalence.js's per-site spacing check
+// (scripts/dev/spacing-sites.js). Negative controls first: each of these
+// is a real way a conversion can change the page.
+// ---------------------------------------------------------------------
+{
+  const { checkSpacingLine, spaceTokenTable } = require('./spacing-sites')
+  const TOK = spaceTokenTable('--afa-space-3: 12px;\n--afa-space-14px: 14px;\n--afa-space-40px: 40px;\n--afa-space-2: 8px;')
+  const kind = (b, a) => checkSpacingLine(b, a, TOK).kind
+
+  t('GEN-2609-107 p2: spacing table reads px tokens from globals.css text', () => {
+    assert.deepEqual(TOK, { '--afa-space-3': 12, '--afa-space-14px': 14, '--afa-space-40px': 40, '--afa-space-2': 8 })
+  })
+
+  t('GEN-2609-107 p2: exact conversions are equivalences', () => {
+    assert.equal(kind('  padding: 40,', "  padding: 'var(--afa-space-40px)',"), 'equiv')
+    assert.equal(kind("  padding: '40px',", "  padding: 'var(--afa-space-40px)',"), 'equiv')
+    assert.equal(kind("  padding: '12px 40px',", "  padding: 'var(--afa-space-3) var(--afa-space-40px)',"), 'equiv')
+    assert.equal(kind('  .x { margin-top: 14px; }', '  .x { margin-top: var(--afa-space-14px); }'), 'equiv')
+    assert.equal(kind('<div className="p-[40px]">', '<div className="p-[var(--afa-space-40px)]">'), 'equiv')
+    assert.equal(kind('  marginBottom: open ? 12 : 0,', "  marginBottom: open ? 'var(--afa-space-3)' : 0,"), 'equiv')
+    assert.equal(kind('  marginLeft: -8,', "  marginLeft: 'calc(-1 * var(--afa-space-2))',"), 'equiv')
+    assert.equal(kind("  margin: '0 -8px',", "  margin: '0 calc(-1 * var(--afa-space-2))',"), 'equiv')
+  })
+
+  t('GEN-2609-107 p2: quoted var() in CSS text is a mismatch (phase 1 finding 1)', () => {
+    assert.equal(kind('  .x { margin-top: 14px; }', "  .x { margin-top: 'var(--afa-space-14px)'; }"), 'mismatch')
+  })
+
+  t('GEN-2609-107 p2: wrong token, wrong sign, unitless quoted and extra edits are mismatches', () => {
+    assert.equal(kind('  padding: 40,', "  padding: 'var(--afa-space-14px)',"), 'mismatch')
+    assert.equal(kind('  marginLeft: -8,', "  marginLeft: 'var(--afa-space-2)',"), 'mismatch')
+    assert.equal(kind('  marginLeft: 8,', "  marginLeft: 'calc(-1 * var(--afa-space-2))',"), 'mismatch')
+    assert.equal(kind("  padding: '40',", "  padding: 'var(--afa-space-40px)',"), 'mismatch')
+    assert.equal(kind('  padding: 40, color: 1,', "  padding: 'var(--afa-space-40px)', color: 2,"), 'mismatch')
+    assert.equal(kind('  padding: 40,', "  padding: 'var(--afa-space-99px)',"), 'mismatch')
+    assert.equal(kind('  padding: 40,', '  padding: 41,'), 'mismatch')
+  })
+
+  t('GEN-2609-107 p2: a line that only gained a token-ok is an exemption', () => {
+    assert.equal(kind('  padding: 5,', '  padding: 5, // token-ok(spacing-literal): 5px optical nudge'), 'exempt')
+    assert.equal(kind('  padding: 5,', '  padding: 6, // token-ok(spacing-literal): 5px optical nudge'), 'mismatch')
+    assert.equal(kind('  color: 1,', '  color: 2,'), 'other')
+  })
+}
+
 console.log(`\n${passed} passed, ${failed} failed.`)
 process.exit(failed > 0 ? 1 : 0)

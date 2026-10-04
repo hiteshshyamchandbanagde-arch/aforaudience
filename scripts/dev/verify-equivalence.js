@@ -47,11 +47,19 @@
 // var() must be one of the decided contrast swaps (SWAPS). Lines that
 // gained a token-ok comment are counted as exemptions, not checked.
 //
+// GEN-2609-107 phase 2 - `--base` also runs a per-site SPACING check
+// (scripts/dev/spacing-sites.js): every var(--afa-space-*) or
+// calc(-1 * var(--afa-space-*)) on a changed line must put back the exact
+// px literal the base line had, with the rest of the line byte-identical.
+// Spacing has no rounding: any other value is a mismatch. A spacing
+// token whose own value differs from the base ref also fails.
+//
 // Usage: node scripts/dev/verify-equivalence.js [--base=<ref>] [--list-rounded] <file...>
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
 const { parseTokenOk } = require('../check-design-tokens')
+const { checkSpacingLine, spaceTokenTable } = require('./spacing-sites')
 
 const { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP, RADIUS_ROUND, COLOR_MAP, COLOR_ROUND, FONT_SIZE_ROUNDED_KEYS, RADIUS_PROPS, colorContext, resolveColor } = require('./migrate-tokens')
 
@@ -457,6 +465,50 @@ function printColorReport() {
   }
 }
 
+// GEN-2609-107 phase 2 - per-site spacing check (see header).
+const liveSpaceTable = spaceTokenTable(fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'app', 'globals.css'), 'utf8'))
+const spacingStats = { equiv: 0, lines: 0, exempt: [] }
+function checkSpacingSites(file) {
+  let oldText
+  try {
+    oldText = execFileSync('git', ['show', `${BASE}:${file.replace(/\\/g, '/')}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+  } catch {
+    return true
+  }
+  const oldLines = oldText.split(/\r?\n/)
+  const newLines = fs.readFileSync(file, 'utf8').split(/\r?\n/)
+  if (oldLines.length !== newLines.length) {
+    console.error(`  SPACING CHECK SKIPPED in ${file}: line count changed (${oldLines.length} -> ${newLines.length}) - review by hand`)
+    return false
+  }
+  let ok = true
+  for (let i = 0; i < newLines.length; i++) {
+    const r = checkSpacingLine(oldLines[i], newLines[i], liveSpaceTable)
+    if (r.kind === 'mismatch') {
+      console.error(`  SPACING MISMATCH ${file}:${i + 1}: ${r.message}`)
+      ok = false
+    } else if (r.kind === 'equiv') {
+      spacingStats.equiv += r.sites
+      spacingStats.lines++
+    } else if (r.kind === 'exempt') {
+      spacingStats.equiv += r.sites
+      spacingStats.exempt.push(`${file}:${i + 1}`)
+    }
+  }
+  return ok
+}
+function checkSpacingTokenValues() {
+  const base = spaceTokenTable(execFileSync('git', ['show', `${BASE}:src/app/globals.css`], { encoding: 'utf8' }))
+  let ok = true
+  for (const [t, v] of Object.entries(base)) {
+    if (liveSpaceTable[t] !== v) {
+      console.error(`  SPACING MISMATCH [globals.css]: ${t} was ${v}px at ${BASE}, now ${liveSpaceTable[t] === undefined ? 'missing' : `${liveSpaceTable[t]}px`}`)
+      ok = false
+    }
+  }
+  return ok
+}
+
 function checkClassNames(file) {
   const text = fs.readFileSync(file, 'utf8')
   let ok = true
@@ -501,7 +553,9 @@ for (const file of files) {
   allOk = checkClassNames(file) && allOk
   if (BASE) allOk = checkRadiusSites(file, liveRadius, roundedSites) && allOk
   if (BASE) allOk = checkColorSites(file) && allOk
+  if (BASE) allOk = checkSpacingSites(file) && allOk
 }
+if (BASE) allOk = checkSpacingTokenValues() && allOk
 
 if (BASE) {
   console.log(`radius vs ${BASE}: ${radiusEquivCount} equivalence(s), ${roundedSites.length} rounded site(s).`)
@@ -515,6 +569,11 @@ if (BASE) {
 }
 
 if (BASE) printColorReport()
+
+if (BASE) {
+  console.log(`spacing vs ${BASE}: ${spacingStats.equiv} equivalent site(s) on ${spacingStats.lines} line(s), ${spacingStats.exempt.length} token-ok exemption(s).`)
+  if (process.argv.includes('--list-rounded')) for (const s of spacingStats.exempt) console.log(`    ${s}  token-ok`)
+}
 
 if (allOk) {
   const mapEntryCount = Object.keys(SPACING_MAP).length + Object.keys(FONT_SIZE_MAP).length + Object.keys(RADIUS_MAP).length + Object.keys(RADIUS_ROUND).length + Object.keys(COLOR_MAP).length
