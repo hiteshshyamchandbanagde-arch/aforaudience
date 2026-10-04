@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { listingPrice } from '@/lib/booking-tiers'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
@@ -38,7 +39,7 @@ export async function GET(req: Request) {
         organiser: { user: { isSuspended: false } },
         ...(city ? { venue: { city } } : {}),
       },
-      include: { venue: true, lineup: { include: { artist: { select: { id: true, user: { select: { name: true, displayName: true } } } } } } },
+      include: { venue: true, ticketTiers: { select: { price: true } }, lineup: { include: { artist: { select: { id: true, user: { select: { name: true, displayName: true } } } } } } },
       orderBy: { date: 'asc' },
     })
 
@@ -86,7 +87,11 @@ export async function GET(req: Request) {
       }
     }
 
-    return NextResponse.json(events)
+    // BUG-2610-003 - a tiered event (e.g. a numbered-seat one) leaves
+    // ticketPrice null; the cards and the price sort read the cheapest tier.
+    const listed = events.map(({ ticketTiers, ...e }: any) => ({ ...e, ticketPrice: listingPrice(e.ticketPrice, ticketTiers) }))
+
+    return NextResponse.json(listed)
   } catch (err) {
     console.error('Error fetching events:', err)
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })

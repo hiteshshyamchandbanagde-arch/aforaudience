@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { formatSeatLabels } from '@/lib/seat-labels'
+import { bookingTierNames } from '@/lib/booking-tiers'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -41,9 +42,13 @@ export async function GET() {
   // surfaced anywhere, only the section+quantity summary. bookingSeats is
   // an internal join detail, not meant for the client response shape -
   // strip it back off after deriving seatLabels from it.
-  const shaped = bookings.map(({ bookingSeats, ...b }: { bookingSeats: { seat: { level: string; row: string; number: string } }[] } & Record<string, unknown>) => ({
+  // BUG-2610-003 - tierNames: a numbered-seat booking stores `seats: {}`,
+  // so its tier comes from the booked seats' tierLabel (read time only).
+  type BookedSeat = { seat: { level: string; row: string; number: string; tierLabel: string } }
+  const shaped = bookings.map(({ bookingSeats, ...b }: { bookingSeats: BookedSeat[] } & Record<string, unknown>) => ({
     ...b,
-    seatLabels: formatSeatLabels(bookingSeats.map((bs: { seat: { level: string; row: string; number: string } }) => bs.seat)),
+    seatLabels: formatSeatLabels(bookingSeats.map((bs: BookedSeat) => bs.seat)),
+    tierNames: bookingTierNames(b.seats as Record<string, number> | null, bookingSeats.map((bs: BookedSeat) => bs.seat)),
   }))
 
   return NextResponse.json(shaped)
