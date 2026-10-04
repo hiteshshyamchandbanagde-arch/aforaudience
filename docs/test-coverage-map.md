@@ -33,11 +33,14 @@ e2e queue), never in a local or autopilot run.
 | BUG-2610-004 | tested | `events-search.spec.ts` › `[BUG-2610-004] a ?search= arrival shows in the search box and searches every city`; `[BUG-2610-004] [BUG-2610-007] clearing the search box …` | |
 | BUG-2610-006 | tested | `competition-show.spec.ts` › `[BUG-2610-006] competition show: the listing card shows the Competition badge` | |
 | BUG-2610-007 | tested | `events-search.spec.ts` › `[BUG-2610-004] [BUG-2610-007] clearing the search box removes ?search= from the address` | |
+| BUG-2610-003 | tested | `ticket-tier.spec.ts` › `[BUG-2610-003] the Jaipur Mic Gala 100 listing card shows its price from the tier, not '—'`; `[BUG-2610-003] My Tickets: a numbered-seat booking's card shows its tier name, not '—'`; unit: `scripts/booking-tiers.test.ts` | Dispatch C. Tier and price resolved at read time; no booking rows rewritten |
+| BUG-2610-008 | tested | `colour-rules.spec.ts` › `[BUG-2610-008] /artists: the selected genre's underline is --afa-selected (amber), not the CTA orange` | Dispatch C |
+| BUG-2610-009 | tested | `events-load.spec.ts` › `[BUG-2610-009] a slow /api/events never shows a '0 events' count before the events arrive` | Dispatch C |
 | FEAT-2608-047 | untested | | Batch 2: add a tour stop as Hrithik, save, see it on the public profile, remove it (restores his profile) |
 | GEN-2609-114 | untested | | The goal spec does not assert 114's rules. Batch 2: modal backdrops use `--afa-scrim`; sage text on dark is the -bright variant (contrast ≥ 4.5) |
-| GEN-2609-118 | tested + HUMAN | `design-system-goal.spec.ts` › `@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor …` | Asserts the admin-editable `--afa-selected` token reaches every page. HUMAN: the orange/amber sweep and the demoted buttons (look and feel) |
+| GEN-2609-118 | tested | `design-system-goal.spec.ts` › `@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor …`; `colour-rules.spec.ts` › `[GEN-2609-118] checkout: the only orange element is the Pay button; 'See fee breakdown' is amber`, `[GEN-2609-118] booking confirmed ('You're going'): the count circle is amber, not orange; only View My Ticket is orange` | Dispatch C (4 Oct): the sweep's remaining look-and-feel check is now these colour assertions (390/1440). Orange = an action you tap, only |
 | GEN-2609-119 | tested | `design-system-goal.spec.ts` (same test) | Manifest, theme-color and share poster follow their tokens. The ticket PDF and emails have no test-safe endpoint (the spec says so) |
-| GEN-2609-121 | tested + HUMAN | `design-system-goal.spec.ts` (same test) | Asserts item 4 (the SiteNav active link follows `--afa-selected`). HUMAN: stage bars, artist/profile button styles (look and feel) |
+| GEN-2609-121 | tested | `design-system-goal.spec.ts` (same test); `colour-rules.spec.ts` › `[GEN-2609-121] artist profile (Hrithik): each show's ticket link is the orange primary; '+ Follow' is an outline; prev/next arrows are not filled`, `[GEN-2609-121] a message thread's Send button is the orange primary` | Dispatch C (4 Oct): the two parts Hitesh had not seen (artist profile, Messages Send) are now tests |
 
 ## IN_TEST
 
@@ -72,6 +75,13 @@ e2e queue), never in a local or autopilot run.
 | OBSOLETE | 2 (BUG-2608-050, GEN-2609-003) |
 | untested (batch 2) | 7 (FEAT-2608-047, GEN-2609-006, GEN-2609-007, GEN-2609-008, GEN-2609-113, GEN-2609-114, GEN-2609-115) |
 
-Of the 26 tested, 4 also have a HUMAN item open (GEN-2609-118,
-GEN-2609-121, GEN-2608-041, GEN-2609-004), so they stay open until
-Hitesh confirms (T5).
+Of the 26 tested, 2 also have a HUMAN item open (GEN-2608-041,
+GEN-2609-004), so they stay open until Hitesh confirms (T5).
+GEN-2609-118 and GEN-2609-121 moved to **tested** on 4 Oct (dispatch C:
+`colour-rules.spec.ts` replaces their manual look-and-feel checks).
+
+Dispatch C (4 Oct) also added BUG-2610-003, BUG-2610-008 and
+BUG-2610-009 (tested, above), plus two checks with no ticket ID:
+`seat-total.spec.ts` (a paid event shows "—", not "Free", before a seat
+is chosen) and `ticket-actions.spec.ts` (My Tickets' three actions on one
+row, each label at most 2 lines).
