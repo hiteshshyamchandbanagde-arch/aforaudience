@@ -138,7 +138,7 @@ export default function AuthPromptSheet({
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
           ].map((field) => (
             <div key={field.name}>
-              <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+              <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                 {field.label}
               </label>
               <Input

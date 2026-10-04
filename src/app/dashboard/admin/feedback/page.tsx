@@ -509,7 +509,7 @@ function AdminFeedbackBoard() {
 
   const inputStyle: React.CSSProperties = {
     fontSize: 'var(--afa-text-ui)',
-    padding: '7px var(--afa-space-10px)',
+    padding: '7px var(--afa-space-10px)', // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
     borderRadius: 'var(--afa-radius-md)',
     border: '1px solid var(--afa-border-resting)',
     background: 'var(--afa-surface-page)',
@@ -566,7 +566,7 @@ function AdminFeedbackBoard() {
               }
               patchItem(item.id, { status: next })
             }}
-            style={{ ...inputStyle, fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-2)', flex: 1 }}
+            style={{ ...inputStyle, fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-2)', flex: 1 }} // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -578,7 +578,7 @@ function AdminFeedbackBoard() {
             value={item.severity || ''}
             disabled={actioningId === item.id}
             onChange={(e) => patchItem(item.id, { severity: e.target.value || null })}
-            style={{ ...inputStyle, fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-2)', flex: 1 }}
+            style={{ ...inputStyle, fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-2)', flex: 1 }} // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
           >
             <option value="">No severity</option>
             {SEVERITIES.map((s) => (

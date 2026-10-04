@@ -427,8 +427,8 @@ function EventsPageContent() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-56px) var(--afa-space-6) 112px; }
-        @media (min-width: 640px) { .afa-events-page-container { padding: var(--afa-space-80px) var(--afa-space-32px) 112px; } }
+        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-56px) var(--afa-space-6) 112px; } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
+        @media (min-width: 640px) { .afa-events-page-container { padding: var(--afa-space-80px) var(--afa-space-32px) 112px; } } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
         .afa-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease, opacity 0.15s ease; }
         .afa-event-card:hover { border-color: var(--afa-amber-border); }
         .afa-event-card-grid .afa-event-card-poster { aspect-ratio: 4 / 5; }
@@ -684,7 +684,7 @@ function EventsPageContent() {
                   <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
                 </select>
 
-                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "var(--afa-space-1)", border: "1px solid var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "3px" }}>
+                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "var(--afa-space-1)", border: "1px solid var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "3px" }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
                   <Button variant="icon" onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`} style={{ color: undefined }}>
                     <GridViewIcon style={{ width: "16px", height: "16px" }} />
                   </Button>
@@ -707,7 +707,7 @@ function EventsPageContent() {
               // A failed load gets the error + Retry here, never the
               // "nothing published" copy - that one is only true after a
               // load that succeeded and returned no events.
-              <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px var(--afa-space-5)", textAlign: "center" }}>
+              <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px var(--afa-space-5)", textAlign: "center" }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
                 <TheaterMark style={{ width: "40px", height: "40px", color: "var(--afa-amber-strong)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
                   {loadFailed ? tr.eventsPage.loadErrorTitle : emptyNamedTitle ?? (tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle)}

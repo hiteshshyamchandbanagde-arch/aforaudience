@@ -634,7 +634,7 @@ export default function RegisterForm() {
                   placeholder={tr.registerPage.minCharsPlaceholder}
                   value={form.password}
                   onChange={handleChange}
-                  style={{ ...inputStyle(), paddingRight: "44px" }}
+                  style={{ ...inputStyle(), paddingRight: "44px" }} // token-ok(spacing-literal): 44px used under 10 times, no exact token (GEN-2609-107)
                 />
                 <Button
                   variant="icon"
@@ -679,7 +679,7 @@ export default function RegisterForm() {
                   placeholder={tr.registerPage.repeatPasswordPlaceholder}
                   value={form.confirm}
                   onChange={handleChange}
-                  style={{ ...inputStyle(), paddingRight: "44px" }}
+                  style={{ ...inputStyle(), paddingRight: "44px" }} // token-ok(spacing-literal): 44px used under 10 times, no exact token (GEN-2609-107)
                 />
                 <Button
                   variant="icon"

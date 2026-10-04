@@ -693,7 +693,7 @@ export default function CheckoutPage() {
                   key={t.id}
                   style={{
                     fontSize: 'var(--afa-text-ui)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)',
-                    background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 'var(--afa-radius-pill)', padding: '5px var(--afa-space-6px) 5px var(--afa-space-3)',
+                    background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 'var(--afa-radius-pill)', padding: '5px var(--afa-space-6px) 5px var(--afa-space-3)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                   }}
                 >
                   {t.taggedUser.displayName || t.taggedUser.name}

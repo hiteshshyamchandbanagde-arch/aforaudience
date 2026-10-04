@@ -288,15 +288,15 @@ export default function VenueDashboard() {
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-amber)', marginTop: 'var(--afa-space-14px)', marginBottom: 0 }}>{rateLabel(venue)}</p>
 
                   <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-4)' }} onClick={(e) => e.stopPropagation()}>
-                    <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
+                    <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                       View
                     </Link>
                     {/* GEN-2609-121 - a secondary action on every card, so the same outline as View. */}
-                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
+                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                       Edit
                     </Link>
                     {venue.seatingMode === 'NUMBERED' && (
-                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
+                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                         <IconMap size={14} />
                       </Link>
                     )}

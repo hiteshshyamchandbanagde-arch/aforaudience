@@ -311,7 +311,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
         )}
         {categories.map((c) => (
           <div key={c.category} style={{ marginBottom: 'var(--afa-space-10px)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-micro)', marginBottom: '3px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-micro)', marginBottom: '3px' }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
               <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
             </div>
@@ -347,7 +347,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                   borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)',
                 }}
               />
-              <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>
+              <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
             </div>
           ))}
         </div>

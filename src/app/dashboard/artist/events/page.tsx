@@ -227,7 +227,7 @@ export default function BrowseEventsToApplyPage() {
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>
+                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)', gap: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>

@@ -24,7 +24,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
   return (
     <main style={{ minHeight: "100vh", background: PAPER, fontFamily: SANS }}>
       <SiteNav />
-      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 96px" }}>
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 96px" }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
         <Link href="/" style={{ fontSize: "var(--afa-text-body)", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
           ← Back to AforAudience
         </Link>
@@ -86,7 +86,7 @@ export function P({ children }: { children: React.ReactNode }) {
 }
 
 export function UL({ children }: { children: React.ReactNode }) {
-  return <ul style={{ marginBottom: "var(--afa-space-4)", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul>
+  return <ul style={{ marginBottom: "var(--afa-space-4)", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul> // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
 }
 
 export function LI({ children }: { children: React.ReactNode }) {

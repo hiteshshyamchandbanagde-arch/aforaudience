@@ -33,7 +33,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    padding: '5px var(--afa-space-10px)',
+    padding: '5px var(--afa-space-10px)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
     borderRadius: 'var(--afa-radius-pill)',
     whiteSpace: 'nowrap',
   },
@@ -70,7 +70,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   pill: {
     fontSize: 'var(--afa-text-ui)',
     fontWeight: 700,
-    padding: '5px var(--afa-space-3)',
+    padding: '5px var(--afa-space-3)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
     borderRadius: 'var(--afa-radius-pill)',
   },
 }

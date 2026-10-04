@@ -214,10 +214,10 @@ export default function HomeHeader() {
                       {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
                     </div>
                     {accountLinks.map((l) => (
-                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                         {l.label}
                         {l.badge > 0 && (
-                          <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>
+                          <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
                             {l.badge}
                           </span>
                         )}
@@ -227,7 +227,7 @@ export default function HomeHeader() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                       {t.nav.signIn}
                     </Link>
                     <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
@@ -267,7 +267,7 @@ export default function HomeHeader() {
           </div>
 
           {!user && status !== "loading" && (
-            <Link href="/register" style={{ marginLeft: "var(--afa-space-1)", fontSize: "var(--afa-text-body)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "9px var(--afa-space-5)", borderRadius: "var(--afa-radius-pill)", textDecoration: "none" }}>
+            <Link href="/register" style={{ marginLeft: "var(--afa-space-1)", fontSize: "var(--afa-text-body)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "9px var(--afa-space-5)", borderRadius: "var(--afa-radius-pill)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
               {t.nav.signUp}
             </Link>
           )}

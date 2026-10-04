@@ -149,7 +149,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
-        <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>
+        <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
       </div>
     </div>
   )
@@ -239,7 +239,7 @@ export default function AdminCommandCenter() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
           Command Center
         </h1>
-        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>
+        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>{/* token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107) */}
           Everything that needs your attention, at a glance.
         </p>
 
@@ -329,8 +329,8 @@ export default function AdminCommandCenter() {
             background: 'var(--afa-surface-raised)',
             borderRadius: 'var(--afa-radius-lg)',
             border: '1px solid var(--afa-tint-08)',
-            padding: 'var(--afa-space-5) 22px',
-            marginBottom: '26px',
+            padding: 'var(--afa-space-5) 22px', // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
+            marginBottom: '26px', // token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107)
           }}
         >
           <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
@@ -347,7 +347,7 @@ export default function AdminCommandCenter() {
                 <div key={i} style={{ borderTop: '1px solid var(--afa-tint-08)' }} />
               ))}
             </div>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '3px', height: '100%' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '3px', height: '100%' }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
               {(data?.dailyTrend || []).map((d, i, arr) => (
                 <div key={d.day} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
                   <div style={{ display: 'flex', gap: 'var(--afa-space-2px)', alignItems: 'flex-end', height: '108px', width: '100%', justifyContent: 'center' }}>
@@ -368,10 +368,10 @@ export default function AdminCommandCenter() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-small)' }}>
-            <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
               <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
             </span>
-            <span style={{ color: 'var(--afa-green-deep)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ color: 'var(--afa-green-deep)', display: 'flex', alignItems: 'center', gap: '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
               <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-green-deep)', display: 'inline-block' }} /> Resolved
             </span>
           </div>

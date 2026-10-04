@@ -149,7 +149,7 @@ function P({ children }: { children: React.ReactNode }) {
         lineHeight: 1.75,
         color: INK,
         opacity: 0.88,
-        marginBottom: "22px",
+        marginBottom: "22px", // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
       }}
     >
       {children}
@@ -546,7 +546,7 @@ export default function AboutPage() {
 
           <div
             style={{
-              marginTop: "72px",
+              marginTop: "72px", // token-ok(spacing-literal): 72px used under 10 times, no exact token (GEN-2609-107)
               paddingTop: "var(--afa-space-48px)",
               borderTop: `1px solid ${MIST}`,
               textAlign: "center",

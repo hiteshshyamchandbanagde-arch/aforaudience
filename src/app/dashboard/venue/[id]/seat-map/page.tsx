@@ -1527,7 +1527,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         title={`Remove ${levelLabel(lvl)}`}
                         aria-label={`Remove ${levelLabel(lvl)}`}
                         style={{
-                          padding: '7px var(--afa-space-2)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-md) var(--afa-radius-md) var(--afa-radius-sharp)', fontSize: 'var(--afa-text-ui)',
+                          padding: '7px var(--afa-space-2)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-md) var(--afa-radius-md) var(--afa-radius-sharp)', fontSize: 'var(--afa-text-ui)', // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
                           border: activeLevel === lvl ? `2px solid ${SELECTED}` : '1px solid var(--afa-border-resting)', borderLeft: 'none',
                           background: activeLevel === lvl ? SELECTED_BG : 'var(--afa-surface-raised)',
                           color: 'var(--afa-error)',
@@ -1864,7 +1864,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         onClick={() => setMarkerMode((v) => (v === t ? null : t))}
                         title={`Click, then click the canvas to place a ${MARKER_META[t].name} marker.`}
                         style={{
-                          padding: '7px var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600,
+                          padding: '7px var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
                           border: markerMode === t ? 'none' : `1px solid ${MARKER_META[t].color}`,
                           background: markerMode === t ? MARKER_META[t].color : 'var(--afa-surface-raised)',
                           color: markerMode === t ? 'var(--afa-cream)' : MARKER_META[t].color,
@@ -1894,7 +1894,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700 }}>Reference image ({levelLabel(activeLevel)}):</span>
                 <label
                   style={{
-                    padding: '7px var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
+                    padding: '7px var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer', // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
                     border: '1px solid var(--afa-tint-20)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)',
                     opacity: underlayUploading ? 0.6 : 1,
                   }}

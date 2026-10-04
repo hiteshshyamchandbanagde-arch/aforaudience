@@ -385,10 +385,10 @@ export default function ArtistDashboard() {
             {(profile.genre.length > 0 || profile.styleTag.length > 0) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                 {profile.genre.map((g) => (
-                  <span key={g} style={{ fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>{g}</span>
+                  <span key={g} style={{ fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>{g}</span> // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                 ))}
                 {profile.styleTag.map((s) => (
-                  <span key={s} style={{ fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-3)', background: FILL_SOLID_TINT, borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-fill-solid)' }}>{s}</span>
+                  <span key={s} style={{ fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-3)', background: FILL_SOLID_TINT, borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-fill-solid)' }}>{s}</span> // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                 ))}
               </div>
             )}

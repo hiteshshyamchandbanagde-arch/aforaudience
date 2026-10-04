@@ -28,7 +28,9 @@ const SPACING_RULE = RULES.find((r) => r.name === 'spacing-literal')
 
 // Optional matching quotes around the site; `\1` is empty when there are none.
 const SITE_RE = /(['"`]?)(calc\(\s*-1\s*\*\s*var\((--afa-space-[a-zA-Z0-9-]+)\)\s*\)|var\((--afa-space-[a-zA-Z0-9-]+)\))\1/g
-const TOKEN_OK_TAIL_RE = /\s*(?:\/\/\s*token-ok\(.*|\{\/\*\s*token-ok\(.*?\*\/\})\s*$/
+// `// token-ok(...)`, `{/* token-ok(...) */}`, or in raw CSS text
+// `/* // token-ok(...) */` (a CSS comment the shared parser still reads)
+const TOKEN_OK_TAIL_RE = /\s*(?:\/\*\s*\/\/\s*token-ok\(.*\*\/|\/\/\s*token-ok\(.*|\{\/\*\s*token-ok\(.*?\*\/\})\s*$/
 
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 

@@ -61,7 +61,7 @@ export default function VenueOwnersGridEmbed() {
     })
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersEmbed.loading}</div>
+  if (loading) return <div style={{ textAlign: "center", padding: "60px var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersEmbed.loading}</div> // token-ok(spacing-literal): 60px used under 10 times, no exact token (GEN-2609-107)
   if (error) return <div style={{ padding: "var(--afa-space-14px) var(--afa-space-4)", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
   if (owners.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueOwnersEmbed.emptyNone}</p>
 

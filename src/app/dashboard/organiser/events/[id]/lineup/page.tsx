@@ -130,7 +130,7 @@ function SortableRow({
           display: 'flex',
           alignItems: 'center',
           gap: 'var(--afa-space-1)',
-          padding: '5px var(--afa-space-10px)',
+          padding: '5px var(--afa-space-10px)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
           borderRadius: 'var(--afa-radius-pill)',
           fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
@@ -289,7 +289,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-6px)' }}>

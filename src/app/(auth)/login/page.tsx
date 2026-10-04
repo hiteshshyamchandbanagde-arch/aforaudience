@@ -258,7 +258,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setInvalidField(null) }}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }} // token-ok(spacing-literal): 44px used under 10 times, no exact token (GEN-2609-107)
                 />
                 <Button
                   variant="icon"

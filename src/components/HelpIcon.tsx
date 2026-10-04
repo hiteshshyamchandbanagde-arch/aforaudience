@@ -13,7 +13,7 @@ export default function HelpIcon({ text }: { text: string }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <span style={{ position: 'relative', display: 'inline-block', marginLeft: '5px', verticalAlign: 'middle' }}>
+    <span style={{ position: 'relative', display: 'inline-block', marginLeft: '5px', verticalAlign: 'middle' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
       <Button
         variant="icon"
         type="button"
@@ -50,7 +50,7 @@ export default function HelpIcon({ text }: { text: string }) {
             fontSize: 'var(--afa-text-small)',
             fontWeight: 400,
             lineHeight: 1.45,
-            padding: 'var(--afa-space-2) 11px',
+            padding: 'var(--afa-space-2) 11px', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
             borderRadius: 'var(--afa-radius-sm)',
             width: '230px',
             zIndex: 30,

@@ -145,7 +145,7 @@ const roleCtaProps = {
 // before, just the background + a subtle amber focus ring.
 const fieldStyle: React.CSSProperties = {
   width: '100%',
-  padding: '11px var(--afa-space-14px)',
+  padding: '11px var(--afa-space-14px)', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-tint-10)',
   fontSize: 'var(--afa-text-body)',
@@ -681,7 +681,7 @@ function ProfileContent() {
                   <span style={{ display: 'flex', flexShrink: 0, color: 'var(--afa-text-secondary)' }}>{row.icon}</span>
                   <span style={{ flex: 1, minWidth: 0, fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{row.title}</span>
                   {!!row.badge && row.badge > 0 && (
-                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3, flexShrink: 0 }}>
+                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3, flexShrink: 0 }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
                       {row.badge}
                     </span>
                   )}

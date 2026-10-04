@@ -168,7 +168,7 @@ export default function MobileTopBar() {
           style={{
             width: '100%',
             boxSizing: 'border-box',
-            padding: onEventsRoute ? 'var(--afa-space-2) 30px var(--afa-space-2) 26px' : 'var(--afa-space-2) var(--afa-space-2) var(--afa-space-2) 26px',
+            padding: onEventsRoute ? 'var(--afa-space-2) 30px var(--afa-space-2) 26px' : 'var(--afa-space-2) var(--afa-space-2) var(--afa-space-2) 26px', // token-ok(spacing-literal): 26px/30px used under 10 times, no exact token; ternary, unseen by the checker (GEN-2609-107)
             borderRadius: 'var(--afa-radius-pill)',
             border: '1px solid var(--afa-tint-12)',
             background: 'var(--afa-surface-raised)',
@@ -239,7 +239,7 @@ export default function MobileTopBar() {
         )}
       </div>
 
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? 'var(--afa-space-2)' : '5px' }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? 'var(--afa-space-2)' : '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token; ternary, unseen by the checker (GEN-2609-107) */}
         {status === 'loading' ? null : user ? (
           <Button
             // bare-reason: must match the Sign in / Register <Link>s it swaps with in the same top-bar slot (mono caption type); those are links, not Buttons
@@ -260,7 +260,7 @@ export default function MobileTopBar() {
             </Link>
             <Link
               href="/register"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: 'var(--afa-radius-pill)' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: 'var(--afa-radius-pill)' }} // token-ok(spacing-literal): 5px/7px odd value, no exact token (GEN-2609-107)
             >
               {t.nav.signUp}
             </Link>

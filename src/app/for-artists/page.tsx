@@ -65,7 +65,7 @@ export default function ForArtistsPage() {
       {/* HONEST MONEY — expands the homepage's one-line promise into real
           payout detail, reusing the shared Ledger component (same stat
           cards/breakdown/tax disclaimer) rather than new stat markup. */}
-      <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-56px)" }}>
+      <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-56px)" }}>{/* token-ok(spacing-literal): 88px used under 10 times, no exact token (GEN-2609-107) */}
         <Ledger eyebrow={tr.forArtistsPage.moneyEyebrow} headline={tr.forArtistsPage.moneyHeadline} />
         <p style={{ marginTop: "var(--afa-space-28px)", maxWidth: "680px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
           {tr.forArtistsPage.moneyPayoutTiming}
@@ -78,7 +78,7 @@ export default function ForArtistsPage() {
           convention, adapted to a single vertical column since this page
           isn't alternating with other rooms. */}
       <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)" }}>
-        <div style={{ maxWidth: "760px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-40px)" }}>
+        <div style={{ maxWidth: "760px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-40px)" }}>{/* token-ok(spacing-literal): 88px used under 10 times, no exact token (GEN-2609-107) */}
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
             {tr.forArtistsPage.journeyEyebrow}
           </div>
@@ -94,7 +94,7 @@ export default function ForArtistsPage() {
       {/* FAQ — real, artist-specific questions (payout timing,
           verification, rate-setting, cancellation). Proof section
           deliberately omitted, see file-level comment. */}
-      <section style={{ maxWidth: "760px", margin: "0 auto", padding: "88px var(--afa-space-36px)" }}>
+      <section style={{ maxWidth: "760px", margin: "0 auto", padding: "88px var(--afa-space-36px)" }}>{/* token-ok(spacing-literal): 88px used under 10 times, no exact token (GEN-2609-107) */}
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
           {tr.forArtistsPage.faqEyebrow}
         </div>
@@ -105,7 +105,7 @@ export default function ForArtistsPage() {
       </section>
 
       {/* FINAL CTA — registration, role pre-selected. */}
-      <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)", padding: "88px var(--afa-space-36px)", textAlign: "center" }}>
+      <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)", padding: "88px var(--afa-space-36px)", textAlign: "center" }}>{/* token-ok(spacing-literal): 88px used under 10 times, no exact token (GEN-2609-107) */}
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
           {tr.forArtistsPage.finalCtaEyebrow}
         </div>

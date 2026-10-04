@@ -360,7 +360,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     <span
                       style={{
                         fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                        padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)',
+                        padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                         background: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).bg,
                         color: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}

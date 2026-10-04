@@ -201,7 +201,7 @@ export default function AdminDiaryPage() {
                       style={{
                         fontSize: 'var(--afa-text-micro)',
                         fontWeight: 600,
-                        padding: '5px var(--afa-space-3)',
+                        padding: '5px var(--afa-space-3)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                         borderRadius: 'var(--afa-radius-pill)',
                         border: s === entry.status ? `1px solid ${STATUS_META[s].color}` : '1px solid var(--afa-tint-12)',
                         background: s === entry.status ? STATUS_META[s].bg : 'var(--afa-surface-raised)',

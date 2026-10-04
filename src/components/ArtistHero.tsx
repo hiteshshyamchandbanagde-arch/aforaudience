@@ -28,7 +28,7 @@ export default function ArtistHero() {
     >
       <PhotoCrossfadeBackdrop photos={photos} active={active} />
 
-      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "100svh", padding: "128px var(--afa-space-6) 72px" }}>
+      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "100svh", padding: "128px var(--afa-space-6) 72px" }}>{/* token-ok(spacing-literal): 72px/128px used under 10 times, no exact token (GEN-2609-107) */}
         <div style={{ maxWidth: "760px" }}>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-6)" }}>
             {tr.homePage.fourRoomsStageName}
@@ -38,7 +38,7 @@ export default function ArtistHero() {
             {tr.homePage.fourRoomsStagePromise}
           </h1>
 
-          <div style={{ marginTop: "34px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>
+          <div style={{ marginTop: "34px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>{/* token-ok(spacing-literal): 34px used under 10 times, no exact token (GEN-2609-107) */}
             <Link href="/register?role=artist" style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-14px) var(--afa-space-28px)", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}>
               {tr.homePage.fourRoomsStageCta}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">

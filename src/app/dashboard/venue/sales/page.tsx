@@ -326,7 +326,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     key={o.organiserId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: '9px var(--afa-space-3)', background: 'var(--afa-tint-04)', color: 'var(--afa-text-secondary)',
+                      fontSize: 'var(--afa-text-ui)', padding: '9px var(--afa-space-3)', background: 'var(--afa-tint-04)', color: 'var(--afa-text-secondary)', // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
                     }}
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>

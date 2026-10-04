@@ -175,7 +175,7 @@ export default function FourRooms() {
 
   return (
     <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)" }}>
-      <div style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-40px)" }}>
+      <div style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px var(--afa-space-36px) var(--afa-space-40px)" }}>{/* token-ok(spacing-literal): 88px used under 10 times, no exact token (GEN-2609-107) */}
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-6)" }}>
           {tr.homePage.fourRoomsEyebrow}
         </div>

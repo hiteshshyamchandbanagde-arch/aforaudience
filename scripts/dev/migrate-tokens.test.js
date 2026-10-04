@@ -542,6 +542,10 @@ t('GEN-2609-107: var()-incompatible files and token sources are never migrated',
     assert.equal(kind('  padding: 5,', '  padding: 5, // token-ok(spacing-literal): 5px optical nudge'), 'exempt')
     assert.equal(kind('  padding: 5,', '  padding: 6, // token-ok(spacing-literal): 5px optical nudge'), 'mismatch')
     assert.equal(kind('  color: 1,', '  color: 2,'), 'other')
+    // JSX form, and the CSS-comment form used inside raw <style> text
+    assert.equal(kind('  <div style={{ padding: 5 }}>', '  <div style={{ padding: 5 }}>{/* token-ok(spacing-literal): odd */}'), 'exempt')
+    assert.equal(kind('  padding: var(--afa-space-2) 9px;', '  padding: var(--afa-space-2) 9px; /* // token-ok(spacing-literal): odd */'), 'exempt')
+    assert.equal(kind('  padding: 0 40px 112px;', '  padding: 0 var(--afa-space-40px) 112px; /* // token-ok(spacing-literal): rare */'), 'exempt')
   })
 }
 

@@ -276,8 +276,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        .afa-event-detail-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-40px) var(--afa-space-6) 112px; }
-        @media (min-width: 640px) { .afa-event-detail-container { padding: var(--afa-space-40px) var(--afa-space-32px) 112px; } }
+        .afa-event-detail-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-40px) var(--afa-space-6) 112px; } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
+        @media (min-width: 640px) { .afa-event-detail-container { padding: var(--afa-space-40px) var(--afa-space-32px) 112px; } } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
         .afa-event-hero-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-32px); }
         @media (min-width: 1024px) { .afa-event-hero-grid { grid-template-columns: minmax(0, 0.9fr) 1.1fr; gap: var(--afa-space-48px); } }
         .afa-event-hero-poster { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--afa-radius-xs); }
@@ -298,7 +298,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
            covers the last section's content. Declared after the two
            rules above so it wins the padding-bottom cascade at any width
            under 1024px, including the 640px-and-up range. */
-        @media (max-width: 1023px) { .afa-event-detail-container { padding-bottom: 132px; } }
+        @media (max-width: 1023px) { .afa-event-detail-container { padding-bottom: 132px; } } /* // token-ok(spacing-literal): 132px used under 10 times, no exact token (GEN-2609-107) */
       `}</style>
       <SiteNav backHref="/events" backLabel={tr.nav.backToEvents} />
 
@@ -501,7 +501,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
                               </div>
                               {r.reply && (
-                                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", marginTop: "3px", marginLeft: "var(--afa-space-4)", paddingLeft: "var(--afa-space-10px)", borderLeft: "2px solid var(--afa-amber-border)" }}>
+                                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", marginTop: "3px", marginLeft: "var(--afa-space-4)", paddingLeft: "var(--afa-space-10px)", borderLeft: "2px solid var(--afa-amber-border)" }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
                                   <strong>{r.reply.author.displayName || r.reply.author.name}</strong> {tr.eventDetailPage.repliedLabel} {r.reply.text}
                                 </div>
                               )}

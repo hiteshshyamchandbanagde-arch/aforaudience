@@ -201,7 +201,7 @@ export default function OrganiserDashboard() {
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
                       >
                         View
                       </Link>
@@ -209,7 +209,7 @@ export default function OrganiserDashboard() {
                         href={`/dashboard/organiser/events/${event.id}/edit`}
                         onClick={(e) => e.stopPropagation()}
                         // GEN-2609-118 - a secondary action beside View, so the same outline; orange is for a screen's one primary action.
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
                       >
                         Edit
                       </Link>

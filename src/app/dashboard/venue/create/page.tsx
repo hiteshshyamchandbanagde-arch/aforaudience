@@ -618,9 +618,9 @@ function PathCard({
         </h3>
       </div>
       <p style={{ marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{consequence}</p>
-      <ul style={{ marginTop: 'var(--afa-space-10px)', display: 'flex', flexDirection: 'column', gap: '5px', listStyle: 'none', padding: 0 }}>
+      <ul style={{ marginTop: 'var(--afa-space-10px)', display: 'flex', flexDirection: 'column', gap: '5px', listStyle: 'none', padding: 0 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
         {points.map((p) => (
-          <li key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
+          <li key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
             <IconCheck size={12} style={{ color: 'var(--afa-text-muted)' }} />
             {p}
           </li>

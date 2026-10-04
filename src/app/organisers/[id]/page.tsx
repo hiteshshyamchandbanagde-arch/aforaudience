@@ -233,7 +233,7 @@ function TourStatusBadge({ status, tr }: { status: string; tr: Dictionary }) {
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    padding: "5px var(--afa-space-10px)",
+    padding: "5px var(--afa-space-10px)", // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
     whiteSpace: "nowrap",
   }
   if (status === "LIVE") {
@@ -274,7 +274,7 @@ function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourCitiesLabel}</div>
           <div style={{ marginTop: "var(--afa-space-2)", display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             {cities.map((c) => (
-              <span key={c} style={{ border: "1px solid var(--afa-tint-10)", padding: "5px var(--afa-space-10px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-text-secondary)" }}>
+              <span key={c} style={{ border: "1px solid var(--afa-tint-10)", padding: "5px var(--afa-space-10px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-text-secondary)" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                 {c}
               </span>
             ))}
@@ -331,8 +331,8 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
       <style>{`
-        .afa-organiser-container { max-width: 1024px; margin: 0 auto; padding: 0 var(--afa-space-6) 112px; }
-        @media (min-width: 640px) { .afa-organiser-container { padding: 0 var(--afa-space-40px) 112px; } }
+        .afa-organiser-container { max-width: 1024px; margin: 0 auto; padding: 0 var(--afa-space-6) 112px; } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
+        @media (min-width: 640px) { .afa-organiser-container { padding: 0 var(--afa-space-40px) 112px; } } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
         .afa-organiser-avatar { width: 144px; height: 144px; }
         @media (min-width: 768px) { .afa-organiser-avatar { width: 176px; height: 176px; } }
         .afa-organiser-hero { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-40px); }

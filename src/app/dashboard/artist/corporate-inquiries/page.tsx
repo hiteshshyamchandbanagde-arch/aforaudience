@@ -116,7 +116,7 @@ export default function CorporateInquiriesPage() {
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
                         <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{formatDate(inq.createdAt, 'medium', locale)}</div>
                       </div>
-                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>
+                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                     </div>
 
                     <div style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: 'var(--afa-space-10px)' }}>

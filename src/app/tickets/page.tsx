@@ -455,7 +455,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)' }}>
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}

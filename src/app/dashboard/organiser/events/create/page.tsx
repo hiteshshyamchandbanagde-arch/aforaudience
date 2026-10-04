@@ -679,7 +679,7 @@ export default function CreateEventPage() {
                             e.target.checked ? [...prev, term.key] : prev.filter((k) => k !== term.key)
                           )
                         }}
-                        style={{ marginTop: '3px' }}
+                        style={{ marginTop: '3px' }} // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                       />
                       <span>{term.label}</span>
                     </label>

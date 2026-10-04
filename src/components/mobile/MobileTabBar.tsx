@@ -345,7 +345,7 @@ export default function MobileTabBar() {
                       color: 'var(--afa-on-fill-solid)',
                       background: 'var(--afa-fill-solid)',
                       borderRadius: 'var(--afa-radius-pill)',
-                      padding: '1px 5px',
+                      padding: '1px 5px', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
                       minWidth: 15,
                       textAlign: 'center',
                       lineHeight: 1.4,

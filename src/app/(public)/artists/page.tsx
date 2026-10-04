@@ -434,7 +434,7 @@ export default function ArtistsPage() {
                           fontFamily: "var(--font-sans)",
                           fontSize: "var(--afa-text-caption)",
                           fontWeight: 700,
-                          padding: "3px var(--afa-space-10px)",
+                          padding: "3px var(--afa-space-10px)", // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                           borderRadius: "var(--afa-radius-pill)",
                           letterSpacing: "0.03em",
                           textTransform: "uppercase",
@@ -460,7 +460,7 @@ export default function ArtistsPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "var(--afa-space-6px)", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span> // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                       ))}
                     </div>
                   </div>

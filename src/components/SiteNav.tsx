@@ -79,7 +79,7 @@ const ROLE_BADGE_STYLE: CSSProperties = {
   fontWeight: 700,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
-  padding: "3px 9px",
+  padding: "3px 9px", // token-ok(spacing-literal): 3px/9px odd value, no exact token (GEN-2609-107)
   borderRadius: "var(--afa-radius-pill)",
   border: "1px solid var(--afa-border-resting)",
   background: "transparent",
@@ -394,7 +394,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           font-size: var(--afa-text-micro);
           font-weight: 600;
           white-space: nowrap;
-          padding: var(--afa-space-1) 9px;
+          padding: var(--afa-space-1) 9px; /* // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */
           border-radius: var(--afa-radius-sm);
           opacity: 0;
           pointer-events: none;
@@ -486,17 +486,17 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     >
                       <NavIcon navKey={l.key} />
                       {l.key === "dashboard" && pendingCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                           {pendingCount}
                         </span>
                       )}
                       {l.key === "messages" && unreadCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                           {unreadCount}
                         </span>
                       )}
                       {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                           {pendingCompanionCount}
                         </span>
                       )}
@@ -517,7 +517,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   <Link href="/login" style={{ fontSize: "var(--afa-text-body)", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
                     {t.nav.signIn}
                   </Link>
-                  <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}>
+                  <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                     {t.nav.signUp}
                   </Link>
                 </div>
@@ -593,11 +593,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                             href={l.href}
                             onClick={() => setMenuOpen(false)}
                             aria-current={l.isActive ? "page" : undefined}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.isActive ? "var(--afa-selected)" : l.accent ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-selected-bg)" : "transparent", textDecoration: "none" }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.isActive ? "var(--afa-selected)" : l.accent ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-selected-bg)" : "transparent", textDecoration: "none" }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
                           >
                             {l.label}
                             {l.badge > 0 && (
-                              <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>
+                              <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
                                 {l.badge}
                               </span>
                             )}
@@ -607,7 +607,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       </>
                     ) : (
                       <>
-                        <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                        <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                           {t.nav.signIn}
                         </Link>
                         <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
