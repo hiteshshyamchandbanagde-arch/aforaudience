@@ -30,7 +30,15 @@ const needsDb = /@needs-db/;
 // the same server logic for minutes and write to the fixture twice.
 // design-system-goal edits a site-wide token and sets its own 390 and 1440
 // viewports, so a second project pass would only repeat the edit.
-const desktopOnly = ["**/waitlist-wallet-credit.spec.ts", "**/competition-show.spec.ts", "**/design-system-goal.spec.ts"];
+// design-system-restore saves and restores the same site-wide token, and
+// artist-tour-stop saves Hrithik's profile twice: one pass each.
+const desktopOnly = [
+  "**/waitlist-wallet-credit.spec.ts",
+  "**/competition-show.spec.ts",
+  "**/design-system-goal.spec.ts",
+  "**/design-system-restore.spec.ts",
+  "**/artist-tour-stop.spec.ts",
+];
 
 // *.mobile.spec.ts: things that only exist at phone width (the filter sheet,
 // the bottom tab bar). The desktop project leaves them out.
