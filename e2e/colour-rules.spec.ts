@@ -142,3 +142,62 @@ test.describe("signed in as Atul", () => {
     expect(ratio, `count text rgb(${text}) on rgb(${back})`).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+test("[GEN-2609-121] artist profile (Hrithik): each show's ticket link is the orange primary; '+ Follow' is an outline; prev/next arrows are not filled", async ({ page }) => {
+  // scripts/qa-seed.ts: Hrithik's Artist row. The prev/next bar renders when
+  // the artist sits in the listing's saved order; give it one around him.
+  const HRITHIK = "qa-demo-artist-full-role";
+  await page.addInitScript((id) => {
+    sessionStorage.setItem("afa-artist-nav-order", JSON.stringify(["e2e-prev-artist", id, "e2e-next-artist"]));
+  }, HRITHIK);
+  await page.goto(`/artists/${HRITHIK}/`);
+  const fillSolid = await tokenColour(page, "--afa-fill-solid");
+  const bgOf = (l: Locator) => l.evaluate((el) => getComputedStyle(el).backgroundColor);
+
+  const shows = page.locator("h2", { hasText: /^Upcoming shows$/i }).locator("xpath=../..");
+  const ticketLinks = shows.getByRole("link", { name: "Book" });
+  await expect(ticketLinks.first(), "Hrithik has an upcoming show in the QA seed").toBeVisible();
+  for (const link of await ticketLinks.all()) expect(await bgOf(link), "a show's ticket link").toBe(fillSolid);
+
+  const follow = page.getByRole("button", { name: /^\+ Follow$/ }).filter({ visible: true }).first();
+  await expect(follow).toBeVisible();
+  const followBg = await bgOf(follow);
+  expect(followBg, "+ Follow has no orange fill").not.toBe(fillSolid);
+  expect(await follow.evaluate((el) => getComputedStyle(el).borderTopStyle), "+ Follow is an outline").toBe("solid");
+
+  for (const name of ["Previous artist", "Next artist"]) {
+    const arrow = page.getByRole("button", { name });
+    await expect(arrow).toBeVisible();
+    expect(await bgOf(arrow), `${name} has no orange fill`).not.toBe(fillSolid);
+  }
+});
+
+test.describe("Messages, signed in as Atul", () => {
+  test.use({ storageState: authFile("atul") });
+
+  test("[GEN-2609-121] a message thread's Send button is the orange primary", async ({ page }) => {
+    // Atul's seeded thread is closed, and a closed thread has no Send box.
+    // It is served to this page as open, in the browser only; nothing is sent.
+    await page.route(/\/api\/conversations\/[^/]+\/messages\/?(\?.*)?$/, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const res = await route.fetch();
+      const body = await res.json();
+      body.isActive = true;
+      await route.fulfill({ response: res, json: body });
+    });
+    await page.goto("/dashboard/messages/");
+    const thread = page.locator('main a[href^="/dashboard/messages/"]:not([href="/dashboard/messages/"]):not([href="/dashboard/messages"])').first();
+    await expect(thread, "Atul has a message thread in the QA seed").toBeVisible({ timeout: 30_000 });
+    await thread.click();
+    await page.waitForURL(/\/dashboard\/messages\/[^/]+/);
+    // Send is enabled only with a draft; the draft is typed, never sent.
+    const box = page.locator("main textarea, main input:not([type])").last();
+    await expect(box).toBeVisible();
+    await box.fill("e2e draft - never sent");
+    const send = page.getByRole("button", { name: /^Send$/ });
+    await expect(send).toBeEnabled();
+    const fillSolid = await tokenColour(page, "--afa-fill-solid");
+    await expect(send).toHaveCSS("background-color", fillSolid);
+    await box.fill("");
+  });
+});
