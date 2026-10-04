@@ -5313,3 +5313,4 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - F triggered: autopilot run 37202683563 on `docs/cc-dispatches/cc-prompt-spacing-p2-f.md` → branch `chore/spacing-p2-f`. Overlap with E: both touch `src/lib/design-tokens.ts` (different regions).
 - Stale: GEN-2609-099 tint-tokens handoff re-pasted; already merged 22 Sep as #697 (`28c5cbf`).
 - Open: BUG-2610-010 nightly never fires. Human-only: GEN-2608-041, BUG-2608-030; plus E Human check = glance at a real ticket email + PDF (orange labels slightly darker).
+- E merged: PR #732 squash → qa `2a5c176` (head 6b2be9d pinned, all 4 checks green). GEN-2610-001 → BUILD_COMPLETE pending Human check. Persona inboxes are `@aforaudience.qa` (not deliverable): the email Human check needs a QA audience account on an address Hitesh reads.
