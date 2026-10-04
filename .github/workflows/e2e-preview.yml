@@ -12,29 +12,23 @@ name: E2E (preview)
 on:
   deployment_status:
 
-# A deployment_status carries no branch, only the commit, so the group is
-# per commit: re-deploys of the same commit replace each other.
-# ONE queue for every e2e run (e2e.yml and e2e-preview.yml share it): all runs
-# use the same QA database fixtures (waitlist/wallet event, design tokens), so
-# two runs at once corrupt each other (3 Oct: #725's QA run and PR #726's preview
-# run both failed waitlist-wallet-credit while overlapping). Runs wait, never cancel
-# a running one. GitHub keeps only the NEWEST pending run per group, so if three
-# queue up the middle one is cancelled: chat re-runs it before merging (T2).
-concurrency:
-  group: e2e-qa-shared-fixtures
-  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  e2e-preview:
+  # Decides OUTSIDE the shared queue whether this deployment needs testing,
+  # so commits already in qa skip at once instead of waiting in the queue and
+  # then being cancelled as superseded pending runs (noise seen 3 Oct).
+  target:
     if: >-
       github.event.deployment_status.state == 'success' &&
       github.event.deployment.environment != 'Production' &&
       !startsWith(github.event.deployment.environment, 'Production')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.target.outputs.run }}
     env:
       PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
     steps:
@@ -62,35 +56,47 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           fi
 
+  e2e-preview:
+    needs: target
+    if: needs.target.outputs.run == 'true'
+    # ONE queue for every e2e run (shared with e2e.yml): shared QA fixtures.
+    concurrency:
+      group: e2e-qa-shared-fixtures
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
       - uses: actions/setup-node@v5
-        if: steps.target.outputs.run == 'true'
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
-        if: steps.target.outputs.run == 'true'
         run: npm ci
 
       - name: Install Playwright browser (chromium only - matches playwright.config.ts projects)
-        if: steps.target.outputs.run == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run e2e suite against the preview
-        if: steps.target.outputs.run == 'true'
         run: npx playwright test
         env:
           CI: true
           E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
 
       - name: Summary annotation (pass/fail counts)
-        if: always() && steps.target.outputs.run == 'true'
+        if: always()
         env:
           E2E_SUMMARY_LABEL: e2e-preview
         run: node e2e/ci-summary.mjs
 
       - name: Upload Playwright report and results.json
-        if: always() && steps.target.outputs.run == 'true'
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: playwright-report
