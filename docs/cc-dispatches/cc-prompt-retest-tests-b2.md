@@ -4,7 +4,7 @@
 
 **FIRST ACTION:** write `cc-autopilot-status.md` (repo root, not committed): `RESULT: PARTIAL test/retest-backlog-b2 none` and "started". Update it after every push. **Budget: about 120 turns.**
 
-**Start:** `git fetch && git reset --hard origin/qa`. Base must be `db4183a` or later. Read `docs/testing-rules.md`, `docs/test-coverage-map.md` (from B1; its "untested" rows describe each test), `e2e/README.md`, `e2e/helpers/*`. Follow B1's conventions exactly: the ticket ID in square brackets in the title; QA personas only; no `src/` change unless a test exposes a real bug (then `test.fixme` + say so in the status file).
+**Start:** `git fetch && git reset --hard origin/qa`. Base must be the current origin/qa (includes #729 and #730). Read `docs/testing-rules.md`, `docs/test-coverage-map.md` (from B1; its "untested" rows describe each test), `e2e/README.md`, `e2e/helpers/*`. Follow B1's conventions exactly: the ticket ID in square brackets in the title; QA personas only; no `src/` change unless a test exposes a real bug (then `test.fixme` + say so in the status file).
 
 **Local runs use `--grep-invert @needs-db`** (the autopilot is outside the shared CI queue). A test that needs DB writes or the temp admin is tagged `@needs-db` and is proven by the CI preview run, not locally. Say which in the status file.
 
