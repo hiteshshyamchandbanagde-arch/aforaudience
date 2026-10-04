@@ -18,7 +18,11 @@ on:
       - "docs/**"
       - "**/*.md"
   schedule:
-    - cron: "0 2 * * *" # 02:00 UTC = 07:30 IST
+    # Off the top of the hour: GitHub delays or DROPS scheduled runs under
+    # load, worst at :00 (the 02:00 slot never fired on 4 Oct). A second,
+    # later slot is the backup; the shared queue serialises them.
+    - cron: "23 1 * * *" # 01:23 UTC = 06:53 IST
+    - cron: "41 4 * * *" # 04:41 UTC = 10:11 IST (backup)
   workflow_dispatch: {}
 
 # One run per ref. A newer push makes the older run pointless, so it is
