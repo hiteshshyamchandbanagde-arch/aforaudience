@@ -87,6 +87,9 @@ test("[GEN-2609-120] मराठी: picked, survives a reload, nav chrome is M
   await page.reload();
   // No pre-paint for the locale (translate.tsx): wait for the saved choice to apply.
   await expect(page.locator("html")).toHaveAttribute("lang", "mr");
+  // The phone tab bar renders only once the session has loaded.
+  const firstLabel = isMobile ? PHONE_TAB_BAR[0] : DESKTOP_NAV[0];
+  await expect(page.locator("nav:visible").getByText(firstLabel, { exact: true }).first()).toBeVisible();
 
   const navs = await visibleNavs(page);
   expect(navs.length, "a nav is visible").toBeGreaterThan(0);
@@ -110,7 +113,13 @@ test("[GEN-2609-120] मराठी: picked, survives a reload, nav chrome is M
   }
 
   // Baseline: the nav a visitor sees at this width, in Marathi.
+  // The tab bar is see-through (scrim + backdrop blur), so whatever scrolls
+  // behind it would change the pixels: made opaque for the shot only.
   const shot = isMobile ? navs[navs.length - 1] : navs[0];
+  await shot.evaluate((el) => {
+    el.style.setProperty("backdrop-filter", "none", "important");
+    el.style.setProperty("background", "black", "important");
+  });
   await expect(shot).toHaveScreenshot(`marathi-nav-${isMobile ? 390 : 1440}.png`, { maxDiffPixelRatio: 0.02 });
 });
 
