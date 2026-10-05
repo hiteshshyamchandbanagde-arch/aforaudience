@@ -17,12 +17,15 @@ import { JAIPUR_EVENT_TITLE, openEventFromListing } from "./helpers/events";
  */
 
 async function serveListing(page: Page, withCarousel: boolean) {
+  // Each test loads /events twice (its own check, then the helper's). The
+  // real listing is fetched once and reused, so the second load is not a
+  // second slow call to QA.
+  let real: { id: string; title: string; date: string; type: string }[] | null = null;
   await page.route(
     (url) => /^\/api\/events\/?$/.test(url.pathname),
     async (route) => {
-      const res = await route.fetch();
-      const real = (await res.json()) as { id: string; title: string; date: string; type: string }[];
-      const jaipur = real.find((e) => e.title === JAIPUR_EVENT_TITLE);
+      if (!real) real = (await (await route.fetch()).json()) as typeof real;
+      const jaipur = real!.find((e) => e.title === JAIPUR_EVENT_TITLE);
       expect(jaipur, "the listing API has Jaipur Mic Gala 100").toBeTruthy();
       const date = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       // Midweek, so the copies never fall in This Weekend's range.
@@ -32,7 +35,7 @@ async function serveListing(page: Page, withCarousel: boolean) {
         : [];
       // Jaipur itself as some other type, so it never adds a 4th to the copies' row.
       const events = [{ ...jaipur!, type: withCarousel ? "THEATER" : jaipur!.type }, ...copies];
-      await route.fulfill({ response: res, json: events });
+      await route.fulfill({ json: events });
     }
   );
 }
