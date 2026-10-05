@@ -38,6 +38,7 @@ const te: Dictionary = {
     tabTickets: "టికెట్లు",
     tabSaved: "సేవ్ చేసినవి",
     tabWallOfFame: "ఫేమ్",
+    tabDashboard: "డాష్‌బోర్డ్",
   },
   roles: {
     VENUE_OWNER: "వేదిక యజమాని",

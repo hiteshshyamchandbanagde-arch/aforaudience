@@ -38,6 +38,7 @@ const en = {
     tabTickets: "Tickets",
     tabSaved: "Saved",
     tabWallOfFame: "WOF",
+    tabDashboard: "Dashboard",
   },
   roles: {
     VENUE_OWNER: "Venue Owner",

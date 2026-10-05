@@ -37,6 +37,7 @@ const hi: Dictionary = {
     tabTickets: "टिकट",
     tabSaved: "सहेजे",
     tabWallOfFame: "फ़ेम",
+    tabDashboard: "डैशबोर्ड",
   },
   roles: {
     VENUE_OWNER: "स्थल स्वामी",

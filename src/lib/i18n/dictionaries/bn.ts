@@ -38,6 +38,7 @@ const bn: Dictionary = {
     tabTickets: "টিকিট",
     tabSaved: "সেভ করা",
     tabWallOfFame: "ফেম",
+    tabDashboard: "ড্যাশবোর্ড",
   },
   roles: {
     VENUE_OWNER: "ভেন্যু মালিক",

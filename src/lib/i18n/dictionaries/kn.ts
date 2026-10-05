@@ -38,6 +38,7 @@ const kn: Dictionary = {
     tabTickets: "ಟಿಕೆಟ್",
     tabSaved: "ಉಳಿಸಿದವು",
     tabWallOfFame: "ಫೇಮ್",
+    tabDashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
   },
   roles: {
     VENUE_OWNER: "ಸ್ಥಳ ಮಾಲೀಕರು",

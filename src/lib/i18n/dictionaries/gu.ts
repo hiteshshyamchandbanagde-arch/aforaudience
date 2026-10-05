@@ -38,6 +38,7 @@ const gu: Dictionary = {
     tabTickets: "ટિકિટ",
     tabSaved: "સેવ કરેલા",
     tabWallOfFame: "ફેમ",
+    tabDashboard: "ડેશબોર્ડ",
   },
   roles: {
     VENUE_OWNER: "સ્થળ માલિક",

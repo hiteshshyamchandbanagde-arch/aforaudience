@@ -47,6 +47,7 @@ const de: Dictionary = {
     tabTickets: "Tickets",
     tabSaved: "Gemerkt",
     tabWallOfFame: "WOF",
+    tabDashboard: "Dashboard",
   },
   roles: {
     VENUE_OWNER: "Standortbesitzer",

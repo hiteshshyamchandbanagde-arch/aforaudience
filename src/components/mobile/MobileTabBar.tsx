@@ -177,9 +177,9 @@ export default function MobileTabBar() {
   // e.g. "My Events"/"Sales"/"Payouts".
   //
   // The visitor bars below are translated (GEN-2609-120: they were the
-  // English left in the Marathi nav). Discover/Tickets/Saved/Events/WOF use
-  // their own short nav.tab* keys rather than t.nav.myTickets /
-  // t.nav.wallOfFame: this bar's 5 equal-width slots wrapped those full
+  // English left in the Marathi nav). Discover/Tickets/Saved/Events/WOF/Dashboard
+  // use their own short nav.tab* keys rather than t.nav.myTickets /
+  // t.nav.wallOfFame / t.nav.dashboard: this bar's 5 equal-width slots wrapped those full
   // words to two lines at 10px/0.08em tracking.
   const primaryItems: ItemDef[] = [
     { id: 'discover', href: '/events', label: t.nav.tabDiscover, Icon: DiscoverTabIcon, nav: 'push' },
@@ -206,7 +206,7 @@ export default function MobileTabBar() {
     // the current QA personas hold 2+ roles, and multi-role switching is
     // Phase D's Profile role-switcher territory, not solvable here
     // regardless of build order.
-    { id: 'dashboard', href: dashboardHref, label: t.nav.dashboard, Icon: DashboardMorphTabIcon, nav: 'push' },
+    { id: 'dashboard', href: dashboardHref, label: t.nav.tabDashboard, Icon: DashboardMorphTabIcon, nav: 'push' },
   ]
 
   // Artist - 3 items, no "More" (nothing to overflow). Icons match

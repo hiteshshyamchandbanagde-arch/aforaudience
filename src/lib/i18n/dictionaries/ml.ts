@@ -38,6 +38,7 @@ const ml: Dictionary = {
     tabTickets: "ടിക്കറ്റ്",
     tabSaved: "സേവ് ചെയ്തവ",
     tabWallOfFame: "ഫെയിം",
+    tabDashboard: "ഡാഷ്‌ബോർഡ്",
   },
   roles: {
     VENUE_OWNER: "വേദി ഉടമ",

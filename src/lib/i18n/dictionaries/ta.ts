@@ -38,6 +38,7 @@ const ta: Dictionary = {
     tabTickets: "டிக்கெட்",
     tabSaved: "சேமித்தவை",
     tabWallOfFame: "ஃபேம்",
+    tabDashboard: "டாஷ்போர்டு",
   },
   roles: {
     VENUE_OWNER: "இட உரிமையாளர்",

@@ -38,6 +38,7 @@ const mr: Dictionary = {
     tabTickets: "तिकिटे",
     tabSaved: "आवडते",
     tabWallOfFame: "फेम",
+    tabDashboard: "डॅशबोर्ड",
   },
   roles: {
     VENUE_OWNER: "ठिकाण मालक",
