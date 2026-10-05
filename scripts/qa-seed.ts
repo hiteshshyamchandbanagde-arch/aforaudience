@@ -16,6 +16,7 @@ import { Pool } from "pg"
 import { fakerEN_IN as faker } from "@faker-js/faker"
 import bcrypt from "bcryptjs"
 import { generateTicketCode } from "../src/lib/ticket-code"
+import { keepFixturesUpcoming } from "../e2e/helpers/upcoming-fixtures"
 
 // ---------------------------------------------------------------------------
 // Hard guard — must run before any DB connection object is constructed.
@@ -1675,6 +1676,16 @@ async function main() {
     const fixtureCreds = await seedE2eFixtures(prisma)
     const goldenCreds = await seedGoldenScenario(prisma, pools)
     const demoCreds = await seedDemoPersonas(prisma, pools)
+
+    // BUG-2610-013 - the events the e2e suite needs upcoming get the same
+    // "at least 45 days ahead" rule global-setup applies on every run, so
+    // a fresh seed and a run months later agree.
+    const client = await pool.connect()
+    try {
+      for (const m of await keepFixturesUpcoming(client)) console.log(`[seed] ${m.title} dated ${m.to.toISOString()} (e2e upcoming fixture)`)
+    } finally {
+      client.release()
+    }
 
     await printSummary(prisma, fixtureCreds, goldenCreds, demoCreds)
     console.log("[qa-seed] Done.")
