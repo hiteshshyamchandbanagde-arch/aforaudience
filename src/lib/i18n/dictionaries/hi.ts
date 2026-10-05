@@ -32,6 +32,11 @@ const hi: Dictionary = {
     signOut: "साइन आउट करें",
     backToVenues: "← स्थलों पर वापस",
     backToEvents: "← इवेंट्स पर वापस",
+    tabDiscover: "खोजें",
+    tabEvents: "इवेंट्स",
+    tabTickets: "टिकट",
+    tabSaved: "सहेजे",
+    tabWallOfFame: "फ़ेम",
   },
   roles: {
     VENUE_OWNER: "स्थल स्वामी",
@@ -333,6 +338,11 @@ const hi: Dictionary = {
     enabling: "चालू हो रहा है…",
     ariaLabel: "सूचनाएं चालू करें",
     dismissAriaLabel: "बंद करें",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "अपना फ़ोन सत्यापित करें",
+    message: "टिकट या स्थल बुक करने के लिए अपना फ़ोन नंबर सत्यापित करें।",
+    verifyNow: "अभी सत्यापित करें",
   },
   welcomeSequence: {
     step1Heading: "AforAudience में आपका स्वागत है",

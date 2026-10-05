@@ -33,6 +33,11 @@ const te: Dictionary = {
     signOut: "సైన్ అవుట్",
     backToVenues: "← వేదికలకు తిరిగి",
     backToEvents: "← ఈవెంట్‌లకు తిరిగి",
+    tabDiscover: "కనుగొనండి",
+    tabEvents: "ఈవెంట్‌లు",
+    tabTickets: "టికెట్లు",
+    tabSaved: "సేవ్ చేసినవి",
+    tabWallOfFame: "ఫేమ్",
   },
   roles: {
     VENUE_OWNER: "వేదిక యజమాని",
@@ -334,6 +339,11 @@ const te: Dictionary = {
     enabling: "ఆన్ చేస్తోంది…",
     ariaLabel: "నోటిఫికేషన్‌లను ఆన్ చేయండి",
     dismissAriaLabel: "మూసివేయండి",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "మీ ఫోన్‌ను ధృవీకరించండి",
+    message: "టికెట్లు లేదా వేదికలు బుక్ చేయడానికి మీ ఫోన్ నంబర్‌ను ధృవీకరించండి.",
+    verifyNow: "ఇప్పుడే ధృవీకరించండి",
   },
   welcomeSequence: {
     step1Heading: "AforAudience కి స్వాగతం",

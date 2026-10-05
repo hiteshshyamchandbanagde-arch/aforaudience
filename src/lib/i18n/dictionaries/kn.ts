@@ -33,6 +33,11 @@ const kn: Dictionary = {
     signOut: "ಸೈನ್ ಔಟ್",
     backToVenues: "← ಸ್ಥಳಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
     backToEvents: "← ಈವೆಂಟ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    tabDiscover: "ಅನ್ವೇಷಿಸಿ",
+    tabEvents: "ಈವೆಂಟ್‌ಗಳು",
+    tabTickets: "ಟಿಕೆಟ್",
+    tabSaved: "ಉಳಿಸಿದವು",
+    tabWallOfFame: "ಫೇಮ್",
   },
   roles: {
     VENUE_OWNER: "ಸ್ಥಳ ಮಾಲೀಕರು",
@@ -334,6 +339,11 @@ const kn: Dictionary = {
     enabling: "ಸಕ್ರಿಯಗೊಳಿಸುತ್ತಿದೆ…",
     ariaLabel: "ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
     dismissAriaLabel: "ವಜಾಗೊಳಿಸಿ",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ",
+    message: "ಟಿಕೆಟ್‌ಗಳು ಅಥವಾ ಸ್ಥಳಗಳನ್ನು ಬುಕ್ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
+    verifyNow: "ಈಗಲೇ ಪರಿಶೀಲಿಸಿ",
   },
   welcomeSequence: {
     step1Heading: "AforAudience ಗೆ ಸ್ವಾಗತ",

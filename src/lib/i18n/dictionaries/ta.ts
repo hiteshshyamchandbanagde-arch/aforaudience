@@ -33,6 +33,11 @@ const ta: Dictionary = {
     signOut: "வெளியேறு",
     backToVenues: "← இடங்களுக்குத் திரும்பு",
     backToEvents: "← நிகழ்வுகளுக்குத் திரும்பு",
+    tabDiscover: "கண்டறி",
+    tabEvents: "நிகழ்வுகள்",
+    tabTickets: "டிக்கெட்",
+    tabSaved: "சேமித்தவை",
+    tabWallOfFame: "ஃபேம்",
   },
   roles: {
     VENUE_OWNER: "இட உரிமையாளர்",
@@ -334,6 +339,11 @@ const ta: Dictionary = {
     enabling: "இயக்குகிறது…",
     ariaLabel: "அறிவிப்புகளை இயக்கு",
     dismissAriaLabel: "நிராகரி",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "உங்கள் தொலைபேசியைச் சரிபார்க்கவும்",
+    message: "டிக்கெட்டுகள் அல்லது இடங்களை முன்பதிவு செய்ய உங்கள் தொலைபேசி எண்ணைச் சரிபார்க்கவும்.",
+    verifyNow: "இப்போதே சரிபார்க்கவும்",
   },
   welcomeSequence: {
     step1Heading: "AforAudience-க்கு வரவேற்கிறோம்",

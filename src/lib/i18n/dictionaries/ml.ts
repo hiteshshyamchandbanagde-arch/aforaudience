@@ -33,6 +33,11 @@ const ml: Dictionary = {
     signOut: "സൈൻ ഔട്ട്",
     backToVenues: "← വേദികളിലേക്ക് തിരികെ",
     backToEvents: "← ഇവന്റുകളിലേക്ക് തിരികെ",
+    tabDiscover: "കണ്ടെത്തൂ",
+    tabEvents: "ഇവന്റുകൾ",
+    tabTickets: "ടിക്കറ്റ്",
+    tabSaved: "സേവ് ചെയ്തവ",
+    tabWallOfFame: "ഫെയിം",
   },
   roles: {
     VENUE_OWNER: "വേദി ഉടമ",
@@ -334,6 +339,11 @@ const ml: Dictionary = {
     enabling: "ഓണാക്കുന്നു…",
     ariaLabel: "അറിയിപ്പുകൾ ഓണാക്കുക",
     dismissAriaLabel: "നിരസിക്കുക",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "നിങ്ങളുടെ ഫോൺ പരിശോധിക്കുക",
+    message: "ടിക്കറ്റുകളോ വേദികളോ ബുക്ക് ചെയ്യാൻ നിങ്ങളുടെ ഫോൺ നമ്പർ പരിശോധിക്കുക.",
+    verifyNow: "ഇപ്പോൾ പരിശോധിക്കുക",
   },
   welcomeSequence: {
     step1Heading: "AforAudience-ലേക്ക് സ്വാഗതം",

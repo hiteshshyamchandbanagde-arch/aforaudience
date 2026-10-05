@@ -38,6 +38,11 @@ const fr: Dictionary = {
     signOut: "Se déconnecter",
     backToVenues: "← Retour aux lieux",
     backToEvents: "← Retour aux événements",
+    tabDiscover: "Découvrir",
+    tabEvents: "Événements",
+    tabTickets: "Billets",
+    tabSaved: "Favoris",
+    tabWallOfFame: "Top",
   },
   roles: {
     VENUE_OWNER: "Propriétaire de lieu",
@@ -339,6 +344,11 @@ const fr: Dictionary = {
     enabling: "Activation…",
     ariaLabel: "Activer les notifications",
     dismissAriaLabel: "Fermer",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "Vérifiez votre téléphone",
+    message: "Vérifiez votre numéro de téléphone pour réserver des billets ou des lieux.",
+    verifyNow: "Vérifier maintenant",
   },
   welcomeSequence: {
     step1Heading: "Bienvenue sur AforAudience",

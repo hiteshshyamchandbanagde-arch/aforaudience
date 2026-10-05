@@ -33,6 +33,11 @@ const bn: Dictionary = {
     signOut: "সাইন আউট",
     backToVenues: "← ভেন্যুতে ফিরে যান",
     backToEvents: "← ইভেন্টে ফিরে যান",
+    tabDiscover: "খুঁজুন",
+    tabEvents: "ইভেন্ট",
+    tabTickets: "টিকিট",
+    tabSaved: "সেভ করা",
+    tabWallOfFame: "ফেম",
   },
   roles: {
     VENUE_OWNER: "ভেন্যু মালিক",
@@ -334,6 +339,11 @@ const bn: Dictionary = {
     enabling: "সক্ষম করা হচ্ছে…",
     ariaLabel: "বিজ্ঞপ্তি সক্ষম করুন",
     dismissAriaLabel: "খারিজ করুন",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "আপনার ফোন যাচাই করুন",
+    message: "টিকিট বা ভেন্যু বুক করতে আপনার ফোন নম্বর যাচাই করুন।",
+    verifyNow: "এখনই যাচাই করুন",
   },
   welcomeSequence: {
     step1Heading: "AforAudience-এ স্বাগতম",
