@@ -5320,3 +5320,7 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - F mid-run (37202683563), branch chore/spacing-p2-f @35a6fba so far: 6 commits, 102 files, 5 tokens (36/40/56/64/80px), 185 sites; spacing hidden from admin per 24 Sep decision (+spec). Interim review clean: no loosened tests; new-spec timeouts only; visual-equivalence skip is by design.
 - F merged: PR #734 squash → qa `1edc087` (head 35a6fba pinned; design-tokens, e2e-preview, target green). GEN-2609-107 → BUILD_COMPLETE. Human check: glance at a few pages at 390/1440 for spacing shifts (should be pixel-identical).
 - G triggered: autopilot run 37212243144 → `fix/ticket-actions-g` (BUG-2610-012).
+
+## Part 49 — 5 Oct morning, chat
+- G merged: PR #735 squash → qa `7b0855b` (head 9256c39 pinned, all checks green). Existing `e2e/ticket-actions.spec.ts` rewritten stricter (1 line, inside box, no overflow, 44px; old "one row, ≤2 lines" assertion dropped — it is what let the bug through). Baselines 390/1440, QR masked. BUG-2610-012 → BUILD_COMPLETE; Human check: My Tickets on a real phone.
+- BUG-2610-010 confirmed: 01:23 and 04:41 UTC slots both silent on 5 Oct; repo has ZERO `schedule` runs ever, though e2e.yml is active on default branch qa with the #728 cron. Next: external trigger (cron-job.org → workflow_dispatch on e2e.yml) unless a re-registration push fixes it.
