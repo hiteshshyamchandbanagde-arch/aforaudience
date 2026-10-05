@@ -48,6 +48,9 @@ const desktopOnly = [
 // the bottom tab bar). The desktop project leaves them out.
 const mobileOnly = "**/*.mobile.spec.ts";
 
+// Runs first, in its own project (see projects below).
+const seedHealth = "**/seed-health.spec.ts";
+
 export default defineConfig({
   testDir: "./e2e",
   // Warm-up request + one login per persona, saved to e2e/.auth (see the file).
@@ -88,9 +91,18 @@ export default defineConfig({
   },
   projects: [
     {
+      // BUG-2610-013: the QA seed's upcoming-event assumptions, checked
+      // once before the browser projects start. If they don't hold, the run
+      // stops here with one message instead of failing as scattered timeouts.
+      name: "seed-health",
+      testMatch: seedHealth,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "chromium-desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: mobileOnly,
+      testIgnore: [mobileOnly, seedHealth],
+      dependencies: ["seed-health"],
     },
     {
       name: "mobile-chrome",
@@ -98,7 +110,8 @@ export default defineConfig({
       // this project mirrors that, since several fixed layout bugs
       // (SeatPicker, sticky nudge banners) have only shown up at narrow widths.
       use: { ...devices["Pixel 7"] },
-      testIgnore: desktopOnly,
+      testIgnore: [...desktopOnly, seedHealth],
+      dependencies: ["seed-health"],
     },
   ],
 });

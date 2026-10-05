@@ -14,15 +14,26 @@ export const JAIPUR_EVENT_TITLE = "Jaipur Mic Gala 100";
  * On mobile the listing opens as carousel rows of a few events each
  * (GEN-2609-012); the full list is behind "See all events". The specs that
  * predate that looked for the card straight away and hung on mobile.
+ *
+ * Those rows only render when one of them (tonight, this weekend, a type)
+ * holds 3+ upcoming events; with fewer, the page shows the plain list and
+ * there is no button (BUG-2610-013: QA's seeded events aged out and the
+ * helper waited 15 s for a button that was never coming). So: wait for
+ * whichever shows first, the button or the plain list, and click the
+ * button only if that is what the page offers.
  */
 export async function openEventFromListing(page: Page, title: string, isMobile: boolean) {
   await page.goto("/events");
-  if (isMobile) {
-    await page.getByRole("button", { name: /see all events/i }).click();
-  }
   // The whole card is one role="link" whose accessible name is the full
   // card text. Match on the unique title: every card shares the rest.
-  await page.getByRole("link", { name: new RegExp(escapeRegExp(title), "i") }).click();
+  // A carousel card has the same name, so take a visible one.
+  const card = page.getByRole("link", { name: new RegExp(escapeRegExp(title), "i") }).filter({ visible: true }).first();
+  if (isMobile) {
+    const seeAll = page.getByRole("button", { name: /see all events/i });
+    await expect(seeAll.or(card).first()).toBeVisible();
+    if (await seeAll.isVisible()) await seeAll.click();
+  }
+  await card.click();
   // Require an id segment after /events/ - a looser pattern matches the
   // listing itself and would pass with no navigation at all.
   await expect(page).toHaveURL(/\/events\/[^/?]+\/?($|\?)/);

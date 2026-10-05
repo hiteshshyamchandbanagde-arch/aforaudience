@@ -1,7 +1,8 @@
 import fs from "fs";
 import { request, type FullConfig } from "@playwright/test";
 import { AUTH_DIR, PERSONAS, authFile, type PersonaKey } from "./helpers/personas";
-import { hasQaDatabase, warn } from "./helpers/qa-db";
+import { hasQaDatabase, warn, withQaDb } from "./helpers/qa-db";
+import { keepFixturesUpcoming } from "./helpers/upcoming-fixtures";
 import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/temp-admin";
 
 /**
@@ -20,6 +21,10 @@ import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/tem
  *    in once and saved to e2e/.auth/temp-admin.json; its password is
  *    random and lives only in memory (helpers/temp-admin.ts).
  *    global-teardown.ts deletes it.
+ * 4. Upcoming fixtures (QA database only, BUG-2610-013): the seeded events
+ *    the specs need upcoming are moved forward if the clock has caught up
+ *    with them (helpers/upcoming-fixtures.ts). seed-health.spec.ts runs
+ *    before every other spec and fails in one line if they still aren't.
  */
 const WARM_UP_BUDGET_MS = 60_000;
 
@@ -57,6 +62,11 @@ export default async function globalSetup(config: FullConfig) {
   }
 
   if (hasQaDatabase()) {
+    const moved = await withQaDb(keepFixturesUpcoming);
+    for (const m of moved) {
+      console.log(`[e2e setup] upcoming fixture "${m.title}" moved from ${m.from.toISOString()} to ${m.to.toISOString()}`);
+    }
+
     const { run, password } = await createTempAdmin();
     try {
       await signIn(baseURL, { label: "E2E temp admin", identifier: run.email, password }, ADMIN_AUTH_FILE);
