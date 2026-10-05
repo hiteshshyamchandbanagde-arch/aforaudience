@@ -19,6 +19,15 @@ import Button from '@/components/ui/Button'
 import StubRow from '@/components/ui/StubRow'
 import { formatDate } from '@/lib/format-date'
 
+// BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
+// Organiser / Cancel ticket): full-width buttons stacked under the QR,
+// each label on one line. minHeight is the 44px tap target, built from
+// the space scale.
+const ACTION_STYLE: React.CSSProperties = {
+  whiteSpace: 'nowrap',
+  minHeight: 'calc(var(--afa-space-40px) + var(--afa-space-1))',
+}
+
 // Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
 // than the Figma mock's decorative QrIcon glyph. Encodes the raw
 // booking ID, same convention as the PDF ticket's QR (src/lib/ticket-
@@ -671,45 +680,44 @@ export default function MyTicketsPage() {
                                 <p style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
                               </div>
                             )}
-                            <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
-                              {/* GEN-2609-069 - flex: '1 1 auto' let each button claim
-                                  its own natural content width first, so in the 2-up
-                                  desktop grid (narrower per-card than the mobile-first
-                                  reference design assumed) all 3 overflowed and each
-                                  wrapped onto its own full-width line instead of
-                                  sharing the row. flex-basis 0 makes them split the
-                                  row equally and wrap their own label text instead. */}
-                              <Button
-                                variant="outline-neutral"
-                                size="sm"
-                                href={`/api/bookings/${b.id}/ticket`}
-                                style={{ flex: '1 1 0', minWidth: 0 }}
-                              >
-                                <DownloadIcon style={{ width: 13, height: 13 }} />
-                                {tr.ticketsPage.downloadPdfShort}
-                              </Button>
-                              <MessageButton
-                                contextType="BOOKING"
-                                contextId={b.id}
-                                label={tr.ticketsPage.messageOrganiser}
-                                icon={<MessageIcon style={{ width: 13, height: 13 }} />}
-                                variant="outline-neutral"
-                                style={{ flex: '1 1 0', minWidth: 0 }}
-                              />
-                              {!isPastEvent(b) && (
-                                <Button
-                                  variant="outline-neutral"
-                                  size="sm"
-                                  onClick={() => cancelBooking(b)}
-                                  disabled={cancelling === b.id}
-                                  title={previewRefund(b, tr).label}
-                                  style={{ flex: '1 1 0', minWidth: 0, opacity: cancelling === b.id ? 0.6 : 1 }}
-                                >
-                                  {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
-                                </Button>
-                              )}
-                            </div>
                           </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                          {/* BUG-2610-012 - the actions used to share the narrow
+                              column beside the QR (about 70px each at 390, and the
+                              2-up desktop grid is narrower still), so every label
+                              wrapped to two lines and spilled past its border. They
+                              now stack at the card's full width under the QR, one
+                              line each, 44px tall (ACTION_STYLE). */}
+                          <Button
+                            variant="outline-neutral"
+                            size="sm"
+                            href={`/api/bookings/${b.id}/ticket`}
+                            style={ACTION_STYLE}
+                          >
+                            <DownloadIcon style={{ width: 13, height: 13 }} />
+                            {tr.ticketsPage.downloadPdfShort}
+                          </Button>
+                          <MessageButton
+                            contextType="BOOKING"
+                            contextId={b.id}
+                            label={tr.ticketsPage.messageOrganiser}
+                            icon={<MessageIcon style={{ width: 13, height: 13 }} />}
+                            variant="outline-neutral"
+                            style={ACTION_STYLE}
+                          />
+                          {!isPastEvent(b) && (
+                            <Button
+                              variant="outline-neutral"
+                              size="sm"
+                              onClick={() => cancelBooking(b)}
+                              disabled={cancelling === b.id}
+                              title={previewRefund(b, tr).label}
+                              style={{ ...ACTION_STYLE, opacity: cancelling === b.id ? 0.6 : 1 }}
+                            >
+                              {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
+                            </Button>
+                          )}
                         </div>
                       </>
                     )}
