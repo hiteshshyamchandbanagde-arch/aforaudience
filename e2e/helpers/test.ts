@@ -1,4 +1,4 @@
-import { test as base, expect, type Page } from "@playwright/test";
+import { test as base, expect, type BrowserContext, type BrowserContextOptions, type Page } from "@playwright/test";
 import { markFirstVisitDone } from "./first-visit";
 
 /**
@@ -10,10 +10,34 @@ import { markFirstVisitDone } from "./first-visit";
  * first-visit.spec.ts, which tests that first-visit flow itself and so
  * imports the untouched `test` from @playwright/test.
  */
-export const test = base.extend({
+export const test = base.extend<{ newContext: (options?: BrowserContextOptions) => Promise<BrowserContext> }>({
   context: async ({ context }, use) => {
     await markFirstVisitDone(context);
     await use(context);
+  },
+  /**
+   * Another browser context for the test (a second persona, its own
+   * viewport), first-visit state settled like `context`. Every one it opened
+   * is closed after the test, the way Playwright closes its own `context`.
+   *
+   * Use this instead of browser.newContext() with `finally { context.close() }`.
+   * When a test times out, Playwright closes its contexts while the test's
+   * last action is still waiting; that action rejects, the `finally` runs
+   * and its close() throws "Target page, context or browser has been
+   * closed", which replaces the error that said where the test was stuck
+   * (BUG-2610-011 cause 2). Closing here, after the test, leaves that
+   * error on the action itself. A test may still close a context early on
+   * its success path; a second close() is a no-op.
+   */
+  newContext: async ({ browser }, use) => {
+    const opened: BrowserContext[] = [];
+    await use(async (options) => {
+      const context = await browser.newContext(options);
+      opened.push(context);
+      await markFirstVisitDone(context);
+      return context;
+    });
+    await Promise.all(opened.map((context) => context.close()));
   },
 });
 
