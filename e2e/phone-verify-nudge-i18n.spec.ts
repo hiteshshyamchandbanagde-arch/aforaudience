@@ -62,9 +62,14 @@ for (const locale of ["hi", "mr"] as const) {
     // Credentials sign-in through the API, as global-setup.ts does; the
     // cookie lands in this page's context.
     const csrf = (await (await page.request.get("/api/auth/csrf/")).json()) as { csrfToken: string };
+    // maxRedirects 0: the answer is a redirect to the homepage, which the
+    // session cookie does not need rendered.
     await page.request.post("/api/auth/callback/credentials/", {
       form: { csrfToken: csrf.csrfToken, identifier: user.email, password: user.password, callbackUrl: baseURL ?? "/", json: "true" },
+      maxRedirects: 0,
     });
+    const session = (await (await page.request.get("/api/auth/session/")).json()) as { user?: { email?: string } };
+    expect(session?.user?.email, "the throwaway account is signed in").toBe(user.email);
 
     await page.addInitScript((id) => window.localStorage.setItem("afa-locale", id), locale);
     await page.goto("/events/");
