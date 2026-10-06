@@ -39,9 +39,15 @@ test("[BUG-2610-011] a timed-out test's error names the stuck action, not contex
   expect(results.get("finally close")?.status, "inner test 'finally close'").toBe("timedOut");
   expect(results.get("newContext fixture")?.status, "inner test 'newContext fixture'").toBe("timedOut");
 
-  // The mechanism: close() in `finally` throws and hides the click. Which
-  // of Playwright's two wordings depends on how far its teardown has got.
-  expect(errors("finally close")).toMatch(/browserContext\.close: (Target page, context or browser has been closed|Test ended)/);
+  // The mechanism: close() in `finally` throws and hides the click. Its
+  // wording is a race between that close() and the runner's own teardown of
+  // the timed-out test's context, so it is not checked: "Target page,
+  // context or browser has been closed" (teardown done), "Protocol error
+  // (Target.disposeBrowserContext): Failed to find context" (teardown half
+  // way, seen in CI on 5 Oct) or "Test ended." (close() still pending).
+  // In every case the error is on close(), and the click is not reported.
+  expect(errors("finally close")).toMatch(/browserContext\.close: /);
+  expect(errors("finally close")).not.toMatch(/locator\.click/);
   // The fix: the error is on the click, and close() is never blamed.
   expect(errors("newContext fixture")).toMatch(/locator\.click/);
   expect(errors("newContext fixture")).not.toMatch(/browserContext\.close/);
