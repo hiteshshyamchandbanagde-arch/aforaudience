@@ -34,6 +34,7 @@ const needsDb = /@needs-db/;
 // artist-tour-stop saves Hrithik's profile twice: one pass each.
 // goal-token-lock is a database check with no page at all.
 // design-system-spacing-hidden sets its own 1440 and 390 viewports.
+// context-timeout runs its own small Playwright run with no page of its own.
 const desktopOnly = [
   "**/waitlist-wallet-credit.spec.ts",
   "**/competition-show.spec.ts",
@@ -42,6 +43,7 @@ const desktopOnly = [
   "**/artist-tour-stop.spec.ts",
   "**/goal-token-lock.spec.ts",
   "**/design-system-spacing-hidden.spec.ts",
+  "**/context-timeout.spec.ts",
 ];
 
 // *.mobile.spec.ts: things that only exist at phone width (the filter sheet,

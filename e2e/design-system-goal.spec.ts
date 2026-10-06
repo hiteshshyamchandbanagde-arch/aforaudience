@@ -1,6 +1,5 @@
-import type { Browser, BrowserContext, Locator, Page } from "@playwright/test";
+import type { BrowserContext, BrowserContextOptions, Locator, Page } from "@playwright/test";
 import { test, expect, AFTER_WRITE, gotoDashboard } from "./helpers/test";
-import { markFirstVisitDone } from "./helpers/first-visit";
 import { authFile } from "./helpers/personas";
 import { FIXTURE_EVENT_ID } from "./helpers/roles";
 import { ADMIN_AUTH_FILE, GOAL_TEST_VALUE, GOAL_TOKEN, lockGoalToken, readTempAdminRun, type TempAdminRun } from "./helpers/temp-admin";
@@ -19,7 +18,14 @@ import { ADMIN_AUTH_FILE, GOAL_TEST_VALUE, GOAL_TOKEN, lockGoalToken, readTempAd
  * Never a locked token, never confirmLocked. The whole test holds the
  * cross-run GOAL_TOKEN lock (helpers/temp-admin.ts): another e2e run on the
  * shared QA database once put the token back mid-test, and the revert then
- * found nothing to save (BUG-2610-011).
+ * found nothing to save (BUG-2610-011). Time spent waiting for that lock
+ * is added to the test's timeout, so a wait never leaves the test itself
+ * too little time.
+ *
+ * Contexts come from the suite's `newContext` fixture, which closes them
+ * after the test, not from `finally { context.close() }`: on a timeout that
+ * close() threw "Target page, context or browser has been closed" and hid
+ * the step the test was stuck on (BUG-2610-011 cause 2, helpers/test.ts).
  *
  * What a download or the browser chrome follows (GEN-2609-119, #721):
  * - manifest theme_color and the theme-color meta: --afa-fill-solid;
@@ -44,15 +50,14 @@ const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
 
 type Token = { key: string; value: string };
+type NewContext = (options?: BrowserContextOptions) => Promise<BrowserContext>;
 
-async function openContext(browser: Browser, storageState: string | undefined, viewport = DESKTOP, phone = false) {
-  const context = await browser.newContext({
+function openContext(newContext: NewContext, storageState: string | undefined, viewport = DESKTOP, phone = false) {
+  return newContext({
     storageState,
     viewport,
     ...(phone ? { isMobile: true, hasTouch: true, deviceScaleFactor: 3 } : {}),
   });
-  await markFirstVisitDone(context);
-  return context;
 }
 
 /** Token values from the admin API, with var(--x) references followed to a concrete value. */
@@ -107,18 +112,24 @@ async function expectSelectedOn(page: Page, path: string, expected: string, who:
 }
 
 test.describe("@needs-db design system goal", () => {
-  test("@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor with no redeploy, then is reverted", async ({ browser }) => {
+  test("@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor with no redeploy, then is reverted", async ({ newContext }) => {
     // One editor save, six page checks under two sessions, the downloads,
     // then a second save to revert: honestly longer than 60 s on QA. Each
-    // single wait still fails in 10-25 s. Up to GOAL_LOCK_WAIT_MS (120 s)
-    // of that is waiting for another run to finish with the token.
+    // single wait still fails in 10-25 s.
     test.setTimeout(240_000);
 
     const run = readTempAdminRun();
     expect(run, "global-setup.ts created no temp admin (needs E2E_DATABASE_URL on the QA project)").not.toBeNull();
+    // Up to GOAL_LOCK_WAIT_MS (120 s) waiting for another run to finish with
+    // the token. That wait is not the test's own time: it is added on top,
+    // so the steps below always keep their 240 s (BUG-2610-011 cause 2).
+    const waitStart = Date.now();
     const unlock = await lockGoalToken();
+    const waited = Date.now() - waitStart;
+    test.setTimeout(test.info().timeout + waited);
+    if (waited > 5_000) test.info().annotations.push({ type: "goal token lock", description: `waited ${Math.round(waited / 1000)} s for another run` });
     try {
-      await editAndCheck(browser, run!);
+      await editAndCheck(newContext, run!);
     } finally {
       await unlock();
     }
@@ -126,8 +137,8 @@ test.describe("@needs-db design system goal", () => {
 });
 
 /** The test body, run holding the GOAL_TOKEN lock. */
-async function editAndCheck(browser: Browser, run: TempAdminRun) {
-  const admin = await openContext(browser, ADMIN_AUTH_FILE);
+async function editAndCheck(newContext: NewContext, run: TempAdminRun) {
+  const admin = await openContext(newContext, ADMIN_AUTH_FILE);
   const editor = await admin.newPage();
 
   // 1. The value before the test.
@@ -154,20 +165,17 @@ async function editAndCheck(browser: Browser, run: TempAdminRun) {
       ["Atul", authFile("atul")],
     ] as const) {
       await test.step(`${who}: the new value on ${PAGES.join(", ")} and on the active nav item`, async () => {
-        const context = await openContext(browser, state);
+        const context = await openContext(newContext, state);
         const page = await context.newPage();
-        try {
-          for (const path of PAGES) {
-            await expectSelectedOn(page, path, GOAL_TEST_VALUE, who);
-            const navHref = ACTIVE_NAV[path];
-            if (navHref) {
-              const link = page.locator(`.sitenav-desktop a[href="${navHref}"]`);
-              await expect(link, `active nav item ${navHref} on ${path} as ${who}`).toHaveCSS("color", hexToRgb(GOAL_TEST_VALUE));
-            }
+        for (const path of PAGES) {
+          await expectSelectedOn(page, path, GOAL_TEST_VALUE, who);
+          const navHref = ACTIVE_NAV[path];
+          if (navHref) {
+            const link = page.locator(`.sitenav-desktop a[href="${navHref}"]`);
+            await expect(link, `active nav item ${navHref} on ${path} as ${who}`).toHaveCSS("color", hexToRgb(GOAL_TEST_VALUE));
           }
-        } finally {
-          await context.close();
         }
+        await context.close();
       });
     }
 
@@ -177,29 +185,29 @@ async function editAndCheck(browser: Browser, run: TempAdminRun) {
       const theme = tokens.resolve("--afa-fill-solid").toLowerCase();
       const background = tokens.resolve("--afa-surface-page").toLowerCase();
 
-      const guest = await openContext(browser, undefined);
-      try {
-        const manifestRes = await guest.request.get("/manifest.webmanifest");
-        expect(manifestRes.ok(), `GET /manifest.webmanifest: HTTP ${manifestRes.status()}`).toBeTruthy();
-        const manifest = (await manifestRes.json()) as { theme_color?: string; background_color?: string };
-        expect(manifest.theme_color?.toLowerCase(), "manifest theme_color = --afa-fill-solid").toBe(theme);
-        expect(manifest.background_color?.toLowerCase(), "manifest background_color = --afa-surface-page").toBe(background);
+      const guest = await openContext(newContext, undefined);
+      const manifestRes = await guest.request.get("/manifest.webmanifest");
+      expect(manifestRes.ok(), `GET /manifest.webmanifest: HTTP ${manifestRes.status()}`).toBeTruthy();
+      const manifest = (await manifestRes.json()) as { theme_color?: string; background_color?: string };
+      expect(manifest.theme_color?.toLowerCase(), "manifest theme_color = --afa-fill-solid").toBe(theme);
+      expect(manifest.background_color?.toLowerCase(), "manifest background_color = --afa-surface-page").toBe(background);
 
-        const page = await guest.newPage();
-        await page.goto("/");
-        const meta = await page.locator('meta[name="theme-color"]').first().getAttribute("content");
-        expect(meta?.toLowerCase(), "theme-color meta = --afa-fill-solid").toBe(theme);
+      const page = await guest.newPage();
+      await page.goto("/");
+      const meta = await page.locator('meta[name="theme-color"]').first().getAttribute("content");
+      expect(meta?.toLowerCase(), "theme-color meta = --afa-fill-solid").toBe(theme);
 
-        const poster = await guest.request.get(`/api/posters/organiser/${FIXTURE_EVENT_ID}/`);
-        expect(poster.status(), "organiser share poster for the fixture event").toBe(200);
-        expect(poster.headers()["content-type"]).toContain("image/png");
-      } finally {
-        await guest.close();
-      }
+      const poster = await guest.request.get(`/api/posters/organiser/${FIXTURE_EVENT_ID}/`);
+      expect(poster.status(), "organiser share poster for the fixture event").toBe(200);
+      expect(poster.headers()["content-type"]).toContain("image/png");
+      await guest.close();
     });
   } finally {
-    // 5. Revert, through the editor like an admin would.
-    await test.step(`Revert ${GOAL_TOKEN} to ${original}`, async () => {
+    // 5. Revert, through the editor like an admin would. Not after a
+    // timeout: Playwright has ended every page by then, so the editor
+    // cannot save, and global-teardown.ts restores the token in the DB
+    // (restoreGoalToken). The timeout stays the reported error.
+    if (test.info().status !== "timedOut") await test.step(`Revert ${GOAL_TOKEN} to ${original}`, async () => {
       await saveThroughEditor(editor, original!);
     });
   }
@@ -207,12 +215,9 @@ async function editAndCheck(browser: Browser, run: TempAdminRun) {
   await test.step("Confirm the revert: a signed-out visitor has the original value again", async () => {
     const after = await loadTokens(admin);
     expect(after.raw.get(GOAL_TOKEN)).toBe(original);
-    const context = await openContext(browser, undefined);
-    try {
-      await expectSelectedOn(await context.newPage(), "/events/", originalResolved, "a signed-out visitor");
-    } finally {
-      await context.close();
-    }
+    const context = await openContext(newContext, undefined);
+    await expectSelectedOn(await context.newPage(), "/events/", originalResolved, "a signed-out visitor");
+    await context.close();
   });
   await admin.close();
 }
@@ -230,46 +235,42 @@ for (const [label, viewport, phone] of [
   ["390 x 844", PHONE, true],
   ["1440 x 900", DESKTOP, false],
 ] as const) {
-  test(`@needs-db [BUG-2609-081] admin settings: Save buttons visible, uncovered and clickable at ${label}`, async ({ browser }) => {
-    const context = await openContext(browser, ADMIN_AUTH_FILE, viewport, phone);
+  test(`@needs-db [BUG-2609-081] admin settings: Save buttons visible, uncovered and clickable at ${label}`, async ({ newContext }) => {
+    const context = await openContext(newContext, ADMIN_AUTH_FILE, viewport, phone);
     const page = await context.newPage();
-    try {
-      await gotoDashboard(page, "/dashboard/admin/settings/");
-      const saves = page.getByRole("button", { name: "Save", exact: true });
-      await expect(saves.first()).toBeVisible();
-      const count = await saves.count();
-      expect(count, "Save buttons on Admin Settings").toBeGreaterThan(0);
+    await gotoDashboard(page, "/dashboard/admin/settings/");
+    const saves = page.getByRole("button", { name: "Save", exact: true });
+    await expect(saves.first()).toBeVisible();
+    const count = await saves.count();
+    expect(count, "Save buttons on Admin Settings").toBeGreaterThan(0);
 
-      for (let i = 0; i < count; i++) {
-        const save = saves.nth(i);
-        // Centred, where a person scrolls a button they want to press.
-        // Playwright's own scroll leaves it on the bottom edge, under the
-        // fixed tab bar, which says nothing about whether it can be reached.
-        await save.evaluate((el) => el.scrollIntoView({ block: "center" }));
-        await expect(save, `Save #${i + 1} of ${count} visible`).toBeVisible();
-        expect(await isTopmostAtCentre(save), `Save #${i + 1} of ${count} is not covered at its centre`).toBe(true);
-      }
-
-      // The last one at the very bottom of the page: the spot a fixed tab
-      // bar or chat bubble would cover for good.
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-      const last = saves.last();
-      await expect(last).toBeInViewport();
-      expect(await isTopmostAtCentre(last), "the last Save, page scrolled to the bottom, is not covered").toBe(true);
-
-      const lookback = page.locator("label", { hasText: /hype score lookback/i }).locator("xpath=following-sibling::div[1]");
-      const field = lookback.locator('input[type="number"]');
-      const save = lookback.getByRole("button", { name: "Save", exact: true });
-      const saved = await field.inputValue();
-      await expect(save, "Save is disabled while nothing changed").toBeDisabled();
-      await field.fill(String(Number(saved || "0") + 1));
-      await expect(save).toBeEnabled();
-      await save.click({ trial: true });
-      await field.fill(saved);
-      await expect(save, "back to the saved value, nothing to save").toBeDisabled();
-    } finally {
-      await context.close();
+    for (let i = 0; i < count; i++) {
+      const save = saves.nth(i);
+      // Centred, where a person scrolls a button they want to press.
+      // Playwright's own scroll leaves it on the bottom edge, under the
+      // fixed tab bar, which says nothing about whether it can be reached.
+      await save.evaluate((el) => el.scrollIntoView({ block: "center" }));
+      await expect(save, `Save #${i + 1} of ${count} visible`).toBeVisible();
+      expect(await isTopmostAtCentre(save), `Save #${i + 1} of ${count} is not covered at its centre`).toBe(true);
     }
+
+    // The last one at the very bottom of the page: the spot a fixed tab
+    // bar or chat bubble would cover for good.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const last = saves.last();
+    await expect(last).toBeInViewport();
+    expect(await isTopmostAtCentre(last), "the last Save, page scrolled to the bottom, is not covered").toBe(true);
+
+    const lookback = page.locator("label", { hasText: /hype score lookback/i }).locator("xpath=following-sibling::div[1]");
+    const field = lookback.locator('input[type="number"]');
+    const save = lookback.getByRole("button", { name: "Save", exact: true });
+    const saved = await field.inputValue();
+    await expect(save, "Save is disabled while nothing changed").toBeDisabled();
+    await field.fill(String(Number(saved || "0") + 1));
+    await expect(save).toBeEnabled();
+    await save.click({ trial: true });
+    await field.fill(saved);
+    await expect(save, "back to the saved value, nothing to save").toBeDisabled();
   });
 }
 
