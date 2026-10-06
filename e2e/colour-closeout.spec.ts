@@ -3,6 +3,7 @@ import { test, expect, gotoDashboard } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { contrastOf, tokenColour } from "./helpers/contrast";
 import { useRuleViewport } from "./helpers/viewports";
+import { openArtistEventsAllCities } from "./helpers/events";
 
 /**
  * The colour closeout's text rules, read off real QA pages at 390 and 1440.
@@ -99,9 +100,10 @@ test.describe("Hrithik", () => {
   });
 
   test("[GEN-2609-113] artist events: 'Buy-in required' is --afa-error-bright on its tint, at least 4.5:1", async ({ page }) => {
-    await gotoDashboard(page, "/dashboard/artist/events/");
+    // The buy-in event is in Bengaluru and Hrithik's city is Ballari: the
+    // page narrows to his city once it has loaded, so show every city.
     const buyIn = page.getByText(/^Buy-in required: ₹/).filter({ visible: true }).first();
-    await expect(buyIn, "a buy-in event is open to Hrithik in the QA seed").toBeVisible({ timeout: 20_000 });
+    await openArtistEventsAllCities(page, buyIn);
     await expectToneText(page, buyIn, ...ERROR, "Buy-in required note");
   });
 });

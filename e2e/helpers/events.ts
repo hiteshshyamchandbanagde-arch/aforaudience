@@ -1,4 +1,5 @@
-import { Page, expect } from "@playwright/test";
+import { Locator, Page, expect } from "@playwright/test";
+import { gotoDashboard } from "./test";
 
 /**
  * "Jaipur Mic Gala 100": the seeded NUMBERED-seat event (scripts/qa-seed.ts
@@ -6,6 +7,27 @@ import { Page, expect } from "@playwright/test";
  * smoke, seat-booking and language specs.
  */
 export const JAIPUR_EVENT_TITLE = "Jaipur Mic Gala 100";
+
+/**
+ * Opens the artist's "Browse Events" page with every city showing, and
+ * waits until `target` (something on a card there) stays visible.
+ *
+ * The page first lists everything, then narrows itself to the artist's own
+ * city once its city list and /api/user/location have both answered
+ * (Hrithik: Ballari; the buy-in fixture event is in Bengaluru), so a card
+ * seen before that vanishes, and a click made too early is undone. Let the
+ * page finish its own requests, then choose "All Cities" until `target`
+ * stays. (Moved here from waitlist-wallet-credit.spec.ts; colour-closeout
+ * measured before the narrowing and failed once responses got faster.)
+ */
+export async function openArtistEventsAllCities(page: Page, target: Locator) {
+  await gotoDashboard(page, "/dashboard/artist/events");
+  await page.waitForLoadState("networkidle");
+  await expect(async () => {
+    await page.getByRole("main").getByRole("combobox").selectOption({ label: "All Cities" });
+    await expect(target).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 15_000 });
+}
 
 /**
  * Opens an event from the /events listing by its title, the way a visitor
