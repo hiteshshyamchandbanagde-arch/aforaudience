@@ -3,6 +3,7 @@ import { test, expect, AFTER_WRITE, gotoDashboard } from "./helpers/test";
 import { FIXTURE_EVENT_ID, FIXTURE_EVENT_TITLE, resetWaitlistFixture } from "./helpers/roles";
 import { authFile, type PersonaKey } from "./helpers/personas";
 import { markFirstVisitDone } from "./helpers/first-visit";
+import { openArtistEventsAllCities } from "./helpers/events";
 
 /**
  * Real target: the full chain fixed in PR #183 (waitlist fullness / wallet
@@ -62,22 +63,9 @@ function fixtureCard(page: Page) {
     .locator('xpath=ancestor::div[contains(., "Buy-in required")][1]');
 }
 
-/**
- * Opens the artist's "Browse Events" page with every city showing.
- *
- * The page first lists everything, then narrows itself to the artist's own
- * city once its city list and /api/user/location have both answered
- * (Hrithik: Ballari; the fixture event is in Bengaluru), so the card would
- * vanish under a click made too early. Let the page finish its own
- * requests, then choose "All Cities" until the card stays.
- */
-async function openBrowseEvents(page: Page) {
-  await gotoDashboard(page, "/dashboard/artist/events");
-  await page.waitForLoadState("networkidle");
-  await expect(async () => {
-    await page.getByRole("main").getByRole("combobox").selectOption({ label: "All Cities" });
-    await expect(fixtureCard(page)).toBeVisible({ timeout: 3_000 });
-  }).toPass({ timeout: 15_000 });
+/** The artist's "Browse Events" page, every city showing, the fixture card loaded. */
+function openBrowseEvents(page: Page) {
+  return openArtistEventsAllCities(page, fixtureCard(page));
 }
 
 test.describe("@needs-db waitlist and wallet credit", () => {
