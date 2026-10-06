@@ -46,15 +46,30 @@ async function restingCentreY(page: Page) {
   });
 }
 
-/** Points a tap may land on that something else covers: centre, and 8 px in from each end. */
+/**
+ * Points a tap may land on that something else covers: centre, and 8 px in from each end.
+ *
+ * A point under the sticky top bar (MobileTopBar's <header>) is scrolled
+ * out of view, like one above the screen, not covered: with the page
+ * scrolled to the end a control can sit there, and scrolling up reaches
+ * it. On #738's faster preview the profile finished loading before the
+ * scroll and left "Become an Artist" at y = 17, under the search box,
+ * which was counted as covering it; the chat button covered nothing.
+ */
 async function coveredPoints(control: Locator) {
   return control.evaluate((el) => {
     const r = el.getBoundingClientRect();
     const y = r.top + r.height / 2;
     const xs = [r.left + r.width / 2, r.left + Math.min(8, r.width / 2), r.right - Math.min(8, r.width / 2)];
+    const topBarBottom = Math.max(
+      0,
+      ...[...document.querySelectorAll("header")]
+        .filter((h) => ["sticky", "fixed"].includes(getComputedStyle(h).position) && h.getBoundingClientRect().height > 0)
+        .map((h) => h.getBoundingClientRect().bottom),
+    );
     const covered: string[] = [];
     for (const x of xs) {
-      if (y < 0 || y > window.innerHeight || x < 0 || x > window.innerWidth) continue;
+      if (y < topBarBottom || y > window.innerHeight || x < 0 || x > window.innerWidth) continue;
       const hit = document.elementFromPoint(x, y);
       if (hit && hit !== el && !el.contains(hit)) {
         const by = hit.closest("[data-afa-floating]") ? "the chat button" : `<${hit.tagName.toLowerCase()} class="${hit.getAttribute("class") ?? ""}">`;
