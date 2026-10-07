@@ -12,6 +12,7 @@ import BrandLoader from '@/components/BrandLoader'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
+import { usePrompt } from '@/components/ConfirmDialog'
 
 // /dashboard/admin/feedback — Admin Dashboard v1 (design.md §9.1)
 //
@@ -145,6 +146,7 @@ function AdminFeedbackBoard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { showToast } = useToast()
+  const prompt = usePrompt()
 
   const [items, setItems] = useState<FeedbackItem[]>([])
   const [resolvedItems, setResolvedItems] = useState<FeedbackItem[]>([])
@@ -284,13 +286,12 @@ function AdminFeedbackBoard() {
 
   // FEAT-2608-045 - reject requires a reason (unlike genre requests
   // above), so the organiser knows what to fix rather than just seeing
-  // their note silently never appear. window.prompt is a deliberate,
-  // minimal choice here - a full modal would be disproportionate for a
-  // single required text input in an admin-only moderation queue.
+  // their note silently never appear. BUG-2609-086 - asked in the shared
+  // in-app dialog (usePrompt), not the browser's window.prompt().
   const actOnEventNote = async (id: string, action: 'approve' | 'reject') => {
     let reason: string | null = null
     if (action === 'reject') {
-      reason = window.prompt('Reason for rejecting this note (shown to the organiser):')
+      reason = await prompt({ title: 'Reject this note?', inputLabel: 'Reason (shown to the organiser)', confirmLabel: 'Reject', destructive: true })
       if (reason === null) return // cancelled
       if (!reason.trim()) {
         showToast('A rejection reason is required.', 'error')

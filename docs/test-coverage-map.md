@@ -101,3 +101,9 @@ BUG-2610-009 (tested, above), plus two checks with no ticket ID:
 `seat-total.spec.ts` (a paid event shows "—", not "Free", before a seat
 is chosen) and `ticket-actions.spec.ts` (My Tickets' three actions on one
 row, each label at most 2 lines).
+
+## UI/UX bundle 2 (7 Oct, `fix/uiux-bundle-2`)
+
+| Ticket | Status | Spec › test title | Note |
+|---|---|---|---|
+| BUG-2609-086 | tested + HUMAN | `confirm-dialog.spec.ts` › `[BUG-2609-086] Cancel ticket opens the in-app sheet with paid, refund and the non-refundable fee` (@needs-db fixture booking); 4 Seat Map Builder tests (stale draft dropped, fresh draft offered with age in words, frozen map never offers + Unfreeze dialog, 412 frozen banner stacks); units `scripts/refund-policy.test.ts`, `scripts/seatmap-draft.test.ts` | HUMAN: the cancel sheet on a real phone |

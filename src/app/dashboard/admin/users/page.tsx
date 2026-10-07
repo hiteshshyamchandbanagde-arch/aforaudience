@@ -9,6 +9,8 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import SearchInputBox from '@/components/SearchInputBox'
 import Button from '@/components/ui/Button'
+import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 interface UserRow {
   id: string
@@ -34,6 +36,9 @@ export default function AdminUsersPage() {
   const [error, setError] = useState('')
   const [actioningId, setActioningId] = useState<string | null>(null)
   const [reasonDraft, setReasonDraft] = useState<Record<string, string>>({})
+  // BUG-2609-086 - in-app confirm and toasts, not the browser's confirm()/alert().
+  const { showToast } = useToast()
+  const confirm = useConfirm()
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -74,7 +79,7 @@ export default function AdminUsersPage() {
   const handleSuspend = async (userId: string) => {
     const reason = (reasonDraft[userId] || '').trim()
     if (!reason) {
-      alert('Please enter a reason before suspending.')
+      showToast('Please enter a reason before suspending.', 'error')
       return
     }
     setActioningId(userId)
@@ -86,7 +91,7 @@ export default function AdminUsersPage() {
       })
       if (!res.ok) {
         const err = await res.json()
-        alert(err.error || 'Failed to suspend')
+        showToast(err.error || 'Failed to suspend', 'error')
         return
       }
       await fetchUsers(search, role)
@@ -96,7 +101,7 @@ export default function AdminUsersPage() {
   }
 
   const handleUnsuspend = async (userId: string) => {
-    if (!confirm('Unsuspend this account? They will be able to log in again immediately.')) return
+    if (!(await confirm({ title: 'Unsuspend this account?', body: 'They will be able to log in again immediately.', confirmLabel: 'Unsuspend' }))) return
     setActioningId(userId)
     try {
       const res = await fetch(`/api/admin/users/${userId}/suspend`, {
@@ -106,7 +111,7 @@ export default function AdminUsersPage() {
       })
       if (!res.ok) {
         const err = await res.json()
-        alert(err.error || 'Failed to unsuspend')
+        showToast(err.error || 'Failed to unsuspend', 'error')
         return
       }
       await fetchUsers(search, role)

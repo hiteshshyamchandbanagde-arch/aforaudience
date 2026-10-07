@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { getPublicKeyId, refundPayment } from '@/lib/razorpay'
 import { getSupporterCount, resolveArtistName } from '@/lib/event-occupancy'
+import { computeRefund, eventStartInstant, type RefundTier } from '@/lib/refund-policy'
 
 // GET /api/bookings/[id]
 //
@@ -110,6 +111,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         expiresAt: booking.expiresAt,
         isExpired,
         createdAt: booking.createdAt,
+        // BUG-2609-086 - the My Tickets cancel sheet shows these exact
+        // numbers (paid / refund / booking fee), computed here by the
+        // same helper PATCH refunds with.
+        refundPreview: computeRefund(booking, eventStartInstant(booking.event.date, booking.event.startTime), now),
         event: {
           id: booking.event.id,
           title: booking.event.title,
@@ -142,48 +147,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 }
 
-// Combines Event.date + startTime into a real instant - same pattern
-// already used in POST /api/events (backdated-event validation) and
-// POST /api/performances/[id]/cancel (artist 24h cutoff).
-function eventStartInstant(date: Date, startTime: string): Date {
-  const [h, m] = startTime.split(':').map(Number)
-  const start = new Date(date)
-  start.setHours(h, m, 0, 0)
-  return start
-}
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-
-// Audience ticket cancellation - graduated refund tiers (design.md
-// "Refund policy", session 47, 29 Jul - the four-actor framework's
-// audience half; Venue/Organiser/Artist tiers are a separate, larger
-// build, not touched here).
-//
-//   >=14 days before show: full amount minus platform fee and taxes
-//   7-14 days before show: 50%
-//   <7 days before show:   no refund
-//
-// ASSUMPTION (not explicit in design.md, flagged for Hitesh to
-// confirm): the 50% mid-tier is calculated on totalAmount (the full
-// amount the audience member paid), matching the plainest reading of
-// "50%" with no fee carve-out mentioned for that tier - only the
-// >=14-day tier explicitly says "minus platform fee and taxes".
-//
-// Tax deduction is a placeholder (0) behind the same §9.0 CA-consultation
-// gate as everywhere else this pattern appears - the mechanism is real,
-// the number isn't decided yet.
-const TAX_DEDUCTION_PLACEHOLDER = 0
-
-function computeRefund(booking: { totalAmount: number; bookingFeeAmount: number }, eventStart: Date, now: Date) {
-  const daysBefore = (eventStart.getTime() - now.getTime()) / MS_PER_DAY
-  if (daysBefore >= 14) {
-    const amount = Math.max(0, booking.totalAmount - booking.bookingFeeAmount - TAX_DEDUCTION_PLACEHOLDER)
-    return { amount, tier: '>=14 days' as const }
-  }
-  if (daysBefore >= 7) {
-    return { amount: booking.totalAmount * 0.5, tier: '7-14 days' as const }
-  }
-  return { amount: 0, tier: '<7 days' as const }
+// Razorpay refund notes keep the tier names they have always carried.
+const TIER_NOTE: Record<RefundTier, string> = {
+  past: 'past',
+  free: 'free',
+  '14plus': '>=14 days',
+  '50pct': '7-14 days',
+  under7: '<7 days',
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -237,7 +207,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json(updated)
     }
 
-    const { amount: refundAmount, tier } = computeRefund(booking, eventStart, now)
+    const { refund: refundAmount, tier } = computeRefund(booking, eventStart, now)
 
     if (refundAmount <= 0) {
       // <7-day tier - real cancellation, genuinely no refund. No
@@ -277,7 +247,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         razorpayPaymentId: booking.payment.razorpayPaymentId,
         amount: Math.round(refundAmount * 100), // paise, same unit as order creation
         bookingId: booking.id,
-        notes: { tier, bookingId: booking.id },
+        notes: { tier: TIER_NOTE[tier], bookingId: booking.id },
       })
       const updated = await prisma.booking.update({
         where: { id },

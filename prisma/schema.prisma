@@ -944,6 +944,10 @@ model Venue {
   // ("once a seat map is genuinely finalized"), not a case of partial
   // per-level lock.
   seatMapFrozen Boolean @default(false)
+  // BUG-2609-086 - when the seat map was last saved (PUT /api/venues/[id]/seats).
+  // The builder discards a local draft older than this. Null on venues not
+  // saved since the column was added: only the 24 h draft age rule applies.
+  seatMapSavedAt DateTime?
 
   availability  VenueAvailability[]
   bookings      VenueBooking[]

@@ -18,6 +18,8 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import StubRow from '@/components/ui/StubRow'
 import { formatDate } from '@/lib/format-date'
+import { useConfirm } from '@/components/ConfirmDialog'
+import { computeRefund, eventStartInstant as refundStartInstant, type RefundPreview } from '@/lib/refund-policy'
 
 // BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
 // Organiser / Cancel ticket): full-width buttons stacked under the QR,
@@ -121,40 +123,58 @@ interface BookingItem {
   }
 }
 
-// Mirrors computeRefund() in /api/bookings/[id]/route.ts - client-side
-// preview only, so the confirm dialog can show the real number before
-// the request fires. Server is the actual source of truth; this must
-// stay in sync with it by hand since there's no shared module between
-// API routes and client components in this codebase's current setup.
+// BUG-2609-086 - the Cancel button's tooltip. Same helper as the refund
+// API (src/lib/refund-policy.ts); the cancel sheet itself shows the
+// server's own numbers (GET /api/bookings/[id] refundPreview).
 //
-// Feedback (31 Jul, Hitesh device test) - a past event's negative
-// daysBefore was silently falling into the "<7 days" bucket, so the
-// confirm dialog said "No refund - less than 7 days out" for a show
-// that had already happened, instead of explaining why cancellation
-// isn't possible at all. Server already blocked the actual cancel
-// correctly; this only fixes the preview's wording (and see isPastEvent
-// below, which now hides the button entirely for this case).
+// Feedback (31 Jul, Hitesh device test) - a past event says so, rather
+// than "No refund - less than 7 days out" (and see isPastEvent below,
+// which hides the button entirely for this case).
 function previewRefund(b: BookingItem, tr: Dictionary): { amount: number; label: string } {
-  const eventStart = eventStartInstant(b)
-  const daysBefore = (eventStart.getTime() - Date.now()) / (24 * 60 * 60 * 1000)
-  if (daysBefore <= 0) return { amount: 0, label: tr.ticketsPage.refundEventHappened }
-  if (b.totalAmount <= 0) return { amount: 0, label: tr.ticketsPage.refundFreeTicket }
-  if (daysBefore >= 14) {
-    const amount = Math.max(0, b.totalAmount - b.bookingFeeAmount)
-    return { amount, label: tr.ticketsPage.refund14PlusTemplate.replace('{amount}', amount.toLocaleString('en-IN')) }
+  const p = computeRefund(b, refundStartInstant(b.event.date, b.event.startTime), new Date())
+  const amount = p.refund.toLocaleString('en-IN')
+  switch (p.tier) {
+    case 'past': return { amount: 0, label: tr.ticketsPage.refundEventHappened }
+    case 'free': return { amount: 0, label: tr.ticketsPage.refundFreeTicket }
+    case '14plus': return { amount: p.refund, label: tr.ticketsPage.refund14PlusTemplate.replace('{amount}', amount) }
+    case '50pct': return { amount: p.refund, label: tr.ticketsPage.refund50PercentTemplate.replace('{amount}', amount) }
+    default: return { amount: 0, label: tr.ticketsPage.refundLessThan7Days }
   }
-  if (daysBefore >= 7) {
-    const amount = b.totalAmount * 0.5
-    return { amount, label: tr.ticketsPage.refund50PercentTemplate.replace('{amount}', amount.toLocaleString('en-IN')) }
-  }
-  return { amount: 0, label: tr.ticketsPage.refundLessThan7Days }
+}
+
+const RULE_KEY = { '14plus': 'cancelSheetRule14Plus', '50pct': 'cancelSheetRule50', under7: 'cancelSheetRuleUnder7' } as const
+
+// The cancel sheet's body: paid, refund (with its rule) and, when the tier
+// keeps it, the booking fee - three separate lines.
+function RefundLines({ p, tr }: { p: RefundPreview; tr: Dictionary }) {
+  const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`
+  const rule = p.tier in RULE_KEY ? tr.ticketsPage[RULE_KEY[p.tier as keyof typeof RULE_KEY]] : null
+  const row: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid var(--afa-border-resting)' }
+  return (
+    <div data-afa-refund-lines>
+      <div style={row} data-afa-refund-line="paid">
+        <span>{tr.ticketsPage.cancelSheetPaidLabel}</span>
+        <span style={{ color: 'var(--afa-text-primary)', fontWeight: 600 }}>{rupees(p.paid)}</span>
+      </div>
+      <div style={row} data-afa-refund-line="refund">
+        <span>
+          {tr.ticketsPage.cancelSheetRefundLabel}
+          {rule && <span style={{ display: 'block', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>{rule}</span>}
+        </span>
+        <span style={{ color: 'var(--afa-text-primary)', fontWeight: 600 }}>{rupees(p.refund)}</span>
+      </div>
+      {p.feeWithheld && (
+        <div style={row} data-afa-refund-line="fee">
+          <span>{tr.ticketsPage.cancelSheetFeeLineTemplate.replace('{amount}', p.bookingFee.toLocaleString('en-IN'))}</span>
+        </div>
+      )}
+      <p style={{ margin: 'var(--afa-space-3) 0 0', fontSize: 'var(--afa-text-small)' }}>{tr.ticketsPage.cancelSheetNoUndo}</p>
+    </div>
+  )
 }
 
 function eventStartInstant(b: BookingItem): Date {
-  const [h, m] = b.event.startTime.split(':').map(Number)
-  const eventStart = new Date(b.event.date)
-  eventStart.setHours(h, m, 0, 0)
-  return eventStart
+  return refundStartInstant(b.event.date, b.event.startTime)
 }
 
 // Same past-event check as the server's block in PATCH /api/bookings/[id]
@@ -271,6 +291,8 @@ export default function MyTicketsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<string | null>(null)
+  const [checkingRefund, setCheckingRefund] = useState<string | null>(null)
+  const confirm = useConfirm()
   const [pendingTags, setPendingTags] = useState<PendingCompanionTag[]>([])
   const [acceptedTags, setAcceptedTags] = useState<AcceptedCompanionTag[]>([])
   const [respondingTag, setRespondingTag] = useState<string | null>(null)
@@ -365,8 +387,26 @@ export default function MyTicketsPage() {
         setError(tr.ticketsPage.eventAlreadyHappenedCancelError)
         return
       }
-      const { label } = previewRefund(b, tr)
-      if (!window.confirm(tr.ticketsPage.cancelConfirmDialogTemplate.replace('{label}', label))) return
+      // BUG-2609-086 - the server's own refund numbers, not a recomputed copy.
+      setCheckingRefund(b.id)
+      let preview: RefundPreview | null = null
+      try {
+        const res = await fetch(`/api/bookings/${b.id}`)
+        if (res.ok) preview = (await res.json()).booking?.refundPreview ?? null
+      } catch {}
+      setCheckingRefund(null)
+      if (!preview) {
+        setError(tr.ticketsPage.cancelSheetLoadFailed)
+        return
+      }
+      const ok = await confirm({
+        title: tr.ticketsPage.cancelSheetTitle,
+        body: <RefundLines p={preview} tr={tr} />,
+        confirmLabel: tr.ticketsPage.cancelTicketButton,
+        cancelLabel: tr.ticketsPage.cancelSheetKeep,
+        destructive: true,
+      })
+      if (!ok) return
     }
     setCancelling(b.id)
     setError('')
@@ -711,7 +751,7 @@ export default function MyTicketsPage() {
                               variant="outline-neutral"
                               size="sm"
                               onClick={() => cancelBooking(b)}
-                              disabled={cancelling === b.id}
+                              disabled={cancelling === b.id || checkingRefund === b.id}
                               title={previewRefund(b, tr).label}
                               style={{ ...ACTION_STYLE, opacity: cancelling === b.id ? 0.6 : 1 }}
                             >
