@@ -162,6 +162,10 @@ export default function VenueOwnerSalesOverviewPage() {
   const { totals, previousTotals, venues, organisers, timeline } = data
   const topVenues = venues.slice(0, TOP_VENUES_SHOWN)
   const hasMoreVenues = venues.length > TOP_VENUES_SHOWN
+  // BUG-2609-070 - with no revenue anywhere the bar chart was venue names
+  // over a meaningless ₹0-₹4 axis; show the empty state instead (the
+  // venue table below stays).
+  const noVenueRevenue = venues.every((v) => !v.revenue)
 
   return (
     <>
@@ -238,6 +242,11 @@ export default function VenueOwnerSalesOverviewPage() {
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
             ) : (
               <>
+                {noVenueRevenue ? (
+                  <div style={{ marginBottom: 'var(--afa-space-5)' }}>
+                    <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption="No bookings in this range" />
+                  </div>
+                ) : (
                 <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: 'var(--afa-space-5)' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
@@ -257,6 +266,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+                )}
 
                 {hasMoreVenues && !showAllVenues && (
                   <Button
@@ -297,9 +307,13 @@ export default function VenueOwnerSalesOverviewPage() {
                       </Link>
                     ))}
                     {showAllVenues && (
+                      // BUG-2609-070 - the same outline button as "View all", so the pair matches.
                       <Button
-                        variant="text-link"
+                        variant="outline-neutral"
+                        size="md"
+                        fullWidth={false}
                         onClick={() => setShowAllVenues(false)}
+                        className="avp-hover-border"
                         style={{ alignSelf: 'flex-start' }}
                       >
                         Show top {TOP_VENUES_SHOWN} only
