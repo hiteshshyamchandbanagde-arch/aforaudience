@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import PosterShareCard from '@/components/PosterShareCard'
 import { useToast } from '@/components/Toast'
@@ -57,7 +57,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
 }
 
 export default function BrowseEventsToApplyPage() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
@@ -77,6 +77,11 @@ export default function BrowseEventsToApplyPage() {
   // active confirmed slot independent of the rest of the lineup filling.
   const [performanceIdByEvent, setPerformanceIdByEvent] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
+  // BUG-2610-002 - true only while the latest load failed, kept apart from
+  // `events` so a failed load never reads as "no published events".
+  // Bumping reloadKey re-runs the load (Retry). Same as /events (#717).
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const { showToast } = useToast()
   const [message, setMessage] = useState<Record<string, string>>({})
   const [applying, setApplying] = useState<string | null>(null)
@@ -116,24 +121,42 @@ export default function BrowseEventsToApplyPage() {
       .catch(() => {})
   }, [cities])
 
+  // BUG-2610-002 - the "All Cities" load and the load for the
+  // auto-applied city overlap on most visits. Each run owns an
+  // AbortController that its cleanup aborts, so only the load for the
+  // current selectedCity may touch state; the ref closes the gap between
+  // a city change committing and that (passive) cleanup running. Same
+  // pattern as (public)/events/page.tsx (BUG-2609-077, #717).
+  const latestCityRef = useRef(selectedCity)
+  useLayoutEffect(() => {
+    latestCityRef.current = selectedCity
+  }, [selectedCity])
+  const hasUser = !!session?.user
   useEffect(() => {
-    if (!session?.user) return
+    if (!hasUser) return
+    const controller = new AbortController()
+    const city = selectedCity
+    const isStale = () => controller.signal.aborted || latestCityRef.current !== city
     const fetchEvents = async () => {
       setLoading(true)
+      setLoadFailed(false)
       try {
-        const url = selectedCity === 'All Cities' ? '/api/events' : `/api/events?city=${encodeURIComponent(selectedCity)}`
-        const eventsRes = await fetch(url)
+        const url = city === 'All Cities' ? '/api/events' : `/api/events?city=${encodeURIComponent(city)}`
+        const eventsRes = await fetch(url, { signal: controller.signal })
         if (!eventsRes.ok) throw new Error('Failed to fetch events')
         const eventsData = await eventsRes.json()
+        if (isStale()) return
         setEvents(eventsData)
+        setLoading(false)
       } catch (err: any) {
-        showToast(err.message || 'Failed to load events', 'error')
-      } finally {
+        if (isStale() || err?.name === 'AbortError') return
+        setLoadFailed(true)
         setLoading(false)
       }
     }
     fetchEvents()
-  }, [session, selectedCity])
+    return () => controller.abort()
+  }, [hasUser, selectedCity, reloadKey])
 
   // Applications/performances status is per-artist, not per-city - fetched
   // once per session, independent of the events filter above.
@@ -216,7 +239,17 @@ export default function BrowseEventsToApplyPage() {
             ))}
           </select>
 
-          {events.length === 0 ? (
+          {loadFailed ? (
+            // BUG-2610-002 - a failed load gets the error + Retry, never
+            // the "no published events" copy below.
+            <div role="alert" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-3)', textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>{tr.eventsPage.loadErrorTitle}</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-muted)', margin: 0 }}>{tr.eventsPage.loadErrorSub}</p>
+              <Button variant="outline-accent" size="pill-md" fullWidth={false} type="button" onClick={() => setReloadKey((k) => k + 1)}>
+                {tr.eventsPage.retry}
+              </Button>
+            </div>
+          ) : events.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
