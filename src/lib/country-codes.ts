@@ -61,3 +61,18 @@ export function cityLabel(city: string, countryName: string | null | undefined):
   const code = countryCode(countryName)
   return code ? `${city} (${code})` : city
 }
+
+// GEN-2610-005 - the one format the LocationChip shows, for the chip and
+// every row in its picker. An IP-detected city often arrives with no
+// country (or a different spelling of it) while a picked one carries
+// "India", so the chip read "PUNE" for one and "JAIPUR (IN)" for the
+// other. Indian cities are now always the bare name (AFA's home market,
+// and "(IN)" also squeezed the 390 top bar); a city abroad keeps its
+// code, "Sydney (AU)". A city with no known country reads as bare too,
+// the same as an Indian one.
+const HOME_COUNTRY_CODE = 'IN'
+
+export function chipCityLabel(city: string, countryName: string | null | undefined): string {
+  const code = countryCode(countryName)
+  return code && code !== HOME_COUNTRY_CODE ? `${city} (${code})` : city
+}
