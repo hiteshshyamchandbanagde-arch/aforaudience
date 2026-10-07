@@ -5362,3 +5362,4 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - Nightly 7 Oct: not fired yet at 08:40 IST (schedule has been firing ~6-10 h late). BUG-2610-010 / GEN-2609-120 / BUG-2609-029 wait on it.
 - N run 37559829714 still in progress (2 commits on feat/use-my-location-n).
 - Bundle 2 scope per Hitesh: BUG-2609-086, BUG-2610-015, BUG-2610-016, GEN-2609-002 (GEN-2610-001 contrast follow-ups dropped from this bundle unless he says otherwise).
+- DECISION (Hitesh, 7 Oct): language preference is saved at USER level. Today it is device-only (localStorage, src/lib/i18n/translate.tsx; no column on User). Build: User.preferredLocale (nullable); signed-in pick writes to the account; on sign-in the account value wins over the device; guests keep localStorage; default stays English, never auto-picked (5 Oct rule). Goes into the bundle 2 dispatch.
