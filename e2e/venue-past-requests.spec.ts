@@ -22,8 +22,16 @@ test.beforeEach(async ({ page, isMobile }) => {
 
 test("[BUG-2608-091] Past Requests rows show the booking date, and the end date when multi-day", async ({ page }) => {
   await page.route("**/api/venues/my-bookings**", async (route) => {
-    const res = await route.fetch();
-    const bookings = (await res.json()) as Record<string, unknown>[];
+    // A request the page gave up on (it can ask twice while settling)
+    // is disposed mid-fetch; let that one go, the next is answered here.
+    let res: Awaited<ReturnType<typeof route.fetch>>;
+    let bookings: Record<string, unknown>[];
+    try {
+      res = await route.fetch();
+      bookings = (await res.json()) as Record<string, unknown>[];
+    } catch {
+      return;
+    }
     const template = bookings[0];
     expect(template, "Vinayak has a venue booking on QA to copy").toBeTruthy();
     const past = (id: string, fromDate: string, toDate: string) => ({
