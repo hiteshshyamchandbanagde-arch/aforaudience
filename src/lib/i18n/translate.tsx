@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import en from "./dictionaries/en"
 import hi from "./dictionaries/hi"
+import mr from "./dictionaries/mr"
 import te from "./dictionaries/te"
 import ta from "./dictionaries/ta"
 import kn from "./dictionaries/kn"
@@ -19,6 +20,7 @@ export type Dictionary = typeof en
 const DICTIONARIES: Record<LocaleId, Dictionary> = {
   en,
   hi,
+  mr,
   te,
   ta,
   kn,

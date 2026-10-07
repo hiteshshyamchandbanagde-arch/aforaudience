@@ -16,10 +16,15 @@
 // for an unproven pilot. Promote to a profile-persisted field (same
 // pattern as User.defaultCity / displayCurrency) once Hindi is confirmed
 // and the other 4 languages are queued.
+//
+// Marathi added 5 Oct 2026 (GEN-2609-120) for the Pune-first launch, right
+// after Hindi. It is offered, never auto-selected: DEFAULT_LOCALE stays
+// "en" (choosing Marathi for Pune visitors is a pending product decision).
 
 export const LOCALES = [
   { id: "en", label: "English", nativeLabel: "English" },
   { id: "hi", label: "Hindi", nativeLabel: "हिन्दी" },
+  { id: "mr", label: "Marathi", nativeLabel: "मराठी" },
   { id: "te", label: "Telugu", nativeLabel: "తెలుగు" },
   { id: "ta", label: "Tamil", nativeLabel: "தமிழ்" },
   { id: "kn", label: "Kannada", nativeLabel: "ಕನ್ನಡ" },

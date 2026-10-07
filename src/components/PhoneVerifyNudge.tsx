@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Button from '@/components/ui/Button';
+import { useLocale } from '@/lib/i18n/translate';
 
 /**
  * "Verify your phone" nudge for logged-in users whose `isVerified` is
@@ -33,6 +34,7 @@ export default function PhoneVerifyNudge() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (status !== 'authenticated') return;
@@ -52,7 +54,7 @@ export default function PhoneVerifyNudge() {
   return (
     <div
       role="status"
-      aria-label="Verify your phone"
+      aria-label={t.phoneVerifyNudge.ariaLabel}
       style={{
         background: 'var(--afa-error-tint)',
         color: 'var(--afa-error-bright)',
@@ -69,7 +71,7 @@ export default function PhoneVerifyNudge() {
         📱
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
-        Verify your phone number to book tickets or venues.
+        {t.phoneVerifyNudge.message}
       </span>
       <Button
         variant="primary"
@@ -78,7 +80,7 @@ export default function PhoneVerifyNudge() {
         href={`/verify-phone?next=${encodeURIComponent(pathname || '/')}`}
         style={{ whiteSpace: 'nowrap' }}
       >
-        Verify now
+        {t.phoneVerifyNudge.verifyNow}
       </Button>
     </div>
   );

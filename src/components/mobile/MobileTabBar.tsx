@@ -171,34 +171,29 @@ export default function MobileTabBar() {
 
   const dashboardHref = getShellDashboardLink(role)
 
-  // "Discover" and "Saved" have no existing i18n dictionary key (flagged
-  // gap, not guessed - same call as the Phase 1/B bar this extends and
-  // DashboardShell's ROLE_SECTIONS labels, BUG-2609-006). Role-bar item
-  // labels stay hardcoded English for the same reason, matching
-  // ROLE_SECTIONS' own already-hardcoded labels exactly (reused verbatim
-  // where the item is the same concept, e.g. "My Events"/"Sales"/
-  // "Payouts" - not re-translated or reworded independently).
+  // Role-bar item labels stay hardcoded English, matching ROLE_SECTIONS'
+  // own already-hardcoded labels exactly (dashboards are English-only;
+  // BUG-2609-006), reused verbatim where the item is the same concept,
+  // e.g. "My Events"/"Sales"/"Payouts".
   //
-  // "Tickets" and "WOF" below are a different case - t.nav.myTickets and
-  // t.nav.wallOfFame do exist and are used as-is by SiteNav/HomeHeader/
-  // DashboardShell's desktop sidebar, which have the width for the full
-  // words. This bar's 5 equal-width slots don't - both wrapped to two
-  // lines at 10px/0.08em tracking - so these two are bar-specific English
-  // shorthand hardcoded here only, not a new i18n key and not a change to
-  // the shared dictionary value the other three surfaces still rely on.
+  // The visitor bars below are translated (GEN-2609-120: they were the
+  // English left in the Marathi nav). Discover/Tickets/Saved/Events/WOF/Dashboard
+  // use their own short nav.tab* keys rather than t.nav.myTickets /
+  // t.nav.wallOfFame / t.nav.dashboard: this bar's 5 equal-width slots wrapped those full
+  // words to two lines at 10px/0.08em tracking.
   const primaryItems: ItemDef[] = [
-    { id: 'discover', href: '/events', label: 'Discover', Icon: DiscoverTabIcon, nav: 'push' },
+    { id: 'discover', href: '/events', label: t.nav.tabDiscover, Icon: DiscoverTabIcon, nav: 'push' },
     { id: 'messages', href: '/dashboard/messages', label: t.nav.messages, Icon: MessagesTabIcon, badge: unreadCount, nav: 'replace' },
-    { id: 'tickets', href: '/tickets', label: 'Tickets', Icon: TicketsTabIcon, nav: 'replace' },
-    { id: 'saved', href: '/saved', label: 'Saved', Icon: SavedTabIcon, badge: savedCount, nav: 'replace' },
+    { id: 'tickets', href: '/tickets', label: t.nav.tabTickets, Icon: TicketsTabIcon, nav: 'replace' },
+    { id: 'saved', href: '/saved', label: t.nav.tabSaved, Icon: SavedTabIcon, badge: savedCount, nav: 'replace' },
     { id: 'profile', href: '/profile', label: t.nav.profile, Icon: ProfileTabIcon, nav: 'replace' },
   ]
 
   const discoverItems: ItemDef[] = [
-    { id: 'events', href: '/events', label: 'Events', Icon: EventsTabIcon, nav: 'push' },
+    { id: 'events', href: '/events', label: t.nav.tabEvents, Icon: EventsTabIcon, nav: 'push' },
     { id: 'artists', href: '/artists', label: t.nav.artists, Icon: ArtistsTabIcon, nav: 'push' },
     { id: 'venues', href: '/venues', label: t.nav.venues, Icon: PinIcon, nav: 'push' },
-    { id: 'wall-of-fame', href: '/wall-of-fame', label: 'WOF', Icon: TrophyIcon, nav: 'push' },
+    { id: 'wall-of-fame', href: '/wall-of-fame', label: t.nav.tabWallOfFame, Icon: TrophyIcon, nav: 'push' },
     // Phase C fills this in for real now (previously a placeholder
     // landing on /dashboard/audience-style routes per Phase B's own
     // comment) - getShellDashboardLink already resolves to each role's
@@ -211,7 +206,7 @@ export default function MobileTabBar() {
     // the current QA personas hold 2+ roles, and multi-role switching is
     // Phase D's Profile role-switcher territory, not solvable here
     // regardless of build order.
-    { id: 'dashboard', href: dashboardHref, label: t.nav.dashboard, Icon: DashboardMorphTabIcon, nav: 'push' },
+    { id: 'dashboard', href: dashboardHref, label: t.nav.tabDashboard, Icon: DashboardMorphTabIcon, nav: 'push' },
   ]
 
   // Artist - 3 items, no "More" (nothing to overflow). Icons match

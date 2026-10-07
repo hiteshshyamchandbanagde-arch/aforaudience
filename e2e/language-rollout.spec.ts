@@ -7,7 +7,7 @@ import { JAIPUR_EVENT_TITLE } from "./helpers/events";
  * the public homepage/events pages.
  *
  * Scope is deliberately mechanical, not linguistic - this catches "the
- * picker is wired correctly and nothing visibly breaks" across all 11
+ * picker is wired correctly and nothing visibly breaks" across all 12
  * locales cheaply and repeatably. It does NOT judge whether a translation
  * reads naturally or whether long German/French strings visually overflow
  * a tight button - those need a human eye on a handful of locales, per the
@@ -41,6 +41,7 @@ import { JAIPUR_EVENT_TITLE } from "./helpers/events";
 const LOCALES: { id: string; nativeLabel: string }[] = [
   { id: "en", nativeLabel: "English" },
   { id: "hi", nativeLabel: "हिन्दी" },
+  { id: "mr", nativeLabel: "मराठी" },
   { id: "te", nativeLabel: "తెలుగు" },
   { id: "ta", nativeLabel: "தமிழ்" },
   { id: "kn", nativeLabel: "ಕನ್ನಡ" },

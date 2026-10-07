@@ -37,6 +37,12 @@ const es: Dictionary = {
     signOut: "Cerrar sesión",
     backToVenues: "← Volver a recintos",
     backToEvents: "← Volver a eventos",
+    tabDiscover: "Descubrir",
+    tabEvents: "Eventos",
+    tabTickets: "Entradas",
+    tabSaved: "Guardados",
+    tabWallOfFame: "Top",
+    tabDashboard: "Panel",
   },
   roles: {
     VENUE_OWNER: "Propietario de recinto",
@@ -338,6 +344,11 @@ const es: Dictionary = {
     enabling: "Activando…",
     ariaLabel: "Activar notificaciones",
     dismissAriaLabel: "Descartar",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "Verifica tu teléfono",
+    message: "Verifica tu número de teléfono para reservar entradas o recintos.",
+    verifyNow: "Verificar ahora",
   },
   welcomeSequence: {
     step1Heading: "Bienvenido a AforAudience",

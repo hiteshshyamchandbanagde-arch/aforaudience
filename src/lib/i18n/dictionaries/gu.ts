@@ -33,6 +33,12 @@ const gu: Dictionary = {
     signOut: "સાઇન આઉટ",
     backToVenues: "← સ્થળો પર પાછા",
     backToEvents: "← ઇવેન્ટ્સ પર પાછા",
+    tabDiscover: "શોધો",
+    tabEvents: "ઇવેન્ટ્સ",
+    tabTickets: "ટિકિટ",
+    tabSaved: "સેવ કરેલા",
+    tabWallOfFame: "ફેમ",
+    tabDashboard: "ડેશબોર્ડ",
   },
   roles: {
     VENUE_OWNER: "સ્થળ માલિક",
@@ -334,6 +340,11 @@ const gu: Dictionary = {
     enabling: "સક્ષમ કરી રહ્યું છે…",
     ariaLabel: "સૂચનાઓ સક્ષમ કરો",
     dismissAriaLabel: "કાઢી નાખો",
+  },
+  phoneVerifyNudge: {
+    ariaLabel: "તમારો ફોન ચકાસો",
+    message: "ટિકિટ અથવા સ્થળો બુક કરવા માટે તમારો ફોન નંબર ચકાસો.",
+    verifyNow: "હમણાં ચકાસો",
   },
   welcomeSequence: {
     step1Heading: "AforAudience માં આપનું સ્વાગત છે",

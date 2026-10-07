@@ -42,7 +42,7 @@ const STYLES = {
 
 export type DateStyle = keyof typeof STYLES
 
-const INDIAN_LOCALES = new Set(['en', 'hi', 'te', 'ta', 'kn', 'ml', 'gu', 'bn'])
+const INDIAN_LOCALES = new Set(['en', 'hi', 'mr', 'te', 'ta', 'kn', 'ml', 'gu', 'bn'])
 
 /** UI locale id ("en", "hi", "de", a full tag, or nothing) -> the tag dates are formatted with. */
 export function dateLocale(uiLocale?: string | null): string {

@@ -32,6 +32,13 @@ const en = {
     signOut: "Sign out",
     backToVenues: "← Back to Venues",
     backToEvents: "← Back to Events",
+    // Phone tab bar (MobileTabBar): one short word per slot.
+    tabDiscover: "Discover",
+    tabEvents: "Events",
+    tabTickets: "Tickets",
+    tabSaved: "Saved",
+    tabWallOfFame: "WOF",
+    tabDashboard: "Dashboard",
   },
   roles: {
     VENUE_OWNER: "Venue Owner",
@@ -356,6 +363,12 @@ const en = {
     enabling: "Enabling…",
     ariaLabel: "Enable notifications",
     dismissAriaLabel: "Dismiss",
+  },
+  // BUG-2609-029 - was hard-coded English in PhoneVerifyNudge.tsx.
+  phoneVerifyNudge: {
+    ariaLabel: "Verify your phone",
+    message: "Verify your phone number to book tickets or venues.",
+    verifyNow: "Verify now",
   },
   welcomeSequence: {
     step1Heading: "Welcome to AforAudience",
