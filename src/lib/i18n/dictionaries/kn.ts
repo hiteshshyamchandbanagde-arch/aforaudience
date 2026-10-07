@@ -356,8 +356,14 @@ const kn: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ",
-    message: "ಟಿಕೆಟ್‌ಗಳು ಅಥವಾ ಸ್ಥಳಗಳನ್ನು ಬುಕ್ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
-    verifyNow: "ಈಗಲೇ ಪರಿಶೀಲಿಸಿ",
+    message: "ಬುಕ್ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್ ಪರಿಶೀಲಿಸಿ",
+    verifyNow: "ಪರಿಶೀಲಿಸಿ",
+  },
+  displayNameNudge: {
+    ariaLabel: "ನಿಮ್ಮ ಹೆಸರು ಸೇರಿಸಿ",
+    message: "ನಿಮ್ಮ ಟಿಕೆಟ್‌ಗಳಿಗೆ ಹೆಸರು ಸೇರಿಸಿ",
+    addName: "ಹೆಸರು ಸೇರಿಸಿ",
+    dismiss: "ಮುಚ್ಚಿ",
   },
   welcomeSequence: {
     step1Heading: "AforAudience ಗೆ ಸ್ವಾಗತ",

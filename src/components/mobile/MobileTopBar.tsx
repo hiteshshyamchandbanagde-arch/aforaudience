@@ -128,13 +128,11 @@ export default function MobileTopBar() {
       className="lg:hidden flex items-center"
       style={{
         position: 'sticky',
-        // Same CSS var SiteNav.tsx uses for its own sticky `top` offset -
-        // NudgeStack.tsx (rendered just before this in layout.tsx) is
-        // itself sticky top:0, and sets this var to its own live height so
-        // whatever sticky element comes after it stacks below instead of
-        // overlapping. Same zIndex as SiteNav/NudgeStack (100) since this
-        // bar now plays SiteNav's header role on mobile.
-        top: 'var(--nudge-stack-height, 0px)',
+        // BUG-2610-017 - the only pinned bar: top 0. NudgeStack's banners
+        // (rendered just before this in layout.tsx) scroll away with the
+        // page instead of sitting sticky above it. Same zIndex as SiteNav
+        // (100) since this bar plays SiteNav's header role on mobile.
+        top: 0,
         zIndex: 100,
         gap: 'var(--afa-space-10px)',
         padding: 'var(--afa-space-10px) var(--afa-space-14px)',

@@ -361,8 +361,14 @@ const fr: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "Vérifiez votre téléphone",
-    message: "Vérifiez votre numéro de téléphone pour réserver des billets ou des lieux.",
-    verifyNow: "Vérifier maintenant",
+    message: "Vérifiez votre téléphone pour réserver",
+    verifyNow: "Vérifier",
+  },
+  displayNameNudge: {
+    ariaLabel: "Ajoutez votre nom",
+    message: "Ajoutez votre nom pour vos billets",
+    addName: "Ajouter un nom",
+    dismiss: "Fermer",
   },
   welcomeSequence: {
     step1Heading: "Bienvenue sur AforAudience",

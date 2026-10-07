@@ -356,8 +356,14 @@ const ta: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "உங்கள் தொலைபேசியைச் சரிபார்க்கவும்",
-    message: "டிக்கெட்டுகள் அல்லது இடங்களை முன்பதிவு செய்ய உங்கள் தொலைபேசி எண்ணைச் சரிபார்க்கவும்.",
-    verifyNow: "இப்போதே சரிபார்க்கவும்",
+    message: "முன்பதிவு செய்ய உங்கள் தொலைபேசியைச் சரிபார்க்கவும்",
+    verifyNow: "சரிபார்",
+  },
+  displayNameNudge: {
+    ariaLabel: "உங்கள் பெயரைச் சேர்க்கவும்",
+    message: "உங்கள் டிக்கெட்டுகளுக்குப் பெயரைச் சேர்க்கவும்",
+    addName: "பெயர் சேர்",
+    dismiss: "மூடு",
   },
   welcomeSequence: {
     step1Heading: "AforAudience-க்கு வரவேற்கிறோம்",

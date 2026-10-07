@@ -19,16 +19,18 @@ import { useRuleViewport } from "./helpers/viewports";
  */
 
 // Literals on purpose (see marathi-locale.spec.ts): hi.ts / mr.ts phoneVerifyNudge.
+// BUG-2610-017 (7 Oct decision) shortened the copy to "Verify your phone to
+// book" + "Verify" in all 12 locales; these literals follow it.
 const EXPECTED = {
   hi: {
     ariaLabel: "अपना फ़ोन सत्यापित करें",
-    message: "टिकट या स्थल बुक करने के लिए अपना फ़ोन नंबर सत्यापित करें।",
-    verifyNow: "अभी सत्यापित करें",
+    message: "बुक करने के लिए अपना फ़ोन सत्यापित करें",
+    verifyNow: "सत्यापित करें",
   },
   mr: {
     ariaLabel: "तुमचा फोन व्हेरिफाय करा",
-    message: "तिकिटे किंवा ठिकाणे बुक करण्यासाठी तुमचा फोन नंबर व्हेरिफाय करा.",
-    verifyNow: "आता व्हेरिफाय करा",
+    message: "बुक करण्यासाठी तुमचा फोन व्हेरिफाय करा",
+    verifyNow: "व्हेरिफाय करा",
   },
 } as const;
 

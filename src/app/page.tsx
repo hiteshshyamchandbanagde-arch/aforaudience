@@ -145,7 +145,7 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="min-h-screen" style={{ background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontFamily: "var(--font-display)" }}>
+    <main className="min-h-screen" style={{ position: "relative", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontFamily: "var(--font-display)" }}>
 
       <HomeHeader />
 

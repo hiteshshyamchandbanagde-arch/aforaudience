@@ -356,8 +356,14 @@ const te: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "మీ ఫోన్‌ను ధృవీకరించండి",
-    message: "టికెట్లు లేదా వేదికలు బుక్ చేయడానికి మీ ఫోన్ నంబర్‌ను ధృవీకరించండి.",
-    verifyNow: "ఇప్పుడే ధృవీకరించండి",
+    message: "బుక్ చేయడానికి మీ ఫోన్‌ను ధృవీకరించండి",
+    verifyNow: "ధృవీకరించండి",
+  },
+  displayNameNudge: {
+    ariaLabel: "మీ పేరు జోడించండి",
+    message: "మీ టికెట్ల కోసం మీ పేరు జోడించండి",
+    addName: "పేరు జోడించు",
+    dismiss: "మూసివేయి",
   },
   welcomeSequence: {
     step1Heading: "AforAudience కి స్వాగతం",

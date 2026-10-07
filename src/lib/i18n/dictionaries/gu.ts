@@ -356,8 +356,14 @@ const gu: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "તમારો ફોન ચકાસો",
-    message: "ટિકિટ અથવા સ્થળો બુક કરવા માટે તમારો ફોન નંબર ચકાસો.",
-    verifyNow: "હમણાં ચકાસો",
+    message: "બુક કરવા માટે તમારો ફોન વેરિફાય કરો",
+    verifyNow: "વેરિફાય કરો",
+  },
+  displayNameNudge: {
+    ariaLabel: "તમારું નામ ઉમેરો",
+    message: "તમારી ટિકિટ માટે તમારું નામ ઉમેરો",
+    addName: "નામ ઉમેરો",
+    dismiss: "બંધ કરો",
   },
   welcomeSequence: {
     step1Heading: "AforAudience માં આપનું સ્વાગત છે",

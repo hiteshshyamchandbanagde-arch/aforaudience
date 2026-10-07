@@ -87,10 +87,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
            sticky nav on desktop; on mobile, above the tab bar and the
            chat button (it used to sit bottom-centre, on top of form
            action rows). */
-        .afa-toast-stack { top: calc(var(--nudge-stack-height, 0px) + 80px); right: 24px; }
+        .afa-toast-stack { top: 80px; right: 24px; }
         @media (max-width: ${MOBILE_BREAKPOINT_MAX}px) {
           .afa-toast-stack { top: auto; bottom: ${ABOVE_CHAT_BUTTON_MOBILE}; right: 16px; left: 16px; width: auto !important; }
-          .afa-toast-stack.afa-toast-stack-top { top: calc(var(--nudge-stack-height, 0px) + 72px); bottom: auto; }
+          .afa-toast-stack.afa-toast-stack-top { top: 72px; bottom: auto; }
         }
       `}</style>
       <div

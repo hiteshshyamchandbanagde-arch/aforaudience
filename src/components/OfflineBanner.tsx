@@ -69,12 +69,9 @@ export default function OfflineBanner() {
 
   const offline = isOffline;
 
-  // Deliberately NOT position: fixed. This renders as a normal-flow child
-  // inside NudgeStack's sticky wrapper (see NudgeStack.tsx), which measures
-  // its own height and publishes --nudge-stack-height for SiteNav to read.
-  // A fixed overlay here would sit outside that system and get covered by -
-  // or itself cover - the sticky nav once scrolled, the same bug NudgeStack
-  // was built to fix for the phone-verify/display-name/notification nudges.
+  // Deliberately NOT position: fixed. NudgeStack.tsx wraps this in its
+  // own sticky top:0 wrapper (BUG-2610-017: the one banner that stays
+  // pinned, above the top bar, while the to-do nudges scroll away).
   return (
     <div
       role="status"

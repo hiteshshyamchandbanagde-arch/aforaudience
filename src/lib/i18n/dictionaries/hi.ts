@@ -355,8 +355,14 @@ const hi: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "अपना फ़ोन सत्यापित करें",
-    message: "टिकट या स्थल बुक करने के लिए अपना फ़ोन नंबर सत्यापित करें।",
-    verifyNow: "अभी सत्यापित करें",
+    message: "बुक करने के लिए अपना फ़ोन सत्यापित करें",
+    verifyNow: "सत्यापित करें",
+  },
+  displayNameNudge: {
+    ariaLabel: "अपना नाम जोड़ें",
+    message: "अपने टिकट के लिए अपना नाम जोड़ें",
+    addName: "नाम जोड़ें",
+    dismiss: "हटाएँ",
   },
   welcomeSequence: {
     step1Heading: "AforAudience में आपका स्वागत है",

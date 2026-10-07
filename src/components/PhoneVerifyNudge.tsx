@@ -51,37 +51,44 @@ export default function PhoneVerifyNudge() {
     }
   }
 
+  // BUG-2610-017 - one line at 390 on a neutral, solid dark surface (a
+  // to-do, not an error: no error red), short copy, orange Verify CTA.
   return (
-    <div
-      role="status"
-      aria-label={t.phoneVerifyNudge.ariaLabel}
-      style={{
-        background: 'var(--afa-error-tint)',
-        color: 'var(--afa-error-bright)',
-        borderBottom: '1px solid var(--afa-error-edge)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'var(--afa-space-3)',
-        padding: 'var(--afa-space-10px) var(--afa-space-4)',
-        fontSize: 'var(--afa-text-body)',
-        lineHeight: 1.4,
-      }}
-    >
-      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-lead)', lineHeight: 1 }}>
+    <div role="status" aria-label={t.phoneVerifyNudge.ariaLabel} data-afa-nudge="phone-verify" style={NUDGE_ROW_STYLE}>
+      <span aria-hidden="true" style={{ flexShrink: 0, lineHeight: 1 }}>
         📱
       </span>
-      <span style={{ flex: 1, minWidth: 0 }}>
-        {t.phoneVerifyNudge.message}
-      </span>
+      <span style={NUDGE_TEXT_STYLE}>{t.phoneVerifyNudge.message}</span>
       <Button
         variant="primary"
         size="pill-sm"
         fullWidth={false}
         href={`/verify-phone?next=${encodeURIComponent(pathname || '/')}`}
-        style={{ whiteSpace: 'nowrap' }}
+        style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
       >
         {t.phoneVerifyNudge.verifyNow}
       </Button>
     </div>
   );
 }
+
+// Shared with DisplayNameNudge: the to-do banners' one-line row.
+export const NUDGE_ROW_STYLE: React.CSSProperties = {
+  background: 'var(--afa-surface-raised)',
+  color: 'var(--afa-text-primary)',
+  borderBottom: '1px solid var(--afa-border-resting)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 'var(--afa-space-3)',
+  padding: 'var(--afa-space-2) var(--afa-space-4)',
+  fontSize: 'var(--afa-text-ui)',
+  lineHeight: 1.4,
+  whiteSpace: 'nowrap',
+};
+
+export const NUDGE_TEXT_STYLE: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};

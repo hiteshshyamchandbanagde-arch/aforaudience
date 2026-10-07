@@ -360,8 +360,14 @@ const es: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "Verifica tu teléfono",
-    message: "Verifica tu número de teléfono para reservar entradas o recintos.",
-    verifyNow: "Verificar ahora",
+    message: "Verifica tu teléfono para reservar",
+    verifyNow: "Verificar",
+  },
+  displayNameNudge: {
+    ariaLabel: "Añade tu nombre",
+    message: "Añade tu nombre para tus entradas",
+    addName: "Añadir nombre",
+    dismiss: "Cerrar",
   },
   welcomeSequence: {
     step1Heading: "Bienvenido a AforAudience",

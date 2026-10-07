@@ -356,8 +356,14 @@ const mr: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "तुमचा फोन व्हेरिफाय करा",
-    message: "तिकिटे किंवा ठिकाणे बुक करण्यासाठी तुमचा फोन नंबर व्हेरिफाय करा.",
-    verifyNow: "आता व्हेरिफाय करा",
+    message: "बुक करण्यासाठी तुमचा फोन व्हेरिफाय करा",
+    verifyNow: "व्हेरिफाय करा",
+  },
+  displayNameNudge: {
+    ariaLabel: "तुमचे नाव जोडा",
+    message: "तुमच्या तिकिटांसाठी तुमचे नाव जोडा",
+    addName: "नाव जोडा",
+    dismiss: "बंद करा",
   },
   welcomeSequence: {
     step1Heading: "AforAudience मध्ये स्वागत आहे",

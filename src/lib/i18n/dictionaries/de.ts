@@ -365,8 +365,14 @@ const de: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "Bestätige dein Telefon",
-    message: "Bestätige deine Telefonnummer, um Tickets oder Veranstaltungsorte zu buchen.",
-    verifyNow: "Jetzt bestätigen",
+    message: "Bestätige dein Telefon, um zu buchen",
+    verifyNow: "Bestätigen",
+  },
+  displayNameNudge: {
+    ariaLabel: "Anzeigenamen hinzufügen",
+    message: "Füge deinen Namen für deine Tickets hinzu",
+    addName: "Name hinzufügen",
+    dismiss: "Schließen",
   },
   welcomeSequence: {
     step1Heading: "Willkommen bei AforAudience",

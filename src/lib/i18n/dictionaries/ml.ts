@@ -356,8 +356,14 @@ const ml: Dictionary = {
   },
   phoneVerifyNudge: {
     ariaLabel: "നിങ്ങളുടെ ഫോൺ പരിശോധിക്കുക",
-    message: "ടിക്കറ്റുകളോ വേദികളോ ബുക്ക് ചെയ്യാൻ നിങ്ങളുടെ ഫോൺ നമ്പർ പരിശോധിക്കുക.",
-    verifyNow: "ഇപ്പോൾ പരിശോധിക്കുക",
+    message: "ബുക്ക് ചെയ്യാൻ നിങ്ങളുടെ ഫോൺ സ്ഥിരീകരിക്കുക",
+    verifyNow: "സ്ഥിരീകരിക്കുക",
+  },
+  displayNameNudge: {
+    ariaLabel: "നിങ്ങളുടെ പേര് ചേർക്കുക",
+    message: "ടിക്കറ്റുകൾക്കായി നിങ്ങളുടെ പേര് ചേർക്കുക",
+    addName: "പേര് ചേർക്കുക",
+    dismiss: "അടയ്ക്കുക",
   },
   welcomeSequence: {
     step1Heading: "AforAudience-ലേക്ക് സ്വാഗതം",

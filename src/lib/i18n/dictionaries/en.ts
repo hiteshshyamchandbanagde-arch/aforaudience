@@ -382,8 +382,15 @@ const en = {
   // BUG-2609-029 - was hard-coded English in PhoneVerifyNudge.tsx.
   phoneVerifyNudge: {
     ariaLabel: "Verify your phone",
-    message: "Verify your phone number to book tickets or venues.",
-    verifyNow: "Verify now",
+    message: "Verify your phone to book",
+    verifyNow: "Verify",
+  },
+  // BUG-2610-017 - DisplayNameNudge copy (was hard-coded English), one line at 390.
+  displayNameNudge: {
+    ariaLabel: "Add your display name",
+    message: "Add your name for your tickets",
+    addName: "Add name",
+    dismiss: "Dismiss",
   },
   welcomeSequence: {
     step1Heading: "Welcome to AforAudience",
