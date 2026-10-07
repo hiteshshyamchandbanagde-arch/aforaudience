@@ -141,6 +141,8 @@ const de: Dictionary = {
     emptyInCity: "Keine Events in {city}",
     emptySearchAllCities: "In allen Städten suchen",
     emptyShowAllCities: "Alle Städte anzeigen",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "Ab ₹{price}",
     emptyClearSearch: "Suche löschen",
     loadErrorTitle: "Events konnten nicht geladen werden",
     loadErrorSub: "Prüfe deine Verbindung und versuche es erneut.",

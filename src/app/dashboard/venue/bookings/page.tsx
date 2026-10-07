@@ -291,6 +291,11 @@ export default function VenueBookingsPage() {
                       <div>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || 'Untitled event'}</p>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{b.venue.name} · {b.organiser.orgName} · ₹{b.amount}</p>
+                        {/* BUG-2608-091 - the booking's date (and end date if multi-day), same format as the Pending cards, so two past bookings of the same venue, organiser and amount can be told apart. */}
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)', marginBottom: 0 }}>
+                          📅 {formatDate(b.fromDate, 'medium', locale)}
+                          {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
+                        </p>
                       </div>
                       <StatusPill tone={tone}>{b.status.toLowerCase()}</StatusPill>
                       {b.status === 'CONFIRMED' && (

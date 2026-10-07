@@ -6,7 +6,7 @@ import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import Ledger from "@/components/Ledger";
-import { TYPE_META, LineupChips, CompetitionBadge, type EventItem } from "@/components/EventCard";
+import { TYPE_META, LineupChips, CompetitionBadge, eventPriceLabel, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
 
@@ -105,7 +105,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
           <LineupChips lineup={event.lineup} size={24} />
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-soft)" }}>
-            {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `from ₹${event.ticketPrice}` : "—"}
+            {eventPriceLabel(event, tr)}
           </span>
         </div>
       </div>

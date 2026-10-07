@@ -2,7 +2,7 @@
 //
 //   npx tsx scripts/booking-tiers.test.ts
 import assert from 'node:assert/strict'
-import { bookingTierNames, listingPrice } from '../src/lib/booking-tiers'
+import { bookingTierNames, listingPrice, withListingPrice } from '../src/lib/booking-tiers'
 
 let passed = 0
 function test(name: string, fn: () => void) {
@@ -48,6 +48,20 @@ test('no price and no priced tiers: nothing to show (card keeps "—")', () => {
   assert.equal(listingPrice(null, []), null)
   assert.equal(listingPrice(0, []), 0)
   assert.equal(listingPrice(undefined, [{ price: 0 }]), null)
+})
+
+test('BUG-2609-079: a tiered event card gets the cheapest tier, marked as a "From" price', () => {
+  const card = withListingPrice({ id: 'e', ticketPrice: null, ticketTiers: [{ price: 500 }, { price: 250 }] })
+  assert.deepEqual(card, { id: 'e', ticketPrice: 250, priceFromTiers: true })
+})
+
+test('BUG-2609-079: a flat-priced event keeps its price and is not a "From" price', () => {
+  assert.deepEqual(withListingPrice({ id: 'e', ticketPrice: 300, ticketTiers: [{ price: 100 }] }), { id: 'e', ticketPrice: 300, priceFromTiers: false })
+})
+
+test('BUG-2609-079: no price and no priced tier (or no tiers loaded): no "From" price', () => {
+  assert.deepEqual(withListingPrice({ id: 'e', ticketPrice: null, ticketTiers: [{ price: 0 }] }), { id: 'e', ticketPrice: null, priceFromTiers: false })
+  assert.deepEqual(withListingPrice({ id: 'e', ticketPrice: null }), { id: 'e', ticketPrice: null, priceFromTiers: false })
 })
 
 console.log(`\n${passed} booking-tiers self-tests passed`)

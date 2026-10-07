@@ -132,6 +132,8 @@ const bn: Dictionary = {
     emptyInCity: "{city}-এ কোনো ইভেন্ট নেই",
     emptySearchAllCities: "সব শহরে খুঁজুন",
     emptyShowAllCities: "সব শহর দেখান",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} থেকে",
     emptyClearSearch: "সার্চ মুছুন",
     loadErrorTitle: "ইভেন্ট লোড করা যায়নি",
     loadErrorSub: "আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",

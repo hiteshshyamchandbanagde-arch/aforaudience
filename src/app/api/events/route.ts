@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { listingPrice } from '@/lib/booking-tiers'
+import { withListingPrice } from '@/lib/booking-tiers'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
@@ -89,7 +89,7 @@ export async function GET(req: Request) {
 
     // BUG-2610-003 - a tiered event (e.g. a numbered-seat one) leaves
     // ticketPrice null; the cards and the price sort read the cheapest tier.
-    const listed = events.map(({ ticketTiers, ...e }: any) => ({ ...e, ticketPrice: listingPrice(e.ticketPrice, ticketTiers) }))
+    const listed = events.map((e: any) => withListingPrice(e))
 
     return NextResponse.json(listed)
   } catch (err) {

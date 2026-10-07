@@ -112,7 +112,7 @@ export default function MobileTabBar() {
   const rawPathname = usePathname()
   const { data: session, status } = useSession()
   const { t } = useLocale()
-  const { unreadCount, flexRequestsPending, venueBookingsPending } = useBadgeCounts()
+  const { unreadCount, flexRequestsOrganiser, flexRequestsVenue, venueBookingsPending } = useBadgeCounts()
   const [moreOpen, setMoreOpen] = useState(false)
   const moreSheetRef = useRef<HTMLDivElement>(null)
   useModalSheet(moreOpen, moreSheetRef, () => setMoreOpen(false), { label: 'More' })
@@ -223,14 +223,14 @@ export default function MobileTabBar() {
     { id: 'inquiries', href: '/dashboard/artist/corporate-inquiries', label: 'Inquiries', Icon: roleIcon('briefcase'), nav: 'replace' },
   ]
 
-  // Organiser - primary 4 + More. "Requests" reuses flexRequestsPending,
+  // Organiser - primary 4 + More. "Requests" reuses flexRequestsOrganiser,
   // same source DashboardShell's own sidebar already badges - not a
   // second data fetch.
   const organiserItems: ItemDef[] = [
     { id: 'my-events', href: '/dashboard/organiser', label: 'My Events', Icon: roleIcon('calendar'), nav: 'replace' },
     { id: 'create', href: '/dashboard/organiser/events/create', label: 'Create', Icon: roleIcon('plus'), nav: 'replace' },
     { id: 'sales', href: '/dashboard/organiser/sales', label: 'Sales', Icon: roleIcon('trendUp'), nav: 'replace' },
-    { id: 'requests', href: '/dashboard/venue-requests', label: 'Requests', Icon: roleIcon('tag'), badge: flexRequestsPending, nav: 'replace' },
+    { id: 'requests', href: '/dashboard/venue-requests', label: 'Requests', Icon: roleIcon('tag'), badge: flexRequestsOrganiser, nav: 'replace' },
   ]
   const organiserMoreItems: MoreItemDef[] = [
     { id: 'payouts', href: '/dashboard/organiser/payouts', label: 'Payouts', Icon: roleIcon('dollarSign') },
@@ -239,13 +239,13 @@ export default function MobileTabBar() {
   ]
 
   // Venue Owner - primary 4 + More. "Bookings" reuses venueBookingsPending,
-  // "Requests" reuses flexRequestsPending - both the same sources
+  // "Requests" reuses flexRequestsVenue - both the same sources
   // DashboardShell's own sidebar already badges.
   const venueOwnerItems: ItemDef[] = [
     { id: 'my-venues', href: '/dashboard/venue', label: 'My Venues', Icon: roleIcon('building'), nav: 'replace' },
     { id: 'bookings', href: '/dashboard/venue/bookings', label: 'Bookings', Icon: roleIcon('grid'), badge: venueBookingsPending, nav: 'replace' },
     { id: 'sales', href: '/dashboard/venue/sales', label: 'Sales', Icon: roleIcon('trendUp'), nav: 'replace' },
-    { id: 'requests', href: '/dashboard/venue-requests', label: 'Requests', Icon: roleIcon('tag'), badge: flexRequestsPending, nav: 'replace' },
+    { id: 'requests', href: '/dashboard/venue-requests', label: 'Requests', Icon: roleIcon('tag'), badge: flexRequestsVenue, nav: 'replace' },
   ]
   const venueOwnerMoreItems: MoreItemDef[] = [
     { id: 'register-venue', href: '/dashboard/venue/create', label: 'Register Venue', Icon: roleIcon('plus') },

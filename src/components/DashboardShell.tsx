@@ -9,6 +9,7 @@ import { useHeldRoles } from '@/components/HeldRolesContext'
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
 import { unifiedTabBarShows } from '@/components/mobile/tabBarRoutes'
+import { BADGE_REFRESH_EVENT } from '@/lib/badge-refresh'
 
 // Shared shell for the Audience-tier dashboard pages (Dashboard/My
 // Activity, Messages, Tickets). Desktop: persistent 220px left sidebar,
@@ -98,7 +99,7 @@ export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
 // session.user.role, never an additive held role.
 type RoleKey = 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER' | 'ADMIN'
 
-type BadgeKey = 'venueBookings' | 'flexRequests' | 'adminFeedbackPending' | 'adminBookingsErrored'
+type BadgeKey = 'venueBookings' | 'flexRequestsOrganiser' | 'flexRequestsVenue' | 'adminFeedbackPending' | 'adminBookingsErrored'
 
 type RoleSectionDef = {
   role: RoleKey
@@ -143,7 +144,7 @@ const ROLE_SECTIONS: (Omit<RoleSectionDef, 'role'> & { role: 'ORGANISER' | 'ARTI
       { label: 'Sales', icon: 'trendUp', href: '/dashboard/organiser/sales' },
       { label: 'Payouts', icon: 'dollarSign', href: '/dashboard/organiser/payouts' },
       { label: 'Edit Profile', icon: 'user', href: '/dashboard/organiser/edit' },
-      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequests' },
+      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequestsOrganiser' },
     ],
   },
   {
@@ -172,7 +173,7 @@ const ROLE_SECTIONS: (Omit<RoleSectionDef, 'role'> & { role: 'ORGANISER' | 'ARTI
       { label: 'Bookings', icon: 'grid', href: '/dashboard/venue/bookings', badgeKey: 'venueBookings' },
       { label: 'Sales', icon: 'trendUp', href: '/dashboard/venue/sales' },
       { label: 'Account Settings', icon: 'user', href: '/dashboard/venue/edit' },
-      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequests' },
+      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequestsVenue' },
     ],
   },
 ]
@@ -217,7 +218,7 @@ const ADMIN_SECTION: RoleSectionDef = {
 // GEN-2609-013 - exported so profile/page.tsx's mobile "Quick links"
 // group can recover the same Dashboard/Messages badge counts the bar
 // below used to show on /profile, without recomputing them separately.
-export function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsPending: number; adminFeedbackPending: number; adminBookingsErrored: number } {
+export function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsOrganiser: number; flexRequestsVenue: number; adminFeedbackPending: number; adminBookingsErrored: number } {
   const { data: session } = useSession()
   const user = session?.user as { email?: string | null; role?: string } | undefined
 
@@ -225,11 +226,19 @@ export function useBadgeCounts(): { pendingCount: number; unreadCount: number; p
   useEffect(() => {
     if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER') return
     let cancelled = false
-    fetch('/api/notifications/pending-count')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
-      .catch(() => {})
-    return () => { cancelled = true }
+    const load = () => {
+      fetch('/api/notifications/pending-count')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
+        .catch(() => {})
+    }
+    load()
+    // BUG-2609-073 - an accept/counter/decline changes this total too.
+    window.addEventListener(BADGE_REFRESH_EVENT, load)
+    return () => {
+      cancelled = true
+      window.removeEventListener(BADGE_REFRESH_EVENT, load)
+    }
   }, [user?.role])
 
   // BUG-2609-010: these per-item counts used to live on the Venue Owner/
@@ -249,15 +258,30 @@ export function useBadgeCounts(): { pendingCount: number; unreadCount: number; p
     return () => { cancelled = true }
   }, [user?.role])
 
-  const [flexRequestsPending, setFlexRequestsPending] = useState(0)
+  // BUG-2609-073 - one count per held role (a user can be both an
+  // Organiser and a Venue Owner), counting only the requests waiting on
+  // this user's action on that side. Refetched when a page changes what
+  // it counts (refreshBadgeCounts, lib/badge-refresh.ts) and when the tab
+  // comes back into view, so the other side's action shows up too.
+  const [flexRequestsWaiting, setFlexRequestsWaiting] = useState({ ORGANISER: 0, VENUE_OWNER: 0 })
   useEffect(() => {
-    if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER') return
+    if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER' && user?.role !== 'ARTIST') return
     let cancelled = false
-    fetch('/api/venue-booking-requests')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (!cancelled && Array.isArray(data)) setFlexRequestsPending(data.filter((r: { status: string }) => r.status === 'PENDING').length) })
-      .catch(() => {})
-    return () => { cancelled = true }
+    const load = () => {
+      fetch('/api/venue-booking-requests/waiting-count')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => { if (!cancelled && data) setFlexRequestsWaiting({ ORGANISER: data.ORGANISER ?? 0, VENUE_OWNER: data.VENUE_OWNER ?? 0 }) })
+        .catch(() => {})
+    }
+    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    load()
+    window.addEventListener(BADGE_REFRESH_EVENT, load)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      cancelled = true
+      window.removeEventListener(BADGE_REFRESH_EVENT, load)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [user?.role])
 
   const [unreadCount, setUnreadCount] = useState(0)
@@ -310,7 +334,7 @@ export function useBadgeCounts(): { pendingCount: number; unreadCount: number; p
     return () => { cancelled = true }
   }, [user?.role])
 
-  return { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending, adminFeedbackPending, adminBookingsErrored }
+  return { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsOrganiser: flexRequestsWaiting.ORGANISER, flexRequestsVenue: flexRequestsWaiting.VENUE_OWNER, adminFeedbackPending, adminBookingsErrored }
 }
 
 // BUG-2609-007: the sidebar's own "Dashboard" link was hardcoded to
@@ -434,13 +458,14 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const { t } = useLocale()
   const { data: session } = useSession()
   const held = useHeldRoles()
-  const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending, adminFeedbackPending, adminBookingsErrored } = useBadgeCounts()
+  const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsOrganiser, flexRequestsVenue, adminFeedbackPending, adminBookingsErrored } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
   useModalSheet(drawerOpen, drawerRef, () => setDrawerOpen(false), { label: 'My Roles' })
   const badgeFor = (key?: BadgeKey): number | undefined =>
     key === 'venueBookings' ? venueBookingsPending
-      : key === 'flexRequests' ? flexRequestsPending
+      : key === 'flexRequestsOrganiser' ? flexRequestsOrganiser
+      : key === 'flexRequestsVenue' ? flexRequestsVenue
       : key === 'adminFeedbackPending' ? adminFeedbackPending
       : key === 'adminBookingsErrored' ? adminBookingsErrored
       : undefined

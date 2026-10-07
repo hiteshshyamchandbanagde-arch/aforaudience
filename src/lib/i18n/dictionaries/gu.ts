@@ -132,6 +132,8 @@ const gu: Dictionary = {
     emptyInCity: "{city}માં કોઈ ઇવેન્ટ નથી",
     emptySearchAllCities: "બધાં શહેરોમાં શોધો",
     emptyShowAllCities: "બધાં શહેરો બતાવો",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} થી",
     emptyClearSearch: "શોધ સાફ કરો",
     loadErrorTitle: "ઇવેન્ટ્સ લોડ થઈ શક્યા નથી",
     loadErrorSub: "તમારું કનેક્શન તપાસો અને ફરી પ્રયાસ કરો.",

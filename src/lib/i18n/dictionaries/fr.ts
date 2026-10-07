@@ -137,6 +137,8 @@ const fr: Dictionary = {
     emptyInCity: "Aucun événement à {city}",
     emptySearchAllCities: "Chercher dans toutes les villes",
     emptyShowAllCities: "Afficher toutes les villes",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "À partir de ₹{price}",
     emptyClearSearch: "Effacer la recherche",
     loadErrorTitle: "Impossible de charger les événements",
     loadErrorSub: "Vérifiez votre connexion et réessayez.",

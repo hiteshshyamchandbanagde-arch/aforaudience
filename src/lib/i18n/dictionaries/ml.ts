@@ -132,6 +132,8 @@ const ml: Dictionary = {
     emptyInCity: "{city} ൽ ഇവന്റുകളില്ല",
     emptySearchAllCities: "എല്ലാ നഗരങ്ങളിലും തിരയുക",
     emptyShowAllCities: "എല്ലാ നഗരങ്ങളും കാണിക്കുക",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} മുതൽ",
     emptyClearSearch: "തിരയൽ മായ്ക്കുക",
     loadErrorTitle: "ഇവന്റുകൾ ലോഡ് ചെയ്യാനായില്ല",
     loadErrorSub: "നിങ്ങളുടെ കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.",

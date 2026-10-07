@@ -132,6 +132,8 @@ const te: Dictionary = {
     emptyInCity: "{city}లో ఈవెంట్‌లు లేవు",
     emptySearchAllCities: "అన్ని నగరాల్లో వెతకండి",
     emptyShowAllCities: "అన్ని నగరాలు చూపించు",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} నుండి",
     emptyClearSearch: "శోధనను తీసివేయి",
     loadErrorTitle: "ఈవెంట్‌లను లోడ్ చేయలేకపోయాము",
     loadErrorSub: "మీ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",

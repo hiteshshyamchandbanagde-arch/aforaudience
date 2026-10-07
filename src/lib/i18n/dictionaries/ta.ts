@@ -132,6 +132,8 @@ const ta: Dictionary = {
     emptyInCity: "{city} இல் நிகழ்வுகள் இல்லை",
     emptySearchAllCities: "எல்லா நகரங்களிலும் தேடு",
     emptyShowAllCities: "எல்லா நகரங்களையும் காட்டு",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} முதல்",
     emptyClearSearch: "தேடலை அழி",
     loadErrorTitle: "நிகழ்வுகளை ஏற்ற முடியவில்லை",
     loadErrorSub: "உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",

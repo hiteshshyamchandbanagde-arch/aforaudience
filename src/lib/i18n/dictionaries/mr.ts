@@ -132,6 +132,8 @@ const mr: Dictionary = {
     emptyInCity: "{city} मध्ये इव्हेंट्स नाहीत",
     emptySearchAllCities: "सगळ्या शहरांत शोधा",
     emptyShowAllCities: "सगळी शहरे दाखवा",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} पासून",
     emptyClearSearch: "शोध पुसा",
     loadErrorTitle: "इव्हेंट्स लोड झाले नाहीत",
     loadErrorSub: "इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.",
