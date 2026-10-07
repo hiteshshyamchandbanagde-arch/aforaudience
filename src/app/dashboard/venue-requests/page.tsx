@@ -11,6 +11,7 @@ import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, Err
 import SharedButton from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { refreshBadgeCounts } from '@/lib/badge-refresh'
 
 interface Offer {
   id: string
@@ -63,6 +64,10 @@ export default function VenueRequestsPage() {
       const res = await fetch('/api/venue-booking-requests')
       if (!res.ok) throw new Error('Failed to load requests')
       setRequests(await res.json())
+      // BUG-2609-073 - the sidebar/tab-bar badge follows this list: after
+      // this user's own accept/counter/decline, and when the 20 s poll
+      // picks up the other side's.
+      refreshBadgeCounts()
     } catch (err: any) {
       setLoadError(err.message)
     } finally {

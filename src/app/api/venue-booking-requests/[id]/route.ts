@@ -5,9 +5,9 @@ import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
+import { isFlexRequestExpired } from '@/lib/flex-requests'
 
 const MAX_OFFERS = 6 // §4.5 suggestion #7 - 3 rounds per side, 6 total
-const EXPIRY_HOURS = 48
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -70,7 +70,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     // 48-hour expiry, checked against the most recent offer.
     const lastOffer = request.offers[request.offers.length - 1]
-    if (lastOffer && Date.now() - new Date(lastOffer.createdAt).getTime() > EXPIRY_HOURS * 60 * 60 * 1000) {
+    if (isFlexRequestExpired(request)) {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'EXPIRED' } })
       if (request.eventId) {
         await prisma.event.updateMany({
