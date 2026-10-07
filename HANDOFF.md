@@ -5340,3 +5340,16 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - BUG-2610-010 nightly: fired 5 Oct 07:12 (cancelled) + 11:49 (green). Resolve when 3 days in a row.
 - Open Human checks: BUG-2610-014 timing, BUG-2610-012 ticket buttons, GEN-2609-107 spacing; pending decision: save language to account.
 - Next: UI/UX bundle dispatch (7 empty-state bugs + BUG-2608-040 + BUG-2609-019); speed items out of UNDER_REVIEW (re-measure after bom1 first).
+
+
+## Part 51 — 7 Oct (chat), qa @ 79512d3
+- MERGED #737 (11eaa2d) Marathi J + BUG-2609-029. Hitesh native read: "Marathi rocks"; all 40 strings + 5 flagged choices kept. GEN-2609-120 / BUG-2609-029 BUILD_COMPLETE -> RESOLVED after nightly.
+- MERGED #740 (79512d3) GEN-2610-004 RESOLVED: design-tokens.yml runs npm ci, then every scripts/*.test.ts (glob; timeout 10 min, npm cache). Written from chat with a workflow-scoped PAT at Hitesh's explicit request: a LOGGED EXCEPTION to the chat/CC split, not a precedent. The first run caught document-contrast.test.ts needing node_modules. Not covered: ci-summary.test.mjs.
+- RESOLVED (Hitesh phone checks): BUG-2610-014 speed (bom1), BUG-2610-012 ticket buttons, GEN-2609-107 spacing. Closed as fixed by bom1: BUG-2607-032, BUG-2608-025, GEN-2607-021. BUG-2608-014 open for back-gesture only. BUG-2609-019 REJECTED (superseded by nav v3). BUG-2610-011 RESOLVED.
+- Logged: GEN-2610-005 (location: picker lists only cities with venues; IP geo says Pune in Mumbai; label format mismatch; top-bar search squeezed to "Sea" by "MUMBAI (IN)"). BUG-2610-015 MEDIUM (chat bubble covers /tickets Expired badge, admin Users Suspend, Revenue last column). BUG-2610-016 LOW (admin Revenue 390: headers run together, chart months unlabelled). BUG-2609-086 raised to MEDIUM (native confirm on Cancel ticket: shows the host URL, doesn't explain the ₹20 non-refundable fee).
+- QA data: venue qa-mumbai-venue-0001 "Bandra Basement Stage" (Mumbai, owner qa-demo-vo-full-role, 19.0544/72.8344) inserted by chat; dispatch N adds it to qa-seed.ts.
+- DISPATCH M pushed fix/uiux-bundle-m @ 552bc14, e2e-preview green, NO PR YET. 5 fixed with tests (2610-002, 079, 070, 073, 091), 066 + 101 already fixed (guard tests), 040 not reproducing (guard test). Note: flat prices now read "₹X" instead of "from ₹X". Next: open PR, review, merge on green, phone-look list to Hitesh.
+- DISPATCH N (GEN-2610-005, use-my-location + nearest city + travel prompt + label/top-bar squeeze + Mumbai seed) RUNNING: run 37559829714 on feat/use-my-location-n.
+- Next queue: UI/UX bundle 2 = BUG-2609-086 (in-app cancel sheet with fee lines), BUG-2610-015, BUG-2610-016, GEN-2610-001 contrast follow-ups, GEN-2609-002 auth scrollbar. Then GEN-2608-071/073 imagery (Hitesh design call).
+- Hitesh pending: billing keys (Razorpay test + Google Places; Vercel Preview + .env.local; not in chat); decision on saving language to account (chat recommends yes); revoke old PATs.
+- BUG-2610-010 nightly: fired 5 Oct and 6 Oct; resolve if the 7 Oct nightly fires.
