@@ -21,3 +21,16 @@ export function listingPrice(ticketPrice: number | null | undefined, tiers: { pr
   const prices = tiers.map((t) => t.price).filter((p) => p > 0)
   return prices.length > 0 ? Math.min(...prices) : ticketPrice ?? null
 }
+
+/**
+ * BUG-2609-079 - an event as a listing card needs it: `ticketPrice` is the
+ * listing price above, and `priceFromTiers` says it came from the cheapest
+ * tier (the card then reads "From ₹X"). The tier rows themselves are dropped.
+ */
+export function withListingPrice<E extends { ticketPrice: number | null }>(
+  event: E & { ticketTiers?: { price: number }[] },
+): Omit<E, 'ticketTiers'> & { ticketPrice: number | null; priceFromTiers: boolean } {
+  const { ticketTiers = [], ...rest } = event
+  const price = listingPrice(event.ticketPrice, ticketTiers)
+  return { ...(rest as Omit<E, 'ticketTiers'>), ticketPrice: price, priceFromTiers: !event.ticketPrice && !!price }
+}

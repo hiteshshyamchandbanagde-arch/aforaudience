@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { withListingPrice } from '@/lib/booking-tiers'
 
 // Mobile Redesign Phase 4b (GEN-2609-007) - the current user's saved
 // (Follow targetType=EVENT) events, shaped identically to GET /api/events
@@ -32,9 +33,10 @@ export async function GET() {
 
   const events = await prisma.event.findMany({
     where: { id: { in: eventIds } },
-    include: { venue: true, lineup: { include: { artist: { select: { id: true, user: { select: { name: true, displayName: true } } } } } } },
+    include: { venue: true, ticketTiers: { select: { price: true } }, lineup: { include: { artist: { select: { id: true, user: { select: { name: true, displayName: true } } } } } } },
     orderBy: { date: 'asc' },
   })
 
-  return NextResponse.json(events)
+  // BUG-2609-079 - a tiered event's card shows "From ₹<cheapest tier>".
+  return NextResponse.json(events.map((e) => withListingPrice(e)))
 }

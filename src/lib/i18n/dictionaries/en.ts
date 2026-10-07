@@ -132,6 +132,8 @@ const en = {
     emptyInCity: "No events in {city}",
     emptySearchAllCities: "Search all cities",
     emptyShowAllCities: "Show all cities",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "From ₹{price}",
     emptyClearSearch: "Clear search",
     loadErrorTitle: "Couldn't load events",
     loadErrorSub: "Check your connection and try again.",

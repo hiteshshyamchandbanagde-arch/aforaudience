@@ -14,6 +14,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { eventPriceLabel } from '@/components/EventCard'
 
 interface EventItem {
   id: string
@@ -24,6 +25,7 @@ interface EventItem {
   totalSeats: number
   isFree: boolean
   ticketPrice: number | null
+  priceFromTiers?: boolean
   venue: { name: string; city: string } | null
   applications: { id: string; status: string }[]
 }
@@ -37,7 +39,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
 }
 
 export default function OrganiserDashboard() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
@@ -191,7 +193,7 @@ export default function OrganiserDashboard() {
 
                     <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                       <span><strong>{event.totalSeats}</strong> seats</span>
-                      <span><strong>{event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}</strong></span>
+                      <span><strong>{event.isFree ? 'Free' : eventPriceLabel(event, tr)}</strong></span>
                       {pendingApplications > 0 && (
                         <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{pendingApplications} pending application{pendingApplications > 1 ? 's' : ''}</span>
                       )}

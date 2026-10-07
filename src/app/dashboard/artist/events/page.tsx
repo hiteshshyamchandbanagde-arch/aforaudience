@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { eventPriceLabel } from '@/components/EventCard'
 
 interface EventItem {
   id: string
@@ -23,6 +24,7 @@ interface EventItem {
   startTime: string
   isFree: boolean
   ticketPrice: number | null
+  priceFromTiers?: boolean
   defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
   defaultFeeAmount: number | null
   defaultBuyInAmount: number | null
@@ -269,7 +271,7 @@ export default function BrowseEventsToApplyPage() {
                         </p>
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                        Audience pays: {event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}
+                        Audience pays: {event.isFree ? 'Free' : eventPriceLabel(event, tr)}
                       </span>
                     </div>
 

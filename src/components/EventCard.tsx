@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { getAvailabilityStatus } from "@/lib/availability"
-import { useLocale } from "@/lib/i18n/translate"
+import { useLocale, type Dictionary } from "@/lib/i18n/translate"
 import Photo from "@/components/Photo"
 import { EventTypeIcon, CalendarIcon, ClockIcon, PinIcon } from "@/components/icons/EventIcons"
 import { EventSaveHeartButton } from "@/components/EventSaveButton"
@@ -17,6 +17,8 @@ export interface EventItem {
   startTime: string
   isFree: boolean
   ticketPrice: number | null
+  // BUG-2609-079 - ticketPrice is the cheapest tier (lib/booking-tiers.ts).
+  priceFromTiers?: boolean
   totalSeats: number
   availableSeats: number
   vibe?: string | null
@@ -24,6 +26,20 @@ export interface EventItem {
   posterImage: string | null
   lineup: { id: string; artist: { id: string; user: { name: string; displayName: string | null } } }[]
   isCompetitionShow?: boolean
+}
+
+/**
+ * BUG-2609-079 - the price on an event card: "Free", "₹X" for a flat
+ * price, "From ₹X" when the price is the event's cheapest tier, "—" when
+ * there is none. Every card that shows Event.ticketPrice reads it here.
+ */
+export function eventPriceLabel(
+  event: { isFree: boolean; ticketPrice: number | null; priceFromTiers?: boolean },
+  tr: Dictionary,
+): string {
+  if (event.isFree) return tr.eventsPage.freeBadge
+  if (!event.ticketPrice) return "—"
+  return event.priceFromTiers ? tr.eventsPage.priceFrom.replace("{price}", String(event.ticketPrice)) : `₹${event.ticketPrice}`
 }
 
 export function initials(name: string): string {
@@ -264,7 +280,7 @@ export function EventCard({
   const { t: tr, locale } = useLocale()
   const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
   const typeLabel = tr.eventTypes[typeKey]
-  const priceLabel = event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"
+  const priceLabel = eventPriceLabel(event, tr)
 
   return (
     <div
@@ -363,7 +379,7 @@ export function EventRow({
   const { t: tr, locale } = useLocale()
   const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
   const typeLabel = tr.eventTypes[typeKey]
-  const priceLabel = event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `from ₹${event.ticketPrice}` : "—"
+  const priceLabel = eventPriceLabel(event, tr)
 
   return (
     <div

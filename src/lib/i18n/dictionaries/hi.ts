@@ -131,6 +131,8 @@ const hi: Dictionary = {
     emptyInCity: "{city} में कोई इवेंट नहीं",
     emptySearchAllCities: "सभी शहरों में खोजें",
     emptyShowAllCities: "सभी शहर दिखाएं",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} से",
     emptyClearSearch: "खोज हटाएं",
     loadErrorTitle: "इवेंट लोड नहीं हो सके",
     loadErrorSub: "अपना कनेक्शन जांचें और फिर से प्रयास करें।",

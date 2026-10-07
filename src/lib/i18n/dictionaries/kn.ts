@@ -132,6 +132,8 @@ const kn: Dictionary = {
     emptyInCity: "{city} ನಲ್ಲಿ ಈವೆಂಟ್‌ಗಳಿಲ್ಲ",
     emptySearchAllCities: "ಎಲ್ಲಾ ನಗರಗಳಲ್ಲಿ ಹುಡುಕಿ",
     emptyShowAllCities: "ಎಲ್ಲಾ ನಗರಗಳನ್ನು ತೋರಿಸಿ",
+    // BUG-2609-079 - a tiered event's card: its cheapest tier.
+    priceFrom: "₹{price} ರಿಂದ",
     emptyClearSearch: "ಹುಡುಕಾಟ ತೆರವುಗೊಳಿಸಿ",
     loadErrorTitle: "ಈವೆಂಟ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
     loadErrorSub: "ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
