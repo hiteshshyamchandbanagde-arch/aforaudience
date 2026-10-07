@@ -21,8 +21,19 @@ export const FLOATING_ATTR = 'data-afa-floating'
 const GAP = 8 // px between the row's top edge and the lifted button
 export const MIN_TOP = 72 // px; a lifted button above this would sit under MobileTopBar
 
+// BUG-2610-015 - a label that must stay readable (a status pill, a
+// table's last-column value) carries this attribute; the button treats it
+// like a compact control.
+export const AVOID_ATTR = 'data-afa-avoid'
+
 // BUG-2609-081 rule 4 - what counts as a control on a short page.
-const INTERACTIVE_SELECTOR = 'a[href], button, input, select, textarea, [role=button], [tabindex]:not([tabindex="-1"]), label[for]'
+const INTERACTIVE_SELECTOR = `a[href], button, input, select, textarea, [role=button], [tabindex]:not([tabindex="-1"]), label[for], [${AVOID_ATTR}]`
+// BUG-2610-015 rule 5 - on every page, long ones included, the button never
+// rests over a compact control (a Suspend button, a status pill): one this
+// tall or less. Bigger ones (a whole ticket or event card that is one link)
+// are surfaces, not targets; lifting above them would hide the button on
+// every card list.
+const COMPACT_MAX = 64
 
 export interface ActionRowClearance {
   bottom: number | null // px from the viewport bottom, or null = resting spot
@@ -103,7 +114,7 @@ export function useActionRowClearance(
     // are re-read on resize / mutation and reused on scroll frames.
     let stale = true
     let short = false
-    let avoid = false
+    let avoidAll = false
 
     const apply = (next: ActionRowClearance) =>
       setState((prev) => (prev.bottom === next.bottom && prev.hidden === next.hidden && prev.scrollable === next.scrollable ? prev : next))
@@ -117,19 +128,22 @@ export function useActionRowClearance(
       if (stale) {
         stale = false
         short = isShortPage()
-        avoid = avoidControls && (short || !!document.querySelector(`[${AVOID_CONTROLS_ATTR}]`))
+        avoidAll = short || !!document.querySelector(`[${AVOID_CONTROLS_ATTR}]`)
       }
       const resting: ActionRowClearance = { bottom: null, hidden: false, scrollable: !short }
-      if (visible.size === 0 && !avoid) return apply(resting)
+      if (visible.size === 0 && !avoidControls) return apply(resting)
       const rest = probe.getBoundingClientRect()
       const rows = [...visible].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
-      // Rule 4. Controls wholly below the resting spot (the tab bar) are
-      // left out: lifting cannot clear them and they are not under it.
-      if (avoid) {
+      // Rule 4 (a short or opted-in page: every control) and rule 5 (any
+      // page: compact controls and marked labels). Controls wholly below
+      // the resting spot (the tab bar) are left out: lifting cannot clear
+      // them and they are not under it.
+      if (avoidControls) {
         for (const el of document.querySelectorAll(INTERACTIVE_SELECTOR)) {
           if (el.closest(`[${FLOATING_ATTR}]`)) continue
           const r = el.getBoundingClientRect()
           if (r.width <= 0 || r.height <= 0 || r.top >= rest.bottom || r.bottom <= 0) continue
+          if (!avoidAll && r.height > COMPACT_MAX) continue
           if (r.left >= rest.right || r.right <= rest.left || !isVisible(el)) continue
           rows.push(r)
         }

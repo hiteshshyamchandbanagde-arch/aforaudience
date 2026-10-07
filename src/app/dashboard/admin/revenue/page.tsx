@@ -179,7 +179,7 @@ export default function AdminRevenueOverviewPage() {
                   <span>Organiser</span>
                   <span>Platform Fee</span>
                   <span className="hidden lg:inline">Ticket Volume</span>
-                  <span>Bookings</span>
+                  <span data-afa-avoid>Bookings</span>
                 </div>
                 {organisers.map((o) => (
                   <div
@@ -194,7 +194,8 @@ export default function AdminRevenueOverviewPage() {
                     <span style={{ fontWeight: 600 }}>{o.orgName}</span>
                     <span>{money(o.platformFee)}</span>
                     <span className="hidden lg:inline">{money(o.ticketSubtotal)}</span>
-                    <span>{o.bookings}</span>
+                    {/* BUG-2610-015 - data-afa-avoid: the chat button never rests on the last column. */}
+                    <span data-afa-avoid>{o.bookings}</span>
                   </div>
                 ))}
               </div>
@@ -209,7 +210,7 @@ export default function AdminRevenueOverviewPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 var(--afa-space-3)' }}>
                   <span>Event</span>
                   <span>Platform Fee</span>
-                  <span>Bookings</span>
+                  <span data-afa-avoid>Bookings</span>
                 </div>
                 {events.map((e) => (
                   <div
@@ -222,7 +223,7 @@ export default function AdminRevenueOverviewPage() {
                   >
                     <span style={{ fontWeight: 600 }}>{e.title}</span>
                     <span>{money(e.platformFee)}</span>
-                    <span>{e.bookings}</span>
+                    <span data-afa-avoid>{e.bookings}</span>
                   </div>
                 ))}
               </div>
