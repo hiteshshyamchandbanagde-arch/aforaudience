@@ -50,10 +50,23 @@ async function flexBadges(page: Page): Promise<number[]> {
   return texts.map((t) => Number(t.match(/\b(\d+)\b/)?.[1] ?? 0));
 }
 
-async function deleteSpecRequests() {
+/**
+ * Deletes this run's request, or (with no id) leftovers of runs that died
+ * before their own clean-up - only those over an hour old, so a run going
+ * on at the same time (another branch's preview) keeps its request.
+ */
+async function deleteSpecRequests(requestId?: string) {
   await withQaDb(async (db) => {
-    await db.query(`DELETE FROM "VenueBookingOffer" WHERE "requestId" LIKE $1`, [`${ID_PREFIX}%`]);
-    await db.query(`DELETE FROM "VenueBookingRequest" WHERE id LIKE $1`, [`${ID_PREFIX}%`]);
+    const ids = requestId
+      ? [requestId]
+      : (
+          await db.query(`SELECT id FROM "VenueBookingRequest" WHERE id LIKE $1 AND "createdAt" < now() - interval '1 hour'`, [
+            `${ID_PREFIX}%`,
+          ])
+        ).rows.map((r: { id: string }) => r.id);
+    if (ids.length === 0) return;
+    await db.query(`DELETE FROM "VenueBookingOffer" WHERE "requestId" = ANY($1)`, [ids]);
+    await db.query(`DELETE FROM "VenueBookingRequest" WHERE id = ANY($1)`, [ids]);
   });
 }
 
@@ -88,7 +101,7 @@ test.describe("@needs-db Flexible Requests badge", () => {
   });
 
   test.afterAll(async () => {
-    await deleteSpecRequests();
+    await deleteSpecRequests(requestId);
   });
 
   test("[BUG-2609-073] Omkar's items count only requests waiting on him, per role - not his request that waits on the venue", async ({
