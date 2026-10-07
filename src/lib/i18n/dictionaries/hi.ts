@@ -61,6 +61,14 @@ const hi: Dictionary = {
   location: {
     searchCityPlaceholder: "शहर खोजें...",
     noMatchingCities: "कोई मिलता-जुलता शहर नहीं",
+    useMyLocation: "मेरी लोकेशन इस्तेमाल करें",
+    locating: "आपकी लोकेशन ढूँढ रहे हैं…",
+    locationUnavailable: "आपकी लोकेशन नहीं मिल सकी। आपका शहर नहीं बदला।",
+    noShowsNearby: "आपके आस-पास अभी कोई शो नहीं। सबसे नज़दीक: {city}, {km} किमी",
+    switchToCity: "{city} पर जाएँ",
+    travelPrompt: "लगता है आप {city} में हैं। बदलें?",
+    switchButton: "बदलें",
+    notNow: "अभी नहीं",
   },
   eventTypes: {
     OPEN_MIC: "ओपन माइक",

@@ -62,6 +62,14 @@ const mr: Dictionary = {
   location: {
     searchCityPlaceholder: "शहर शोधा...",
     noMatchingCities: "जुळणारे शहर नाही",
+    useMyLocation: "माझे स्थान वापरा",
+    locating: "तुमचे स्थान शोधत आहोत…",
+    locationUnavailable: "तुमचे स्थान मिळाले नाही. तुमचे शहर बदलले नाही.",
+    noShowsNearby: "तुमच्या जवळ अजून शो नाहीत. सर्वात जवळ: {city}, {km} किमी",
+    switchToCity: "{city} निवडा",
+    travelPrompt: "तुम्ही {city} मध्ये आहात असे दिसते. बदलायचे?",
+    switchButton: "बदला",
+    notNow: "आत्ता नाही",
   },
   eventTypes: {
     OPEN_MIC: "ओपन माइक",

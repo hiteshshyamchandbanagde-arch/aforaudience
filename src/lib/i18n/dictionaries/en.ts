@@ -62,6 +62,15 @@ const en = {
   location: {
     searchCityPlaceholder: "Search city...",
     noMatchingCities: "No matching cities",
+    // GEN-2610-005 - "Use my location" in the LocationChip picker
+    useMyLocation: "Use my location",
+    locating: "Finding you…",
+    locationUnavailable: "Couldn't get your location. Your city is unchanged.",
+    noShowsNearby: "No shows near you yet. Nearest: {city}, {km} km",
+    switchToCity: "Switch to {city}",
+    travelPrompt: "You seem to be in {city}. Switch?",
+    switchButton: "Switch",
+    notNow: "Not now",
   },
   eventTypes: {
     OPEN_MIC: "Open Mic",

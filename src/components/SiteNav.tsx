@@ -630,7 +630,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     </div>
                     {!backHref && (
                       <div style={{ padding: "0 var(--afa-space-3) var(--afa-space-1)" }}>
-                        <LocationChip />
+                        <LocationChip inPanel />
                       </div>
                     )}
                     {user && (
