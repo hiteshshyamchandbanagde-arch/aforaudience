@@ -13,6 +13,8 @@ import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLock
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
 import { countNoun } from '@/lib/i18n/plural'
+import { draftDecision, humaniseAge } from '@/lib/seatmap-draft'
+import { useConfirm, usePrompt } from '@/components/ConfirmDialog'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
 //
@@ -518,6 +520,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const { data: session, status } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
+  const confirm = useConfirm()
+  const prompt = usePrompt()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -551,10 +555,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [seatMapFrozen, setSeatMapFrozen] = useState(false)
   const [freezing, setFreezing] = useState(false)
   const toggleFreeze = async (next: boolean) => {
-    if (next && !window.confirm(
-      'Freeze this seat map? It becomes read-only everywhere in this builder until you Unfreeze it.\n\nThis does not affect any live event or booking - it just locks further edits here.'
-    )) return
-    if (!next && !window.confirm('Unfreeze this seat map so it can be edited again?')) return
+    // BUG-2609-086 - in-app confirm, not the browser's window.confirm().
+    if (next && !(await confirm({
+      title: 'Freeze this seat map?',
+      body: 'It becomes read-only everywhere in this builder until you Unfreeze it. This does not affect any live event or booking - it just locks further edits here.',
+      confirmLabel: 'Freeze',
+    }))) return
+    if (!next && !(await confirm({ title: 'Unfreeze this seat map?', body: 'It can be edited again.', confirmLabel: 'Unfreeze' }))) return
     setFreezing(true)
     try {
       const res = await fetch(`/api/venues/${id}/seats`, {
@@ -642,9 +649,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const setBuilderPath = (path: 'choose' | 'canvas' | null) =>
     setBuilderPathByLevel((prev) => ({ ...prev, [activeLevel]: path }))
 
-  const addLevel = () => {
+  const addLevel = async () => {
     if (seatMapFrozen) return
-    const name = window.prompt('Name this level (e.g. "Ground Floor", "Balcony", "1st Floor")')
+    const name = await prompt({ title: 'Add a level', inputLabel: 'Level name', placeholder: 'e.g. Ground Floor, Balcony, 1st Floor', confirmLabel: 'Add level' })
     if (name === null) return
     const trimmed = normalizeWhitespace(name).slice(0, 60)
     if (!trimmed) { showToast('Level name cannot be empty.', 'error'); return }
@@ -652,9 +659,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     setLevels((prev) => [...prev, trimmed])
     setActiveLevel(trimmed)
   }
-  const removeLevel = (name: string) => {
+  const removeLevel = async (name: string) => {
     if (levels.length <= 1 || seatMapFrozen) return
-    if (!window.confirm(`Remove level "${levelLabel(name)}"? This clears its local layout - nothing is deleted server-side until you Save.`)) return
+    if (!(await confirm({ title: `Remove level "${levelLabel(name)}"?`, body: 'This clears its local layout - nothing is deleted server-side until you Save.', confirmLabel: 'Remove level', destructive: true }))) return
     setLevels((prev) => prev.filter((l) => l !== name))
     setSeatsByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
     setGridConfigByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
@@ -725,11 +732,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // overlapping duplicate seats. A confirm-gated switch is the
   // "separate deliberate action" Hitesh asked for. Empty levels have
   // nothing to lose, so no prompt needed there.
-  const backToChoice = () => {
-    if (seats.length > 0 && !window.confirm(
-      `Go back and change the setup approach for ${levelLabel(activeLevel)}?\n\n` +
-      `This level already has ${seats.length} seat${seats.length === 1 ? '' : 's'}. Existing seats won't be deleted, but generating a new layout adds seats on top of them and can create overlapping duplicates - review the canvas afterward if you continue.`
-    )) return
+  const backToChoice = async () => {
+    if (seats.length > 0 && !(await confirm({
+      title: `Change the setup approach for ${levelLabel(activeLevel)}?`,
+      body: `This level already has ${countNoun(seats.length, 'seat')}. Existing seats won't be deleted, but generating a new layout adds seats on top of them and can create overlapping duplicates - review the canvas afterward if you continue.`,
+      confirmLabel: 'Go back',
+    }))) return
     setBuilderPath('choose')
     setWizardShape(null)
     setWizardMultiZone(null)
@@ -912,9 +920,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     showToast(`Generated ${countNoun(generated.length, 'seat')}.`, 'success')
   }
 
-  const resetLayout = () => {
+  const resetLayout = async () => {
     if (seats.length === 0) return
-    if (!window.confirm(`Clear the layout for ${levelLabel(activeLevel)}? This only affects your local edits - nothing is deleted until you Save.`)) return
+    if (!(await confirm({ title: `Clear the layout for ${levelLabel(activeLevel)}?`, body: 'This only affects your local edits - nothing is deleted until you Save.', confirmLabel: 'Clear layout', destructive: true }))) return
     setSeats(() => [])
     setSelectedId(null)
   }
@@ -999,56 +1007,58 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         // (someone else edited the venue meanwhile, or the draft is
         // just stale from an earlier abandoned session).
         //
-        // Deferred via setTimeout(0) - Feedback 78cb970a ("seat-map view
-        // sometimes fails to render fully... resolves after... dismissing
-        // the confirmation dialog"). window.confirm() is synchronous and
-        // blocks the whole tab; firing it immediately after the several
-        // setState calls above gave React no chance to commit/paint the
-        // just-loaded seat data before the dialog froze everything, so
-        // the canvas could still be showing its pre-load state underneath
-        // when the dialog appeared. Deferring one tick lets the browser
-        // paint the loaded seats first; the dialog then appears on top of
-        // a fully-rendered canvas instead of a half-rendered one.
-        setTimeout(() => {
-          try {
-            const raw = localStorage.getItem(draftKey(id))
-            if (raw) {
-              const draft: SeatMapDraft = JSON.parse(raw)
-              const draftSeatCount = Object.values(draft.seatsByLevel || {}).reduce((n, arr) => n + arr.length, 0)
-              if (draftSeatCount > 0) {
-                const minsAgo = Math.max(0, Math.round((Date.now() - draft.savedAt) / 60000))
-                const levelCount = Object.keys(draft.seatsByLevel).length
-                const restore = window.confirm(
-                  `Found an unsaved local draft from ${minsAgo < 1 ? 'less than a minute' : `${minsAgo} minute${minsAgo === 1 ? '' : 's'}`} ago ` +
-                  `(${draftSeatCount} seat${draftSeatCount === 1 ? '' : 's'} across ${levelCount} level${levelCount === 1 ? '' : 's'}) - ` +
-                  `likely from an accidental refresh. Restore it?\n\nCancel discards the draft and keeps what's saved on the server.`
-                )
-                if (restore) {
-                  setSeatingMode(draft.seatingMode)
-                  setLevels(draft.levels)
-                  setActiveLevel(draft.activeLevel)
-                  setSeatsByLevel(draft.seatsByLevel)
-                  setGridConfigByLevel(draft.gridConfigByLevel)
-                  setZonePricesByLevel(draft.zonePricesByLevel)
-                  setBuilderPathByLevel(draft.builderPathByLevel)
-                  setMarkersByLevel(draft.markersByLevel || {})
-                } else {
-                  localStorage.removeItem(draftKey(id))
-                }
-              } else {
-                localStorage.removeItem(draftKey(id))
-              }
+        // BUG-2609-086 - in-app dialog (the native confirm() blocked the
+        // tab over a half-painted canvas, Feedback 78cb970a), the age in
+        // words, and no offer at all when the draft can't be an
+        // accidental refresh: frozen map, older than 24 h, or older than
+        // the server's last save (src/lib/seatmap-draft.ts). The draft is
+        // read now, before autosave (gated on hydratedRef) can overwrite
+        // it, and autosave stays off until the decision is made.
+        let draft: SeatMapDraft | null = null
+        try {
+          const raw = localStorage.getItem(draftKey(id))
+          if (raw) draft = JSON.parse(raw)
+        } catch {
+          // Corrupt/unparseable draft - dropped below.
+        }
+        const draftSeatCount = draft ? Object.values(draft.seatsByLevel || {}).reduce((n, arr) => n + arr.length, 0) : 0
+        const decision = draft
+          ? draftDecision(
+              { savedAt: draft.savedAt, seatCount: draftSeatCount },
+              { now: Date.now(), frozen: Boolean(data.seatMapFrozen), serverSavedAt: data.seatMapSavedAt ? Date.parse(data.seatMapSavedAt) : null },
+            )
+          : 'discard'
+        if (decision === 'discard') {
+          try { localStorage.removeItem(draftKey(id)) } catch {}
+          hydratedRef.current = true
+        } else if (draft) {
+          const d = draft
+          const levelCount = Object.keys(d.seatsByLevel).length
+          confirm({
+            title: 'Restore your unsaved draft?',
+            body: `You have an unsaved local draft from ${humaniseAge(Date.now() - d.savedAt)} (${countNoun(draftSeatCount, 'seat')} across ${countNoun(levelCount, 'level')}). Discard keeps what's saved on the server.`,
+            confirmLabel: 'Restore draft',
+            cancelLabel: 'Discard',
+          }).then((restore) => {
+            if (restore) {
+              setSeatingMode(d.seatingMode)
+              setLevels(d.levels)
+              setActiveLevel(d.activeLevel)
+              setSeatsByLevel(d.seatsByLevel)
+              setGridConfigByLevel(d.gridConfigByLevel)
+              setZonePricesByLevel(d.zonePricesByLevel)
+              setBuilderPathByLevel(d.builderPathByLevel)
+              setMarkersByLevel(d.markersByLevel || {})
+            } else {
+              try { localStorage.removeItem(draftKey(id)) } catch {}
             }
-          } catch {
-            // Corrupt/unparseable draft - drop it rather than throw.
-            localStorage.removeItem(draftKey(id))
-          }
-        }, 0)
+            hydratedRef.current = true
+          })
+        }
       } catch (err: any) {
         setError(err.message)
       } finally {
         setLoading(false)
-        hydratedRef.current = true
       }
     }
     if (session?.user) fetchSeatMap()
@@ -1284,7 +1294,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const removeUnderlay = async () => {
     if (seatMapFrozen || !underlay) return
-    if (!window.confirm(`Remove the reference image for ${levelLabel(activeLevel)}?`)) return
+    if (!(await confirm({ title: `Remove the reference image for ${levelLabel(activeLevel)}?`, confirmLabel: 'Remove image', destructive: true }))) return
     try {
       const res = await fetch(`/api/venues/${id}/underlay?level=${encodeURIComponent(activeLevel)}`, { method: 'DELETE' })
       if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Failed to remove') }
@@ -1302,7 +1312,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     // proceeding silently, but doesn't block Save outright, since other
     // levels may already have a real, finished layout worth saving.
     if (guidedPanelOpen && seats.length === 0) {
-      if (!window.confirm(`You haven't generated a layout for ${levelLabel(activeLevel)} yet - it will save with 0 seats. Continue?`)) {
+      if (!(await confirm({ title: `Save ${levelLabel(activeLevel)} with 0 seats?`, body: "You haven't generated a layout for this level yet.", confirmLabel: 'Save anyway' }))) {
         return
       }
     }
@@ -1384,9 +1394,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     const crossLevelDupes = Array.from(levelsByZoneName.entries()).filter(([, lvls]) => lvls.size > 1)
     if (crossLevelDupes.length > 0) {
       const names = crossLevelDupes.map(([name]) => name).join(', ')
-      if (!window.confirm(
-        `Section name "${names}" is used on more than one level. This is allowed, but audiences won't be able to tell the levels apart by section name alone - only proceed if that's intentional.\n\nContinue saving?`
-      )) {
+      if (!(await confirm({
+        title: 'Continue saving?',
+        body: `Section name "${names}" is used on more than one level. This is allowed, but audiences won't be able to tell the levels apart by section name alone - only proceed if that's intentional.`,
+        confirmLabel: 'Save',
+      }))) {
         return
       }
     }
@@ -1473,9 +1485,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               border: seatMapFrozen ? '1px solid var(--afa-amber-border)' : '1px dashed var(--afa-tint-20)',
             }}
           >
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: seatMapFrozen ? 'var(--afa-amber)' : 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)' }}>
+            {/* BUG-2609-086 - the text is one span, so at 412 it wraps as a
+                sentence under the lock icon instead of the flex row turning
+                "Seat map frozen" and the rest into two cramped columns. */}
+            <div data-afa-frozen-banner-text style={{ fontSize: 'var(--afa-text-ui)', color: seatMapFrozen ? 'var(--afa-amber)' : 'var(--afa-text-primary)', display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', flex: '1 1 240px', minWidth: 0 }}>
               {seatMapFrozen ? (
-                <><IconLockGlyph size={15} /> <strong>Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</>
+                <><span style={{ flexShrink: 0, display: 'inline-flex', paddingTop: 'var(--afa-space-2px)' }}><IconLockGlyph size={15} /></span><span><strong>Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</span></>
               ) : (
                 'Once this layout is finished, freeze it to lock it against accidental edits.'
               )}

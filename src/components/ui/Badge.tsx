@@ -92,8 +92,9 @@ export default function Badge({
   children: React.ReactNode
   style?: React.CSSProperties
 }) {
+  // BUG-2610-015 - data-afa-avoid: the floating chat button never rests over a badge.
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
+    <span data-afa-avoid style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
       {icon}
       {children}
     </span>

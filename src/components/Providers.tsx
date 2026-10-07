@@ -5,6 +5,7 @@ import SessionGuard from "@/components/SessionGuard"
 import IdleTimeoutGuard from "@/components/IdleTimeoutGuard"
 import NumberInputWheelGuard from "@/components/NumberInputWheelGuard"
 import { ToastProvider } from "@/components/Toast"
+import { ConfirmProvider } from "@/components/ConfirmDialog"
 import { LocaleProvider } from "@/lib/i18n/translate"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -14,7 +15,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <IdleTimeoutGuard />
       <NumberInputWheelGuard />
       <LocaleProvider>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <ConfirmProvider>{children}</ConfirmProvider>
+        </ToastProvider>
       </LocaleProvider>
     </SessionProvider>
   )

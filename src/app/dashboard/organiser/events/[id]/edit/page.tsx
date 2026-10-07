@@ -15,6 +15,7 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 import { countNoun } from '@/lib/i18n/plural'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 interface SeatSection {
   id?: string
@@ -151,6 +152,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [saving, setSaving] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -590,7 +592,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   }
 
   const removePanelist = async (panelistId: string) => {
-    if (!confirm('Remove this panelist?')) return
+    if (!(await confirm({ title: 'Remove this panelist?', confirmLabel: 'Remove', destructive: true }))) return
     try {
       const res = await fetch(`/api/events/${id}/panelists/${panelistId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to remove')
@@ -635,7 +637,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   }
 
   const removeCelebrity = async (celebrityId: string) => {
-    if (!confirm('Remove this celebrity invite?')) return
+    if (!(await confirm({ title: 'Remove this celebrity invite?', confirmLabel: 'Remove', destructive: true }))) return
     try {
       const res = await fetch(`/api/events/${id}/celebrities/${celebrityId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to remove')

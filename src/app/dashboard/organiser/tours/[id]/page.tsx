@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 const inputStyle = {
   width: '100%',
@@ -64,6 +65,7 @@ export default function TourDetailPage() {
   const params = useParams()
   const tourId = params?.id as string
   const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const [tour, setTour] = useState<TourDetail | null>(null)
   const [venues, setVenues] = useState<VenueOption[]>([])
@@ -211,7 +213,7 @@ export default function TourDetailPage() {
   }
 
   const handleCancelTour = async () => {
-    if (!confirm('Cancel this entire Tour? This cannot be undone.')) return
+    if (!(await confirm({ title: 'Cancel this entire Tour?', body: 'This cannot be undone.', confirmLabel: 'Cancel Tour', cancelLabel: 'Keep Tour', destructive: true }))) return
     try {
       const res = await fetch(`/api/tours/${tour.slug}`, {
         method: 'PATCH',

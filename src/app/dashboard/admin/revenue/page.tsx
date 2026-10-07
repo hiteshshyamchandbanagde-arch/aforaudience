@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
+import { timelineLabels } from '@/lib/timeline-label'
 
 interface OrganiserRow {
   organiserId: string
@@ -46,6 +47,17 @@ interface OverviewData {
 }
 
 const POLL_MS = 30000
+
+// Header and rows of the two "Top ..." tables: same horizontal padding and
+// border width, so the columns line up.
+const TABLE_HEAD_STYLE: React.CSSProperties = {
+  fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)',
+  padding: '0 var(--afa-space-3)', border: '1px solid transparent',
+}
+const TABLE_ROW_STYLE: React.CSSProperties = {
+  fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
+  border: '1px solid var(--afa-tint-06)',
+}
 
 const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
 
@@ -111,6 +123,7 @@ export default function AdminRevenueOverviewPage() {
 
   const { totals, organisers, events, timeline, currentFeeSettingRupees } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
+  const timelineLabelList = timelineLabels(timeline.map((t) => t.date))
 
   return (
     <>
@@ -118,6 +131,20 @@ export default function AdminRevenueOverviewPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          {/* BUG-2610-016 - header and rows share one column template (with a
+              gap), and numbers are right-aligned under their headers, so at
+              390 "Platform fee" and "Bookings" no longer run together and
+              the headers line up with the values. Ticket volume shows from
+              lg up only. */}
+          <style>{`
+            .afa-rev-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--afa-space-3); align-items: center; }
+            .afa-rev-num { text-align: right; }
+            .afa-rev-wide { display: none; }
+            @media (min-width: 1024px) {
+              .afa-rev-grid-4 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
+              .afa-rev-wide { display: block; }
+            }
+          `}</style>
           {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
           <div className="lg:hidden">
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
@@ -157,12 +184,18 @@ export default function AdminRevenueOverviewPage() {
             {timeline.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No confirmed bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
-                {timeline.map((t) => (
-                  <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
-                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-1)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                      {t.date.slice(5)}
+              // BUG-2610-016 - "Sep" / "Oct" read horizontally under each bar
+              // (the year only when the range spans years) and the ₹ value on
+              // top of it; it used to be a rotated "09" / "10" and no value.
+              <div data-afa-revenue-chart style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-2)', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
+                {timeline.map((t, i) => (
+                  <div key={t.date} data-afa-revenue-bar title={`${timelineLabelList[i]}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '52px', flexShrink: 0 }}>
+                    <span data-afa-bar-value style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-primary)', fontWeight: 600, marginBottom: 'var(--afa-space-1)', whiteSpace: 'nowrap' }}>
+                      {money(t.revenue)}
+                    </span>
+                    <div style={{ width: '24px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
+                    <span data-afa-bar-label style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-1)', whiteSpace: 'nowrap' }}>
+                      {timelineLabelList[i]}
                     </span>
                   </div>
                 ))}
@@ -175,26 +208,19 @@ export default function AdminRevenueOverviewPage() {
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
-                <div className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]" style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 var(--afa-space-3)' }}>
+                <div className="afa-rev-grid afa-rev-grid-4" style={TABLE_HEAD_STYLE}>
                   <span>Organiser</span>
-                  <span>Platform Fee</span>
-                  <span className="hidden lg:inline">Ticket Volume</span>
-                  <span>Bookings</span>
+                  <span className="afa-rev-num">Platform fee</span>
+                  <span className="afa-rev-num afa-rev-wide">Ticket volume</span>
+                  {/* BUG-2610-015 - data-afa-avoid: the chat button never rests on the last column. */}
+                  <span className="afa-rev-num" data-afa-avoid>Bookings</span>
                 </div>
                 {organisers.map((o) => (
-                  <div
-                    key={o.organiserId}
-                    className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]"
-                    style={{
-                      alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
-                      border: '1px solid var(--afa-tint-06)',
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>{o.orgName}</span>
-                    <span>{money(o.platformFee)}</span>
-                    <span className="hidden lg:inline">{money(o.ticketSubtotal)}</span>
-                    <span>{o.bookings}</span>
+                  <div key={o.organiserId} className="afa-rev-grid afa-rev-grid-4" style={TABLE_ROW_STYLE}>
+                    <span style={{ fontWeight: 600, minWidth: 0, overflowWrap: 'anywhere' }}>{o.orgName}</span>
+                    <span className="afa-rev-num">{money(o.platformFee)}</span>
+                    <span className="afa-rev-num afa-rev-wide">{money(o.ticketSubtotal)}</span>
+                    <span className="afa-rev-num" data-afa-avoid>{o.bookings}</span>
                   </div>
                 ))}
               </div>
@@ -206,23 +232,16 @@ export default function AdminRevenueOverviewPage() {
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 var(--afa-space-3)' }}>
+                <div className="afa-rev-grid" style={TABLE_HEAD_STYLE}>
                   <span>Event</span>
-                  <span>Platform Fee</span>
-                  <span>Bookings</span>
+                  <span className="afa-rev-num">Platform fee</span>
+                  <span className="afa-rev-num" data-afa-avoid>Bookings</span>
                 </div>
                 {events.map((e) => (
-                  <div
-                    key={e.eventId}
-                    style={{
-                      display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
-                      border: '1px solid var(--afa-tint-06)',
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>{e.title}</span>
-                    <span>{money(e.platformFee)}</span>
-                    <span>{e.bookings}</span>
+                  <div key={e.eventId} className="afa-rev-grid" style={TABLE_ROW_STYLE}>
+                    <span style={{ fontWeight: 600, minWidth: 0, overflowWrap: 'anywhere' }}>{e.title}</span>
+                    <span className="afa-rev-num">{money(e.platformFee)}</span>
+                    <span className="afa-rev-num" data-afa-avoid>{e.bookings}</span>
                   </div>
                 ))}
               </div>

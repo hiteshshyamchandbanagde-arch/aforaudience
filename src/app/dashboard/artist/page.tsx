@@ -11,6 +11,7 @@ import { fillSolidTint, FILL_SOLID_TINT, STATUS_TONE } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 interface Application {
   id: string
@@ -113,6 +114,7 @@ export default function ArtistDashboard() {
 
   const [profile, setProfile] = useState<ArtistProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const confirm = useConfirm()
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<string | null>(null)
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
@@ -207,7 +209,7 @@ export default function ArtistDashboard() {
   }
 
   const cancelPerformance = async (performanceId: string) => {
-    if (!window.confirm("Cancel this performance? If it's a Buy-in slot, your payment is recorded as refunded.")) return
+    if (!(await confirm({ title: 'Cancel this performance?', body: "If it's a Buy-in slot, your payment is recorded as refunded.", confirmLabel: 'Cancel performance', cancelLabel: 'Keep it', destructive: true }))) return
     setCancelling(performanceId)
     try {
       const res = await fetch(`/api/performances/${performanceId}/cancel`, { method: 'POST' })

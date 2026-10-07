@@ -138,7 +138,9 @@ export default function HomeHeader() {
   const initialsLabel = user ? initials(user.displayName || user.name || user.email || "?") : null
 
   return (
-    <header className="home-header-root" style={{ position: "absolute", insetInline: 0, top: "var(--nudge-stack-height, 0px)", zIndex: 100 }}>
+    // BUG-2610-017 - top 0 of the home page's <main> (position: relative in
+    // page.tsx), which starts below the nudge banners: no height variable.
+    <header className="home-header-root" style={{ position: "absolute", insetInline: 0, top: 0, zIndex: 100 }}>
       <style>{`
         .home-header-desktop { display: flex; }
         .home-header-root { display: block; }

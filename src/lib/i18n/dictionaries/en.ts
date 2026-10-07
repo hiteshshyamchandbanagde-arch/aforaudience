@@ -14,6 +14,10 @@ const en = {
     nounOrganisers: "organisers",
     nounVenueOwners: "venue owners",
     byEventDate: "by event date",
+    // BUG-2609-086 - default buttons of the shared in-app confirm dialog.
+    dialogConfirm: "Confirm",
+    dialogCancel: "Cancel",
+    dialogOk: "OK",
   },
   nav: {
     events: "Events",
@@ -378,8 +382,15 @@ const en = {
   // BUG-2609-029 - was hard-coded English in PhoneVerifyNudge.tsx.
   phoneVerifyNudge: {
     ariaLabel: "Verify your phone",
-    message: "Verify your phone number to book tickets or venues.",
-    verifyNow: "Verify now",
+    message: "Verify your phone to book",
+    verifyNow: "Verify",
+  },
+  // BUG-2610-017 - DisplayNameNudge copy (was hard-coded English), one line at 390.
+  displayNameNudge: {
+    ariaLabel: "Add your display name",
+    message: "Add your name for your tickets",
+    addName: "Add name",
+    dismiss: "Dismiss",
   },
   welcomeSequence: {
     step1Heading: "Welcome to AforAudience",
@@ -700,7 +711,6 @@ const en = {
     cancelTicketButton: "Cancel ticket",
     refundedNoteTemplate: "₹{amount} refunded to your original payment method.",
     cancelledNoRefund: "Cancelled - no amount was refunded.",
-    cancelConfirmDialogTemplate: "Cancel this ticket?\n\n{label}\n\nThis can't be undone.",
     eventAlreadyHappenedCancelError: "This event has already happened - it can't be cancelled.",
     failedToCancelFallback: "Failed to cancel",
     refundEventHappened: "This event has already happened",
@@ -708,6 +718,17 @@ const en = {
     refund14PlusTemplate: "₹{amount} refund (14+ days out)",
     refund50PercentTemplate: "₹{amount} refund - 50% (7-14 days out)",
     refundLessThan7Days: "No refund - less than 7 days out",
+    // BUG-2609-086 - in-app cancel sheet: paid / refund / non-refundable fee as separate lines.
+    cancelSheetTitle: "Cancel this ticket?",
+    cancelSheetPaidLabel: "Paid",
+    cancelSheetRefundLabel: "Refund",
+    cancelSheetFeeLineTemplate: "Booking fee ₹{amount}, not refundable",
+    cancelSheetRule14Plus: "14+ days before the show",
+    cancelSheetRule50: "50%, 7-14 days before the show",
+    cancelSheetRuleUnder7: "Less than 7 days before the show",
+    cancelSheetNoUndo: "This can't be undone.",
+    cancelSheetKeep: "Keep ticket",
+    cancelSheetLoadFailed: "Couldn't check your refund. Please try again.",
     // FEAT-2608-006 - date-based sections so tickets aren't one flat list.
     sectionToday: "Today",
     sectionThisWeekend: "This weekend",

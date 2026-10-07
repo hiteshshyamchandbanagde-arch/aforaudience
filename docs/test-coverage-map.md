@@ -65,6 +65,7 @@ e2e queue), never in a local or autopilot run.
 | GEN-2609-004 | tested + HUMAN | `smoke.spec.ts` › `[GEN-2609-004] Jaipur Mic Gala 100 event detail page loads and offers seat selection` | Asserts the seat picker is its own `/events/<id>/seats` route. HUMAN: the Discover/EventDetail restyle |
 | GEN-2609-006 | tested + HUMAN | `ticket-qr.spec.ts` › `[GEN-2609-006] My Tickets: each confirmed card's QR encodes its bookingId; each status keeps its actions` | Batch 2 (4 Oct). Atul's 10 confirmed cards: the QR image's pixels, sampled per module, are exactly the symbol for that card's bookingId. CONFIRMED / PENDING (served unexpired in the browser) / EXPIRED / CANCELLED actions. HUMAN: poster-card look |
 | GEN-2609-007 | tested | `saved-events.spec.ts` › `[GEN-2609-007] save an event with the heart, see it on /saved, unsave it there` | Batch 2 (4 Oct). Atul, 390/1440; his saved list is put back in `finally` |
+| GEN-2609-007 | tested | `seed-health.spec.ts` › `[GEN-2609-007] seed health: each persona's saved city is the one the suite expects` | bundle-2-amend (7 Oct). Atul's saved city changed by hand on QA (Mumbai) turned saved-events red on every branch; global-setup puts it back (`helpers/persona-cities.ts`), this checks it first |
 | GEN-2609-008 | tested + HUMAN | `profile-hub.mobile.spec.ts` › `[GEN-2609-008] profile hub at 390: Create and Money & account rows; Fee breakdown opens the fee sheet` | Batch 2 (4 Oct). The fee sheet's focus trap reuses 065's check (`helpers/focus.ts`). HUMAN: look |
 | GEN-2609-010 | tested | `seat-legend.spec.ts` › `[GEN-2609-010] Jaipur Mic Gala 100 seat map shows a price-tier legend matching its tiers` | |
 | GEN-2609-012 | tested | `discover-carousels.mobile.spec.ts` › `[GEN-2609-012] Discover: every carousel on QA holds at least 3 events`; `[GEN-2609-012] Discover: a row under 3 events is not drawn; all-sparse falls back to the list` | |
@@ -101,3 +102,12 @@ BUG-2610-009 (tested, above), plus two checks with no ticket ID:
 `seat-total.spec.ts` (a paid event shows "—", not "Free", before a seat
 is chosen) and `ticket-actions.spec.ts` (My Tickets' three actions on one
 row, each label at most 2 lines).
+
+## UI/UX bundle 2 (7 Oct, `fix/uiux-bundle-2`)
+
+| Ticket | Status | Spec › test title | Note |
+|---|---|---|---|
+| BUG-2609-086 | tested + HUMAN | `confirm-dialog.spec.ts` › `[BUG-2609-086] Cancel ticket opens the in-app sheet with paid, refund and the non-refundable fee` (@needs-db fixture booking); 4 Seat Map Builder tests (stale draft dropped, fresh draft offered with age in words, frozen map never offers + Unfreeze dialog, 412 frozen banner stacks); units `scripts/refund-policy.test.ts`, `scripts/seatmap-draft.test.ts` | HUMAN: the cancel sheet on a real phone |
+| BUG-2610-017 | tested + HUMAN | `nudge-banners.spec.ts` › `[BUG-2610-017] phone-verify banner: one line, solid neutral surface, short copy, orange Verify`; `… on scroll the banner goes and the top bar sits at top 0 with nothing bleeding through`; `… the offline banner stays pinned while the page scrolls` (@needs-db throwaway unverified account) | HUMAN: banner look on a real phone. `phone-verify-nudge-i18n.spec.ts` literals follow the new copy |
+| BUG-2610-015 | tested | `chat-bubble.mobile.spec.ts` › `[BUG-2610-015] my tickets status pills / admin users Suspend / admin revenue last column: the chat button never rests on them at 390` and `… at 360` (admin pages @needs-db, temp admin) | Counts only the chat button: Vercel's preview toolbar rests mid-screen too |
+| BUG-2610-016 | tested | `admin-revenue.spec.ts` › `[BUG-2610-016] Top organisers: headers keep apart and line up with their values`; `… revenue chart: month names read horizontally, a ₹ value on each bar` (390 + 1440, @needs-db temp admin); unit `scripts/timeline-label.test.ts` | Baseline: header row only (values change with QA bookings) |

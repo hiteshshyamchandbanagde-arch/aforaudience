@@ -1,5 +1,7 @@
 import { test, expect } from "./helpers/test";
 import { CLOCK_FORWARD_DAYS, HRITHIK_ARTIST_ID, HRITHIK_UPCOMING_EVENT_ID, UPCOMING_FIXTURES } from "./helpers/upcoming-fixtures";
+import { PERSONA_CITIES } from "./helpers/persona-cities";
+import { authFile } from "./helpers/personas";
 
 /**
  * BUG-2610-013 - the QA seed's date assumptions, checked before anything
@@ -58,5 +60,27 @@ test("[BUG-2610-013] seed health: every event the suite needs upcoming is upcomi
     problems,
     "The QA seed's upcoming-event assumptions do not hold, so specs that need an upcoming event will fail. " +
       "global-setup.ts moves these forward when E2E_DATABASE_URL is set; otherwise rerun `npm run db:seed:qa`. Problems"
+  ).toEqual([]);
+});
+
+test("[GEN-2609-007] seed health: each persona's saved city is the one the suite expects", async ({ playwright, baseURL }) => {
+  const problems: string[] = [];
+  for (const p of PERSONA_CITIES) {
+    const ctx = await playwright.request.newContext({ baseURL, storageState: authFile(p.persona) });
+    try {
+      const res = await ctx.get("/api/user/location/");
+      expect(res.ok(), `GET /api/user/location/ as ${p.label} answered HTTP ${res.status()}`).toBeTruthy();
+      const loc = (await res.json()) as { city: string | null; source: string };
+      if (loc.source !== "profile" || loc.city !== p.city) {
+        problems.push(`${p.label}'s saved city is ${loc.source === "profile" ? loc.city : "unset"}, not ${p.city} (used by ${p.usedBy})`);
+      }
+    } finally {
+      await ctx.dispose();
+    }
+  }
+  expect(
+    problems,
+    "A persona's saved city was changed on QA outside the suite. global-setup.ts puts it back when E2E_DATABASE_URL is set " +
+      "(helpers/persona-cities.ts); otherwise set it back in the app, signed in as that persona. Problems"
   ).toEqual([]);
 });

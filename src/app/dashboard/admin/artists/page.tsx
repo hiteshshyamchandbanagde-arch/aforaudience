@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 import SearchInputBox from '@/components/SearchInputBox'
 import Button from '@/components/ui/Button'
 
@@ -63,6 +64,7 @@ export default function AdminArtistsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [search, setSearch] = useState('')
   const [roster, setRoster] = useState<ArtistRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -112,10 +114,10 @@ export default function AdminArtistsPage() {
   const handleHeadlinerToggle = async (artist: ArtistRow) => {
     const granting = !artist.isSceneStatusHeadliner
     if (granting) {
-      const ok = confirm(`Grant ${artist.name} Headliner status? This is meant to be earned deliberately, not automatic.`)
+      const ok = await confirm({ title: `Grant ${artist.name} Headliner status?`, body: 'This is meant to be earned deliberately, not automatic.', confirmLabel: 'Grant Headliner' })
       if (!ok) return
     } else {
-      const ok = confirm(`Remove ${artist.name}'s Headliner status?`)
+      const ok = await confirm({ title: `Remove ${artist.name}'s Headliner status?`, confirmLabel: 'Remove', destructive: true })
       if (!ok) return
     }
     setActioningId(artist.id)

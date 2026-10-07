@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Button from '@/components/ui/Button';
+import { useLocale } from '@/lib/i18n/translate';
+import { NUDGE_ROW_STYLE, NUDGE_TEXT_STYLE } from './PhoneVerifyNudge';
 
 /**
  * "Add your display name" nudge for existing users whose `displayName`
@@ -50,6 +52,7 @@ export default function DisplayNameNudge() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [dismissed, setDismissed] = useState(false);
+  const { t } = useLocale();
 
   // Read the dismissal timestamp on mount. State default is `false`
   // (i.e. "assume not dismissed"); we only flip it to `true` if a
@@ -93,52 +96,36 @@ export default function DisplayNameNudge() {
     }
   };
 
+  // BUG-2610-017 - same one-line neutral row as PhoneVerifyNudge.
   return (
-    <div
-      role="status"
-      aria-label="Add your display name"
-      style={{
-        background: 'var(--afa-amber-tint)',
-        color: 'var(--afa-text-primary)',
-        borderBottom: '1px solid var(--afa-amber)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'var(--afa-space-3)',
-        padding: 'var(--afa-space-10px) var(--afa-space-4)',
-        fontSize: 'var(--afa-text-body)',
-        lineHeight: 1.4,
-      }}
-    >
-      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-lead)', lineHeight: 1 }}>
+    <div role="status" aria-label={t.displayNameNudge.ariaLabel} data-afa-nudge="display-name" style={NUDGE_ROW_STYLE}>
+      <span aria-hidden="true" style={{ flexShrink: 0, lineHeight: 1 }}>
         ✨
       </span>
-      <span style={{ flex: 1, minWidth: 0 }}>
-        Add your name so tickets say your name, not your username.
-      </span>
+      <span style={NUDGE_TEXT_STYLE}>{t.displayNameNudge.message}</span>
       <Button
         variant="primary"
         size="pill-sm"
         fullWidth={false}
         href="/profile"
         onClick={() => {
-          // Dismiss on click-through too — user is going to fix it now,
-          // so we don't need to keep the banner around after they return.
           onDismiss();
         }}
-        style={{ whiteSpace: 'nowrap' }}
+        style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
       >
-        Add name
+        {t.displayNameNudge.addName}
       </Button>
       <Button
         variant="icon"
         onClick={onDismiss}
-        aria-label="Dismiss"
+        aria-label={t.displayNameNudge.dismiss}
         style={{
           color: 'var(--afa-text-primary)',
           padding: 'var(--afa-space-1) var(--afa-space-2)',
           fontSize: 'var(--afa-text-lead)',
           opacity: 0.6,
           lineHeight: 1,
+          flexShrink: 0,
         }}
       >
         ×

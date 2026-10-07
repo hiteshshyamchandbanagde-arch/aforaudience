@@ -306,7 +306,8 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       className="sitenav-root"
       style={{
         position: isHome ? "fixed" : "sticky",
-        top: "var(--nudge-stack-height, 0px)",
+        // BUG-2610-017 - pinned at 0; the nudge banners above scroll away.
+        top: 0,
         left: isHome ? 0 : undefined,
         right: isHome ? 0 : undefined,
         zIndex: 100,

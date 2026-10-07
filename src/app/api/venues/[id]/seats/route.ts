@@ -16,6 +16,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       select: {
         seatingMode: true,
         seatMapFrozen: true,
+        seatMapSavedAt: true,
         seats: {
           select: { id: true, tierLabel: true, level: true, row: true, number: true, x: true, y: true },
         },
@@ -220,6 +221,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         where: { id },
         data: {
           seatingMode,
+          seatMapSavedAt: new Date(),
           // Capacity was only ever a placeholder number entered at
           // creation for NUMBERED venues (no real seats existed yet).
           // Once a real seat map is saved, capacity should reflect it -

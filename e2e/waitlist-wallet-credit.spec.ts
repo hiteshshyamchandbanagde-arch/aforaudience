@@ -128,10 +128,6 @@ test.describe("@needs-db waitlist and wallet credit", () => {
 
       await test.step("Artist A cancels - B should be auto-promoted off the waitlist", async () => {
         await gotoDashboard(artistAPage, "/dashboard/artist");
-        // cancelPerformance() gates on window.confirm() - the handler must
-        // be registered before the click that triggers it, or Playwright's
-        // default (auto-dismiss) fires instead and nothing actually cancels.
-        artistAPage.once("dialog", (dialog) => dialog.accept());
         // The upcoming-performance row: a block holding the event title and
         // a Cancel button and no section heading. (The title also appears
         // under "My Applications", and the artist has other slots with
@@ -144,6 +140,12 @@ test.describe("@needs-db waitlist and wallet credit", () => {
           .last();
         await expect(slot.getByRole("button")).toHaveCount(1);
         await slot.getByRole("button", { name: /^cancel$/i }).click();
+        // cancelPerformance() asks in the in-app dialog (BUG-2609-086
+        // replaced its window.confirm()); nothing cancels until it is
+        // confirmed there.
+        const confirmCancel = artistAPage.getByRole("dialog", { name: "Cancel this performance?" });
+        await confirmCancel.getByRole("button", { name: "Cancel performance" }).click();
+        await expect(confirmCancel).toBeHidden();
         // The page refetches after a successful cancel and the slot leaves
         // the upcoming list.
         await expect(slot).toBeHidden(AFTER_WRITE);

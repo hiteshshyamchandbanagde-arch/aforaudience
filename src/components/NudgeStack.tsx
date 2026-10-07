@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import OfflineBanner from './OfflineBanner';
@@ -10,27 +9,23 @@ import NotificationOptIn from './NotificationOptIn';
 import { isOnboardingSequenceDue } from '@/lib/onboarding';
 
 /**
- * Wraps the top-of-page nudge banners (phone verify, display name,
- * notification opt-in) in a single sticky stack.
+ * The top-of-page banners: offline state, phone verify, display name,
+ * notification opt-in.
  *
- * Previously each of the three banners independently declared
- * `position: sticky; top: 0`, and SiteNav (z-index 100) did the same.
- * Once scrolled far enough for SiteNav's sticky to engage, it visually
- * covered whichever banner was showing (SiteNav has the higher
- * z-index) - so e.g. the "Verify now" CTA disappeared entirely until
- * the user scrolled back to the very top of the page. Reported by
- * Hitesh via real QA testing (Nita's venue-publish flow), 19 Jul.
- *
- * Fix: only this outer wrapper is sticky now. The individual banners
- * render as normal-flow children inside it, so if more than one is
- * ever visible at once they stack vertically instead of overlapping.
- * The wrapper measures its own rendered height and publishes it as
- * the --nudge-stack-height CSS variable on the root element, which
- * SiteNav reads to offset its own sticky `top` - so nav docks *below*
- * the banner stack instead of competing for the same top:0 slot.
+ * BUG-2610-017 (decision 7 Oct): the to-do banners scroll away with the
+ * page. Only the top bar (MobileTopBar / SiteNav) is pinned, at top 0.
+ * This stack used to be sticky above it and publish its height as
+ * --nudge-stack-height for the top bar's own sticky offset; with no
+ * background of its own, scrolled content showed through the
+ * translucent banner tints above the top bar. Now:
+ *   - PhoneVerifyNudge / DisplayNameNudge / NotificationOptIn sit in
+ *     normal flow on a solid page-surface base, so nothing shows through;
+ *   - OfflineBanner alone stays pinned (live connection state), above
+ *     the top bar (z-index 101) while it shows.
+ * The booking gate is unchanged: Book / venue request still redirect to
+ * /verify-phone.
  */
 export default function NudgeStack() {
-  const ref = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
   const pathname = usePathname();
 
@@ -43,31 +38,18 @@ export default function NudgeStack() {
     status === 'authenticated' &&
     isOnboardingSequenceDue((session?.user as any)?.onboardedAt, pathname);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const update = () => {
-      document.documentElement.style.setProperty('--nudge-stack-height', `${el.offsetHeight}px`);
-    };
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-      document.documentElement.style.setProperty('--nudge-stack-height', '0px');
-    };
-  }, []);
+  if (suppressed) return null;
 
   return (
-    <div ref={ref} style={{ position: 'sticky', top: 0, zIndex: 100 }}>
-      {!suppressed && (
-        <>
-          <OfflineBanner />
-          <PhoneVerifyNudge />
-          <DisplayNameNudge />
-          <NotificationOptIn />
-        </>
-      )}
-    </div>
+    <>
+      <div data-afa-offline-pin style={{ position: 'sticky', top: 0, zIndex: 101 }}>
+        <OfflineBanner />
+      </div>
+      <div data-afa-nudge-stack style={{ position: 'relative', background: 'var(--afa-surface-page)' }}>
+        <PhoneVerifyNudge />
+        <DisplayNameNudge />
+        <NotificationOptIn />
+      </div>
+    </>
   );
 }
