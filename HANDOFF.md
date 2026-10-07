@@ -5353,3 +5353,12 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - Next queue: UI/UX bundle 2 = BUG-2609-086 (in-app cancel sheet with fee lines), BUG-2610-015, BUG-2610-016, GEN-2610-001 contrast follow-ups, GEN-2609-002 auth scrollbar. Then GEN-2608-071/073 imagery (Hitesh design call).
 - Hitesh pending: billing keys (Razorpay test + Google Places; Vercel Preview + .env.local; not in chat); decision on saving language to account (chat recommends yes); revoke old PATs.
 - BUG-2610-010 nightly: fired 5 Oct and 6 Oct; resolve if the 7 Oct nightly fires.
+
+## Part 52 — 7 Oct (chat), qa @ ed314a9
+- MERGED #741 (ed314a9) dispatch M. Checks on pinned 552bc14: e2e-preview, design-tokens, Vercel green. Vercel READY; runtime errors 30 min: only the pre-existing pg DeprecationWarning (/api/bookings, since Jul).
+- Feedback -> BUILD_COMPLETE: BUG-2610-002, BUG-2609-079/070/073, BUG-2608-091, BUG-2609-066 (guard), BUG-2608-040 (guard, not reproducing). RESOLVED after nightly + phone look. GEN-2610-005 -> IN_BUILD.
+- Review nit (not blocking): withListingPrice sets priceFromTiers only when ticketPrice is null; an event with BOTH a flat price and tiers shows min tier as "₹X" without "From".
+- Phone-look list sent to Hitesh (M).
+- Nightly 7 Oct: not fired yet at 08:40 IST (schedule has been firing ~6-10 h late). BUG-2610-010 / GEN-2609-120 / BUG-2609-029 wait on it.
+- N run 37559829714 still in progress (2 commits on feat/use-my-location-n).
+- Bundle 2 scope per Hitesh: BUG-2609-086, BUG-2610-015, BUG-2610-016, GEN-2609-002 (GEN-2610-001 contrast follow-ups dropped from this bundle unless he says otherwise).
