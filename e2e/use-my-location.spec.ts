@@ -69,7 +69,8 @@ async function settledChipText(page: Page, isMobile: boolean): Promise<string> {
       await expect(chipScope(page, isMobile)).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
   }
-  await expect(chip(page, isMobile)).not.toHaveText(/^…/);
+  // Desktop puts a 📍 in front, so the placeholder there reads "📍…▾".
+  await expect(chip(page, isMobile)).not.toHaveText(/^(📍)?\s*…/);
   return ((await chip(page, isMobile).textContent()) ?? "").trim();
 }
 
