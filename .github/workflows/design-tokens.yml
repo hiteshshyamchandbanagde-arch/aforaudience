@@ -75,6 +75,9 @@ jobs:
       - name: Tab-bar route self-tests
         run: npx --yes tsx@^4.23.1 scripts/tab-bar-routes.test.ts
 
+      - name: All TypeScript self-tests (scripts/*.test.ts, GEN-2610-004)
+        run: for f in scripts/*.test.ts; do echo "== $f"; npx --yes tsx@^4.23.1 "$f" || exit 1; done
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}
