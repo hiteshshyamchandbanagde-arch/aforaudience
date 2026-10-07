@@ -1050,6 +1050,34 @@ async function seedDemoPersonas(
     })
   }
 
+  // GEN-2610-005 - QA's one Mumbai venue, so "Use my location" in Mumbai
+  // has a city with shows to land on (the picker lists only cities with
+  // an approved venue). Same row chat inserted into QA by hand on 7 Oct;
+  // here so a reseed keeps it. lat/lng set: the nearest-city check uses
+  // them when the city has no entry in src/lib/city-centroids.ts.
+  await prisma.venue.upsert({
+    where: { id: "qa-mumbai-venue-0001" },
+    update: { city: "Mumbai", state: "Maharashtra", country: "India", lat: 19.0544, lng: 72.8344, isApproved: true },
+    create: {
+      id: "qa-mumbai-venue-0001",
+      ownerId: vinayakRoleId,
+      name: "Bandra Basement Stage",
+      address: "Hill Road, Bandra West",
+      city: "Mumbai",
+      state: "Maharashtra",
+      country: "India",
+      lat: 19.0544,
+      lng: 72.8344,
+      capacity: 80,
+      photos: [],
+      facilities: ["Sound System", "Bar", "Air Conditioning"],
+      isApproved: true,
+      rateType: RateType.HOURLY,
+      hourlyRate: 2500,
+      seatingMode: "GENERAL_ADMISSION",
+    },
+  })
+
   // -- Omkar — Organiser Full: 10 events across Vinayak's 6 venues ---------
   const omkarId = "qa-demo-org-full"
   const omkarRoleId = "qa-demo-org-full-role"
