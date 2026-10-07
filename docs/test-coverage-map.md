@@ -41,6 +41,13 @@ e2e queue), never in a local or autopilot run.
 | GEN-2609-118 | tested | `design-system-goal.spec.ts` › `@needs-db [GEN-2609-118] [GEN-2609-119] [GEN-2609-121] an admin's token save reaches every visitor …`; `colour-rules.spec.ts` › `[GEN-2609-118] checkout: the only orange element is the Pay button; 'See fee breakdown' is amber`, `[GEN-2609-118] booking confirmed ('You're going'): the count circle is amber, not orange; only View My Ticket is orange` | Dispatch C (4 Oct): the sweep's remaining look-and-feel check is now these colour assertions (390/1440). Orange = an action you tap, only |
 | GEN-2609-119 | tested | `design-system-goal.spec.ts` (same test) | Manifest, theme-color and share poster follow their tokens. The ticket PDF and emails have no test-safe endpoint (the spec says so) |
 | GEN-2609-121 | tested | `design-system-goal.spec.ts` (same test); `colour-rules.spec.ts` › `[GEN-2609-121] artist profile (Hrithik): each show's ticket link is the orange primary; '+ Follow' is an outline; prev/next arrows are not filled`, `[GEN-2609-121] a message thread's Send button is the orange primary` | Dispatch C (4 Oct): the two parts Hitesh had not seen (artist profile, Messages Send) are now tests |
+| BUG-2609-066 | tested | `events-city-empty.spec.ts` › `[BUG-2609-066] a city with no events says 'No events in {city}' with Show all cities, never 'No events published yet'` | already fixed by #722; guard |
+| BUG-2610-002 | tested | `artist-events-load.spec.ts` › `[BUG-2610-002] a failed load shows an error with Retry…`; `[BUG-2610-002] an All Cities load that answers after the city's load never replaces the city's list` | |
+| BUG-2609-079 | tested | `event-card-price.spec.ts` › `[BUG-2609-079] …` (3 tests); `scripts/booking-tiers.test.ts` (withListingPrice) | |
+| BUG-2609-070 | tested | `venue-sales-empty.spec.ts` › `[BUG-2609-070] By venue with no revenue anywhere shows the empty state…`; `…with revenue still draws the bar chart` | |
+| BUG-2609-073 | tested | `flex-requests-badge.spec.ts` (@needs-db) › `[BUG-2609-073] Omkar's items count only requests waiting on him…`; `[BUG-2609-073] Vinayak declines the request and his badge drops at once…`; `scripts/flex-requests.test.ts` | |
+| BUG-2608-091 | tested | `venue-past-requests.spec.ts` › `[BUG-2608-091] Past Requests rows show the booking date, and the end date when multi-day` | |
+| BUG-2608-040 | tested | `venues-hindi-seats.spec.ts` › `[BUG-2608-040] /venues in Hindi: every card's seat count says सीटें…` | does not reproduce; guard |
 
 ## IN_TEST
 

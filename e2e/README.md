@@ -120,3 +120,10 @@ stay in QA.
 | `profile-hub.mobile.spec.ts` | Atul | GEN-2609-008 Profile hub rows at 390; fee sheet traps focus |
 | `ticket-qr.spec.ts` | Atul | GEN-2609-006 each confirmed card's QR is its bookingId; actions per status |
 | `artist-tour-stop.spec.ts` | Hrithik | FEAT-2608-047 tour stop abroad reaches the public profile; removed (restored) |
+| `events-city-empty.spec.ts` | guest | BUG-2609-066 empty city says "No events in {city}" + Show all cities |
+| `artist-events-load.spec.ts` | Hrithik | BUG-2610-002 artist Browse Events: failed load shows Retry; a late All Cities load never wins |
+| `event-card-price.spec.ts` | guest, Hrithik | BUG-2609-079 tiered event cards read "From ₹<cheapest tier>"; flat prices stay plain |
+| `venue-sales-empty.spec.ts` | Vinayak | BUG-2609-070 By venue empty state when no venue has revenue; table stays |
+| `flex-requests-badge.spec.ts` `@needs-db` | Omkar, Vinayak | BUG-2609-073 Flexible Requests badge per role, drops after decline without reload (own request, deleted after) |
+| `venue-past-requests.spec.ts` | Vinayak | BUG-2608-091 Past Requests rows show the date (and end date) |
+| `venues-hindi-seats.spec.ts` | guest | BUG-2608-040 every /venues seat count is Hindi to the end of the list |
