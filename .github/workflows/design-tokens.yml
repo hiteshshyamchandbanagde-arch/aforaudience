@@ -27,7 +27,7 @@ on:
 jobs:
   design-tokens:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,6 +36,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Rule-engine self-tests
         run: node scripts/check-design-tokens.test.js
@@ -74,6 +75,11 @@ jobs:
       # that renders DashboardShell has no mapping.
       - name: Tab-bar route self-tests
         run: npx --yes tsx@^4.23.1 scripts/tab-bar-routes.test.ts
+
+      # Some self-tests import app code (pdf-lib, resend, the Prisma client),
+      # so install dependencies first; postinstall runs prisma generate.
+      - name: Install dependencies (for self-tests that import app code)
+        run: npm ci
 
       - name: All TypeScript self-tests (scripts/*.test.ts, GEN-2610-004)
         run: for f in scripts/*.test.ts; do echo "== $f"; npx --yes tsx@^4.23.1 "$f" || exit 1; done
