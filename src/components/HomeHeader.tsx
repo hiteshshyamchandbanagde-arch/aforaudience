@@ -249,7 +249,7 @@ export default function HomeHeader() {
                   ))}
                 </div>
                 <div style={{ padding: "0 var(--afa-space-3) var(--afa-space-1)" }}>
-                  <LocationChip />
+                  <LocationChip inPanel />
                 </div>
                 {user && (
                   <>

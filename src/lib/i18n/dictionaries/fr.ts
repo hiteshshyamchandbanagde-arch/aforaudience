@@ -67,6 +67,14 @@ const fr: Dictionary = {
   location: {
     searchCityPlaceholder: "Rechercher une ville...",
     noMatchingCities: "Aucune ville correspondante",
+    useMyLocation: "Utiliser ma position",
+    locating: "Localisation en cours…",
+    locationUnavailable: "Position introuvable. Votre ville ne change pas.",
+    noShowsNearby: "Pas encore de spectacles près de vous. Le plus proche : {city}, {km} km",
+    switchToCity: "Passer à {city}",
+    travelPrompt: "Vous semblez être à {city}. Changer ?",
+    switchButton: "Changer",
+    notNow: "Plus tard",
   },
   eventTypes: {
     OPEN_MIC: "Scène ouverte",

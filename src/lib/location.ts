@@ -34,6 +34,11 @@ export interface ResolvedLocation {
   // 'detected'  - first-touch guess from Vercel's edge geo headers this request
   // 'none'      - nothing available (e.g. local dev with no geo headers, first-ever guest hit)
   source: 'profile' | 'cookie' | 'detected' | 'none'
+  // GEN-2610-005 - true when the city is a deliberate choice (the account
+  // city, or a city picked in LocationChip and kept in a manual cookie).
+  // "Use my location" never replaces a saved city without asking; an IP
+  // guess (saved:false) it may replace straight away.
+  saved: boolean
 }
 
 interface ParsedCookie {
@@ -109,27 +114,27 @@ export async function resolveLocation(opts: {
   const { profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore } = opts
 
   if (profileCity) {
-    return { city: profileCity, lat: profileLat ?? null, lng: profileLng ?? null, country: profileCountry ?? null, source: 'profile' }
+    return { city: profileCity, lat: profileLat ?? null, lng: profileLng ?? null, country: profileCountry ?? null, source: 'profile', saved: true }
   }
 
   const fromCookie = parseCookie(cookieStore.get(LOCATION_COOKIE)?.value)
 
   if (fromCookie?.manual) {
-    return { city: fromCookie.city, lat: fromCookie.lat, lng: fromCookie.lng, country: fromCookie.country, source: 'cookie' }
+    return { city: fromCookie.city, lat: fromCookie.lat, lng: fromCookie.lng, country: fromCookie.country, source: 'cookie', saved: true }
   }
 
   const detected = detectFromVercelHeaders(headerStore)
   if (detected) {
-    return { ...detected, source: 'detected' }
+    return { ...detected, source: 'detected', saved: false }
   }
 
   if (fromCookie) {
     // Non-manual cookie, but no fresh geo headers this request (e.g.
     // local dev) - fall back to the provisional guess rather than 'none'.
-    return { city: fromCookie.city, lat: fromCookie.lat, lng: fromCookie.lng, country: fromCookie.country, source: 'cookie' }
+    return { city: fromCookie.city, lat: fromCookie.lat, lng: fromCookie.lng, country: fromCookie.country, source: 'cookie', saved: false }
   }
 
-  return { city: null, lat: null, lng: null, country: null, source: 'none' }
+  return { city: null, lat: null, lng: null, country: null, source: 'none', saved: false }
 }
 
 export function locationCookieValue(city: string, lat: number | null, lng: number | null, country: string | null, manual: boolean): string {

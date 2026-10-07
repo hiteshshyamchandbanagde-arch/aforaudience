@@ -62,6 +62,14 @@ const te: Dictionary = {
   location: {
     searchCityPlaceholder: "నగరం వెతకండి...",
     noMatchingCities: "సరిపోలే నగరాలు లేవు",
+    useMyLocation: "Use my location", // TODO i18n
+    locating: "Finding you…", // TODO i18n
+    locationUnavailable: "Couldn't get your location. Your city is unchanged.", // TODO i18n
+    noShowsNearby: "No shows near you yet. Nearest: {city}, {km} km", // TODO i18n
+    switchToCity: "Switch to {city}", // TODO i18n
+    travelPrompt: "You seem to be in {city}. Switch?", // TODO i18n
+    switchButton: "Switch", // TODO i18n
+    notNow: "Not now", // TODO i18n
   },
   eventTypes: {
     OPEN_MIC: "ఓపెన్ మైక్",

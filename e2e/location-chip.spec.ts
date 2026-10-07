@@ -23,8 +23,10 @@ async function chooseCity(page: Page, isMobile: boolean, city: string) {
       await expect(scope).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
   }
-  // "Jaipur (IN)" exactly: the chip itself reads "Jaipur (IN) ▾" once chosen.
-  const cityOption = scope.getByRole("button", { name: new RegExp(`^${city} \\([A-Z]+\\)$`) });
+  // "Jaipur" exactly: the chip itself reads "Jaipur ▾" once chosen. (Was
+  // "Jaipur (IN)" until GEN-2610-005 dropped "(IN)" from Indian cities in
+  // the chip and its picker: one label format for detected and picked.)
+  const cityOption = scope.getByRole("button", { name: city, exact: true });
   await expect(async () => {
     if (!(await cityOption.isVisible())) await scope.getByRole("button", { name: /▾/ }).click();
     await expect(cityOption).toBeVisible({ timeout: 2_000 });
