@@ -111,3 +111,9 @@ row, each label at most 2 lines).
 | BUG-2610-017 | tested + HUMAN | `nudge-banners.spec.ts` › `[BUG-2610-017] phone-verify banner: one line, solid neutral surface, short copy, orange Verify`; `… on scroll the banner goes and the top bar sits at top 0 with nothing bleeding through`; `… the offline banner stays pinned while the page scrolls` (@needs-db throwaway unverified account) | HUMAN: banner look on a real phone. `phone-verify-nudge-i18n.spec.ts` literals follow the new copy |
 | BUG-2610-015 | tested | `chat-bubble.mobile.spec.ts` › `[BUG-2610-015] my tickets status pills / admin users Suspend / admin revenue last column: the chat button never rests on them at 390` and `… at 360` (admin pages @needs-db, temp admin) | Counts only the chat button: Vercel's preview toolbar rests mid-screen too |
 | BUG-2610-016 | tested | `admin-revenue.spec.ts` › `[BUG-2610-016] Top organisers: headers keep apart and line up with their values`; `… revenue chart: month names read horizontally, a ₹ value on each bar` (390 + 1440, @needs-db temp admin); unit `scripts/timeline-label.test.ts` | Baseline: header row only (values change with QA bookings) |
+
+## UI/UX bundle 3a (8 Oct, `fix/uiux-bundle-3a`)
+
+| Ticket | Status | Spec › test title | Note |
+|---|---|---|---|
+| GEN-2610-006 | tested + HUMAN | `account-locale.spec.ts` › `[GEN-2610-006] a language picked while signed in follows the account to a new browser`; `… the account value wins over the device on session load; a null account keeps the device's choice`; `… the server only accepts an offered language` (390 + 1440) | Atul's language put back after each test; global setup resets every persona's. HUMAN: pick on the phone, sign in on another device |

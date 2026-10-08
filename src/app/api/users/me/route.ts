@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { VALID_LOCALE_IDS } from '@/lib/i18n/locales'
 
 // GET /api/users/me
 //
@@ -26,6 +27,7 @@ export async function GET() {
       avatar: true,
       bio: true,
       displayCurrency: true,
+      preferredLocale: true,
     },
   })
   if (!user) {
@@ -62,7 +64,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null; bio?: string | null; onboardedAt?: Date } = {}
+    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null; bio?: string | null; preferredLocale?: string | null; onboardedAt?: Date } = {}
 
     // Only touch displayName if it appears in the body. Undefined means
     // "not touched"; null/empty string means "clear". A trimmed non-empty
@@ -139,6 +141,20 @@ export async function PATCH(req: Request) {
       }
     }
 
+    // GEN-2610-006 - the account's language. Must be one of the offered
+    // locales; null clears it back to "use the device's choice". Never
+    // set from the city or anything else, only from the person's pick.
+    if (Object.prototype.hasOwnProperty.call(body, 'preferredLocale')) {
+      const raw = body.preferredLocale
+      if (raw === null) {
+        updates.preferredLocale = null
+      } else if (typeof raw === 'string' && VALID_LOCALE_IDS.indexOf(raw) !== -1) {
+        updates.preferredLocale = raw
+      } else {
+        return NextResponse.json({ error: 'preferredLocale must be one of the offered languages or null' }, { status: 400 })
+      }
+    }
+
     // GEN-2609-042 - onboarding welcome sequence's completion marker.
     // Deliberately a boolean flag, not a client-supplied date: the
     // server always stamps its own `now()` rather than trusting whatever
@@ -167,6 +183,7 @@ export async function PATCH(req: Request) {
         avatar: true,
         bio: true,
         displayCurrency: true,
+        preferredLocale: true,
       },
     })
 

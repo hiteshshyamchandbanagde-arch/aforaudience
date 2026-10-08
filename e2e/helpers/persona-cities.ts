@@ -37,3 +37,19 @@ export async function keepPersonaCities(db: ClientBase): Promise<{ label: string
   }
   return fixed;
 }
+
+/**
+ * GEN-2610-006 - every persona's account language (User.preferredLocale)
+ * is "none", so pages render in English unless a spec picks otherwise.
+ * account-locale.spec.ts sets Atul's and puts it back itself; this catches
+ * a run that died in between, or a hand-picked language on QA.
+ */
+export async function keepPersonaLocales(db: ClientBase, emails: string[]): Promise<{ email: string; from: string }[]> {
+  const { rows } = await db.query(
+    `UPDATE "User" u SET "preferredLocale" = NULL FROM "User" old
+     WHERE u.id = old.id AND u.email = ANY($1) AND old."preferredLocale" IS NOT NULL
+     RETURNING u.email, old."preferredLocale" AS "from"`,
+    [emails],
+  );
+  return rows as { email: string; from: string }[];
+}

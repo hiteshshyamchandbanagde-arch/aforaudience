@@ -3,7 +3,7 @@ import { request, type FullConfig } from "@playwright/test";
 import { AUTH_DIR, PERSONAS, authFile, type PersonaKey } from "./helpers/personas";
 import { hasQaDatabase, warn, withQaDb } from "./helpers/qa-db";
 import { keepFixturesUpcoming } from "./helpers/upcoming-fixtures";
-import { keepPersonaCities } from "./helpers/persona-cities";
+import { keepPersonaCities, keepPersonaLocales } from "./helpers/persona-cities";
 import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/temp-admin";
 
 /**
@@ -28,7 +28,8 @@ import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/tem
  *    before every other spec and fails in one line if they still aren't.
  * 5. Persona cities (QA database only): a persona's saved city changed
  *    by hand on QA is put back (helpers/persona-cities.ts), with a
- *    warning; seed-health.spec.ts checks it too.
+ *    warning; seed-health.spec.ts checks it too. Their account language
+ *    (GEN-2610-006) is put back to none the same way.
  */
 const WARM_UP_BUDGET_MS = 60_000;
 
@@ -73,6 +74,10 @@ export default async function globalSetup(config: FullConfig) {
     const cities = await withQaDb(keepPersonaCities);
     for (const c of cities) {
       warn("e2e setup", `${c.label}'s saved city was ${c.from ?? "unset"} (changed outside the suite); put back to ${c.to}.`);
+    }
+    const emails = Object.values(PERSONAS).map((p) => p.identifier);
+    for (const l of await withQaDb((db) => keepPersonaLocales(db, emails))) {
+      warn("e2e setup", `${l.email}'s account language was ${l.from}; put back to none.`);
     }
 
     const { run, password } = await createTempAdmin();
