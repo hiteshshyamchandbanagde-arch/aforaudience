@@ -5375,3 +5375,17 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - 7 Oct night (chat). Bundle 2 e2e diagnosed: (1) waitlist-wallet-credit still accepted a native dialog that 086 replaced with useConfirm(); (2) saved-events was QA data drift, Atul's defaultCity set to Mumbai by hand at 12:32 (Hitesh's city-switch phone check), not code. Amend run 37643764444 fixed both (global-setup now restores persona cities, seed-health checks them). e2e-preview on 60c799b: 261 passed, 0 failed, 1 flaky (language-rollout de). MERGED #743 (fa99d77, squash). Feedback -> BUILD_COMPLETE: BUG-2609-086, BUG-2610-017, -015, -016.
 - Bundle-2 run lost GEN-2610-006 (49a6fb8) to a token expiring before push; User.preferredLocale column already in QA. Bundle 3 split in two to keep runs short: 3a = GEN-2610-006, BUG-2610-021, -019, -020 (DISPATCHED, docs/cc-dispatches/cc-prompt-uiux-bundle-3a.md); 3b = BUG-2610-018, -022, -023, GEN-2609-002 after 3a merges.
 - Bundle 2 phone list sent to Hitesh.
+
+## Part 53 - 8 Oct night (chat), qa @ 1715bd9
+
+- Bundle 3a first run (37652905507) died ~6 min in, nothing pushed (claude-code-action is_error; log blob unreachable from chat, likely usage limit). Re-fired 8 Oct 21:29 IST as run 37805220182.
+- Feedback-table writes from chat were CANCELLED twice this session (execute_sql INSERT/UPDATE). Tickets below are NOT yet in the Feedback table: next session inserts them (CodeCounter BUG/2610 -> 28, GEN/2610 -> 7) and appends the 022 note.
+- Hitesh phone checks (bundle M leftovers): step 10 airplane Retry = couldn't trigger on a phone (dropdown change does a full navigation, SW offline page shows); covered by the BUG-2610-002 e2e. Vinayak Sales By venue PASS (real bar, Rs0-38K axis). Vinayak Past Requests dates PASS. Omkar flex badge PASS (no request waiting on him). Hindi /venues and Pune location still open.
+- DECISION (Hitesh delegated, option a): translate role dashboards (Organiser/Artist/Venue Owner; Admin stays English) into all 12 locales incl. Marathi -> GEN-2610-007 MEDIUM, own bundle after 3b.
+- New tickets to insert (all BUILD_QUEUE):
+  - BUG-2610-024 LOW: offline fallback page light cream + system font; restyle dark/AFA fonts (static SW page, inline tokens).
+  - BUG-2610-025 LOW: venue Past Requests uses emoji icons (Android calendar emoji reads "July 17" beside "1 Oct 2026"; also the speech-bubble on Message Organiser) and Rs37417 without separator; use app icon + shared money formatter; sweep dashboard emoji-as-icon.
+  - BUG-2610-026 MEDIUM: Recharts tooltip value line black on black (venue Sales By venue); check all chart tooltips.
+  - BUG-2610-027 LOW: money axis ticks uneven (10K/19K/29K/38K); nice round ticks helper.
+  - BUG-2610-028 LOW: Venue Owner page titles sans vs Organiser/Artist display serif, stat labels mono vs sans bold; Edit Your Profile "Change Photo" in CTA orange (should be secondary).
+- BUG-2610-022 addition: Omkar's Dashboard badge "1" = Hrithik's PENDING application on One-Act Play Festival (20 Sep, past). /api/notifications/pending-count counts Application PENDING with no date filter. Past-event applications -> Closed and excluded from pending-count + per-event counts. Goes into bundle 3b with 022.
