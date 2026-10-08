@@ -75,3 +75,13 @@ export async function POST(req: Request) {
   res.cookies.set(LOCATION_COOKIE, locationCookieValue(cleanCity, cleanLat, cleanLng, cleanCountry, true), MANUAL_LOCATION_COOKIE_OPTIONS)
   return res
 }
+
+// BUG-2610-021 - sign-out clears the device's city cookie (it is
+// httpOnly, so only the server can), so whoever uses the device next -
+// a guest, or another account with no saved city - does not inherit the
+// last account's pick. The account's own User.defaultCity is untouched.
+export async function DELETE() {
+  const res = NextResponse.json({ ok: true })
+  res.cookies.set(LOCATION_COOKIE, '', { ...MANUAL_LOCATION_COOKIE_OPTIONS, maxAge: 0 })
+  return res
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { chipCityLabel } from '@/lib/country-codes'
 import { nearestCity, locateOutcome, roundKm, type CityPoint } from '@/lib/nearest-city'
 import { useLocale } from '@/lib/i18n/translate'
@@ -95,6 +96,22 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   const [geo, setGeo] = useState<GeoState>({ kind: 'idle' })
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // BUG-2610-021 - re-read whenever the signed-in user changes (sign-in,
+  // sign-out, another account), not only on mount: the top bar stays
+  // mounted through a client-side sign-in, and kept the previous
+  // account's city. The mount read already matches the session cookie,
+  // so the first resolved session only records who it was for.
+  const { data: session, status } = useSession()
+  const sessionUser = status === 'loading' ? undefined : ((session?.user as { id?: string } | undefined)?.id ?? null)
+  const readFor = useRef<string | null | undefined>(undefined)
+  const [readCount, setReadCount] = useState(0)
+
+  useEffect(() => {
+    if (sessionUser === undefined) return
+    if (readFor.current !== undefined && readFor.current !== sessionUser) setReadCount((n) => n + 1)
+    readFor.current = sessionUser
+  }, [sessionUser])
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/user/location')
@@ -102,7 +119,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
       .then((data) => { if (!cancelled && data) setLocation({ city: data.city, lat: data.lat, lng: data.lng, country: data.country ?? null, saved: data.saved === true }) })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [])
+  }, [readCount])
 
   // A page can show two chips (SiteNav's and the mobile top bar's, one
   // hidden by CSS); a change made in one shows in the other.

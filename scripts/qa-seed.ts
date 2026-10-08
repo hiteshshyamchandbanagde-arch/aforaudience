@@ -1208,13 +1208,16 @@ async function seedDemoPersonas(
   const hrithikRoleId = "qa-demo-artist-full-role"
   await prisma.user.upsert({
     where: { id: hrithikId },
-    update: { email: "hrithik.artist@aforaudience.qa", displayName: "Hrithik", password: passwordHash },
+    // Saved city Ballari: e2e/helpers/persona-cities.ts (location-chip-accounts.spec.ts).
+    update: { email: "hrithik.artist@aforaudience.qa", displayName: "Hrithik", password: passwordHash, defaultCity: "Ballari", defaultCountry: "India" },
     create: {
       id: hrithikId,
       name: "qa_demo_art_full",
       email: "hrithik.artist@aforaudience.qa",
       displayName: "Hrithik",
       password: passwordHash,
+      defaultCity: "Ballari",
+      defaultCountry: "India",
       role: Role.ARTIST,
       phone: `+91${faker.string.numeric(10)}`,
       avatar: faker.image.avatarGitHub(),

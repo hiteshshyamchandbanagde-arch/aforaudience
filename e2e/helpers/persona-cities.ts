@@ -21,6 +21,7 @@ export type PersonaCity = { persona: PersonaKey; email: string; label: string; c
 
 export const PERSONA_CITIES: PersonaCity[] = [
   { persona: "atul", email: "atul.audience@aforaudience.qa", label: "Atul", city: "Jaipur", country: "India", usedBy: "saved-events" },
+  { persona: "hrithik", email: "hrithik.artist@aforaudience.qa", label: "Hrithik", city: "Ballari", country: "India", usedBy: "location-chip-accounts" },
 ];
 
 /** Puts each persona's saved city back; returns the ones that had drifted. */
