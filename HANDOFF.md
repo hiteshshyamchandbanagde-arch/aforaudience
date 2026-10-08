@@ -5392,3 +5392,5 @@ Every `list_tables`/schema query against `aforaudience-qa` this session carried 
 - More from Hitesh's Hindi phone check, homepage `/` (also to insert into Feedback):
   - BUG-2610-029 MEDIUM: homepage primary CTA `ctaFindTonightsShow` is English ("Find tonight's show") in 10 of 11 non-English dictionaries (only mr translated). Translate all; grep the dictionaries for other values identical to en.ts on audience-facing pages and list them.
   - BUG-2610-030 LOW: the mono eyebrow's letter-spacing is applied to Devanagari ("जीवंत कला, असली पल" renders as "जी वं त  क ला"), which breaks the visual joins. Drop letter-spacing and uppercase transforms for non-Latin scripts (e.g. `:lang(hi), :lang(mr), ...` or a script-aware utility) across all tracked labels, not only this one.
+  - BUG-2610-031 LOW: /venues hero in hi, "जहाँ शो होता है": the gold italic highlighted word "शो" has no space after it and its slant overlaps "होता". Check the highlighted-word split in every locale's hero strings (space ownership belongs outside the span).
+- Phone check 5 (Hindi /venues, all cities, 22 cards to the end) PASS: every card "सीटें".
