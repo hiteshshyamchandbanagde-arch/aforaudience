@@ -12,7 +12,8 @@ import { useRuleViewport } from "./helpers/viewports";
  *   CONFIRMED  QR, Download PDF, Message Organiser; Cancel ticket while
  *              the event is still ahead
  *   PENDING    Pay now (to its checkout), Cancel; no QR
- *   EXPIRED    no QR, no actions (an expired PENDING)
+ *   EXPIRED    no card at all (BUG-2610-018: an expired PENDING hold
+ *              is not a ticket)
  *   CANCELLED  no QR, no actions, the card does not open the event
  *
  * The QR is an <img> data URL with no data attribute, so it is read the
@@ -93,8 +94,11 @@ test("[GEN-2609-006] My Tickets: each confirmed card's QR encodes its bookingId;
   await expect(main.getByText(LABEL.CONFIRMED, { exact: true }).first(), "Atul has confirmed tickets in QA").toBeVisible({ timeout: 20_000 });
 
   const effective = (b: Booking) => (b.status === "PENDING" && b.expiresAt && new Date(b.expiresAt) < new Date() ? "EXPIRED" : b.status);
+  // BUG-2610-018: an expired unpaid hold is not a ticket, so it has no card
+  // (at most a compact "Unfinished checkout" row; e2e/unfinished-checkout.spec.ts).
+  await expect(main.getByText(LABEL.EXPIRED, { exact: true }), "no Expired ticket cards").toHaveCount(0);
   const expected = new Map<string, number>();
-  for (const b of bookings) expected.set(effective(b), (expected.get(effective(b)) ?? 0) + 1);
+  for (const b of bookings) if (effective(b) !== "EXPIRED") expected.set(effective(b), (expected.get(effective(b)) ?? 0) + 1);
   test.info().annotations.push({ type: "statuses", description: JSON.stringify(Object.fromEntries(expected)) });
   expect(expected.get("CONFIRMED"), "confirmed bookings").toBeGreaterThan(0);
   expect(livePendingId, "a pending booking to show as live").not.toBe("");
@@ -140,10 +144,10 @@ test("[GEN-2609-006] My Tickets: each confirmed card's QR encodes its bookingId;
         await expect(card.getByRole("button", { name: "Cancel", exact: true }), `${where}: Cancel`).toBeVisible();
         await expect(qr, `${where}: no QR`).toHaveCount(0);
       } else {
-        // EXPIRED, CANCELLED, REFUNDED: nothing to scan, nothing to press.
+        // CANCELLED, REFUNDED: nothing to scan, nothing to press.
         await expect(qr, `${where}: no QR`).toHaveCount(0);
         await expect(card.locator("a, button"), `${where}: no actions`).toHaveCount(0);
-        if (status !== "EXPIRED") await expect(card, `${where}: does not open the event`).not.toHaveAttribute("role", "link");
+        await expect(card, `${where}: does not open the event`).not.toHaveAttribute("role", "link");
       }
     }
   }

@@ -708,6 +708,8 @@ const en = {
     browseEventsLink: "Browse events",
     seatsListTemplate: "Seats {labels}",
     payNowArrow: "Pay now →",
+    unfinishedCheckoutLabel: "Unfinished checkout",
+    bookAgainLink: "Book again",
     cancelButton: "Cancel",
     cancellingEllipsis: "Cancelling...",
     messageOrganiser: "Message Organiser",

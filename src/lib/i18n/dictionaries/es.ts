@@ -678,6 +678,8 @@ const es: Dictionary = {
     browseEventsLink: "Explorar eventos",
     seatsListTemplate: "Asientos {labels}",
     payNowArrow: "Pagar ahora →",
+    unfinishedCheckoutLabel: "Compra sin terminar",
+    bookAgainLink: "Reservar de nuevo",
     cancelButton: "Cancelar",
     cancellingEllipsis: "Cancelando...",
     messageOrganiser: "Enviar mensaje al organizador",

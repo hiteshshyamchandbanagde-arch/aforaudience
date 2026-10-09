@@ -679,6 +679,8 @@ const fr: Dictionary = {
     browseEventsLink: "Parcourir les événements",
     seatsListTemplate: "Places {labels}",
     payNowArrow: "Payer maintenant →",
+    unfinishedCheckoutLabel: "Paiement non finalisé",
+    bookAgainLink: "Réserver à nouveau",
     cancelButton: "Annuler",
     cancellingEllipsis: "Annulation en cours...",
     messageOrganiser: "Envoyer un message à l'organisateur",

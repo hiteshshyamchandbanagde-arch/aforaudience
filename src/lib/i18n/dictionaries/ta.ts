@@ -674,6 +674,8 @@ const ta: Dictionary = {
     browseEventsLink: "நிகழ்வுகளை உலாவவும்",
     seatsListTemplate: "இருக்கைகள் {labels}",
     payNowArrow: "இப்போது செலுத்துங்கள் →",
+    unfinishedCheckoutLabel: "முடிக்கப்படாத செக்அவுட்",
+    bookAgainLink: "மீண்டும் பதிவு செய்யுங்கள்",
     cancelButton: "ரத்து செய்",
     cancellingEllipsis: "ரத்து செய்கிறது...",
     messageOrganiser: "நிர்வாகிக்கு செய்தி அனுப்பு",

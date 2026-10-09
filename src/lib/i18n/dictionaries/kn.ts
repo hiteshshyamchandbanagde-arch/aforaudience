@@ -674,6 +674,8 @@ const kn: Dictionary = {
     browseEventsLink: "ಈವೆಂಟ್‌ಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
     seatsListTemplate: "ಸೀಟುಗಳು {labels}",
     payNowArrow: "ಈಗ ಪಾವತಿಸಿ →",
+    unfinishedCheckoutLabel: "ಅಪೂರ್ಣ ಚೆಕ್‌ಔಟ್",
+    bookAgainLink: "ಮತ್ತೆ ಬುಕ್ ಮಾಡಿ",
     cancelButton: "ರದ್ದುಗೊಳಿಸಿ",
     cancellingEllipsis: "ರದ್ದುಗೊಳಿಸುತ್ತಿದೆ...",
     messageOrganiser: "ಆಯೋಜಕರಿಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ",

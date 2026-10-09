@@ -674,6 +674,8 @@ const mr: Dictionary = {
     browseEventsLink: "इव्हेंट्स बघा",
     seatsListTemplate: "सीट्स {labels}",
     payNowArrow: "आता पैसे भरा →",
+    unfinishedCheckoutLabel: "अपूर्ण चेकआउट",
+    bookAgainLink: "पुन्हा बुक करा",
     cancelButton: "रद्द करा",
     cancellingEllipsis: "रद्द करत आहोत...",
     messageOrganiser: "आयोजकांना मेसेज करा",
