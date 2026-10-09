@@ -12,6 +12,7 @@ import { useToast } from '@/components/Toast'
 import { useConfirm } from '@/components/ConfirmDialog'
 import SearchInputBox from '@/components/SearchInputBox'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 // /dashboard/admin/artists — session 56, Hitesh's request: a roster view
 // with the real signals needed to make Featured/Headliner calls (gigs
@@ -184,9 +185,9 @@ export default function AdminArtistsPage() {
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle style={{ marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
             Artist Roster
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', maxWidth: '680px' }}>
             Rising and Featured are fully automatic — thresholds live at{' '}
             <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Platform Settings</Link>.

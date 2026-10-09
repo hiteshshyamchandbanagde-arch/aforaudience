@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 import { countNoun } from '@/lib/i18n/plural'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface SeatSection {
   id?: string
@@ -543,9 +544,9 @@ export default function CreateEventPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
             Create an Event
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Set up your event details, book a venue, and publish when ready.
           </p>

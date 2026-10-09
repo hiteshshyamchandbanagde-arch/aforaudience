@@ -17,6 +17,7 @@ import { calendarDate, formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { countNoun } from '@/lib/i18n/plural'
 import { chartTooltipProps } from '@/lib/chart-tooltip'
+import { StatLabel } from '@/components/dashboard/PageTitle'
 
 interface VenueRow {
   id: string
@@ -360,7 +361,7 @@ export default function VenueOwnerSalesOverviewPage() {
 function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
   return (
     <Card style={{ padding: 'var(--afa-space-18px)' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{label}</p>
+      <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{label}</StatLabel>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>

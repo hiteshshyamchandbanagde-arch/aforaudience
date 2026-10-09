@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
-import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, SectionTitle, Label, Field, outlineLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
 
 // Session 62, design.md §9.5. First edit surface for VenueOwner - the role
@@ -120,7 +120,7 @@ export default function VenueOwnerEditPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
-            <PageHead eyebrow="Public profile" title="Edit Your Profile" description="This is what people see on your public Venue Owner page." />
+            <PageHead eyebrow="Public profile" title="Edit Your Profile" titleSize="lg" description="This is what people see on your public Venue Owner page." />
           </div>
 
           {message && (
@@ -139,7 +139,7 @@ export default function VenueOwnerEditPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
-                <label className="avp-btn-primary" style={{ ...primaryLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                <label className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>

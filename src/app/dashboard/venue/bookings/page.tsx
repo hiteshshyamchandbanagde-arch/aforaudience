@@ -12,6 +12,7 @@ import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type
 import SharedButton from '@/components/ui/Button'
 import { calendarDate, formatDate, istMonthKey } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { StatLabel } from '@/components/dashboard/PageTitle'
 
 interface BookingRequest {
   id: string
@@ -161,7 +162,7 @@ export default function VenueBookingsPage() {
               { label: 'Pending value', value: pendingValue, sub: null },
             ].map((s) => (
               <Card key={s.label} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{s.label}</p>
+                <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{s.label}</StatLabel>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
                 {s.sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>{s.sub}</p>}
               </Card>

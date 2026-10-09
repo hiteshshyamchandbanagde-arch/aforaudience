@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 type ScanResult = {
   ok: boolean
@@ -244,9 +245,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
           <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-1)' }}>
+          <PageTitle style={{ marginTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-1)' }}>
             Check-In
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{eventTitle}</p>
           {counts && (
             <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', marginBottom: 'var(--afa-space-6)' }}>

@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface PayoutStatus {
   linked: boolean
@@ -104,9 +105,9 @@ export default function OrganiserPayoutsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle style={{ marginBottom: 'var(--afa-space-2)' }}>
             Direct Payouts
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-28px)' }}>
             Link your Razorpay account so ticket revenue settles straight to you — AforAudience only ever keeps the small audience booking fee, never a cut of your ticket price.
           </p>

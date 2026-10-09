@@ -8,6 +8,7 @@ import { useToast } from '@/components/Toast'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 // /dashboard/admin/diary — Admin Diary
 //
@@ -235,9 +236,9 @@ export default function AdminDiaryPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-80px)' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-6px)' }}>
+        <PageTitle style={{ margin: '0 0 var(--afa-space-6px)' }}>
           Admin Diary
-        </h1>
+        </PageTitle>
         <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 'var(--afa-space-6)' }}>
           Company, legal, and administrative milestones — registration, PAN, GST, current account, CA sign-offs, and anything else worth tracking outside the product Feedback board.
         </p>

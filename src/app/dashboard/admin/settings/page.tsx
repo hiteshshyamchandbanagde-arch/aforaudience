@@ -10,6 +10,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 // /dashboard/admin/settings
 //
@@ -498,9 +499,9 @@ export default function AdminSettingsPage() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: 560, margin: '0 auto' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
+            <PageTitle style={{ marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
               Admins only
-            </h1>
+            </PageTitle>
             <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>
               This page is only visible to platform admins.
             </p>
@@ -535,9 +536,9 @@ export default function AdminSettingsPage() {
           / Settings
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-2)' }}>
+        <PageTitle style={{ marginBottom: 'var(--afa-space-2)' }}>
           Platform settings
-        </h1>
+        </PageTitle>
         <p style={{ opacity: 0.65, marginBottom: 'var(--afa-space-28px)', fontSize: 'var(--afa-text-body)', lineHeight: 1.5 }}>
           Changes here take effect immediately — the next booking anyone starts will use the new values.
         </p>

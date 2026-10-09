@@ -193,7 +193,7 @@ export default function VenueDashboard() {
               of an in-page CTA, per Hitesh's call. pendingBookings/
               pendingFlexRequests badges moved with Bookings/Flexible
               Requests into the sidebar (SidebarLink's own badge prop). */}
-          <PageHead eyebrow="Portfolio" title="Your Venues" />
+          <PageHead eyebrow="Portfolio" title="Your Venues" titleSize="lg" />
 
           {error && (
             <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>

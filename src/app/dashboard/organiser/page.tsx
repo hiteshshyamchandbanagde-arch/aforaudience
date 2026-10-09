@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { eventPriceLabel } from '@/components/EventCard'
 import { isPastEvent } from '@/lib/application-status'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface EventItem {
   id: string
@@ -129,9 +130,9 @@ export default function OrganiserDashboard() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--afa-space-32px)', flexWrap: 'wrap', gap: 'var(--afa-space-4)' }}>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-6px)' }}>
                 Your Events
-              </h1>
+              </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>
               {!!orgStatus?.walletBalance && orgStatus.walletBalance > 0 && (
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>

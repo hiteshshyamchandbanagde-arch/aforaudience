@@ -8,6 +8,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 const inputStyle = {
   width: '100%',
@@ -64,9 +65,9 @@ export default function CreateTourPage() {
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) var(--afa-space-80px)' }}>
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-2)' }}>
+        <PageTitle style={{ marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-2)' }}>
           Create a Tour
-        </h1>
+        </PageTitle>
         <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-28px)' }}>
           Start with the basics. You'll add stops, fixed lineup, and open local slots once the Tour exists.
         </p>

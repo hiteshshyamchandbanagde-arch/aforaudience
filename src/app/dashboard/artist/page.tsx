@@ -14,6 +14,7 @@ import { displayApplicationStatus, splitApplicationsByEventDate } from '@/lib/ap
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface Application {
   id: string
@@ -298,9 +299,9 @@ export default function ArtistDashboard() {
               {/* BUG-2609-018: was profile.name (the API's raw username
                   field) - this heading is the public-profile preview, same
                   fallback chain as the rest of the app. */}
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-6px)' }}>
                 {profile.displayName || profile.name || profile.email}
-              </h1>
+              </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                 {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
               </p>

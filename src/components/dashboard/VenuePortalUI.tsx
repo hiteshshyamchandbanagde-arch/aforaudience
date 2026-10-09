@@ -1,6 +1,7 @@
 import type { ReactNode, ButtonHTMLAttributes, CSSProperties } from 'react'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import SharedButton from '@/components/ui/Button'
+import { PageTitle, StatLabel, type PageTitleSize } from '@/components/dashboard/PageTitle'
 export { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 
 // Shared visual layer for the Venue Owner Portal (dashboard/venue/*,
@@ -325,10 +326,12 @@ export function PageHead({
   eyebrow,
   title,
   description,
+  titleSize = 'default',
   children,
 }: {
   eyebrow: string
   title: string
+  titleSize?: PageTitleSize
   description?: ReactNode
   children?: ReactNode
 }) {
@@ -357,19 +360,7 @@ export function PageHead({
           >
             {eyebrow}
           </p>
-          <h1
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: '34px', // token-ok(font-size-literal): Venue Portal page h1 in the UI font, the only 34px UI-font title, above page-title-lg (32px)
-              fontWeight: 500,
-              lineHeight: 1,
-              letterSpacing: '-0.01em',
-              color: 'var(--afa-text-primary)',
-              margin: 0,
-            }}
-          >
-            {title}
-          </h1>
+          <PageTitle size={titleSize} style={{ margin: 0 }}>{title}</PageTitle>
           {description ? (
             <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-10px)', marginBottom: 0, maxWidth: '520px' }}>
               {description}
@@ -387,9 +378,7 @@ export function PageHead({
 export function Stat({ label, value, delta }: { label: string; value: string; delta?: string }) {
   return (
     <Card style={{ padding: 'var(--afa-space-5)' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
-        {label}
-      </p>
+      <StatLabel style={{ margin: 0 }}>{label}</StatLabel>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-display)', lineHeight: 1, color: 'var(--afa-text-primary)', margin: 'var(--afa-space-3) 0 0' }}>{value}</p>
       {delta ? (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage-bright)', margin: 'var(--afa-space-2) 0 0' }}>▲ {delta}</p>

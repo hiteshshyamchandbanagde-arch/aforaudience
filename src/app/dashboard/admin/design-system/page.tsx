@@ -15,6 +15,7 @@ import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-tok
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
 import { formatDate } from '@/lib/format-date'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -411,9 +412,9 @@ export default function AdminDesignSystemPage() {
         <DashboardShell>
           <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', fontFamily: 'var(--font-sans)' }}>
             <div style={{ maxWidth: 560, margin: '0 auto' }}>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
+              <PageTitle style={{ marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
                 Admins only
-              </h1>
+              </PageTitle>
               <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>This page is only visible to platform admins.</p>
               <Link href="/" style={{ color: 'var(--afa-amber)', fontWeight: 600 }}>
                 ← Home
@@ -433,9 +434,9 @@ export default function AdminDesignSystemPage() {
           <div style={{ maxWidth: 1040, margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-6)' }}>
               <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
+                <PageTitle style={{ marginBottom: 'var(--afa-space-1)' }}>
                   Design System
-                </h1>
+                </PageTitle>
                 <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
                   Edit here, save, and it's live on the next page load — everywhere, no deploy.
                 </p>

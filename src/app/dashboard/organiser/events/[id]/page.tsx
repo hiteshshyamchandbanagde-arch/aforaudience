@@ -16,6 +16,7 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { displayApplicationStatus } from '@/lib/application-status'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface Application {
   id: string
@@ -269,9 +270,9 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-28px)', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-6px)' }}>
                 {event.title}
-              </h1>
+              </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                 {formatDate(event.date, 'medium', locale)} · {formatEventTimeRange(event.startTime, event.endTime)}
               </p>
