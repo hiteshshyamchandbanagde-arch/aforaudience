@@ -19,6 +19,7 @@ import { countNoun } from '@/lib/i18n/plural'
 import { chartTooltipProps } from '@/lib/chart-tooltip'
 import { StatLabel } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
+import { moneyAxis } from '@/lib/money-axis'
 
 interface VenueRow {
   id: string
@@ -69,14 +70,6 @@ const TOP_VENUES_SHOWN = 5
 
 const money = formatINR
 
-// Compact axis/bar-label form (₹73.4L, not ₹73,40,000) - full precision in
-// the stat cards, compact here since chart labels have little room.
-function compactMoney(n: number) {
-  if (n >= 1e7) return `₹${(n / 1e7).toFixed(1)}Cr`
-  if (n >= 1e5) return `₹${(n / 1e5).toFixed(1)}L`
-  if (n >= 1e3) return `₹${(n / 1e3).toFixed(0)}K`
-  return formatINR(n)
-}
 
 // bucketKeyFor() produces "YYYY-MM" (year/all ranges), a Monday-anchored
 // "YYYY-MM-DD" (quarter), or a daily "YYYY-MM-DD" (week/month) - format
@@ -219,7 +212,7 @@ export default function VenueOwnerSalesOverviewPage() {
                       tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
                     />
                     <YAxis
-                      tickFormatter={compactMoney}
+                      {...moneyAxis(Math.max(0, ...timeline.map((t) => t.revenue)))}
                       tickLine={false}
                       axisLine={false}
                       width={56}
@@ -252,7 +245,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
                       <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} horizontal={false} />
-                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
+                      <XAxis type="number" {...moneyAxis(Math.max(0, ...topVenues.map((v) => v.revenue)))} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
                         {...chartTooltipProps}
