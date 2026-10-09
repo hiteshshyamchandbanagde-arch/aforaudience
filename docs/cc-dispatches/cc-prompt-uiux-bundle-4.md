@@ -1,0 +1,15 @@
+# CC dispatch: UI/UX bundle 4 (BUG-2610-026, BUG-2610-029, BUG-2610-030, BUG-2610-032)
+
+> **New branch `fix/uiux-bundle-4` off `origin/qa`** (bundle 3b merged as #745). Push after EVERY commit. One commit per ticket, ticket ID in the message. Chat merges. Autopilot. Budget about 200 turns. Do not edit `.github/workflows/`. QA DB only, never production (`cncumfwwnjcwacggrgsr`). If origin/qa moves, rebase, never merge.
+> Run the e2e specs you add or touch locally against your branch before each push (bundle 3b's first run pushed three tickets without running them and went 12 red).
+
+**FIRST ACTION:** status file `RESULT: PARTIAL fix/uiux-bundle-4 none`. Update it after each ticket. Read the FULL text of all four tickets in the QA Feedback table, plus `docs/testing-rules.md` and `docs/design.md`. Order is priority.
+
+1. **BUG-2610-026 MEDIUM: chart tooltip value text is black on black.** Venue Sales "By venue": the tooltip's value line ("Revenue : ₹0") is unreadable. Set the Recharts tooltip `itemStyle`/`labelStyle`/`contentStyle` from tokens in ONE shared place and use it in every chart in the app (venue Sales, organiser Sales, admin Revenue, any other Recharts use: grep). e2e: hover/tap a bar at 390 and 1440, assert the value text's computed colour has AA contrast against the tooltip background.
+2. **BUG-2610-029 MEDIUM: homepage CTA untranslated.** `ctaFindTonightsShow` is English in 10 of 11 non-English dictionaries (only mr is translated). Translate it in all. Then write a small check (unit test under `scripts/`) that lists audience-facing dictionary values identical to `en.ts` (allow-list proper nouns, "AforAudience", ₹ amounts, codes); fix what it finds on the homepage, /events, /venues, /artists, event detail and checkout, and report the rest.
+3. **BUG-2610-030 LOW: letter-spacing breaks Devanagari.** Tracked mono/eyebrow labels apply `letter-spacing` (and uppercase) to non-Latin scripts, splitting conjuncts ("जीवंत" renders "जी वं त"). Drop letter-spacing and text-transform for non-Latin locales in ONE place (e.g. `:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)` rules on the tracked-label classes/tokens, or a script-aware token), not per component. Check `<html lang>` is set from the active locale. e2e in hi at 390: homepage eyebrow and /events count labels have letter-spacing normal; English unchanged.
+4. **BUG-2610-032 LOW: city picker says "no match" while loading.** `LocationChip` shows "no matching city" with an empty search before the city list arrives. Show a loading state until the list is loaded; "no match" only for a non-empty query with zero results. e2e with a delayed `/api/venues/cities` response.
+
+**Tests (T1):** each ticket gets a regression check at 390 and 1440 (baselines for touched UI), ticket ID in the test title. New copy in all 12 locales. Persona state restored (T6).
+
+Status file: `RESULT: PUSHED fix/uiux-bundle-4 <sha>`, per ticket what changed and the test (before/after), the dictionary check's leftover list, the e2e-preview result if it finishes, and the **Human check** list for Hitesh's phone.
