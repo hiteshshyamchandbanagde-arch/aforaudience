@@ -1244,6 +1244,7 @@ const kn: Dictionary = {
     },
     eventDetail: {
       noAccess: "ಈ ಈವೆಂಟ್‌ಗೆ ನಿಮಗೆ ಪ್ರವೇಶವಿಲ್ಲ",
+      nextDay: "ಮರುದಿನ",
       notFound: "ಈವೆಂಟ್ ಸಿಗಲಿಲ್ಲ",
       backToEvents: "ಈವೆಂಟ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
       sharePosterTitle: "ಪೋಸ್ಟರ್ ಹಂಚಿಕೊಳ್ಳಿ",
@@ -1392,6 +1393,7 @@ const kn: Dictionary = {
       paidEntry: "ಪಾವತಿಸಿದ ಪ್ರವೇಶ",
       sectionsFromSeatMap: "ವಿಭಾಗಗಳು ಮತ್ತು ಆಸನಗಳ ಸಂಖ್ಯೆ {venue} ನ ಆಸನ ನಕ್ಷೆಯಿಂದ ಬರುತ್ತವೆ — ಈ ಈವೆಂಟ್‌ಗೆ ನೀವು ಪ್ರತಿ ವಿಭಾಗದ ಬೆಲೆ ಮಾತ್ರ ನಿಗದಿಪಡಿಸುತ್ತೀರಿ.",
       mainLevel: "ಮುಖ್ಯ",
+      layoutPreview: "ವಿನ್ಯಾಸದ ಮುನ್ನೋಟ",
       pricePlaceholder: "₹ ಬೆಲೆ",
       free: "ಉಚಿತ",
       totalCapacity: "ಒಟ್ಟು ಸಾಮರ್ಥ್ಯ: {sections} ನಲ್ಲಿ {seats}",
