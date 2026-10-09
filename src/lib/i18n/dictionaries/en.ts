@@ -1278,6 +1278,48 @@ const en = {
     inquiriesLoadFailed: "Failed to load inquiries",
     updateFailed: "Failed to update",
   },
+
+  // GEN-2610-007 - everything under /dashboard/organiser, one sub-object
+  // per page. Status/enum values stay English in data; only labels translate.
+  organiserDashboard: {
+    // Your Events (/dashboard/organiser)
+    yourEvents: {
+      statusDraft: "Draft",
+      statusPublished: "Published",
+      statusPending: "Pending",
+      statusCancelled: "Cancelled",
+      statusCompleted: "Completed",
+      notOrganiserTitle: "You're not registered as an Organiser",
+      notOrganiserBody: "Apply to become an Organiser from your profile to start creating events.",
+      backToHome: "Back to Home",
+      // {org}: the organisation's name.
+      orgPendingTitle: "{org} is pending approval",
+      accountPendingTitle: "Your Organiser account is pending approval",
+      pendingBody: "Our team reviews new Organiser applications before you can create and publish events. We'll notify you as soon as you're approved.",
+      title: "Your Events",
+      subtitle: "Create events, book venues, and review artist applications",
+      // {amount}: a ₹ amount.
+      walletBalance: "Wallet balance: {amount}",
+      walletBalanceNote: "(from cancelled Buy-in slots kept as credit)",
+      setUpPayouts: "Set up direct payouts →",
+      payoutNotActivated: "Payout account linked, not yet activated —",
+      checkStatus: "check status",
+      payoutsActive: "✓ Direct payouts active",
+      noEventsTitle: "No events yet",
+      noEventsBody: "Create your first event to start booking venues and artists",
+      createEvent: "Create Event",
+      noVenueBooked: "No venue booked",
+      seatsOne: "{n} seat",
+      seatsOther: "{n} seats",
+      free: "Free",
+      pendingApplicationsOne: "{n} pending application",
+      pendingApplicationsOther: "{n} pending applications",
+      view: "View",
+      edit: "Edit",
+      statusLoadFailed: "Failed to load account status",
+      eventsLoadFailed: "Failed to fetch events",
+    },
+  },
 }
 
 export default en
