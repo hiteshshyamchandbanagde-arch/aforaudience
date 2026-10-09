@@ -88,6 +88,6 @@ test("[BUG-2610-018] My Tickets: an expired unpaid hold is never a ticket card; 
   await expect(page.locator("[data-afa-unfinished-checkouts]")).toHaveScreenshot(`unfinished-checkout-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
     // The fixture event is re-dated forward as the clock walks on.
-    mask: [page.locator("[data-afa-unfinished-date]")],
+    mask: [page.locator("[data-afa-unfinished-date]"), page.locator(".afa-support-chat-btn")],
   });
 });

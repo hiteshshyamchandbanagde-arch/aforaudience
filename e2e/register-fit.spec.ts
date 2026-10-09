@@ -23,6 +23,12 @@ import { PHONE } from "./helpers/viewports";
 const LAPTOP = { width: 1440, height: 864 };
 const FIELD_ORDER = ["fullName", "username", "email", "phoneNumber", "password", "confirm"];
 
+// Overlays that are not the form: the phone top bar (fixed; it shows the
+// visitor's located city), the chat button, and a Vercel preview's toolbar.
+// Hidden just before the screenshot (the page is not used afterwards, or
+// is navigated away from).
+const HIDE_OVERLAYS = "header, .afa-support-chat-btn, vercel-live-feedback { visibility: hidden !important; }";
+
 async function openRegister(page: Page) {
   await page.goto("/register/");
   await expect(page.locator('input[name="confirm"]')).toBeVisible({ timeout: 20_000 });
@@ -54,6 +60,7 @@ test("[GEN-2609-002] Register fits a 1440x864 window (phone layout unchanged at 
     // The compact gaps are desktop-only: the phone card keeps its 40 px padding.
     const card = page.locator('main input[name="fullName"]').locator("xpath=ancestor::div[contains(@style, 'border-radius')][1]");
     expect(await card.evaluate((el) => getComputedStyle(el).paddingTop), "phone card padding unchanged").toBe("40px");
+    await page.addStyleTag({ content: HIDE_OVERLAYS });
     await expect(card).toHaveScreenshot("register-card-390.png", { animations: "disabled" });
     return;
   }
@@ -87,6 +94,7 @@ test("[GEN-2609-002] Register fits a 1440x864 window (phone layout unchanged at 
   // Desktop spacing really is the compact set.
   const column = page.locator("main > div").first();
   expect(await column.evaluate((el) => getComputedStyle(el).paddingTop), "Register column padding").toBe("24px");
+  await page.addStyleTag({ content: HIDE_OVERLAYS });
   await expect(column).toHaveScreenshot("register-1440x864.png", { animations: "disabled" });
 
   // Login keeps the usual 64 px.

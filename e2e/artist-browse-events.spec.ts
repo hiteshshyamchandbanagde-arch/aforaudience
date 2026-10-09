@@ -54,7 +54,7 @@ test("[BUG-2610-023] artist Browse Events: Apply to Perform has the primary fill
   expect(bg, "Apply to Perform has the primary fill").toBe(fill);
   expect(bg).not.toBe("rgba(0, 0, 0, 0)");
   expect(fg, "and the on-fill text colour").toBe(onFill);
-  await expect(apply).toHaveScreenshot(`artist-apply-button-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+  await expect(apply).toHaveScreenshot(`artist-apply-button-${isMobile ? 390 : 1440}.png`, { animations: "disabled", mask: [page.locator(".afa-support-chat-btn")] });
 
   // 2. No past events: every listed title is an upcoming event, and the API's past ones are absent.
   expect(all.length, "the All Cities list came back").toBeGreaterThan(0);
@@ -126,6 +126,6 @@ test("[BUG-2610-023] artist share poster: no stray blocks; the link is this depl
   await expect(shareCard).toHaveScreenshot(`artist-poster-card-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
     // The poster prints the fixture's date, which moves forward as the clock does.
-    mask: [poster],
+    mask: [poster, page.locator(".afa-support-chat-btn")],
   });
 });
