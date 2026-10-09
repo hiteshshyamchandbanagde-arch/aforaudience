@@ -67,9 +67,12 @@ function focusSearchOnOpen(): boolean {
   return !window.matchMedia('(pointer: coarse), (max-width: 767px)').matches
 }
 
+// Throws on a failed response, so the picker keeps "loading" and asks
+// again on the next open instead of treating it as a city list (BUG-2610-032).
 async function fetchCities(): Promise<CityOption[]> {
   const res = await fetch('/api/venues/cities')
-  const data = res.ok ? await res.json() : null
+  if (!res.ok) throw new Error(`/api/venues/cities: HTTP ${res.status}`)
+  const data = await res.json()
   return data?.cities ?? []
 }
 
@@ -100,6 +103,9 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   const [location, setLocation] = useState<LocationState | null>(null)
   const [open, setOpen] = useState(false)
   const [cities, setCities] = useState<CityOption[]>([])
+  // BUG-2610-032 - false until /api/venues/cities has answered. Before that
+  // an empty list means "still loading", not "no city matches".
+  const [citiesLoaded, setCitiesLoaded] = useState(false)
   const [query, setQuery] = useState('')
   const [saving, setSaving] = useState(false)
   const [geo, setGeo] = useState<GeoState>({ kind: 'idle' })
@@ -142,11 +148,19 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   }, [])
 
   useEffect(() => {
-    if (!open || cities.length > 0) return
+    if (!open || citiesLoaded) return
+    let cancelled = false
     fetchCities()
-      .then((list) => { if (list.length > 0) setCities(list) })
+      .then((list) => {
+        if (cancelled) return
+        setCities(list)
+        setCitiesLoaded(true)
+      })
       .catch(() => {})
-  }, [open, cities.length])
+    return () => {
+      cancelled = true
+    }
+  }, [open, citiesLoaded])
 
   // A closed picker starts clean next time it opens.
   useEffect(() => {
@@ -198,8 +212,11 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const list = cities.length > 0 ? cities : await fetchCities()
-          if (cities.length === 0 && list.length > 0) setCities(list)
+          const list = citiesLoaded ? cities : await fetchCities()
+          if (!citiesLoaded) {
+            setCities(list)
+            setCitiesLoaded(true)
+          }
           const byPoint = new Map<CityPoint, CityOption>()
           for (const c of list) {
             if (typeof c.lat === 'number' && typeof c.lng === 'number') byPoint.set({ city: c.city, country: c.country, lat: c.lat, lng: c.lng }, c)
@@ -316,8 +333,14 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
             style={{ width: '100%', boxSizing: 'border-box', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-2)', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-            {filteredCities.length === 0 ? (
-              <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: 'var(--afa-space-6px) var(--afa-space-1)' }}>{t.location.noMatchingCities}</div>
+            {/* BUG-2610-032 - "no match" only once the list is here and a search found nothing. */}
+            {!citiesLoaded ? (
+              // aria-live, not role="status": the picker's one status region is the "Use my location" message.
+              <div aria-live="polite" data-testid="city-list-loading" style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: 'var(--afa-space-6px) var(--afa-space-1)' }}>{t.location.loadingCities}</div>
+            ) : filteredCities.length === 0 ? (
+              query.trim() !== '' && (
+                <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: 'var(--afa-space-6px) var(--afa-space-1)' }}>{t.location.noMatchingCities}</div>
+              )
             ) : (
               filteredCities.map((c) => (
                 <Button

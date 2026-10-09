@@ -16,6 +16,7 @@ import Button from '@/components/ui/Button'
 import { calendarDate, formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { countNoun } from '@/lib/i18n/plural'
+import { chartTooltipProps } from '@/lib/chart-tooltip'
 
 interface VenueRow {
   id: string
@@ -223,11 +224,9 @@ export default function VenueOwnerSalesOverviewPage() {
                       tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
                     />
                     <Tooltip
+                      {...chartTooltipProps}
                       cursor={{ style: { stroke: 'var(--afa-amber-border)' }, strokeDasharray: '3 3' }}
-                      contentStyle={{ background: 'var(--afa-surface-inverse)', border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
-                      labelStyle={{ color: 'var(--afa-text-muted)' }}
                       labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label, locale) : String(label ?? ''))}
-                      itemStyle={{ color: 'var(--afa-amber)' }}
                       formatter={(v: any) => [money(Number(v)), 'Revenue']}
                     />
                     <Area type="monotone" dataKey="revenue" style={{ stroke: 'var(--afa-amber)' }} strokeWidth={2} fill="url(#revFill)" dot={false} activeDot={{ r: 4, style: { fill: 'var(--afa-amber)' } }} />
@@ -254,8 +253,8 @@ export default function VenueOwnerSalesOverviewPage() {
                       <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
+                        {...chartTooltipProps}
                         cursor={{ style: { fill: 'var(--afa-tint-04)' } }}
-                        contentStyle={{ background: 'var(--afa-surface-inverse)', border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                         formatter={(v: any) => [money(Number(v)), 'Revenue']}
                       />
                       <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={22}>
