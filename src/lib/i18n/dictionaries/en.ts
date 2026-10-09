@@ -1958,6 +1958,33 @@ const en = {
       unpublish: "Unpublish",
       publishVenue: "Publish Venue",
     },
+    // The register/edit venue form's shared pieces: SeatSectionEditor,
+    // FacilitiesPicker, City/AddressAutocomplete, HelpIcon.
+    venueForm: {
+      noSections: "No sections yet. Add one to start designing your seating layout — e.g. \"VIP Front Row\", \"General\", \"Balcony\".",
+      // {n}: the row number.
+      sectionNamePlaceholder: "Section name (e.g. Section {n})",
+      seats: "Seats",
+      price: "Price",
+      free: "Free",
+      removeSection: "Remove section",
+      // {names}: the repeated names, already quoted and joined.
+      duplicateNamesOne: "Section name \"{names}\" is used more than once — each section needs a unique name.",
+      duplicateNamesOther: "Section names \"{names}\" are used more than once — each section needs a unique name.",
+      // {n}: rows started but not finished.
+      incompleteRowsOne: "{n} row is missing a name, seat count, or price (check \"Free\" for a free section) — fill it in or remove it with ✕.",
+      incompleteRowsOther: "{n} rows are missing a name, seat count, or price (check \"Free\" for a free section) — fill them in or remove them with ✕.",
+      addSection: "Add another section",
+      totalSeats: "total seats",
+      perSeatRange: "per-seat range",
+      otherFacilities: "Other",
+      otherFacilitiesHint: "(comma separated, optional)",
+      otherFacilitiesPlaceholder: "e.g., Rooftop seating, Valet",
+      cityPlaceholder: "Start typing a city...",
+      addressPlaceholder: "Start typing an address or venue name...",
+      searching: "Searching...",
+      moreInfo: "More info",
+    },
   },
 }
 
