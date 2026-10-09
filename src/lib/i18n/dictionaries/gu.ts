@@ -1758,6 +1758,34 @@ const gu: Dictionary = {
       waiting: "બીજી બાજુના જવાબની રાહ છે.",
     },
   },
+
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "તમે સ્થળ માલિક તરીકે નોંધાયેલા નથી",
+      notOwnerBody: "બુકિંગ સંભાળવાનું શરૂ કરવા માટે તમારી પ્રોફાઇલમાંથી તમારું સ્થળ લિસ્ટ કરવા અરજી કરો.",
+      backToHome: "હોમ પર પાછા જાઓ",
+      pendingTitle: "તમારા સ્થળ માલિક એકાઉન્ટની મંજૂરી બાકી છે",
+      pendingBody: "તમે સ્થળ લિસ્ટ કરો અને બુકિંગ સ્વીકારો તે પહેલાં અમારી ટીમ નવી સ્થળ માલિક અરજીઓ તપાસે છે. મંજૂરી મળતાં જ અમે તમને જણાવીશું.",
+      eyebrow: "પોર્ટફોલિયો",
+      title: "તમારાં સ્થળો",
+      loadFailed: "તમારાં સ્થળો લોડ થઈ શક્યાં નહીં",
+      emptyCaption: "હજી કોઈ સ્થળ નથી — તમારી પહેલી જગ્યા નોંધાવો",
+      statusPublished: "પ્રકાશિત",
+      statusDraft: "ડ્રાફ્ટ",
+      capacity: "ક્ષમતા",
+      perSeat: "પ્રતિ સીટ",
+      rateType: "દરનો પ્રકાર",
+      rateHourly: "કલાક દીઠ",
+      rateDaily: "દિવસ દીઠ",
+      rateFlexible: "લવચીક",
+      hourlyRate: "કલાક દીઠ · {amount}/કલાક",
+      dailyRate: "દિવસ દીઠ · {amount}/દિવસ",
+      flexibleRate: "લવચીક દર",
+      view: "જુઓ",
+      edit: "બદલો",
+      seatMap: "સીટ મેપ",
+    },
+  },
 }
 
 export default gu
