@@ -51,7 +51,8 @@ export function englishUiText(source: string): string[] {
     if (/^\s*(\*|\/\*)/.test(line)) return
     // JSX text between tags on one line: <p ...>Text</p>
     for (const m of code.matchAll(/>([^<>{}]+)</g)) {
-      if (/=>/.test(m[0]) || /^\s*$/.test(m[1])) continue
+      // Not text: the ">" of an arrow function ("(s) => a || b <= 0").
+      if (/=>/.test(m[0]) || code[m.index! - 1] === '=' || /^\s*$/.test(m[1])) continue
       if (hasEnglish(m[1])) found.push(`${i + 1}: ${m[1].trim()}`)
     }
     // JSX text alone on its line (a child between an opening and closing tag)
@@ -113,6 +114,7 @@ test('[GEN-2610-007] the check catches English UI text and lets translated text 
     '<input placeholder={a.replyPlaceholder} />',
     "showToast(a.profileSaved, 'success')",
     '<BrandLoader label={chrome.loading} />',
+    'const missing = sections.some((s) => !prices[key(s)] || Number(prices[key(s)]) <= 0)',
   ].join('\n')
   assert.deepEqual(englishUiText(good), [])
 })
@@ -130,6 +132,7 @@ test('[GEN-2610-007] no hard-coded English UI text on the Artist dashboard pages
 const ORGANISER_FILES = [
   'src/app/dashboard/organiser/page.tsx',
   'src/app/dashboard/organiser/events/[id]/page.tsx',
+  'src/app/dashboard/organiser/events/create/page.tsx',
 ].map((f) => join(ROOT, f))
 
 test('[GEN-2610-007] no hard-coded English UI text on the translated Organiser dashboard pages', () => {
