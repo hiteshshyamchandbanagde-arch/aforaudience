@@ -8255,3 +8255,7 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
 ## Decision 8 Oct (delegated by Hitesh): role dashboards are translated (GEN-2610-007)
 
 - Artist, Organiser and Venue Owner dashboards are translated into all 12 locales (incl. Marathi). Admin stays English. Supersedes the earlier "dashboard labels are deliberately English-only" rule. Delivered in three runs: 6a shared chrome + Artist, 6b Organiser, 6c Venue Owner.
+
+## Process rule 9 Oct (Hitesh): run tasks in small chunks
+
+- Every CC dispatch has a small scope (about 2-4 tickets or one page group). Inside a run: one small edit, commit, push, then the next; never more than one dictionary/locale file per edit; never rewrite a whole large file. Pointer in `AGENTS.md` so every autopilot run reads it.
