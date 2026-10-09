@@ -15,6 +15,7 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 import { countNoun } from '@/lib/i18n/plural'
+import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
@@ -147,6 +148,8 @@ function RemoveRowButton({ onClick }: { onClick: () => void }) {
 }
 
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+  // GEN-2610-007 - the terms checklist reads its translated labels.
+  const { t: tr } = useLocale()
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -787,7 +790,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         }}
                         style={{ marginTop: '3px' }} // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                       />
-                      <span>{term.label}</span>
+                      <span>{tr.eventTermsChecklist[term.key as keyof typeof tr.eventTermsChecklist] || term.label}</span>
                     </label>
                   ))}
                 </div>

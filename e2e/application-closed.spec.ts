@@ -143,9 +143,9 @@ test.describe("Hrithik", () => {
     await expect(closed).toContainText(/closed/i);
     await expect(closed).not.toContainText(/pending/i);
     // Neutral pill, not the gold PENDING one.
-    const pill = closed.getByText(/^closed$/i);
+    const pill = closed.locator('[data-afa-status="CLOSED"]');
     const bg = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
-    const gold = await page.locator(`[data-afa-application="${OPEN_APP.id}"]`).getByText(/^pending$/i).evaluate((el) => getComputedStyle(el).backgroundColor);
+    const gold = await page.locator(`[data-afa-application="${OPEN_APP.id}"] [data-afa-status="PENDING"]`).evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(bg, "Closed pill is not the gold pending tint").not.toBe(gold);
     await hideFloatingOverlays(page);
     await expect(closed).toHaveScreenshot(`application-closed-artist-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });

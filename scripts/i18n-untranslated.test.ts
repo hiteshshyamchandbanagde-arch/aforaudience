@@ -13,6 +13,9 @@
 //   /artists, event detail, checkout, and the nav/location/shared strings
 //   on all of them), any such value fails the test unless it is allowed
 //   below.
+// - GEN-2610-007: the role dashboards are translated too, one namespace
+//   per area (DASHBOARD_GROUPS), checked the same way. Admin stays English
+//   and has no namespace.
 // - Everywhere else it is printed as a leftover, so the list stays visible
 //   until those pages get their own pass. It does not fail.
 import assert from 'node:assert/strict'
@@ -27,10 +30,14 @@ async function test(name: string, fn: () => void | Promise<void>) {
 
 const OTHER_LOCALES = ['hi', 'mr', 'te', 'ta', 'kn', 'ml', 'gu', 'bn', 'de', 'fr', 'es']
 
-/** Dictionary groups rendered on the homepage, /events, /venues, /artists, event detail and checkout. */
+/** GEN-2610-007 - the role dashboards' namespaces (6a: shared chrome + Artist; 6b/6c add Organiser and Venue Owner). */
+export const DASHBOARD_GROUPS = ['dashboardChrome', 'artistDashboard', 'eventTermsChecklist']
+
+/** Dictionary groups rendered on the homepage, /events, /venues, /artists, event detail and checkout, plus the dashboards'. */
 export const CHECKED_GROUPS = [
   'common', 'nav', 'roles', 'search', 'location', 'eventTypes', 'availability', 'bookingStatus',
   'homePage', 'eventsPage', 'venuesPage', 'venueDetailPage', 'artistsPage', 'eventDetailPage', 'checkoutPage',
+  ...DASHBOARD_GROUPS,
 ]
 
 /**
@@ -66,6 +73,11 @@ export const ALLOWED: Record<string, { locales: string[]; why: string }> = {
   'homePage.fourRoomsHouseStep3': { locales: ['de'], why: '"Ticket" is the German word' },
   'homePage.footerLivestreams': { locales: ['de', 'fr'], why: '"Livestreams" is used as is in de/fr' },
   'homePage.footerBlog': { locales: ['de', 'fr', 'es'], why: '"Blog" is the word in de/fr/es' },
+  'artistDashboard.genres': { locales: ['de', 'fr'], why: '"Genres" is the German and French word' },
+  'artistDashboard.tour': { locales: ['de'], why: '"Tour" is the German word' },
+  'artistDashboard.linkOptional': { locales: ['de'], why: '"Link (optional)" is the German wording' },
+  'artistDashboard.budgetLabel': { locales: ['de'], why: '"Budget" is the German word' },
+  'artistDashboard.influences': { locales: ['fr'], why: '"Influences" is the French word' },
 }
 
 /** Proper nouns that read the same in every language. */
@@ -129,6 +141,23 @@ async function main() {
   await test('[BUG-2610-029] no English left on the homepage, /events, /venues, /artists, event detail or checkout', () => {
     assert.deepEqual(
       checked.map((f) => `${f.locale} ${f.key}: "${f.value}"`),
+      [],
+    )
+  })
+
+  await test('[GEN-2610-007] the dashboard namespaces exist in en.ts with the shared chrome and Artist strings', () => {
+    for (const group of DASHBOARD_GROUPS) {
+      assert.ok(Object.keys(flatEn).some((k) => k.startsWith(`${group}.`)), `${group} is missing from en.ts`)
+    }
+    for (const key of ['dashboardChrome.myEvents', 'dashboardChrome.more', 'artistDashboard.applicationsTitle', 'artistDashboard.browseTitle']) {
+      assert.equal(typeof flatEn[key], 'string', `${key} is missing from en.ts`)
+    }
+  })
+
+  await test('[GEN-2610-007] no English left in the dashboard namespaces (shared chrome + Artist) in any of the 11 other locales', () => {
+    const dashboard = checked.filter((f) => DASHBOARD_GROUPS.includes(f.key.split('.')[0]))
+    assert.deepEqual(
+      dashboard.map((f) => `${f.locale} ${f.key}: "${f.value}"`),
       [],
     )
   })

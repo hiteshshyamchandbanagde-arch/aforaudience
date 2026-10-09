@@ -147,6 +147,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <div
               key={t.id}
               role="alert"
+              data-afa-toast={t.kind}
               style={{
                 position: 'relative',
                 display: 'flex',

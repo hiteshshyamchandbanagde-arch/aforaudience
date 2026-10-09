@@ -12,7 +12,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { eventPriceLabel } from '@/components/EventCard'
 import { isPastEvent } from '@/lib/application-status'
 import { PageTitle } from '@/components/dashboard/PageTitle'
@@ -35,14 +35,14 @@ interface EventItem {
   venue: { name: string; city: string } | null
 }
 
-function compensationBadge(event: EventItem): { label: string; bg: string; color: string } {
+function compensationBadge(event: EventItem, a: Dictionary['artistDashboard']): { label: string; bg: string; color: string } {
   if (event.defaultCompensationType === 'PAID') {
-    return { label: `You're paid: ₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`, ...STATUS_TONE.sage }
+    return { label: a.compPaid.replace('{amount}', `₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`), ...STATUS_TONE.sage }
   }
   if (event.defaultCompensationType === 'BUY_IN') {
-    return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, ...STATUS_TONE.error }
+    return { label: a.compBuyIn.replace('{amount}', `₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`), ...STATUS_TONE.error }
   }
-  return { label: 'Free / Exposure slot', bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }
+  return { label: a.compFree, bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }
 }
 
 // Full lineups no longer hard-block applying - they queue as WAITLISTED
@@ -53,15 +53,18 @@ function isEventFull(event: EventItem): boolean {
   return event.maxPerformers !== null && event.lineup.length >= event.maxPerformers
 }
 
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  PENDING: { label: '✓ Applied - pending review', color: 'var(--afa-sage-bright)' },
-  APPROVED: { label: "✓ You're in the lineup!", color: 'var(--afa-sage-bright)' },
-  WAITLISTED: { label: 'Waitlisted', color: 'var(--afa-amber)' },
-  REJECTED: { label: 'Not selected this time', color: 'var(--afa-text-primary)' },
+// GEN-2610-007 - labels from t.artistDashboard; the stored status stays English.
+const STATUS_LABEL: Record<string, { labelKey: 'statusPending' | 'statusApproved' | 'statusWaitlisted' | 'statusRejected'; color: string }> = {
+  PENDING: { labelKey: 'statusPending', color: 'var(--afa-sage-bright)' },
+  APPROVED: { labelKey: 'statusApproved', color: 'var(--afa-sage-bright)' },
+  WAITLISTED: { labelKey: 'statusWaitlisted', color: 'var(--afa-amber)' },
+  REJECTED: { labelKey: 'statusRejected', color: 'var(--afa-text-primary)' },
 }
 
 export default function BrowseEventsToApplyPage() {
   const { locale, t: tr } = useLocale()
+  const a = tr.artistDashboard
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
@@ -204,17 +207,17 @@ export default function BrowseEventsToApplyPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to apply')
+        throw new Error(data.error || a.applyFailed)
       }
       setApplicationStatus((prev) => ({ ...prev, [eventId]: data.status }))
     } catch (err: any) {
-      showToast(err.message || 'Failed to apply', 'error')
+      showToast(err.message || a.applyFailed, 'error')
     } finally {
       setApplying(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
@@ -224,10 +227,10 @@ export default function BrowseEventsToApplyPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
-            Browse Events
+            {a.browseTitle}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
-            Apply to perform at published events.
+            {a.browseSubtitle}
           </p>
 
           <select
@@ -239,7 +242,8 @@ export default function BrowseEventsToApplyPage() {
               borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2) var(--afa-space-14px)', marginBottom: 'var(--afa-space-32px)', cursor: 'pointer',
             }}
           >
-            <option value="All Cities">All Cities</option>
+            {/* The value stays the "All Cities" sentinel; only the label is translated. */}
+            <option value="All Cities">{a.allCities}</option>
             {cities.map((c) => (
               <option key={`${c.city}-${c.country ?? ''}`} value={c.city}>{c.label}</option>
             ))}
@@ -271,7 +275,7 @@ export default function BrowseEventsToApplyPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-4)' }}>
               {events.map((event) => {
                 const existingStatus = applicationStatus[event.id]
-                const comp = compensationBadge(event)
+                const comp = compensationBadge(event, a)
                 const full = isEventFull(event)
                 return (
                   <div key={event.id} data-afa-browse-event={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
@@ -279,19 +283,19 @@ export default function BrowseEventsToApplyPage() {
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>
-                          {formatDate(event.date, 'medium', locale)} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
+                          {formatDate(event.date, 'medium', locale)} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : chrome.venueTbd}
                         </p>
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                        Audience pays: {event.isFree ? 'Free' : eventPriceLabel(event, tr)}
+                        {a.audiencePays.replace('{price}', event.isFree ? a.free : eventPriceLabel(event, tr))}
                       </span>
                     </div>
 
                     <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-3)' }}>
-                      <Badge variant="pill" tone={comp}>{comp.label}</Badge>
+                      <Badge variant="pill" tone={comp} data-afa-compensation={event.defaultCompensationType ?? 'FREE'}>{comp.label}</Badge>
                       {full && !existingStatus && (
                         <Badge variant="pill" tone={{ bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }}>
-                          Lineup full - waitlist only
+                          {a.lineupFull}
                         </Badge>
                       )}
                     </div>
@@ -306,7 +310,7 @@ export default function BrowseEventsToApplyPage() {
                         consistency. */}
                     {event.defaultCompensationType === 'BUY_IN' && (
                       <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: 'calc(-1 * var(--afa-space-6px))', marginBottom: 'var(--afa-space-3)' }}>
-                        Pay directly to the organiser - not yet processed or confirmed by the platform.
+                        {a.buyInNote}
                       </p>
                     )}
 
@@ -315,14 +319,14 @@ export default function BrowseEventsToApplyPage() {
                     {existingStatus ? (
                       <>
                         <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-text-primary)' }}>
-                          {STATUS_LABEL[existingStatus]?.label || existingStatus}
+                          {STATUS_LABEL[existingStatus] ? a[STATUS_LABEL[existingStatus].labelKey] : existingStatus}
                         </span>
                         {performanceIdByEvent[event.id] && (
                           <div style={{ marginTop: 'var(--afa-space-14px)' }}>
                             <PosterShareCard
                               src={`/api/posters/artist/${performanceIdByEvent[event.id]}`}
                               filename={`${event.title}-my-poster.png`}
-                              title={`I'm performing at ${event.title}`}
+                              title={a.posterTitle.replace('{title}', event.title)}
                             />
                           </div>
                         )}
@@ -332,7 +336,7 @@ export default function BrowseEventsToApplyPage() {
                         <textarea
                           value={message[event.id] || ''}
                           onChange={(e) => setMessage((prev) => ({ ...prev, [event.id]: e.target.value }))}
-                          placeholder="Optional note to the organiser"
+                          placeholder={a.notePlaceholder}
                           rows={2}
                           style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-10px)', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
@@ -341,6 +345,7 @@ export default function BrowseEventsToApplyPage() {
                           size="sm"
                           fullWidth={false}
                           onClick={() => apply(event.id)}
+                          data-afa-apply={full ? 'waitlist' : 'apply'}
                           disabled={applying === event.id}
                           // BUG-2610-023 - colour, fill and border are set only for
                           // the outlined Join Waitlist. An explicit `background:
@@ -354,7 +359,7 @@ export default function BrowseEventsToApplyPage() {
                             opacity: applying === event.id ? 0.6 : 1,
                           }}
                         >
-                          {applying === event.id ? 'Submitting...' : full ? 'Join Waitlist' : 'Apply to Perform'}
+                          {applying === event.id ? a.submitting : full ? a.joinWaitlist : a.applyToPerform}
                         </Button>
                       </div>
                     )}

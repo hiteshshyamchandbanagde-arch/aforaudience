@@ -64,9 +64,11 @@ async function clearLeftoverStops(request: APIRequestContext) {
   return stops.length - keep.length;
 }
 
+// The editor is found by its data-afa-* hooks, not its English labels: the
+// dashboard follows the UI language (GEN-2610-007).
 async function saveProfile(page: Page) {
-  await page.getByRole("button", { name: "Save Profile" }).click();
-  await expect(page.getByText("Profile saved.")).toBeVisible(AFTER_WRITE);
+  await page.locator("[data-afa-save-profile]").click();
+  await expect(page.locator('[data-afa-toast="success"]')).toBeVisible(AFTER_WRITE);
 }
 
 /** Hrithik's public Tour list, reloading past the page cache until it does (or does not) show the stop. */
@@ -96,12 +98,12 @@ test("[FEAT-2608-047] a tour stop in another country, saved in the editor, is sh
   try {
     await test.step("Editor: add Lisbon, Portugal and save", async () => {
       await gotoDashboard(page, "/dashboard/artist/edit/");
-      const tour = page.locator("div").filter({ has: page.locator("label", { hasText: /^Tour$/ }) }).last();
-      const before = await tour.getByRole("button", { name: "Remove tour stop" }).count();
-      await tour.getByRole("button", { name: "+ Add tour stop" }).click();
-      const row = tour.getByRole("button", { name: "Remove tour stop" }).nth(before).locator("xpath=..");
-      await row.getByPlaceholder("City").fill(STOP.city);
-      await row.getByPlaceholder("Country").fill(STOP.country);
+      const tour = page.locator("[data-afa-tour]");
+      const before = await tour.locator("[data-afa-tour-stop]").count();
+      await tour.locator("[data-afa-tour-add]").click();
+      const row = tour.locator("[data-afa-tour-stop]").nth(before);
+      await row.locator("[data-afa-tour-city]").fill(STOP.city);
+      await row.locator("[data-afa-tour-country]").fill(STOP.country);
       await row.locator('input[type="date"]').fill(STOP.date);
       await saveProfile(page);
       const saved = (await profile(page.request)).tourStops as TourStop[];
@@ -117,12 +119,11 @@ test("[FEAT-2608-047] a tour stop in another country, saved in the editor, is sh
 
     await test.step("Editor: remove the stop and save", async () => {
       await gotoDashboard(page, "/dashboard/artist/edit/");
-      const tour = page.locator("div").filter({ has: page.locator("label", { hasText: /^Tour$/ }) }).last();
-      const row = tour.locator("div").filter({ has: page.getByRole("button", { name: "Remove tour stop" }) }).filter({
-        has: page.locator(`input[placeholder="City"][value="${STOP.city}"]`),
+      const row = page.locator("[data-afa-tour] [data-afa-tour-stop]").filter({
+        has: page.locator(`input[data-afa-tour-city][value="${STOP.city}"]`),
       });
       await expect(row).toHaveCount(1);
-      await row.getByRole("button", { name: "Remove tour stop" }).click();
+      await row.locator("[data-afa-tour-remove]").click();
       await expect(row).toHaveCount(0);
       await saveProfile(page);
     });

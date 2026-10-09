@@ -81,6 +81,7 @@ export default function Badge({
   icon,
   children,
   style,
+  ...data
 }: {
   variant?: BadgeVariant
   tone: StatusToneStyle
@@ -91,10 +92,12 @@ export default function Badge({
   icon?: React.ReactNode
   children: React.ReactNode
   style?: React.CSSProperties
+  /** GEN-2610-007 - data-* hooks for tests (the label follows the UI language). */
+  [hook: `data-${string}`]: string | undefined
 }) {
   // BUG-2610-015 - data-afa-avoid: the floating chat button never rests over a badge.
   return (
-    <span data-afa-avoid style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
+    <span {...data} data-afa-avoid style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
       {icon}
       {children}
     </span>

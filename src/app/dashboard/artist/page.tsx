@@ -12,7 +12,8 @@ import Button from '@/components/ui/Button'
 import RatingStars from '@/components/ui/RatingStars'
 import { displayApplicationStatus, splitApplicationsByEventDate } from '@/lib/application-status'
 import { formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
@@ -101,8 +102,22 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
   CLOSED: { ...STATUS_TONE.muted },
 }
 
+// GEN-2610-007 - the pill's label in the UI language; the stored status
+// stays English. An unknown status falls back to the old lower-case value.
+function applicationStatusLabel(status: string, chrome: Dictionary['dashboardChrome']): string {
+  switch (status) {
+    case 'PENDING': return chrome.applicationPending
+    case 'APPROVED': return chrome.applicationApproved
+    case 'REJECTED': return chrome.applicationRejected
+    case 'WAITLISTED': return chrome.applicationWaitlisted
+    default: return status.toLowerCase()
+  }
+}
+
 export default function ArtistDashboard() {
   const { t: tr, locale } = useLocale()
+  const a = tr.artistDashboard
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -146,7 +161,7 @@ export default function ArtistDashboard() {
         body: JSON.stringify({ text }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to send reply')
+      if (!res.ok) throw new Error(data.error || a.replyFailed)
       setLocalReplies((prev) => ({
         ...prev,
         [reviewId]: { text: data.text, author: { name: profile?.name || '', displayName: null } },
@@ -169,7 +184,7 @@ export default function ArtistDashboard() {
     const fetchProfile = async () => {
       try {
         const res = await fetch('/api/artists/me')
-        if (!res.ok) throw new Error('Failed to fetch profile')
+        if (!res.ok) throw new Error(a.profileLoadFailed)
         const data = await res.json()
         setProfile(data)
       } catch (err: any) {
@@ -208,7 +223,7 @@ export default function ArtistDashboard() {
         body: JSON.stringify({ accept }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to respond')
+      if (!res.ok) throw new Error(data.error || a.respondFailed)
       setTourInvites((prev) => prev.filter((inv) => inv.id !== consentId))
     } catch (err: any) {
       setError(err.message)
@@ -218,12 +233,12 @@ export default function ArtistDashboard() {
   }
 
   const cancelPerformance = async (performanceId: string) => {
-    if (!(await confirm({ title: 'Cancel this performance?', body: "If it's a Buy-in slot, your payment is recorded as refunded.", confirmLabel: 'Cancel performance', cancelLabel: 'Keep it', destructive: true }))) return
+    if (!(await confirm({ title: a.cancelConfirmTitle, body: a.cancelConfirmBody, confirmLabel: a.cancelConfirmLabel, cancelLabel: a.keepIt, destructive: true }))) return
     setCancelling(performanceId)
     try {
       const res = await fetch(`/api/performances/${performanceId}/cancel`, { method: 'POST' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to cancel')
+      if (!res.ok) throw new Error(data.error || a.cancelFailed)
       const refreshed = await fetch('/api/artists/me')
       if (refreshed.ok) setProfile(await refreshed.json())
     } catch (err: any) {
@@ -243,10 +258,10 @@ export default function ArtistDashboard() {
     return start.getTime() - Date.now() >= 24 * 60 * 60 * 1000
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={chrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
-  if (!profile) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>Profile not found</div></DashboardShell></>)
+  if (!profile) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>{chrome.profileNotFound}</div></DashboardShell></>)
 
   const upcoming = profile.performances
     .filter((p) => !p.cancelledAt && new Date(p.event.date) >= new Date(new Date().toDateString()))
@@ -305,7 +320,7 @@ export default function ArtistDashboard() {
                 {profile.displayName || profile.name || profile.email}
               </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
+                {countText(locale, profile.followers.length, a.followersOne, a.followersOther)}
               </p>
             </div>
             {/* BUG-2609-010: Edit Profile/Corporate Inquiries/Browse Events
@@ -321,12 +336,12 @@ export default function ArtistDashboard() {
               {tourInvites.map((inv) => (
                 <div key={inv.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-gold)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)' }}>
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-amber)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 'var(--afa-space-2)' }}>
-                    Tour invite
+                    {a.tourInvite}
                   </p>
                   <h3 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>{inv.tour.title}</h3>
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-10px)' }}>
-                    {inv.tour.organiser.orgName} wants to feature you on this Tour
-                    {inv.tour.stops.length > 0 && ` — ${inv.tour.stops.length} stop${inv.tour.stops.length > 1 ? 's' : ''}`}.
+                    {a.tourInviteBody.replace('{org}', inv.tour.organiser.orgName)}
+                    {inv.tour.stops.length > 0 && ` — ${countText(locale, inv.tour.stops.length, a.tourStopsOne, a.tourStopsOther)}`}.
                   </p>
                   {inv.tour.stops.length > 0 && (
                     <ul style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8, marginBottom: 'var(--afa-space-14px)', paddingLeft: 'var(--afa-space-18px)' }}>
@@ -343,7 +358,7 @@ export default function ArtistDashboard() {
                       onClick={() => respondToTourInvite(inv.id, true)}
                       disabled={respondingTour === inv.id}
                     >
-                      Accept
+                      {a.accept}
                     </Button>
                     <Button
                       variant="outline-error"
@@ -352,7 +367,7 @@ export default function ArtistDashboard() {
                       onClick={() => respondToTourInvite(inv.id, false)}
                       disabled={respondingTour === inv.id}
                     >
-                      Decline
+                      {a.decline}
                     </Button>
                   </div>
                 </div>
@@ -368,10 +383,10 @@ export default function ArtistDashboard() {
           {profile.performances.length === 0 && profile.followers.length === 0 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: `1px solid ${fillSolidTint(0.15)}` }}>
               <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
-                Today is just the beginning <Icon name="music" size={16} style={INLINE_ICON_STYLE} />
+                {a.beginningTitle} <Icon name="music" size={16} style={INLINE_ICON_STYLE} />
               </p>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, lineHeight: 1.5 }}>
-                Every hype score and follower count starts at zero. Complete your profile and apply to your first event to start building yours — this platform is here to grow with you.
+                {a.beginningBody}
               </p>
             </div>
           )}
@@ -379,16 +394,16 @@ export default function ArtistDashboard() {
           {completionPercent < 100 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: '1px solid var(--afa-fill-tint)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-10px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-                <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Profile {completionPercent}% complete</span>
+                <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{a.profileComplete.replace('{percent}', String(completionPercent))}</span>
                 <Link href="/dashboard/artist/edit" style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
-                  Complete your profile →
+                  {a.completeProfileLink}
                 </Link>
               </div>
               <div style={{ height: '6px', borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-tint-08)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-pill)' }} />
               </div>
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-2)' }}>
-                A complete profile - bio, genre, style, and a social link - helps Organisers say yes faster.
+                {a.completeProfileHint}
               </p>
             </div>
           )}
@@ -396,7 +411,7 @@ export default function ArtistDashboard() {
           {/* Profile summary */}
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
             <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: profile.bio ? 0.8 : 0.4, marginBottom: 'var(--afa-space-4)', lineHeight: 1.6, fontStyle: profile.bio ? 'normal' : 'italic' }}>
-              {profile.bio || 'No bio yet — add one from Edit Profile.'}
+              {profile.bio || a.noBio}
             </p>
             {(profile.genre.length > 0 || profile.styleTag.length > 0) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
@@ -417,22 +432,22 @@ export default function ArtistDashboard() {
           {(totalCompensation > 0 || totalSpend > 0) && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
-                Recorded Earnings
+                {a.earningsTitle}
               </h2>
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-18px)' }}>
-                Compensation and spend agreed with Organisers - not processed or confirmed by the platform. Tips will show separately once available.
+                {a.earningsNote}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-4)' }}>
                 <div>
-                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Compensation</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{a.recordedCompensation}</p>
                   <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{formatINR(totalCompensation)}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Spend</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{a.recordedSpend}</p>
                   <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{formatINR(totalSpend)}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Net</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{a.net}</p>
                   <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error-bright)' }}>
                     {netFigure >= 0 ? '+' : '−'}{formatINR(Math.abs(netFigure))}
                   </p>
@@ -445,18 +460,18 @@ export default function ArtistDashboard() {
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-14px)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-                Reviews
+                {a.reviewsTitle}
               </h2>
               {avgRating !== null && (
                 <span data-afa-reviews-summary style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
-                  <RatingStars rating={Math.round(avgRating * 10) / 10} />{' '}
-                  <span style={{ opacity: 0.6 }}>{avgRating.toFixed(1)} · {allReviews.length} review{allReviews.length === 1 ? '' : 's'}</span>
+                  <RatingStars rating={Math.round(avgRating * 10) / 10} label={a.ratingOutOf5.replace('{rating}', String(Math.round(avgRating * 10) / 10))} />{' '}
+                  <span style={{ opacity: 0.6 }}>{avgRating.toFixed(1)} · {countText(locale, allReviews.length, a.reviewsCountOne, a.reviewsCountOther)}</span>
                 </span>
               )}
             </div>
             {allReviews.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                No reviews yet. Audiences can rate you after checking in at a show.
+                {a.noReviews}
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
@@ -465,7 +480,7 @@ export default function ArtistDashboard() {
                   return (
                     <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4) var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-                        <RatingStars rating={r.rating} style={{ fontSize: 'var(--afa-text-body)' }} />
+                        <RatingStars rating={r.rating} label={a.ratingOutOf5.replace('{rating}', String(r.rating))} style={{ fontSize: 'var(--afa-text-body)' }} />
                         <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{r.eventTitle}</span>
                       </div>
                       {r.comment && (
@@ -478,14 +493,14 @@ export default function ArtistDashboard() {
                       {reply ? (
                         <div style={{ marginTop: 'var(--afa-space-1)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid var(--afa-tint-06)' }}>
                           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.85, lineHeight: 1.5 }}>
-                            <strong>Your reply:</strong> {reply.text}
+                            <strong>{a.yourReply}</strong> {reply.text}
                           </p>
                         </div>
                       ) : (
                         <div style={{ marginTop: 'var(--afa-space-10px)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid var(--afa-tint-06)', display: 'flex', gap: 'var(--afa-space-2)' }}>
                           <input
                             type="text"
-                            placeholder="Write a reply..."
+                            placeholder={a.replyPlaceholder}
                             value={replyDrafts[r.id] || ''}
                             onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
                             maxLength={500}
@@ -502,7 +517,7 @@ export default function ArtistDashboard() {
                               opacity: replySubmitting === r.id || !(replyDrafts[r.id] || '').trim() ? 0.6 : 1,
                             }}
                           >
-                            {replySubmitting === r.id ? 'Sending...' : 'Reply'}
+                            {replySubmitting === r.id ? chrome.sending : a.reply}
                           </Button>
                         </div>
                       )}
@@ -516,11 +531,11 @@ export default function ArtistDashboard() {
           {/* Followers */}
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
-              Followers
+              {a.followersTitle}
             </h2>
             {profile.followers.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                No followers yet. They&apos;ll show up here as people find your profile.
+                {a.noFollowers}
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
@@ -536,7 +551,7 @@ export default function ArtistDashboard() {
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', fontWeight: 500 }}>{label}</span>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginLeft: 'auto' }}>
-                        since {formatDate(f.createdAt, 'medium', locale)}
+                        {a.followerSince.replace('{date}', formatDate(f.createdAt, 'medium', locale))}
                       </span>
                     </div>
                   )
@@ -548,10 +563,10 @@ export default function ArtistDashboard() {
           {/* Upcoming performances */}
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
-              Upcoming Performances
+              {a.upcomingTitle}
             </h2>
             {upcoming.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No upcoming performances yet. Apply to events to get booked.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{a.noUpcoming}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {upcoming.map((p) => (
@@ -559,11 +574,11 @@ export default function ArtistDashboard() {
                     <div>
                       <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        {formatDate(p.event.date, 'medium', locale)} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
+                        {formatDate(p.event.date, 'medium', locale)} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : chrome.venueTbd}
                       </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
-                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-fill-solid)' }}>Slot #{p.slot} · {p.duration} min</span>
+                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-fill-solid)' }}>{a.slotLine.replace('{slot}', String(p.slot)).replace('{min}', String(p.duration))}</span>
                       {canCancel(p) ? (
                         <Button
                           variant="outline-error"
@@ -572,11 +587,11 @@ export default function ArtistDashboard() {
                           onClick={() => cancelPerformance(p.id)}
                           disabled={cancelling === p.id}
                         >
-                          {cancelling === p.id ? 'Cancelling...' : 'Cancel'}
+                          {cancelling === p.id ? a.cancelling : chrome.cancel}
                         </Button>
                       ) : (
-                        <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
-                          Too close to cancel
+                        <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4 }} title={a.tooCloseToCancelHint}>
+                          {a.tooCloseToCancel}
                         </span>
                       )}
                     </div>
@@ -589,11 +604,14 @@ export default function ArtistDashboard() {
           {/* Applications */}
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
-              My Applications
+              {a.applicationsTitle}
             </h2>
             {profile.applications.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                No applications yet. <Link href="/dashboard/artist/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Browse events</Link> to apply.
+                {/* {link} sits where the language puts it. */}
+                {a.noApplications.split('{link}')[0]}
+                <Link href="/dashboard/artist/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{a.browseEventsLink}</Link>
+                {a.noApplications.split('{link}')[1] ?? ''}
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
@@ -660,12 +678,12 @@ export default function ArtistDashboard() {
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
-                        <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
-                          {shownStatus === 'CLOSED' ? tr.common.applicationClosed : app.status.toLowerCase()}
+                        <span data-afa-status={shownStatus} style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
+                          {shownStatus === 'CLOSED' ? tr.common.applicationClosed : applicationStatusLabel(app.status, chrome)}
                         </span>
                       </div>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        {formatDate(app.event.date, 'medium', locale)} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : 'Venue TBD'} · by {app.event.organiser.orgName}
+                        {formatDate(app.event.date, 'medium', locale)} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : chrome.venueTbd} · {a.byOrganiser.replace('{org}', app.event.organiser.orgName)}
                       </p>
                     </div>
                     </Fragment>

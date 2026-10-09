@@ -19,25 +19,29 @@ test("[BUG-2609-084] organiser event detail shows one bottom bar, the organiser'
   await gotoDashboard(page, `/dashboard/organiser/events/${EVENT_ID}`);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-  const organiserBar = page.getByRole("navigation").filter({ has: page.getByRole("link", { name: "My Events" }) });
+  // The bar and its items by their data-afa-* hooks, not their English
+  // labels: the role bars follow the UI language (GEN-2610-007).
+  const organiserBar = page.locator('nav[data-afa-tab-bar="organiser"]');
   await expect(organiserBar).toBeVisible();
-  for (const name of ["My Events", "Create", "Sales", "Requests"]) {
-    await expect(organiserBar.getByRole("link", { name, exact: true })).toBeVisible();
+  for (const id of ["my-events", "create", "sales", "requests"]) {
+    await expect(organiserBar.locator(`a[data-afa-tab="${id}"]`)).toBeVisible();
   }
-  await expect(organiserBar.getByRole("button", { name: "More" })).toBeVisible();
+  await expect(organiserBar.locator('button[data-afa-tab="more"]')).toBeVisible();
 
-  // The legacy bar's own items are nowhere on screen: exactly one bar.
-  for (const name of ["My Tickets", "Messages", "Profile"]) {
-    await expect(page.getByRole("link", { name, exact: true }).filter({ visible: true })).toHaveCount(0);
+  // The legacy bar's own items (My Tickets, Messages, Profile) are nowhere
+  // on screen, found by where they link: exactly one bar.
+  await expect(page.locator("nav[data-afa-tab-bar]").filter({ visible: true })).toHaveCount(1);
+  for (const href of ["/tickets", "/dashboard/messages", "/profile"]) {
+    await expect(page.locator(`nav a[href="${href}"], nav a[href="${href}/"]`).filter({ visible: true })).toHaveCount(0);
   }
 
   // "My Events" is the active item. The bar marks it by weight only (no
   // aria-current), so compare it with a sibling.
-  const weight = (name: string) =>
+  const weight = (id: string) =>
     organiserBar
-      .getByRole("link", { name, exact: true })
+      .locator(`a[data-afa-tab="${id}"]`)
       .evaluate((link) => Math.max(...[link, ...link.querySelectorAll("*")].map((el) => Number(getComputedStyle(el).fontWeight))));
-  expect(await weight("My Events")).toBeGreaterThan(await weight("Sales"));
+  expect(await weight("my-events")).toBeGreaterThan(await weight("sales"));
 
   // The page's own action row is not hidden under the bar.
   const edit = page.getByRole("link", { name: "Edit Event" });

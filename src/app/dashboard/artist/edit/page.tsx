@@ -11,6 +11,7 @@ import DashboardShell from '@/components/DashboardShell'
 import Button, { variantStyle } from '@/components/ui/Button'
 import GenrePicker from '@/components/GenrePicker'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { useLocale } from '@/lib/i18n/translate'
 
 const inputStyle = {
   width: '100%',
@@ -31,6 +32,9 @@ const labelStyle = {
 }
 
 export default function EditArtistProfilePage() {
+  const { t: tr } = useLocale()
+  const a = tr.artistDashboard
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -68,7 +72,7 @@ export default function EditArtistProfilePage() {
           fetch('/api/artists/me'),
           fetch('/api/users/me'),
         ])
-        if (!artistRes.ok) throw new Error('Failed to fetch profile')
+        if (!artistRes.ok) throw new Error(a.profileLoadFailed)
         const data = await artistRes.json()
         setBio(data.bio || '')
         setGenre(data.genre || [])
@@ -97,7 +101,7 @@ export default function EditArtistProfilePage() {
           setAvatar(userData.user?.avatar || '')
         }
       } catch (err: any) {
-        showToast(err.message || 'Failed to load profile', 'error')
+        showToast(err.message || a.profileLoadError, 'error')
       } finally {
         setLoading(false)
       }
@@ -120,13 +124,13 @@ export default function EditArtistProfilePage() {
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) {
-        showToast(data.error || 'Upload failed - please try again.', 'error')
+        showToast(data.error || a.uploadFailed, 'error')
         return
       }
       setAvatar(data.url)
-      showToast('Photo uploaded. Save to keep it.', 'success')
+      showToast(a.photoUploaded, 'success')
     } catch {
-      showToast('Upload failed - please try again.', 'error')
+      showToast(a.uploadFailed, 'error')
     } finally {
       setUploadingAvatar(false)
     }
@@ -173,21 +177,21 @@ export default function EditArtistProfilePage() {
           body: JSON.stringify({ avatar: avatar.trim() || null }),
         }),
       ])
-      if (!artistRes.ok) throw new Error('Failed to save profile')
+      if (!artistRes.ok) throw new Error(a.saveFailed)
       if (!userRes.ok) {
         const data = await userRes.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to save profile picture')
+        throw new Error(data.error || a.savePhotoFailed)
       }
-      showToast('Profile saved.', 'success')
+      showToast(a.profileSaved, 'success')
       router.push('/dashboard/artist')
     } catch (err: any) {
-      showToast(err.message || 'Failed to save profile', 'error')
+      showToast(err.message || a.saveFailed, 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
@@ -197,44 +201,44 @@ export default function EditArtistProfilePage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
-            Edit Your Profile
+            {a.editTitle}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
-            This is what organisers see when you apply to their events.
+            {a.editSubtitle}
           </p>
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Profile Picture</label>
+              <label style={labelStyle}>{a.profilePicture}</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
+                  <img src={avatar} alt={a.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
                 <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
-                  {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
+                  {uploadingAvatar ? a.uploading : avatar ? a.changePhoto : a.uploadPhoto}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
               </div>
               <details>
-                <summary style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
+                <summary style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer' }}>{a.pasteImageLink}</summary>
                 <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={{ ...inputStyle, marginTop: 'var(--afa-space-2)' }} />
               </details>
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Bio</label>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Tell organisers about your act" style={{ ...inputStyle, resize: 'vertical' as const }} />
+              <label style={labelStyle}>{a.bio}</label>
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder={a.bioPlaceholder} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Genres</label>
+              <label style={labelStyle}>{a.genres}</label>
               <GenrePicker value={genre} onChange={setGenre} />
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Style Tags <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
-              <input type="text" value={styleTagInput} onChange={(e) => setStyleTagInput(e.target.value)} placeholder="e.g., Observational, High-energy" style={inputStyle} />
+              <label style={labelStyle}>{a.styleTags} <span style={{ fontWeight: 400, opacity: 0.6 }}>{a.commaSeparated}</span></label>
+              <input type="text" value={styleTagInput} onChange={(e) => setStyleTagInput(e.target.value)} placeholder={a.styleTagsPlaceholder} style={inputStyle} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)' }}>
@@ -253,40 +257,40 @@ export default function EditArtistProfilePage() {
               section beyond the short bio above. Nothing here is required. */}
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
-              Your Background
+              {a.backgroundTitle}
             </h2>
             <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
-              All optional - share as much or as little of your story as you want.
+              {a.backgroundSubtitle}
             </p>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Tagline <span style={{ fontWeight: 400, opacity: 0.6 }}>(one line, shown prominently)</span></label>
-              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={200} placeholder="e.g., Turning everyday chaos into comedy" style={inputStyle} />
+              <label style={labelStyle}>{a.tagline} <span style={{ fontWeight: 400, opacity: 0.6 }}>{a.taglineHint}</span></label>
+              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={200} placeholder={a.taglinePlaceholder} style={inputStyle} />
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Full Biography <span style={{ fontWeight: 400, opacity: 0.6 }}>(as long as you&apos;d like)</span></label>
-              <textarea value={fullBiography} onChange={(e) => setFullBiography(e.target.value)} rows={5} placeholder="The complete story, beyond the short bio above" style={{ ...inputStyle, resize: 'vertical' as const }} />
+              <label style={labelStyle}>{a.fullBiography} <span style={{ fontWeight: 400, opacity: 0.6 }}>{a.fullBiographyHint}</span></label>
+              <textarea value={fullBiography} onChange={(e) => setFullBiography(e.target.value)} rows={5} placeholder={a.fullBiographyPlaceholder} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Your Journey</label>
-              <textarea value={journey} onChange={(e) => setJourney(e.target.value)} rows={5} placeholder="How you got started, key moments along the way" style={{ ...inputStyle, resize: 'vertical' as const }} />
+              <label style={labelStyle}>{a.journey}</label>
+              <textarea value={journey} onChange={(e) => setJourney(e.target.value)} rows={5} placeholder={a.journeyPlaceholder} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Influences <span style={{ fontWeight: 400, opacity: 0.6 }}>(who inspired you)</span></label>
+              <label style={labelStyle}>{a.influences} <span style={{ fontWeight: 400, opacity: 0.6 }}>{a.influencesHint}</span></label>
               <textarea value={influences} onChange={(e) => setInfluences(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Thanks <span style={{ fontWeight: 400, opacity: 0.6 }}>(anyone you&apos;d like to acknowledge)</span></label>
+              <label style={labelStyle}>{a.thanks} <span style={{ fontWeight: 400, opacity: 0.6 }}>{a.thanksHint}</span></label>
               <textarea value={acknowledgments} onChange={(e) => setAcknowledgments(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
 
             <div>
-              <label style={labelStyle}>Goals &amp; Ambitions</label>
-              <textarea value={goals} onChange={(e) => setGoals(e.target.value)} rows={3} placeholder="Where you want this to go" style={{ ...inputStyle, resize: 'vertical' as const }} />
+              <label style={labelStyle}>{a.goals}</label>
+              <textarea value={goals} onChange={(e) => setGoals(e.target.value)} rows={3} placeholder={a.goalsPlaceholder} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
           </div>
 
@@ -294,14 +298,16 @@ export default function EditArtistProfilePage() {
               artist can show they perform beyond Pune/India. Purely
               informational - not tied to AFA's booking flow, since these
               shows aren't happening through the platform. */}
-          <div style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
-            <label style={labelStyle}>Tour</label>
+          {/* GEN-2610-007 - data-afa-tour-* are stable test hooks (labels are translated). */}
+          <div data-afa-tour style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
+            <label style={labelStyle}>{a.tour}</label>
             <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
-              Show where else you're performing — city, country, and an optional date or link. Shown on your public profile.
+              {a.tourHint}
             </p>
             {tourStops.map((stop) => (
               <div
                 key={stop.key}
+                data-afa-tour-stop
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
@@ -313,17 +319,18 @@ export default function EditArtistProfilePage() {
                   alignItems: 'start',
                 }}
               >
-                <input type="text" value={stop.city} onChange={(e) => updateTourStop(stop.key, 'city', e.target.value)} placeholder="City" style={inputStyle} />
-                <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder="Country" style={inputStyle} />
+                <input type="text" value={stop.city} onChange={(e) => updateTourStop(stop.key, 'city', e.target.value)} placeholder={a.city} data-afa-tour-city style={inputStyle} />
+                <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder={a.country} data-afa-tour-country style={inputStyle} />
                 <input type="date" value={stop.date} onChange={(e) => updateTourStop(stop.key, 'date', e.target.value)} style={inputStyle} />
-                <input type="url" value={stop.link} onChange={(e) => updateTourStop(stop.key, 'link', e.target.value)} placeholder="Link (optional)" style={inputStyle} />
+                <input type="url" value={stop.link} onChange={(e) => updateTourStop(stop.key, 'link', e.target.value)} placeholder={a.linkOptional} style={inputStyle} />
                 <Button
                   variant="outline-error"
                   size="md"
                   onClick={() => removeTourStop(stop.key)}
-                  aria-label="Remove tour stop"
+                  aria-label={a.removeTourStop}
+                  data-afa-tour-remove
                 >
-                  ✕ Remove
+                  ✕ {a.remove}
                 </Button>
               </div>
             ))}
@@ -332,9 +339,10 @@ export default function EditArtistProfilePage() {
               size="md"
               fullWidth={false}
               onClick={addTourStop}
+              data-afa-tour-add
               style={{ marginTop: 'var(--afa-space-1)' }}
             >
-              + Add tour stop
+              + {a.addTourStop}
             </Button>
           </div>
 
@@ -344,13 +352,14 @@ export default function EditArtistProfilePage() {
               size="lg"
               fullWidth={false}
               onClick={save}
+              data-afa-save-profile
               disabled={saving}
               style={{ opacity: saving ? 0.6 : 1 }}
             >
-              {saving ? 'Saving...' : 'Save Profile'}
+              {saving ? chrome.saving : a.saveProfile}
             </Button>
             <Link href="/dashboard/artist" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
-              Cancel
+              {chrome.cancel}
             </Link>
           </div>
         </div>
