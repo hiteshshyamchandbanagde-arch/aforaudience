@@ -1244,6 +1244,7 @@ const ta: Dictionary = {
     },
     eventDetail: {
       noAccess: "இந்த நிகழ்வை அணுக உங்களுக்கு அனுமதி இல்லை",
+      nextDay: "மறுநாள்",
       notFound: "நிகழ்வு கிடைக்கவில்லை",
       backToEvents: "நிகழ்வுகளுக்குத் திரும்பு",
       sharePosterTitle: "போஸ்டரைப் பகிரவும்",
@@ -1392,6 +1393,7 @@ const ta: Dictionary = {
       paidEntry: "கட்டண அனுமதி",
       sectionsFromSeatMap: "பிரிவுகளும் இருக்கை எண்ணிக்கையும் {venue}-இன் இருக்கை வரைபடத்திலிருந்து வருகின்றன — இந்த நிகழ்வுக்கு ஒவ்வொரு பிரிவின் விலையை மட்டும் நீங்கள் அமைக்கிறீர்கள்.",
       mainLevel: "முதன்மை",
+      layoutPreview: "அமைப்பு முன்னோட்டம்",
       pricePlaceholder: "₹ விலை",
       free: "இலவசம்",
       totalCapacity: "மொத்தக் கொள்ளளவு: {sections}-இல் {seats}",
