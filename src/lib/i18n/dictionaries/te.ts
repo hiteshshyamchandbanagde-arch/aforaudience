@@ -1244,6 +1244,7 @@ const te: Dictionary = {
     },
     eventDetail: {
       noAccess: "ఈ ఈవెంట్‌కు మీకు యాక్సెస్ లేదు",
+      nextDay: "మరుసటి రోజు",
       notFound: "ఈవెంట్ కనుగొనబడలేదు",
       backToEvents: "ఈవెంట్‌లకు తిరిగి వెళ్లండి",
       sharePosterTitle: "పోస్టర్ షేర్ చేయండి",
@@ -1392,6 +1393,7 @@ const te: Dictionary = {
       paidEntry: "చెల్లింపు ప్రవేశం",
       sectionsFromSeatMap: "విభాగాలు, సీట్ల సంఖ్య {venue} సీట్ మ్యాప్ నుండి వస్తాయి — ఈ ఈవెంట్‌కు మీరు ఒక్కో విభాగం ధర మాత్రమే నిర్ణయిస్తారు.",
       mainLevel: "ప్రధాన",
+      layoutPreview: "లేఅవుట్ ప్రివ్యూ",
       pricePlaceholder: "₹ ధర",
       free: "ఉచితం",
       totalCapacity: "మొత్తం సామర్థ్యం: {sections}లో {seats}",
