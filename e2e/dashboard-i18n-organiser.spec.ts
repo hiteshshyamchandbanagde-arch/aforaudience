@@ -10,7 +10,9 @@ import de from "../src/lib/i18n/dictionaries/de";
 /**
  * GEN-2610-007 (6b-1) - the Organiser dashboard follows the UI language:
  * Your Events, an event's detail page (Artist Applications, the declared
- * compensation terms), Create Event and Edit Event. As Omkar, at 390 and
+ * compensation terms), Create Event and Edit Event. 6b-2 adds Sales
+ * Overview, an event's sales, the Lineup builder, door check-in, Tours,
+ * Direct Payouts, Edit Profile and Venue Booking Requests. As Omkar, at 390 and
  * 1440, in Hindi, with Marathi and German spot checks, no English UI
  * strings are left in the page's main region. Same method as
  * dashboard-i18n-artist.spec.ts (6a), on the nested organiserDashboard
@@ -36,7 +38,12 @@ type Locale = keyof typeof DICTS;
 // Read the same in every language. "Buy-in" is AFA's slot-type name, kept
 // in Latin script in hi/mr (as in 6a); whether it should be is on
 // Hitesh's Hindi/Marathi read.
-const PROPER_NOUNS = ["AforAudience", "AFA", "Instagram", "YouTube", "Google", "Buy-in"];
+// Payouts keeps Razorpay's own menu path, ID format and "KYC" as on
+// Razorpay; check-in's ticket-ref example is a code, not a word.
+const PROPER_NOUNS = [
+  "AforAudience", "AFA", "Instagram", "YouTube", "Google", "Buy-in",
+  "Razorpay", "Route → Accounts → Add Account", "acc_XXXXXXXXXXXXXX", "acc_", "KYC", "ID", "AFA-7K3M-Q9TX",
+];
 
 // Expected headings per language (organiserDashboard.yourEvents.title,
 // eventDetail.editEvent / artistApplications, createEvent.title, editEvent.title).
@@ -44,6 +51,15 @@ const HEADINGS: Record<Locale, { events: string; editLink: string; applications:
   hi: { events: "आपके इवेंट", editLink: "इवेंट बदलें", applications: "कलाकारों के आवेदन", create: "इवेंट बनाएँ", edit: "इवेंट बदलें" },
   mr: { events: "तुमचे इव्हेंट", editLink: "इव्हेंट बदला", applications: "कलाकारांचे अर्ज", create: "इव्हेंट तयार करा", edit: "इव्हेंट बदला" },
   de: { events: "Deine Events", editLink: "Event bearbeiten", applications: "Künstler-Bewerbungen", create: "Event erstellen", edit: "Event bearbeiten" },
+};
+
+// 6b-2 page headings (organiserDashboard.sales.title, sales.eventTitle's
+// suffix, lineup.title's suffix, checkin.title, tours.title,
+// tours.createTitle, payouts.title, editProfile.title, venueRequests.title).
+const HEADINGS_2: Record<Locale, { sales: string; eventSales: string; lineup: string; checkin: string; tours: string; createTour: string; payouts: string; editProfile: string; venueRequests: string }> = {
+  hi: { sales: "बिक्री का सारांश", eventSales: "— बिक्री", lineup: "— लाइनअप", checkin: "चेक-इन", tours: "टूर", createTour: "टूर बनाएं", payouts: "डायरेक्ट पेआउट", editProfile: "अपनी प्रोफ़ाइल एडिट करें", venueRequests: "वेन्यू बुकिंग अनुरोध" },
+  mr: { sales: "विक्रीचा आढावा", eventSales: "— विक्री", lineup: "— लाइनअप", checkin: "चेक-इन", tours: "टूर्स", createTour: "टूर तयार करा", payouts: "डायरेक्ट पेआउट", editProfile: "तुमची प्रोफाइल एडिट करा", venueRequests: "व्हेन्यू बुकिंग विनंत्या" },
+  de: { sales: "Verkaufsübersicht", eventSales: "— Verkäufe", lineup: "— Line-up", checkin: "Einlass", tours: "Touren", createTour: "Tour erstellen", payouts: "Direkte Auszahlungen", editProfile: "Profil bearbeiten", venueRequests: "Buchungsanfragen für Locations" },
 };
 
 const NAMESPACES = ["organiserDashboard", "dashboardChrome", "eventTermsChecklist", "eventTypes", "nav"] as const;
@@ -248,6 +264,61 @@ for (const locale of ["hi", "mr", "de"] as const) {
       expect(await englishLeftIn(main, locale, data), "English left on Edit Event").toEqual([]);
       if (locale === "hi") await shotTitle(page, "organiser-edit-event-title", isMobile);
       // Nothing was saved.
+    });
+
+    test(`[GEN-2610-007] Sales Overview in ${locale}: no English UI strings, range picker included`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/organiser/sales/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].sales);
+      // The range picker's segments and the "Updated … ago" line are read too.
+      await expect(main.getByRole("button", { name: DICTS[locale].dashboardChrome.rangeAll })).toBeVisible();
+      await expect(main.getByText(DICTS[locale].organiserDashboard.sales.byEvent)).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on Sales Overview").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "organiser-sales-title", isMobile);
+    });
+
+    test(`[GEN-2610-007] an event's sales page in ${locale}: no English UI strings`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      const event = await pickEvent(page);
+      await gotoInLocale(page, `/dashboard/organiser/events/${event.id}/sales/`, locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toContainText(HEADINGS_2[locale].eventSales);
+      await expect(main.getByText(DICTS[locale].organiserDashboard.sales.byTicketTier)).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on the event's sales page").toEqual([]);
+    });
+
+    test(`[GEN-2610-007] the Lineup builder in ${locale}: no English UI strings`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      const event = await pickEvent(page);
+      await gotoInLocale(page, `/dashboard/organiser/events/${event.id}/lineup/`, locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toContainText(HEADINGS_2[locale].lineup);
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on the Lineup builder").toEqual([]);
+      // Nothing was saved or sent.
+    });
+
+    test(`[GEN-2610-007] door check-in in ${locale}: no English UI strings, attendee list open`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      const event = await pickEvent(page);
+      await gotoInLocale(page, `/dashboard/organiser/events/${event.id}/checkin/`, locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].checkin);
+      // Open the attendee list so its filters and rows are read too.
+      const c = DICTS[locale].organiserDashboard.checkin;
+      await main.getByRole("button", { name: c.attendeeList }).click();
+      await expect(main.getByRole("button", { name: c.filterCheckedIn })).toBeVisible();
+      await expect(main.getByText(DICTS[locale].dashboardChrome.loading)).toHaveCount(0);
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on door check-in").toEqual([]);
+      // Nobody was checked in: the camera never starts and no code is sent.
     });
   });
 }
