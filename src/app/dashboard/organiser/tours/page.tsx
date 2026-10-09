@@ -10,6 +10,7 @@ import { ErrorBanner } from '@/components/ErrorBanner'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface TourItem {
   id: string
@@ -70,7 +71,7 @@ export default function OrganiserToursPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) var(--afa-space-80px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-28px)', flexWrap: 'wrap', gap: 'var(--afa-space-3)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
+            <PageTitle>Tours</PageTitle>
             <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-1)' }}>
               A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
             </p>

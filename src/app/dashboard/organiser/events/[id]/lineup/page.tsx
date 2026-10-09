@@ -27,6 +27,8 @@ import { CSS } from '@dnd-kit/utilities'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface LineupSlot {
   id: string
@@ -143,7 +145,7 @@ function SortableRow({
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
       </Button>
 
-      <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ₹${compAmount}` : ''}</Badge>
+      <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ${formatINR(compAmount)}` : ''}</Badge>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
         <input
@@ -292,9 +294,9 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-6px)' }}>
-            🎤 {event.title} — Lineup
-          </h1>
+          <PageTitle style={{ marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-6px)' }}>
+            {event.title} — Lineup
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
             Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).
             {event.maxPerformers !== null && ` Max ${event.maxPerformers} performer${event.maxPerformers === 1 ? '' : 's'}.`}

@@ -16,6 +16,9 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { displayApplicationStatus } from '@/lib/application-status'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface Application {
   id: string
@@ -89,8 +92,8 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
 function describeDefaultCompensation(event: EventDetail): string {
   const t = event.defaultCompensationType || 'FREE'
   if (t === 'FREE') return 'Free (no money either way)'
-  if (t === 'PAID') return `Paid${event.defaultFeeAmount ? ` — ₹${event.defaultFeeAmount}` : ''}`
-  return `Buy-in${event.defaultBuyInAmount ? ` — ₹${event.defaultBuyInAmount}` : ''}`
+  if (t === 'PAID') return `Paid${event.defaultFeeAmount ? ` — ${formatINR(event.defaultFeeAmount)}` : ''}`
+  return `Buy-in${event.defaultBuyInAmount ? ` — ${formatINR(event.defaultBuyInAmount)}` : ''}`
 }
 
 export default function OrganiserEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -143,7 +146,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to apply wallet credit')
       await fetchEvent()
-      showToast(`₹${data.applied.toLocaleString('en-IN')} wallet credit applied.`, 'success')
+      showToast(`${formatINR(data.applied)} wallet credit applied.`, 'success')
     } catch (err: any) {
       showToast(err.message || 'Failed to apply wallet credit', 'error')
     } finally {
@@ -269,9 +272,9 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-28px)', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-6px)' }}>
                 {event.title}
-              </h1>
+              </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                 {formatDate(event.date, 'medium', locale)} · {formatEventTimeRange(event.startTime, event.endTime)}
               </p>
@@ -326,13 +329,13 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                   {event.isFree
                     ? 'Free'
                     : event.ticketPrice
-                    ? `₹${event.ticketPrice}`
+                    ? formatINR(event.ticketPrice)
                     : event.ticketTiers && event.ticketTiers.length > 0
                     ? (() => {
                         const prices = event.ticketTiers.map((t) => t.price)
                         const min = Math.min(...prices)
                         const max = Math.max(...prices)
-                        return min === max ? `₹${min}` : `₹${min} – ₹${max}`
+                        return min === max ? formatINR(min) : `${formatINR(min)} – ${formatINR(max)}`
                       })()
                     : '—'}
                 </p>
@@ -374,7 +377,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
                       <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-06)' }}>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? 'var(--afa-space-2)' : 0 }}>
-                          Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
+                          Platform fee remaining: {formatINR(event.venueBooking.platformFeeAmount)}
                         </p>
                         {walletBalance > 0 && (
                           <Button
@@ -384,7 +387,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                             onClick={applyWalletCredit}
                             disabled={applyingWallet}
                           >
-                            {applyingWallet ? 'Applying...' : `💰 Apply wallet credit (₹${walletBalance.toLocaleString('en-IN')} available)`}
+                            {applyingWallet ? 'Applying...' : <><Icon name="wallet" size={14} style={INLINE_ICON_STYLE} /> Apply wallet credit ({formatINR(walletBalance)} available)</>}
                           </Button>
                         )}
                       </div>
@@ -418,7 +421,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     {p.compensationType === 'BUY_IN' && p.buyInAmount && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                         <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
-                          Buy-in ₹{p.buyInAmount.toLocaleString('en-IN')} - {p.buyInRefundStatus === 'WALLET_CREDITED' ? 'kept as wallet credit' : 'marked as refunded to the artist'}
+                          Buy-in {formatINR(p.buyInAmount)} - {p.buyInRefundStatus === 'WALLET_CREDITED' ? 'kept as wallet credit' : 'marked as refunded to the artist'}
                         </span>
                         {p.buyInRefundStatus === 'REFUNDED' && (
                           <Button
@@ -508,19 +511,19 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               href={`/dashboard/organiser/events/${event.id}/lineup`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              🎤 Lineup
+              <Icon name="music" size={16} style={INLINE_ICON_STYLE} /> Lineup
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/checkin`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              🎟 Check-In
+              <Icon name="ticket" size={16} style={INLINE_ICON_STYLE} /> Check-In
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/sales`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              📊 Sales
+              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> Sales
             </Link>
             <Button
               variant="primary"

@@ -16,6 +16,9 @@ import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AG
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 import { countNoun } from '@/lib/i18n/plural'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface SeatSection {
   id?: string
@@ -405,7 +408,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       return
     }
     if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
-      showToast(`Offer Amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
+      showToast(`Offer Amount can't exceed ${formatINR(MAX_INR_AMOUNT)}.`, 'error')
       return
     }
     if (publishing && defaultCompensationType === 'PAID' && !defaultFeeAmount) {
@@ -413,7 +416,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       return
     }
     if (defaultFeeAmount && Number(defaultFeeAmount) > MAX_INR_AMOUNT) {
-      showToast(`Fee per artist can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
+      showToast(`Fee per artist can't exceed ${formatINR(MAX_INR_AMOUNT)}.`, 'error')
       return
     }
     if (publishing && defaultCompensationType === 'BUY_IN' && !defaultBuyInAmount) {
@@ -421,7 +424,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       return
     }
     if (defaultBuyInAmount && Number(defaultBuyInAmount) > MAX_INR_AMOUNT) {
-      showToast(`Buy-in amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
+      showToast(`Buy-in amount can't exceed ${formatINR(MAX_INR_AMOUNT)}.`, 'error')
       return
     }
     if (usingTierPricing && !isFree) {
@@ -659,9 +662,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle size="lg" style={{ marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
             Edit Event
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Update your event details, seats, pricing, and venue.
           </p>
@@ -814,7 +817,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         color: (specialNotesStatus === 'APPROVED' ? STATUS_TONE.sage : specialNotesStatus === 'REJECTED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}
                     >
-                      {specialNotesStatus === 'APPROVED' ? '✓ Approved — visible on your event page' : specialNotesStatus === 'REJECTED' ? '✕ Rejected' : '⏳ Pending review'}
+                      {specialNotesStatus === 'APPROVED' ? '✓ Approved — visible on your event page' : specialNotesStatus === 'REJECTED' ? '✕ Rejected' : <><Icon name="clock" size={14} style={INLINE_ICON_STYLE} /> Pending review</>}
                     </div>
                   )}
                   {specialNotesStatus === 'REJECTED' && specialNotesRejectionReason && (
@@ -1182,7 +1185,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                       </div>
                       <div style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-                        {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
+                        {suggestedAmount !== null ? formatINR(suggestedAmount) : 'Set your event date & time to calculate'}
                       </div>
                     </div>
                   )}

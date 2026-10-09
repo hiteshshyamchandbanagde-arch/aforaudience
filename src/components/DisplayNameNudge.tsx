@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { useLocale } from '@/lib/i18n/translate';
 import { NUDGE_ROW_STYLE, NUDGE_TEXT_STYLE } from './PhoneVerifyNudge';
+import { Icon } from '@/components/Icon';
 
 /**
  * "Add your display name" nudge for existing users whose `displayName`
@@ -100,7 +101,7 @@ export default function DisplayNameNudge() {
   return (
     <div role="status" aria-label={t.displayNameNudge.ariaLabel} data-afa-nudge="display-name" style={NUDGE_ROW_STYLE}>
       <span aria-hidden="true" style={{ flexShrink: 0, lineHeight: 1 }}>
-        ✨
+        <Icon name="sparkle" size={16} />
       </span>
       <span style={NUDGE_TEXT_STYLE}>{t.displayNameNudge.message}</span>
       <Button

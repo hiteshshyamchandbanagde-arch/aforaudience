@@ -868,7 +868,7 @@ const fr: Dictionary = {
     heroEyebrow: "Art vivant. Moments réels.",
     heroLine1Prefix: "Là où l'",
     heroLine1Emphasis: "Art",
-    heroLine2: "trouve",
+    heroLine2: "trouve ",
     heroLine3: "son public",
     heroSubtitle: "Le tout premier univers de l'art vivant au monde — connectant humoristes, poètes, artistes de scène ouverte, organisateurs et lieux dans un écosystème vivant unique.",
     ctaExploreEvents: "Explorer les événements",

@@ -10,6 +10,8 @@ import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface TimelinePoint {
   date: string
@@ -43,7 +45,7 @@ interface VenueSalesData {
 
 const POLL_MS = 20000
 
-const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+const money = formatINR
 
 function timeAgo(iso: string) {
   const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
@@ -128,9 +130,9 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-              📊 {venue.name} — Revenue
-            </h1>
+            <PageTitle>
+              {venue.name} — Revenue
+            </PageTitle>
             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
             </span>
@@ -202,7 +204,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
     <div style={{ background: muted ? 'var(--afa-tint-04)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)' }}>
-      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+      <StatLabel style={{ marginBottom: 'var(--afa-space-6px)' }}>{label}</StatLabel>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
       {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)' }}>{sub}</p>}
     </div>

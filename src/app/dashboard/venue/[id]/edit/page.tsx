@@ -15,6 +15,8 @@ import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 import Button, { variantStyle } from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface Venue {
   id: string
@@ -244,9 +246,9 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <BackLink href={`/dashboard/venue/${id}`} label="Back to Venue" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle size="lg" style={{ marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
             Edit Venue
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Update your venue details and seating layout.
           </p>
@@ -319,7 +321,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                       rel="noopener noreferrer"
                       style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-fill-solid)', fontWeight: 600 }}
                     >
-                      📍 Directions
+                      <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />&nbsp;Directions
                     </a>
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
                       Derived automatically from the address you picked above. Edit the address to change it.

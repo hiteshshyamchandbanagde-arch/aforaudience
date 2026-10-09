@@ -1,5 +1,6 @@
 "use client"
 import { useLocale } from "@/lib/i18n/translate"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 // Split out of page.tsx (server component - direct prisma/session/cookies
 // access, can't call the client-only useLocale hook itself) so the
@@ -25,7 +26,7 @@ export default function VenuesHero({ count }: { count: number }) {
       </span>
       <h1 style={{ marginTop: "var(--afa-space-5)", fontFamily: "var(--font-display)", fontSize: "clamp(44px, 7vw, 80px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
         {tr.venuesPage.headingPrefix}
-        <em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.venuesPage.headingEmphasis}</em>
+        <HeroEmphasis style={{ fontWeight: 400 }}>{tr.venuesPage.headingEmphasis}</HeroEmphasis>
         {tr.venuesPage.headingSuffix}
       </h1>
       <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "var(--afa-space-5)", maxWidth: "420px", lineHeight: 1.6 }}>

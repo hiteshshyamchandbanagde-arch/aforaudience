@@ -12,6 +12,7 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 const inputStyle = {
   width: '100%',
@@ -236,7 +237,7 @@ export default function TourDetailPage() {
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
         <div style={{ marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-28px)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h1>
+          <PageTitle>{tour.title}</PageTitle>
           {tour.subject && <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-6px)' }}>{tour.subject}</p>}
           {tour.status === 'LIVE' && (
             <a href={`/tours/${tour.slug}`} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-fill-solid)', display: 'inline-block', marginTop: 'var(--afa-space-2)' }}>

@@ -8,6 +8,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import Button, { variantStyle } from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }
 const inputStyle = { width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
@@ -129,9 +130,9 @@ export default function OrganiserEditPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
             Edit Your Profile
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             This is what audience members and artists see on your public Organiser page.
           </p>
@@ -151,7 +152,7 @@ export default function OrganiserEditPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
-                <label style={{ ...variantStyle('primary', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>

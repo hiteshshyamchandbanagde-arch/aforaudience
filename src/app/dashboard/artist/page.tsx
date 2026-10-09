@@ -14,6 +14,9 @@ import { displayApplicationStatus, splitApplicationsByEventDate } from '@/lib/ap
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface Application {
   id: string
@@ -298,9 +301,9 @@ export default function ArtistDashboard() {
               {/* BUG-2609-018: was profile.name (the API's raw username
                   field) - this heading is the public-profile preview, same
                   fallback chain as the rest of the app. */}
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-6px)' }}>
                 {profile.displayName || profile.name || profile.email}
-              </h1>
+              </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                 {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
               </p>
@@ -365,7 +368,7 @@ export default function ArtistDashboard() {
           {profile.performances.length === 0 && profile.followers.length === 0 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: `1px solid ${fillSolidTint(0.15)}` }}>
               <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
-                Today is just the beginning 🎤
+                Today is just the beginning <Icon name="music" size={16} style={INLINE_ICON_STYLE} />
               </p>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, lineHeight: 1.5 }}>
                 Every hype score and follower count starts at zero. Complete your profile and apply to your first event to start building yours — this platform is here to grow with you.
@@ -422,16 +425,16 @@ export default function ArtistDashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-4)' }}>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Compensation</p>
-                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
+                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{formatINR(totalCompensation)}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Spend</p>
-                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
+                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{formatINR(totalSpend)}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Net</p>
                   <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error-bright)' }}>
-                    {netFigure >= 0 ? '+' : '−'}₹{Math.abs(netFigure).toLocaleString('en-IN')}
+                    {netFigure >= 0 ? '+' : '−'}{formatINR(Math.abs(netFigure))}
                   </p>
                 </div>
               </div>

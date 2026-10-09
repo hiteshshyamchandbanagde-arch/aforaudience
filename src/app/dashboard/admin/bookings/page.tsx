@@ -8,6 +8,8 @@ import DashboardShell from '@/components/DashboardShell'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 // /dashboard/admin/bookings
 //
@@ -152,7 +154,7 @@ export default function AdminBookingsPage() {
     )
   }
 
-  const formatMoney = (rupees: number) => `₹${rupees.toLocaleString('en-IN')}`
+  const formatMoney = (rupees: number) => formatINR(rupees)
 
   const rowState = (b: BookingItem): { label: string; color: string } => {
     if (b.deliveredAt) return { label: 'Delivered', color: 'var(--afa-green-deep)' }
@@ -166,9 +168,9 @@ export default function AdminBookingsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-80px)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
+          <PageTitle style={{ marginBottom: 'var(--afa-space-1)' }}>
             Bookings &amp; delivery
-          </h1>
+          </PageTitle>
           <p style={{ color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', fontSize: 'var(--afa-text-body)' }}>
             Confirmed bookings, grouped by ticket-delivery state. Retry re-fires the delivery pipeline on failed
             attempts (30-second cooldown enforced by the endpoint).

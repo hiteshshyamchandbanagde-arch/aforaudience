@@ -155,8 +155,9 @@ test.describe("Hrithik", () => {
     const stars = summary.locator("[data-afa-rating-stars]");
     await expect(stars).toHaveAttribute("aria-label", "4.5 out of 5");
     await expect(stars.locator("[data-afa-half-star]")).toHaveCount(1);
-    const whole = await stars.evaluate((el) => [...(el.childNodes as NodeListOf<ChildNode>)].filter((n) => n.nodeType === Node.TEXT_NODE).map((n) => n.textContent).join(""));
-    expect([...whole].filter((c) => c === "⭐").length, "four whole stars").toBe(4);
+    // BUG-2610-025: each star is the app's star icon (an SVG), no longer the ⭐ emoji.
+    await expect(stars.locator(':scope > svg[data-afa-icon="star"]'), "four whole stars").toHaveCount(4);
+    await expect(stars.locator('[data-afa-half-star] > svg[data-afa-icon="star"]')).toHaveCount(1);
     await expect(summary).toContainText("4.5");
     await expect(summary).toHaveScreenshot(`reviews-summary-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
   });

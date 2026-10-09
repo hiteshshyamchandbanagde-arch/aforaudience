@@ -15,6 +15,8 @@ import {
   IconVenue, IconTag, IconPlus, IconUsers, IconMap,
   primaryLinkStyle, outlineLinkStyle,
 } from '@/components/dashboard/VenuePortalUI'
+import { formatINR } from '@/lib/money-display'
+import { Icon } from '@/components/Icon'
 
 interface SeatSection {
   id: string
@@ -52,12 +54,12 @@ function priceRange(venue: Venue) {
   if (prices.length === 0) return '—'
   const min = Math.min(...prices)
   const max = Math.max(...prices)
-  return min === max ? `₹${min}` : `₹${min}–₹${max}`
+  return min === max ? formatINR(min) : `${formatINR(min)}–${formatINR(max)}`
 }
 
 function rateLabel(venue: Venue) {
-  if (venue.rateType === 'HOURLY' && venue.hourlyRate) return `Hourly · ₹${venue.hourlyRate.toLocaleString('en-IN')}/hr`
-  if (venue.rateType === 'DAILY' && venue.dailyRate) return `Daily · ₹${venue.dailyRate.toLocaleString('en-IN')}/day`
+  if (venue.rateType === 'HOURLY' && venue.hourlyRate) return `Hourly · ${formatINR(venue.hourlyRate)}/hr`
+  if (venue.rateType === 'DAILY' && venue.dailyRate) return `Daily · ${formatINR(venue.dailyRate)}/day`
   return 'Flexible rate'
 }
 
@@ -168,7 +170,7 @@ export default function VenueDashboard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}>⏳</div>
+            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}><Icon name="clock" size={32} /></div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>Your Venue Owner account is pending approval</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.
@@ -193,7 +195,7 @@ export default function VenueDashboard() {
               of an in-page CTA, per Hitesh's call. pendingBookings/
               pendingFlexRequests badges moved with Bookings/Flexible
               Requests into the sidebar (SidebarLink's own badge prop). */}
-          <PageHead eyebrow="Portfolio" title="Your Venues" />
+          <PageHead eyebrow="Portfolio" title="Your Venues" titleSize="lg" />
 
           {error && (
             <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>

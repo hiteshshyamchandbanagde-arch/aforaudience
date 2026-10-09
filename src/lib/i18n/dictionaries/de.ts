@@ -872,7 +872,7 @@ const de: Dictionary = {
     heroEyebrow: "Live-Kunst. Echte Momente.",
     heroLine1Prefix: "Wo ",
     heroLine1Emphasis: "Kunst",
-    heroLine2: "ihr",
+    heroLine2: "ihr ",
     heroLine3: "Publikum findet",
     heroSubtitle: "Das weltweit erste Live-Kunst-Universum — vernetzt Comedians, Dichter, Open-Mic-Künstler, Veranstalter und Veranstaltungsorte in einem lebendigen Ökosystem.",
     ctaExploreEvents: "Events entdecken",

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { useLocale } from '@/lib/i18n/translate';
+import { Icon } from '@/components/Icon';
 
 /**
  * "Verify your phone" nudge for logged-in users whose `isVerified` is
@@ -56,7 +57,7 @@ export default function PhoneVerifyNudge() {
   return (
     <div role="status" aria-label={t.phoneVerifyNudge.ariaLabel} data-afa-nudge="phone-verify" style={NUDGE_ROW_STYLE}>
       <span aria-hidden="true" style={{ flexShrink: 0, lineHeight: 1 }}>
-        📱
+        <Icon name="phone" size={16} />
       </span>
       <span style={NUDGE_TEXT_STYLE}>{t.phoneVerifyNudge.message}</span>
       <Button

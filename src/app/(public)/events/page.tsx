@@ -13,6 +13,7 @@ import { LOCATION_CHANGED_EVENT, MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS
 import { useLocale } from "@/lib/i18n/translate"
 import { countText } from "@/lib/i18n/plural"
 import { formatDate } from "@/lib/format-date"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
 // so the hero search (lifted up here, session 65) can type its dropdown
@@ -487,9 +488,9 @@ function EventsPageContent() {
           )}
           <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
             {contentMode === "organisers" ? (
-              <>{tr.eventsPage.heroPrefixOrganisers}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.eventsPage.heroEmphasisOrganisers}</em>{tr.eventsPage.heroSuffixOrganisers}</>
+              <>{tr.eventsPage.heroPrefixOrganisers}<HeroEmphasis style={{ fontWeight: 400 }}>{tr.eventsPage.heroEmphasisOrganisers}</HeroEmphasis>{tr.eventsPage.heroSuffixOrganisers}</>
             ) : (
-              <>{tr.eventsPage.heroPrefixEvents}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.eventsPage.heroEmphasisEvents}</em>{tr.eventsPage.heroSuffixEvents}</>
+              <>{tr.eventsPage.heroPrefixEvents}<HeroEmphasis style={{ fontWeight: 400 }}>{tr.eventsPage.heroEmphasisEvents}</HeroEmphasis>{tr.eventsPage.heroSuffixEvents}</>
             )}
           </h1>
           {contentMode === "events" && (

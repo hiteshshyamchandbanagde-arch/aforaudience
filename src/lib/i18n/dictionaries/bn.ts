@@ -863,7 +863,7 @@ const bn: Dictionary = {
     heroEyebrow: "লাইভ আর্ট। বাস্তব মুহূর্ত।",
     heroLine1Prefix: "যেখানে ",
     heroLine1Emphasis: "আর্ট",
-    heroLine2: "খুঁজে পায়",
+    heroLine2: "খুঁজে পায় ",
     heroLine3: "তার ভিড়",
     heroSubtitle: "বিশ্বের প্রথম লাইভ আর্ট ইউনিভার্স — কমেডিয়ান, কবি, ওপেন মাইক শিল্পী, আয়োজক এবং ভেন্যুগুলিকে একটি জীবন্ত ইকোসিস্টেমে সংযুক্ত করে।",
     ctaExploreEvents: "ইভেন্ট অন্বেষণ করুন",

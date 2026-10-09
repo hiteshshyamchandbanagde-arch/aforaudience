@@ -17,6 +17,9 @@ import { calendarDate, formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { countNoun } from '@/lib/i18n/plural'
 import { chartTooltipProps } from '@/lib/chart-tooltip'
+import { StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { moneyAxis } from '@/lib/money-axis'
 
 interface VenueRow {
   id: string
@@ -65,16 +68,8 @@ interface OverviewData {
 const POLL_MS = 30000
 const TOP_VENUES_SHOWN = 5
 
-const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+const money = formatINR
 
-// Compact axis/bar-label form (₹73.4L, not ₹73,40,000) - full precision in
-// the stat cards, compact here since chart labels have little room.
-function compactMoney(n: number) {
-  if (n >= 1e7) return `₹${(n / 1e7).toFixed(1)}Cr`
-  if (n >= 1e5) return `₹${(n / 1e5).toFixed(1)}L`
-  if (n >= 1e3) return `₹${(n / 1e3).toFixed(0)}K`
-  return `₹${n}`
-}
 
 // bucketKeyFor() produces "YYYY-MM" (year/all ranges), a Monday-anchored
 // "YYYY-MM-DD" (quarter), or a daily "YYYY-MM-DD" (week/month) - format
@@ -217,7 +212,7 @@ export default function VenueOwnerSalesOverviewPage() {
                       tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
                     />
                     <YAxis
-                      tickFormatter={compactMoney}
+                      {...moneyAxis(Math.max(0, ...timeline.map((t) => t.revenue)))}
                       tickLine={false}
                       axisLine={false}
                       width={56}
@@ -250,7 +245,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
                       <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} horizontal={false} />
-                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
+                      <XAxis type="number" {...moneyAxis(Math.max(0, ...topVenues.map((v) => v.revenue)))} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
                         {...chartTooltipProps}
@@ -360,7 +355,7 @@ export default function VenueOwnerSalesOverviewPage() {
 function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
   return (
     <Card style={{ padding: 'var(--afa-space-18px)' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-2)' }}>{label}</p>
+      <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{label}</StatLabel>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import Button from '@/components/ui/Button'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 // Audience Choice voting (§6, session 58). Scoped to Competition Show
 // events. Three cases handled: cast a ballot (voting open + eligible),
@@ -162,7 +163,7 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
   return (
     <div style={{ marginTop: 'var(--afa-space-5)' }}>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>
-        🗳️ Audience Choice
+        <Icon name="vote" size={18} style={INLINE_ICON_STYLE} /> Audience Choice
       </h3>
 
       {results?.available ? (

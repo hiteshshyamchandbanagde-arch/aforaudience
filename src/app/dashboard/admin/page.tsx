@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { formatDate } from '@/lib/format-date'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 // /dashboard/admin — Command Center (design.md §9.6, session 47)
 //
@@ -236,9 +237,9 @@ export default function AdminCommandCenter() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
+        <PageTitle style={{ marginBottom: 'var(--afa-space-1)' }}>
           Command Center
-        </h1>
+        </PageTitle>
         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>{/* token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107) */}
           Everything that needs your attention, at a glance.
         </p>

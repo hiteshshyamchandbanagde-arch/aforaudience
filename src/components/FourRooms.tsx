@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useLocale, type Dictionary } from "@/lib/i18n/translate"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 type Room = {
   n: string
@@ -182,7 +183,7 @@ export default function FourRooms() {
         <div className="four-rooms-intro">
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(34px, 5vw, 60px)", fontWeight: 500, lineHeight: 0.98, letterSpacing: "-0.01em", color: "var(--afa-text-primary)", margin: 0 }}>
             {tr.homePage.fourRoomsHeadingLine1}<br />
-            <em style={{ fontStyle: "italic", color: "var(--afa-amber)" }}>{tr.homePage.fourRoomsHeadingEmphasis}</em>{tr.homePage.fourRoomsHeadingSuffix}
+            <HeroEmphasis>{tr.homePage.fourRoomsHeadingEmphasis}</HeroEmphasis>{tr.homePage.fourRoomsHeadingSuffix}
           </h2>
           <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "var(--afa-text-soft)", margin: 0 }}>
             {tr.homePage.fourRoomsSubtitle}

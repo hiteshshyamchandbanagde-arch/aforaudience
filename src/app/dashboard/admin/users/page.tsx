@@ -11,6 +11,7 @@ import SearchInputBox from '@/components/SearchInputBox'
 import Button from '@/components/ui/Button'
 import { useToast } from '@/components/Toast'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface UserRow {
   id: string
@@ -134,9 +135,9 @@ export default function AdminUsersPage() {
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle style={{ marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
             Accounts
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', maxWidth: '640px' }}>
             Suspending blocks login immediately and hides the account's future events/venues from public
             listings. It does not cancel existing confirmed bookings or already-published events. Fully

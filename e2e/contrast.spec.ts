@@ -24,7 +24,8 @@ const EVENT_ID = "qa-demo-event-full-9";
 const STATUSES = [
   ["APPROVED", "✓ Approved — visible on your event page"],
   ["REJECTED", "✕ Rejected"],
-  ["PENDING", "⏳ Pending review"],
+  // BUG-2610-025: the hourglass emoji is now the app's clock icon (an SVG, no text).
+  ["PENDING", "Pending review"],
 ] as const;
 
 for (const [status, label] of STATUSES) {

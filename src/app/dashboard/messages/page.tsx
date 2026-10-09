@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { useLocale } from '@/lib/i18n/translate'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 function initials(name: string) {
   return name.charAt(0).toUpperCase() || '?'
@@ -76,9 +77,9 @@ export default function MessagesInboxPage() {
       <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '760px', padding: 'var(--afa-space-32px) var(--afa-space-6)' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6)' }}>
+            <PageTitle style={{ marginBottom: 'var(--afa-space-6)' }}>
               {tr.messagesInboxPage.heading}
-            </h1>
+            </PageTitle>
 
             {threads.length === 0 && (
               <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-sans)' }}>

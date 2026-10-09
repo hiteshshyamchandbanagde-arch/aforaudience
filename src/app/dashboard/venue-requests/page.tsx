@@ -12,6 +12,7 @@ import SharedButton from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { refreshBadgeCounts } from '@/lib/badge-refresh'
+import { formatINR } from '@/lib/money-display'
 
 interface Offer {
   id: string
@@ -177,7 +178,7 @@ export default function VenueRequestsPage() {
                             <span style={{ color: 'var(--afa-text-secondary)' }}>
                               {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
                             </span>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--afa-amber)' }}>₹{o.amount.toLocaleString('en-IN')}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--afa-amber)' }}>{formatINR(o.amount)}</span>
                           </div>
                           {o.comment && (
                             <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: 'var(--afa-space-2px) 0 0' }}>
@@ -223,7 +224,7 @@ export default function VenueRequestsPage() {
                       <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                         {lastOffer && (
                           <Button onClick={() => act(r.id, 'accept')} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id ? 0.6 : 1 }}>
-                            <IconCheck /> Accept ₹{lastOffer.amount.toLocaleString('en-IN')}
+                            <IconCheck /> Accept {formatINR(lastOffer.amount)}
                           </Button>
                         )}
                         <Button

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface MessageButtonProps {
   contextType: 'PERFORMANCE' | 'VENUE_BOOKING' | 'BOOKING'
@@ -64,7 +65,7 @@ export default function MessageButton({ contextType, contextId, label = 'Message
       disabled={loading}
       style={style}
     >
-      {icon ?? '💬'} {label}
+      {icon ?? <Icon name="message" size={14} style={INLINE_ICON_STYLE} />} {label}
     </Button>
   )
 }

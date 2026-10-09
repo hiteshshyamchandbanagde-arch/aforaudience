@@ -9,6 +9,8 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import { ErrorBanner, PageHead, Card, SectionTitle, StatusPill, Button } from '@/components/dashboard/VenuePortalUI'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
+import { formatINR } from '@/lib/money-display'
 
 interface SeatSection {
   id: string
@@ -176,7 +178,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               <div>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Price Range</p>
                 <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-                  {minPrice !== null ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : '—'}
+                  {minPrice !== null ? (minPrice === maxPrice ? formatINR(minPrice) : `${formatINR(minPrice)}–${formatINR(maxPrice!)}`) : '—'}
                 </p>
               </div>
               <div>
@@ -229,7 +231,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           {z.price === null ? (
                             '—'
                           ) : z.price > 0 ? (
-                            `₹${z.price}`
+                            formatINR(z.price)
                           ) : (
                             // Rule (Hitesh, 27 Jul): ₹0 is a valid,
                             // explicit "Free" zone now - must read as
@@ -274,7 +276,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                       <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{s.seats} seats</span>
                       <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
                         {Number(s.price) > 0 ? (
-                          `₹${s.price}`
+                          formatINR(s.price)
                         ) : (
                           // Rule (Hitesh, 27 Jul): a ₹0 price must read as
                           // an intentional "Free" section to anyone
@@ -314,7 +316,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               href={`/dashboard/venue/${venue.id}/sales`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              📊 Revenue
+              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> Revenue
             </Link>
             <Button
               onClick={togglePublish}

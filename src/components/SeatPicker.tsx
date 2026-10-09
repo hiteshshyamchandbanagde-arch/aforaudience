@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { colorForZone } from '@/components/SeatLayoutPreview'
 import Button from '@/components/ui/Button'
 import { SELECTED, SELECTED_BG } from '@/lib/statusStyle'
+import { formatINR } from '@/lib/money-display'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
 // x/y layout the Venue Owner builder saved, read-only except for click-
@@ -313,7 +314,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           {zonePrices.map(({ zone, price }) => (
             <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)' }}>
               <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: colorForZone(zone, zoneOrder), marginRight: 'var(--afa-space-6px)' }} />
-              {zone} — {price ? `₹${price}` : 'not on sale'}
+              {zone} — {price ? formatINR(price) : 'not on sale'}
             </span>
           ))}
         </div>
@@ -405,7 +406,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                   ? `Row ${s.row}, Seat ${s.number} — taken`
                   : s.status === 'priceUnset'
                   ? `Row ${s.row}, Seat ${s.number} — not on sale`
-                  : `Row ${s.row}, Seat ${s.number} — ₹${s.price}`
+                  : `Row ${s.row}, Seat ${s.number} — ${formatINR(s.price!)}`
               }
               style={{
                 position: 'absolute',

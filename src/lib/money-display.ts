@@ -19,6 +19,15 @@ export interface DisplayCurrency {
 }
 
 /**
+ * BUG-2610-025 - the one way to show a rupee amount: ₹ plus Indian digit
+ * grouping (₹37,417, ₹1,25,000), never a bare ₹37417. Whole rupees, as
+ * every dashboard figure is. Amounts are rupees, not paise.
+ */
+export function formatINR(amountINR: number): string {
+  return `₹${amountINR.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+}
+
+/**
  * Format an INR rupee amount (not paise) for display, converting to the
  * given currency if it isn't INR. Always shows the real INR amount
  * alongside a non-INR conversion, in parentheses, so it's never ambiguous

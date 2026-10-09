@@ -15,6 +15,8 @@ import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 import { countNoun } from '@/lib/i18n/plural'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface SeatSection {
   id?: string
@@ -458,7 +460,7 @@ export default function CreateEventPage() {
       return
     }
     if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
-      fail(`Offer Amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`)
+      fail(`Offer Amount can't exceed ${formatINR(MAX_INR_AMOUNT)}.`)
       setSaving(false)
       return
     }
@@ -468,7 +470,7 @@ export default function CreateEventPage() {
       return
     }
     if (defaultFeeAmount && Number(defaultFeeAmount) > MAX_INR_AMOUNT) {
-      fail(`Fee per artist can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`)
+      fail(`Fee per artist can't exceed ${formatINR(MAX_INR_AMOUNT)}.`)
       setSaving(false)
       return
     }
@@ -478,7 +480,7 @@ export default function CreateEventPage() {
       return
     }
     if (defaultBuyInAmount && Number(defaultBuyInAmount) > MAX_INR_AMOUNT) {
-      fail(`Buy-in amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`)
+      fail(`Buy-in amount can't exceed ${formatINR(MAX_INR_AMOUNT)}.`)
       setSaving(false)
       return
     }
@@ -543,9 +545,9 @@ export default function CreateEventPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+          <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
             Create an Event
-          </h1>
+          </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Set up your event details, book a venue, and publish when ready.
           </p>
@@ -775,7 +777,7 @@ export default function CreateEventPage() {
                           {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                         </div>
                         <div style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-                          {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
+                          {suggestedAmount !== null ? formatINR(suggestedAmount) : 'Set your event date & time to calculate'}
                         </div>
                       </div>
                       <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span></label>

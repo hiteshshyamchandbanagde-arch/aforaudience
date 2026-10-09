@@ -8,6 +8,8 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { useLocale } from '@/lib/i18n/translate'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 function StatTile({ label, value, icon, sub }: { label: string; value: string; icon: 'creditCard' | 'calendar' | 'gift'; sub?: string }) {
   const icons: Record<string, ReactElement> = {
@@ -108,15 +110,15 @@ export default function AudienceActivityPage() {
       <DashboardShell>
         <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '900px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+            <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-6px)' }}>
               {tr.audienceActivityPage.heading}
-            </h1>
+            </PageTitle>
             <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
               {tr.audienceActivityPage.subtitle}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ marginBottom: 'var(--afa-space-4)' }}>
-              <StatTile label={tr.audienceActivityPage.totalSpend} value={`₹${totalSpend.toLocaleString('en-IN')}`} icon="creditCard" />
+              <StatTile label={tr.audienceActivityPage.totalSpend} value={formatINR(totalSpend)} icon="creditCard" />
               <StatTile label={tr.audienceActivityPage.eventsAttended} value={String(totalEventsAttended)} icon="calendar" />
               <StatTile label={tr.audienceActivityPage.freeEventsAttended} value={String(freeEventsAttended)} icon="gift" />
             </div>
