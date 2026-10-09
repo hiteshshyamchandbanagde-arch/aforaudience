@@ -5,6 +5,7 @@ import PhotoCrossfadeBackdrop from "@/components/PhotoCrossfadeBackdrop"
 import PhotoRotationDots from "@/components/PhotoRotationDots"
 import { usePhotoRotation } from "@/hooks/usePhotoRotation"
 import { useLocale } from "@/lib/i18n/translate"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 /**
  * Full-bleed hero, per design.md "Four rooms, one house" (17 Aug) -
@@ -43,7 +44,7 @@ export default function Hero() {
 
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 8vw, 104px)", fontWeight: 500, lineHeight: 0.94, letterSpacing: "-0.02em", color: "var(--afa-text-primary)", margin: 0 }}>
             {tr.homePage.heroLine1Prefix}{tr.homePage.heroLine1Emphasis}<br />
-            {tr.homePage.heroLine2}<em style={{ fontStyle: "italic", fontWeight: 500, color: "var(--afa-amber)" }}>{tr.homePage.heroLine3}</em>
+            {tr.homePage.heroLine2}<HeroEmphasis style={{ fontWeight: 500 }}>{tr.homePage.heroLine3}</HeroEmphasis>
           </h1>
 
           <p style={{ marginTop: "26px", maxWidth: "560px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-lead)", lineHeight: 1.65, color: "var(--afa-text-primary)", opacity: 0.75 }}>{/* token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107) */}

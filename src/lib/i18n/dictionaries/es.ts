@@ -867,7 +867,7 @@ const es: Dictionary = {
     heroEyebrow: "Arte en vivo. Momentos reales.",
     heroLine1Prefix: "Donde el ",
     heroLine1Emphasis: "Arte",
-    heroLine2: "encuentra a",
+    heroLine2: "encuentra a ",
     heroLine3: "su Público",
     heroSubtitle: "El primer universo de arte en vivo del mundo — conectando comediantes, poetas, artistas de micrófono abierto, organizadores y recintos en un solo ecosistema vivo.",
     ctaExploreEvents: "Explorar eventos",

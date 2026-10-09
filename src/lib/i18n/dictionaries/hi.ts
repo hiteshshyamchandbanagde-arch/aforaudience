@@ -862,7 +862,7 @@ const hi: Dictionary = {
     heroEyebrow: "जीवंत कला। असली पल।",
     heroLine1Prefix: "जहां ",
     heroLine1Emphasis: "कला",
-    heroLine2: "पाती है",
+    heroLine2: "पाती है ",
     heroLine3: "अपनी भीड़",
     heroSubtitle: "यह दुनिया का पहला लाइव आर्ट यूनिवर्स है — जो कॉमेडियन, कवि, ओपन माइक कलाकार, आयोजकों और स्थलों को एक जीवंत इकोसिस्टम में जोड़ता है।",
     ctaExploreEvents: "इवेंट्स देखें",

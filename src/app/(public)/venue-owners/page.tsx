@@ -5,6 +5,7 @@ import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import { ErrorBanner } from "@/components/ErrorBanner"
 import { useLocale } from "@/lib/i18n/translate"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 interface VenueOwnerItem {
   id: string
@@ -53,7 +54,7 @@ export default function VenueOwnersPage() {
       <div style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-48px)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
-            {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
+            {tr.venueOwnersPage.heroPrefix}<HeroEmphasis>{tr.venueOwnersPage.heroEmphasis}</HeroEmphasis>{tr.venueOwnersPage.heroSuffix}
           </div>
           <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)", marginBottom: "var(--afa-space-32px)" }}>
             {loading ? tr.venueOwnersPage.loading : tr.venueOwnersPage.countHosting.replace("{n}", String(filtered.length))}

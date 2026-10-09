@@ -7,6 +7,7 @@ import { useLocale } from "@/lib/i18n/translate"
 import Photo from "@/components/Photo"
 import { initials } from "@/components/EventCard"
 import { TrophyMark, StarMark } from "@/components/WallOfFameMarks"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 interface LeaderboardEntry {
   id: string
@@ -179,7 +180,7 @@ export default function WallOfFamePage() {
       <div style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-48px)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
-            {tr.wallOfFamePage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.wallOfFamePage.heroEmphasis}</em>
+            {tr.wallOfFamePage.heroPrefix}<HeroEmphasis>{tr.wallOfFamePage.heroEmphasis}</HeroEmphasis>
           </div>
           <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)" }}>
             {loading ? tr.wallOfFamePage.loading : data ? tr.wallOfFamePage.subtitleTemplate.replace("{month}", data.month) : ""}

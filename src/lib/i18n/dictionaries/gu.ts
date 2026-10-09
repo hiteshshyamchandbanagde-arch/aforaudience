@@ -863,7 +863,7 @@ const gu: Dictionary = {
     heroEyebrow: "લાઇવ કલા. વાસ્તવિક ક્ષણો.",
     heroLine1Prefix: "જ્યાં ",
     heroLine1Emphasis: "કલા",
-    heroLine2: "શોધે છે",
+    heroLine2: "શોધે છે ",
     heroLine3: "તેની ભીડ",
     heroSubtitle: "વિશ્વનું પ્રથમ લાઇવ આર્ટ યુનિવર્સ — કોમેડિયન્સ, કવિઓ, ઓપન માઇક કલાકારો, આયોજકો, અને સ્થળોને એક જીવંત ઇકોસિસ્ટમમાં જોડે છે.",
     ctaExploreEvents: "ઇવેન્ટ્સ અન્વેષણ કરો",

@@ -5,6 +5,7 @@ import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import { ErrorBanner } from "@/components/ErrorBanner"
 import { useLocale } from "@/lib/i18n/translate"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
 interface OrganiserItem {
   id: string
@@ -56,7 +57,7 @@ export default function OrganisersPage() {
       <div style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-48px)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
-            {tr.organisersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.organisersPage.heroEmphasis}</em>{tr.organisersPage.heroSuffix}
+            {tr.organisersPage.heroPrefix}<HeroEmphasis>{tr.organisersPage.heroEmphasis}</HeroEmphasis>{tr.organisersPage.heroSuffix}
           </div>
           <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)", marginBottom: "var(--afa-space-32px)" }}>
             {loading ? tr.organisersPage.loading : tr.organisersPage.countTemplate.replace("{n}", String(filtered.length))}
