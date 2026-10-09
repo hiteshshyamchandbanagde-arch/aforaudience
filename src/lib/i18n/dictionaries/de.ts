@@ -1770,15 +1770,15 @@ const de: Dictionary = {
 
   venueDashboard: {
     myVenues: {
-      notOwnerTitle: "Du bist nicht als Location-Betreiber registriert",
-      notOwnerBody: "Beantrage in deinem Profil, deine Location einzutragen, um Buchungen zu verwalten.",
+      notOwnerTitle: "Du bist nicht als Betreiber eines Veranstaltungsorts registriert",
+      notOwnerBody: "Beantrage in deinem Profil, deinen Veranstaltungsort einzutragen, um Buchungen zu verwalten.",
       backToHome: "Zurück zur Startseite",
-      pendingTitle: "Dein Konto als Location-Betreiber wartet auf Freigabe",
-      pendingBody: "Unser Team prüft neue Anträge von Location-Betreibern, bevor du eine Location eintragen und Buchungen annehmen kannst. Wir melden uns, sobald du freigegeben bist.",
+      pendingTitle: "Dein Betreiber-Konto wartet auf Freigabe",
+      pendingBody: "Unser Team prüft neue Betreiber-Anträge, bevor du einen Veranstaltungsort eintragen und Buchungen annehmen kannst. Wir melden uns, sobald du freigegeben bist.",
       eyebrow: "Portfolio",
-      title: "Deine Locations",
-      loadFailed: "Deine Locations konnten nicht geladen werden",
-      emptyCaption: "Noch keine Locations — registriere deinen ersten Ort",
+      title: "Deine Veranstaltungsorte",
+      loadFailed: "Deine Veranstaltungsorte konnten nicht geladen werden",
+      emptyCaption: "Noch keine Veranstaltungsorte — registriere deinen ersten Ort",
       statusPublished: "Veröffentlicht",
       statusDraft: "Entwurf",
       capacity: "Kapazität",
