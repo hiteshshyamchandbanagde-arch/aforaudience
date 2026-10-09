@@ -1642,6 +1642,46 @@ const en = {
       recentBookings: "Recent bookings",
       noBookings: "No bookings yet.",
     },
+    // Door check-in (/dashboard/organiser/events/[id]/checkin).
+    checkin: {
+      noAccess: "You do not have access to this event",
+      notFound: "Event not found",
+      networkError: "Network error - try again.",
+      cameraError: "Could not access the camera. Check browser permissions, or use manual entry below.",
+      checkedIn: "✓ Checked in",
+      alreadyCheckedIn: "Already checked in",
+      notValid: "✗ Not valid",
+      // Scan results, by the API's reason code; an unknown reason shows
+      // the server's own message.
+      reasonEmpty: "Scan a ticket or enter a booking code.",
+      reasonNotFound: "No booking matches this code.",
+      reasonWrongEvent: "This ticket is for a different event.",
+      // {status}: the booking's stored status (e.g. PENDING), kept as is.
+      reasonNotConfirmed: "Booking status is {status}, not confirmed - can't check in.",
+      reasonError: "Check-in failed.",
+      tapToDismiss: "Tap to dismiss",
+      backToEvent: "Back to Event",
+      title: "Check-In",
+      // {n}: checked in so far; {total}: all attendees.
+      countCheckedIn: "{n} of {total} checked in",
+      startCamera: "Start Camera Scan",
+      stopCamera: "Stop Camera",
+      manualEntry: "Manual entry",
+      manualEntryHint: "(ticket ref printed on the ticket)",
+      manualPlaceholder: "e.g., AFA-7K3M-Q9TX",
+      checkInButton: "Check In",
+      attendeeList: "Attendee List",
+      hide: "▲ Hide",
+      show: "▼ Show",
+      filterAll: "All",
+      filterCheckedIn: "Checked In",
+      filterPending: "Pending",
+      emptyList: "No one in this list yet.",
+      in: "✓ In",
+      pending: "Pending",
+      checkingIn: "Checking in…",
+      checkInCompanion: "Check in",
+    },
   },
 }
 
