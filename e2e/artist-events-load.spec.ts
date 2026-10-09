@@ -39,7 +39,8 @@ test("[BUG-2610-002] a failed load shows an error with Retry, never 'No publishe
   await page.unroute(isEventsList);
   await alert.getByRole("button", { name: "Retry" }).click();
   await expect(alert).toHaveCount(0, { timeout: 30_000 });
-  await expect(page.getByRole("main").getByRole("heading", { name: "Browse Events" })).toBeVisible();
+  // The page title by its hook: "Browse Events" follows the UI language (GEN-2610-007).
+  await expect(page.getByRole("main").locator("h1[data-afa-page-title]")).toBeVisible();
 });
 
 test("[BUG-2610-002] an All Cities load that answers after the city's load never replaces the city's list", async ({ page }) => {
