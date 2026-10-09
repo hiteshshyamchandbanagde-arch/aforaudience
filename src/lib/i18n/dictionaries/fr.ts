@@ -1763,6 +1763,34 @@ const fr: Dictionary = {
       waiting: "En attente de la réponse de l'autre partie.",
     },
   },
+
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "Vous n'êtes pas inscrit comme propriétaire de lieu",
+      notOwnerBody: "Depuis votre profil, demandez à référencer votre lieu pour commencer à gérer les réservations.",
+      backToHome: "Retour à l'accueil",
+      pendingTitle: "Votre compte de propriétaire de lieu attend sa validation",
+      pendingBody: "Notre équipe examine les nouvelles demandes de propriétaire de lieu avant que vous puissiez référencer un lieu et accepter des réservations. Nous vous préviendrons dès votre validation.",
+      eyebrow: "Portefeuille",
+      title: "Vos lieux",
+      loadFailed: "Impossible de charger vos lieux",
+      emptyCaption: "Aucun lieu pour l'instant — enregistrez votre premier espace",
+      statusPublished: "Publié",
+      statusDraft: "Brouillon",
+      capacity: "Capacité",
+      perSeat: "Par place",
+      rateType: "Type de tarif",
+      rateHourly: "À l'heure",
+      rateDaily: "À la journée",
+      rateFlexible: "Flexible",
+      hourlyRate: "À l'heure · {amount}/h",
+      dailyRate: "À la journée · {amount}/jour",
+      flexibleRate: "Tarif flexible",
+      view: "Voir",
+      edit: "Modifier",
+      seatMap: "Plan de salle",
+    },
+  },
 }
 
 export default fr
