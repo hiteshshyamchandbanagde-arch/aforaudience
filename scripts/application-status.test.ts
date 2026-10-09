@@ -65,10 +65,26 @@ test("Omkar's badge: a past-event PENDING application is not counted", () => {
 
 test('order: upcoming soonest first, then past most recent first', () => {
   // Hitesh's 7 Oct order: 4 Oct, 5 Dec, 20 Sep, 13 Sep, 8 Sep, 6 Sep (4 Oct already past on 9 Oct).
-  const apps = ['2026-10-04', '2026-12-05', '2026-09-20', '2026-09-13', '2026-09-08', '2026-09-06', '2026-11-01'].map((d) => ({ id: d, event: { date: day(d), startTime: '19:00' } }))
+  const apps = ['2026-10-04', '2026-12-05', '2026-09-20', '2026-09-13', '2026-09-08', '2026-09-06', '2026-11-01'].map((d) => ({ id: d, event: { title: `Event ${d}`, date: day(d), startTime: '19:00' } }))
   const { upcoming, past } = splitApplicationsByEventDate(apps, NOW)
   assert.deepEqual(upcoming.map((a) => a.id), ['2026-11-01', '2026-12-05'])
   assert.deepEqual(past.map((a) => a.id), ['2026-10-04', '2026-09-20', '2026-09-13', '2026-09-08', '2026-09-06'])
+})
+
+test('order: two events starting at the same time keep a fixed order (title, then id), whatever the input order', () => {
+  // QA, 9 Oct: Mixed Bag Comedy Lineup and Improv Theatre Jam both start
+  // 5 Dec 19:00 India time; their stored dates differ by 81 ms, which is
+  // not an event start. The list used to follow the API's order for them.
+  const mixed = { id: 'qa-demo-app-full-hrithik-5', event: { title: 'Mixed Bag Comedy Lineup', date: '2026-12-05T01:45:03.422Z', startTime: '19:00' } }
+  const improv = { id: 'e2e-bug-2610-022-open-app', event: { title: 'Improv Theatre Jam', date: '2026-12-05T01:45:03.503Z', startTime: '19:00' } }
+  const sameTitleA = { id: 'a', event: { title: 'Same', date: day('2026-12-06'), startTime: '19:00' } }
+  const sameTitleB = { id: 'b', event: { title: 'Same', date: day('2026-12-06'), startTime: '19:00' } }
+  for (const input of [[mixed, improv, sameTitleB, sameTitleA], [sameTitleA, improv, sameTitleB, mixed]]) {
+    assert.deepEqual(splitApplicationsByEventDate(input, NOW).upcoming.map((a) => a.id), [improv.id, mixed.id, 'a', 'b'])
+  }
+  const pastMixed = { ...mixed, event: { ...mixed.event, date: '2026-09-05T01:45:03.422Z' } }
+  const pastImprov = { ...improv, event: { ...improv.event, date: '2026-09-05T01:45:03.503Z' } }
+  assert.deepEqual(splitApplicationsByEventDate([pastMixed, pastImprov], NOW).past.map((a) => a.id), [improv.id, mixed.id])
 })
 
 test('stars: 4.5 is four and a half, not five', () => {

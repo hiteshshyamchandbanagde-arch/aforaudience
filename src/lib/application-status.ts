@@ -42,10 +42,18 @@ export function countOpenPendingApplications(apps: { status: string; event: Appl
   return apps.filter((a) => a.status === 'PENDING' && !isPastEvent(a.event, now)).length
 }
 
-/** Upcoming first (soonest first), then past (most recent first). */
-export function splitApplicationsByEventDate<T extends { event: ApplicationEventLike }>(apps: T[], now: Date = new Date()): { upcoming: T[]; past: T[] } {
+const byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
+
+/**
+ * Upcoming first (soonest first), then past (most recent first). Two
+ * events that start at the same time keep one fixed order, by event title
+ * then application id, so the list never depends on the order the API
+ * returned them in.
+ */
+export function splitApplicationsByEventDate<T extends { id: string; event: ApplicationEventLike & { title: string } }>(apps: T[], now: Date = new Date()): { upcoming: T[]; past: T[] } {
   const at = (a: T) => eventStartsAt(a.event).getTime()
-  const upcoming = apps.filter((a) => !isPastEvent(a.event, now)).sort((a, b) => at(a) - at(b))
-  const past = apps.filter((a) => isPastEvent(a.event, now)).sort((a, b) => at(b) - at(a))
+  const tie = (a: T, b: T) => byText(a.event.title, b.event.title) || byText(a.id, b.id)
+  const upcoming = apps.filter((a) => !isPastEvent(a.event, now)).sort((a, b) => at(a) - at(b) || tie(a, b))
+  const past = apps.filter((a) => isPastEvent(a.event, now)).sort((a, b) => at(b) - at(a) || tie(a, b))
   return { upcoming, past }
 }

@@ -102,15 +102,24 @@ test.describe("Hrithik", () => {
 
   test("[BUG-2610-022] artist My Applications: past PENDING shows Closed, upcoming first then Past; 4.5 rating is 4.5 stars @needs-db", async ({ page, isMobile }) => {
     await useRuleViewport(page, isMobile);
-    // Expected order from the database: upcoming soonest first, then past most recent first.
+    // Expected order from the database, by the event's start as Hitesh sees
+    // it: its India-time day at startTime (the raw Event.date timestamp is
+    // not a start time; two QA events on 5 Dec 19:00 differ in it by 81 ms).
+    // Upcoming soonest first, then past most recent first; the same start:
+    // event title, then application id.
     const order = await withQaDb(async (db) => {
-      const { rows } = await db.query<{ id: string; past: boolean; at: Date }>(
-        `SELECT a.id, (e.date < now()) AS past, e.date AS at FROM "Application" a JOIN "Event" e ON e.id = a."eventId" WHERE a."artistId" = $1`,
+      const { rows } = await db.query<{ id: string; title: string; at: Date }>(
+        `SELECT a.id, e.title,
+                (((e.date AT TIME ZONE 'Asia/Kolkata')::date + COALESCE(NULLIF(e."startTime", ''), '23:59')::time) AT TIME ZONE 'Asia/Kolkata') AS at
+           FROM "Application" a JOIN "Event" e ON e.id = a."eventId" WHERE a."artistId" = $1`,
         [HRITHIK_ARTIST]
       );
       const t = (r: { at: Date }) => new Date(r.at).getTime();
-      const upcoming = rows.filter((r) => !r.past).sort((a, b) => t(a) - t(b)).map((r) => r.id);
-      const past = rows.filter((r) => r.past).sort((a, b) => t(b) - t(a)).map((r) => r.id);
+      const text = (x: string, y: string) => (x < y ? -1 : x > y ? 1 : 0);
+      const tie = (a: { id: string; title: string }, b: { id: string; title: string }) => text(a.title, b.title) || text(a.id, b.id);
+      const now = Date.now();
+      const upcoming = rows.filter((r) => t(r) > now).sort((a, b) => t(a) - t(b) || tie(a, b)).map((r) => r.id);
+      const past = rows.filter((r) => t(r) <= now).sort((a, b) => t(b) - t(a) || tie(a, b)).map((r) => r.id);
       return { upcoming, past };
     });
     expect(order.upcoming.length, "Hrithik has upcoming applications").toBeGreaterThan(0);
