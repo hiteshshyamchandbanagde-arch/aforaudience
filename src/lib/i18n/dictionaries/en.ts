@@ -1140,6 +1140,12 @@ const en = {
     preparingPoster: "Preparing...",
     shareDownload: "Share / Download",
     posterLoadError: "Couldn't load the poster - please try again.",
+    // RangePicker (Sales pages): the period segments.
+    rangeWeek: "Week",
+    rangeMonth: "Month",
+    rangeQuarter: "Quarter",
+    rangeYear: "Year",
+    rangeAll: "All Time",
   },
 
   // GEN-2610-007 - everything under /dashboard/artist.
@@ -1583,6 +1589,58 @@ const en = {
       removePanelistTitle: "Remove this panelist?",
       removeCelebrityTitle: "Remove this celebrity invite?",
       removeFailed: "Failed to remove",
+    },
+    // Sales Overview (/dashboard/organiser/sales) and one event's sales
+    // (/dashboard/organiser/events/[id]/sales).
+    sales: {
+      title: "Sales Overview",
+      // {title}: the event's title.
+      eventTitle: "{title} — Sales",
+      justNow: "just now",
+      secondsAgo: "{n}s ago",
+      minutesAgo: "{n}m ago",
+      hoursAgo: "{n}h ago",
+      // {ago}: one of the *Ago values above; {n}: seconds.
+      updated: "Updated {ago} · refreshes every {n}s",
+      pageNoAccess: "You do not have access to this page",
+      eventNoAccess: "You do not have access to this event",
+      overviewLoadFailed: "Could not load sales overview",
+      eventLoadFailed: "Could not load sales data",
+      // {error}: one of the load errors above.
+      staleData: "{error} (showing last good data)",
+      noData: "No data",
+      grossRevenue: "Gross Revenue",
+      ticketsSold: "Tickets Sold",
+      events: "Events",
+      confirmedBookings: "Confirmed Bookings",
+      revenueOverTime: "Revenue over time",
+      noSalesInRange: "No confirmed sales in this range.",
+      byEvent: "By event",
+      noEvents: "No events yet.",
+      colEvent: "Event",
+      colRevenue: "Revenue",
+      colTickets: "Tickets",
+      colBookings: "Bookings",
+      backToEvent: "Back to Event",
+      allEvents: "All events →",
+      // {tickets}, {fees}: ₹ amounts.
+      grossSub: "{tickets} tickets + {fees} fees — this range",
+      seatsSoldAllTime: "Seats Sold (all-time)",
+      // {pct}: a whole number.
+      pctOfCapacity: "{pct}% of capacity",
+      thisRange: "this range",
+      reserved: "Reserved (payment in progress)",
+      // {amount}: a ₹ amount.
+      atStake: "{amount} at stake, may expire",
+      noneRightNow: "none right now",
+      byTicketTier: "By ticket tier",
+      free: "Free",
+      salesOverTime: "Sales over time",
+      noSalesYet: "No confirmed sales yet.",
+      // Bar tooltip. {date}: YYYY-MM-DD; {n}: seats; {amount}: a ₹ amount.
+      timelineTip: "{date}: {n} seats, {amount}",
+      recentBookings: "Recent bookings",
+      noBookings: "No bookings yet.",
     },
   },
 }
