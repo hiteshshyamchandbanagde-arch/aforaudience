@@ -90,7 +90,9 @@ test.describe("Hrithik", () => {
       await route.fulfill({ response: res, json: body });
     });
     await gotoDashboard(page, "/dashboard/artist/");
-    const pending = page.locator("main").getByText("pending", { exact: true }).filter({ visible: true }).first();
+    // The pill's label follows the UI language (GEN-2610-007); its
+    // data-afa-status hook is the shown status and is the same in every locale.
+    const pending = page.locator('main [data-afa-status="PENDING"]').filter({ visible: true }).first();
     await expectToneText(page, pending, ...GOLD, "pending application badge");
   });
 
@@ -107,7 +109,7 @@ test.describe("Hrithik", () => {
       await route.fulfill({ response: res, json: body });
     });
     await gotoDashboard(page, "/dashboard/artist/");
-    const rejected = page.locator("main").getByText("rejected", { exact: true }).filter({ visible: true }).first();
+    const rejected = page.locator('main [data-afa-status="REJECTED"]').filter({ visible: true }).first();
     await expectToneText(page, rejected, ...ERROR, "rejected application badge");
   });
 

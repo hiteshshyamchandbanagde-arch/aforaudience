@@ -678,7 +678,7 @@ export default function ArtistDashboard() {
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
-                        <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
+                        <span data-afa-status={shownStatus} style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
                           {shownStatus === 'CLOSED' ? tr.common.applicationClosed : applicationStatusLabel(app.status, chrome)}
                         </span>
                       </div>
