@@ -1758,6 +1758,34 @@ const bn: Dictionary = {
       waiting: "অন্য পক্ষের উত্তরের অপেক্ষা।",
     },
   },
+
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "আপনি ভেন্যু মালিক হিসেবে নিবন্ধিত নন",
+      notOwnerBody: "বুকিং সামলানো শুরু করতে আপনার প্রোফাইল থেকে আপনার ভেন্যু তালিকাভুক্ত করার জন্য আবেদন করুন।",
+      backToHome: "হোমে ফিরে যান",
+      pendingTitle: "আপনার ভেন্যু মালিক অ্যাকাউন্ট অনুমোদনের অপেক্ষায়",
+      pendingBody: "আপনি ভেন্যু তালিকাভুক্ত করে বুকিং নেওয়ার আগে আমাদের দল নতুন ভেন্যু মালিকের আবেদন যাচাই করে। অনুমোদন পেলেই আমরা আপনাকে জানাব।",
+      eyebrow: "পোর্টফোলিও",
+      title: "আপনার ভেন্যু",
+      loadFailed: "আপনার ভেন্যুগুলি লোড করা যায়নি",
+      emptyCaption: "এখনও কোনো ভেন্যু নেই — আপনার প্রথম জায়গা নিবন্ধন করুন",
+      statusPublished: "প্রকাশিত",
+      statusDraft: "খসড়া",
+      capacity: "ধারণক্ষমতা",
+      perSeat: "প্রতি আসন",
+      rateType: "রেটের ধরন",
+      rateHourly: "ঘণ্টা প্রতি",
+      rateDaily: "দিন প্রতি",
+      rateFlexible: "নমনীয়",
+      hourlyRate: "ঘণ্টা প্রতি · {amount}/ঘণ্টা",
+      dailyRate: "দিন প্রতি · {amount}/দিন",
+      flexibleRate: "নমনীয় রেট",
+      view: "দেখুন",
+      edit: "সম্পাদনা",
+      seatMap: "আসন মানচিত্র",
+    },
+  },
 }
 
 export default bn
