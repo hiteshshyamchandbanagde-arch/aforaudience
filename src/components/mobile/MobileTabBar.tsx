@@ -115,10 +115,13 @@ export default function MobileTabBar() {
   const { unreadCount, flexRequestsOrganiser, flexRequestsVenue, venueBookingsPending } = useBadgeCounts()
   const [moreOpen, setMoreOpen] = useState(false)
   const moreSheetRef = useRef<HTMLDivElement>(null)
-  useModalSheet(moreOpen, moreSheetRef, () => setMoreOpen(false), { label: 'More' })
 
   const role = (session?.user as { role?: string } | undefined)?.role
   const barState = deriveBarState(rawPathname, role)
+  // GEN-2610-007 - Admin stays English, its More slot and sheet included.
+  const moreLabel = barState.kind === 'role' && barState.role === 'ADMIN' ? 'More' : t.dashboardChrome.more
+  const closeLabel = barState.kind === 'role' && barState.role === 'ADMIN' ? 'Close' : t.dashboardChrome.close
+  useModalSheet(moreOpen, moreSheetRef, () => setMoreOpen(false), { label: moreLabel })
 
   // Saved count - "live count from the same source /saved itself already
   // uses" (GET /api/events/saved, .length) rather than a second data
@@ -170,11 +173,13 @@ export default function MobileTabBar() {
   if (status === 'loading' || barState.kind === 'hidden') return null
 
   const dashboardHref = getShellDashboardLink(role)
+  const chrome = t.dashboardChrome
 
-  // Role-bar item labels stay hardcoded English, matching ROLE_SECTIONS'
-  // own already-hardcoded labels exactly (dashboards are English-only;
-  // BUG-2609-006), reused verbatim where the item is the same concept,
-  // e.g. "My Events"/"Sales"/"Payouts".
+  // Role-bar item labels come from t.dashboardChrome, the same keys as
+  // DashboardShell's ROLE_SECTIONS where the item is the same concept
+  // (e.g. "My Events"/"Sales"/"Payouts"). GEN-2610-007: the Artist,
+  // Organiser and Venue Owner bars are translated; the Admin bar stays
+  // English.
   //
   // The visitor bars below are translated (GEN-2609-120: they were the
   // English left in the Marathi nav). Discover/Tickets/Saved/Events/WOF/Dashboard
@@ -213,43 +218,43 @@ export default function MobileTabBar() {
   // ROLE_SECTIONS' own choices for these exact items in the desktop
   // sidebar (calendar/user/briefcase) via the roleIcon() adapter above.
   const artistItems: ItemDef[] = [
-    { id: 'my-events', href: '/dashboard/artist/events', label: 'My Events', Icon: roleIcon('calendar'), nav: 'replace' },
+    { id: 'my-events', href: '/dashboard/artist/events', label: chrome.myEvents, Icon: roleIcon('calendar'), nav: 'replace' },
     // Label fix (caught live, not in the original brief): this is
     // /dashboard/artist/edit, the artist's public performer profile -
     // a different page from the primary bar's own "Profile" (/profile,
     // the account page). "Edit Profile" matches ROLE_SECTIONS' own label
     // for this exact item, not a new label invented for this bar.
-    { id: 'edit-profile', href: '/dashboard/artist/edit', label: 'Edit Profile', Icon: roleIcon('user'), nav: 'replace' },
-    { id: 'inquiries', href: '/dashboard/artist/corporate-inquiries', label: 'Inquiries', Icon: roleIcon('briefcase'), nav: 'replace' },
+    { id: 'edit-profile', href: '/dashboard/artist/edit', label: chrome.editProfile, Icon: roleIcon('user'), nav: 'replace' },
+    { id: 'inquiries', href: '/dashboard/artist/corporate-inquiries', label: chrome.inquiries, Icon: roleIcon('briefcase'), nav: 'replace' },
   ]
 
   // Organiser - primary 4 + More. "Requests" reuses flexRequestsOrganiser,
   // same source DashboardShell's own sidebar already badges - not a
   // second data fetch.
   const organiserItems: ItemDef[] = [
-    { id: 'my-events', href: '/dashboard/organiser', label: 'My Events', Icon: roleIcon('calendar'), nav: 'replace' },
-    { id: 'create', href: '/dashboard/organiser/events/create', label: 'Create', Icon: roleIcon('plus'), nav: 'replace' },
-    { id: 'sales', href: '/dashboard/organiser/sales', label: 'Sales', Icon: roleIcon('trendUp'), nav: 'replace' },
-    { id: 'requests', href: '/dashboard/venue-requests', label: 'Requests', Icon: roleIcon('tag'), badge: flexRequestsOrganiser, nav: 'replace' },
+    { id: 'my-events', href: '/dashboard/organiser', label: chrome.myEvents, Icon: roleIcon('calendar'), nav: 'replace' },
+    { id: 'create', href: '/dashboard/organiser/events/create', label: chrome.create, Icon: roleIcon('plus'), nav: 'replace' },
+    { id: 'sales', href: '/dashboard/organiser/sales', label: chrome.sales, Icon: roleIcon('trendUp'), nav: 'replace' },
+    { id: 'requests', href: '/dashboard/venue-requests', label: chrome.requests, Icon: roleIcon('tag'), badge: flexRequestsOrganiser, nav: 'replace' },
   ]
   const organiserMoreItems: MoreItemDef[] = [
-    { id: 'payouts', href: '/dashboard/organiser/payouts', label: 'Payouts', Icon: roleIcon('dollarSign') },
-    { id: 'tours', href: '/dashboard/organiser/tours', label: 'Tours', Icon: roleIcon('map') },
-    { id: 'edit-profile', href: '/dashboard/organiser/edit', label: 'Edit Profile', Icon: roleIcon('user') },
+    { id: 'payouts', href: '/dashboard/organiser/payouts', label: chrome.payouts, Icon: roleIcon('dollarSign') },
+    { id: 'tours', href: '/dashboard/organiser/tours', label: chrome.tours, Icon: roleIcon('map') },
+    { id: 'edit-profile', href: '/dashboard/organiser/edit', label: chrome.editProfile, Icon: roleIcon('user') },
   ]
 
   // Venue Owner - primary 4 + More. "Bookings" reuses venueBookingsPending,
   // "Requests" reuses flexRequestsVenue - both the same sources
   // DashboardShell's own sidebar already badges.
   const venueOwnerItems: ItemDef[] = [
-    { id: 'my-venues', href: '/dashboard/venue', label: 'My Venues', Icon: roleIcon('building'), nav: 'replace' },
-    { id: 'bookings', href: '/dashboard/venue/bookings', label: 'Bookings', Icon: roleIcon('grid'), badge: venueBookingsPending, nav: 'replace' },
-    { id: 'sales', href: '/dashboard/venue/sales', label: 'Sales', Icon: roleIcon('trendUp'), nav: 'replace' },
-    { id: 'requests', href: '/dashboard/venue-requests', label: 'Requests', Icon: roleIcon('tag'), badge: flexRequestsVenue, nav: 'replace' },
+    { id: 'my-venues', href: '/dashboard/venue', label: chrome.myVenues, Icon: roleIcon('building'), nav: 'replace' },
+    { id: 'bookings', href: '/dashboard/venue/bookings', label: chrome.bookings, Icon: roleIcon('grid'), badge: venueBookingsPending, nav: 'replace' },
+    { id: 'sales', href: '/dashboard/venue/sales', label: chrome.sales, Icon: roleIcon('trendUp'), nav: 'replace' },
+    { id: 'requests', href: '/dashboard/venue-requests', label: chrome.requests, Icon: roleIcon('tag'), badge: flexRequestsVenue, nav: 'replace' },
   ]
   const venueOwnerMoreItems: MoreItemDef[] = [
-    { id: 'register-venue', href: '/dashboard/venue/create', label: 'Register Venue', Icon: roleIcon('plus') },
-    { id: 'account-settings', href: '/dashboard/venue/edit', label: 'Account Settings', Icon: roleIcon('user') },
+    { id: 'register-venue', href: '/dashboard/venue/create', label: chrome.registerVenue, Icon: roleIcon('plus') },
+    { id: 'account-settings', href: '/dashboard/venue/edit', label: chrome.accountSettings, Icon: roleIcon('user') },
   ]
 
   // Admin - primary 4 + More. Icons pulled from the same shared
@@ -384,7 +389,7 @@ export default function MobileTabBar() {
                 letterSpacing: '0.08em',
               }}
             >
-              More
+              {moreLabel}
             </span>
           </Button>
         )}
@@ -399,11 +404,11 @@ export default function MobileTabBar() {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(var(--afa-space-4) + env(safe-area-inset-bottom))' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--afa-tint-08)' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>More</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>{moreLabel}</span>
               <Button
                 variant="icon"
                 onClick={() => setMoreOpen(false)}
-                aria-label="Close"
+                aria-label={closeLabel}
                 style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
               >
                 <DashboardIcon name="x" size={20} />

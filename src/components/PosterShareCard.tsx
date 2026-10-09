@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
 
 // Session 39 (Feedback ec6e4adf) - shared between organiser and artist
 // dashboards. Web Share API (with the image as a file) for the native
 // mobile share sheet where supported; falls back to a plain download
 // link everywhere else (desktop browsers mostly).
 export default function PosterShareCard({ src, filename, title }: { src: string; filename: string; title: string }) {
+  const { t } = useLocale()
   const [sharing, setSharing] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,7 +33,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
         URL.revokeObjectURL(url)
       }
     } catch (err: any) {
-      if (err?.name !== 'AbortError') setError('Couldn\'t load the poster - please try again.')
+      if (err?.name !== 'AbortError') setError(t.dashboardChrome.posterLoadError)
     } finally {
       setSharing(false)
     }
@@ -40,7 +42,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
   return (
     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>
-        Share Poster
+        {t.dashboardChrome.sharePoster}
       </h3>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -56,7 +58,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
         disabled={sharing}
         style={{ opacity: sharing ? 0.6 : 1 }}
       >
-        {sharing ? 'Preparing...' : 'Share / Download'}
+        {sharing ? t.dashboardChrome.preparingPoster : t.dashboardChrome.shareDownload}
       </Button>
       {error && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-2)' }}>{error}</p>}
     </div>

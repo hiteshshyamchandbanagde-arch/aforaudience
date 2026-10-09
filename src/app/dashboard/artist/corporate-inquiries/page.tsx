@@ -28,10 +28,11 @@ interface Inquiry {
   createdAt: string
 }
 
-const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color: string }> = {
-  NEW: { label: 'New', bg: fillSolidTint(0.12), color: 'var(--afa-fill-solid)' },
-  CONTACTED: { label: 'Contacted', ...STATUS_TONE.sage },
-  CLOSED: { label: 'Closed', bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)' },
+// GEN-2610-007 - labels from t.artistDashboard; the stored status stays English.
+const STATUS_META: Record<Inquiry['status'], { labelKey: 'inquiryNew' | 'inquiryContacted' | 'inquiryClosed'; bg: string; color: string }> = {
+  NEW: { labelKey: 'inquiryNew', bg: fillSolidTint(0.12), color: 'var(--afa-fill-solid)' },
+  CONTACTED: { labelKey: 'inquiryContacted', ...STATUS_TONE.sage },
+  CLOSED: { labelKey: 'inquiryClosed', bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)' },
 }
 
 // FEAT-2608-046 - corporate show booking, inquiry-only. This is the
@@ -40,7 +41,9 @@ const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color:
 // (Mark Contacted / Close), everything past that (negotiation, contract,
 // payment) happens off-platform.
 export default function CorporateInquiriesPage() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
+  const a = tr.artistDashboard
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
@@ -58,10 +61,10 @@ export default function CorporateInquiriesPage() {
     const fetchData = async () => {
       try {
         const res = await fetch('/api/corporate-inquiries')
-        if (!res.ok) throw new Error('Failed to load inquiries')
+        if (!res.ok) throw new Error(a.inquiriesLoadFailed)
         setInquiries(await res.json())
       } catch (err: any) {
-        showToast(err.message || 'Failed to load inquiries', 'error')
+        showToast(err.message || a.inquiriesLoadFailed, 'error')
       } finally {
         setLoading(false)
       }
@@ -77,16 +80,16 @@ export default function CorporateInquiriesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       })
-      if (!res.ok) throw new Error('Failed to update')
+      if (!res.ok) throw new Error(a.updateFailed)
       setInquiries((prev) => prev.map((i) => (i.id === id ? { ...i, status: newStatus } : i)))
     } catch (err: any) {
-      showToast(err.message || 'Failed to update', 'error')
+      showToast(err.message || a.updateFailed, 'error')
     } finally {
       setUpdating(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
@@ -96,15 +99,15 @@ export default function CorporateInquiriesPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
-            Corporate Inquiries
+            {chrome.corporateInquiries}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
-            Direct booking inquiries from companies and private event organisers. Reach out to them directly - AforAudience doesn't handle payment for these.
+            {a.inquiriesSubtitle}
           </p>
 
           {inquiries.length === 0 ? (
             <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-              No inquiries yet. They'll show up here when a company sends you a booking request from your public profile.
+              {a.noInquiries}
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-14px)' }}>
@@ -117,15 +120,15 @@ export default function CorporateInquiriesPage() {
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
                         <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{formatDate(inq.createdAt, 'medium', locale)}</div>
                       </div>
-                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{a[meta.labelKey]}</span>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                     </div>
 
                     <div style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: 'var(--afa-space-10px)' }}>
-                      <div><strong>Contact:</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-fill-solid)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
-                      {inq.eventType && <div><strong>Event type:</strong> {inq.eventType}</div>}
-                      {inq.city && <div><strong>City:</strong> {inq.city}</div>}
-                      {inq.preferredDate && <div><strong>Preferred date:</strong> {formatDate(inq.preferredDate, 'medium', locale)}</div>}
-                      {inq.budgetRange && <div><strong>Budget:</strong> {inq.budgetRange}</div>}
+                      <div><strong>{a.contactLabel}</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-fill-solid)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
+                      {inq.eventType && <div><strong>{a.eventTypeLabel}</strong> {inq.eventType}</div>}
+                      {inq.city && <div><strong>{a.cityLabel}</strong> {inq.city}</div>}
+                      {inq.preferredDate && <div><strong>{a.preferredDateLabel}</strong> {formatDate(inq.preferredDate, 'medium', locale)}</div>}
+                      {inq.budgetRange && <div><strong>{a.budgetLabel}</strong> {inq.budgetRange}</div>}
                     </div>
 
                     {inq.message && (
@@ -143,7 +146,7 @@ export default function CorporateInquiriesPage() {
                           onClick={() => updateStatus(inq.id, 'CONTACTED')}
                           disabled={updating === inq.id}
                         >
-                          Mark Contacted
+                          {a.markContacted}
                         </Button>
                       )}
                       {inq.status !== 'CLOSED' && (
@@ -154,7 +157,7 @@ export default function CorporateInquiriesPage() {
                           onClick={() => updateStatus(inq.id, 'CLOSED')}
                           disabled={updating === inq.id}
                         >
-                          Close
+                          {a.closeInquiry}
                         </Button>
                       )}
                     </div>

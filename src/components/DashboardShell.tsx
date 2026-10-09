@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { useHeldRoles } from '@/components/HeldRolesContext'
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
@@ -38,20 +38,21 @@ type RoleKey = 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER' | 'ADMIN'
 
 type BadgeKey = 'venueBookings' | 'flexRequestsOrganiser' | 'flexRequestsVenue' | 'adminFeedbackPending' | 'adminBookingsErrored'
 
+// GEN-2610-007 - the held-role items name a dashboardChrome key (they are
+// translated); Admin's items keep a plain English label (Admin stays English).
+type ChromeLabel = keyof Dictionary['dashboardChrome']
+
 type RoleSectionDef = {
   role: RoleKey
   icon: IconName
-  items: { label: string; icon: IconName; href: string; badgeKey?: BadgeKey }[]
+  items: { label?: string; labelKey?: ChromeLabel; icon: IconName; href: string; badgeKey?: BadgeKey }[]
 }
 
 // BUG-2609-006: these were built as inert placeholders on a wrong claim
 // that the target pages didn't exist yet - all 11 are real, already-built
-// pages. Item labels stay hardcoded English (this repo's i18n Dictionary
-// type requires real, hand-written translations across all 11 locale
-// files for any new key - see src/lib/i18n/translate.tsx - and guessing
-// translations is worse than a flagged gap, same call as the profile
-// page's skipped column-eyebrow labels from PR #554), but the links
-// themselves are now real.
+// pages. Item labels were hardcoded English until GEN-2610-007 (8 Oct):
+// the Organiser/Artist/Venue Owner items now name a dashboardChrome key
+// and render in the UI language; Admin's stay English.
 //
 // Organiser's "My Events" points at /dashboard/organiser itself, not
 // /dashboard/organiser/events - that route doesn't exist (only
@@ -75,22 +76,22 @@ const ROLE_SECTIONS: (Omit<RoleSectionDef, 'role'> & { role: 'ORGANISER' | 'ARTI
     role: 'ORGANISER',
     icon: 'briefcase',
     items: [
-      { label: 'My Events', icon: 'calendar', href: '/dashboard/organiser' },
-      { label: 'Create Event', icon: 'plus', href: '/dashboard/organiser/events/create' },
-      { label: 'Tours', icon: 'map', href: '/dashboard/organiser/tours' },
-      { label: 'Sales', icon: 'trendUp', href: '/dashboard/organiser/sales' },
-      { label: 'Payouts', icon: 'dollarSign', href: '/dashboard/organiser/payouts' },
-      { label: 'Edit Profile', icon: 'user', href: '/dashboard/organiser/edit' },
-      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequestsOrganiser' },
+      { labelKey: 'myEvents', icon: 'calendar', href: '/dashboard/organiser' },
+      { labelKey: 'createEvent', icon: 'plus', href: '/dashboard/organiser/events/create' },
+      { labelKey: 'tours', icon: 'map', href: '/dashboard/organiser/tours' },
+      { labelKey: 'sales', icon: 'trendUp', href: '/dashboard/organiser/sales' },
+      { labelKey: 'payouts', icon: 'dollarSign', href: '/dashboard/organiser/payouts' },
+      { labelKey: 'editProfile', icon: 'user', href: '/dashboard/organiser/edit' },
+      { labelKey: 'flexibleRequests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequestsOrganiser' },
     ],
   },
   {
     role: 'ARTIST',
     icon: 'music',
     items: [
-      { label: 'Edit Profile', icon: 'user', href: '/dashboard/artist/edit' },
-      { label: 'My Events', icon: 'calendar', href: '/dashboard/artist/events' },
-      { label: 'Corporate Inquiries', icon: 'briefcase', href: '/dashboard/artist/corporate-inquiries' },
+      { labelKey: 'editProfile', icon: 'user', href: '/dashboard/artist/edit' },
+      { labelKey: 'myEvents', icon: 'calendar', href: '/dashboard/artist/events' },
+      { labelKey: 'corporateInquiries', icon: 'briefcase', href: '/dashboard/artist/corporate-inquiries' },
     ],
   },
   {
@@ -100,17 +101,17 @@ const ROLE_SECTIONS: (Omit<RoleSectionDef, 'role'> & { role: 'ORGANISER' | 'ARTI
     // category label. 'map' isn't used by any of this section's items.
     icon: 'map',
     items: [
-      { label: 'My Venues', icon: 'building', href: '/dashboard/venue' },
+      { labelKey: 'myVenues', icon: 'building', href: '/dashboard/venue' },
       // BUG-2609-013: was an icon-only "+" affordance next to the section
       // header (BUG-2609-010 Part 1) - reversed as confusing; a normal
       // SidebarLink row is the same treatment ORGANISER's "Create Event"
       // already gets right after its own primary listing item, and that
       // one hasn't been flagged.
-      { label: 'Register Venue', icon: 'plus', href: '/dashboard/venue/create' },
-      { label: 'Bookings', icon: 'grid', href: '/dashboard/venue/bookings', badgeKey: 'venueBookings' },
-      { label: 'Sales', icon: 'trendUp', href: '/dashboard/venue/sales' },
-      { label: 'Account Settings', icon: 'user', href: '/dashboard/venue/edit' },
-      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequestsVenue' },
+      { labelKey: 'registerVenue', icon: 'plus', href: '/dashboard/venue/create' },
+      { labelKey: 'bookings', icon: 'grid', href: '/dashboard/venue/bookings', badgeKey: 'venueBookings' },
+      { labelKey: 'sales', icon: 'trendUp', href: '/dashboard/venue/sales' },
+      { labelKey: 'accountSettings', icon: 'user', href: '/dashboard/venue/edit' },
+      { labelKey: 'flexibleRequests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequestsVenue' },
     ],
   },
 ]
@@ -360,7 +361,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
   )
 }
 
-function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; isActive: (id: string) => boolean; badgeFor: (key?: BadgeKey) => number | undefined; dense?: boolean; onNavigate?: () => void }) {
+function RoleSectionBlock({ section, roleLabel, chrome, isActive, badgeFor, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; chrome: Dictionary['dashboardChrome']; isActive: (id: string) => boolean; badgeFor: (key?: BadgeKey) => number | undefined; dense?: boolean; onNavigate?: () => void }) {
   return (
     <div className={dense ? undefined : 'pt-3 mt-1'} style={dense ? undefined : { borderTop: SIDEBAR_BORDER }}>
       {/* BUG-2609-011: no icon on this row (every real nav row below has
@@ -378,7 +379,7 @@ function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNav
           <SidebarLink
             key={item.href}
             href={item.href}
-            label={item.label}
+            label={item.labelKey ? chrome[item.labelKey] : item.label ?? ''}
             icon={item.icon}
             active={isActive(`role:${section.role}:${item.href}`)}
             badge={badgeFor(item.badgeKey)}
@@ -398,7 +399,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsOrganiser, flexRequestsVenue, adminFeedbackPending, adminBookingsErrored } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
-  useModalSheet(drawerOpen, drawerRef, () => setDrawerOpen(false), { label: 'My Roles' })
+  useModalSheet(drawerOpen, drawerRef, () => setDrawerOpen(false), { label: t.dashboardChrome.myRoles })
   const badgeFor = (key?: BadgeKey): number | undefined =>
     key === 'venueBookings' ? venueBookingsPending
       : key === 'flexRequestsOrganiser' ? flexRequestsOrganiser
@@ -471,10 +472,10 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             ))}
           </div>
           {roleSections.map((section) => (
-            <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} isActive={isActive} badgeFor={badgeFor} />
+            <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} chrome={t.dashboardChrome} isActive={isActive} badgeFor={badgeFor} />
           ))}
           {isAdmin && (
-            <RoleSectionBlock section={ADMIN_SECTION} roleLabel={roleLabelFor.ADMIN} isActive={isActive} badgeFor={badgeFor} />
+            <RoleSectionBlock section={ADMIN_SECTION} roleLabel={roleLabelFor.ADMIN} chrome={t.dashboardChrome} isActive={isActive} badgeFor={badgeFor} />
           )}
         </div>
       </aside>
@@ -533,12 +534,12 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
               // bare-reason: tab-bar slot that must match its sibling tab items, which are <Link>s styled by the same Tailwind classes, not Buttons
               variant="bare"
               onClick={() => setDrawerOpen(true)}
-              aria-label="More"
+              aria-label={t.dashboardChrome.more}
               className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
               style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
             >
               <Icon name="more" size={20} />
-              <span style={{ fontSize: 'var(--afa-text-caption)' }}>More</span>
+              <span style={{ fontSize: 'var(--afa-text-caption)' }}>{t.dashboardChrome.more}</span>
             </Button>
           )}
         </nav>
@@ -554,11 +555,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: SIDEBAR_BORDER }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>My Roles</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>{t.dashboardChrome.myRoles}</span>
               <Button
                 variant="icon"
                 onClick={() => setDrawerOpen(false)}
-                aria-label="Close"
+                aria-label={t.dashboardChrome.close}
                 style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
               >
                 <Icon name="x" size={20} />
@@ -570,6 +571,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                   key={section.role}
                   section={section}
                   roleLabel={roleLabelFor[section.role]}
+                  chrome={t.dashboardChrome}
                   isActive={isActive}
                   badgeFor={badgeFor}
                   dense

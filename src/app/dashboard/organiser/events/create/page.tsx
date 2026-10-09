@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
 import { countNoun } from '@/lib/i18n/plural'
+import { useLocale } from '@/lib/i18n/translate'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
 
@@ -116,6 +117,8 @@ function nowLocalTimeString() {
 }
 
 export default function CreateEventPage() {
+  // GEN-2610-007 - the terms checklist reads its translated labels.
+  const { t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
@@ -683,7 +686,7 @@ export default function CreateEventPage() {
                         }}
                         style={{ marginTop: '3px' }} // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
                       />
-                      <span>{term.label}</span>
+                      <span>{tr.eventTermsChecklist[term.key as keyof typeof tr.eventTermsChecklist] || term.label}</span>
                     </label>
                   ))}
                 </div>
