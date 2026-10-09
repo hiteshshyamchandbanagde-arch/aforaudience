@@ -26,8 +26,15 @@ export async function clearSwRuntimeCache(): Promise<void> {
 
 // Drop-in for next-auth's signOut - every sign-out in the app goes
 // through this so the cache is gone before the session is.
+// BUG-2610-021 - the city cookie (afa_loc) goes with it, so the next
+// person on this device does not start in the last account's city.
 export async function signOutAndClearCache(options?: Parameters<typeof signOut>[0]) {
-  await clearSwRuntimeCache()
+  await Promise.all([
+    clearSwRuntimeCache(),
+    fetch('/api/user/location', { method: 'DELETE' }).catch(() => {
+      // Offline: the cookie stays, the sign-out must still happen.
+    }),
+  ])
   return signOut(options)
 }
 

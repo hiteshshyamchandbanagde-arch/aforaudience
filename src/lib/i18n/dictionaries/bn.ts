@@ -143,6 +143,9 @@ const bn: Dictionary = {
     emptyInCity: "{city}-এ কোনো ইভেন্ট নেই",
     emptySearchAllCities: "সব শহরে খুঁজুন",
     emptyShowAllCities: "সব শহর দেখান",
+    emptyCityYet: "{city}-এ এখনও কোনো শো নেই",
+    artistBrowseEmpty: "এখনও কোনো প্রকাশিত ইভেন্ট নেই। শীঘ্রই আবার দেখুন!",
+    artistBrowseEmptyInCity: "{city}-এ এখনও কোনো প্রকাশিত ইভেন্ট নেই",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
     priceFrom: "₹{price} থেকে",
     emptyClearSearch: "সার্চ মুছুন",

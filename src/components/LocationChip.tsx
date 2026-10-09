@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { chipCityLabel } from '@/lib/country-codes'
 import { nearestCity, locateOutcome, roundKm, type CityPoint } from '@/lib/nearest-city'
 import { useLocale } from '@/lib/i18n/translate'
@@ -57,6 +58,15 @@ function rememberDismissed(city: string) {
   }
 }
 
+// BUG-2610-019 - the search box takes focus when the picker opens on a
+// desktop only. On a touch screen or a narrow one (< 768 px) focus would
+// pop the keyboard over half the screen, hiding "Use my location" and the
+// short city list. Read when the picker opens (it only renders after a tap).
+function focusSearchOnOpen(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
+  return !window.matchMedia('(pointer: coarse), (max-width: 767px)').matches
+}
+
 async function fetchCities(): Promise<CityOption[]> {
   const res = await fetch('/api/venues/cities')
   const data = res.ok ? await res.json() : null
@@ -95,6 +105,22 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   const [geo, setGeo] = useState<GeoState>({ kind: 'idle' })
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // BUG-2610-021 - re-read whenever the signed-in user changes (sign-in,
+  // sign-out, another account), not only on mount: the top bar stays
+  // mounted through a client-side sign-in, and kept the previous
+  // account's city. The mount read already matches the session cookie,
+  // so the first resolved session only records who it was for.
+  const { data: session, status } = useSession()
+  const sessionUser = status === 'loading' ? undefined : ((session?.user as { id?: string } | undefined)?.id ?? null)
+  const readFor = useRef<string | null | undefined>(undefined)
+  const [readCount, setReadCount] = useState(0)
+
+  useEffect(() => {
+    if (sessionUser === undefined) return
+    if (readFor.current !== undefined && readFor.current !== sessionUser) setReadCount((n) => n + 1)
+    readFor.current = sessionUser
+  }, [sessionUser])
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/user/location')
@@ -102,7 +128,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
       .then((data) => { if (!cancelled && data) setLocation({ city: data.city, lat: data.lat, lng: data.lng, country: data.country ?? null, saved: data.saved === true }) })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [])
+  }, [readCount])
 
   // A page can show two chips (SiteNav's and the mobile top bar's, one
   // hidden by CSS); a change made in one shows in the other.
@@ -286,7 +312,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.location.searchCityPlaceholder}
-            autoFocus
+            autoFocus={focusSearchOnOpen()}
             style={{ width: '100%', boxSizing: 'border-box', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-2)', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>

@@ -327,6 +327,13 @@ model User {
   // (which already knows each city's country) - never guessed.
   defaultCountry String?
 
+  // GEN-2610-006 (7 Oct 2026, Hitesh: language is a user-level setting).
+  // One of VALID_LOCALE_IDS (src/lib/i18n/locales.ts), validated in
+  // PATCH /api/users/me. Null means "no choice saved on the account": the
+  // device's localStorage pick (or English) stands. Never auto-picked
+  // from the city (5 Oct rule) - only written when the person picks.
+  preferredLocale String?
+
   // H3 — moderation. suspendedByUserId is a plain scalar (not a relation),
   // same pattern as Booking.checkedInByUserId - who did it matters for the
   // admin's own record, doesn't need a join for anything the app does.

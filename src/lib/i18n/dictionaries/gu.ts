@@ -143,6 +143,9 @@ const gu: Dictionary = {
     emptyInCity: "{city}માં કોઈ ઇવેન્ટ નથી",
     emptySearchAllCities: "બધાં શહેરોમાં શોધો",
     emptyShowAllCities: "બધાં શહેરો બતાવો",
+    emptyCityYet: "{city}માં હજી કોઈ શો નથી",
+    artistBrowseEmpty: "હજી કોઈ પ્રકાશિત ઇવેન્ટ નથી. જલદી ફરી જુઓ!",
+    artistBrowseEmptyInCity: "{city}માં હજી કોઈ પ્રકાશિત ઇવેન્ટ નથી",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
     priceFrom: "₹{price} થી",
     emptyClearSearch: "શોધ સાફ કરો",

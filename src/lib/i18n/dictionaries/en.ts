@@ -145,6 +145,11 @@ const en = {
     emptyInCity: "No events in {city}",
     emptySearchAllCities: "Search all cities",
     emptyShowAllCities: "Show all cities",
+    // BUG-2610-020 - a city with no events and no filter applied.
+    emptyCityYet: "No shows in {city} yet",
+    // BUG-2610-020 - the artist dashboard's Browse Events empty state.
+    artistBrowseEmpty: "No published events yet. Check back soon!",
+    artistBrowseEmptyInCity: "No published events in {city} yet",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
     priceFrom: "From ₹{price}",
     emptyClearSearch: "Clear search",

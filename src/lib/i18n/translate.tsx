@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { useSession } from "next-auth/react"
 import en from "./dictionaries/en"
 import hi from "./dictionaries/hi"
 import mr from "./dictionaries/mr"
@@ -46,17 +47,40 @@ const LocaleContext = createContext<LocaleContextValue>({
   t: en,
 })
 
-// Client-only, localStorage-backed - deliberately mirrors the Theme
-// picker's pattern (SiteNav.tsx applyTheme/useEffect), not a DB field yet.
-// No pre-paint script for this pilot: unlike the theme's CSS attribute,
-// there's no flash-free way to swap rendered text before hydration
-// without SSR-aware routing (next-intl style [locale] segments), which is
-// a much bigger structural change than this pilot's nav-only scope
-// justifies. Worst case on a saved Hindi preference: nav briefly shows
-// English then flips after mount - acceptable for a chrome-only pilot,
-// revisit if/when this expands past nav labels.
+function saveToAccount(id: LocaleId) {
+  fetch("/api/users/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ preferredLocale: id }),
+  }).catch(() => {
+    // Not saved to the account this time; the device keeps it.
+  })
+}
+
+// Client-only rendering, like the Theme picker's pattern (SiteNav.tsx
+// applyTheme/useEffect). No pre-paint script: unlike the theme's CSS
+// attribute, there's no flash-free way to swap rendered text before
+// hydration without SSR-aware routing (next-intl style [locale]
+// segments). Worst case on a saved Hindi preference: the page briefly
+// shows English then flips after mount.
+//
+// GEN-2610-006 - where the choice lives:
+// - The device: localStorage (afa-locale), for guests and signed-in alike.
+// - The account: User.preferredLocale. A signed-in pick is saved there too
+//   (PATCH /api/users/me), and whenever a signed-in user appears (sign-in,
+//   session load) the account's value wins over the device and is mirrored
+//   to localStorage. A null account value keeps the device's choice.
+// The default stays English and is never picked from the city (5 Oct rule).
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<LocaleId>(DEFAULT_LOCALE)
+  const { data: session, status } = useSession()
+  const userId = (session?.user as { id?: string } | undefined)?.id
+  // Bumped on every pick, so an account read that started before the pick
+  // can't overwrite it when it lands.
+  const pickSeq = useRef(0)
+  // A pick made while the session is still loading: saved to the account
+  // once it turns out someone is signed in, instead of being read over.
+  const pendingSave = useRef<LocaleId | null>(null)
 
   useEffect(() => {
     try {
@@ -71,16 +95,47 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
+    if (!userId) return
+    if (pendingSave.current) {
+      saveToAccount(pendingSave.current)
+      pendingSave.current = null
+      return
+    }
+    const seq = pickSeq.current
+    let cancelled = false
+    fetch("/api/users/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const saved = data?.user?.preferredLocale
+        if (cancelled || seq !== pickSeq.current) return
+        if (typeof saved !== "string" || VALID_LOCALE_IDS.indexOf(saved) === -1) return
+        setLocaleState(saved as LocaleId)
+        try {
+          localStorage.setItem(STORAGE_KEY, saved)
+        } catch (e) {}
+      })
+      .catch(() => {
+        // Offline or a cold function: the device's choice stands.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
+
+  useEffect(() => {
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("lang", locale)
     }
   }, [locale])
 
   const setLocale = (id: LocaleId) => {
+    pickSeq.current += 1
     setLocaleState(id)
     try {
       localStorage.setItem(STORAGE_KEY, id)
     } catch (e) {}
+    if (userId) saveToAccount(id)
+    else if (status === "loading") pendingSave.current = id
   }
 
   return (
