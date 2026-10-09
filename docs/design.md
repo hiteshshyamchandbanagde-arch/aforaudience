@@ -8243,3 +8243,15 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
 - **BUG-2610-029 - no English left in audience copy (standing).** `scripts/i18n-untranslated.test.ts` fails on dictionary values identical to `en.ts` outside its allow-list (proper nouns, brand, amounts, codes).
 - **BUG-2610-030 - Indic scripts are never tracked or uppercased (standing).** One global rule in `globals.css`: under `:lang(hi|mr|bn|gu|kn|ml|ta|te)` any element with letter-spacing or text-transform gets `letter-spacing: normal` and `text-transform: none`. `<html lang>` follows the active locale.
 - **BUG-2610-032 - city picker states.** Loading until the city list arrives; "no matching city" only for a non-empty search with zero results.
+
+## UI/UX bundle 5 (9 Oct, PR #747)
+
+- **BUG-2610-028 - one dashboard page-title style (standing).** `src/components/dashboard/PageTitle.tsx` (`PageTitle`, `StatLabel`) for every role dashboard h1 and stat label: display serif 700 titles (28/32 px), sans 600 stat labels. Photo pickers ("Change Photo") are outline, never CTA orange.
+- **BUG-2610-025 - no emoji as icons; one rupee formatter (standing).** Dashboards and shared components use the app icon set; money always via the shared formatter (₹37,417).
+- **BUG-2610-027 - money axes use the nice-ticks helper** (₹0, ₹10K, ₹20K…).
+- **BUG-2610-031 - highlighted hero word:** the space sits outside the highlighted span, with room for the italic overhang, in every locale.
+- **BUG-2610-024 - offline page** uses the dark surface and AFA fonts (tokens inlined at build).
+
+## Decision 8 Oct (delegated by Hitesh): role dashboards are translated (GEN-2610-007)
+
+- Artist, Organiser and Venue Owner dashboards are translated into all 12 locales (incl. Marathi). Admin stays English. Supersedes the earlier "dashboard labels are deliberately English-only" rule. Delivered in three runs: 6a shared chrome + Artist, 6b Organiser, 6c Venue Owner.
