@@ -1490,7 +1490,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 "Seat map frozen" and the rest into two cramped columns. */}
             <div data-afa-frozen-banner-text style={{ fontSize: 'var(--afa-text-ui)', color: seatMapFrozen ? 'var(--afa-amber)' : 'var(--afa-text-primary)', display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', flex: '1 1 240px', minWidth: 0 }}>
               {seatMapFrozen ? (
-                <><span style={{ flexShrink: 0, display: 'inline-flex', paddingTop: 'var(--afa-space-2px)' }}><IconLockGlyph size={15} /></span><span><strong>Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</span></>
+                <><span style={{ flexShrink: 0, display: 'inline-flex', paddingTop: 'var(--afa-space-2px)' }}><IconLockGlyph size={15} /></span><span data-afa-frozen-message><strong data-afa-frozen-title>Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</span></>
               ) : (
                 'Once this layout is finished, freeze it to lock it against accidental edits.'
               )}
@@ -1502,6 +1502,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               fullWidth={false}
               onClick={() => toggleFreeze(!seatMapFrozen)}
               disabled={freezing}
+              data-afa-freeze-toggle={seatMapFrozen ? 'unfreeze' : 'freeze'}
             >
               {freezing ? 'Working…' : seatMapFrozen ? 'Unfreeze' : 'Freeze this seat map'}
             </Button>

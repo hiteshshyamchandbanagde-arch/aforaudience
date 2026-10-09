@@ -83,7 +83,9 @@ for (const p of VENUE_PAGES) {
   test(`[BUG-2610-028] ${p.title}: the page title is the shared display-serif PageTitle (Organiser/Artist style)`, async ({ page, isMobile }) => {
     await gotoDashboard(page, p.url);
     await hideFloatingOverlays(page);
-    const h1 = page.getByRole("heading", { level: 1, name: p.title, exact: true });
+    // data-afa-* hook, not the English text: the venue pages follow the UI language (GEN-2610-007).
+    const h1 = page.getByRole("main").locator("h1[data-afa-page-title]");
+    await expect(h1).toHaveText(p.title);
     const font = await fontOf(h1);
     expect(font.family, `${p.title}: font family = --font-display`).toBe(await displayFamily(page));
     expect(font.weight, `${p.title}: weight 700`).toBe("700");

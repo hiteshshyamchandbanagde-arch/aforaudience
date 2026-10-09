@@ -139,7 +139,7 @@ function ConfirmDialogView({ options, onClose }: { options: DialogRequest; onClo
         )}
         <div className="afa-confirm-actions">
           {!alertOnly && (
-            <Button variant="outline-neutral" size="md" fullWidth={false} onClick={() => onClose(null)}>
+            <Button variant="outline-neutral" size="md" fullWidth={false} onClick={() => onClose(null)} data-afa-confirm-cancel>
               {cancelLabel}
             </Button>
           )}
