@@ -1,6 +1,6 @@
 import { PNG } from "pngjs";
 import jsQR from "jsqr";
-import { test, expect } from "./helpers/test";
+import { test, expect, hideFloatingOverlays } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { useRuleViewport } from "./helpers/viewports";
 import { JAIPUR_EVENT_TITLE, openArtistEventsAllCities } from "./helpers/events";
@@ -54,7 +54,8 @@ test("[BUG-2610-023] artist Browse Events: Apply to Perform has the primary fill
   expect(bg, "Apply to Perform has the primary fill").toBe(fill);
   expect(bg).not.toBe("rgba(0, 0, 0, 0)");
   expect(fg, "and the on-fill text colour").toBe(onFill);
-  await expect(apply).toHaveScreenshot(`artist-apply-button-${isMobile ? 390 : 1440}.png`, { animations: "disabled", mask: [page.locator(".afa-support-chat-btn")] });
+  await hideFloatingOverlays(page);
+  await expect(apply).toHaveScreenshot(`artist-apply-button-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 
   // 2. No past events: every listed title is an upcoming event, and the API's past ones are absent.
   expect(all.length, "the All Cities list came back").toBeGreaterThan(0);
@@ -123,9 +124,10 @@ test("[BUG-2610-023] artist share poster: no stray blocks; the link is this depl
   // The preview card itself (title, image, button): one baseline per width.
   await poster.evaluate((img: HTMLImageElement) => img.decode());
   const shareCard = poster.locator("xpath=..");
+  await hideFloatingOverlays(page);
   await expect(shareCard).toHaveScreenshot(`artist-poster-card-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
     // The poster prints the fixture's date, which moves forward as the clock does.
-    mask: [poster, page.locator(".afa-support-chat-btn")],
+    mask: [poster],
   });
 });

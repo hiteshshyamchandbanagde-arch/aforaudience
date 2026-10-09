@@ -1,4 +1,4 @@
-import { test, expect } from "./helpers/test";
+import { test, expect, hideFloatingOverlays } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { useRuleViewport } from "./helpers/viewports";
 import { withQaDb } from "./helpers/qa-db";
@@ -85,9 +85,10 @@ test("[BUG-2610-018] My Tickets: an expired unpaid hold is never a ticket card; 
   const box = (await row.boundingBox())!;
   expect(box.height, "the row is compact, not a ticket card").toBeLessThan(80);
 
+  await hideFloatingOverlays(page);
   await expect(page.locator("[data-afa-unfinished-checkouts]")).toHaveScreenshot(`unfinished-checkout-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
     // The fixture event is re-dated forward as the clock walks on.
-    mask: [page.locator("[data-afa-unfinished-date]"), page.locator(".afa-support-chat-btn")],
+    mask: [page.locator("[data-afa-unfinished-date]")],
   });
 });

@@ -1,4 +1,4 @@
-import { test, expect, gotoDashboard } from "./helpers/test";
+import { test, expect, gotoDashboard, hideFloatingOverlays } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { useRuleViewport } from "./helpers/viewports";
 import { withQaDb } from "./helpers/qa-db";
@@ -87,7 +87,8 @@ test.describe("Omkar", () => {
     await expect(row).toContainText(/closed/i);
     await expect(row).not.toContainText(/pending/i);
     await expect(row.getByRole("button", { name: /Approve|Reject/ }), "no Approve/Reject on a closed application").toHaveCount(0);
-    await expect(row).toHaveScreenshot(`application-closed-organiser-${isMobile ? 390 : 1440}.png`, { animations: "disabled", mask: [page.locator(".afa-support-chat-btn")] });
+    await hideFloatingOverlays(page);
+    await expect(row).toHaveScreenshot(`application-closed-organiser-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 
     // The upcoming one keeps its actions.
     await gotoDashboard(page, `/dashboard/organiser/events/${OPEN_APP.eventId}/`);
@@ -146,7 +147,8 @@ test.describe("Hrithik", () => {
     const bg = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
     const gold = await page.locator(`[data-afa-application="${OPEN_APP.id}"]`).getByText(/^pending$/i).evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(bg, "Closed pill is not the gold pending tint").not.toBe(gold);
-    await expect(closed).toHaveScreenshot(`application-closed-artist-${isMobile ? 390 : 1440}.png`, { animations: "disabled", mask: [page.locator(".afa-support-chat-btn")] });
+    await hideFloatingOverlays(page);
+    await expect(closed).toHaveScreenshot(`application-closed-artist-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 
     // Reviews header: 4.5 average = 4 whole stars + a half star, labelled 4.5.
     const summary = page.locator("[data-afa-reviews-summary]");
@@ -156,6 +158,6 @@ test.describe("Hrithik", () => {
     const whole = await stars.evaluate((el) => [...(el.childNodes as NodeListOf<ChildNode>)].filter((n) => n.nodeType === Node.TEXT_NODE).map((n) => n.textContent).join(""));
     expect([...whole].filter((c) => c === "⭐").length, "four whole stars").toBe(4);
     await expect(summary).toContainText("4.5");
-    await expect(summary).toHaveScreenshot(`reviews-summary-${isMobile ? 390 : 1440}.png`, { animations: "disabled", mask: [page.locator(".afa-support-chat-btn")] });
+    await expect(summary).toHaveScreenshot(`reviews-summary-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
   });
 });
