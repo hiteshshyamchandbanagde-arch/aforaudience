@@ -18,6 +18,8 @@ const kn: Dictionary = {
     dialogConfirm: "ದೃಢೀಕರಿಸಿ",
     dialogCancel: "ರದ್ದುಮಾಡಿ",
     dialogOk: "ಸರಿ",
+    applicationClosed: "ಮುಚ್ಚಲಾಗಿದೆ",
+    pastDivider: "ಹಿಂದಿನವು",
   },
   nav: {
     events: "ಈವೆಂಟ್‌ಗಳು",

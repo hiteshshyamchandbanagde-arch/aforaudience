@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
+import { displayApplicationStatus } from '@/lib/application-status'
 
 interface Application {
   id: string
@@ -80,6 +81,9 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
   // Organiser promotes manually the same way as any pending applicant -
   // the Approve/Reject UI below is enabled for WAITLISTED too.
   WAITLISTED: { ...STATUS_TONE.gold },
+  // BUG-2610-022 - still undecided, but the event has happened: nothing
+  // left to decide, so a neutral pill and no Approve/Reject.
+  CLOSED: { ...STATUS_TONE.muted },
 }
 
 function describeDefaultCompensation(event: EventDetail): string {
@@ -90,7 +94,7 @@ function describeDefaultCompensation(event: EventDetail): string {
 }
 
 export default function OrganiserEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { locale } = useLocale()
+  const { t: tr, locale } = useLocale()
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -451,19 +455,20 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {event.applications.map((app) => {
-                  const appStyle = APPLICATION_STYLE[app.status] || APPLICATION_STYLE.PENDING
+                  const shownStatus = displayApplicationStatus(app.status, event)
+                  const appStyle = APPLICATION_STYLE[shownStatus] || APPLICATION_STYLE.PENDING
                   return (
-                    <div key={app.id} style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
+                    <div key={app.id} data-afa-application={app.id} style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)' }}>
                         <span style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                           {app.artist.stageName || app.artist.user.name}
                         </span>
                         <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
-                          {app.status.toLowerCase()}
+                          {shownStatus === 'CLOSED' ? tr.common.applicationClosed : app.status.toLowerCase()}
                         </span>
                       </div>
                       {app.message && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-10px)' }}>{app.message}</p>}
-                      {(app.status === 'PENDING' || app.status === 'WAITLISTED') && (
+                      {shownStatus !== 'CLOSED' && (app.status === 'PENDING' || app.status === 'WAITLISTED') && (
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                           <Button
                             variant="success"

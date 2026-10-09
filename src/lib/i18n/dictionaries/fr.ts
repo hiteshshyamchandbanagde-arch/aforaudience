@@ -23,6 +23,8 @@ const fr: Dictionary = {
     dialogConfirm: "Confirmer",
     dialogCancel: "Annuler",
     dialogOk: "OK",
+    applicationClosed: "Clôturée",
+    pastDivider: "Passés",
   },
   nav: {
     events: "Événements",

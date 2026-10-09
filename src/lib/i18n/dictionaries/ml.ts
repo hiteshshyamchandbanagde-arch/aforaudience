@@ -18,6 +18,8 @@ const ml: Dictionary = {
     dialogConfirm: "സ്ഥിരീകരിക്കുക",
     dialogCancel: "റദ്ദാക്കുക",
     dialogOk: "ശരി",
+    applicationClosed: "അടച്ചു",
+    pastDivider: "കഴിഞ്ഞവ",
   },
   nav: {
     events: "ഇവന്റുകൾ",

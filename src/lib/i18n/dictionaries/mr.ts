@@ -18,6 +18,8 @@ const mr: Dictionary = {
     dialogConfirm: "खात्री करा",
     dialogCancel: "रद्द करा",
     dialogOk: "ठीक आहे",
+    applicationClosed: "बंद",
+    pastDivider: "मागील",
   },
   nav: {
     events: "इव्हेंट्स",

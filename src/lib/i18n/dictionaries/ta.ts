@@ -18,6 +18,8 @@ const ta: Dictionary = {
     dialogConfirm: "உறுதிசெய்",
     dialogCancel: "ரத்துசெய்",
     dialogOk: "சரி",
+    applicationClosed: "மூடப்பட்டது",
+    pastDivider: "கடந்தவை",
   },
   nav: {
     events: "நிகழ்வுகள்",

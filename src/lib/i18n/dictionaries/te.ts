@@ -18,6 +18,8 @@ const te: Dictionary = {
     dialogConfirm: "నిర్ధారించండి",
     dialogCancel: "రద్దు చేయండి",
     dialogOk: "సరే",
+    applicationClosed: "మూసివేయబడింది",
+    pastDivider: "గతం",
   },
   nav: {
     events: "ఈవెంట్‌లు",

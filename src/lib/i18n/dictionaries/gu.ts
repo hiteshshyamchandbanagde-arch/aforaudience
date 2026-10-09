@@ -18,6 +18,8 @@ const gu: Dictionary = {
     dialogConfirm: "પુષ્ટિ કરો",
     dialogCancel: "રદ કરો",
     dialogOk: "બરાબર",
+    applicationClosed: "બંધ",
+    pastDivider: "પાછલા",
   },
   nav: {
     events: "ઇવેન્ટ્સ",

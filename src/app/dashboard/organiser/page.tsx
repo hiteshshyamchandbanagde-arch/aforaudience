@@ -15,12 +15,14 @@ import Badge from '@/components/ui/Badge'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { eventPriceLabel } from '@/components/EventCard'
+import { isPastEvent } from '@/lib/application-status'
 
 interface EventItem {
   id: string
   title: string
   type: string
   date: string
+  startTime?: string
   status: string
   totalSeats: number
   isFree: boolean
@@ -173,11 +175,13 @@ export default function OrganiserDashboard() {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--afa-space-5)' }}>
               {events.map((event) => {
-                const pendingApplications = event.applications.filter((a) => a.status === 'PENDING').length
+                // BUG-2610-022 - an application for a past event can no longer be decided: not pending.
+                const pendingApplications = isPastEvent(event) ? 0 : event.applications.filter((a) => a.status === 'PENDING').length
                 const statusStyle = STATUS_STYLE[event.status] || STATUS_STYLE.DRAFT
                 return (
                   <div
                     key={event.id}
+                    data-afa-event-card={event.id}
                     onClick={() => router.push(`/dashboard/organiser/events/${event.id}`)}
                     style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
                   >

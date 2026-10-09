@@ -18,6 +18,8 @@ const en = {
     dialogConfirm: "Confirm",
     dialogCancel: "Cancel",
     dialogOk: "OK",
+    applicationClosed: "Closed",
+    pastDivider: "Past",
   },
   nav: {
     events: "Events",

@@ -18,6 +18,8 @@ const bn: Dictionary = {
     dialogConfirm: "নিশ্চিত করুন",
     dialogCancel: "বাতিল করুন",
     dialogOk: "ঠিক আছে",
+    applicationClosed: "বন্ধ",
+    pastDivider: "অতীত",
   },
   nav: {
     events: "ইভেন্ট",

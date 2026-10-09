@@ -2,13 +2,15 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { Fragment, useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { fillSolidTint, FILL_SOLID_TINT, STATUS_TONE } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
+import RatingStars from '@/components/ui/RatingStars'
+import { displayApplicationStatus, splitApplicationsByEventDate } from '@/lib/application-status'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
@@ -22,6 +24,7 @@ interface Application {
     id: string
     title: string
     date: string
+    startTime?: string
     venue: { name: string; city: string } | null
     organiser: { orgName: string }
   }
@@ -90,10 +93,13 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
   PENDING: { ...STATUS_TONE.gold },
   APPROVED: { ...STATUS_TONE.sage },
   REJECTED: { ...STATUS_TONE.error },
+  WAITLISTED: { ...STATUS_TONE.gold },
+  // BUG-2610-022 - undecided, but the event has happened: neutral, not gold.
+  CLOSED: { ...STATUS_TONE.muted },
 }
 
 export default function ArtistDashboard() {
-  const { locale } = useLocale()
+  const { t: tr, locale } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -262,6 +268,11 @@ export default function ArtistDashboard() {
     .flatMap((p) => p.reviews.map((r) => ({ ...r, eventTitle: p.event.title })))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const avgRating = allReviews.length > 0 ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length : null
+
+  // BUG-2610-022 - upcoming events first (soonest first), then past ones
+  // (most recent first) under a "Past" divider.
+  const { upcoming: upcomingApplications, past: pastApplications } = splitApplicationsByEventDate(profile.applications)
+  const orderedApplications = [...upcomingApplications, ...pastApplications]
 
   // Recorded compensation/spend - these are off-platform promises between
   // Organiser and Artist (§4.5 "never tax the scene" model), NOT real
@@ -434,8 +445,9 @@ export default function ArtistDashboard() {
                 Reviews
               </h2>
               {avgRating !== null && (
-                <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                  {'⭐'.repeat(Math.round(avgRating))} {avgRating.toFixed(1)} · {allReviews.length} review{allReviews.length === 1 ? '' : 's'}
+                <span data-afa-reviews-summary style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                  <RatingStars rating={Math.round(avgRating * 10) / 10} />{' '}
+                  <span style={{ opacity: 0.6 }}>{avgRating.toFixed(1)} · {allReviews.length} review{allReviews.length === 1 ? '' : 's'}</span>
                 </span>
               )}
             </div>
@@ -450,7 +462,7 @@ export default function ArtistDashboard() {
                   return (
                     <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4) var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-                        <span style={{ fontSize: 'var(--afa-text-body)' }}>{'⭐'.repeat(r.rating)}</span>
+                        <RatingStars rating={r.rating} style={{ fontSize: 'var(--afa-text-body)' }} />
                         <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{r.eventTitle}</span>
                       </div>
                       {r.comment && (
@@ -582,12 +594,20 @@ export default function ArtistDashboard() {
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
-                {profile.applications.map((app) => {
-                  const appStyle = APPLICATION_STYLE[app.status] || APPLICATION_STYLE.PENDING
+                {orderedApplications.map((app, i) => {
+                  const shownStatus = displayApplicationStatus(app.status, app.event)
+                  const appStyle = APPLICATION_STYLE[shownStatus] || APPLICATION_STYLE.PENDING
                   const isNavigatingThis = navigatingEventId === app.event.id
                   return (
+                    <Fragment key={app.id}>
+                    {i === upcomingApplications.length && pastApplications.length > 0 && (
+                      <div data-afa-applications-past-divider style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', marginTop: i > 0 ? 'var(--afa-space-2)' : 0 }}>
+                        <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-text-muted)', whiteSpace: 'nowrap' }}>{tr.common.pastDivider}</p>
+                        <div style={{ height: 1, flex: 1, background: 'var(--afa-tint-08)' }} />
+                      </div>
+                    )}
                     <div
-                      key={app.id}
+                      data-afa-application={app.id}
                       role="link"
                       tabIndex={0}
                       aria-busy={isNavigatingThis}
@@ -638,13 +658,14 @@ export default function ArtistDashboard() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
                         <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
-                          {app.status.toLowerCase()}
+                          {shownStatus === 'CLOSED' ? tr.common.applicationClosed : app.status.toLowerCase()}
                         </span>
                       </div>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                         {formatDate(app.event.date, 'medium', locale)} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : 'Venue TBD'} · by {app.event.organiser.orgName}
                       </p>
                     </div>
+                    </Fragment>
                   )
                 })}
               </div>

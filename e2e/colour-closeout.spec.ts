@@ -77,6 +77,18 @@ test.describe("Hrithik", () => {
   test.use({ storageState: authFile("hrithik") });
 
   test("[GEN-2609-113] artist dashboard: a pending application's badge is amber on its tint, at least 4.5:1", async ({ page }) => {
+    // Hrithik's only pending application in the seed is for a past event,
+    // which shows as Closed (BUG-2610-022). Its event is moved a month
+    // ahead, in this browser only, so it is still undecided.
+    await page.route(/\/api\/artists\/me\/?$/, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const res = await route.fetch();
+      const body = await res.json();
+      const app = body.applications.find((a: { status: string }) => a.status === "PENDING");
+      expect(app, "Hrithik has a pending application in the QA seed").toBeTruthy();
+      app.event.date = new Date(Date.now() + 30 * 86_400_000).toISOString();
+      await route.fulfill({ response: res, json: body });
+    });
     await gotoDashboard(page, "/dashboard/artist/");
     const pending = page.locator("main").getByText("pending", { exact: true }).filter({ visible: true }).first();
     await expectToneText(page, pending, ...GOLD, "pending application badge");

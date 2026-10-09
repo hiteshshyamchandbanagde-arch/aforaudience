@@ -17,6 +17,8 @@ const hi: Dictionary = {
     dialogConfirm: "पुष्टि करें",
     dialogCancel: "रद्द करें",
     dialogOk: "ठीक है",
+    applicationClosed: "बंद",
+    pastDivider: "पिछले",
   },
   nav: {
     events: "इवेंट्स",

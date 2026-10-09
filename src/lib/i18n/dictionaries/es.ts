@@ -22,6 +22,8 @@ const es: Dictionary = {
     dialogConfirm: "Confirmar",
     dialogCancel: "Cancelar",
     dialogOk: "Aceptar",
+    applicationClosed: "Cerrada",
+    pastDivider: "Pasados",
   },
   nav: {
     events: "Eventos",
