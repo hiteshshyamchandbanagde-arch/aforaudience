@@ -30,8 +30,8 @@ async function test(name: string, fn: () => void | Promise<void>) {
 
 const OTHER_LOCALES = ['hi', 'mr', 'te', 'ta', 'kn', 'ml', 'gu', 'bn', 'de', 'fr', 'es']
 
-/** GEN-2610-007 - the role dashboards' namespaces (6a: shared chrome + Artist; 6b/6c add Organiser and Venue Owner). */
-export const DASHBOARD_GROUPS = ['dashboardChrome', 'artistDashboard', 'eventTermsChecklist']
+/** GEN-2610-007 - the role dashboards' namespaces (6a: shared chrome + Artist; 6b: Organiser; 6c adds Venue Owner). */
+export const DASHBOARD_GROUPS = ['dashboardChrome', 'artistDashboard', 'eventTermsChecklist', 'organiserDashboard']
 
 /** Dictionary groups rendered on the homepage, /events, /venues, /artists, event detail and checkout, plus the dashboards'. */
 export const CHECKED_GROUPS = [
@@ -78,6 +78,7 @@ export const ALLOWED: Record<string, { locales: string[]; why: string }> = {
   'artistDashboard.linkOptional': { locales: ['de'], why: '"Link (optional)" is the German wording' },
   'artistDashboard.budgetLabel': { locales: ['de'], why: '"Budget" is the German word' },
   'artistDashboard.influences': { locales: ['fr'], why: '"Influences" is the French word' },
+  'organiserDashboard.eventDetail.compBuyIn': { locales: OTHER_LOCALES, why: '"Buy-in" is the AFA slot-type name, kept in Latin script in every language' },
 }
 
 /** Proper nouns that read the same in every language. */
@@ -145,16 +146,20 @@ async function main() {
     )
   })
 
-  await test('[GEN-2610-007] the dashboard namespaces exist in en.ts with the shared chrome and Artist strings', () => {
+  await test('[GEN-2610-007] the dashboard namespaces exist in en.ts with the shared chrome, Artist and Organiser strings', () => {
     for (const group of DASHBOARD_GROUPS) {
       assert.ok(Object.keys(flatEn).some((k) => k.startsWith(`${group}.`)), `${group} is missing from en.ts`)
     }
-    for (const key of ['dashboardChrome.myEvents', 'dashboardChrome.more', 'artistDashboard.applicationsTitle', 'artistDashboard.browseTitle']) {
+    for (const key of [
+      'dashboardChrome.myEvents', 'dashboardChrome.more', 'artistDashboard.applicationsTitle', 'artistDashboard.browseTitle',
+      // 6b-1: Organiser Your Events, event detail, Create Event, Edit Event.
+      'organiserDashboard.yourEvents.title', 'organiserDashboard.eventDetail.artistApplications',
+    ]) {
       assert.equal(typeof flatEn[key], 'string', `${key} is missing from en.ts`)
     }
   })
 
-  await test('[GEN-2610-007] no English left in the dashboard namespaces (shared chrome + Artist) in any of the 11 other locales', () => {
+  await test('[GEN-2610-007] no English left in the dashboard namespaces (shared chrome, Artist, Organiser) in any of the 11 other locales', () => {
     const dashboard = checked.filter((f) => DASHBOARD_GROUPS.includes(f.key.split('.')[0]))
     assert.deepEqual(
       dashboard.map((f) => `${f.locale} ${f.key}: "${f.value}"`),

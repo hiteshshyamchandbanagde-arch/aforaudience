@@ -125,6 +125,21 @@ test('[GEN-2610-007] no hard-coded English UI text on the Artist dashboard pages
   assert.deepEqual(found, [])
 })
 
+// 6b-1: the Organiser pages translated so far (6b-2 adds Sales, Requests,
+// check-in, tours, payouts and edit profile).
+const ORGANISER_FILES = [
+  'src/app/dashboard/organiser/page.tsx',
+  'src/app/dashboard/organiser/events/[id]/page.tsx',
+].map((f) => join(ROOT, f))
+
+test('[GEN-2610-007] no hard-coded English UI text on the translated Organiser dashboard pages', () => {
+  const found: string[] = []
+  for (const file of ORGANISER_FILES) {
+    for (const hit of englishUiText(readFileSync(file, 'utf8'))) found.push(`${file.slice(ROOT.length + 1)}:${hit}`)
+  }
+  assert.deepEqual(found, [])
+})
+
 test('[GEN-2610-007] DashboardShell: only the Admin section keeps English item labels', () => {
   const src = readFileSync(join(ROOT, 'src/components/DashboardShell.tsx'), 'utf8')
   assert.deepEqual(roleLabelLiterals(src, ['const ADMIN_SECTION']), [])
