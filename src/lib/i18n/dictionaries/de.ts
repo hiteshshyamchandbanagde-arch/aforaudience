@@ -1253,6 +1253,7 @@ const de: Dictionary = {
     },
     eventDetail: {
       noAccess: "Du hast keinen Zugriff auf dieses Event",
+      nextDay: "nächster Tag",
       notFound: "Event nicht gefunden",
       backToEvents: "Zurück zu den Events",
       sharePosterTitle: "Poster teilen",
@@ -1401,6 +1402,7 @@ const de: Dictionary = {
       paidEntry: "Kostenpflichtiger Eintritt",
       sectionsFromSeatMap: "Bereiche und Platzzahlen stammen aus dem Sitzplan von {venue} — du legst für dieses Event nur den Preis pro Bereich fest.",
       mainLevel: "Hauptebene",
+      layoutPreview: "Vorschau des Sitzplans",
       pricePlaceholder: "₹ Preis",
       free: "Kostenlos",
       totalCapacity: "Gesamtkapazität: {seats} in {sections}",
