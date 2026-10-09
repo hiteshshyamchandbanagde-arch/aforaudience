@@ -725,7 +725,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
               {timeWarning && (
-                <p role="status" style={{ margin: '0 0 var(--afa-space-18px)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5 }}>
+                <p role="status" data-afa-time-warning style={{ margin: '0 0 var(--afa-space-18px)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5 }}>
                   {timeWarning}
                 </p>
               )}
@@ -804,6 +804,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                   {specialNotesStatus !== 'NONE' && (
                     <div
+                      data-afa-special-notes-status={specialNotesStatus}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -850,7 +851,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               </div>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                <input type="checkbox" checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
+                <input type="checkbox" data-afa-competition-toggle checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
                 This is a competition show (panelists, prizes, celebrity guest)
               </label>
 
@@ -859,15 +860,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)' }}>
                     <div>
                       <label style={labelStyle}>1st Prize</label>
-                      <input style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder="e.g. ₹10,000 + trophy" />
+                      <input data-afa-prize="1" style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder="e.g. ₹10,000 + trophy" />
                     </div>
                     <div>
                       <label style={labelStyle}>2nd Prize</label>
-                      <input style={inputStyle} value={competitionPrizeSecond} onChange={(e) => setCompetitionPrizeSecond(e.target.value)} placeholder="Optional" />
+                      <input data-afa-prize="2" style={inputStyle} value={competitionPrizeSecond} onChange={(e) => setCompetitionPrizeSecond(e.target.value)} placeholder="Optional" />
                     </div>
                     <div>
                       <label style={labelStyle}>3rd Prize</label>
-                      <input style={inputStyle} value={competitionPrizeThird} onChange={(e) => setCompetitionPrizeThird(e.target.value)} placeholder="Optional" />
+                      <input data-afa-prize="3" style={inputStyle} value={competitionPrizeThird} onChange={(e) => setCompetitionPrizeThird(e.target.value)} placeholder="Optional" />
                     </div>
                   </div>
 
@@ -1171,7 +1172,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
               <div style={{ marginBottom: venueId ? 'var(--afa-space-18px)' : 0 }}>
                 <label style={labelStyle}>Venue</label>
-                <select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
+                <select data-afa-venue-select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
                   <option value="">No venue selected</option>
                   {venues.map((v) => (
                     <option key={v.id} value={v.id}>{v.name} — {v.city} ({countNoun(v.capacity, 'seat')})</option>
@@ -1183,7 +1184,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 <div>
                   {venueId !== originalVenueId && (selectedVenue?.rateType === 'HOURLY' || selectedVenue?.rateType === 'DAILY') && (
                     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) var(--afa-space-14px)', marginBottom: 'var(--afa-space-10px)' }}>
-                      <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2px)' }}>
+                      <div data-afa-rate-note style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2px)' }}>
                         {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
                         {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                       </div>
@@ -1200,6 +1201,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
             <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               <Button
+                data-afa-save-event
                 variant="primary"
                 size="lg"
                 fullWidth={false}

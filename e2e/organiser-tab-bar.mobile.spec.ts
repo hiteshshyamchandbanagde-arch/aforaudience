@@ -44,7 +44,7 @@ test("[BUG-2609-084] organiser event detail shows one bottom bar, the organiser'
   expect(await weight("my-events")).toBeGreaterThan(await weight("sales"));
 
   // The page's own action row is not hidden under the bar.
-  const edit = page.getByRole("link", { name: "Edit Event" });
+  const edit = page.locator("a[data-afa-edit-event]");
   await edit.scrollIntoViewIfNeeded();
   const editBox = await edit.boundingBox();
   const barBox = await organiserBar.boundingBox();

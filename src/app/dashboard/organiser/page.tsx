@@ -195,14 +195,14 @@ export default function OrganiserDashboard() {
                           {formatDate(event.date, 'medium', locale)} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'No venue booked'}
                         </p>
                       </div>
-                      <Badge tone={statusStyle}>{statusStyle.label}</Badge>
+                      <Badge tone={statusStyle} data-afa-status={event.status}>{statusStyle.label}</Badge>
                     </div>
 
                     <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                       <span><strong>{event.totalSeats}</strong> seats</span>
                       <span><strong>{event.isFree ? 'Free' : eventPriceLabel(event, tr)}</strong></span>
                       {pendingApplications > 0 && (
-                        <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{pendingApplications} pending application{pendingApplications > 1 ? 's' : ''}</span>
+                        <span data-afa-pending-count={pendingApplications} style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{pendingApplications} pending application{pendingApplications > 1 ? 's' : ''}</span>
                       )}
                     </div>
 

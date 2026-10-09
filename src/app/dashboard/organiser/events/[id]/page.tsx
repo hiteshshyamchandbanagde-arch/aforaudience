@@ -376,11 +376,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     </span>
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
                       <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-06)' }}>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? 'var(--afa-space-2)' : 0 }}>
+                        <p data-afa-platform-fee style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? 'var(--afa-space-2)' : 0 }}>
                           Platform fee remaining: {formatINR(event.venueBooking.platformFeeAmount)}
                         </p>
                         {walletBalance > 0 && (
                           <Button
+                            data-afa-apply-wallet
                             variant="outline-accent"
                             size="sm"
                             fullWidth={false}
@@ -420,11 +421,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                     </div>
                     {p.compensationType === 'BUY_IN' && p.buyInAmount && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-                        <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
+                        <span data-afa-refund-status={p.buyInRefundStatus ?? ''} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
                           Buy-in {formatINR(p.buyInAmount)} - {p.buyInRefundStatus === 'WALLET_CREDITED' ? 'kept as wallet credit' : 'marked as refunded to the artist'}
                         </span>
                         {p.buyInRefundStatus === 'REFUNDED' && (
                           <Button
+                            data-afa-keep-wallet-credit
                             variant="outline-neutral"
                             size="sm"
                             fullWidth={false}
@@ -449,7 +451,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             </h2>
             {event.applications.length > 0 && (
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-14px)' }}>
-                Artists apply under this event's declared compensation terms — <strong>{describeDefaultCompensation(event)}</strong>. Approving locks this in for the artist; it's final.
+                Artists apply under this event's declared compensation terms — <strong data-afa-default-compensation>{describeDefaultCompensation(event)}</strong>. Approving locks this in for the artist; it's final.
                 {event.defaultCompensationType === 'BUY_IN' && ' A Buy-in amount is paid directly to you by the artist - not yet processed or confirmed by the platform.'}
               </p>
             )}
@@ -466,7 +468,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         <span style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                           {app.artist.stageName || app.artist.user.name}
                         </span>
-                        <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
+                        <span data-afa-status={shownStatus} style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
                           {shownStatus === 'CLOSED' ? tr.common.applicationClosed : app.status.toLowerCase()}
                         </span>
                       </div>
@@ -474,6 +476,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       {shownStatus !== 'CLOSED' && (app.status === 'PENDING' || app.status === 'WAITLISTED') && (
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                           <Button
+                            data-afa-review="approve"
                             variant="success"
                             size="sm"
                             fullWidth={false}
@@ -483,6 +486,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                             Approve
                           </Button>
                           <Button
+                            data-afa-review="reject"
                             variant="outline-error"
                             size="sm"
                             fullWidth={false}
@@ -502,6 +506,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
           <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
             <Link
+              data-afa-edit-event
               href={`/dashboard/organiser/events/${event.id}/edit`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >

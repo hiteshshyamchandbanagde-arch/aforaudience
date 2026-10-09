@@ -109,9 +109,10 @@ test.describe("@needs-db waitlist and wallet credit", () => {
         // and its Free-by-default trap, is gone): approving locks in the
         // terms the event declared. Check they are the Buy-in the rest of
         // this flow depends on before approving.
-        await expect(organiserPage.getByText("Buy-in — ₹300", { exact: true })).toBeVisible();
-        await organiserPage.getByRole("button", { name: /^approve$/i }).first().click();
-        await expect(organiserPage.getByText(/application approved/i)).toBeVisible(AFTER_WRITE);
+        // data-afa-* hooks (the English text is still checked): the organiser page follows the UI language (GEN-2610-007).
+        await expect(organiserPage.locator("[data-afa-default-compensation]")).toHaveText("Buy-in — ₹300");
+        await organiserPage.locator('[data-afa-review="approve"]').first().click();
+        await expect(organiserPage.locator("[data-afa-toast]").filter({ hasText: /application approved/i })).toBeVisible(AFTER_WRITE);
       });
 
       await test.step("Artist B applies - lineup is now full, so B is waitlisted", async () => {
@@ -153,20 +154,20 @@ test.describe("@needs-db waitlist and wallet credit", () => {
 
       await test.step("Organiser sees the cancelled Buy-in slot as Refunded, converts it to wallet credit", async () => {
         await gotoDashboard(organiserPage, `/dashboard/organiser/events/${FIXTURE_EVENT_ID}`);
-        await expect(organiserPage.getByText(/marked as refunded to the artist/i)).toBeVisible();
-        await organiserPage.getByRole("button", { name: /keep as wallet credit instead/i }).click();
-        await expect(organiserPage.getByText(/kept as wallet credit instead of a refund/i)).toBeVisible(AFTER_WRITE);
-        await expect(organiserPage.getByText(/kept as wallet credit$/i)).toBeVisible();
+        await expect(organiserPage.locator('[data-afa-refund-status="REFUNDED"]')).toContainText(/marked as refunded to the artist/i);
+        await organiserPage.locator("[data-afa-keep-wallet-credit]").click();
+        await expect(organiserPage.locator("[data-afa-toast]").filter({ hasText: /kept as wallet credit instead of a refund/i })).toBeVisible(AFTER_WRITE);
+        await expect(organiserPage.locator('[data-afa-refund-status="WALLET_CREDITED"]')).toHaveText(/kept as wallet credit$/i);
       });
 
       await test.step("Organiser applies the new wallet balance to the venue booking's platform fee", async () => {
-        await expect(organiserPage.getByText(/platform fee remaining: ₹199/i)).toBeVisible();
-        await organiserPage.getByRole("button", { name: /apply wallet credit/i }).click();
+        await expect(organiserPage.locator("[data-afa-platform-fee]")).toHaveText(/platform fee remaining: ₹199/i);
+        await organiserPage.locator("[data-afa-apply-wallet]").click();
         // ₹300 credited vs a ₹199 fee - applied is capped at the fee
         // (min(remainingFee, walletBalance) per apply-wallet/route.ts), so
         // the fee line should disappear/zero out, not just shrink.
-        await expect(organiserPage.getByText(/₹199 wallet credit applied/i)).toBeVisible(AFTER_WRITE);
-        await expect(organiserPage.getByText(/platform fee remaining: ₹199/i)).toBeHidden();
+        await expect(organiserPage.locator("[data-afa-toast]").filter({ hasText: /₹199 wallet credit applied/i })).toBeVisible(AFTER_WRITE);
+        await expect(organiserPage.locator("[data-afa-platform-fee]").filter({ hasText: /platform fee remaining: ₹199/i })).toBeHidden();
       });
     } finally {
       await artistAPage.context().close();

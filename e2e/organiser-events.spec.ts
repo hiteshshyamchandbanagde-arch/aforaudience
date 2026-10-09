@@ -18,7 +18,8 @@ test.describe("[BUG-2609-071] dates do not follow the browser", () => {
     page,
   }) => {
     await gotoDashboard(page, "/dashboard/organiser");
-    await expect(page.getByRole("heading", { level: 1, name: "Your Events" })).toBeVisible();
+    // The page-title hook, not the English name: the dashboard follows the UI language (GEN-2610-007).
+    await expect(page.locator("h1[data-afa-page-title]")).toHaveText("Your Events");
 
     // Every event card's first line is "<date> · <venue>".
     const dateLines = page.getByRole("main").locator("p").filter({ hasText: /\d{4} · / });
@@ -65,7 +66,8 @@ test.describe("[BUG-2609-083] venue hours are billed in half-hours and a very lo
     const main = page.getByRole("main");
 
     // Any venue with an hourly rate will do; this one is Omkar's own seed venue.
-    const venueSelect = main.locator("select").filter({ has: page.locator("option", { hasText: "No venue selected" }) });
+    // data-afa-* hooks, not the English text: the create page follows the UI language (GEN-2610-007).
+    const venueSelect = main.locator("select[data-afa-venue-select]");
     const venueOption = venueSelect.locator("option", { hasText: "Koregaon Park Lounge" });
     await expect(venueOption).toHaveCount(1);
 
@@ -74,14 +76,16 @@ test.describe("[BUG-2609-083] venue hours are billed in half-hours and a very lo
     await venueSelect.selectOption({ label: (await venueOption.innerText()).trim() });
 
     // Before: "× 14.966666666666667 hr" and no warning.
-    await expect(main.getByText(/₹[\d,]+\/hr × 15 hr \(14 h 58 m, billed as 15 hr\)/)).toBeVisible();
-    await expect(main.getByText("This event runs 14 h 58 m and ends the next day. Check AM/PM.")).toBeVisible();
+    const rateNote = main.locator("[data-afa-rate-note]");
+    const warning = main.locator("[data-afa-time-warning]");
+    await expect(rateNote).toContainText(/₹[\d,]+\/hr × 15 hr \(14 h 58 m, billed as 15 hr\)/);
+    await expect(warning).toHaveText("This event runs 14 h 58 m and ends the next day. Check AM/PM.");
     await expect(main).not.toContainText(/\d\.\d{3,} hr/);
 
     await page.locator('input[name="startTime"]').fill("19:00");
     await page.locator('input[name="endTime"]').fill("21:05");
-    await expect(main.getByText(/₹[\d,]+\/hr × 2\.5 hr \(2 h 5 m, billed as 2\.5 hr\)/)).toBeVisible();
-    await expect(main.getByText(/ends the next day/)).toHaveCount(0);
+    await expect(rateNote).toContainText(/₹[\d,]+\/hr × 2\.5 hr \(2 h 5 m, billed as 2\.5 hr\)/);
+    await expect(warning).toHaveCount(0);
 
     // Nothing was submitted: leaving the page creates no event.
   });

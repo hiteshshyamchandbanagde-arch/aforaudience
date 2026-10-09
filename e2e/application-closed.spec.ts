@@ -76,9 +76,10 @@ test.describe("Omkar", () => {
     // Dashboard cards: the past event has no "pending application" line; the upcoming one does.
     await gotoDashboard(page, "/dashboard/organiser/");
     const card = (eventId: string) => page.locator(`[data-afa-event-card="${eventId}"]`);
-    await expect(card(OPEN_APP.eventId).getByText(/\d+ pending applications?/), "upcoming event counts its pending application").toBeVisible();
+    // data-afa-* hooks, not the English text: the dashboard follows the UI language (GEN-2610-007).
+    await expect(card(OPEN_APP.eventId).locator("[data-afa-pending-count]"), "upcoming event counts its pending application").toBeVisible();
     await expect(card(PAST_APP.eventId), "One-Act Play Festival is on Omkar's dashboard").toBeVisible();
-    await expect(card(PAST_APP.eventId).getByText(/pending application/), "past event: no pending count").toHaveCount(0);
+    await expect(card(PAST_APP.eventId).locator("[data-afa-pending-count]"), "past event: no pending count").toHaveCount(0);
 
     // Event page: Closed, nothing to decide.
     await gotoDashboard(page, `/dashboard/organiser/events/${PAST_APP.eventId}/`);
@@ -86,7 +87,7 @@ test.describe("Omkar", () => {
     await expect(row).toBeVisible();
     await expect(row).toContainText(/closed/i);
     await expect(row).not.toContainText(/pending/i);
-    await expect(row.getByRole("button", { name: /Approve|Reject/ }), "no Approve/Reject on a closed application").toHaveCount(0);
+    await expect(row.locator("[data-afa-review]"), "no Approve/Reject on a closed application").toHaveCount(0);
     await hideFloatingOverlays(page);
     await expect(row).toHaveScreenshot(`application-closed-organiser-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 
@@ -94,7 +95,7 @@ test.describe("Omkar", () => {
     await gotoDashboard(page, `/dashboard/organiser/events/${OPEN_APP.eventId}/`);
     const open = page.locator(`[data-afa-application="${OPEN_APP.id}"]`);
     await expect(open).toContainText(/pending/i);
-    await expect(open.getByRole("button", { name: "Approve" })).toBeVisible();
+    await expect(open.locator('[data-afa-review="approve"]')).toBeVisible();
   });
 });
 

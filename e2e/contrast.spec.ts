@@ -40,8 +40,10 @@ for (const [status, label] of STATUSES) {
       });
     });
     await gotoDashboard(page, `/dashboard/organiser/events/${EVENT_ID}/edit/`);
-    const badge = page.getByText(label, { exact: true });
+    // By its status hook (the English label is still checked): the edit page follows the UI language (GEN-2610-007).
+    const badge = page.locator(`[data-afa-special-notes-status="${status}"]`);
     await expect(badge).toBeVisible();
+    await expect(badge).toHaveText(label);
     const ratio = await contrastOf(badge);
     test.info().annotations.push({ type: "contrast", description: `${status}: ${ratio}:1` });
     expect(ratio, `${status} badge text contrast`).toBeGreaterThanOrEqual(4.5);
