@@ -18,12 +18,13 @@ test.use({ storageState: authFile("hrithik"), viewport: PHONE });
 
 test("[BUG-2608-049] artist edit, Tour at 390: no field narrower than its content, inputs usable", async ({ page }) => {
   await gotoDashboard(page, "/dashboard/artist/edit/");
-  const tour = page.locator("div").filter({ has: page.locator("label", { hasText: /^Tour$/ }) }).last();
-  const before = await tour.getByRole("button", { name: "Remove tour stop" }).count();
-  await tour.getByRole("button", { name: "+ Add tour stop" }).click();
-  const remove = tour.getByRole("button", { name: "Remove tour stop" }).nth(before);
+  // data-afa-* hooks, not English labels: the editor follows the UI language (GEN-2610-007).
+  const tour = page.locator("[data-afa-tour]");
+  const before = await tour.locator("[data-afa-tour-stop]").count();
+  await tour.locator("[data-afa-tour-add]").click();
+  const row = tour.locator("[data-afa-tour-stop]").nth(before);
+  const remove = row.locator("[data-afa-tour-remove]");
   await expect(remove).toBeVisible();
-  const row = remove.locator("xpath=..");
 
   const fields = await row.locator("input, button").evaluateAll((els) =>
     els.map((el) => {
@@ -51,15 +52,15 @@ test("[BUG-2608-049] artist edit, Tour at 390: no field narrower than its conten
     expect(f.overflow, `"${f.name}" does not clip its content`).toBe(false);
   }
 
-  const city = row.getByPlaceholder("City");
+  const city = row.locator("[data-afa-tour-city]");
   await city.fill("Thiruvananthapuram");
   await expect(city).toHaveValue("Thiruvananthapuram");
-  await row.getByPlaceholder("Country").fill("India");
-  await expect(row.getByPlaceholder("Country")).toHaveValue("India");
+  await row.locator("[data-afa-tour-country]").fill("India");
+  await expect(row.locator("[data-afa-tour-country]")).toHaveValue("India");
   await row.locator('input[type="date"]').fill("2026-12-31");
   await expect(row.locator('input[type="date"]')).toHaveValue("2026-12-31");
 
   // Put the page back as it was; nothing was saved.
   await remove.click();
-  await expect(tour.getByRole("button", { name: "Remove tour stop" })).toHaveCount(before);
+  await expect(tour.locator("[data-afa-tour-stop]")).toHaveCount(before);
 });

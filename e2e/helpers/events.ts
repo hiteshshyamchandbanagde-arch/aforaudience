@@ -24,7 +24,8 @@ export async function openArtistEventsAllCities(page: Page, target: Locator) {
   await gotoDashboard(page, "/dashboard/artist/events");
   await page.waitForLoadState("networkidle");
   await expect(async () => {
-    await page.getByRole("main").getByRole("combobox").selectOption({ label: "All Cities" });
+    // By value: the "All Cities" sentinel; the label is translated (GEN-2610-007).
+    await page.getByRole("main").getByRole("combobox").selectOption("All Cities");
     await expect(target).toBeVisible({ timeout: 3_000 });
   }).toPass({ timeout: 15_000 });
 }

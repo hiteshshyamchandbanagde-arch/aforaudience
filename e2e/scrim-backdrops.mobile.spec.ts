@@ -47,8 +47,10 @@ test.describe("signed in as Omkar", () => {
 
   test("[GEN-2609-114] dashboard tab bar More sheet: the backdrop is --afa-scrim", async ({ page }) => {
     await gotoDashboard(page, "/dashboard/organiser/");
-    await page.getByRole("button", { name: /^More$/i }).filter({ visible: true }).click();
-    const sheet = page.getByRole("dialog", { name: "More" });
+    // data-afa-* hooks, not the English "More": the bar follows the UI language (GEN-2610-007).
+    await page.locator('[data-afa-tab="more"]').filter({ visible: true }).click();
+    const sheet = page.locator("[data-afa-more-sheet]");
+    await expect(sheet).toHaveAttribute("role", "dialog");
     await expect(sheet).toBeVisible();
 
     const scrim = await tokenColour(page, "--afa-scrim");

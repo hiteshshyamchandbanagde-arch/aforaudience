@@ -292,7 +292,7 @@ export default function BrowseEventsToApplyPage() {
                     </div>
 
                     <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-3)' }}>
-                      <Badge variant="pill" tone={comp}>{comp.label}</Badge>
+                      <Badge variant="pill" tone={comp} data-afa-compensation={event.defaultCompensationType ?? 'FREE'}>{comp.label}</Badge>
                       {full && !existingStatus && (
                         <Badge variant="pill" tone={{ bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }}>
                           {a.lineupFull}
@@ -345,6 +345,7 @@ export default function BrowseEventsToApplyPage() {
                           size="sm"
                           fullWidth={false}
                           onClick={() => apply(event.id)}
+                          data-afa-apply={full ? 'waitlist' : 'apply'}
                           disabled={applying === event.id}
                           // BUG-2610-023 - colour, fill and border are set only for
                           // the outlined Join Waitlist. An explicit `background:

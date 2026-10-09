@@ -37,7 +37,8 @@ test("[BUG-2610-023] artist Browse Events: Apply to Perform has the primary fill
   });
 
   const card = page.locator("[data-afa-browse-event]", { has: page.locator("h3", { hasText: JAIPUR_EVENT_TITLE }) });
-  const apply = card.getByRole("button", { name: "Apply to Perform" });
+  // data-afa-apply, not the English label (GEN-2610-007). The card has no application yet, so this is Apply to Perform.
+  const apply = card.locator('[data-afa-apply="apply"]');
   await openArtistEventsAllCities(page, apply);
 
   // 1. The primary fill: the button's background is the --afa-fill-solid colour, its text the on-fill colour.

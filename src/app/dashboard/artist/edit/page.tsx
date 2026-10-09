@@ -298,7 +298,8 @@ export default function EditArtistProfilePage() {
               artist can show they perform beyond Pune/India. Purely
               informational - not tied to AFA's booking flow, since these
               shows aren't happening through the platform. */}
-          <div style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
+          {/* GEN-2610-007 - data-afa-tour-* are stable test hooks (labels are translated). */}
+          <div data-afa-tour style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
             <label style={labelStyle}>{a.tour}</label>
             <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {a.tourHint}
@@ -306,6 +307,7 @@ export default function EditArtistProfilePage() {
             {tourStops.map((stop) => (
               <div
                 key={stop.key}
+                data-afa-tour-stop
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
@@ -317,8 +319,8 @@ export default function EditArtistProfilePage() {
                   alignItems: 'start',
                 }}
               >
-                <input type="text" value={stop.city} onChange={(e) => updateTourStop(stop.key, 'city', e.target.value)} placeholder={a.city} style={inputStyle} />
-                <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder={a.country} style={inputStyle} />
+                <input type="text" value={stop.city} onChange={(e) => updateTourStop(stop.key, 'city', e.target.value)} placeholder={a.city} data-afa-tour-city style={inputStyle} />
+                <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder={a.country} data-afa-tour-country style={inputStyle} />
                 <input type="date" value={stop.date} onChange={(e) => updateTourStop(stop.key, 'date', e.target.value)} style={inputStyle} />
                 <input type="url" value={stop.link} onChange={(e) => updateTourStop(stop.key, 'link', e.target.value)} placeholder={a.linkOptional} style={inputStyle} />
                 <Button
@@ -326,6 +328,7 @@ export default function EditArtistProfilePage() {
                   size="md"
                   onClick={() => removeTourStop(stop.key)}
                   aria-label={a.removeTourStop}
+                  data-afa-tour-remove
                 >
                   ✕ {a.remove}
                 </Button>
@@ -336,6 +339,7 @@ export default function EditArtistProfilePage() {
               size="md"
               fullWidth={false}
               onClick={addTourStop}
+              data-afa-tour-add
               style={{ marginTop: 'var(--afa-space-1)' }}
             >
               + {a.addTourStop}
@@ -348,6 +352,7 @@ export default function EditArtistProfilePage() {
               size="lg"
               fullWidth={false}
               onClick={save}
+              data-afa-save-profile
               disabled={saving}
               style={{ opacity: saving ? 0.6 : 1 }}
             >

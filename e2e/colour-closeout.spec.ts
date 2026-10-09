@@ -116,7 +116,7 @@ test.describe("Hrithik", () => {
   test("[GEN-2609-113] artist events: 'Buy-in required' is --afa-error-bright on its tint, at least 4.5:1", async ({ page }) => {
     // The buy-in event is in Bengaluru and Hrithik's city is Ballari: the
     // page narrows to his city once it has loaded, so show every city.
-    const buyIn = page.getByText(/^Buy-in required: ₹/).filter({ visible: true }).first();
+    const buyIn = page.locator('main [data-afa-compensation="BUY_IN"]').filter({ visible: true }).first();
     await openArtistEventsAllCities(page, buyIn);
     await expectToneText(page, buyIn, ...ERROR, "Buy-in required note");
   });

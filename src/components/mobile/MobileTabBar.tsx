@@ -309,7 +309,10 @@ export default function MobileTabBar() {
 
   return (
     <>
+      {/* GEN-2610-007 - data-afa-tab-bar / -tab / -more-* are stable hooks for
+          tests: the labels follow the UI language, the ids do not. */}
       <nav
+        data-afa-tab-bar={barState.kind === 'role' ? barState.role.toLowerCase() : barState.kind}
         className="lg:hidden fixed bottom-0 left-0 right-0 flex items-stretch justify-around"
         style={{
           background: 'var(--afa-scrim-strong)',
@@ -327,6 +330,7 @@ export default function MobileTabBar() {
           return (
             <Link
               key={item.id}
+              data-afa-tab={item.id}
               href={item.href}
               replace={item.nav === 'replace'}
               className="relative flex flex-1 flex-col items-center gap-1 py-1.5"
@@ -375,6 +379,7 @@ export default function MobileTabBar() {
             // bare-reason: tab-bar slot that must match its sibling tab items, which are <Link>s styled by the same Tailwind classes, not Buttons
             variant="bare"
             type="button"
+            data-afa-tab="more"
             onClick={() => setMoreOpen(true)}
             className="flex flex-1 flex-col items-center gap-1 py-1.5"
             style={{ color: moreActive ? 'var(--afa-selected)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55 }}
@@ -400,6 +405,7 @@ export default function MobileTabBar() {
           <div className="absolute inset-0" style={{ background: 'var(--afa-scrim)' }} onClick={() => setMoreOpen(false)} />
           <div
             ref={moreSheetRef}
+            data-afa-more-sheet
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(var(--afa-space-4) + env(safe-area-inset-bottom))' }}
           >
@@ -418,6 +424,7 @@ export default function MobileTabBar() {
               {moreItems.map((item) => (
                 <Link
                   key={item.id}
+                  data-afa-more-item={item.id}
                   href={item.href}
                   replace
                   onClick={() => setMoreOpen(false)}
