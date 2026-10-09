@@ -1863,6 +1863,42 @@ const en = {
       saving: "Saving...",
       saveLineup: "Save Lineup",
     },
+    // Venue Booking Requests (/dashboard/venue-requests, "Flexible
+    // Requests"). The same page serves the Venue Owner side.
+    venueRequests: {
+      statusPending: "Pending",
+      statusAccepted: "Accepted",
+      statusDeclined: "Declined",
+      statusExpired: "Expired",
+      loadFailed: "Failed to load requests",
+      actionFailed: "Action failed",
+      accepted: "Offer accepted.",
+      declined: "Request declined.",
+      countered: "Counter-offer sent.",
+      eyebrow: "Flexible-rate negotiations",
+      title: "Venue Booking Requests",
+      venueOwnerSubtitle: "Requests against your venues.",
+      organiserSubtitle: "Your outstanding requests.",
+      empty: "No booking requests yet",
+      untitledEvent: "Untitled event",
+      // {n}: hours booked.
+      hours: "{n}hr",
+      youProposed: "You proposed",
+      organiserProposed: "Organiser proposed",
+      venueProposed: "Venue proposed",
+      // {n}: offers made so far; {max}: the round limit.
+      round: "Round {n} of {max} · expires 48hr after the last offer with no response",
+      // {amount}: the last offer, e.g. ₹4000.
+      counterPlaceholder: "Counter {amount}",
+      proposePlaceholder: "Propose an amount (₹)",
+      notePlaceholder: "Add a note (optional) — e.g. can do ₹4000 but need load-in by 6pm",
+      // {amount}: a ₹ amount.
+      accept: "Accept {amount}",
+      counter: "Counter",
+      sendQuote: "Send quote",
+      decline: "Decline",
+      waiting: "Waiting on the other side to respond.",
+    },
   },
 }
 

@@ -10,7 +10,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { refreshBadgeCounts } from '@/lib/badge-refresh'
 import { formatINR } from '@/lib/money-display'
 
@@ -33,15 +33,17 @@ interface RequestItem {
   offers: Offer[]
 }
 
-const STATUS_STYLE: Record<string, { tone: StatusPillTone; label: string }> = {
-  PENDING: { tone: 'gold', label: 'Pending' },
-  ACCEPTED: { tone: 'sage', label: 'Accepted' },
-  DECLINED: { tone: 'error', label: 'Declined' },
-  EXPIRED: { tone: 'muted', label: 'Expired' },
+// GEN-2610-007 - the pill's label in the UI language; the stored status stays English.
+const STATUS_STYLE: Record<string, { tone: StatusPillTone; label: keyof Dictionary['organiserDashboard']['venueRequests'] }> = {
+  PENDING: { tone: 'gold', label: 'statusPending' },
+  ACCEPTED: { tone: 'sage', label: 'statusAccepted' },
+  DECLINED: { tone: 'error', label: 'statusDeclined' },
+  EXPIRED: { tone: 'muted', label: 'statusExpired' },
 }
 
 export default function VenueRequestsPage() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
+  const v = tr.organiserDashboard.venueRequests
   const { data: session, status } = useSession()
   const router = useRouter()
   const [requests, setRequests] = useState<RequestItem[]>([])
@@ -63,7 +65,7 @@ export default function VenueRequestsPage() {
   const load = async () => {
     try {
       const res = await fetch('/api/venue-booking-requests')
-      if (!res.ok) throw new Error('Failed to load requests')
+      if (!res.ok) throw new Error(v.loadFailed)
       setRequests(await res.json())
       // BUG-2609-073 - the sidebar/tab-bar badge follows this list: after
       // this user's own accept/counter/decline, and when the 20 s poll
@@ -107,21 +109,21 @@ export default function VenueRequestsPage() {
         body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId] }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Action failed')
+      if (!res.ok) throw new Error(data.error || v.actionFailed)
       await load()
       setCommentInputs((prev) => ({ ...prev, [reqId]: '' }))
       showToast(
-        action === 'accept' ? 'Offer accepted.' : action === 'decline' ? 'Request declined.' : 'Counter-offer sent.',
+        action === 'accept' ? v.accepted : action === 'decline' ? v.declined : v.countered,
         'success'
       )
     } catch (err: any) {
-      showToast(err.message || 'Action failed', 'error')
+      showToast(err.message || v.actionFailed, 'error')
     } finally {
       setActingOn(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
@@ -132,11 +134,11 @@ export default function VenueRequestsPage() {
         <div style={{ maxWidth: '820px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
             <PageHead
-              eyebrow="Flexible-rate negotiations"
-              title="Venue Booking Requests"
+              eyebrow={v.eyebrow}
+              title={v.title}
               description={
-                callerSide === 'VENUE_OWNER' ? 'Requests against your venues.'
-                  : callerSide === 'ORGANISER' ? 'Your outstanding requests.'
+                callerSide === 'VENUE_OWNER' ? v.venueOwnerSubtitle
+                  : callerSide === 'ORGANISER' ? v.organiserSubtitle
                   : undefined
               }
             />
@@ -147,7 +149,7 @@ export default function VenueRequestsPage() {
           )}
 
           {requests.length === 0 ? (
-            <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption="No booking requests yet" />
+            <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption={v.empty} />
           ) : (
             requests.map((r) => {
               const lastOffer = r.offers[r.offers.length - 1]
@@ -160,14 +162,14 @@ export default function VenueRequestsPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-1)', gap: 'var(--afa-space-10px)' }}>
                     <div>
                       <p style={{ fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>
-                        {r.event?.title || 'Untitled event'}
+                        {r.event?.title || v.untitledEvent}
                       </p>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', margin: 'var(--afa-space-2px) 0 0' }}>
-                        {r.venue.name}, {r.venue.city} · {formatDate(r.requestedDate, 'medium', locale)} · {r.durationHours}hr
+                        {r.venue.name}, {r.venue.city} · {formatDate(r.requestedDate, 'medium', locale)} · {v.hours.replace('{n}', String(r.durationHours))}
                         {callerSide === 'VENUE_OWNER' && <> · {r.organiser.orgName} ({r.organiser.user.email})</>}
                       </p>
                     </div>
-                    <StatusPill tone={statusStyle.tone}>{statusStyle.label}</StatusPill>
+                    <StatusPill tone={statusStyle.tone}>{v[statusStyle.label]}</StatusPill>
                   </div>
 
                   {r.offers.length > 0 && (
@@ -176,7 +178,7 @@ export default function VenueRequestsPage() {
                         <div key={o.id} style={{ padding: 'var(--afa-space-1) 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)' }}>
                             <span style={{ color: 'var(--afa-text-secondary)' }}>
-                              {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
+                              {o.proposedBy === callerSide ? v.youProposed : o.proposedBy === 'ORGANISER' ? v.organiserProposed : v.venueProposed}
                             </span>
                             <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--afa-amber)' }}>{formatINR(o.amount)}</span>
                           </div>
@@ -192,7 +194,7 @@ export default function VenueRequestsPage() {
 
                   {r.status === 'PENDING' && (
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-14px)' }}>
-                      Round {roundsUsed} of 6 · expires 48hr after the last offer with no response
+                      {v.round.replace('{n}', String(roundsUsed)).replace('{max}', '6')}
                     </p>
                   )}
 
@@ -201,7 +203,7 @@ export default function VenueRequestsPage() {
                       <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
                         <input
                           type="number"
-                          placeholder={lastOffer ? `Counter ₹${lastOffer.amount}` : 'Propose an amount (₹)'}
+                          placeholder={lastOffer ? v.counterPlaceholder.replace('{amount}', `₹${lastOffer.amount}`) : v.proposePlaceholder}
                           value={counterInputs[r.id] || ''}
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
                           min="1"
@@ -213,7 +215,7 @@ export default function VenueRequestsPage() {
                       <div style={{ marginBottom: 'var(--afa-space-3)' }}>
                         <input
                           type="text"
-                          placeholder="Add a note (optional) — e.g. can do ₹4000 but need load-in by 6pm"
+                          placeholder={v.notePlaceholder}
                           value={commentInputs[r.id] || ''}
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
                           maxLength={300}
@@ -224,7 +226,7 @@ export default function VenueRequestsPage() {
                       <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                         {lastOffer && (
                           <Button onClick={() => act(r.id, 'accept')} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id ? 0.6 : 1 }}>
-                            <IconCheck /> Accept {formatINR(lastOffer.amount)}
+                            <IconCheck /> {v.accept.replace('{amount}', formatINR(lastOffer.amount))}
                           </Button>
                         )}
                         <Button
@@ -233,7 +235,7 @@ export default function VenueRequestsPage() {
                           disabled={actingOn === r.id || roundsUsed >= 6}
                           style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
                         >
-                          {lastOffer ? 'Counter' : 'Send quote'}
+                          {lastOffer ? v.counter : v.sendQuote}
                         </Button>
                         <SharedButton
                           variant="outline-error"
@@ -243,7 +245,7 @@ export default function VenueRequestsPage() {
                           disabled={actingOn === r.id}
                           style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)' }}
                         >
-                          Decline
+                          {v.decline}
                         </SharedButton>
                       </div>
                     </div>
@@ -251,7 +253,7 @@ export default function VenueRequestsPage() {
 
                   {r.status === 'PENDING' && !canRespond && (
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: 0 }}>
-                      Waiting on the other side to respond.
+                      {v.waiting}
                     </p>
                   )}
                 </Card>
