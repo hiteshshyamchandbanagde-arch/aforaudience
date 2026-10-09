@@ -78,6 +78,12 @@ jobs:
           E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The Claude GitHub App token this action mints by default expires
+          # 60 min after the run starts; every push after that failed (lost
+          # bundle 2's GEN-2610-006 on 7 Oct and bundle 3a's BUG-2610-020 on
+          # 8 Oct). The job's own GITHUB_TOKEN lives for the whole job
+          # (permissions above: contents write), so git push and gh use it.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_args: >-
             --model opus
             --max-turns 400
