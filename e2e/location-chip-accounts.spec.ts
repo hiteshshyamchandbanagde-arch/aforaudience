@@ -70,7 +70,9 @@ test("[BUG-2610-021] after Atul picks Mumbai and signs out, Hrithik signing in s
   // Sign out (the app's own control).
   const signOut = (isMobile ? page.getByRole("banner") : page.getByRole("menu")).getByRole("button", { name: "Sign out", exact: true });
   await signOut.click();
-  await expect(page).toHaveURL(/:\d+\/$/, AFTER_WRITE);
+  // Lands on the home page: any host, with or without a port (a Vercel
+  // preview has none).
+  await expect.poll(() => new URL(page.url()).pathname, AFTER_WRITE).toBe("/");
 
   // A guest on this device does not start in Atul's city.
   await page.goto("/events");
