@@ -638,6 +638,24 @@ select:-webkit-autofill {
   }
 }
 
+/* GEN-2609-002 - Register on a ~1440x864 laptop window: AuthLayout's
+   `compact` flag adds .afa-auth-compact, and on desktop these tighten the
+   gaps RegisterForm reads (each falls back to its usual spacing anywhere
+   else, so phones and the other auth pages are unchanged). Nothing is
+   removed or reordered; a form that still can't fit scrolls with the page. */
+@media (min-width: 1024px) {
+  .afa-auth-compact {
+    --afa-register-header-gap: var(--afa-space-4);
+    --afa-register-card-pad: var(--afa-space-6) var(--afa-space-32px);
+    --afa-register-divider-gap: var(--afa-space-3);
+    --afa-register-field-gap: var(--afa-space-3);
+    --afa-register-submit-gap: var(--afa-space-4);
+    --afa-register-terms-gap: var(--afa-space-10px);
+    --afa-register-footer-gap: var(--afa-space-14px);
+    --afa-register-note-gap: var(--afa-space-6px);
+  }
+}
+
 /* Push-transition mount animation for full-screen routes entered from
    the mobile tab shell (EventDetail, Checkout - see their own
    layout.tsx files). Ported from the Figma Make export's
