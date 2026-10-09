@@ -1762,6 +1762,34 @@ const es: Dictionary = {
       waiting: "Esperando la respuesta de la otra parte.",
     },
   },
+
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "No estás registrado como propietario de recinto",
+      notOwnerBody: "Solicita desde tu perfil publicar tu recinto para empezar a gestionar reservas.",
+      backToHome: "Volver al inicio",
+      pendingTitle: "Tu cuenta de propietario de recinto está pendiente de aprobación",
+      pendingBody: "Nuestro equipo revisa las nuevas solicitudes de propietarios de recintos antes de que puedas publicar un recinto y aceptar reservas. Te avisaremos en cuanto te aprueben.",
+      eyebrow: "Portafolio",
+      title: "Tus recintos",
+      loadFailed: "No se pudieron cargar tus recintos",
+      emptyCaption: "Aún no hay recintos — registra tu primer espacio",
+      statusPublished: "Publicado",
+      statusDraft: "Borrador",
+      capacity: "Capacidad",
+      perSeat: "Por asiento",
+      rateType: "Tipo de tarifa",
+      rateHourly: "Por hora",
+      rateDaily: "Por día",
+      rateFlexible: "Flexible",
+      hourlyRate: "Por hora · {amount}/h",
+      dailyRate: "Por día · {amount}/día",
+      flexibleRate: "Tarifa flexible",
+      view: "Ver",
+      edit: "Editar",
+      seatMap: "Mapa de asientos",
+    },
+  },
 }
 
 export default es
