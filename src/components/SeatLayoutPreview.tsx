@@ -48,7 +48,8 @@ export function colorForZone(zoneName: string, zoneOrder: string[]) {
   return TIER_COLORS[idx % TIER_COLORS.length] || 'var(--afa-cream)'
 }
 
-export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: PreviewSeat[]; zoneOrder: string[] }) {
+// GEN-2610-007 - the Organiser create/edit pages pass their translated labels.
+export default function SeatLayoutPreview({ seats, zoneOrder, title = 'Layout preview', mainLabel = 'Main' }: { seats: PreviewSeat[]; zoneOrder: string[]; title?: string; mainLabel?: string }) {
   const levels = Array.from(new Set(seats.map((s) => s.level || '')))
   const [activeLevel, setActiveLevel] = useState(levels[0] ?? '')
   const levelSeats = seats.filter((s) => (s.level || '') === activeLevel)
@@ -65,7 +66,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
   return (
     <div style={{ marginTop: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-5)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-2)' }}>
-        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Layout preview</span>
+        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{title}</span>
         {levels.length > 1 && (
           <div style={{ display: 'flex', gap: 'var(--afa-space-6px)' }}>
             {levels.map((lvl) => (
@@ -78,7 +79,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 type="button"
                 onClick={() => setActiveLevel(lvl)}
               >
-                {lvl || 'Main'}
+                {lvl || mainLabel}
               </Button>
             ))}
           </div>

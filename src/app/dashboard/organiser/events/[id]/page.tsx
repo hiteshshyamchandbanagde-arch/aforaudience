@@ -302,7 +302,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 {event.title}
               </PageTitle>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                {formatDate(event.date, 'medium', locale)} · {formatEventTimeRange(event.startTime, event.endTime)}
+                {formatDate(event.date, 'medium', locale)} · {formatEventTimeRange(event.startTime, event.endTime).replace(' (next day)', ` (${d.nextDay})`)}
               </p>
             </div>
             <span

@@ -823,7 +823,7 @@ export default function CreateEventPage() {
                     {f.sectionsFromSeatMap.replace('{venue}', selectedVenue?.name ?? '')}
                   </p>
                   {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
-                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} />
+                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} title={f.layoutPreview} mainLabel={f.mainLevel} />
                   )}
                   {venueLevels.map((lvl) => (
                     <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? 'var(--afa-space-10px)' : 0 }}>

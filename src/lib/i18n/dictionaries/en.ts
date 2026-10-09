@@ -1323,6 +1323,8 @@ const en = {
     // reuses yourEvents.status*; application pills use dashboardChrome.
     eventDetail: {
       noAccess: "You do not have access to this event",
+      // After an overnight event's time range: "23:00 – 02:00 (next day)".
+      nextDay: "next day",
       notFound: "Event not found",
       backToEvents: "Back to Events",
       sharePosterTitle: "Share Poster",
@@ -1488,6 +1490,7 @@ const en = {
       // {venue}: the venue's name.
       sectionsFromSeatMap: "Sections and seat counts come from {venue}'s seat map — you only set the price per section for this event.",
       mainLevel: "Main",
+      layoutPreview: "Layout preview",
       pricePlaceholder: "₹ price",
       free: "Free",
       // {seats} / {sections}: seatsOne/Other and sectionsOne/Other.
