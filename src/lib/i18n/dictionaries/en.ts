@@ -1930,6 +1930,34 @@ const en = {
       // The seat-map link is an icon; this is its accessible name.
       seatMap: "Seat map",
     },
+    // The venue's own page (/dashboard/venue/[id]). Published/Draft come from myVenues.
+    venueView: {
+      accessDenied: "You do not have access to this venue",
+      notFound: "Venue not found",
+      publishFailed: "Failed to update publish status",
+      published: "Venue published.",
+      unpublished: "Venue unpublished.",
+      backToVenues: "Back to Venues",
+      eyebrow: "Venue",
+      overview: "Overview",
+      totalCapacity: "Total Capacity",
+      // {n}: a seat count.
+      seatsOne: "{n} seat",
+      seatsOther: "{n} seats",
+      priceRange: "Price Range",
+      acousticRating: "Acoustic Rating",
+      notRatedYet: "Not Rated Yet",
+      facilities: "Facilities",
+      seatingSections: "Seating Sections",
+      noSeatMap: "No seat map built yet — use Seat Map Builder to add zones and seats.",
+      noSections: "No seating sections defined yet.",
+      free: "FREE",
+      editVenue: "Edit Venue",
+      revenue: "Revenue",
+      updating: "Updating...",
+      unpublish: "Unpublish",
+      publishVenue: "Publish Venue",
+    },
   },
 }
 
