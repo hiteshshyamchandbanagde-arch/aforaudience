@@ -97,6 +97,29 @@ test("[BUG-2610-023] artist share poster: no stray blocks; the link is this depl
   }
   expect(off, `poster right edge is page background rgb(${background.join(",")})`).toEqual([]);
 
+  // A long host (a Vercel preview's, ~70 characters) used to push the QR
+  // box past the 72 px right margin, over x 1015-1075 (e2e-preview on
+  // b8ae472). Ask for the poster as if served from such a host: a local
+  // server takes the forwarded host as given; on Vercel the preview's own
+  // long host stands in for it. The QR stays inside the margin and decodes.
+  const longHost = "aforaudience-git-fix-uiux-bundle-3b-hitesh-shyamchand-bangade-s-projects.vercel.app";
+  const longRes = await page.request.get(src, { headers: { "x-forwarded-host": longHost } });
+  expect(longRes.ok()).toBe(true);
+  const longPng = PNG.sync.read(await longRes.body());
+  const longQr = jsQR(new Uint8ClampedArray(longPng.data), longPng.width, longPng.height);
+  expect(longQr, "the long-host poster's QR decodes").not.toBeNull();
+  const qrRight = Math.max(longQr!.location.topRightCorner.x, longQr!.location.bottomRightCorner.x);
+  expect(qrRight, "QR inside the poster's 72 px right margin (x <= 1008)").toBeLessThanOrEqual(1008);
+  const longPx = (x: number, y: number) => Array.from(longPng.data.subarray((y * longPng.width + x) * 4, (y * longPng.width + x) * 4 + 3));
+  const longOff: string[] = [];
+  for (let y = 872; y <= 1300; y += 6) {
+    for (let x = 1015; x <= 1075; x += 6) {
+      const p = longPx(x, y);
+      if (p.some((v, i) => Math.abs(v - background[i]) > 3)) longOff.push(`(${x},${y}) rgb(${p.join(",")})`);
+    }
+  }
+  expect(longOff, "long host: the right margin is page background").toEqual([]);
+
   // The preview card itself (title, image, button): one baseline per width.
   await poster.evaluate((img: HTMLImageElement) => img.decode());
   const shareCard = poster.locator("xpath=..");

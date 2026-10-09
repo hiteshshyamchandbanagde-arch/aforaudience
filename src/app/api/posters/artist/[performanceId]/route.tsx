@@ -103,12 +103,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
           {performance.event.venue && <div style={{ display: 'flex' }}>{performance.event.venue.name}, {performance.event.venue.city}</div>}
         </div>
 
+        {/* BUG-2610-023 - a long host (a Vercel preview's) used to push the
+            QR past the right margin: the text column takes what is left
+            and the link wraps; the QR keeps its size. */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `2px solid ${c.rule}`, paddingTop: '36px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '32px' }}>
             <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: c.text }}>Come Watch Me</div>
-            <div style={{ display: 'flex', fontSize: '18px', fontWeight: 400, color: c.textMuted }}>{url.replace(/^https?:\/\//, '')}</div>
+            <div style={{ display: 'flex', fontSize: '18px', fontWeight: 400, color: c.textMuted, wordBreak: 'break-all' }}>{url.replace(/^https?:\/\//, '')}</div>
           </div>
-          <div style={{ display: 'flex', padding: '14px', background: POSTER_QR.light, borderRadius: '12px' }}>
+          <div style={{ display: 'flex', flexShrink: 0, padding: '14px', background: POSTER_QR.light, borderRadius: '12px' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrDataUrl} width={120} height={120} alt="" />
           </div>
