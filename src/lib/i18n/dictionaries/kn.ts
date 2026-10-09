@@ -18,6 +18,8 @@ const kn: Dictionary = {
     dialogConfirm: "ದೃಢೀಕರಿಸಿ",
     dialogCancel: "ರದ್ದುಮಾಡಿ",
     dialogOk: "ಸರಿ",
+    applicationClosed: "ಮುಚ್ಚಲಾಗಿದೆ",
+    pastDivider: "ಹಿಂದಿನವು",
   },
   nav: {
     events: "ಈವೆಂಟ್‌ಗಳು",
@@ -674,6 +676,8 @@ const kn: Dictionary = {
     browseEventsLink: "ಈವೆಂಟ್‌ಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
     seatsListTemplate: "ಸೀಟುಗಳು {labels}",
     payNowArrow: "ಈಗ ಪಾವತಿಸಿ →",
+    unfinishedCheckoutLabel: "ಅಪೂರ್ಣ ಚೆಕ್‌ಔಟ್",
+    bookAgainLink: "ಮತ್ತೆ ಬುಕ್ ಮಾಡಿ",
     cancelButton: "ರದ್ದುಗೊಳಿಸಿ",
     cancellingEllipsis: "ರದ್ದುಗೊಳಿಸುತ್ತಿದೆ...",
     messageOrganiser: "ಆಯೋಜಕರಿಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ",

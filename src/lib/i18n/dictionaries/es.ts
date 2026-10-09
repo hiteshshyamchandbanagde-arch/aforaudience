@@ -22,6 +22,8 @@ const es: Dictionary = {
     dialogConfirm: "Confirmar",
     dialogCancel: "Cancelar",
     dialogOk: "Aceptar",
+    applicationClosed: "Cerrada",
+    pastDivider: "Pasados",
   },
   nav: {
     events: "Eventos",
@@ -678,6 +680,8 @@ const es: Dictionary = {
     browseEventsLink: "Explorar eventos",
     seatsListTemplate: "Asientos {labels}",
     payNowArrow: "Pagar ahora →",
+    unfinishedCheckoutLabel: "Compra sin terminar",
+    bookAgainLink: "Reservar de nuevo",
     cancelButton: "Cancelar",
     cancellingEllipsis: "Cancelando...",
     messageOrganiser: "Enviar mensaje al organizador",

@@ -33,7 +33,9 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
             whiteSpace: 'nowrap',
             // GEN-2609-118 - the chosen period is a selected state: amber.
             color: value === r.value ? SELECTED : 'var(--afa-text-primary)',
-            background: value === r.value ? SELECTED_BG : undefined,
+            // BUG-2610-023 sweep - unselected keeps the bare variant's
+            // `background: none`; an explicit undefined used to clear it.
+            ...(value === r.value ? { background: SELECTED_BG } : {}),
           }}
         >
           {r.label}

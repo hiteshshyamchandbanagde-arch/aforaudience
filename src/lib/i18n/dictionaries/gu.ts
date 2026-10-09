@@ -18,6 +18,8 @@ const gu: Dictionary = {
     dialogConfirm: "પુષ્ટિ કરો",
     dialogCancel: "રદ કરો",
     dialogOk: "બરાબર",
+    applicationClosed: "બંધ",
+    pastDivider: "પાછલા",
   },
   nav: {
     events: "ઇવેન્ટ્સ",
@@ -674,6 +676,8 @@ const gu: Dictionary = {
     browseEventsLink: "ઇવેન્ટ્સ બ્રાઉઝ કરો",
     seatsListTemplate: "સીટો {labels}",
     payNowArrow: "હમણાં ચૂકવો →",
+    unfinishedCheckoutLabel: "અધૂરું ચેકઆઉટ",
+    bookAgainLink: "ફરી બુક કરો",
     cancelButton: "રદ કરો",
     cancellingEllipsis: "રદ કરી રહ્યું છે...",
     messageOrganiser: "આયોજકને સંદેશ મોકલો",

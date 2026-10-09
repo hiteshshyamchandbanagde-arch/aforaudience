@@ -36,7 +36,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
   }
 
   const artistName = performance.artist.user.displayName || performance.artist.user.name
-  const url = publicEventUrl(performance.event.id)
+  const url = publicEventUrl(performance.event.id, req)
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 240, color: { dark: POSTER_QR.dark, light: POSTER_QR.light } })
   const dateStr = formatDate(performance.event.date, 'long')
 
@@ -61,12 +61,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
           position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', position: 'absolute', right: '-60px', bottom: '160px', flexDirection: 'column', opacity: 0.06 }}>
-          <div style={{ display: 'flex', width: '460px', height: '90px', background: POSTER_LOGO.barTop, marginBottom: '24px', borderRadius: '8px' }} />
-          <div style={{ display: 'flex', width: '340px', height: '90px', background: POSTER_LOGO.barMiddle, marginBottom: '24px', borderRadius: '8px' }} />
-          <div style={{ display: 'flex', width: '230px', height: '90px', background: POSTER_LOGO.barBottom, borderRadius: '8px' }} />
-        </div>
-
+        {/* BUG-2610-023 - the oversized three-bar watermark that sat here
+            rendered as three stray solid rectangles (dark red, brown,
+            grey) over the bottom right of the artist poster: removed. */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '56px' }}>
           <div style={{ display: 'flex', width: '48px', height: '48px', borderRadius: '12px', background: POSTER_LOGO.tile, marginRight: '16px', flexDirection: 'column', padding: '8px' }}>
             <div style={{ display: 'flex', width: '32px', height: '8px', background: POSTER_LOGO.barTop, marginBottom: '4px' }} />
@@ -106,12 +103,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
           {performance.event.venue && <div style={{ display: 'flex' }}>{performance.event.venue.name}, {performance.event.venue.city}</div>}
         </div>
 
+        {/* BUG-2610-023 - a long host (a Vercel preview's) used to push the
+            QR past the right margin: the text column takes what is left
+            and the link wraps; the QR keeps its size. */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `2px solid ${c.rule}`, paddingTop: '36px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '32px' }}>
             <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: c.text }}>Come Watch Me</div>
-            <div style={{ display: 'flex', fontSize: '18px', fontWeight: 400, color: c.textMuted }}>{url.replace(/^https?:\/\//, '')}</div>
+            <div style={{ display: 'flex', fontSize: '18px', fontWeight: 400, color: c.textMuted, wordBreak: 'break-all' }}>{url.replace(/^https?:\/\//, '')}</div>
           </div>
-          <div style={{ display: 'flex', padding: '14px', background: POSTER_QR.light, borderRadius: '12px' }}>
+          <div style={{ display: 'flex', flexShrink: 0, padding: '14px', background: POSTER_QR.light, borderRadius: '12px' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrDataUrl} width={120} height={120} alt="" />
           </div>

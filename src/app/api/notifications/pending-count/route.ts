@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { countOpenPendingApplications } from '@/lib/application-status'
 
 // Feedback cms1ibqtf: "we need to required notification icon in dashboard
 // to know any request check". Per-page badges already existed (Venue
@@ -34,11 +35,20 @@ export async function GET() {
   if (user.role === 'ORGANISER') {
     const organiser = await prisma.organiser.findUnique({ where: { userId: user.id } })
     if (!organiser) return NextResponse.json({ count: 0 })
+    // BUG-2610-022 - an application for an event that has already happened
+    // can no longer be decided, so it is not waiting on the organiser. The
+    // stored status stays PENDING (no migration); the event date decides.
+    // The database narrows to events dated from two days ago on; the exact
+    // start instant (date + startTime, India time) is checked here.
+    const recent = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
     const [pendingApplications, pendingFlex] = await Promise.all([
-      prisma.application.count({ where: { event: { organiserId: organiser.id }, status: 'PENDING' } }),
+      prisma.application.findMany({
+        where: { event: { organiserId: organiser.id, date: { gte: recent } }, status: 'PENDING' },
+        select: { status: true, event: { select: { date: true, startTime: true } } },
+      }),
       prisma.venueBookingRequest.count({ where: { organiserId: organiser.id, status: 'PENDING' } }),
     ])
-    return NextResponse.json({ count: pendingApplications + pendingFlex })
+    return NextResponse.json({ count: countOpenPendingApplications(pendingApplications) + pendingFlex })
   }
 
   return NextResponse.json({ count: 0 })

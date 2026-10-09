@@ -70,3 +70,14 @@ export async function gotoDashboard(page: Page, url: string) {
   await page.goto(url);
   await expect(page.locator(BRAND_LOADER)).toHaveCount(0, { timeout: 30_000 });
 }
+
+/**
+ * Hides the floating overlays that are not part of the page under test,
+ * for an element screenshot: the chat button, and on a Vercel preview the
+ * preview toolbar (<vercel-live-feedback>, mid-screen at the right edge),
+ * which lands over a row's edge depending on scroll. Lasts until the next
+ * navigation.
+ */
+export async function hideFloatingOverlays(page: Page) {
+  await page.addStyleTag({ content: ".afa-support-chat-btn, vercel-live-feedback { visibility: hidden !important; }" });
+}

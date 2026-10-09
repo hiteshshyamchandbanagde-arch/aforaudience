@@ -20,6 +20,7 @@ import StubRow from '@/components/ui/StubRow'
 import { formatDate } from '@/lib/format-date'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { computeRefund, eventStartInstant as refundStartInstant, type RefundPreview } from '@/lib/refund-policy'
+import { splitUnfinishedCheckouts } from '@/lib/unfinished-checkout'
 
 // BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
 // Organiser / Cancel ticket): full-width buttons stacked under the QR,
@@ -427,6 +428,10 @@ export default function MyTicketsPage() {
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
+  // BUG-2610-018 - an expired unpaid hold is not a ticket: no card, at
+  // most one compact "Unfinished checkout" row (src/lib/unfinished-checkout.ts).
+  const { tickets, unfinished } = splitUnfinishedCheckouts(bookings)
+
   return (
     <>
       <SiteNav />
@@ -525,7 +530,32 @@ export default function MyTicketsPage() {
             </div>
           )}
 
-          {bookings.length === 0 && acceptedTags.length === 0 ? (
+          {unfinished.length > 0 && (
+            <div data-afa-unfinished-checkouts style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-6)' }}>
+              {unfinished.map((b) => (
+                <div
+                  key={b.id}
+                  data-afa-unfinished-checkout={b.id}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)' }}
+                >
+                  <ClockIcon style={{ width: 14, height: 14, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>
+                      {tr.ticketsPage.unfinishedCheckoutLabel}
+                    </p>
+                    <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {b.event.title} · <span data-afa-unfinished-date>{formatDate(b.event.date, 'short', locale)}</span>
+                    </p>
+                  </div>
+                  <Link href={`/events/${b.event.id}`} style={{ flexShrink: 0, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    {tr.ticketsPage.bookAgainLink}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tickets.length === 0 && acceptedTags.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-64px) var(--afa-space-32px)', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-raised)' }}>
                 <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
@@ -540,7 +570,7 @@ export default function MyTicketsPage() {
             </div>
           ) : (
             (['today', 'weekend', 'upcoming', 'past'] as TicketSection[]).map((section) => {
-              const items = bookings.filter((b) => getSection(b) === section)
+              const items = tickets.filter((b) => getSection(b) === section)
               if (items.length === 0) return null
               const heading = {
                 today: tr.ticketsPage.sectionToday,

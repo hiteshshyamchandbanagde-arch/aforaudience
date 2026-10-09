@@ -18,6 +18,8 @@ const ml: Dictionary = {
     dialogConfirm: "സ്ഥിരീകരിക്കുക",
     dialogCancel: "റദ്ദാക്കുക",
     dialogOk: "ശരി",
+    applicationClosed: "അടച്ചു",
+    pastDivider: "കഴിഞ്ഞവ",
   },
   nav: {
     events: "ഇവന്റുകൾ",
@@ -674,6 +676,8 @@ const ml: Dictionary = {
     browseEventsLink: "ഇവന്റുകൾ ബ്രൗസ് ചെയ്യുക",
     seatsListTemplate: "സീറ്റുകൾ {labels}",
     payNowArrow: "ഇപ്പോൾ പണമടയ്ക്കുക →",
+    unfinishedCheckoutLabel: "പൂർത്തിയാകാത്ത ചെക്ക്ഔട്ട്",
+    bookAgainLink: "വീണ്ടും ബുക്ക് ചെയ്യുക",
     cancelButton: "റദ്ദാക്കുക",
     cancellingEllipsis: "റദ്ദാക്കുന്നു...",
     messageOrganiser: "സംഘാടകന് സന്ദേശം അയയ്ക്കുക",

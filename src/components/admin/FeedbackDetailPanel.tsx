@@ -424,7 +424,8 @@ export default function FeedbackDetailPanel({
                     padding: 'var(--afa-space-6px) var(--afa-space-3)',
                     borderRadius: 'var(--afa-radius-pill)',
                     border: item.severity === sev ? 'none' : '1px solid var(--afa-border-resting)',
-                    background: item.severity === sev ? SEVERITY_COLORS[sev] : undefined,
+                    // BUG-2610-023 sweep - unselected keeps the bare variant's `background: none`.
+                    ...(item.severity === sev ? { background: SEVERITY_COLORS[sev] } : {}),
                     color: item.severity === sev ? 'white' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.6 : 1,

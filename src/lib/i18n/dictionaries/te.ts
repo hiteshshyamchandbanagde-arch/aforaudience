@@ -18,6 +18,8 @@ const te: Dictionary = {
     dialogConfirm: "నిర్ధారించండి",
     dialogCancel: "రద్దు చేయండి",
     dialogOk: "సరే",
+    applicationClosed: "మూసివేయబడింది",
+    pastDivider: "గతం",
   },
   nav: {
     events: "ఈవెంట్‌లు",
@@ -674,6 +676,8 @@ const te: Dictionary = {
     browseEventsLink: "ఈవెంట్‌లను బ్రౌజ్ చేయండి",
     seatsListTemplate: "సీట్లు {labels}",
     payNowArrow: "ఇప్పుడు చెల్లించండి →",
+    unfinishedCheckoutLabel: "పూర్తికాని చెక్‌అవుట్",
+    bookAgainLink: "మళ్ళీ బుక్ చేయండి",
     cancelButton: "రద్దు చేయండి",
     cancellingEllipsis: "రద్దు చేస్తోంది...",
     messageOrganiser: "నిర్వాహకుడికి సందేశం పంపండి",

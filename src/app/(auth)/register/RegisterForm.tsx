@@ -448,7 +448,7 @@ export default function RegisterForm() {
 
   return (
       <div style={{ width: "100%", maxWidth: "480px" }}>
-        <div style={{ textAlign: "center", marginBottom: "var(--afa-space-32px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "var(--afa-register-header-gap, var(--afa-space-32px))" }}>
           <Link href="/" className="lg:hidden" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
             <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             <EnvBadge />
@@ -460,7 +460,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div ref={formCardRef} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "var(--afa-space-40px)", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
+        <div ref={formCardRef} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "var(--afa-register-card-pad, var(--afa-space-40px))", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
           {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - new, above Full
               Name per docs/design.md. QST-2607-009 backend is merged so the
               call is wired for real, but it only actually completes once
@@ -477,7 +477,7 @@ export default function RegisterForm() {
                 <GoogleIcon />
                 {tr.loginPage.continueWithGoogle}
               </Button>
-              <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-register-divider-gap, var(--afa-space-5)) 0" }}>
                 <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
                 <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
                 <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
@@ -491,7 +491,7 @@ export default function RegisterForm() {
             </div>
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-register-field-gap, var(--afa-space-4))" }}>
             <div>
               <label style={labelStyle}>{tr.registerPage.fullNameLabel}</label>
               <input
@@ -713,22 +713,22 @@ export default function RegisterForm() {
             variant="form-submit"
             onClick={handleRegister}
             disabled={loading || usernameStatus === "taken" || usernameStatus === "invalid"}
-            style={{ marginTop: "var(--afa-space-6)" }}
+            style={{ marginTop: "var(--afa-register-submit-gap, var(--afa-space-6))" }}
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </Button>
-          <p style={{ textAlign: "center", marginTop: "var(--afa-space-14px)", fontSize: "var(--afa-text-small)" }}>
+          <p style={{ textAlign: "center", marginTop: "var(--afa-register-terms-gap, var(--afa-space-14px))", fontSize: "var(--afa-text-small)" }}>
             <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.agreeToTermsPrefix}</span>{" "}
             <Link href="/terms" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.andConjunction}</span>{" "}
             <Link href="/privacy" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link><span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>.</span>
           </p>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-body)" }}>
+        <p style={{ textAlign: "center", marginTop: "var(--afa-register-footer-gap, var(--afa-space-6))", fontSize: "var(--afa-text-body)" }}>
           <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.registerPage.alreadyHaveAccountPrefix}</span> {" "}
           <Link href="/login" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
         </p>
-        <p style={{ textAlign: "center", marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
+        <p style={{ textAlign: "center", marginTop: "var(--afa-register-note-gap, var(--afa-space-3))", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
           {tr.registerPage.everyoneJoinsAsAudience}
         </p>
       </div>

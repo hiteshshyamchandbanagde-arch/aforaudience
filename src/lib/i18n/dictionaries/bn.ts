@@ -18,6 +18,8 @@ const bn: Dictionary = {
     dialogConfirm: "নিশ্চিত করুন",
     dialogCancel: "বাতিল করুন",
     dialogOk: "ঠিক আছে",
+    applicationClosed: "বন্ধ",
+    pastDivider: "অতীত",
   },
   nav: {
     events: "ইভেন্ট",
@@ -674,6 +676,8 @@ const bn: Dictionary = {
     browseEventsLink: "ইভেন্ট ব্রাউজ করুন",
     seatsListTemplate: "সিট {labels}",
     payNowArrow: "এখনই পেমেন্ট করুন →",
+    unfinishedCheckoutLabel: "অসম্পূর্ণ চেকআউট",
+    bookAgainLink: "আবার বুক করুন",
     cancelButton: "বাতিল করুন",
     cancellingEllipsis: "বাতিল করা হচ্ছে...",
     messageOrganiser: "আয়োজককে বার্তা পাঠান",
