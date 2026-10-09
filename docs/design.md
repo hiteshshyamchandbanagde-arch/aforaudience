@@ -8236,3 +8236,10 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
 - **BUG-2610-022 - past-event applications are Closed (derived, not stored).** An application whose event has started shows a neutral "Closed" pill to both artist and organiser; its stored status is untouched. Closed applications are excluded from the organiser pending-count badge and per-event pending counts (`src/lib/application-status.ts`). Artist My Applications: upcoming first (soonest first), then past (most recent first), fixed tie-break for the same start. Ratings render half stars (4.5 = 4.5).
 - **BUG-2610-023 - never pass `background: undefined` (standing).** An explicit `undefined` in a `style` object clears a Button variant's fill; set the key only when overriding (spread it in conditionally). Artist Browse lists upcoming events only. Share posters: no stray blocks, the QR stays on the poster with a long host, links use the current deployment's origin.
 - **GEN-2609-002 - Register fits ~1440x864.** `AuthLayout compact` tightens desktop spacing via `.afa-auth-compact` variables; phones and other auth pages unchanged; never an inner scroll box.
+
+## UI/UX bundle 4 (9 Oct, PR #746)
+
+- **BUG-2610-026 - chart tooltips (standing).** Every Recharts `<Tooltip>` spreads the shared props from `src/lib/chart-tooltip.ts` (token colours; value text `--afa-text-primary`, AA on the tooltip surface). `scripts/chart-tooltip.test.ts` enforces it.
+- **BUG-2610-029 - no English left in audience copy (standing).** `scripts/i18n-untranslated.test.ts` fails on dictionary values identical to `en.ts` outside its allow-list (proper nouns, brand, amounts, codes).
+- **BUG-2610-030 - Indic scripts are never tracked or uppercased (standing).** One global rule in `globals.css`: under `:lang(hi|mr|bn|gu|kn|ml|ta|te)` any element with letter-spacing or text-transform gets `letter-spacing: normal` and `text-transform: none`. `<html lang>` follows the active locale.
+- **BUG-2610-032 - city picker states.** Loading until the city list arrives; "no matching city" only for a non-empty search with zero results.
