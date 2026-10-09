@@ -480,6 +480,22 @@
 html {
   font-family: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif;
 }
+
+/* BUG-2610-030 - tracked labels in Indic scripts. Letter-spacing splits
+   a word at every conjunct and vowel sign ("जीवंत" read "जी वं त"), and
+   uppercase means nothing in these scripts. The one switch for every
+   tracked label: in an Indic locale (TranslationProvider sets <html lang>
+   from the active locale) any element that sets letter-spacing or
+   text-transform - inline style (how every label here sets it) or a
+   Tailwind tracking-/uppercase class - gets normal spacing and no
+   transform. !important because the labels set both inline.
+   e2e/homepage-hindi.spec.ts checks it at 390 and 1440. */
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="letter-spacing"], [class*="tracking-"]) {
+  letter-spacing: normal !important;
+}
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="text-transform"], .uppercase) {
+  text-transform: none !important;
+}
 .hero-rotator {
   height: 100%;
   min-height: 360px;

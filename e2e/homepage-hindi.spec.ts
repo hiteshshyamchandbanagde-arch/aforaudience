@@ -91,3 +91,53 @@ test("[BUG-2610-029] no English homepage copy is left on the Hindi homepage", as
   const left = ENGLISH_LEFT_BEFORE.filter((s) => text.includes(s));
   expect(left).toEqual([]);
 });
+
+/**
+ * BUG-2610-030 - tracked labels split Devanagari: letter-spacing pulled
+ * every conjunct and vowel sign apart ("जीवंत कला" read "जी वं त  क ला").
+ * In an Indic locale, one rule in globals.css drops letter-spacing and
+ * text-transform on every tracked label; English keeps both.
+ */
+async function tracking(el: import("@playwright/test").Locator) {
+  return el.evaluate((node) => {
+    const s = getComputedStyle(node);
+    return { letterSpacing: s.letterSpacing, textTransform: s.textTransform };
+  });
+}
+
+const UNTRACKED = { letterSpacing: "normal", textTransform: "none" };
+
+test("[BUG-2610-030] Hindi: the homepage eyebrow has no letter-spacing", async ({ page, isMobile }) => {
+  await gotoInLocale(page, "/", "hi");
+  const eyebrow = page.getByRole("main").getByText("जीवंत कला, असली पल", { exact: true });
+  await expect(eyebrow).toBeVisible();
+  expect(await tracking(eyebrow)).toEqual(UNTRACKED);
+  await expect(eyebrow).toHaveScreenshot(`hi-eyebrow-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+});
+
+test("[BUG-2610-030] Hindi: the /events count labels have no letter-spacing", async ({ page }) => {
+  await gotoInLocale(page, "/events", "hi");
+  const showing = page.getByRole("main").getByText(/^\d+ इवेंट्?स? दिखा रहे हैं$/);
+  await expect(showing).toBeVisible();
+  expect(await tracking(showing)).toEqual(UNTRACKED);
+  const near = page.getByTestId("events-count-eyebrow");
+  await expect(near).toHaveText(/आपके आसपास \d+ इवेंट/);
+  expect(await tracking(near)).toEqual(UNTRACKED);
+});
+
+test("[BUG-2610-030] English keeps its tracked, uppercase labels", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  const eyebrow = page.getByRole("main").getByText("Live, right now — six cities and counting", { exact: true });
+  await expect(eyebrow).toBeVisible();
+  const home = await tracking(eyebrow);
+  expect(home.letterSpacing).not.toBe("normal");
+  expect(home.textTransform).toBe("uppercase");
+
+  await page.goto("/events");
+  const showing = page.getByRole("main").getByText(/^Showing \d+ events?$/i);
+  await expect(showing).toBeVisible();
+  const events = await tracking(showing);
+  expect(events.letterSpacing).not.toBe("normal");
+  expect(events.textTransform).toBe("uppercase");
+});
