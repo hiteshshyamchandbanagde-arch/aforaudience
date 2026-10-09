@@ -1244,6 +1244,7 @@ const gu: Dictionary = {
     },
     eventDetail: {
       noAccess: "તમને આ ઇવેન્ટની ઍક્સેસ નથી",
+      nextDay: "બીજા દિવસે",
       notFound: "ઇવેન્ટ મળી નહીં",
       backToEvents: "ઇવેન્ટ્સ પર પાછા જાઓ",
       sharePosterTitle: "પોસ્ટર શેર કરો",
@@ -1392,6 +1393,7 @@ const gu: Dictionary = {
       paidEntry: "પેઇડ પ્રવેશ",
       sectionsFromSeatMap: "સેક્શન અને બેઠકોની સંખ્યા {venue} ના સીટ મેપમાંથી આવે છે — આ ઇવેન્ટ માટે તમે ફક્ત દરેક સેક્શનની કિંમત નક્કી કરો છો.",
       mainLevel: "મુખ્ય",
+      layoutPreview: "લેઆઉટની ઝલક",
       pricePlaceholder: "₹ કિંમત",
       free: "મફત",
       totalCapacity: "કુલ ક્ષમતા: {sections} માં {seats}",
