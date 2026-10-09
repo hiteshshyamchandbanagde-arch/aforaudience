@@ -143,6 +143,9 @@ const ta: Dictionary = {
     emptyInCity: "{city} இல் நிகழ்வுகள் இல்லை",
     emptySearchAllCities: "எல்லா நகரங்களிலும் தேடு",
     emptyShowAllCities: "எல்லா நகரங்களையும் காட்டு",
+    emptyCityYet: "{city}-இல் இன்னும் நிகழ்ச்சிகள் இல்லை",
+    artistBrowseEmpty: "இன்னும் வெளியிடப்பட்ட நிகழ்வுகள் இல்லை. விரைவில் மீண்டும் பாருங்கள்!",
+    artistBrowseEmptyInCity: "{city}-இல் இன்னும் வெளியிடப்பட்ட நிகழ்வுகள் இல்லை",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
     priceFrom: "₹{price} முதல்",
     emptyClearSearch: "தேடலை அழி",

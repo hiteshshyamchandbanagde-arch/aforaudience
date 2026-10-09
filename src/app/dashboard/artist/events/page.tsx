@@ -252,8 +252,16 @@ export default function BrowseEventsToApplyPage() {
               </Button>
             </div>
           ) : events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
+            <div data-testid="artist-browse-empty" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-3)', textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+              {/* BUG-2610-020 - with a city picked, name it and offer every city. */}
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>
+                {selectedCity === 'All Cities' ? tr.eventsPage.artistBrowseEmpty : tr.eventsPage.artistBrowseEmptyInCity.replace('{city}', selectedCity)}
+              </p>
+              {selectedCity !== 'All Cities' && (
+                <Button variant="outline-accent" size="pill-md" fullWidth={false} type="button" onClick={() => setSelectedCity('All Cities')}>
+                  {tr.eventsPage.emptyShowAllCities}
+                </Button>
+              )}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-4)' }}>

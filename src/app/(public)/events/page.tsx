@@ -366,14 +366,27 @@ function EventsPageContent() {
   // auto-applied city used to read as a bare "No events found").
   const activeQuery = search.trim()
   const activeCity = selectedCity !== "All Cities" ? selectedCity : null
+  // BUG-2610-020 - "Try adjusting your filters" only when a search or a
+  // filter is actually applied; a city with no events and nothing else
+  // set reads "No shows in Mumbai yet" with "Show all cities".
+  const filterApplied = activeQuery !== "" || selectedType !== null || priceFilter !== "All"
   const emptyNamedTitle =
     activeQuery && activeCity
       ? tr.eventsPage.emptySearchInCity.replace("{query}", activeQuery).replace("{city}", activeCity)
       : activeQuery
       ? tr.eventsPage.emptySearch.replace("{query}", activeQuery)
       : activeCity
-      ? tr.eventsPage.emptyInCity.replace("{city}", activeCity)
+      ? (filterApplied || tab === "past" ? tr.eventsPage.emptyInCity : tr.eventsPage.emptyCityYet).replace("{city}", activeCity)
       : null
+  const emptySub = loadFailed
+    ? tr.eventsPage.loadErrorSub
+    : filterApplied
+    ? tr.eventsPage.emptyNoneFoundSub
+    : tab === "past"
+    ? tr.eventsPage.emptyNoPastSub
+    : emptyNamedTitle
+    ? null
+    : tr.eventsPage.emptyNoneYetSub
 
   // Same `search` box drives both modes (session 65 fix) - the hero
   // search is now shared rather than two visually-different boxes for
@@ -464,11 +477,14 @@ function EventsPageContent() {
             separate boxed/inverse hero background in the export - the hero
             sits directly on the page. */}
         <header style={{ maxWidth: "760px" }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
-            {contentMode === "organisers"
-              ? tr.eventsPage.heroSubtitleOrganisers
-              : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast)}
-          </span>
+          {/* BUG-2610-020 - no eyebrow at zero: "0 events happening near you" advertised the emptiness. */}
+          {(contentMode === "organisers" || loading || loadFailed || filtered.length > 0) && (
+            <span data-testid="events-count-eyebrow" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+              {contentMode === "organisers"
+                ? tr.eventsPage.heroSubtitleOrganisers
+                : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast)}
+            </span>
+          )}
           <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
             {contentMode === "organisers" ? (
               <>{tr.eventsPage.heroPrefixOrganisers}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.eventsPage.heroEmphasisOrganisers}</em>{tr.eventsPage.heroSuffixOrganisers}</>
@@ -710,11 +726,13 @@ function EventsPageContent() {
               <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px var(--afa-space-5)", textAlign: "center" }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
                 <TheaterMark style={{ width: "40px", height: "40px", color: "var(--afa-amber-strong)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
-                  {loadFailed ? tr.eventsPage.loadErrorTitle : emptyNamedTitle ?? (tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle)}
+                  {loadFailed ? tr.eventsPage.loadErrorTitle : emptyNamedTitle ?? (tab === "past" ? tr.eventsPage.emptyNoPastTitle : filterApplied ? tr.eventsPage.emptyNoneFoundTitle : tr.eventsPage.emptyNoneYetTitle)}
                 </p>
-                <p style={{ maxWidth: "360px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", margin: 0 }}>
-                  {loadFailed ? tr.eventsPage.loadErrorSub : emptyNamedTitle ? tr.eventsPage.emptyNoneFoundSub : tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
-                </p>
+                {emptySub && (
+                  <p style={{ maxWidth: "360px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", margin: 0 }}>
+                    {emptySub}
+                  </p>
+                )}
                 {!loadFailed && emptyNamedTitle && (
                   <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "var(--afa-space-3)" }}>
                     {activeCity && (

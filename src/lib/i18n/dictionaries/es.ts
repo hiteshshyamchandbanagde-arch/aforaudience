@@ -147,6 +147,9 @@ const es: Dictionary = {
     emptyInCity: "No hay eventos en {city}",
     emptySearchAllCities: "Buscar en todas las ciudades",
     emptyShowAllCities: "Mostrar todas las ciudades",
+    emptyCityYet: "Aún no hay shows en {city}",
+    artistBrowseEmpty: "Aún no hay eventos publicados. ¡Vuelve pronto!",
+    artistBrowseEmptyInCity: "Aún no hay eventos publicados en {city}",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
     priceFrom: "Desde ₹{price}",
     emptyClearSearch: "Borrar búsqueda",

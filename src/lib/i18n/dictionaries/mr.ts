@@ -143,6 +143,9 @@ const mr: Dictionary = {
     emptyInCity: "{city} मध्ये इव्हेंट्स नाहीत",
     emptySearchAllCities: "सगळ्या शहरांत शोधा",
     emptyShowAllCities: "सगळी शहरे दाखवा",
+    emptyCityYet: "{city} मध्ये अजून कोणतेही शो नाहीत",
+    artistBrowseEmpty: "अजून कोणतेही प्रकाशित इव्हेंट नाहीत. लवकरच पुन्हा पहा!",
+    artistBrowseEmptyInCity: "{city} मध्ये अजून कोणतेही प्रकाशित इव्हेंट नाहीत",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
     priceFrom: "₹{price} पासून",
     emptyClearSearch: "शोध पुसा",
