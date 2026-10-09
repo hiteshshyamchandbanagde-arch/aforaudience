@@ -14,7 +14,7 @@ import DashboardShell from '@/components/DashboardShell'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { displayApplicationStatus } from '@/lib/application-status'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
@@ -66,12 +66,35 @@ interface EventDetail {
   venueBooking: { id: string; status: string; amount: number; fromDate: string; toDate: string; platformFeeAmount: number | null } | null
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT: { ...STATUS_TONE.gold, label: 'Draft' },
-  APPROVED: { ...STATUS_TONE.sage, label: 'Published' },
-  PENDING_APPROVAL: { ...STATUS_TONE.gold, label: 'Pending' },
-  CANCELLED: { ...STATUS_TONE.error, label: 'Cancelled' },
-  COMPLETED: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'Completed' },
+// GEN-2610-007 - the badge's label in the UI language (the Your Events
+// list's labels); the stored status stays English.
+type DetailText = Dictionary['organiserDashboard']['eventDetail']
+const STATUS_STYLE: Record<string, { bg: string; color: string; label: keyof Dictionary['organiserDashboard']['yourEvents'] }> = {
+  DRAFT: { ...STATUS_TONE.gold, label: 'statusDraft' },
+  APPROVED: { ...STATUS_TONE.sage, label: 'statusPublished' },
+  PENDING_APPROVAL: { ...STATUS_TONE.gold, label: 'statusPending' },
+  CANCELLED: { ...STATUS_TONE.error, label: 'statusCancelled' },
+  COMPLETED: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'statusCompleted' },
+}
+
+function applicationStatusLabel(status: string, chrome: Dictionary['dashboardChrome']): string {
+  switch (status) {
+    case 'PENDING': return chrome.applicationPending
+    case 'APPROVED': return chrome.applicationApproved
+    case 'REJECTED': return chrome.applicationRejected
+    case 'WAITLISTED': return chrome.applicationWaitlisted
+    default: return status.toLowerCase()
+  }
+}
+
+function bookingStatusLabel(status: string, d: DetailText): string {
+  switch (status) {
+    case 'PENDING': return d.bookingPending
+    case 'CONFIRMED': return d.bookingConfirmed
+    case 'CANCELLED': return d.bookingCancelled
+    case 'REFUNDED': return d.bookingRefunded
+    default: return d.bookingOther.replace('{status}', status.toLowerCase())
+  }
 }
 
 const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
@@ -89,15 +112,18 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
   CLOSED: { ...STATUS_TONE.muted },
 }
 
-function describeDefaultCompensation(event: EventDetail): string {
+function describeDefaultCompensation(event: EventDetail, d: DetailText): string {
   const t = event.defaultCompensationType || 'FREE'
-  if (t === 'FREE') return 'Free (no money either way)'
-  if (t === 'PAID') return `Paid${event.defaultFeeAmount ? ` — ${formatINR(event.defaultFeeAmount)}` : ''}`
-  return `Buy-in${event.defaultBuyInAmount ? ` — ${formatINR(event.defaultBuyInAmount)}` : ''}`
+  if (t === 'FREE') return d.compFree
+  const withAmount = (label: string, amount: number | null | undefined) =>
+    amount ? d.compWithAmount.replace('{label}', label).replace('{amount}', formatINR(amount)) : label
+  if (t === 'PAID') return withAmount(d.compPaid, event.defaultFeeAmount)
+  return withAmount(d.compBuyIn, event.defaultBuyInAmount)
 }
 
 export default function OrganiserEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t: tr, locale } = useLocale()
+  const d = tr.organiserDashboard.eventDetail
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -120,8 +146,8 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
     try {
       const res = await fetch(`/api/events/${id}/owner`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this event')
-        throw new Error('Event not found')
+        if (res.status === 403) throw new Error(d.noAccess)
+        throw new Error(d.notFound)
       }
       const data = await res.json()
       setEvent(data)
@@ -144,11 +170,11 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
     try {
       const res = await fetch(`/api/venue-bookings/${event.venueBooking.id}/apply-wallet`, { method: 'PATCH' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to apply wallet credit')
+      if (!res.ok) throw new Error(data.error || d.applyWalletFailed)
       await fetchEvent()
-      showToast(`${formatINR(data.applied)} wallet credit applied.`, 'success')
+      showToast(d.walletCreditApplied.replace('{amount}', formatINR(data.applied)), 'success')
     } catch (err: any) {
-      showToast(err.message || 'Failed to apply wallet credit', 'error')
+      showToast(err.message || d.applyWalletFailed, 'error')
     } finally {
       setApplyingWallet(false)
     }
@@ -171,7 +197,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ publish: willPublish }),
       })
-      if (!res.ok) throw new Error('Failed to update publish status')
+      if (!res.ok) throw new Error(d.publishFailed)
       const updated = await res.json()
       // PATCH /api/events/[id] intentionally returns a bare
       // prisma.event.update() result with no relations - venue,
@@ -194,16 +220,16 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       // say "Event published." regardless of what actually came back,
       // which was misleading when the real result was still pending.
       if (!willPublish) {
-        showToast('Event unpublished.', 'success')
+        showToast(d.eventUnpublished, 'success')
       } else if (updated.status === 'APPROVED') {
-        showToast('Event published and live.', 'success')
+        showToast(d.eventPublished, 'success')
       } else if (updated.status === 'PENDING_APPROVAL') {
-        showToast('Submitted - waiting on the venue owner to confirm the booking.', 'success')
+        showToast(d.submittedWaiting, 'success')
       } else {
-        showToast('Event updated.', 'success')
+        showToast(d.eventUpdated, 'success')
       }
     } catch (err: any) {
-      showToast(err.message || 'Failed to update publish status', 'error')
+      showToast(err.message || d.publishFailed, 'error')
     } finally {
       setToggling(false)
     }
@@ -224,12 +250,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to update application')
+        throw new Error(data.error || d.updateApplicationFailed)
       }
       await fetchEvent()
-      showToast(newStatus === 'APPROVED' ? 'Application approved.' : 'Application rejected.', 'success')
+      showToast(newStatus === 'APPROVED' ? d.applicationApproved : d.applicationRejected, 'success')
     } catch (err: any) {
-      showToast(err.message || 'Failed to update application', 'error')
+      showToast(err.message || d.updateApplicationFailed, 'error')
     } finally {
       setActingOn(null)
     }
@@ -244,21 +270,21 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       const res = await fetch(`/api/performances/${performanceId}/refund-status`, { method: 'PATCH' })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to update')
+        throw new Error(data.error || d.updateFailed)
       }
       await fetchEvent()
-      showToast('Kept as wallet credit instead of a refund.', 'success')
+      showToast(d.keptAsWalletCredit, 'success')
     } catch (err: any) {
-      showToast(err.message || 'Failed to update', 'error')
+      showToast(err.message || d.updateFailed, 'error')
     } finally {
       setActingOn(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
   if (error && !event) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
-  if (!event) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>Event not found</div></DashboardShell></>)
+  if (!event) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>{d.notFound}</div></DashboardShell></>)
 
   const statusStyle = STATUS_STYLE[event.status] || STATUS_STYLE.DRAFT
 
@@ -268,7 +294,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <BackLink href="/dashboard/organiser" label="Back to Events" />
+          <BackLink href="/dashboard/organiser" label={d.backToEvents} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-28px)', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
             <div>
@@ -285,7 +311,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', background: statusStyle.bg, color: statusStyle.color, whiteSpace: 'nowrap',
               }}
             >
-              {statusStyle.label}
+              {tr.organiserDashboard.yourEvents[statusStyle.label]}
             </span>
           </div>
 
@@ -305,10 +331,10 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               // would always fail. Found via live device test 29 Jul.
               <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
-                  Share Poster
+                  {d.sharePosterTitle}
                 </h3>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                  Available once {event.venue ? 'the venue owner confirms your booking' : "you've booked a venue and it's confirmed"}.
+                  {event.venue ? d.posterAfterConfirm : d.posterAfterBooking}
                 </p>
               </div>
             )}
@@ -320,14 +346,14 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-5)' }}>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Seats</p>
-                <p style={{ fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.availableSeats} / {event.totalSeats} available</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{d.seats}</p>
+                <p style={{ fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{d.seatsAvailable.replace('{available}', String(event.availableSeats)).replace('{total}', String(event.totalSeats))}</p>
               </div>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Ticket Price</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{d.ticketPrice}</p>
                 <p style={{ fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                   {event.isFree
-                    ? 'Free'
+                    ? d.free
                     : event.ticketPrice
                     ? formatINR(event.ticketPrice)
                     : event.ticketTiers && event.ticketTiers.length > 0
@@ -342,13 +368,13 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               </div>
               {event.dresscode && (
                 <div>
-                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Dress Code</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{d.dressCode}</p>
                   <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>{event.dresscode}</p>
                 </div>
               )}
               {event.vibe && (
                 <div>
-                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Vibe</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{d.vibe}</p>
                   <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>{event.vibe}</p>
                 </div>
               )}
@@ -357,7 +383,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
           {/* Venue booking */}
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
-            <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>Venue</h2>
+            <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>{d.venue}</h2>
             {event.venue ? (
               <div>
                 <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{event.venue.name}</p>
@@ -372,12 +398,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         color: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}
                     >
-                      Booking {event.venueBooking.status.toLowerCase()}
+                      {bookingStatusLabel(event.venueBooking.status, d)}
                     </span>
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
                       <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-06)' }}>
                         <p data-afa-platform-fee style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? 'var(--afa-space-2)' : 0 }}>
-                          Platform fee remaining: {formatINR(event.venueBooking.platformFeeAmount)}
+                          {d.platformFeeRemaining.replace('{amount}', formatINR(event.venueBooking.platformFeeAmount))}
                         </p>
                         {walletBalance > 0 && (
                           <Button
@@ -388,7 +414,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                             onClick={applyWalletCredit}
                             disabled={applyingWallet}
                           >
-                            {applyingWallet ? 'Applying...' : <><Icon name="wallet" size={14} style={INLINE_ICON_STYLE} /> Apply wallet credit ({formatINR(walletBalance)} available)</>}
+                            {applyingWallet ? d.applying : <><Icon name="wallet" size={14} style={INLINE_ICON_STYLE} /> {d.applyWalletCredit.replace('{amount}', formatINR(walletBalance))}</>}
                           </Button>
                         )}
                       </div>
@@ -398,7 +424,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               </div>
             ) : (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                No venue booked yet. <Link href={`/dashboard/organiser/events/${event.id}/edit`} style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Add one from the edit page.</Link>
+                {d.noVenueYet} <Link href={`/dashboard/organiser/events/${event.id}/edit`} style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{d.addVenueLink}</Link>
               </p>
             )}
           </div>
@@ -406,7 +432,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           {event.lineup.some((p) => p.cancelledAt) && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
-                Cancelled Performances
+                {d.cancelledPerformances}
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {event.lineup.filter((p) => p.cancelledAt).map((p) => (
@@ -416,13 +442,13 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         {p.artist.stageName || p.artist.user.displayName || p.artist.user.name}
                       </span>
                       <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                        Cancelled {formatDate(p.cancelledAt as string, 'medium', locale)}
+                        {d.cancelledOn.replace('{date}', formatDate(p.cancelledAt as string, 'medium', locale))}
                       </span>
                     </div>
                     {p.compensationType === 'BUY_IN' && p.buyInAmount && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                         <span data-afa-refund-status={p.buyInRefundStatus ?? ''} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
-                          Buy-in {formatINR(p.buyInAmount)} - {p.buyInRefundStatus === 'WALLET_CREDITED' ? 'kept as wallet credit' : 'marked as refunded to the artist'}
+                          {(p.buyInRefundStatus === 'WALLET_CREDITED' ? d.buyInKeptAsCredit : d.buyInRefunded).replace('{amount}', formatINR(p.buyInAmount))}
                         </span>
                         {p.buyInRefundStatus === 'REFUNDED' && (
                           <Button
@@ -433,7 +459,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                             onClick={() => convertToWalletCredit(p.id)}
                             disabled={actingOn === p.id}
                           >
-                            {actingOn === p.id ? 'Updating...' : 'Keep as wallet credit instead'}
+                            {actingOn === p.id ? d.updating : d.keepAsWalletCredit}
                           </Button>
                         )}
                       </div>
@@ -447,16 +473,16 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           {/* Applications */}
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
-              Artist Applications {event.applications.length > 0 && `(${event.applications.length})`}
+              {d.artistApplications} {event.applications.length > 0 && `(${event.applications.length})`}
             </h2>
             {event.applications.length > 0 && (
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-14px)' }}>
-                Artists apply under this event's declared compensation terms — <strong data-afa-default-compensation>{describeDefaultCompensation(event)}</strong>. Approving locks this in for the artist; it's final.
-                {event.defaultCompensationType === 'BUY_IN' && ' A Buy-in amount is paid directly to you by the artist - not yet processed or confirmed by the platform.'}
+                {d.termsIntro.split('{terms}')[0]}<strong data-afa-default-compensation>{describeDefaultCompensation(event, d)}</strong>{d.termsIntro.split('{terms}')[1]}
+                {event.defaultCompensationType === 'BUY_IN' && ` ${d.buyInDirectNote}`}
               </p>
             )}
             {event.applications.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No applications yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{d.noApplications}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {event.applications.map((app) => {
@@ -469,7 +495,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                           {app.artist.stageName || app.artist.user.name}
                         </span>
                         <span data-afa-status={shownStatus} style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
-                          {shownStatus === 'CLOSED' ? tr.common.applicationClosed : app.status.toLowerCase()}
+                          {shownStatus === 'CLOSED' ? tr.common.applicationClosed : applicationStatusLabel(app.status, tr.dashboardChrome)}
                         </span>
                       </div>
                       {app.message && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-10px)' }}>{app.message}</p>}
@@ -483,7 +509,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                             onClick={() => reviewApplication(app.id, 'APPROVED')}
                             disabled={actingOn === app.id}
                           >
-                            Approve
+                            {d.approve}
                           </Button>
                           <Button
                             data-afa-review="reject"
@@ -493,7 +519,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                             onClick={() => reviewApplication(app.id, 'REJECTED')}
                             disabled={actingOn === app.id}
                           >
-                            Reject
+                            {d.reject}
                           </Button>
                         </div>
                       )}
@@ -510,25 +536,25 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               href={`/dashboard/organiser/events/${event.id}/edit`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              Edit Event
+              {d.editEvent}
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/lineup`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              <Icon name="music" size={16} style={INLINE_ICON_STYLE} /> Lineup
+              <Icon name="music" size={16} style={INLINE_ICON_STYLE} /> {d.lineup}
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/checkin`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              <Icon name="ticket" size={16} style={INLINE_ICON_STYLE} /> Check-In
+              <Icon name="ticket" size={16} style={INLINE_ICON_STYLE} /> {d.checkIn}
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/sales`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> Sales
+              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> {d.sales}
             </Link>
             <Button
               variant="primary"
@@ -538,7 +564,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               disabled={toggling}
               title={
                 event.status === 'PENDING_APPROVAL'
-                  ? 'Waiting on the venue owner to confirm the booking - click to check again'
+                  ? d.waitingOnVenueHint
                   : undefined
               }
               // BUG-2610-023 sweep - same `background: undefined` override as
@@ -549,12 +575,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               }}
             >
               {toggling
-                ? 'Updating...'
+                ? d.updating
                 : event.status === 'APPROVED'
-                ? 'Unpublish'
+                ? d.unpublish
                 : event.status === 'PENDING_APPROVAL'
-                ? 'Check approval status'
-                : 'Publish Event'}
+                ? d.checkApproval
+                : d.publishEvent}
             </Button>
           </div>
         </div>
