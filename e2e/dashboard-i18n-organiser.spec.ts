@@ -320,6 +320,68 @@ for (const locale of ["hi", "mr", "de"] as const) {
       expect(await englishLeftIn(main, locale, data), "English left on door check-in").toEqual([]);
       // Nobody was checked in: the camera never starts and no code is sent.
     });
+
+    test(`[GEN-2610-007] Tours and Create Tour in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/organiser/tours/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].tours);
+      await page.waitForLoadState("networkidle");
+      expect(await englishLeftIn(main, locale, data), "English left on Tours").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "organiser-tours-title", isMobile);
+
+      await gotoInLocale(page, "/dashboard/organiser/tours/create/", locale);
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].createTour);
+      await page.waitForLoadState("networkidle");
+      expect(await englishLeftIn(main, locale, data), "English left on Create Tour").toEqual([]);
+      // Nothing was created.
+    });
+
+    test(`[GEN-2610-007] a Tour's page in ${locale}: no English UI strings, Add Stop form open`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      const res = await page.request.get("/api/tours/mine/");
+      expect(res.ok()).toBe(true);
+      const tours = ((await res.json()) as { tours: { id: string }[] }).tours;
+      expect(tours.length, "Omkar has a Tour in QA").toBeGreaterThan(0);
+      await gotoInLocale(page, `/dashboard/organiser/tours/${tours[0].id}/`, locale);
+      const main = page.getByRole("main");
+      const o = DICTS[locale].organiserDashboard.tours;
+      await expect(main.getByRole("heading", { level: 2, name: o.consentTitle })).toBeVisible();
+      // Open the Add Stop form so its labels and the stop types are read too.
+      await main.getByRole("button", { name: o.addStop }).click();
+      await expect(main.getByText(o.saveStopDraft)).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on the Tour's page").toEqual([]);
+      // Nothing was saved: the form is left unsubmitted.
+    });
+
+    test(`[GEN-2610-007] Direct Payouts and Edit Profile in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/organiser/payouts/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].payouts);
+      await page.waitForLoadState("networkidle");
+      expect(await englishLeftIn(main, locale, data), "English left on Direct Payouts").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "organiser-payouts-title", isMobile);
+
+      await gotoInLocale(page, "/dashboard/organiser/edit/", locale);
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].editProfile);
+      await page.waitForLoadState("networkidle");
+      expect(await englishLeftIn(main, locale, data), "English left on Edit Profile").toEqual([]);
+      // Nothing was linked or saved.
+    });
+
+    test(`[GEN-2610-007] Venue Booking Requests in ${locale}: no English UI strings`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue-requests/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS_2[locale].venueRequests);
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on Venue Booking Requests").toEqual([]);
+      // No offer was accepted, countered or declined.
+    });
   });
 }
 
@@ -336,4 +398,24 @@ test("[GEN-2610-007] English is unchanged: no language picked, the Organiser pag
   await expect(main.locator("h1[data-afa-page-title]")).toHaveText("Create an Event");
   await gotoDashboard(page, `/dashboard/organiser/events/${event.id}/edit/`);
   await expect(main.locator("h1[data-afa-page-title]")).toHaveText("Edit Event");
+});
+
+test("[GEN-2610-007] English is unchanged on the 6b-2 pages: Sales Overview, Check-In, Tours, Direct Payouts, Edit Your Profile, Venue Booking Requests", async ({ page }) => {
+  const event = await pickEvent(page);
+  const main = page.getByRole("main");
+  const title = main.locator("h1[data-afa-page-title]");
+  await gotoDashboard(page, "/dashboard/organiser/sales/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(title).toHaveText("Sales Overview");
+  await expect(main.getByRole("button", { name: "All Time" })).toBeVisible();
+  await gotoDashboard(page, `/dashboard/organiser/events/${event.id}/checkin/`);
+  await expect(title).toHaveText("Check-In");
+  await gotoDashboard(page, "/dashboard/organiser/tours/");
+  await expect(title).toHaveText("Tours");
+  await gotoDashboard(page, "/dashboard/organiser/payouts/");
+  await expect(title).toHaveText("Direct Payouts");
+  await gotoDashboard(page, "/dashboard/organiser/edit/");
+  await expect(title).toHaveText("Edit Your Profile");
+  await gotoDashboard(page, "/dashboard/venue-requests/");
+  await expect(title).toHaveText("Venue Booking Requests");
 });
