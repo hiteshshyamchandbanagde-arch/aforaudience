@@ -78,6 +78,13 @@ export const ALLOWED: Record<string, { locales: string[]; why: string }> = {
   'artistDashboard.linkOptional': { locales: ['de'], why: '"Link (optional)" is the German wording' },
   'artistDashboard.budgetLabel': { locales: ['de'], why: '"Budget" is the German word' },
   'artistDashboard.influences': { locales: ['fr'], why: '"Influences" is the French word' },
+  'organiserDashboard.eventForm.fieldDescription': { locales: ['fr'], why: '"Description" is the French word' },
+  'organiserDashboard.eventForm.descriptionLabel': { locales: ['fr'], why: '"Description" is the French word' },
+  'organiserDashboard.eventForm.fieldDate': { locales: ['fr'], why: '"Date" is the French word' },
+  'organiserDashboard.eventForm.dateLabel': { locales: ['fr'], why: '"Date" is the French word' },
+  'organiserDashboard.eventForm.sectionsOne': { locales: ['fr'], why: '"section" is the French word' },
+  'organiserDashboard.eventForm.sectionsOther': { locales: ['fr'], why: '"sections" is the French word' },
+  'organiserDashboard.eventForm.durationHours': { locales: ['fr', 'es'], why: '"h" is the French and Spanish hour abbreviation' },
   'organiserDashboard.eventDetail.compBuyIn': { locales: OTHER_LOCALES, why: '"Buy-in" is the AFA slot-type name, kept in Latin script in every language' },
 }
 
