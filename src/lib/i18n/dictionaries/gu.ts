@@ -67,6 +67,7 @@ const gu: Dictionary = {
   location: {
     searchCityPlaceholder: "શહેર શોધો...",
     noMatchingCities: "કોઈ મેળ ખાતું શહેર નથી",
+    loadingCities: "શહેરો લોડ થઈ રહ્યાં છે…",
     useMyLocation: "મારું લોકેશન વાપરો", // TODO i18n
     locating: "તમારું લોકેશન શોધી રહ્યા છીએ…", // TODO i18n
     locationUnavailable: "તમારું લોકેશન મળ્યું નહીં. તમારું શહેર બદલાયું નથી.", // TODO i18n

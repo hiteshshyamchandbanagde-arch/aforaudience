@@ -67,6 +67,7 @@ const ta: Dictionary = {
   location: {
     searchCityPlaceholder: "நகரத்தைத் தேடுங்கள்...",
     noMatchingCities: "பொருந்தும் நகரங்கள் இல்லை",
+    loadingCities: "நகரங்கள் ஏற்றப்படுகின்றன…",
     useMyLocation: "என் இருப்பிடத்தைப் பயன்படுத்து", // TODO i18n
     locating: "உங்கள் இருப்பிடத்தைத் தேடுகிறோம்…", // TODO i18n
     locationUnavailable: "உங்கள் இருப்பிடத்தைப் பெற முடியவில்லை. உங்கள் நகரம் மாறவில்லை.", // TODO i18n

@@ -67,6 +67,7 @@ const ml: Dictionary = {
   location: {
     searchCityPlaceholder: "നഗരം തിരയുക...",
     noMatchingCities: "പൊരുത്തപ്പെടുന്ന നഗരങ്ങളില്ല",
+    loadingCities: "നഗരങ്ങൾ ലോഡ് ചെയ്യുന്നു…",
     useMyLocation: "എന്റെ ലൊക്കേഷൻ ഉപയോഗിക്കൂ", // TODO i18n
     locating: "നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തുന്നു…", // TODO i18n
     locationUnavailable: "നിങ്ങളുടെ ലൊക്കേഷൻ ലഭിച്ചില്ല. നിങ്ങളുടെ നഗരം മാറിയിട്ടില്ല.", // TODO i18n

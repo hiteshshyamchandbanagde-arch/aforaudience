@@ -67,6 +67,7 @@ const te: Dictionary = {
   location: {
     searchCityPlaceholder: "నగరం వెతకండి...",
     noMatchingCities: "సరిపోలే నగరాలు లేవు",
+    loadingCities: "నగరాలు లోడ్ అవుతున్నాయి…",
     useMyLocation: "నా లొకేషన్ ఉపయోగించండి", // TODO i18n
     locating: "మీ లొకేషన్ కనుగొంటున్నాం…", // TODO i18n
     locationUnavailable: "మీ లొకేషన్ పొందలేకపోయాం. మీ నగరం మారలేదు.", // TODO i18n

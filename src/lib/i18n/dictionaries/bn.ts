@@ -67,6 +67,7 @@ const bn: Dictionary = {
   location: {
     searchCityPlaceholder: "শহর খুঁজুন...",
     noMatchingCities: "কোনো মিলে যাওয়া শহর নেই",
+    loadingCities: "শহরগুলো লোড হচ্ছে…",
     useMyLocation: "আমার লোকেশন ব্যবহার করুন", // TODO i18n
     locating: "আপনার লোকেশন খোঁজা হচ্ছে…", // TODO i18n
     locationUnavailable: "আপনার লোকেশন পাওয়া যায়নি। আপনার শহর বদলায়নি।", // TODO i18n

@@ -76,6 +76,7 @@ const de: Dictionary = {
   location: {
     searchCityPlaceholder: "Stadt suchen...",
     noMatchingCities: "Keine passenden Städte",
+    loadingCities: "Städte werden geladen…",
     useMyLocation: "Meinen Standort verwenden",
     locating: "Standort wird ermittelt…",
     locationUnavailable: "Standort nicht verfügbar. Deine Stadt bleibt unverändert.",

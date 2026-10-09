@@ -67,6 +67,7 @@ const kn: Dictionary = {
   location: {
     searchCityPlaceholder: "ನಗರವನ್ನು ಹುಡುಕಿ...",
     noMatchingCities: "ಹೊಂದಿಕೆಯಾಗುವ ನಗರಗಳಿಲ್ಲ",
+    loadingCities: "ನಗರಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ…",
     useMyLocation: "ನನ್ನ ಸ್ಥಳ ಬಳಸಿ", // TODO i18n
     locating: "ನಿಮ್ಮ ಸ್ಥಳ ಹುಡುಕುತ್ತಿದ್ದೇವೆ…", // TODO i18n
     locationUnavailable: "ನಿಮ್ಮ ಸ್ಥಳ ಸಿಗಲಿಲ್ಲ. ನಿಮ್ಮ ನಗರ ಬದಲಾಗಿಲ್ಲ.", // TODO i18n

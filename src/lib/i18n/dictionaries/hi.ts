@@ -66,6 +66,7 @@ const hi: Dictionary = {
   location: {
     searchCityPlaceholder: "शहर खोजें...",
     noMatchingCities: "कोई मिलता-जुलता शहर नहीं",
+    loadingCities: "शहर लोड हो रहे हैं…",
     useMyLocation: "मेरी लोकेशन इस्तेमाल करें",
     locating: "आपकी लोकेशन ढूँढ रहे हैं…",
     locationUnavailable: "आपकी लोकेशन नहीं मिल सकी। आपका शहर नहीं बदला।",

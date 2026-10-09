@@ -71,6 +71,7 @@ const es: Dictionary = {
   location: {
     searchCityPlaceholder: "Buscar ciudad...",
     noMatchingCities: "No hay ciudades que coincidan",
+    loadingCities: "Cargando ciudades…",
     useMyLocation: "Usar mi ubicación",
     locating: "Buscando tu ubicación…",
     locationUnavailable: "No se pudo obtener tu ubicación. Tu ciudad no cambia.",

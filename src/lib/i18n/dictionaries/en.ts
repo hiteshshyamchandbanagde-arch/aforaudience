@@ -68,6 +68,8 @@ const en = {
   location: {
     searchCityPlaceholder: "Search city...",
     noMatchingCities: "No matching cities",
+    // BUG-2610-032 - the city picker before its list has arrived
+    loadingCities: "Loading cities…",
     // GEN-2610-005 - "Use my location" in the LocationChip picker
     useMyLocation: "Use my location",
     locating: "Finding you…",
