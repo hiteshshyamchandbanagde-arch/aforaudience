@@ -1757,6 +1757,34 @@ const hi: Dictionary = {
       waiting: "दूसरी ओर के जवाब का इंतज़ार है।",
     },
   },
+
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "आप स्थल मालिक के रूप में रजिस्टर्ड नहीं हैं",
+      notOwnerBody: "बुकिंग संभालना शुरू करने के लिए अपनी प्रोफ़ाइल से अपना स्थल लिस्ट करने के लिए आवेदन करें।",
+      backToHome: "होम पर वापस जाएँ",
+      pendingTitle: "आपके स्थल मालिक अकाउंट की मंज़ूरी बाकी है",
+      pendingBody: "स्थल लिस्ट करने और बुकिंग स्वीकार करने से पहले हमारी टीम नए स्थल मालिक आवेदनों की जाँच करती है। मंज़ूरी मिलते ही हम आपको सूचित करेंगे।",
+      eyebrow: "पोर्टफ़ोलियो",
+      title: "आपके स्थल",
+      loadFailed: "आपके स्थल लोड नहीं हो पाए",
+      emptyCaption: "अभी कोई स्थल नहीं — अपनी पहली जगह रजिस्टर करें",
+      statusPublished: "प्रकाशित",
+      statusDraft: "ड्राफ़्ट",
+      capacity: "क्षमता",
+      perSeat: "प्रति सीट",
+      rateType: "रेट का प्रकार",
+      rateHourly: "प्रति घंटा",
+      rateDaily: "प्रति दिन",
+      rateFlexible: "लचीला",
+      hourlyRate: "प्रति घंटा · {amount}/घंटा",
+      dailyRate: "प्रति दिन · {amount}/दिन",
+      flexibleRate: "लचीला रेट",
+      view: "देखें",
+      edit: "बदलें",
+      seatMap: "सीट मैप",
+    },
+  },
 }
 
 export default hi
