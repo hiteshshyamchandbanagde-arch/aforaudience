@@ -13,8 +13,8 @@ import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatL
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
-import { billableHours, hourlyNote, hourlyTotal, longEventWarning } from '@/lib/venue-billing'
-import { countNoun } from '@/lib/i18n/plural'
+import { billableHours, hourlyNote, hourlyTotal } from '@/lib/venue-billing'
+import { presetLabels, longEventText, seatsText, sectionsText, weekdayName } from '@/components/dashboard/eventFormText'
 import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
@@ -141,15 +141,22 @@ function nowLocalTimeString() {
 // rows. Local extraction rather than Button.tsx - no existing variant
 // matches this opacity (0.5) + fontSize (16px) combination without a
 // visible change from `secondary` (0.4 opacity, 13px).
-function RemoveRowButton({ onClick }: { onClick: () => void }) {
+function RemoveRowButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <Button variant="icon" type="button" onClick={onClick} style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-title)' }} aria-label="Remove">✕</Button>
+    <Button variant="icon" type="button" onClick={onClick} style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-title)' }} aria-label={label}>✕</Button>
   )
 }
 
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
-  // GEN-2610-007 - the terms checklist reads its translated labels.
-  const { t: tr } = useLocale()
+  // GEN-2610-007 - the form reads organiserDashboard.eventForm (shared with
+  // Create Event) and .editEvent; the terms checklist its translated labels.
+  const { t: tr, locale } = useLocale()
+  const f = tr.organiserDashboard.eventForm
+  const ed = tr.organiserDashboard.editEvent
+  const d = tr.organiserDashboard.eventDetail
+  const labels = presetLabels(f)
+  // Invite pills: the label only; the stored status stays English.
+  const inviteStatusLabel = (st: string) => (st === 'ACCEPTED' ? ed.inviteAccepted : st === 'DECLINED' ? ed.inviteDeclined : st === 'PENDING' ? ed.invitePending : st)
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -264,7 +271,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   // BUG-2609-083 - length and billed hours come from one shared helper
   // (src/lib/venue-billing.ts), the same one the server records with.
   const eventLength = billableHours(formData.startTime, formData.endTime)
-  const timeWarning = eventLength ? longEventWarning(eventLength) : null
+  const timeWarning = eventLength ? longEventText(f, eventLength) : null
 
   let suggestedAmount: number | null = null
   let suggestedAmountNote = ''
@@ -273,13 +280,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     if (rate && eventLength) {
       const hire = billableHours(formData.startTime, formData.endTime, selectedVenue.minDurationHours) ?? eventLength
       suggestedAmount = hourlyTotal(rate, hire.billedHours)
-      suggestedAmountNote = `${hourlyNote(rate, hire, selectedVenue.minDurationHours)}${dayOverride?.hourlyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()} rate` : ''}`
+      // TODO i18n: hourlyNote's "₹/hr × n hr (…, billed as n hr)" formula stays English (venue-billing.ts, shared and unit-tested).
+      suggestedAmountNote = `${hourlyNote(rate, hire, selectedVenue.minDurationHours)}${dayOverride?.hourlyRate ? ` — ${f.dayRateSuffix.replace('{day}', weekdayName(locale, formData.date))}` : ''}`
     }
   } else if (selectedVenue?.rateType === 'DAILY') {
     const rate = dayOverride?.dailyRate || selectedVenue.dailyRate
     if (rate) {
       suggestedAmount = rate
-      suggestedAmountNote = `Day rate${dayOverride?.dailyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()}` : ''}`
+      suggestedAmountNote = `${f.dayRate}${dayOverride?.dailyRate ? ` — ${weekdayName(locale, formData.date)}` : ''}`
     }
   }
 
@@ -323,8 +331,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           fetch('/api/venues'),
         ])
         if (!eventRes.ok) {
-          if (eventRes.status === 403) throw new Error('You do not have access to this event')
-          throw new Error('Event not found')
+          if (eventRes.status === 403) throw new Error(d.noAccess)
+          throw new Error(d.notFound)
         }
         const data: EventDetail = await eventRes.json()
         setEvent(data)
@@ -407,33 +415,33 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     // previously had no client-side check, blank sailed through to Publish.
     const MAX_INR_AMOUNT = 10_000_000
     if (publishing && venueId && !bookingAmount) {
-      showToast('Please enter an Offer Amount before publishing, or remove the venue.', 'error')
+      showToast(f.offerBeforePublish, 'error')
       return
     }
     if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
-      showToast(`Offer Amount can't exceed ${formatINR(MAX_INR_AMOUNT)}.`, 'error')
+      showToast(f.offerTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
       return
     }
     if (publishing && defaultCompensationType === 'PAID' && !defaultFeeAmount) {
-      showToast('Please enter a Fee per artist before publishing, or choose Free/Buy-in instead.', 'error')
+      showToast(f.feeBeforePublish, 'error')
       return
     }
     if (defaultFeeAmount && Number(defaultFeeAmount) > MAX_INR_AMOUNT) {
-      showToast(`Fee per artist can't exceed ${formatINR(MAX_INR_AMOUNT)}.`, 'error')
+      showToast(f.feeTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
       return
     }
     if (publishing && defaultCompensationType === 'BUY_IN' && !defaultBuyInAmount) {
-      showToast('Please enter a Buy-in amount before publishing, or choose Free/Paid instead.', 'error')
+      showToast(f.buyInBeforePublish, 'error')
       return
     }
     if (defaultBuyInAmount && Number(defaultBuyInAmount) > MAX_INR_AMOUNT) {
-      showToast(`Buy-in amount can't exceed ${formatINR(MAX_INR_AMOUNT)}.`, 'error')
+      showToast(f.buyInTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
       return
     }
     if (usingTierPricing && !isFree) {
       const missingPrice = venueSections.some((s) => !tierPrices[tierKey(s)] || Number(tierPrices[tierKey(s)]) <= 0)
       if (missingPrice) {
-        showToast('Please set a price for every section.', 'error')
+        showToast(f.missingSectionPrice, 'error')
         return
       }
     }
@@ -484,7 +492,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to update event')
+        throw new Error(data.error || ed.updateFailed)
       }
 
       // Venue booking is a separate resource, so it's updated as its own request.
@@ -506,14 +514,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             router.push(`/verify-phone?next=${encodeURIComponent(`/dashboard/organiser/events/${id}/edit`)}`)
             return
           }
-          throw new Error(vbData.error || 'Failed to book venue')
+          throw new Error(vbData.error || ed.bookVenueFailed)
         }
       }
 
-      showToast('Event saved.', 'success')
+      showToast(ed.eventSaved, 'success')
       router.push(`/dashboard/organiser/events/${id}`)
     } catch (err: any) {
-      showToast(err.message || 'Failed to save event', 'error')
+      showToast(err.message || ed.saveEventFailed, 'error')
     } finally {
       setSaving(false)
     }
@@ -547,16 +555,16 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         body: JSON.stringify(payload),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Save failed')
+      if (!res.ok) throw new Error(data.error || ed.saveFailed)
       if (useDefault) {
         setAudienceVoteWeight('')
         setPanelistVoteWeight('')
         setCelebrityVoteWeight('')
       }
-      showToast('Saved.', 'success')
+      showToast(ed.saved, 'success')
       await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Save failed', 'error')
+      showToast(err.message || ed.saveFailed, 'error')
     } finally {
       setVoteWeightSaving(false)
     }
@@ -584,27 +592,27 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         body: JSON.stringify({ userId, bio: panelistBioDraft }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Invite failed')
+      if (!res.ok) throw new Error(data.error || ed.inviteFailed)
       setPanelistSearch('')
       setPanelistSearchResults([])
       setPanelistBioDraft('')
-      showToast('Invite sent. They\'ll appear on the public page once they accept.', 'success')
+      showToast(ed.inviteSent, 'success')
       await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Invite failed', 'error')
+      showToast(err.message || ed.inviteFailed, 'error')
     } finally {
       setPanelistInviting(false)
     }
   }
 
   const removePanelist = async (panelistId: string) => {
-    if (!(await confirm({ title: 'Remove this panelist?', confirmLabel: 'Remove', destructive: true }))) return
+    if (!(await confirm({ title: ed.removePanelistTitle, confirmLabel: ed.remove, destructive: true }))) return
     try {
       const res = await fetch(`/api/events/${id}/panelists/${panelistId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to remove')
+      if (!res.ok) throw new Error(ed.removeFailed)
       await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Failed to remove', 'error')
+      showToast(err.message || ed.removeFailed, 'error')
     }
   }
 
@@ -630,85 +638,85 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         body: JSON.stringify({ userId }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Invite failed')
+      if (!res.ok) throw new Error(data.error || ed.inviteFailed)
       setCelebritySearch('')
       setCelebritySearchResults([])
-      showToast('Invite sent. They\'ll appear on the public page once they accept.', 'success')
+      showToast(ed.inviteSent, 'success')
       await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Invite failed', 'error')
+      showToast(err.message || ed.inviteFailed, 'error')
     } finally {
       setCelebrityInviting(false)
     }
   }
 
   const removeCelebrity = async (celebrityId: string) => {
-    if (!(await confirm({ title: 'Remove this celebrity invite?', confirmLabel: 'Remove', destructive: true }))) return
+    if (!(await confirm({ title: ed.removeCelebrityTitle, confirmLabel: ed.remove, destructive: true }))) return
     try {
       const res = await fetch(`/api/events/${id}/celebrities/${celebrityId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to remove')
+      if (!res.ok) throw new Error(ed.removeFailed)
       await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Failed to remove', 'error')
+      showToast(err.message || ed.removeFailed, 'error')
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error && !event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Event not found</div></>)
+  if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{d.notFound}</div></>)
 
   return (
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
+          <BackLink href={`/dashboard/organiser/events/${id}`} label={ed.backToEvent} />
 
           <PageTitle size="lg" style={{ marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
-            Edit Event
+            {ed.title}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
-            Update your event details, seats, pricing, and venue.
+            {ed.subtitle}
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
-                Event Details
+                {f.eventDetails}
               </h2>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
-                AforAudience is for live performances - music, comedy, theatre, spoken word, and similar. Movie screenings and film events aren&apos;t supported on the platform.
+                {f.liveOnlyNote}
               </p>
 
               <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={labelStyle}>Title *</label>
+                <label style={labelStyle}>{f.titleLabel}</label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} style={inputStyle} required />
               </div>
 
               <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={labelStyle}>Description *</label>
+                <label style={labelStyle}>{f.descriptionLabel}</label>
                 <textarea name="description" value={formData.description} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} required />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Event Type *</label>
+                  <label style={labelStyle}>{f.eventTypeLabel}</label>
                   <select name="type" value={formData.type} onChange={handleChange} style={inputStyle}>
                     {EVENT_TYPES.map((t) => (
-                      <option key={t} value={t}>{t.replace('_', ' ')}</option>
+                      <option key={t} value={t}>{tr.eventTypes[t as keyof typeof tr.eventTypes] ?? t.replace('_', ' ')}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label style={labelStyle}>Date *</label>
+                  <label style={labelStyle}>{f.dateLabel}</label>
                   <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} style={inputStyle} required />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Start Time *</label>
+                  <label style={labelStyle}>{f.startTimeLabel}</label>
                   <input
                     type="time"
                     name="startTime"
@@ -720,7 +728,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>End Time *</label>
+                  <label style={labelStyle}>{f.endTimeLabel}</label>
                   <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} style={inputStyle} required />
                 </div>
               </div>
@@ -732,22 +740,28 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Dress Code</label>
+                  <label style={labelStyle}>{f.dressCode}</label>
                   <PresetSelectWithOther
                     value={formData.dresscode}
                     onChange={(val) => setFormData((prev) => ({ ...prev, dresscode: val }))}
                     presets={DRESSCODE_PRESETS}
-                    placeholder="e.g., Vintage cocktail attire"
+                    placeholder={f.dressCodePlaceholder}
+                    presetLabels={labels}
+                    noneLabel={f.presetNone}
+                    otherLabel={f.presetOther}
                     inputStyle={inputStyle}
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>Vibe</label>
+                  <label style={labelStyle}>{f.vibe}</label>
                   <PresetSelectWithOther
                     value={formData.vibe}
                     onChange={(val) => setFormData((prev) => ({ ...prev, vibe: val }))}
                     presets={VIBE_PRESETS}
-                    placeholder="e.g., Underground, edgy"
+                    placeholder={f.vibePlaceholder}
+                    presetLabels={labels}
+                    noneLabel={f.presetNone}
+                    otherLabel={f.presetOther}
                     inputStyle={inputStyle}
                   />
                 </div>
@@ -755,24 +769,26 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
-                This event includes a surprise act
+                {f.surpriseAct}
               </label>
 
               {/* FEAT-2608-045 */}
               <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-08)' }}>
-                <label style={labelStyle}>Event terms</label>
+                <label style={labelStyle}>{f.eventTerms}</label>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
-                  Select anything that applies to this event. AFA's refund and cancellation policy applies to every
-                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>view it here</Link>.
+                  {f.eventTermsIntro.split('{link}')[0]}<Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{f.refundPolicyLink}</Link>{f.eventTermsIntro.split('{link}')[1]}
                 </p>
 
                 <div style={{ marginBottom: 'var(--afa-space-4)', maxWidth: '260px' }}>
-                  <label style={labelStyle}>Age limit</label>
+                  <label style={labelStyle}>{f.ageLimit}</label>
                   <PresetSelectWithOther
                     value={ageLimit}
                     onChange={setAgeLimit}
                     presets={AGE_LIMIT_PRESETS}
-                    placeholder="e.g., 25+ (ladies free before 9pm)"
+                    placeholder={f.ageLimitPlaceholder}
+                    presetLabels={labels}
+                    noneLabel={f.presetNone}
+                    otherLabel={f.presetOther}
                     inputStyle={inputStyle}
                   />
                 </div>
@@ -796,10 +812,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </div>
 
                 <div style={{ marginTop: 'var(--afa-space-18px)' }}>
-                  <label style={labelStyle}>Special notes (optional)</label>
+                  <label style={labelStyle}>{f.specialNotes}</label>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-6px)' }}>
-                    Anything specific to this event that isn't covered above. Reviewed by AFA before it's shown
-                    publicly.
+                    {ed.specialNotesHint}
                   </p>
 
                   {specialNotesStatus !== 'NONE' && (
@@ -821,18 +836,17 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         color: (specialNotesStatus === 'APPROVED' ? STATUS_TONE.sage : specialNotesStatus === 'REJECTED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}
                     >
-                      {specialNotesStatus === 'APPROVED' ? '✓ Approved — visible on your event page' : specialNotesStatus === 'REJECTED' ? '✕ Rejected' : <><Icon name="clock" size={14} style={INLINE_ICON_STYLE} /> Pending review</>}
+                      {specialNotesStatus === 'APPROVED' ? ed.notesApproved : specialNotesStatus === 'REJECTED' ? ed.notesRejected : <><Icon name="clock" size={14} style={INLINE_ICON_STYLE} /> {ed.notesPending}</>}
                     </div>
                   )}
                   {specialNotesStatus === 'REJECTED' && specialNotesRejectionReason && (
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-2)' }}>
-                      Reason: {specialNotesRejectionReason}
+                      {ed.rejectionReason.replace('{reason}', specialNotesRejectionReason)}
                     </p>
                   )}
                   {specialNotesStatus === 'APPROVED' && specialNotes !== specialNotesOriginal && (
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-brown-gold)', marginBottom: 'var(--afa-space-2)' }}>
-                      Editing this will send it back for review — it won't be visible on your event page until
-                      re-approved.
+                      {ed.notesReReview}
                     </p>
                   )}
 
@@ -841,7 +855,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     onChange={(e) => setSpecialNotes(e.target.value.slice(0, SPECIAL_NOTES_MAX_LENGTH))}
                     maxLength={SPECIAL_NOTES_MAX_LENGTH}
                     rows={3}
-                    placeholder="e.g., This show includes strobe lighting and haze effects."
+                    placeholder={f.specialNotesPlaceholder}
                     style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
                   />
                   <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: 'var(--afa-space-1)', textAlign: 'right' }}>
@@ -852,30 +866,30 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" data-afa-competition-toggle checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
-                This is a competition show (panelists, prizes, celebrity guest)
+                {f.competitionToggle}
               </label>
 
               {isCompetitionShow && (
                 <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)' }}>
                     <div>
-                      <label style={labelStyle}>1st Prize</label>
-                      <input data-afa-prize="1" style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder="e.g. ₹10,000 + trophy" />
+                      <label style={labelStyle}>{f.prizeFirst}</label>
+                      <input data-afa-prize="1" style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder={f.prizeFirstPlaceholder} />
                     </div>
                     <div>
-                      <label style={labelStyle}>2nd Prize</label>
-                      <input data-afa-prize="2" style={inputStyle} value={competitionPrizeSecond} onChange={(e) => setCompetitionPrizeSecond(e.target.value)} placeholder="Optional" />
+                      <label style={labelStyle}>{f.prizeSecond}</label>
+                      <input data-afa-prize="2" style={inputStyle} value={competitionPrizeSecond} onChange={(e) => setCompetitionPrizeSecond(e.target.value)} placeholder={f.optional} />
                     </div>
                     <div>
-                      <label style={labelStyle}>3rd Prize</label>
-                      <input data-afa-prize="3" style={inputStyle} value={competitionPrizeThird} onChange={(e) => setCompetitionPrizeThird(e.target.value)} placeholder="Optional" />
+                      <label style={labelStyle}>{f.prizeThird}</label>
+                      <input data-afa-prize="3" style={inputStyle} value={competitionPrizeThird} onChange={(e) => setCompetitionPrizeThird(e.target.value)} placeholder={f.optional} />
                     </div>
                   </div>
 
                   <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-                    <label style={labelStyle}>Celebrity Attending</label>
+                    <label style={labelStyle}>{ed.celebrityAttending}</label>
                     <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
-                      Invited by AFA account — they'll only appear publicly once they accept.
+                      {ed.celebrityHint}
                     </p>
                     {(event?.celebrities || []).map((c) => (
                       <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', padding: 'var(--afa-space-2) var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
@@ -889,9 +903,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           background: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
                           color: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
-                          {c.status}
+                          {inviteStatusLabel(c.status)}
                         </span>
-                        <RemoveRowButton onClick={() => removeCelebrity(c.id)} />
+                        <RemoveRowButton onClick={() => removeCelebrity(c.id)} label={ed.remove} />
                       </div>
                     ))}
                     <div style={{ position: 'relative' }}>
@@ -899,7 +913,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         style={inputStyle}
                         value={celebritySearch}
                         onChange={(e) => searchCelebrityCandidates(e.target.value)}
-                        placeholder="Search by name to invite..."
+                        placeholder={ed.searchToInvite}
                         disabled={celebrityInviting}
                       />
                       {celebritySearchResults.length > 0 && (
@@ -921,9 +935,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   </div>
 
                   <div>
-                    <label style={labelStyle}>Panelists</label>
+                    <label style={labelStyle}>{ed.panelists}</label>
                     <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
-                      Same as Celebrity — invited by account, only shown publicly once accepted.
+                      {ed.panelistsHint}
                     </p>
                     {(event?.panelists || []).map((p) => (
                       <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', padding: 'var(--afa-space-2) var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
@@ -940,23 +954,23 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           background: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
                           color: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
-                          {p.status}
+                          {inviteStatusLabel(p.status)}
                         </span>
-                        <RemoveRowButton onClick={() => removePanelist(p.id)} />
+                        <RemoveRowButton onClick={() => removePanelist(p.id)} label={ed.remove} />
                       </div>
                     ))}
                     <input
                       style={{ ...inputStyle, marginBottom: 'var(--afa-space-2)' }}
                       value={panelistBioDraft}
                       onChange={(e) => setPanelistBioDraft(e.target.value)}
-                      placeholder="Bio for next invite (optional)"
+                      placeholder={ed.panelistBioPlaceholder}
                     />
                     <div style={{ position: 'relative' }}>
                       <input
                         style={inputStyle}
                         value={panelistSearch}
                         onChange={(e) => searchPanelistCandidates(e.target.value)}
-                        placeholder="Search by name to invite..."
+                        placeholder={ed.searchToInvite}
                         disabled={panelistInviting}
                       />
                       {panelistSearchResults.length > 0 && (
@@ -978,13 +992,13 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   </div>
 
                   <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-10)' }}>
-                    <label style={labelStyle}>Audience Choice vote weighting</label>
+                    <label style={labelStyle}>{ed.voteWeighting}</label>
                     <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
-                      How much each voter category counts toward the Audience Choice result. Leave blank to follow the platform default (currently 80/10/10). Must sum to 100, Audience at least 50.
+                      {ed.voteWeightingHint}
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
                       <div>
-                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)' }}>AUDIENCE</label>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)', textTransform: 'uppercase' }}>{ed.voteAudience}</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -995,7 +1009,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)' }}>PANELIST</label>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)', textTransform: 'uppercase' }}>{ed.votePanelist}</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -1006,7 +1020,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)' }}>CELEBRITY</label>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)', textTransform: 'uppercase' }}>{ed.voteCelebrity}</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -1027,7 +1041,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         disabled={voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight}
                         style={{ opacity: voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight ? 0.5 : 1 }}
                       >
-                        {voteWeightSaving ? 'Saving…' : 'Save override'}
+                        {voteWeightSaving ? ed.saving : ed.saveOverride}
                       </Button>
                       <Button
                         variant="outline-neutral"
@@ -1037,7 +1051,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         onClick={() => saveVoteWeights(true)}
                         disabled={voteWeightSaving}
                       >
-                        Use platform default
+                        {ed.usePlatformDefault}
                       </Button>
                     </div>
                   </div>
@@ -1047,13 +1061,13 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
-                Seats & Ticket Price
+                {f.seatsAndPrice}
               </h2>
 
               {usingTierPricing ? (
                 <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-14px)' }}>
-                    Sections and seat counts come from {selectedVenue?.name}'s seat map - you only set the price per section for this event.
+                    {f.sectionsFromSeatMap.replace('{venue}', selectedVenue?.name ?? '')}
                   </p>
                   {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
                     <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} />
@@ -1062,7 +1076,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? 'var(--afa-space-10px)' : 0 }}>
                       {venueLevels.length > 1 && (
                         <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-1)' }}>
-                          {lvl || 'Main'}
+                          {lvl || f.mainLevel}
                         </div>
                       )}
                       {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
@@ -1074,7 +1088,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                               )}
                               {s.name}
                             </div>
-                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{countNoun(Number(s.seats) || 0, 'seat')}</div>
+                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{seatsText(locale, f, Number(s.seats) || 0)}</div>
                           </div>
                           {!isFree ? (
                             <input
@@ -1082,47 +1096,47 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                               value={tierPrices[tierKey(s)] || ''}
                               onChange={(e) => setTierPrices((prev) => ({ ...prev, [tierKey(s)]: e.target.value }))}
                               min="0"
-                              placeholder="₹ price"
+                              placeholder={f.pricePlaceholder}
                               style={{ ...inputStyle, width: '120px' }}
                             />
                           ) : (
-                            <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Free</span>
+                            <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{f.free}</span>
                           )}
                         </div>
                       ))}
                     </div>
                   ))}
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-14px)' }}>
-                    Total capacity: {countNoun(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0), 'seat')} across {countNoun(venueSections.length, 'section')}
+                    {f.totalCapacity.replace('{seats}', seatsText(locale, f, venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))).replace('{sections}', sectionsText(locale, f, venueSections.length))}
                   </p>
                 </div>
               ) : (
                 <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                  <label style={labelStyle}>Total Seats *</label>
+                  <label style={labelStyle}>{f.totalSeatsLabel}</label>
                   <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" style={inputStyle} required />
                 </div>
               )}
 
               <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
+                <label style={labelStyle}>{f.plusOnes} <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.optionalParen}</span></label>
                 <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" style={{ ...inputStyle, maxWidth: '120px' }} />
                 <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>
-                  Each artist in the lineup must have this many audience members confirm support - included in their spot fee. Set to 0 if not required.
+                  {ed.plusOnesHint}
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-14px)' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
+                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> {f.freeEntry}
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
+                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> {f.paidEntry}
                 </label>
               </div>
 
               {!isFree && !usingTierPricing && (
                 <div>
-                  <label style={labelStyle}>Ticket Price (₹)</label>
+                  <label style={labelStyle}>{f.ticketPriceLabel}</label>
                   <input type="number" value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} min="0" style={inputStyle} />
                 </div>
               )}
@@ -1130,16 +1144,16 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
-                Artist Payment Terms
+                {f.paymentTerms}
               </h2>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
-                Shown to Artists before they apply. You can still negotiate a different amount with a specific artist when approving their application.
+                {ed.paymentTermsHint}
               </p>
               <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
                 {([
-                  { value: 'FREE', label: 'Free / Exposure' },
-                  { value: 'PAID', label: 'Paid' },
-                  { value: 'BUY_IN', label: 'Buy-in (pay to play)' },
+                  { value: 'FREE', label: f.compFree },
+                  { value: 'PAID', label: f.compPaid },
+                  { value: 'BUY_IN', label: f.compBuyIn },
                 ] as const).map((opt) => (
                   <Button
                     key={opt.value}
@@ -1155,27 +1169,27 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 ))}
               </div>
               {defaultCompensationType === 'PAID' && (
-                <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+                <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder={f.feePlaceholder} style={{ ...inputStyle, maxWidth: '200px' }} />
               )}
               {defaultCompensationType === 'BUY_IN' && (
-                <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder="Buy-in amount (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+                <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder={f.buyInPlaceholder} style={{ ...inputStyle, maxWidth: '200px' }} />
               )}
             </section>
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
-                Venue
+                {f.venue}
               </h2>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
-                Changing the venue sends a new booking request.
+                {ed.changeVenueHint}
               </p>
 
               <div style={{ marginBottom: venueId ? 'var(--afa-space-18px)' : 0 }}>
-                <label style={labelStyle}>Venue</label>
+                <label style={labelStyle}>{f.venue}</label>
                 <select data-afa-venue-select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
-                  <option value="">No venue selected</option>
+                  <option value="">{f.noVenueSelected}</option>
                   {venues.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name} — {v.city} ({countNoun(v.capacity, 'seat')})</option>
+                    <option key={v.id} value={v.id}>{f.venueOption.replace('{name}', v.name).replace('{city}', v.city).replace('{seats}', seatsText(locale, f, v.capacity))}</option>
                   ))}
                 </select>
               </div>
@@ -1185,15 +1199,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   {venueId !== originalVenueId && (selectedVenue?.rateType === 'HOURLY' || selectedVenue?.rateType === 'DAILY') && (
                     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) var(--afa-space-14px)', marginBottom: 'var(--afa-space-10px)' }}>
                       <div data-afa-rate-note style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2px)' }}>
-                        {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
+                        {selectedVenue.rateType === 'HOURLY' ? f.hourlyRate : f.dailyRate}
                         {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                       </div>
                       <div style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-                        {suggestedAmount !== null ? formatINR(suggestedAmount) : 'Set your event date & time to calculate'}
+                        {suggestedAmount !== null ? formatINR(suggestedAmount) : f.setDateTimeToCalculate}
                       </div>
                     </div>
                   )}
-                  <label style={labelStyle}>Offer Amount (₹) {venueId !== originalVenueId && <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span>}</label>
+                  <label style={labelStyle}>{f.offerAmount} {venueId !== originalVenueId && <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountPrefilledHint}</span>}</label>
                   <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" style={inputStyle} />
                 </div>
               )}
@@ -1210,7 +1224,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 onClick={() => save(event.status === 'APPROVED' ? true : undefined)}
                 style={{ opacity: saving ? 0.6 : 1 }}
               >
-                {saving ? 'Saving...' : event.status === 'APPROVED' ? 'Save Changes' : 'Save & Publish'}
+                {saving ? ed.saving : event.status === 'APPROVED' ? ed.saveChanges : ed.saveAndPublish}
               </Button>
               {event.status !== 'APPROVED' && (
                 <Button
@@ -1221,11 +1235,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   disabled={saving}
                   onClick={() => save(false)}
                 >
-                  Save as Draft
+                  {f.saveDraft}
                 </Button>
               )}
               <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
-                Cancel
+                {f.cancel}
               </Link>
             </div>
           </form>
