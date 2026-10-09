@@ -203,7 +203,7 @@ export default function VenueRequestsPage() {
                       <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
                         <input
                           type="number"
-                          placeholder={lastOffer ? v.counterPlaceholder.replace('{amount}', `₹${lastOffer.amount}`) : v.proposePlaceholder}
+                          placeholder={lastOffer ? v.counterPlaceholder.replace('{amount}', formatINR(lastOffer.amount)) : v.proposePlaceholder}
                           value={counterInputs[r.id] || ''}
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
                           min="1"
