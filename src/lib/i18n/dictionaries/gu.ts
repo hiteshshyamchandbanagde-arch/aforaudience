@@ -1100,6 +1100,7 @@ const gu: Dictionary = {
     reviewsTitle: "સમીક્ષાઓ",
     reviewsCountOne: "{n} સમીક્ષા",
     reviewsCountOther: "{n} સમીક્ષાઓ",
+    ratingOutOf5: "5 માંથી {rating}",
     noReviews: "હજુ સુધી કોઈ સમીક્ષા નથી. શોમાં ચેક-ઇન કર્યા પછી પ્રેક્ષકો તમને રેટ કરી શકે છે.",
     yourReply: "તમારો જવાબ:",
     replyPlaceholder: "જવાબ લખો...",

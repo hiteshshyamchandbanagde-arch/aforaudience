@@ -1100,6 +1100,7 @@ const ta: Dictionary = {
     reviewsTitle: "மதிப்புரைகள்",
     reviewsCountOne: "{n} மதிப்புரை",
     reviewsCountOther: "{n} மதிப்புரைகள்",
+    ratingOutOf5: "5 இல் {rating}",
     noReviews: "இதுவரை மதிப்புரைகள் இல்லை. நிகழ்ச்சியில் செக்-இன் செய்த பிறகு பார்வையாளர்கள் உங்களை மதிப்பிடலாம்.",
     yourReply: "உங்கள் பதில்:",
     replyPlaceholder: "பதில் எழுதுங்கள்...",

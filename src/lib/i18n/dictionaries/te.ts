@@ -1100,6 +1100,7 @@ const te: Dictionary = {
     reviewsTitle: "రివ్యూలు",
     reviewsCountOne: "{n} రివ్యూ",
     reviewsCountOther: "{n} రివ్యూలు",
+    ratingOutOf5: "5 లో {rating}",
     noReviews: "ఇంకా రివ్యూలు లేవు. షోలో చెక్-ఇన్ చేసిన తర్వాత ప్రేక్షకులు మిమ్మల్ని రేట్ చేయవచ్చు.",
     yourReply: "మీ సమాధానం:",
     replyPlaceholder: "సమాధానం రాయండి...",

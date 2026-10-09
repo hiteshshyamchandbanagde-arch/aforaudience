@@ -1104,6 +1104,7 @@ const es: Dictionary = {
     reviewsTitle: "Reseñas",
     reviewsCountOne: "{n} reseña",
     reviewsCountOther: "{n} reseñas",
+    ratingOutOf5: "{rating} de 5",
     noReviews: "Aún no hay reseñas. El público puede calificarte después de registrar su entrada en un espectáculo.",
     yourReply: "Tu respuesta:",
     replyPlaceholder: "Escribe una respuesta...",

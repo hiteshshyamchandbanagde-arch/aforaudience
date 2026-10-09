@@ -464,7 +464,7 @@ export default function ArtistDashboard() {
               </h2>
               {avgRating !== null && (
                 <span data-afa-reviews-summary style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
-                  <RatingStars rating={Math.round(avgRating * 10) / 10} />{' '}
+                  <RatingStars rating={Math.round(avgRating * 10) / 10} label={a.ratingOutOf5.replace('{rating}', String(Math.round(avgRating * 10) / 10))} />{' '}
                   <span style={{ opacity: 0.6 }}>{avgRating.toFixed(1)} · {countText(locale, allReviews.length, a.reviewsCountOne, a.reviewsCountOther)}</span>
                 </span>
               )}
@@ -480,7 +480,7 @@ export default function ArtistDashboard() {
                   return (
                     <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4) var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-                        <RatingStars rating={r.rating} style={{ fontSize: 'var(--afa-text-body)' }} />
+                        <RatingStars rating={r.rating} label={a.ratingOutOf5.replace('{rating}', String(r.rating))} style={{ fontSize: 'var(--afa-text-body)' }} />
                         <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{r.eventTitle}</span>
                       </div>
                       {r.comment && (

@@ -1100,6 +1100,7 @@ const bn: Dictionary = {
     reviewsTitle: "রিভিউ",
     reviewsCountOne: "{n}টি রিভিউ",
     reviewsCountOther: "{n}টি রিভিউ",
+    ratingOutOf5: "5-এর মধ্যে {rating}",
     noReviews: "এখনও কোনো রিভিউ নেই। শো-তে চেক-ইন করার পর দর্শকরা আপনাকে রেট করতে পারবেন।",
     yourReply: "আপনার উত্তর:",
     replyPlaceholder: "একটি উত্তর লিখুন...",

@@ -1105,6 +1105,7 @@ const fr: Dictionary = {
     reviewsTitle: "Avis",
     reviewsCountOne: "{n} avis",
     reviewsCountOther: "{n} avis",
+    ratingOutOf5: "{rating} sur 5",
     noReviews: "Pas encore d'avis. Le public peut vous noter après s'être enregistré à un spectacle.",
     yourReply: "Votre réponse :",
     replyPlaceholder: "Écrire une réponse...",

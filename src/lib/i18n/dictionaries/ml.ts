@@ -1100,6 +1100,7 @@ const ml: Dictionary = {
     reviewsTitle: "അവലോകനങ്ങൾ",
     reviewsCountOne: "{n} അവലോകനം",
     reviewsCountOther: "{n} അവലോകനങ്ങൾ",
+    ratingOutOf5: "5-ൽ {rating}",
     noReviews: "ഇതുവരെ അവലോകനങ്ങളില്ല. ഷോയിൽ ചെക്ക്-ഇൻ ചെയ്ത ശേഷം പ്രേക്ഷകർക്ക് നിങ്ങളെ റേറ്റ് ചെയ്യാം.",
     yourReply: "നിങ്ങളുടെ മറുപടി:",
     replyPlaceholder: "ഒരു മറുപടി എഴുതുക...",

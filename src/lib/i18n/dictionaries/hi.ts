@@ -1099,6 +1099,7 @@ const hi: Dictionary = {
     reviewsTitle: "रिव्यू",
     reviewsCountOne: "{n} रिव्यू",
     reviewsCountOther: "{n} रिव्यू",
+    ratingOutOf5: "5 में से {rating}",
     noReviews: "अभी कोई रिव्यू नहीं। शो में चेक-इन करने के बाद दर्शक आपको रेटिंग दे सकते हैं।",
     yourReply: "आपका जवाब:",
     replyPlaceholder: "जवाब लिखें...",

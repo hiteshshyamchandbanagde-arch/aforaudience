@@ -33,8 +33,10 @@ const LOCALE_STORAGE_KEY = "afa-locale";
 const DICTS = { hi, mr, de } as const;
 type Locale = keyof typeof DICTS;
 
-// Read the same in every language.
-const PROPER_NOUNS = ["AforAudience", "AFA", "Instagram", "YouTube", "Google"];
+// Read the same in every language. "Buy-in" is AFA's name for the slot
+// type: hi.ts and mr.ts keep it in Latin script (as the artist marketing
+// copy does); whether it should be is on Hitesh's Hindi/Marathi read.
+const PROPER_NOUNS = ["AforAudience", "AFA", "Instagram", "YouTube", "Google", "Buy-in"];
 
 // Expected headings, per language (dictionaries: artistDashboard.applicationsTitle / browseTitle, dashboardChrome.more).
 const HEADINGS: Record<Locale, { applications: string; browse: string; more: string }> = {

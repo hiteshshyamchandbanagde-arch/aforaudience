@@ -1100,6 +1100,7 @@ const kn: Dictionary = {
     reviewsTitle: "ವಿಮರ್ಶೆಗಳು",
     reviewsCountOne: "{n} ವಿಮರ್ಶೆ",
     reviewsCountOther: "{n} ವಿಮರ್ಶೆಗಳು",
+    ratingOutOf5: "5 ರಲ್ಲಿ {rating}",
     noReviews: "ಇನ್ನೂ ವಿಮರ್ಶೆಗಳಿಲ್ಲ. ಶೋದಲ್ಲಿ ಚೆಕ್-ಇನ್ ಮಾಡಿದ ನಂತರ ಪ್ರೇಕ್ಷಕರು ನಿಮ್ಮನ್ನು ರೇಟ್ ಮಾಡಬಹುದು.",
     yourReply: "ನಿಮ್ಮ ಉತ್ತರ:",
     replyPlaceholder: "ಉತ್ತರ ಬರೆಯಿರಿ...",

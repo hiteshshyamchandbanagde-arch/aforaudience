@@ -1167,6 +1167,8 @@ const en = {
     reviewsTitle: "Reviews",
     reviewsCountOne: "{n} review",
     reviewsCountOther: "{n} reviews",
+    // RatingStars' accessible name ({rating}: 4.5, 5).
+    ratingOutOf5: "{rating} out of 5",
     noReviews: "No reviews yet. Audiences can rate you after checking in at a show.",
     yourReply: "Your reply:",
     replyPlaceholder: "Write a reply...",

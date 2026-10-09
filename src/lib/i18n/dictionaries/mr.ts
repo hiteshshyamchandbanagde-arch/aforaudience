@@ -1098,6 +1098,7 @@ const mr: Dictionary = {
     reviewsTitle: "रिव्ह्यू",
     reviewsCountOne: "{n} रिव्ह्यू",
     reviewsCountOther: "{n} रिव्ह्यू",
+    ratingOutOf5: "5 पैकी {rating}",
     noReviews: "अजून रिव्ह्यू नाहीत. शोमध्ये चेक-इन केल्यानंतर प्रेक्षक तुम्हाला रेटिंग देऊ शकतात.",
     yourReply: "तुमचे उत्तर:",
     replyPlaceholder: "उत्तर लिहा...",
