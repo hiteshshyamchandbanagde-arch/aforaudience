@@ -1829,6 +1829,40 @@ const en = {
       saving: "Saving...",
       saveProfile: "Save Profile",
     },
+    // Lineup builder (/dashboard/organiser/events/[id]/lineup). Pay badges
+    // reuse eventDetail.compPaid / compBuyIn and yourEvents.free.
+    lineup: {
+      dragToReorder: "Drag to reorder",
+      removeVouchTip: "Remove your Featured vouch for this artist",
+      vouchTip: "Vouch this artist as Featured — once 5+ (configurable) distinct organisers vouch, their Scene Status auto-promotes to Featured",
+      featured: "★ Featured",
+      vouchFeatured: "☆ Vouch Featured",
+      min: "min",
+      message: "Message",
+      noAccess: "You do not have access to this event",
+      loadFailed: "Could not load lineup",
+      // {n}: artists the message went to.
+      sentToOne: "Sent to {n} artist.",
+      sentToOther: "Sent to {n} artists.",
+      broadcastFailed: "Broadcast failed.",
+      saveLineupFailed: "Could not save lineup",
+      saved: "Lineup saved.",
+      saveFailed: "Save failed",
+      noData: "No data",
+      backToEvent: "Back to Event",
+      // {title}: the event's title.
+      title: "{title} — Lineup",
+      // {time}: the event's start time as stored (e.g. 19:00).
+      intro: "Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({time}).",
+      maxPerformersOne: " Max {n} performer.",
+      maxPerformersOther: " Max {n} performers.",
+      broadcastHint: "Message the whole lineup — sent as a private message to each artist individually, replies stay private.",
+      broadcastPlaceholder: "e.g. Load-in is now 6pm, not 6:30...",
+      sendToAll: "Send to all",
+      empty: "No approved performers yet. Approve an Artist application to add them to the lineup.",
+      saving: "Saving...",
+      saveLineup: "Save Lineup",
+    },
   },
 }
 
