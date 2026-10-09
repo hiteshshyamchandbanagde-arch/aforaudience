@@ -29,6 +29,8 @@ import MessageButton from '@/components/MessageButton'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 
 interface LineupSlot {
   id: string
@@ -52,10 +54,11 @@ interface EventInfo {
   maxPerformers: number | null
 }
 
-const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> = {
-  PAID: { label: 'Paid', ...STATUS_TONE.sage },
-  FREE: { label: 'Free', bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' },
-  BUY_IN: { label: 'Buy-in', ...STATUS_TONE.gold },
+// GEN-2610-007 - the badge's label in the UI language; the stored type stays English.
+const COMP_LABEL: Record<string, { label: (t: Dictionary['organiserDashboard']) => string; bg: string; color: string }> = {
+  PAID: { label: (t) => t.eventDetail.compPaid, ...STATUS_TONE.sage },
+  FREE: { label: (t) => t.yourEvents.free, bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' },
+  BUY_IN: { label: (t) => t.eventDetail.compBuyIn, ...STATUS_TONE.gold },
 }
 
 function SortableRow({
@@ -68,6 +71,8 @@ function SortableRow({
   onFeaturedToggle: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+  const { t: tr } = useLocale()
+  const l = tr.organiserDashboard.lineup
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -94,7 +99,7 @@ function SortableRow({
         variant="icon"
         {...attributes}
         {...listeners}
-        aria-label="Drag to reorder"
+        aria-label={l.dragToReorder}
         style={{
           cursor: 'grab',
           fontSize: 'var(--afa-text-lead)',
@@ -125,8 +130,8 @@ function SortableRow({
         onClick={() => onFeaturedToggle(item.id)}
         title={
           item.isFeaturedVouch
-            ? 'Remove your Featured vouch for this artist'
-            : 'Vouch this artist as Featured — once 5+ (configurable) distinct organisers vouch, their Scene Status auto-promotes to Featured'
+            ? l.removeVouchTip
+            : l.vouchTip
         }
         style={{
           display: 'flex',
@@ -142,10 +147,10 @@ function SortableRow({
           color: item.isFeaturedVouch ? 'var(--afa-selected)' : 'var(--afa-text-muted)',
         }}
       >
-        {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
+        {item.isFeaturedVouch ? l.featured : l.vouchFeatured}
       </Button>
 
-      <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ${formatINR(compAmount)}` : ''}</Badge>
+      <Badge variant="status-compact" tone={comp}>{comp.label(tr.organiserDashboard)}{compAmount ? ` · ${formatINR(compAmount)}` : ''}</Badge>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
         <input
@@ -156,10 +161,10 @@ function SortableRow({
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
           style={{ width: '56px', padding: 'var(--afa-space-6px) var(--afa-space-2)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
-        <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>min</span>
+        <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>{l.min}</span>
       </div>
 
-      <MessageButton contextType="PERFORMANCE" contextId={item.id} label="Message" />
+      <MessageButton contextType="PERFORMANCE" contextId={item.id} label={l.message} />
     </div>
   )
 }
@@ -175,6 +180,8 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
   const { showToast } = useToast()
+  const { locale, t: tr } = useLocale()
+  const l = tr.organiserDashboard.lineup
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -191,8 +198,8 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
     try {
       const res = await fetch(`/api/events/${id}/lineup`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this event')
-        throw new Error('Could not load lineup')
+        if (res.status === 403) throw new Error(l.noAccess)
+        throw new Error(l.loadFailed)
       }
       const json = await res.json()
       setEvent(json.event)
@@ -203,7 +210,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, l])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -250,13 +257,13 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
       })
       const data = await res.json()
       if (res.ok) {
-        showToast(`Sent to ${data.sentTo} artist${data.sentTo === 1 ? '' : 's'}.`, 'success')
+        showToast(countText(locale, data.sentTo, l.sentToOne, l.sentToOther), 'success')
         setBroadcastDraft('')
       } else {
-        showToast(data.error || 'Broadcast failed.', 'error')
+        showToast(data.error || l.broadcastFailed, 'error')
       }
     } catch {
-      showToast('Broadcast failed.', 'error')
+      showToast(l.broadcastFailed, 'error')
     } finally {
       setBroadcasting(false)
     }
@@ -270,36 +277,36 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order: lineup.map((i) => ({ performanceId: i.id, duration: i.duration, isFeaturedVouch: i.isFeaturedVouch })) }),
       })
-      if (!res.ok) throw new Error('Could not save lineup')
+      if (!res.ok) throw new Error(l.saveLineupFailed)
       const json = await res.json()
       setLineup(json.lineup)
       setDirty(false)
-      showToast('Lineup saved.', 'success')
+      showToast(l.saved, 'success')
     } catch (err: any) {
-      showToast(err.message || 'Save failed', 'error')
+      showToast(err.message || l.saveFailed, 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error && !event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></>)
+  if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{l.noData}</div></>)
 
   return (
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 96px' }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
-          <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
+          <BackLink href={`/dashboard/organiser/events/${id}`} label={l.backToEvent} />
 
           <PageTitle style={{ marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-6px)' }}>
-            {event.title} — Lineup
+            {l.title.replace('{title}', event.title)}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
-            Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).
-            {event.maxPerformers !== null && ` Max ${event.maxPerformers} performer${event.maxPerformers === 1 ? '' : 's'}.`}
+            {l.intro.replace('{time}', event.startTime)}
+            {event.maxPerformers !== null && countText(locale, event.maxPerformers, l.maxPerformersOne, l.maxPerformersOther)}
           </p>
 
           {error && (
@@ -309,13 +316,13 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           {lineup.length > 0 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-2)' }}>
-                Message the whole lineup — sent as a private message to each artist individually, replies stay private.
+                {l.broadcastHint}
               </p>
               <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                 <input
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
-                  placeholder="e.g. Load-in is now 6pm, not 6:30..."
+                  placeholder={l.broadcastPlaceholder}
                   style={{ flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <Button
@@ -326,7 +333,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   disabled={broadcasting || !broadcastDraft.trim()}
                   style={{ opacity: broadcasting || !broadcastDraft.trim() ? 0.6 : 1 }}
                 >
-                  Send to all
+                  {l.sendToAll}
                 </Button>
               </div>
             </div>
@@ -335,7 +342,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           {lineup.length === 0 ? (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-32px)', textAlign: 'center', border: '1px solid var(--afa-tint-06)' }}>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>
-                No approved performers yet. Approve an Artist application to add them to the lineup.
+                {l.empty}
               </p>
             </div>
           ) : (
@@ -364,7 +371,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   opacity: 1,
                 }}
               >
-                {saving ? 'Saving...' : 'Save Lineup'}
+                {saving ? l.saving : l.saveLineup}
               </Button>
             </div>
           )}

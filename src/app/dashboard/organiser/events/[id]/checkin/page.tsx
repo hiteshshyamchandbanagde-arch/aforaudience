@@ -9,6 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 
 type ScanResult = {
   ok: boolean
@@ -42,10 +43,30 @@ function seatsSummary(seats?: Record<string, number>) {
     .join(', ')
 }
 
+// GEN-2610-007 - the scan result's detail line in the UI language, by the
+// API's reason code; an unknown reason keeps the server's message.
+function resultMessage(r: ScanResult, c: Dictionary['organiserDashboard']['checkin']) {
+  switch (r.reason) {
+    case 'EMPTY': return c.reasonEmpty
+    case 'NOT_FOUND': return c.reasonNotFound
+    case 'WRONG_EVENT': return c.reasonWrongEvent
+    case 'NOT_CONFIRMED': {
+      const m = r.message?.match(/status is (\S+),/)
+      return m ? c.reasonNotConfirmed.replace('{status}', m[1]) : r.message
+    }
+    // The heading already says it.
+    case 'ALREADY_CHECKED_IN': return undefined
+    case 'ERROR': return c.reasonError
+    default: return r.message
+  }
+}
+
 export default function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: eventId } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr } = useLocale()
+  const c = tr.organiserDashboard.checkin
 
   const [eventTitle, setEventTitle] = useState('')
   const [loading, setLoading] = useState(true)
@@ -116,7 +137,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       try {
         const res = await fetch(`/api/events/${eventId}/owner`)
         if (!res.ok) {
-          throw new Error(res.status === 403 ? 'You do not have access to this event' : 'Event not found')
+          throw new Error(res.status === 403 ? c.noAccess : c.notFound)
         }
         const data = await res.json()
         setEventTitle(data.title)
@@ -128,7 +149,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       }
     }
     if (session?.user) load()
-  }, [session, eventId, refreshCounts])
+  }, [session, eventId, refreshCounts, c])
 
   const submitCode = useCallback(async (code: string) => {
     if (!code.trim() || scanningRef.current) return
@@ -160,7 +181,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         if (listOpen) refreshAttendees()
       }
     } catch {
-      setLastResult({ ok: false, message: 'Network error - try again.' })
+      setLastResult({ ok: false, message: c.networkError })
       if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
       dismissTimerRef.current = setTimeout(() => setLastResult(null), 4000)
     } finally {
@@ -169,7 +190,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       // same still-visible QR code before the person walks off.
       setTimeout(() => { scanningRef.current = false }, 1500)
     }
-  }, [eventId, refreshCounts, listOpen, refreshAttendees])
+  }, [eventId, refreshCounts, listOpen, refreshAttendees, c])
 
   useEffect(() => {
     if (!cameraOn) return
@@ -187,7 +208,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           () => { /* per-frame no-QR-found noise, ignore */ }
         )
         .catch((err: any) => {
-          setCameraError('Could not access the camera. Check browser permissions, or use manual entry below.')
+          setCameraError(c.cameraError)
           setCameraOn(false)
           console.error('Camera start failed:', err)
         })
@@ -203,7 +224,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     }
   }, [cameraOn, submitCode])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{loadError}</div></>)
 
@@ -227,7 +248,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           }}
         >
           <p style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, marginBottom: 'var(--afa-space-1)' }}>
-            {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? <><Icon name="alert" size={14} style={INLINE_ICON_STYLE} /> Already checked in</> : '✗ Not valid'}
+            {lastResult.ok ? c.checkedIn : lastResult.reason === 'ALREADY_CHECKED_IN' ? <><Icon name="alert" size={14} style={INLINE_ICON_STYLE} /> {c.alreadyCheckedIn}</> : c.notValid}
           </p>
           {lastResult.attendeeName && (
             <p style={{ fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-2px)' }}>{lastResult.attendeeName}</p>
@@ -235,31 +256,31 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           {lastResult.seats && seatsSummary(lastResult.seats) && (
             <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85, marginBottom: 'var(--afa-space-2px)' }}>{seatsSummary(lastResult.seats)}</p>
           )}
-          {lastResult.message && (
-            <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85 }}>{lastResult.message}</p>
+          {resultMessage(lastResult, c) && (
+            <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85 }}>{resultMessage(lastResult, c)}</p>
           )}
-          <p style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.7, marginTop: 'var(--afa-space-6px)' }}>Tap to dismiss</p>
+          <p style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.7, marginTop: 'var(--afa-space-6px)' }}>{c.tapToDismiss}</p>
         </div>
       )}
 
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
-          <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
+          <BackLink href={`/dashboard/organiser/events/${eventId}`} label={c.backToEvent} />
 
           <PageTitle style={{ marginTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-1)' }}>
-            Check-In
+            {c.title}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{eventTitle}</p>
           {counts && (
             <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', marginBottom: 'var(--afa-space-6)' }}>
-              {counts.checkedIn} of {counts.total} checked in
+              {c.countCheckedIn.replace('{n}', String(counts.checkedIn)).replace('{total}', String(counts.total))}
             </p>
           )}
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             {!cameraOn ? (
               <Button variant="primary" size="lg" fullWidth={true} onClick={() => { setCameraError(''); setCameraOn(true) }}>
-                <Icon name="camera" size={18} style={INLINE_ICON_STYLE} /> Start Camera Scan
+                <Icon name="camera" size={18} style={INLINE_ICON_STYLE} /> {c.startCamera}
               </Button>
             ) : (
               <>
@@ -270,7 +291,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                   onClick={() => setCameraOn(false)}
                   style={{ marginTop: 'var(--afa-space-3)' }}
                 >
-                  Stop Camera
+                  {c.stopCamera}
                 </Button>
               </>
             )}
@@ -281,7 +302,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-2)', color: 'var(--afa-text-primary)' }}>
-              Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(ticket ref printed on the ticket)</span>
+              {c.manualEntry} <span style={{ fontWeight: 400, opacity: 0.6 }}>{c.manualEntryHint}</span>
             </label>
             <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
               <input
@@ -289,7 +310,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') submitCode(manualCode) }}
-                placeholder="e.g., AFA-7K3M-Q9TX"
+                placeholder={c.manualPlaceholder}
                 style={{
                   flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)',
                   background: 'var(--afa-surface-raised)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)',
@@ -302,7 +323,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 onClick={() => submitCode(manualCode)}
                 disabled={submitting || !manualCode.trim()}
               >
-                Check In
+                {c.checkInButton}
               </Button>
             </div>
           </div>
@@ -322,8 +343,8 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 padding: 0,
               }}
             >
-              <span>Attendee List</span>
-              <span style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>{listOpen ? '▲ Hide' : '▼ Show'}</span>
+              <span>{c.attendeeList}</span>
+              <span style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>{listOpen ? c.hide : c.show}</span>
             </Button>
 
             {listOpen && (
@@ -339,20 +360,20 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                       onClick={() => setListFilter(f)}
                       style={{ flex: 1 }}
                     >
-                      {f === 'all' ? 'All' : f === 'checked_in' ? 'Checked In' : 'Pending'}
+                      {f === 'all' ? c.filterAll : f === 'checked_in' ? c.filterCheckedIn : c.filterPending}
                     </Button>
                   ))}
                 </div>
 
                 {attendees === null ? (
-                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Loading...</p>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{tr.dashboardChrome.loading}</p>
                 ) : (
                   (() => {
                     const filtered = attendees.filter((a) =>
                       listFilter === 'all' ? true : listFilter === 'checked_in' ? !!a.checkedInAt : !a.checkedInAt
                     )
                     if (filtered.length === 0) {
-                      return <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No one in this list yet.</p>
+                      return <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{c.emptyList}</p>
                     }
                     return (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
@@ -378,7 +399,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                 )}
                               </div>
                               <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage-bright)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>
-                                {a.checkedInAt ? '✓ In' : 'Pending'}
+                                {a.checkedInAt ? c.in : c.pending}
                               </span>
                             </div>
                             {/* Companion Tagging Phase 2 (step 6) - accepted
@@ -386,32 +407,32 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                 under the booking they're tagged on. */}
                             {a.companions.length > 0 && (
                               <div style={{ marginLeft: 'var(--afa-space-18px)', marginTop: 'var(--afa-space-1)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
-                                {a.companions.map((c) => (
+                                {a.companions.map((comp) => (
                                   <div
-                                    key={c.id}
+                                    key={comp.id}
                                     style={{
                                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                       padding: 'var(--afa-space-2) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)',
-                                      background: c.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
-                                      border: c.checkedInAt ? 'none' : '1px dashed var(--afa-border-resting)',
+                                      background: comp.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
+                                      border: comp.checkedInAt ? 'none' : '1px dashed var(--afa-border-resting)',
                                     }}
                                   >
                                     <span style={{ color: 'var(--afa-text-primary)' }}>
-                                      <Icon name="users" size={14} style={INLINE_ICON_STYLE} /> {c.name}
-                                      {c.seatLabel && <span style={{ opacity: 0.6 }}> · {c.seatLabel}</span>}
+                                      <Icon name="users" size={14} style={INLINE_ICON_STYLE} /> {comp.name}
+                                      {comp.seatLabel && <span style={{ opacity: 0.6 }}> · {comp.seatLabel}</span>}
                                     </span>
-                                    {c.checkedInAt ? (
-                                      <span style={{ fontWeight: 600, color: 'var(--afa-sage-bright)' }}>✓ In</span>
+                                    {comp.checkedInAt ? (
+                                      <span style={{ fontWeight: 600, color: 'var(--afa-sage-bright)' }}>{c.in}</span>
                                     ) : (
                                       <Button
                                         variant="primary"
                                         size="sm"
                                         fullWidth={false}
-                                        onClick={() => checkInCompanion(c.id)}
-                                        disabled={checkingInCompanion === c.id}
-                                        style={{ opacity: checkingInCompanion === c.id ? 0.6 : 1 }}
+                                        onClick={() => checkInCompanion(comp.id)}
+                                        disabled={checkingInCompanion === comp.id}
+                                        style={{ opacity: checkingInCompanion === comp.id ? 0.6 : 1 }}
                                       >
-                                        {checkingInCompanion === c.id ? 'Checking in…' : 'Check in'}
+                                        {checkingInCompanion === comp.id ? c.checkingIn : c.checkInCompanion}
                                       </Button>
                                     )}
                                   </div>

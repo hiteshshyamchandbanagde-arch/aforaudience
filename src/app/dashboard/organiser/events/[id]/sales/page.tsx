@@ -10,6 +10,8 @@ import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
+import { useLocale } from '@/lib/i18n/translate'
+import { timeAgo } from '@/lib/sales-time-ago'
 
 interface Tier {
   sectionName: string
@@ -55,21 +57,13 @@ const POLL_MS = 20000
 
 const money = formatINR
 
-function timeAgo(iso: string) {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 5) return 'just now'
-  if (secs < 60) return `${secs}s ago`
-  const mins = Math.floor(secs / 60)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  return `${hrs}h ago`
-}
-
 function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t: tr } = useLocale()
+  const s = tr.organiserDashboard.sales
   const [range, setRange] = useState(searchParams.get('range') || 'all')
   const [data, setData] = useState<SalesData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -87,8 +81,8 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     try {
       const res = await fetch(`/api/events/${id}/sales?range=${r}`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this event')
-        throw new Error('Could not load sales data')
+        if (res.status === 403) throw new Error(s.eventNoAccess)
+        throw new Error(s.eventLoadFailed)
       }
       const json = await res.json()
       setData(json)
@@ -99,7 +93,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, s])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -112,10 +106,10 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [status, range, fetchSales])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error && !data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></>)
+  if (!data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{s.noData}</div></>)
 
   const { event, tiers, totals, timeline, recentBookings } = data
   const maxTimelineSeats = Math.max(1, ...timeline.map((t) => t.seats))
@@ -127,18 +121,18 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <div style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
-            <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
+            <BackLink href={`/dashboard/organiser/events/${id}`} label={s.backToEvent} />
             <Link href="/dashboard/organiser/sales" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
-              All events →
+              {s.allEvents}
             </Link>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
             <PageTitle>
-              {event.title} — Sales
+              {s.eventTitle.replace('{title}', event.title)}
             </PageTitle>
             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
-              {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
+              {refreshedAt ? s.updated.replace('{ago}', timeAgo(refreshedAt.toISOString(), s)).replace('{n}', String(POLL_MS / 1000)) : ''}
             </span>
           </div>
 
@@ -147,31 +141,31 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{s.staleData.replace('{error}', error)}</div>
           )}
 
           {/* Summary cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub={`${money(totals.subtotalRevenue)} tickets + ${money(totals.bookingFeeRevenue)} fees — this range`} />
-            <SummaryCard label="Seats Sold (all-time)" value={`${totals.totalSeatsSold} / ${totals.totalCapacity}`} sub={`${pctSold}% of capacity`} />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} sub="this range" />
+            <SummaryCard label={s.grossRevenue} value={money(totals.grossRevenue)} sub={s.grossSub.replace('{tickets}', money(totals.subtotalRevenue)).replace('{fees}', money(totals.bookingFeeRevenue))} />
+            <SummaryCard label={s.seatsSoldAllTime} value={`${totals.totalSeatsSold} / ${totals.totalCapacity}`} sub={s.pctOfCapacity.replace('{pct}', String(pctSold))} />
+            <SummaryCard label={s.confirmedBookings} value={String(totals.confirmedBookingsCount)} sub={s.thisRange} />
             <SummaryCard
-              label="Reserved (payment in progress)"
+              label={s.reserved}
               value={String(totals.pendingSeats)}
-              sub={totals.pendingCount > 0 ? `${money(totals.pendingValue)} at stake, may expire` : 'none right now'}
+              sub={totals.pendingCount > 0 ? s.atStake.replace('{amount}', money(totals.pendingValue)) : s.noneRightNow}
               muted
             />
           </div>
 
           {/* Tier breakdown */}
-          <Section title="By ticket tier">
+          <Section title={s.byTicketTier}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
               {tiers.map((t) => {
                 const pct = t.totalSeats > 0 ? Math.min(100, Math.round((t.sold / t.totalSeats) * 100)) : 0
                 return (
                   <div key={t.sectionName}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-1)' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{t.sectionName} {t.price > 0 ? `· ${formatINR(t.price)}` : '· Free'}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{t.sectionName} {t.price > 0 ? `· ${formatINR(t.price)}` : `· ${s.free}`}</span>
                       <span style={{ color: 'var(--afa-text-secondary)' }}>{t.sold} / {t.totalSeats}</span>
                     </div>
                     <div style={{ height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-08)', overflow: 'hidden' }}>
@@ -184,13 +178,13 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </Section>
 
           {/* Timeline */}
-          <Section title="Sales over time">
+          <Section title={s.salesOverTime}>
             {timeline.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No confirmed sales yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{s.noSalesYet}</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
                 {timeline.map((t) => (
-                  <div key={t.date} title={`${t.date}: ${t.seats} seats, ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
+                  <div key={t.date} title={s.timelineTip.replace('{date}', t.date).replace('{n}', String(t.seats)).replace('{amount}', money(t.revenue))} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
                     <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
@@ -202,9 +196,9 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </Section>
 
           {/* Recent bookings */}
-          <Section title="Recent bookings">
+          <Section title={s.recentBookings}>
             {recentBookings.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No bookings yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{s.noBookings}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                 {recentBookings.map((b) => (
@@ -214,7 +208,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                       {Object.entries(b.seats).map(([s, q]) => `${q}× ${s}`).join(', ')}
                     </span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
-                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt)}</span>
+                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt, s)}</span>
                   </div>
                 ))}
               </div>

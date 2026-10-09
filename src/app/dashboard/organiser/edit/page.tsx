@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import Button, { variantStyle } from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { useLocale } from '@/lib/i18n/translate'
 
 const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }
 const inputStyle = { width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
@@ -22,6 +23,8 @@ const inputStyle = { width: '100%', padding: 'var(--afa-space-10px) var(--afa-sp
 export default function OrganiserEditPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr } = useLocale()
+  const o = tr.organiserDashboard.editProfile
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -53,12 +56,14 @@ export default function OrganiserEditPage() {
           setAvatar(d.user?.avatar || '')
         }
       } catch {
-        setError('Failed to load profile')
+        setError(o.loadFailed)
       } finally {
         setLoading(false)
       }
     }
     if (session?.user) fetchProfile()
+    // Not on `o`: switching language must not reload and drop unsaved edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,12 +78,12 @@ export default function OrganiserEditPage() {
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || 'Upload failed - please try again.')
+        setError(data.error || o.uploadFailed)
         return
       }
       setAvatar(data.url)
     } catch {
-      setError('Upload failed - please try again.')
+      setError(o.uploadFailed)
     } finally {
       setUploadingAvatar(false)
     }
@@ -86,7 +91,7 @@ export default function OrganiserEditPage() {
 
   const save = async () => {
     if (!orgName.trim()) {
-      setError('Organisation name cannot be empty.')
+      setError(o.nameEmpty)
       return
     }
     setSaving(true)
@@ -107,21 +112,21 @@ export default function OrganiserEditPage() {
       ])
       if (!orgRes.ok) {
         const data = await orgRes.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to save profile')
+        throw new Error(data.error || o.saveFailed)
       }
       if (!userRes.ok) {
         const data = await userRes.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to save profile picture')
+        throw new Error(data.error || o.savePhotoFailed)
       }
-      setMessage('Profile saved.')
+      setMessage(o.saved)
     } catch (err: any) {
-      setError(err.message || 'Failed to save profile')
+      setError(err.message || o.saveFailed)
     } finally {
       setSaving(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
@@ -131,10 +136,10 @@ export default function OrganiserEditPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
-            Edit Your Profile
+            {o.title}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
-            This is what audience members and artists see on your public Organiser page.
+            {o.subtitle}
           </p>
 
           {message && (
@@ -146,27 +151,27 @@ export default function OrganiserEditPage() {
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Profile Picture</label>
+              <label style={labelStyle}>{o.profilePicture}</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
+                  <img src={avatar} alt={o.photoAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
                 <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
-                  {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
+                  {uploadingAvatar ? o.uploading : avatar ? o.changePhoto : o.uploadPhoto}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
               </div>
             </div>
 
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-              <label style={labelStyle}>Organisation / Brand Name</label>
+              <label style={labelStyle}>{o.orgName}</label>
               <input type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} maxLength={120} style={inputStyle} />
             </div>
 
             <div>
-              <label style={labelStyle}>Bio</label>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder="Tell people about the shows you run" style={{ ...inputStyle, resize: 'vertical' as const }} />
+              <label style={labelStyle}>{o.bio}</label>
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder={o.bioPlaceholder} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
           </div>
 
@@ -179,7 +184,7 @@ export default function OrganiserEditPage() {
             disabled={saving}
             style={{ opacity: saving ? 0.6 : 1 }}
           >
-            {saving ? 'Saving...' : 'Save Profile'}
+            {saving ? o.saving : o.saveProfile}
           </Button>
         </div>
       </main>

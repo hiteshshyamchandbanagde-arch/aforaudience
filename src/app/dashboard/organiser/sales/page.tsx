@@ -10,6 +10,8 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
+import { useLocale } from '@/lib/i18n/translate'
+import { timeAgo } from '@/lib/sales-time-ago'
 
 interface EventRow {
   id: string
@@ -43,19 +45,11 @@ const POLL_MS = 30000
 
 const money = formatINR
 
-function timeAgo(iso: string) {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 5) return 'just now'
-  if (secs < 60) return `${secs}s ago`
-  const mins = Math.floor(secs / 60)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  return `${hrs}h ago`
-}
-
 export default function OrganiserSalesOverviewPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr } = useLocale()
+  const s = tr.organiserDashboard.sales
   const [range, setRange] = useState('all')
   const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -73,8 +67,8 @@ export default function OrganiserSalesOverviewPage() {
     try {
       const res = await fetch(`/api/organisers/sales-overview?range=${r}`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this page')
-        throw new Error('Could not load sales overview')
+        if (res.status === 403) throw new Error(s.pageNoAccess)
+        throw new Error(s.overviewLoadFailed)
       }
       const json = await res.json()
       setData(json)
@@ -85,7 +79,7 @@ export default function OrganiserSalesOverviewPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [s])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -98,10 +92,10 @@ export default function OrganiserSalesOverviewPage() {
     }
   }, [status, range, fetchOverview])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
   if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
-  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></DashboardShell></>)
+  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>{s.noData}</div></DashboardShell></>)
 
   const { totals, events, timeline } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
@@ -114,10 +108,10 @@ export default function OrganiserSalesOverviewPage() {
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--afa-space-5)', flexWrap: 'wrap', gap: 'var(--afa-space-3)' }}>
             <PageTitle>
-              Sales Overview
+              {s.title}
             </PageTitle>
             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
-              {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : ''}
+              {refreshedAt ? s.updated.replace('{ago}', timeAgo(refreshedAt.toISOString(), s)).replace('{n}', String(POLL_MS / 1000)) : ''}
             </span>
           </div>
 
@@ -126,19 +120,19 @@ export default function OrganiserSalesOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{s.staleData.replace('{error}', error)}</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} />
-            <SummaryCard label="Tickets Sold" value={String(totals.ticketsSold)} />
-            <SummaryCard label="Events" value={String(totals.eventsCount)} />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} />
+            <SummaryCard label={s.grossRevenue} value={money(totals.grossRevenue)} />
+            <SummaryCard label={s.ticketsSold} value={String(totals.ticketsSold)} />
+            <SummaryCard label={s.events} value={String(totals.eventsCount)} />
+            <SummaryCard label={s.confirmedBookings} value={String(totals.confirmedBookingsCount)} />
           </div>
 
-          <Section title="Revenue over time">
+          <Section title={s.revenueOverTime}>
             {timeline.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No confirmed sales in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{s.noSalesInRange}</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
                 {timeline.map((t) => (
@@ -153,16 +147,16 @@ export default function OrganiserSalesOverviewPage() {
             )}
           </Section>
 
-          <Section title="By event">
+          <Section title={s.byEvent}>
             {events.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No events yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{s.noEvents}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-muted)', padding: '0 var(--afa-space-3)' }}>
-                  <span>Event</span>
-                  <span>Revenue</span>
-                  <span>Tickets</span>
-                  <span>Bookings</span>
+                  <span>{s.colEvent}</span>
+                  <span>{s.colRevenue}</span>
+                  <span>{s.colTickets}</span>
+                  <span>{s.colBookings}</span>
                 </div>
                 {events.map((e) => (
                   <Link

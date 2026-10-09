@@ -10,13 +10,18 @@ interface Props {
   presets: string[]
   placeholder?: string
   inputStyle: React.CSSProperties
+  // GEN-2610-007 - labels in the UI language; the stored value stays the
+  // English preset. Pages that aren't translated leave these out.
+  presetLabels?: Record<string, string>
+  noneLabel?: string
+  otherLabel?: string
 }
 
 // Single-select preset dropdown + "Other - specify" free-text fallback.
 // Distinct from FacilitiesPicker (multi-select chips) since Dress Code and
 // Vibe are each a single value, not a list. Optional field either way -
 // "None / not specified" is always available as the first option.
-export default function PresetSelectWithOther({ value, onChange, presets, placeholder, inputStyle }: Props) {
+export default function PresetSelectWithOther({ value, onChange, presets, placeholder, inputStyle, presetLabels, noneLabel = 'None / not specified', otherLabel = 'Other — specify' }: Props) {
   const isPreset = value === '' || presets.includes(value)
   const [showOther, setShowOther] = useState(!isPreset)
 
@@ -43,11 +48,11 @@ export default function PresetSelectWithOther({ value, onChange, presets, placeh
         onChange={(e) => handleSelectChange(e.target.value)}
         style={inputStyle}
       >
-        <option value="">None / not specified</option>
+        <option value="">{noneLabel}</option>
         {presets.map((preset) => (
-          <option key={preset} value={preset}>{preset}</option>
+          <option key={preset} value={preset}>{presetLabels?.[preset] ?? preset}</option>
         ))}
-        <option value="__other__">Other — specify</option>
+        <option value="__other__">{otherLabel}</option>
       </select>
       {showOther && (
         <input

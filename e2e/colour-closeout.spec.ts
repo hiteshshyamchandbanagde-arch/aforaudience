@@ -60,7 +60,8 @@ test.describe("Omkar", () => {
 
   test("[GEN-2609-113] organiser dashboard: the Draft badge is amber on its tint, at least 4.5:1", async ({ page }) => {
     await gotoDashboard(page, "/dashboard/organiser/");
-    const draft = page.locator("main").getByText("Draft", { exact: true }).filter({ visible: true }).first();
+    // By its status hook, not the English "Draft": the badge follows the UI language (GEN-2610-007).
+    const draft = page.locator("main").locator('[data-afa-status="DRAFT"]').filter({ visible: true }).first();
     await expectToneText(page, draft, ...GOLD, "Draft badge");
   });
 

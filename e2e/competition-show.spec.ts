@@ -50,11 +50,12 @@ const PRIZE_SECOND = "₹5,000";
 const PRIZE_THIRD = "Goodie hamper";
 
 function competitionCheckbox(page: Page) {
-  return page.locator("label", { hasText: /this is a competition show/i }).locator('input[type="checkbox"]');
+  // data-afa-* hooks, not the English labels: the edit page follows the UI language (GEN-2610-007).
+  return page.locator('input[type="checkbox"][data-afa-competition-toggle]');
 }
 
 async function saveEvent(page: Page) {
-  await page.getByRole("button", { name: /^save changes$/i }).click();
+  await page.locator("[data-afa-save-event]").click();
   // A successful save leaves the edit page for the organiser's event page.
   await expect(page).toHaveURL(new RegExp(`/dashboard/organiser/events/${FIXTURE_EVENT_ID}/?$`), { timeout: 20_000 });
 }
@@ -74,9 +75,9 @@ async function enableCompetitionShow(page: Page) {
   await expect(competitionCheckbox(page)).toBeVisible();
   await competitionCheckbox(page).check();
 
-  await page.getByPlaceholder(/e\.g\. ₹10,000 \+ trophy/i).fill(PRIZE_FIRST);
-  await page.getByPlaceholder("Optional").first().fill(PRIZE_SECOND);
-  await page.getByPlaceholder("Optional").nth(1).fill(PRIZE_THIRD);
+  await page.locator('[data-afa-prize="1"]').fill(PRIZE_FIRST);
+  await page.locator('[data-afa-prize="2"]').fill(PRIZE_SECOND);
+  await page.locator('[data-afa-prize="3"]').fill(PRIZE_THIRD);
 
   await saveEvent(page);
 }
@@ -107,9 +108,9 @@ test("competition show: toggle and prizes survive a save and show on the public 
     await test.step("Reload the edit page - the toggle and prize text persisted", async () => {
       await page.goto(EDIT_URL);
       await expect(competitionCheckbox(page)).toBeChecked();
-      await expect(page.getByPlaceholder(/e\.g\. ₹10,000 \+ trophy/i)).toHaveValue(PRIZE_FIRST);
-      await expect(page.getByPlaceholder("Optional").first()).toHaveValue(PRIZE_SECOND);
-      await expect(page.getByPlaceholder("Optional").nth(1)).toHaveValue(PRIZE_THIRD);
+      await expect(page.locator('[data-afa-prize="1"]')).toHaveValue(PRIZE_FIRST);
+      await expect(page.locator('[data-afa-prize="2"]')).toHaveValue(PRIZE_SECOND);
+      await expect(page.locator('[data-afa-prize="3"]')).toHaveValue(PRIZE_THIRD);
     });
 
     await test.step("Public event page shows the Competition Show section with all three prizes", async () => {

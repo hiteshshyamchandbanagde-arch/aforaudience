@@ -2,16 +2,19 @@
 
 import { SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 
-const RANGES: { value: string; label: string }[] = [
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'quarter', label: 'Quarter' },
-  { value: 'year', label: 'Year' },
-  { value: 'all', label: 'All Time' },
+// GEN-2610-007 - labels follow the UI language (dashboardChrome.range*).
+const RANGES: { value: string; label: keyof Dictionary['dashboardChrome'] }[] = [
+  { value: 'week', label: 'rangeWeek' },
+  { value: 'month', label: 'rangeMonth' },
+  { value: 'quarter', label: 'rangeQuarter' },
+  { value: 'year', label: 'rangeYear' },
+  { value: 'all', label: 'rangeAll' },
 ]
 
 export default function RangePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t: tr } = useLocale()
   return (
     // BUG-2609-087 - five segments on one line at phone width: labels never
     // wrap ("All Time" did at 412), the side padding narrows with the
@@ -38,7 +41,7 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
             ...(value === r.value ? { background: SELECTED_BG } : {}),
           }}
         >
-          {r.label}
+          {tr.dashboardChrome[r.label]}
         </Button>
       ))}
     </div>

@@ -51,8 +51,11 @@ async function organiserReference(newContext: (o?: BrowserContextOptions) => Pro
   const ctx = await newContext({ storageState: authFile("omkar"), viewport: isMobile ? { width: 390, height: 844 } : { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   await gotoDashboard(page, "/dashboard/organiser/sales");
-  const title = await fontOf(page.getByRole("heading", { level: 1, name: "Sales Overview" }));
-  const label = await fontOf(page.getByText("Gross Revenue", { exact: true }).first());
+  // data-afa-* hooks, not the English text: the Organiser pages follow the UI language (GEN-2610-007).
+  const h1 = page.locator("h1[data-afa-page-title]");
+  await expect(h1).toHaveText("Sales Overview");
+  const title = await fontOf(h1);
+  const label = await fontOf(page.locator("[data-afa-stat-label]").first());
   await ctx.close();
   return { title, label };
 }
