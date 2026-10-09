@@ -1900,6 +1900,37 @@ const en = {
       waiting: "Waiting on the other side to respond.",
     },
   },
+
+  // GEN-2610-007 (6c) - everything under /dashboard/venue, one sub-object per page.
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "You're not registered as a Venue Owner",
+      notOwnerBody: "Apply to list your venue from your profile to start managing bookings.",
+      backToHome: "Back to Home",
+      pendingTitle: "Your Venue Owner account is pending approval",
+      pendingBody: "Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.",
+      eyebrow: "Portfolio",
+      title: "Your Venues",
+      loadFailed: "Couldn't load your venues",
+      emptyCaption: "No venues yet — register your first space",
+      statusPublished: "Published",
+      statusDraft: "Draft",
+      capacity: "Capacity",
+      perSeat: "Per seat",
+      rateType: "Rate Type",
+      rateHourly: "Hourly",
+      rateDaily: "Daily",
+      rateFlexible: "Flexible",
+      // {amount}: the rate, e.g. ₹2,000.
+      hourlyRate: "Hourly · {amount}/hr",
+      dailyRate: "Daily · {amount}/day",
+      flexibleRate: "Flexible rate",
+      view: "View",
+      edit: "Edit",
+      // The seat-map link is an icon; this is its accessible name.
+      seatMap: "Seat map",
+    },
+  },
 }
 
 export default en
