@@ -13,6 +13,8 @@ import SharedButton from '@/components/ui/Button'
 import { calendarDate, formatDate, istMonthKey } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface BookingRequest {
   id: string
@@ -163,7 +165,7 @@ export default function VenueBookingsPage() {
             ].map((s) => (
               <Card key={s.label} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
                 <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{s.label}</StatLabel>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{formatINR(s.value)}</p>
                 {s.sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>{s.sub}</p>}
               </Card>
             ))}
@@ -233,7 +235,7 @@ export default function VenueBookingsPage() {
                 {bookingsByDate[selectedDay].map((b) => (
                   <div key={b.id} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-1) 0' }}>
                     <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: 'var(--afa-space-6px)' }} />
-                    {b.event?.title || 'Untitled event'} — {b.venue.name} · ₹{b.amount.toLocaleString('en-IN')} · <span style={{ color: 'var(--afa-text-secondary)' }}>{b.status.toLowerCase()}</span>
+                    {b.event?.title || 'Untitled event'} — {b.venue.name} · {formatINR(b.amount)} · <span style={{ color: 'var(--afa-text-secondary)' }}>{b.status.toLowerCase()}</span>
                   </div>
                 ))}
               </div>
@@ -258,10 +260,10 @@ export default function VenueBookingsPage() {
                           for {b.venue.name}, {b.venue.city} · requested by {b.organiser.orgName}
                         </p>
                       </div>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>₹{b.amount}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>{formatINR(b.amount)}</span>
                     </div>
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-4)' }}>
-                      📅 {formatDate(b.fromDate, 'medium', locale)}
+                      <Icon name="calendar" size={14} style={INLINE_ICON_STYLE} /> {formatDate(b.fromDate, 'medium', locale)}
                       {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
                     </p>
                     <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
@@ -291,10 +293,10 @@ export default function VenueBookingsPage() {
                     <Card key={b.id} style={{ padding: 'var(--afa-space-4) var(--afa-space-5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-10px)' }}>
                       <div>
                         <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || 'Untitled event'}</p>
-                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{b.venue.name} · {b.organiser.orgName} · ₹{b.amount}</p>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{b.venue.name} · {b.organiser.orgName} · {formatINR(b.amount)}</p>
                         {/* BUG-2608-091 - the booking's date (and end date if multi-day), same format as the Pending cards, so two past bookings of the same venue, organiser and amount can be told apart. */}
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)', marginBottom: 0 }}>
-                          📅 {formatDate(b.fromDate, 'medium', locale)}
+                          <Icon name="calendar" size={14} style={INLINE_ICON_STYLE} /> {formatDate(b.fromDate, 'medium', locale)}
                           {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
                         </p>
                       </div>

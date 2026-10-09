@@ -16,6 +16,7 @@ import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 import Button, { variantStyle } from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface Venue {
   id: string
@@ -320,7 +321,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                       rel="noopener noreferrer"
                       style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-fill-solid)', fontWeight: 600 }}
                     >
-                      📍 Directions
+                      <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />&nbsp;Directions
                     </a>
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
                       Derived automatically from the address you picked above. Edit the address to change it.

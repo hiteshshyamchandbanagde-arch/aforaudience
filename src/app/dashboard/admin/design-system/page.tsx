@@ -16,6 +16,7 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
 import { formatDate } from '@/lib/format-date'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -615,7 +616,7 @@ export default function AdminDesignSystemPage() {
                           <span style={{ color: 'var(--afa-text-muted)' }}>—</span>
                         ) : (
                           <span style={{ color: pass ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', fontWeight: 700 }}>
-                            {ratio.toFixed(2)}:1 {pass ? '✓ AA' : `⚠ below AA (${min}:1)`}
+                            {ratio.toFixed(2)}:1 {pass ? '✓ AA' : <><Icon name="alert" size={12} style={INLINE_ICON_STYLE} /> below AA ({min}:1)</>}
                           </span>
                         )}
                       </li>
@@ -781,7 +782,7 @@ function TokenField({
         {meta.label}
         {token.locked && (
           <span title="Locked — editable only with confirmation" style={{ color: 'var(--afa-amber)' }}>
-            🔒
+            <Icon name="lock" size={14} style={INLINE_ICON_STYLE} />
           </span>
         )}
         {coverage === 'unused' && (

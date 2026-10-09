@@ -28,6 +28,7 @@ import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface LineupSlot {
   id: string
@@ -144,7 +145,7 @@ function SortableRow({
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
       </Button>
 
-      <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ₹${compAmount}` : ''}</Badge>
+      <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ${formatINR(compAmount)}` : ''}</Badge>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
         <input
@@ -294,7 +295,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
           <PageTitle style={{ marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-6px)' }}>
-            🎤 {event.title} — Lineup
+            {event.title} — Lineup
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6)' }}>
             Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).

@@ -9,6 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { useLocale } from '@/lib/i18n/translate'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 function StatTile({ label, value, icon, sub }: { label: string; value: string; icon: 'creditCard' | 'calendar' | 'gift'; sub?: string }) {
   const icons: Record<string, ReactElement> = {
@@ -117,7 +118,7 @@ export default function AudienceActivityPage() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ marginBottom: 'var(--afa-space-4)' }}>
-              <StatTile label={tr.audienceActivityPage.totalSpend} value={`₹${totalSpend.toLocaleString('en-IN')}`} icon="creditCard" />
+              <StatTile label={tr.audienceActivityPage.totalSpend} value={formatINR(totalSpend)} icon="creditCard" />
               <StatTile label={tr.audienceActivityPage.eventsAttended} value={String(totalEventsAttended)} icon="calendar" />
               <StatTile label={tr.audienceActivityPage.freeEventsAttended} value={String(freeEventsAttended)} icon="gift" />
             </div>

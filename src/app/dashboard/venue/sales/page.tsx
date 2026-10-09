@@ -18,6 +18,7 @@ import { useLocale } from '@/lib/i18n/translate'
 import { countNoun } from '@/lib/i18n/plural'
 import { chartTooltipProps } from '@/lib/chart-tooltip'
 import { StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface VenueRow {
   id: string
@@ -66,7 +67,7 @@ interface OverviewData {
 const POLL_MS = 30000
 const TOP_VENUES_SHOWN = 5
 
-const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+const money = formatINR
 
 // Compact axis/bar-label form (₹73.4L, not ₹73,40,000) - full precision in
 // the stat cards, compact here since chart labels have little room.
@@ -74,7 +75,7 @@ function compactMoney(n: number) {
   if (n >= 1e7) return `₹${(n / 1e7).toFixed(1)}Cr`
   if (n >= 1e5) return `₹${(n / 1e5).toFixed(1)}L`
   if (n >= 1e3) return `₹${(n / 1e3).toFixed(0)}K`
-  return `₹${n}`
+  return formatINR(n)
 }
 
 // bucketKeyFor() produces "YYYY-MM" (year/all ranges), a Monday-anchored

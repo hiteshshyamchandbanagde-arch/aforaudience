@@ -17,6 +17,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 import { SELECTED, SELECTED_BG } from '@/lib/statusStyle'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 const inputStyle = {
   width: '100%',
@@ -357,7 +358,7 @@ export default function CreateVenuePage() {
                       rel="noopener noreferrer"
                       style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-amber)', fontWeight: 600 }}
                     >
-                      📍 Directions
+                      <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />&nbsp;Directions
                     </a>
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-6px)' }}>
                       Derived automatically from the address you picked above. Edit the address to change it.

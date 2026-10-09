@@ -11,6 +11,7 @@ import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import { timelineLabels } from '@/lib/timeline-label'
 import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface OrganiserRow {
   organiserId: string
@@ -60,7 +61,7 @@ const TABLE_ROW_STYLE: React.CSSProperties = {
   border: '1px solid var(--afa-tint-06)',
 }
 
-const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+const money = formatINR
 
 function timeAgo(iso: string) {
   const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))

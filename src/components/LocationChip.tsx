@@ -7,6 +7,7 @@ import { nearestCity, locateOutcome, roundKm, type CityPoint } from '@/lib/neare
 import { useLocale } from '@/lib/i18n/translate'
 import Button from '@/components/ui/Button'
 import { LOCATION_CHANGED_EVENT, type LocationChangedDetail } from '@/lib/app-events'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface LocationState {
   city: string | null
@@ -267,7 +268,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
         onClick={() => setOpen((v) => !v)}
         style={chipStyle}
       >
-        {variant !== 'topbar' && <span aria-hidden>📍</span>}
+        {variant !== 'topbar' && <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />}
         {/* GEN-2610-005 - capped with an ellipsis in the top bar: a long
             city ("Thiruthuraipoondi") squeezed the 390 search box down to
             "Sea". The full name stays in the text, so it is still read out. */}
@@ -295,7 +296,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
             onClick={handleUseMyLocation}
             disabled={geo.kind === 'locating'}
           >
-            <span aria-hidden>📍</span> {t.location.useMyLocation}
+            <Icon name="pin" size={14} style={INLINE_ICON_STYLE} /> {t.location.useMyLocation}
           </Button>
           {geo.kind !== 'idle' && (
             <div role="status" style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-6px) var(--afa-space-1)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-6px)' }}>

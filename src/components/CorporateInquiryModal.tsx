@@ -5,6 +5,7 @@ import CityAutocomplete from "./CityAutocomplete"
 import Button from "@/components/ui/Button"
 import { useModalSheet } from "@/lib/use-modal-sheet"
 import Input, { INPUT_STYLES } from "@/components/ui/Input"
+import { Icon } from "@/components/Icon"
 
 type CorporateInquiryModalProps = {
   open: boolean
@@ -183,10 +184,9 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
 
         {submitted ? (
           <div style={{ textAlign: "center", padding: "var(--afa-space-6) var(--afa-space-2)" }}>
-            <div style={{
-              fontSize: "40px", // token-ok(font-size-literal): emoji glyph used as a success icon, an icon size rather than text
-              marginBottom: "var(--afa-space-3)",
-            }}>✅</div>
+            <div style={{ display: "flex", justifyContent: "center", color: "var(--afa-sage-bright)", marginBottom: "var(--afa-space-3)" }}>
+              <Icon name="check" size={40} />
+            </div>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>
               Inquiry sent!
             </h2>

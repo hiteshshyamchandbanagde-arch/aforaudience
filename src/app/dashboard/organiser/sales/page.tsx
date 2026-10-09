@@ -9,6 +9,7 @@ import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 interface EventRow {
   id: string
@@ -40,7 +41,7 @@ interface OverviewData {
 
 const POLL_MS = 30000
 
-const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+const money = formatINR
 
 function timeAgo(iso: string) {
   const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))

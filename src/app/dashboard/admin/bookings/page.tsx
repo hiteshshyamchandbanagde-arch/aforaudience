@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
 
 // /dashboard/admin/bookings
 //
@@ -153,7 +154,7 @@ export default function AdminBookingsPage() {
     )
   }
 
-  const formatMoney = (rupees: number) => `₹${rupees.toLocaleString('en-IN')}`
+  const formatMoney = (rupees: number) => formatINR(rupees)
 
   const rowState = (b: BookingItem): { label: string; color: string } => {
     if (b.deliveredAt) return { label: 'Delivered', color: 'var(--afa-green-deep)' }

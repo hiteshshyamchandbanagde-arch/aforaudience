@@ -7,6 +7,8 @@ import { EventTypeIcon, CalendarIcon, ClockIcon, PinIcon } from "@/components/ic
 import { EventSaveHeartButton } from "@/components/EventSaveButton"
 import SpinnerOverlay from "@/components/SpinnerOverlay"
 import { formatDate } from "@/lib/format-date"
+import { Icon } from "@/components/Icon"
+import { formatINR } from "@/lib/money-display"
 
 export interface EventItem {
   id: string
@@ -39,7 +41,7 @@ export function eventPriceLabel(
 ): string {
   if (event.isFree) return tr.eventsPage.freeBadge
   if (!event.ticketPrice) return "—"
-  return event.priceFromTiers ? tr.eventsPage.priceFrom.replace("{price}", String(event.ticketPrice)) : `₹${event.ticketPrice}`
+  return event.priceFromTiers ? tr.eventsPage.priceFrom.replace("{price}", event.ticketPrice.toLocaleString("en-IN")) : formatINR(event.ticketPrice)
 }
 
 export function initials(name: string): string {
@@ -113,17 +115,18 @@ export function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]
 }
 
 // Still used by the homepage bento tiles (src/app/page.tsx) for their
-// fallback-tile background color/emoji - untouched, out of scope for
+// fallback-tile background color (the unused emoji field went in
+// BUG-2610-025) - untouched, out of scope for
 // this redesign (a separate, already-shipped "Four rooms" homepage
 // project). The Events directory/detail pages below use the export's
 // own illustrated-fallback treatment (IllustratedEventFallback)
 // instead, not this map.
-export const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
-  OPEN_MIC: { emoji: "🎤", color: "var(--afa-green-black)", label: "Open Mic" },
-  STAND_UP: { emoji: "😂", color: "var(--afa-maroon-black)", label: "Stand Up" },
-  POETRY: { emoji: "📜", color: "var(--afa-indigo-black)", label: "Poetry" },
-  THEATER: { emoji: "🎩", color: "var(--afa-plum-black)", label: "Theater" },
-  LINEUP: { emoji: "🌟", color: "var(--afa-brown-black)", label: "Lineup" },
+export const TYPE_META: Record<string, { color: string; label: string }> = {
+  OPEN_MIC: { color: "var(--afa-green-black)", label: "Open Mic" },
+  STAND_UP: { color: "var(--afa-maroon-black)", label: "Stand Up" },
+  POETRY: { color: "var(--afa-indigo-black)", label: "Poetry" },
+  THEATER: { color: "var(--afa-plum-black)", label: "Theater" },
+  LINEUP: { color: "var(--afa-brown-black)", label: "Lineup" },
 }
 
 // Quiet mono type badge (export: bits.tsx TypeBadge) - icon + uppercase
@@ -198,7 +201,7 @@ export function CompetitionBadge({ onPoster = false, style }: { onPoster?: boole
         ...style,
       }}
     >
-      <span aria-hidden="true">🏆</span>
+      <Icon name="trophy" size={12} />
       <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{tr.eventsPage.competitionBadge}</span>
     </span>
   )

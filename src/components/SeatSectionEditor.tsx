@@ -4,6 +4,7 @@ import type { CSSProperties } from "react"
 import { normalizeWhitespace, normalizeForCompare } from "@/lib/text"
 import { IconSection } from "@/components/dashboard/VenuePortalUI"
 import Button from "@/components/ui/Button"
+import { formatINR } from "@/lib/money-display"
 
 export type SeatSection = {
   id: string
@@ -292,7 +293,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           <div style={{ width: "1px", background: "var(--afa-tint-12)" }} />
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
-              {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}
+              {prices.length ? (minPrice === maxPrice ? formatINR(minPrice) : `${formatINR(minPrice)}–${formatINR(maxPrice)}`) : "—"}
             </div>
             <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>per-seat range</div>
           </div>

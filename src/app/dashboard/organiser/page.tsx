@@ -17,6 +17,8 @@ import { useLocale } from '@/lib/i18n/translate'
 import { eventPriceLabel } from '@/components/EventCard'
 import { isPastEvent } from '@/lib/application-status'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface EventItem {
   id: string
@@ -108,7 +110,7 @@ export default function OrganiserDashboard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}>⏳</div>
+            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}><Icon name="clock" size={32} /></div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>
               {orgStatus.orgName ? `${orgStatus.orgName} is` : 'Your Organiser account is'} pending approval
             </h1>
@@ -136,7 +138,7 @@ export default function OrganiserDashboard() {
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>
               {!!orgStatus?.walletBalance && orgStatus.walletBalance > 0 && (
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
-                  💰 Wallet balance: ₹{orgStatus.walletBalance.toLocaleString('en-IN')} <span style={{ fontWeight: 400, opacity: 0.8 }}>(from cancelled Buy-in slots kept as credit)</span>
+                  <Icon name="wallet" size={14} style={INLINE_ICON_STYLE} /> Wallet balance: {formatINR(orgStatus.walletBalance)} <span style={{ fontWeight: 400, opacity: 0.8 }}>(from cancelled Buy-in slots kept as credit)</span>
                 </p>
               )}
               {!orgStatus?.payoutAccountLinked ? (
@@ -147,7 +149,7 @@ export default function OrganiserDashboard() {
                 ) : null
               ) : orgStatus.payoutAccountStatus !== 'activated' ? (
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>
-                  ⏳ Payout account linked, not yet activated — <Link href="/dashboard/organiser/payouts" style={{ color: 'inherit' }}>check status</Link>
+                  <Icon name="clock" size={14} style={INLINE_ICON_STYLE} /> Payout account linked, not yet activated — <Link href="/dashboard/organiser/payouts" style={{ color: 'inherit' }}>check status</Link>
                 </p>
               ) : (
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-sage-bright)', fontWeight: 600, marginTop: 'var(--afa-space-6px)' }}>

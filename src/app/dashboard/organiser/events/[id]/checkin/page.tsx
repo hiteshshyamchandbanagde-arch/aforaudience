@@ -8,6 +8,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 type ScanResult = {
   ok: boolean
@@ -226,7 +227,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           }}
         >
           <p style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, marginBottom: 'var(--afa-space-1)' }}>
-            {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
+            {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? <><Icon name="alert" size={14} style={INLINE_ICON_STYLE} /> Already checked in</> : '✗ Not valid'}
           </p>
           {lastResult.attendeeName && (
             <p style={{ fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-2px)' }}>{lastResult.attendeeName}</p>
@@ -258,7 +259,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             {!cameraOn ? (
               <Button variant="primary" size="lg" fullWidth={true} onClick={() => { setCameraError(''); setCameraOn(true) }}>
-                📷 Start Camera Scan
+                <Icon name="camera" size={18} style={INLINE_ICON_STYLE} /> Start Camera Scan
               </Button>
             ) : (
               <>
@@ -396,7 +397,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                     }}
                                   >
                                     <span style={{ color: 'var(--afa-text-primary)' }}>
-                                      👥 {c.name}
+                                      <Icon name="users" size={14} style={INLINE_ICON_STYLE} /> {c.name}
                                       {c.seatLabel && <span style={{ opacity: 0.6 }}> · {c.seatLabel}</span>}
                                     </span>
                                     {c.checkedInAt ? (
