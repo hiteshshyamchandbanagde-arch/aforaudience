@@ -9,6 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { useLocale } from '@/lib/i18n/translate'
 
 const inputStyle = {
   width: '100%',
@@ -25,6 +26,8 @@ export default function CreateTourPage() {
   const { status } = useSession()
   const router = useRouter()
   const { showToast } = useToast()
+  const { t: tr } = useLocale()
+  const o = tr.organiserDashboard.tours
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState('')
   const [saving, setSaving] = useState(false)
@@ -33,11 +36,11 @@ export default function CreateTourPage() {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
-  if (status === 'loading') return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading') return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
 
   const handleCreate = async () => {
     if (!title.trim()) {
-      showToast('Tour title is required', 'error')
+      showToast(o.titleRequired, 'error')
       return
     }
     setSaving(true)
@@ -48,8 +51,8 @@ export default function CreateTourPage() {
         body: JSON.stringify({ title, subject }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to create Tour')
-      showToast('Tour created', 'success')
+      if (!res.ok) throw new Error(data.error || o.createFailed)
+      showToast(o.created, 'success')
       router.push(`/dashboard/organiser/tours/${data.tour.id}`)
     } catch (err: any) {
       showToast(err.message, 'error')
@@ -63,33 +66,33 @@ export default function CreateTourPage() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) var(--afa-space-80px)' }}>
-        <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
+        <BackLink href="/dashboard/organiser/tours" label={o.backToTours} />
 
         <PageTitle style={{ marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-2)' }}>
-          Create a Tour
+          {o.createTitle}
         </PageTitle>
         <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-28px)' }}>
-          Start with the basics. You'll add stops, fixed lineup, and open local slots once the Tour exists.
+          {o.createSubtitle}
         </p>
 
         <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
           <div style={{ marginBottom: 'var(--afa-space-5)' }}>
-            <label style={labelStyle}>Tour title</label>
+            <label style={labelStyle}>{o.tourTitleLabel}</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Monsoon Comedy Circuit 2026"
+              placeholder={o.tourTitlePlaceholder}
               maxLength={120}
               style={inputStyle}
             />
           </div>
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-            <label style={labelStyle}>Subject (optional)</label>
+            <label style={labelStyle}>{o.subjectLabel}</label>
             <textarea
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="A short description of what this Tour is"
+              placeholder={o.subjectPlaceholder}
               maxLength={500}
               rows={4}
               style={{ ...inputStyle, resize: 'vertical' as const }}
@@ -104,7 +107,7 @@ export default function CreateTourPage() {
             disabled={saving}
             style={{ opacity: saving ? 0.6 : 1 }}
           >
-            {saving ? 'Creating...' : 'Create Tour'}
+            {saving ? o.creating : o.createTour}
           </Button>
         </div>
         </div>

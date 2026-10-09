@@ -10,7 +10,8 @@ import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 
@@ -53,14 +54,24 @@ interface TourDetail {
 interface VenueOption { id: string; name: string; city: string }
 interface ArtistOption { id: string; user: { name: string; displayName: string | null } }
 
-const CONSENT_LABEL: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'Awaiting response', color: 'var(--afa-amber)' },
-  ACCEPTED: { label: 'Accepted', color: 'var(--afa-sage-bright)' },
-  DECLINED: { label: 'Declined', color: 'var(--afa-error-bright)' },
+// GEN-2610-007 - labels in the UI language; the stored status stays English.
+type ToursText = Dictionary['organiserDashboard']['tours']
+const CONSENT_LABEL: Record<string, { label: keyof ToursText; color: string }> = {
+  PENDING: { label: 'consentPending', color: 'var(--afa-amber)' },
+  ACCEPTED: { label: 'consentAccepted', color: 'var(--afa-sage-bright)' },
+  DECLINED: { label: 'consentDeclined', color: 'var(--afa-error-bright)' },
 }
+const STOP_STATUS: Record<string, keyof Dictionary['organiserDashboard']['yourEvents']> = {
+  DRAFT: 'statusDraft',
+  PENDING_APPROVAL: 'statusPending',
+  CANCELLED: 'statusCancelled',
+  COMPLETED: 'statusCompleted',
+}
+const STOP_TYPES = ['STAND_UP', 'OPEN_MIC', 'POETRY', 'THEATER', 'LINEUP'] as const
 
 export default function TourDetailPage() {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
+  const o = tr.organiserDashboard.tours
   const { status } = useSession()
   const router = useRouter()
   const params = useParams()
@@ -102,10 +113,10 @@ export default function TourDetailPage() {
       // right after a mutation (add/remove artist, publish, cancel) -
       // this refetch must never be served from any HTTP cache layer.
       const res = await fetch('/api/tours/mine', { cache: 'no-store' })
-      if (!res.ok) throw new Error('Failed to load Tour')
+      if (!res.ok) throw new Error(o.loadFailed)
       const data = await res.json()
       const found = (data.tours || []).find((t: TourDetail) => t.id === tourId)
-      if (!found) throw new Error('Tour not found')
+      if (!found) throw new Error(o.notFound)
       setTour(found)
     } catch (err: any) {
       showToast(err.message, 'error')
@@ -122,12 +133,12 @@ export default function TourDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, tourId])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!tour) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', textAlign: 'center', color: 'var(--afa-text-primary)' }}>Tour not found.</main></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
+  if (!tour) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', textAlign: 'center', color: 'var(--afa-text-primary)' }}>{o.notFoundPage}</main></>)
 
   const handleAddStop = async () => {
     if (!stopTitle.trim() || !stopDate || !stopVenueId) {
-      showToast('Title, date, and venue are required', 'error')
+      showToast(o.stopRequired, 'error')
       return
     }
     setSavingStop(true)
@@ -154,8 +165,8 @@ export default function TourDetailPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to add stop')
-      showToast('Stop added as draft - add lineup, then publish', 'success')
+      if (!res.ok) throw new Error(data.error || o.addStopFailed)
+      showToast(o.stopAdded, 'success')
       setShowAddStop(false)
       setStopTitle(''); setStopDescription(''); setStopDate(''); setStopVenueId(''); setStopOpenSlots(''); setStopDeadline('')
       await loadTour()
@@ -175,8 +186,8 @@ export default function TourDetailPage() {
         body: JSON.stringify({ artistId }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to add artist')
-      showToast(data.consentStatus === 'ACCEPTED' ? 'Artist added to lineup' : 'Artist added - invite sent, awaiting their confirmation', 'success')
+      if (!res.ok) throw new Error(data.error || o.addArtistFailed)
+      showToast(data.consentStatus === 'ACCEPTED' ? o.artistAdded : o.artistInvited, 'success')
       await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
@@ -189,8 +200,8 @@ export default function TourDetailPage() {
     try {
       const res = await fetch(`/api/events/${stopId}/tour-lineup?artistId=${artistId}`, { method: 'DELETE' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to remove artist')
-      showToast('Artist removed from lineup', 'success')
+      if (!res.ok) throw new Error(data.error || o.removeArtistFailed)
+      showToast(o.artistRemoved, 'success')
       await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
@@ -205,8 +216,8 @@ export default function TourDetailPage() {
         body: JSON.stringify({ publish: true }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to publish stop')
-      showToast('Stop published', 'success')
+      if (!res.ok) throw new Error(data.error || o.publishFailed)
+      showToast(o.stopPublished, 'success')
       await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
@@ -214,15 +225,15 @@ export default function TourDetailPage() {
   }
 
   const handleCancelTour = async () => {
-    if (!(await confirm({ title: 'Cancel this entire Tour?', body: 'This cannot be undone.', confirmLabel: 'Cancel Tour', cancelLabel: 'Keep Tour', destructive: true }))) return
+    if (!(await confirm({ title: o.cancelConfirmTitle, body: o.cancelConfirmBody, confirmLabel: o.cancelTour, cancelLabel: o.keepTour, destructive: true }))) return
     try {
       const res = await fetch(`/api/tours/${tour.slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cancel: true }),
       })
-      if (!res.ok) throw new Error('Failed to cancel Tour')
-      showToast('Tour cancelled', 'success')
+      if (!res.ok) throw new Error(o.cancelFailed)
+      showToast(o.tourCancelled, 'success')
       await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
@@ -234,23 +245,23 @@ export default function TourDetailPage() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) 100px' }}>{/* token-ok(spacing-literal): 100px used under 10 times, no exact token (GEN-2609-107) */}
-        <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
+        <BackLink href="/dashboard/organiser/tours" label={o.backToTours} />
 
         <div style={{ marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-28px)' }}>
           <PageTitle>{tour.title}</PageTitle>
           {tour.subject && <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-6px)' }}>{tour.subject}</p>}
           {tour.status === 'LIVE' && (
             <a href={`/tours/${tour.slug}`} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-fill-solid)', display: 'inline-block', marginTop: 'var(--afa-space-2)' }}>
-              View public page →
+              {o.viewPublicPage}
             </a>
           )}
         </div>
 
         {/* Artist consent status */}
         <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-6)' }}>
-          <h2 style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>Artist consent</h2>
+          <h2 style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>{o.consentTitle}</h2>
           {tour.consents.length === 0 ? (
-            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No artists invited yet - add a stop and place artists in the lineup below.</p>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{o.noConsents}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
               {tour.consents.map((c) => {
@@ -258,7 +269,7 @@ export default function TourDetailPage() {
                 return (
                   <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)' }}>
                     <span>{c.artist.user.displayName || c.artist.user.name}</span>
-                    <span style={{ color: style.color, fontWeight: 600 }}>{style.label}</span>
+                    <span style={{ color: style.color, fontWeight: 600 }}>{o[style.label]}</span>
                   </div>
                 )
               })}
@@ -268,9 +279,9 @@ export default function TourDetailPage() {
 
         {/* Stops */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-14px)' }}>
-          <h2 style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Stops</h2>
+          <h2 style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{o.stops}</h2>
           <Button variant="primary" size="md" fullWidth={false} onClick={() => setShowAddStop((v) => !v)}>
-            {showAddStop ? 'Cancel' : '+ Add Stop'}
+            {showAddStop ? o.cancel : o.addStop}
           </Button>
         </div>
 
@@ -278,42 +289,40 @@ export default function TourDetailPage() {
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-14px)' }}>
               <div>
-                <label style={labelStyle}>Stop title</label>
-                <input type="text" value={stopTitle} onChange={(e) => setStopTitle(e.target.value)} placeholder="e.g. Mumbai Night" style={inputStyle} />
+                <label style={labelStyle}>{o.stopTitle}</label>
+                <input type="text" value={stopTitle} onChange={(e) => setStopTitle(e.target.value)} placeholder={o.stopTitlePlaceholder} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>Type</label>
+                <label style={labelStyle}>{o.type}</label>
                 <select value={stopType} onChange={(e) => setStopType(e.target.value)} style={inputStyle}>
-                  <option value="STAND_UP">Stand-up</option>
-                  <option value="OPEN_MIC">Open Mic</option>
-                  <option value="POETRY">Poetry</option>
-                  <option value="THEATER">Theater</option>
-                  <option value="LINEUP">Lineup</option>
+                  {STOP_TYPES.map((t) => (
+                    <option key={t} value={t}>{tr.eventTypes[t]}</option>
+                  ))}
                 </select>
               </div>
             </div>
             <div style={{ marginBottom: 'var(--afa-space-14px)' }}>
-              <label style={labelStyle}>Description</label>
+              <label style={labelStyle}>{o.description}</label>
               <textarea value={stopDescription} onChange={(e) => setStopDescription(e.target.value)} rows={2} style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-14px)' }}>
               <div>
-                <label style={labelStyle}>Date</label>
+                <label style={labelStyle}>{o.date}</label>
                 <input type="date" value={stopDate} onChange={(e) => setStopDate(e.target.value)} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>Start time</label>
+                <label style={labelStyle}>{o.startTime}</label>
                 <input type="time" value={stopStartTime} onChange={(e) => setStopStartTime(e.target.value)} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>End time</label>
+                <label style={labelStyle}>{o.endTime}</label>
                 <input type="time" value={stopEndTime} onChange={(e) => setStopEndTime(e.target.value)} style={inputStyle} />
               </div>
             </div>
             <div style={{ marginBottom: 'var(--afa-space-14px)' }}>
-              <label style={labelStyle}>Venue</label>
+              <label style={labelStyle}>{o.venue}</label>
               <select value={stopVenueId} onChange={(e) => setStopVenueId(e.target.value)} style={inputStyle}>
-                <option value="">Select a venue</option>
+                <option value="">{o.selectVenue}</option>
                 {venues.map((v) => (
                   <option key={v.id} value={v.id}>{v.name}, {v.city}</option>
                 ))}
@@ -321,35 +330,35 @@ export default function TourDetailPage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-14px)' }}>
               <div>
-                <label style={labelStyle}>Total seats</label>
+                <label style={labelStyle}>{o.totalSeats}</label>
                 <input type="number" value={stopSeats} onChange={(e) => setStopSeats(e.target.value)} style={inputStyle} />
               </div>
               <div>
                 <label style={labelStyle}>
                   <input type="checkbox" checked={stopIsFree} onChange={(e) => setStopIsFree(e.target.checked)} style={{ marginRight: 'var(--afa-space-6px)' }} />
-                  Free event
+                  {o.freeEvent}
                 </label>
               </div>
               {!stopIsFree && (
                 <div>
-                  <label style={labelStyle}>Ticket price (₹)</label>
+                  <label style={labelStyle}>{o.ticketPrice}</label>
                   <input type="number" value={stopPrice} onChange={(e) => setStopPrice(e.target.value)} style={inputStyle} />
                 </div>
               )}
             </div>
             <div style={{ borderTop: '1px solid var(--afa-tint-08)', paddingTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-14px)' }}>
-              <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>Open local/beginner slots (optional)</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>{o.openSlotsTitle}</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-14px)' }}>
                 <div>
-                  <label style={labelStyle}>Number of open slots</label>
+                  <label style={labelStyle}>{o.openSlotsCount}</label>
                   <input type="number" min="0" value={stopOpenSlots} onChange={(e) => setStopOpenSlots(e.target.value)} placeholder="0" style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Slot duration (min)</label>
+                  <label style={labelStyle}>{o.slotDuration}</label>
                   <input type="number" value={stopSlotDuration} onChange={(e) => setStopSlotDuration(e.target.value)} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Application deadline</label>
+                  <label style={labelStyle}>{o.applicationDeadline}</label>
                   <input type="date" value={stopDeadline} onChange={(e) => setStopDeadline(e.target.value)} style={inputStyle} />
                 </div>
               </div>
@@ -363,13 +372,13 @@ export default function TourDetailPage() {
               disabled={savingStop}
               style={{ opacity: savingStop ? 0.6 : 1 }}
             >
-              {savingStop ? 'Saving...' : 'Save Stop as Draft'}
+              {savingStop ? o.saving : o.saveStopDraft}
             </Button>
           </div>
         )}
 
         {tour.stops.length === 0 ? (
-          <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No stops yet.</p>
+          <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{o.noStops}</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-4)' }}>
             {tour.stops.map((stop) => {
@@ -385,18 +394,18 @@ export default function TourDetailPage() {
                     <div>
                       <h3 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        {formatDate(stop.date, 'medium', locale)} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : 'No venue'}
+                        {formatDate(stop.date, 'medium', locale)} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : o.noVenue}
                       </p>
                     </div>
                     <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).bg, color: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).color }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
-                      {stop.status === 'APPROVED' ? 'Live' : stop.status.replace('_', ' ')}
+                      {stop.status === 'APPROVED' ? o.statusLive : STOP_STATUS[stop.status] ? tr.organiserDashboard.yourEvents[STOP_STATUS[stop.status]] : stop.status.replace('_', ' ')}
                     </span>
                   </div>
 
                   <div style={{ marginBottom: 'var(--afa-space-10px)' }}>
-                    <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-6px)' }}>Fixed lineup</p>
+                    <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-6px)' }}>{o.fixedLineup}</p>
                     {stop.lineup.length === 0 ? (
-                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No artists yet.</p>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{o.noArtists}</p>
                     ) : (
                       stop.lineup.map((l) => (
                         <div key={l.artistId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-1) 0' }}>
@@ -407,7 +416,7 @@ export default function TourDetailPage() {
                             fullWidth={false}
                             onClick={() => handleRemoveArtist(stop.id, l.artistId)}
                           >
-                            Remove
+                            {o.remove}
                           </Button>
                         </div>
                       ))
@@ -417,7 +426,7 @@ export default function TourDetailPage() {
                   <div style={{ marginBottom: 'var(--afa-space-14px)' }}>
                     <input
                       type="text"
-                      placeholder="Search artist to add..."
+                      placeholder={o.searchArtist}
                       value={artistSearch[stop.id] || ''}
                       onChange={(e) => setArtistSearch((prev) => ({ ...prev, [stop.id]: e.target.value }))}
                       style={{ ...inputStyle, marginBottom: 'var(--afa-space-6px)' }}
@@ -432,7 +441,7 @@ export default function TourDetailPage() {
                           onClick={() => handleAddArtist(stop.id, a.id)}
                           disabled={addingArtist === stop.id}
                         >
-                          Add
+                          {o.add}
                         </Button>
                       </div>
                     ))}
@@ -440,8 +449,8 @@ export default function TourDetailPage() {
 
                   {stop.openSlotCount ? (
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
-                      {stop.openSlotCount} open slot{stop.openSlotCount > 1 ? 's' : ''} · {stop.slotDuration}min each
-                      {stop.applicationDeadline && ` · applications close ${formatDate(stop.applicationDeadline, 'medium', locale)}`}
+                      {countText(locale, stop.openSlotCount, o.openSlotsOne, o.openSlotsOther).replace('{min}', String(stop.slotDuration))}
+                      {stop.applicationDeadline && o.applicationsClose.replace('{date}', formatDate(stop.applicationDeadline, 'medium', locale))}
                     </p>
                   ) : null}
 
@@ -452,7 +461,7 @@ export default function TourDetailPage() {
                       fullWidth={false}
                       onClick={() => handlePublishStop(stop.id)}
                     >
-                      Publish Stop
+                      {o.publishStop}
                     </Button>
                   )}
                 </div>
@@ -469,7 +478,7 @@ export default function TourDetailPage() {
               fullWidth={false}
               onClick={handleCancelTour}
             >
-              Cancel Tour
+              {o.cancelTour}
             </Button>
           </div>
         )}

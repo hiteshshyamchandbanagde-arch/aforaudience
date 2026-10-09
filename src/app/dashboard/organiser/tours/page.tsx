@@ -11,6 +11,8 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 
 interface TourItem {
   id: string
@@ -22,12 +24,20 @@ interface TourItem {
   stops: { id: string; status: string; date: string }[]
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'Draft' },
-  PENDING_CONSENT: { ...STATUS_TONE.gold, label: 'Awaiting artist consent' },
-  LIVE: { ...STATUS_TONE.sage, label: 'Live' },
-  CANCELLED: { ...STATUS_TONE.error, label: 'Cancelled' },
-  COMPLETED: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'Completed' },
+// GEN-2610-007 - the badge's label in the UI language; the stored status stays English.
+type ToursText = Dictionary['organiserDashboard']['tours']
+const STATUS_STYLE: Record<string, { bg: string; color: string; label: keyof ToursText }> = {
+  DRAFT: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'statusDraft' },
+  PENDING_CONSENT: { ...STATUS_TONE.gold, label: 'statusPendingConsent' },
+  LIVE: { ...STATUS_TONE.sage, label: 'statusLive' },
+  CANCELLED: { ...STATUS_TONE.error, label: 'statusCancelled' },
+  COMPLETED: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'statusCompleted' },
+}
+
+/** A count text with its number in bold: "<strong>4</strong> stops". */
+function boldCount(locale: string, n: number, one: string, other: string = one) {
+  const [before, after = ''] = countText(locale, n, one.replace('{n}', '{b}'), other.replace('{n}', '{b}')).split('{b}')
+  return <>{before}<strong>{n}</strong>{after}</>
 }
 
 // Tour by Organiser (12 Aug) - management list. Distinct from the public
@@ -37,6 +47,8 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
 export default function OrganiserToursPage() {
   const { status } = useSession()
   const router = useRouter()
+  const { locale, t: tr } = useLocale()
+  const o = tr.organiserDashboard.tours
   const [tours, setTours] = useState<TourItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -49,7 +61,7 @@ export default function OrganiserToursPage() {
     const load = async () => {
       try {
         const res = await fetch('/api/tours/mine')
-        if (!res.ok) throw new Error('Failed to load your Tours')
+        if (!res.ok) throw new Error(o.listLoadFailed)
         const data = await res.json()
         setTours(data.tours || [])
       } catch (err: any) {
@@ -59,9 +71,9 @@ export default function OrganiserToursPage() {
       }
     }
     if (status === 'authenticated') load()
-  }, [status])
+  }, [status, o])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
 
   return (
     <>
@@ -71,13 +83,13 @@ export default function OrganiserToursPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-6) var(--afa-space-80px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-28px)', flexWrap: 'wrap', gap: 'var(--afa-space-3)' }}>
           <div>
-            <PageTitle>Tours</PageTitle>
+            <PageTitle>{o.title}</PageTitle>
             <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-1)' }}>
-              A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
+              {o.subtitle}
             </p>
           </div>
           <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/tours/create" style={{ whiteSpace: 'nowrap' }}>
-            + Create Tour
+            {o.createTourPlus}
           </Button>
         </div>
 
@@ -87,12 +99,12 @@ export default function OrganiserToursPage() {
 
         {tours.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
-            <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>No Tours yet</p>
+            <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>{o.noToursTitle}</p>
             <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
-              Create a Tour to group a series of stops under one shared page for your audience.
+              {o.noToursBody}
             </p>
             <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/tours/create">
-              Create Tour
+              {o.createTour}
             </Button>
           </div>
         ) : (
@@ -114,14 +126,14 @@ export default function OrganiserToursPage() {
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>{tour.subject}</p>
                       )}
                     </div>
-                    <Badge tone={statusStyle}>{statusStyle.label}</Badge>
+                    <Badge tone={statusStyle}>{o[statusStyle.label]}</Badge>
                   </div>
 
                   <div style={{ display: 'flex', gap: 'var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
-                    <span><strong>{tour.stops.length}</strong> stop{tour.stops.length !== 1 ? 's' : ''}</span>
-                    <span><strong>{liveStops}</strong> live</span>
+                    <span>{boldCount(locale, tour.stops.length, o.stopsOne, o.stopsOther)}</span>
+                    <span>{boldCount(locale, liveStops, o.liveCount)}</span>
                     {pendingConsents > 0 && (
-                      <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{pendingConsents} awaiting response</span>
+                      <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{o.awaitingResponseCount.replace('{n}', String(pendingConsents))}</span>
                     )}
                   </div>
                 </div>
