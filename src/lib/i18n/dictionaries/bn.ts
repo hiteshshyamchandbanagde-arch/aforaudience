@@ -1244,6 +1244,7 @@ const bn: Dictionary = {
     },
     eventDetail: {
       noAccess: "এই ইভেন্টে আপনার অ্যাক্সেস নেই",
+      nextDay: "পরের দিন",
       notFound: "ইভেন্ট পাওয়া যায়নি",
       backToEvents: "ইভেন্টে ফিরে যান",
       sharePosterTitle: "পোস্টার শেয়ার করুন",
@@ -1392,6 +1393,7 @@ const bn: Dictionary = {
       paidEntry: "টিকিটে প্রবেশ",
       sectionsFromSeatMap: "সেকশন ও আসনের সংখ্যা {venue}-এর সিট ম্যাপ থেকে আসে — এই ইভেন্টের জন্য আপনি শুধু প্রতিটি সেকশনের দাম ঠিক করেন।",
       mainLevel: "প্রধান",
+      layoutPreview: "লেআউটের প্রিভিউ",
       pricePlaceholder: "₹ দাম",
       free: "বিনামূল্যে",
       totalCapacity: "মোট ধারণক্ষমতা: {sections} জুড়ে {seats}",
