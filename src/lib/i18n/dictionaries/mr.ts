@@ -1756,6 +1756,34 @@ const mr: Dictionary = {
       waiting: "दुसऱ्या बाजूच्या उत्तराची प्रतीक्षा आहे.",
     },
   },
+
+  venueDashboard: {
+    myVenues: {
+      notOwnerTitle: "तुम्ही स्थळ मालक म्हणून नोंदणीकृत नाही",
+      notOwnerBody: "बुकिंग सांभाळायला सुरुवात करण्यासाठी तुमच्या प्रोफाइलवरून तुमचे स्थळ लिस्ट करण्यासाठी अर्ज करा.",
+      backToHome: "होमवर परत जा",
+      pendingTitle: "तुमच्या स्थळ मालक खात्याची मंजुरी बाकी आहे",
+      pendingBody: "स्थळ लिस्ट करण्यापूर्वी आणि बुकिंग स्वीकारण्यापूर्वी आमची टीम नवीन स्थळ मालक अर्ज तपासते. मंजुरी मिळताच आम्ही तुम्हाला कळवू.",
+      eyebrow: "पोर्टफोलिओ",
+      title: "तुमची स्थळे",
+      loadFailed: "तुमची स्थळे लोड होऊ शकली नाहीत",
+      emptyCaption: "अजून कोणतेही स्थळ नाही — तुमची पहिली जागा नोंदवा",
+      statusPublished: "प्रकाशित",
+      statusDraft: "ड्राफ्ट",
+      capacity: "क्षमता",
+      perSeat: "प्रति सीट",
+      rateType: "दराचा प्रकार",
+      rateHourly: "तासाला",
+      rateDaily: "दिवसाला",
+      rateFlexible: "लवचिक",
+      hourlyRate: "तासाला · {amount}/तास",
+      dailyRate: "दिवसाला · {amount}/दिवस",
+      flexibleRate: "लवचिक दर",
+      view: "पहा",
+      edit: "बदला",
+      seatMap: "सीट मॅप",
+    },
+  },
 }
 
 export default mr
