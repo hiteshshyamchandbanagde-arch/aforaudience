@@ -185,7 +185,9 @@ test.describe("Hrithik (Artist)", () => {
 
       if (locale === "hi") {
         await hideFloatingOverlays(page);
-        await expect(chrome).toHaveScreenshot(`artist-${isMobile ? "role-bar" : "sidebar"}-hi-${isMobile ? 390 : 1440}.png`, {
+        // At 1440 the sidebar's Artist section only: the whole sidebar is as tall as the page.
+        const shot = isMobile ? chrome : chrome.locator('[data-afa-role-section="artist"]');
+        await expect(shot).toHaveScreenshot(`artist-${isMobile ? "role-bar" : "sidebar"}-hi-${isMobile ? 390 : 1440}.png`, {
           animations: "disabled",
         });
       }

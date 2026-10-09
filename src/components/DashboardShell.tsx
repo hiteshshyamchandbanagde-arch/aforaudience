@@ -363,7 +363,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
 
 function RoleSectionBlock({ section, roleLabel, chrome, isActive, badgeFor, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; chrome: Dictionary['dashboardChrome']; isActive: (id: string) => boolean; badgeFor: (key?: BadgeKey) => number | undefined; dense?: boolean; onNavigate?: () => void }) {
   return (
-    <div className={dense ? undefined : 'pt-3 mt-1'} style={dense ? undefined : { borderTop: SIDEBAR_BORDER }}>
+    <div data-afa-role-section={section.role.toLowerCase()} className={dense ? undefined : 'pt-3 mt-1'} style={dense ? undefined : { borderTop: SIDEBAR_BORDER }}>
       {/* BUG-2609-011: no icon on this row (every real nav row below has
           one) is what marks it as a category label rather than a link -
           it used to carry section.icon, which for Venue Owner duplicated
