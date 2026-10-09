@@ -14,6 +14,7 @@ import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale } from '@/lib/i18n/translate'
 import { eventPriceLabel } from '@/components/EventCard'
+import { isPastEvent } from '@/lib/application-status'
 
 interface EventItem {
   id: string
@@ -148,7 +149,9 @@ export default function BrowseEventsToApplyPage() {
         if (!eventsRes.ok) throw new Error('Failed to fetch events')
         const eventsData = await eventsRes.json()
         if (isStale()) return
-        setEvents(eventsData)
+        // BUG-2610-023 - Browse is for applying: upcoming events only. Past
+        // lineups belong to the dashboard's history.
+        setEvents(eventsData.filter((e: EventItem) => !isPastEvent(e)))
         setLoading(false)
       } catch (err: any) {
         if (isStale() || err?.name === 'AbortError') return
@@ -270,7 +273,7 @@ export default function BrowseEventsToApplyPage() {
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
+                  <div key={event.id} data-afa-browse-event={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)', gap: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
@@ -338,11 +341,14 @@ export default function BrowseEventsToApplyPage() {
                           fullWidth={false}
                           onClick={() => apply(event.id)}
                           disabled={applying === event.id}
+                          // BUG-2610-023 - colour, fill and border are set only for
+                          // the outlined Join Waitlist. An explicit `background:
+                          // undefined` key used to override the primary variant's
+                          // fill (Button spreads `style` last), leaving Apply to
+                          // Perform as dark text on no fill.
                           style={{
                             fontSize: 'var(--afa-text-ui)',
-                            color: full ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
-                            background: full ? 'transparent' : undefined,
-                            border: full ? '1.5px solid var(--afa-tint-20)' : 'none',
+                            ...(full ? { color: 'var(--afa-text-primary)', background: 'transparent', border: '1.5px solid var(--afa-tint-20)' } : {}),
                             padding: 'var(--afa-space-2) var(--afa-space-5)',
                             opacity: applying === event.id ? 0.6 : 1,
                           }}

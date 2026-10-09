@@ -36,7 +36,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
   }
 
   const artistName = performance.artist.user.displayName || performance.artist.user.name
-  const url = publicEventUrl(performance.event.id)
+  const url = publicEventUrl(performance.event.id, req)
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 240, color: { dark: POSTER_QR.dark, light: POSTER_QR.light } })
   const dateStr = formatDate(performance.event.date, 'long')
 
@@ -61,12 +61,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
           position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', position: 'absolute', right: '-60px', bottom: '160px', flexDirection: 'column', opacity: 0.06 }}>
-          <div style={{ display: 'flex', width: '460px', height: '90px', background: POSTER_LOGO.barTop, marginBottom: '24px', borderRadius: '8px' }} />
-          <div style={{ display: 'flex', width: '340px', height: '90px', background: POSTER_LOGO.barMiddle, marginBottom: '24px', borderRadius: '8px' }} />
-          <div style={{ display: 'flex', width: '230px', height: '90px', background: POSTER_LOGO.barBottom, borderRadius: '8px' }} />
-        </div>
-
+        {/* BUG-2610-023 - the oversized three-bar watermark that sat here
+            rendered as three stray solid rectangles (dark red, brown,
+            grey) over the bottom right of the artist poster: removed. */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '56px' }}>
           <div style={{ display: 'flex', width: '48px', height: '48px', borderRadius: '12px', background: POSTER_LOGO.tile, marginRight: '16px', flexDirection: 'column', padding: '8px' }}>
             <div style={{ display: 'flex', width: '32px', height: '8px', background: POSTER_LOGO.barTop, marginBottom: '4px' }} />

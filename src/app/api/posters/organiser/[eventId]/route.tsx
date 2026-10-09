@@ -82,7 +82,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
     sceneStatus: sceneStatusByArtistId.get(p.artist.id) || 'NEW_EMERGING',
   }))
 
-  const url = publicEventUrl(event.id)
+  const url = publicEventUrl(event.id, req)
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 260, color: { dark: POSTER_QR.dark, light: POSTER_QR.light } })
   const dateStr = formatDate(event.date, 'long')
 

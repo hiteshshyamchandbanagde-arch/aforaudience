@@ -533,10 +533,10 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                   ? 'Waiting on the venue owner to confirm the booking - click to check again'
                   : undefined
               }
+              // BUG-2610-023 sweep - same `background: undefined` override as
+              // the artist Apply button: only Unpublish sets its own outline.
               style={{
-                color: event.status === 'APPROVED' ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
-                background: event.status === 'APPROVED' ? 'transparent' : undefined,
-                border: event.status === 'APPROVED' ? '1px solid var(--afa-tint-20)' : 'none',
+                ...(event.status === 'APPROVED' ? { color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)' } : {}),
                 opacity: toggling ? 0.6 : 1,
               }}
             >
