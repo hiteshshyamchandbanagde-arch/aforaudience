@@ -1244,6 +1244,7 @@ const ml: Dictionary = {
     },
     eventDetail: {
       noAccess: "ഈ ഇവന്റിലേക്ക് നിങ്ങൾക്ക് പ്രവേശനമില്ല",
+      nextDay: "അടുത്ത ദിവസം",
       notFound: "ഇവന്റ് കണ്ടെത്തിയില്ല",
       backToEvents: "ഇവന്റുകളിലേക്ക് മടങ്ങുക",
       sharePosterTitle: "പോസ്റ്റർ പങ്കിടുക",
@@ -1392,6 +1393,7 @@ const ml: Dictionary = {
       paidEntry: "പണമടച്ചുള്ള പ്രവേശനം",
       sectionsFromSeatMap: "വിഭാഗങ്ങളും സീറ്റുകളുടെ എണ്ണവും {venue}-ന്റെ സീറ്റ് മാപ്പിൽ നിന്നാണ് — ഈ ഇവന്റിന് ഓരോ വിഭാഗത്തിന്റെയും വില മാത്രം നിങ്ങൾ നിശ്ചയിക്കുന്നു.",
       mainLevel: "പ്രധാനം",
+      layoutPreview: "ലേഔട്ട് പ്രിവ്യൂ",
       pricePlaceholder: "₹ വില",
       free: "സൗജന്യം",
       totalCapacity: "ആകെ ശേഷി: {sections}-ലായി {seats}",
