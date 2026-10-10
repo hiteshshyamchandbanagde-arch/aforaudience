@@ -2045,6 +2045,20 @@ const ml: Dictionary = {
       bioPlaceholder: "നിങ്ങളുടെ വേദികളെക്കുറിച്ച് ആളുകളോട് പറയൂ",
       saveProfile: "പ്രൊഫൈൽ സേവ് ചെയ്യുക",
     },
+    venueSales: {
+      loadFailed: "വരുമാന ഡാറ്റ ലോഡ് ചെയ്യാനായില്ല",
+      allVenues: "എല്ലാ വേദികളും →",
+      title: "{venue} — വരുമാനം",
+      grossRevenue: "ആകെ വരുമാനം",
+      grossSub: "{byEventDate}, പ്ലാറ്റ്‌ഫോമിന് വിഹിതമില്ല",
+      upcomingCompleted: "വരാനിരിക്കുന്നവ / പൂർത്തിയായവ (ഇതുവരെ)",
+      pending: "തീർപ്പാകാത്തവ (സ്ഥിരീകരണത്തിനായി കാത്തിരിക്കുന്നു)",
+      atStake: "{amount} അപകടത്തിൽ",
+      noneRightNow: "ഇപ്പോൾ ഒന്നുമില്ല",
+      noConfirmedInRange: "ഈ കാലയളവിൽ സ്ഥിരീകരിച്ച ബുക്കിംഗുകളില്ല.",
+      recentBookings: "സമീപകാല ബുക്കിംഗുകൾ",
+      noLinkedEvent: "ബന്ധിപ്പിച്ച ഇവന്റില്ല",
+    },
   },
 }
 
