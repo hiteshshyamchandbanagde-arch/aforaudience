@@ -21,6 +21,8 @@ import { formatDate } from '@/lib/format-date'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { computeRefund, eventStartInstant as refundStartInstant, type RefundPreview } from '@/lib/refund-policy'
 import { splitUnfinishedCheckouts } from '@/lib/unfinished-checkout'
+import { readOfflineTickets, saveOfflineTickets, type OfflineTicket, type OfflineTicketsSnapshot } from '@/lib/offline-tickets'
+import { lastSignedInUserId } from '@/lib/sw-cache'
 
 // BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
 // Organiser / Cancel ticket): full-width buttons stacked under the QR,
@@ -284,6 +286,41 @@ function PerfDivider() {
   )
 }
 
+// BUG-2610-001 - a saved offline ticket back in the card's shape: always
+// CONFIRMED (only those are saved), no amounts, no poster (a remote image).
+function offlineToBooking(t: OfflineTicket): BookingItem {
+  return {
+    id: t.id,
+    seats: { [t.tierNames.join(', ') || '-']: t.qty },
+    tierNames: t.tierNames,
+    totalAmount: 0,
+    bookingFeeAmount: 0,
+    status: 'CONFIRMED',
+    expiresAt: null,
+    createdAt: '',
+    cancelledAt: null,
+    refundAmount: null,
+    checkedInAt: t.checkedInAt,
+    ticketCode: t.ticketCode,
+    companionTags: [],
+    event: { ...t.event, posterImage: null },
+  }
+}
+
+// BUG-2610-001 - "no network" as opposed to "signed out". Offline, the
+// next-auth session fetch fails and useSession reports unauthenticated,
+// exactly like a real sign-out; a failed request (TypeError, no response
+// at all) is what tells them apart. /api is never served from the SW cache.
+async function isNetworkDown(): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
+  try {
+    await fetch('/api/auth/session', { cache: 'no-store' })
+    return false
+  } catch {
+    return true
+  }
+}
+
 export default function MyTicketsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -297,6 +334,14 @@ export default function MyTicketsPage() {
   const [pendingTags, setPendingTags] = useState<PendingCompanionTag[]>([])
   const [acceptedTags, setAcceptedTags] = useState<AcceptedCompanionTag[]>([])
   const [respondingTag, setRespondingTag] = useState<string | null>(null)
+  // BUG-2610-001 - set when the network is down: the saved snapshot for
+  // the last signed-in user on this device, or null if there is none.
+  const [offline, setOffline] = useState<{ snapshot: OfflineTicketsSnapshot | null } | null>(null)
+  const userId = (session?.user as { id?: string } | undefined)?.id ?? null
+  const showOffline = (forUserId: string | null) => {
+    setOffline({ snapshot: readOfflineTickets(forUserId) })
+    setLoading(false)
+  }
   // Mobile Redesign Phase 4a (GEN-2609-006) - click-guarded card
   // navigation, same pattern as EventCard/events/page.tsx's
   // navigatingId + useTransition (see that file's comment: without the
@@ -312,15 +357,36 @@ export default function MyTicketsPage() {
     })
   }
 
+  // BUG-2610-001 - signed out while online still goes to /login; with no
+  // network it shows the saved tickets instead.
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/login')
+    if (status !== 'unauthenticated') return
+    let cancelled = false
+    isNetworkDown().then((down) => {
+      if (cancelled) return
+      if (down) showOffline(lastSignedInUserId())
+      else router.push('/login')
+    })
+    return () => {
+      cancelled = true
+    }
   }, [status, router])
 
   const load = async () => {
     try {
-      const res = await fetch('/api/bookings/my')
+      let res: Response
+      try {
+        res = await fetch('/api/bookings/my')
+      } catch {
+        // BUG-2610-001 - no network (not a 401): the saved tickets.
+        showOffline(userId)
+        return
+      }
       if (!res.ok) throw new Error(tr.ticketsPage.failedToLoadFallback)
-      setBookings(await res.json())
+      const data = await res.json()
+      setBookings(data)
+      setOffline(null)
+      if (userId) saveOfflineTickets(userId, data)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -425,6 +491,7 @@ export default function MyTicketsPage() {
     }
   }
 
+  if (offline) return renderOffline(offline.snapshot)
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
@@ -594,9 +661,60 @@ export default function MyTicketsPage() {
     </>
   )
 
+  // BUG-2610-001 - My Tickets with no network: a banner, then the saved
+  // tickets (QR drawn on the device by TicketQr, no request) or, with no
+  // snapshot, how to get one. Never a redirect to /login.
+  function renderOffline(snapshot: OfflineTicketsSnapshot | null) {
+    const savedAt = snapshot ? formatDate(snapshot.savedAt, 'dateTime', locale) : ''
+    return (
+      <>
+        <SiteNav />
+        <DashboardShell>
+        <main data-afa-offline-tickets style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+          <style>{`
+            .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-4); }
+            @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }
+          `}</style>
+          <div style={{ maxWidth: '800px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
+              {tr.ticketsPage.pageTitle}
+            </h1>
+            {snapshot ? (
+              <>
+                <p
+                  role="status"
+                  data-afa-offline-banner
+                  style={{ margin: '0 0 var(--afa-space-6)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)' }}
+                >
+                  {tr.ticketsPage.offlineBannerTemplate.replace('{savedAt}', savedAt)}
+                </p>
+                {snapshot.tickets.length === 0 ? (
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{tr.ticketsPage.emptyTitle}</p>
+                ) : (
+                  <div className="afa-tickets-grid">
+                    {snapshot.tickets.map((t) => renderCard(offlineToBooking(t), true))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div role="status" data-afa-offline-empty style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-48px) var(--afa-space-6)', textAlign: 'center' }}>
+                <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
+                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)' }}>{tr.ticketsPage.offlineNoSavedTitle}</p>
+                <p style={{ margin: 0, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{tr.ticketsPage.offlineNoSavedBody}</p>
+              </div>
+            )}
+          </div>
+        </main>
+        </DashboardShell>
+      </>
+    )
+  }
+
   // Extracted so the four date-sections above can share one card
   // renderer instead of duplicating this JSX per bucket.
-  function renderCard(b: BookingItem) {
+  // BUG-2610-001 - `offlineView`: a saved ticket, QR only, no actions
+  // (they all need the network) and no tap-through to the event page.
+  function renderCard(b: BookingItem, offlineView = false) {
               const eff = effectiveStatus(b)
               const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
               const StatusIcon = STATUS_ICON[eff] || ClockIcon
@@ -614,6 +732,7 @@ export default function MyTicketsPage() {
               // the simpler, lower-risk default - easy to reverse if
               // that confirmation comes back the other way.
               const isGhosted = eff === 'CANCELLED' || eff === 'REFUNDED'
+              const inert = isGhosted || offlineView
               const typeKey = (b.event.type in tr.eventTypes ? b.event.type : 'OPEN_MIC') as keyof typeof tr.eventTypes
               const typeLabel = tr.eventTypes[typeKey]
               const isNavigating = navigatingId === b.event.id
@@ -626,12 +745,12 @@ export default function MyTicketsPage() {
               return (
                 <div
                   key={b.id}
-                  role={isGhosted ? undefined : 'link'}
-                  tabIndex={isGhosted ? undefined : 0}
+                  role={inert ? undefined : 'link'}
+                  tabIndex={inert ? undefined : 0}
                   aria-busy={isNavigating}
-                  onClick={isGhosted ? undefined : () => goToEvent(b.event.id)}
+                  onClick={inert ? undefined : () => goToEvent(b.event.id)}
                   onKeyDown={
-                    isGhosted
+                    inert
                       ? undefined
                       : (e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
@@ -640,14 +759,14 @@ export default function MyTicketsPage() {
                           }
                         }
                   }
-                  className={isGhosted ? undefined : 'afa-focusable'}
+                  className={inert ? undefined : 'afa-focusable'}
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
                     background: 'var(--afa-surface-raised)',
                     borderRadius: 'var(--afa-radius-xl)',
                     border: isGhosted ? '1px solid var(--afa-tint-06)' : '1px solid var(--afa-tint-10)',
-                    cursor: isGhosted ? 'default' : navigatingId && !isNavigating ? 'default' : 'pointer',
+                    cursor: inert ? 'default' : navigatingId && !isNavigating ? 'default' : 'pointer',
                     opacity: (isGhosted ? 0.55 : 1) * (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.85 : 1),
                     transition: 'opacity 0.15s ease',
                   }}
@@ -752,6 +871,7 @@ export default function MyTicketsPage() {
                             )}
                           </div>
                         </div>
+                        {!offlineView && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                           {/* BUG-2610-012 - the actions used to share the narrow
                               column beside the QR (about 70px each at 390, and the
@@ -789,6 +909,7 @@ export default function MyTicketsPage() {
                             </Button>
                           )}
                         </div>
+                        )}
                       </>
                     )}
 

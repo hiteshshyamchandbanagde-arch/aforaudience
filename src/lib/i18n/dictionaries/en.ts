@@ -754,6 +754,10 @@ const en = {
     pageKicker: "Your passes, ready to scan",
     scanAtDoor: "Scan at door",
     scannedLabel: "Scanned",
+    // BUG-2610-001 - offline My Tickets (src/lib/offline-tickets.ts).
+    offlineBannerTemplate: "You're offline. Showing your saved tickets, last updated {savedAt}.",
+    offlineNoSavedTitle: "No saved tickets on this device",
+    offlineNoSavedBody: "Connect to the internet and open My Tickets once to save your tickets for offline use.",
     stubTierLabel: "Tier",
     stubQtyLabel: "Qty",
     stubRefLabel: "Ref",
