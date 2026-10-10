@@ -1,14 +1,24 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { test, expect, gotoDashboard, hideFloatingOverlays } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { useRuleViewport } from "./helpers/viewports";
+import en from "../src/lib/i18n/dictionaries/en";
+import hi from "../src/lib/i18n/dictionaries/hi";
+import mr from "../src/lib/i18n/dictionaries/mr";
+import de from "../src/lib/i18n/dictionaries/de";
 
 /**
  * GEN-2610-007 (6c-1) - the Venue Owner dashboard follows the UI language.
  * As Vinayak, at 390 and 1440, in Hindi, with Marathi and German spot
  * checks.
  *
- * Seat Map Builder (this part): the restore-draft dialog (its age and
+ * My Venues, a venue's page and Edit Venue: no English UI strings are left
+ * in the page's main region, by the method of dashboard-i18n-organiser.spec.ts
+ * on the venueDashboard namespace (an English dashboard string whose
+ * translation differs, or, in hi/mr, a Latin-script word that is not the
+ * page's own /api data or a proper noun).
+ *
+ * Seat Map Builder: the restore-draft dialog (its age and
  * counts in words), the level labels a restored two-level draft shows,
  * the freeze banner and its Freeze / Unfreeze buttons, and the Unfreeze
  * dialog. The canvas, Guided Setup and the toolbars are still English
@@ -74,6 +84,124 @@ async function gotoInLocale(page: Page, url: string, locale: Locale) {
   await expect(page.locator("html")).toHaveAttribute("lang", locale);
 }
 
+const DICTS = { hi, mr, de } as const;
+// The Maps-link example is a URL, not a word.
+const PROPER_NOUNS = ["AforAudience", "AFA", "Google", "Google Maps", "Instagram", "YouTube", "https://maps.app.goo.gl/..."];
+
+// FacilitiesPicker's preset chips are the stored facility values (saved on
+// the venue and shown as is on its public page), not dictionary strings.
+// Giving them display labels per language is a TODO of its own (6c-1b
+// status file); until then they count as the page's data.
+const PRESET_FACILITIES = [
+  "Parking", "WiFi", "Air Conditioning", "Sound System", "Stage Lighting", "Green Room",
+  "Bar / Refreshments", "Wheelchair Accessible", "Restrooms", "Power Backup", "Projector / Screen",
+];
+
+// venueDashboard.myVenues.title, venueView.editVenue, venueEdit.title.
+const HEADINGS: Record<Locale, { venues: string; editLink: string; edit: string }> = {
+  hi: { venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें" },
+  mr: { venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला" },
+  de: { venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten" },
+};
+
+const NAMESPACES = ["venueDashboard", "dashboardChrome", "nav"] as const;
+
+type Tree = { [key: string]: string | Tree };
+function flatten(obj: Tree, prefix = "", out: Record<string, string> = {}): Record<string, string> {
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === "string") out[`${prefix}${k}`] = v;
+    else flatten(v, `${prefix}${k}.`, out);
+  }
+  return out;
+}
+
+/** English dashboard strings that read differently in `locale`; a {placeholder} value gives its literal parts. */
+function englishStrings(locale: Locale): { exact: string[]; parts: string[] } {
+  const exact = new Set<string>();
+  const parts = new Set<string>();
+  for (const ns of NAMESPACES) {
+    const enFlat = flatten(en[ns] as unknown as Tree);
+    const otherFlat = flatten(DICTS[locale][ns] as unknown as Tree);
+    for (const [key, value] of Object.entries(enFlat)) {
+      if (value === otherFlat[key]) continue;
+      if (value.includes("{")) {
+        for (const part of value.split(/\{[^}]*\}/)) {
+          const p = part.trim();
+          if (p.length >= 4 && /[A-Za-z]{3}/.test(p) && !PROPER_NOUNS.includes(p)) parts.add(p);
+        }
+      } else if (/[A-Za-z]/.test(value)) {
+        exact.add(value.trim());
+      }
+    }
+  }
+  return { exact: [...exact], parts: [...parts] };
+}
+
+/** Every string in the JSON the page loads from /api (the data it shows). */
+function collectApiStrings(page: Page): Set<string> {
+  const strings = new Set<string>();
+  const walk = (v: unknown) => {
+    if (typeof v === "string") {
+      if (v.trim()) strings.add(v.trim());
+    } else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+  };
+  page.on("response", async (res) => {
+    if (!new URL(res.url()).pathname.startsWith("/api/")) return;
+    if (!(res.headers()["content-type"] ?? "").includes("json")) return;
+    walk(await res.json().catch(() => null));
+  });
+  return strings;
+}
+
+/** The English UI strings (and, for Indic locales, stray Latin words) visible in `region`. */
+async function englishLeftIn(region: Locator, locale: Locale, data: Set<string>): Promise<string[]> {
+  const { exact, parts } = englishStrings(locale);
+  const allowed = [...data, ...PROPER_NOUNS].filter((s) => /[A-Za-z]/.test(s)).sort((a, b) => b.length - a.length);
+  const latinCheck = locale === "hi" || locale === "mr";
+  return region.evaluateAll(
+    (roots, { exact, parts, allowed, latinCheck }) => {
+      const texts: string[] = [];
+      for (const root of roots) {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          const el = n.parentElement;
+          if (!el || ["SCRIPT", "STYLE", "NOSCRIPT"].includes(el.tagName)) continue;
+          if (!el.checkVisibility({ visibilityProperty: true, opacityProperty: false })) continue;
+          if (n.textContent && n.textContent.trim()) texts.push(n.textContent.trim());
+        }
+        for (const el of [root, ...root.querySelectorAll("[aria-label], [placeholder]")]) {
+          if (!(el as HTMLElement).checkVisibility?.({ visibilityProperty: true })) continue;
+          for (const attr of ["aria-label", "placeholder"]) {
+            const v = el.getAttribute(attr);
+            if (v && v.trim()) texts.push(v.trim());
+          }
+        }
+      }
+      const exactSet = new Set(exact.map((s) => s.toLowerCase()));
+      const bad: string[] = [];
+      for (const t of texts) {
+        let rest = t;
+        for (const a of allowed) if (rest.includes(a)) rest = rest.split(a).join(" ");
+        if (exactSet.has(t.toLowerCase()) || parts.some((p) => rest.includes(p))) {
+          bad.push(`English UI string: "${t}"`);
+          continue;
+        }
+        if (!latinCheck) continue;
+        const words = rest.match(/[A-Za-z]{2,}/g);
+        if (words) bad.push(`Latin text "${words.join(" ")}" in "${t}"`);
+      }
+      return [...new Set(bad)];
+    },
+    { exact, parts, allowed, latinCheck },
+  );
+}
+
+async function shotTitle(page: Page, name: string, isMobile: boolean) {
+  await hideFloatingOverlays(page);
+  await expect(page.locator("h1[data-afa-page-title]")).toHaveScreenshot(`${name}-hi-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+}
+
 /** Puts a 5-minute-old local draft for `venueId` in place before the builder loads: one seat on the main level, one on PLANTED_LEVEL. */
 async function plantTwoLevelDraft(page: Page, venueId: string) {
   await page.addInitScript(
@@ -116,6 +244,41 @@ test.afterEach(async ({ page }) => {
 
 for (const locale of ["hi", "mr", "de"] as const) {
   test.describe(`Vinayak (Venue Owner) in ${locale}`, () => {
+    test(`[GEN-2610-007] My Venues in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].venues);
+      await expect(main.locator(`a[href*="${GA_VENUE}"]`).first()).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on My Venues").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "venue-my-venues-title", isMobile);
+    });
+
+    test(`[GEN-2610-007] a venue's page in ${locale}: no English UI strings`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, `/dashboard/venue/${GA_VENUE}/`, locale);
+      const main = page.getByRole("main");
+      await expect(main.locator(`a[href*="/dashboard/venue/${GA_VENUE}/edit"]`).first()).toHaveText(HEADINGS[locale].editLink);
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on the venue page").toEqual([]);
+    });
+
+    test(`[GEN-2610-007] Edit Venue in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, `/dashboard/venue/${GA_VENUE}/edit/`, locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].edit);
+      await page.waitForLoadState("networkidle");
+
+      for (const f of PRESET_FACILITIES) data.add(f);
+      expect(await englishLeftIn(main, locale, data), "English left on Edit Venue").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "venue-edit-venue-title", isMobile);
+      // Nothing was submitted: leaving the page changes nothing.
+    });
+
     test(`[GEN-2610-007] Seat Map Builder in ${locale}: restore-draft dialog, level labels and freeze banner`, async ({ page, isMobile }) => {
       const s = SEAT_MAP[locale];
       await plantTwoLevelDraft(page, GA_VENUE);
