@@ -13,7 +13,8 @@ import de from "../src/lib/i18n/dictionaries/de";
  * checks.
  *
  * My Venues, a venue's page, Edit Venue and (6c-2) Bookings, Revenue
- * Overview and Venue Booking Requests: no English UI strings are left
+ * Overview, Venue Booking Requests, Register Venue, Edit Your Profile and
+ * the role bar's More sheet / the sidebar: no English UI strings are left
  * in the page's main region, by the method of dashboard-i18n-organiser.spec.ts
  * on the venueDashboard namespace (an English dashboard string whose
  * translation differs, or, in hi/mr, a Latin-script word that is not the
@@ -104,22 +105,27 @@ const PRESET_FACILITIES = [
 
 // venueDashboard.myVenues.title, venueView.editVenue, venueEdit.title;
 // 6c-2: bookings.title and bookings.pending, sales.title and sales.byVenue,
-// organiserDashboard.venueRequests.title (the page both roles share) and
-// venueCreate.title.
+// organiserDashboard.venueRequests.title (the page both roles share),
+// venueCreate.title, editProfile.title, and the More sheet's
+// dashboardChrome.more / registerVenue / accountSettings.
 const HEADINGS: Record<Locale, {
   venues: string; editLink: string; edit: string; bookings: string; pending: string; sales: string; byVenue: string; requests: string; create: string;
+  profile: string; more: string; registerVenue: string; accountSettings: string;
 }> = {
   hi: {
     venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें", bookings: "बुकिंग अनुरोध", pending: "लंबित",
     sales: "कमाई का सारांश", byVenue: "स्थल के अनुसार", requests: "वेन्यू बुकिंग अनुरोध", create: "स्थल रजिस्टर करें",
+    profile: "अपनी प्रोफ़ाइल एडिट करें", more: "और", registerVenue: "स्थल रजिस्टर करें", accountSettings: "अकाउंट सेटिंग्स",
   },
   mr: {
     venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला", bookings: "बुकिंग विनंत्या", pending: "प्रलंबित",
     sales: "कमाईचा आढावा", byVenue: "स्थळानुसार", requests: "व्हेन्यू बुकिंग विनंत्या", create: "स्थळ नोंदवा",
+    profile: "तुमची प्रोफाइल एडिट करा", more: "अजून", registerVenue: "ठिकाण नोंदवा", accountSettings: "अकाउंट सेटिंग्ज",
   },
   de: {
     venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten", bookings: "Buchungsanfragen", pending: "Offen",
     sales: "Einnahmenübersicht", byVenue: "Nach Veranstaltungsort", requests: "Buchungsanfragen für Locations", create: "Veranstaltungsort registrieren",
+    profile: "Profil bearbeiten", more: "Mehr", registerVenue: "Veranstaltungsort registrieren", accountSettings: "Kontoeinstellungen",
   },
 };
 
@@ -359,6 +365,42 @@ for (const locale of ["hi", "mr", "de"] as const) {
       expect(await englishLeftIn(main, locale, data), "English left on Register Venue (Numbered, daily rate)").toEqual([]);
       if (locale === "hi") await shotTitle(page, "venue-create-title", isMobile);
       // Nothing was submitted, and the draft only lives in this test's own sessionStorage.
+    });
+
+    test(`[GEN-2610-007] Edit Your Profile in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue/edit/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].profile);
+      await expect(main.locator("button[data-afa-save-profile]")).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on Edit Your Profile").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "venue-edit-profile-title", isMobile);
+      // Nothing is saved.
+    });
+
+    test(`[GEN-2610-007] the Venue Owner role bar and its More sheet (390) / the sidebar's role section (1440) in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue/bookings/", locale);
+      if (!isMobile) {
+        const sidebar = page.locator("aside").filter({ visible: true }).first();
+        await expect(sidebar).toBeVisible();
+        await expect(sidebar.locator('a[href="/dashboard/venue/create"]').first()).toContainText(HEADINGS[locale].registerVenue);
+        expect(await englishLeftIn(sidebar, locale, data), "English left in the sidebar").toEqual([]);
+        return;
+      }
+      const bar = page.locator('nav[data-afa-tab-bar="venue_owner"]');
+      await expect(bar).toBeVisible();
+      await bar.locator('[data-afa-tab="more"]').click();
+      const sheet = page.locator("[data-afa-more-sheet]");
+      await expect(sheet).toBeVisible();
+      await expect(sheet).toHaveAttribute("aria-label", HEADINGS[locale].more);
+      await expect(sheet.locator('[data-afa-more-item="register-venue"]')).toContainText(HEADINGS[locale].registerVenue);
+      await expect(sheet.locator('[data-afa-more-item="account-settings"]')).toContainText(HEADINGS[locale].accountSettings);
+
+      expect(await englishLeftIn(bar, locale, data), "English left in the Venue Owner role bar").toEqual([]);
+      expect(await englishLeftIn(sheet, locale, data), "English left in the More sheet").toEqual([]);
     });
 
     test(`[GEN-2610-007] Seat Map Builder in ${locale}: restore-draft dialog, level labels and freeze banner`, async ({ page, isMobile }) => {
