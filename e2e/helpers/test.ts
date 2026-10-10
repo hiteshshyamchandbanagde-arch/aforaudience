@@ -1,4 +1,4 @@
-import { test as base, expect, type BrowserContext, type BrowserContextOptions, type Page } from "@playwright/test";
+import { test as base, expect, type BrowserContext, type BrowserContextOptions, type Locator, type Page } from "@playwright/test";
 import { markFirstVisitDone } from "./first-visit";
 
 /**
@@ -80,4 +80,22 @@ export async function gotoDashboard(page: Page, url: string) {
  */
 export async function hideFloatingOverlays(page: Page) {
   await page.addStyleTag({ content: ".afa-support-chat-btn, vercel-live-feedback { visibility: hidden !important; }" });
+}
+
+/**
+ * BUG-2610-033 - a page-screenshot clip for `locator`, snapped out to whole
+ * pixels. Inside the desktop account menu everything sits half a pixel
+ * down: the signed-out nav row is 37 px tall ("Sign up") and the 36 px
+ * account wrapper is centred in it (top 16.5), so the menu and the city
+ * picker under it start on .5. An element screenshot of a box on a .5 edge
+ * came out 30 or 31 px tall from run to run. This clip covers the same
+ * pixels every time: use it with `expect(page).toHaveScreenshot(name, { clip })`.
+ */
+export async function wholePixelClip(locator: Locator) {
+  await locator.scrollIntoViewIfNeeded();
+  const box = await locator.boundingBox();
+  if (!box) throw new Error("wholePixelClip: element has no box");
+  const x = Math.floor(box.x);
+  const y = Math.floor(box.y);
+  return { x, y, width: Math.ceil(box.x + box.width) - x, height: Math.ceil(box.y + box.height) - y };
 }
