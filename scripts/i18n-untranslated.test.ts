@@ -168,6 +168,10 @@ async function main() {
       // 6c-1: Venue Owner My Venues, venue page, Edit Venue, Seat Map Builder.
       'venueDashboard.myVenues.eyebrow', 'venueDashboard.venueView.notFound', 'venueDashboard.venueEdit.title',
       'venueDashboard.seatMap.restoreTitle', 'venueDashboard.seatMap.frozenTitle', 'venueDashboard.seatMap.mainLevel',
+      // 6c-2: Bookings, Revenue Overview, Register Venue, Edit Your Profile.
+      'venueDashboard.bookings.title', 'venueDashboard.bookings.pastRequests', 'venueDashboard.sales.title',
+      'venueDashboard.sales.bookingsOther', 'venueDashboard.venueCreate.title', 'venueDashboard.venueCreate.gaTitle',
+      'venueDashboard.editProfile.title',
     ]) {
       assert.equal(typeof flatEn[key], 'string', `${key} is missing from en.ts`)
     }
