@@ -1,5 +1,5 @@
 import type { BrowserContext, Locator, Page } from "@playwright/test";
-import { test, expect } from "./helpers/test";
+import { test, expect, wholePixelClip } from "./helpers/test";
 import { useRuleViewport } from "./helpers/viewports";
 
 /**
@@ -132,7 +132,9 @@ test("[GEN-2610-005] in Lonavala: no city within 50 km, names Pune at 54 km and 
   // Baseline of the open picker with the message (the city list below it
   // is masked: it changes whenever QA gains or loses a venue city).
   const panel = status.locator("..");
-  await expect(panel).toHaveScreenshot(`use-my-location-far-${isMobile ? 390 : 1440}.png`, {
+  // BUG-2610-033 - a whole-pixel clip: the panel starts on a half pixel at 1440.
+  await expect(page).toHaveScreenshot(`use-my-location-far-${isMobile ? 390 : 1440}.png`, {
+    clip: await wholePixelClip(panel),
     mask: [panel.locator("input + div")],
   });
 
@@ -170,7 +172,7 @@ test("[GEN-2610-005] saved Jaipur, GPS in Pune: the travel prompt shows once, No
   const status = chipScope(page, isMobile).getByRole("status");
   await expect(status).toContainText("You seem to be in Pune. Switch?");
   await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
-  await expect(status).toHaveScreenshot(`use-my-location-prompt-${isMobile ? 390 : 1440}.png`);
+  await expect(page).toHaveScreenshot(`use-my-location-prompt-${isMobile ? 390 : 1440}.png`, { clip: await wholePixelClip(status) });
   await status.getByRole("button", { name: "Not now" }).click();
   await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
 
