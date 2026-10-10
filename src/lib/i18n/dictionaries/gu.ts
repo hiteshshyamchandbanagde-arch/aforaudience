@@ -2045,6 +2045,20 @@ const gu: Dictionary = {
       bioPlaceholder: "લોકોને તમારાં સ્થળો વિશે જણાવો",
       saveProfile: "પ્રોફાઇલ સેવ કરો",
     },
+    venueSales: {
+      loadFailed: "આવકનો ડેટા લોડ થઈ શક્યો નહીં",
+      allVenues: "બધાં સ્થળો →",
+      title: "{venue} — આવક",
+      grossRevenue: "કુલ આવક",
+      grossSub: "{byEventDate}, પ્લેટફોર્મનો કોઈ હિસ્સો નથી",
+      upcomingCompleted: "આગામી / પૂર્ણ (અત્યાર સુધી)",
+      pending: "બાકી (પુષ્ટિની રાહ)",
+      atStake: "{amount} દાવ પર",
+      noneRightNow: "હાલ કોઈ નહીં",
+      noConfirmedInRange: "આ સમયગાળામાં કોઈ પુષ્ટિ થયેલ બુકિંગ નથી.",
+      recentBookings: "તાજેતરનાં બુકિંગ",
+      noLinkedEvent: "કોઈ જોડાયેલી ઇવેન્ટ નથી",
+    },
   },
 }
 
