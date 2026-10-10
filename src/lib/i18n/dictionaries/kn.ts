@@ -2045,6 +2045,20 @@ const kn: Dictionary = {
       bioPlaceholder: "ನಿಮ್ಮ ಸ್ಥಳಗಳ ಬಗ್ಗೆ ಜನರಿಗೆ ತಿಳಿಸಿ",
       saveProfile: "ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ",
     },
+    venueSales: {
+      loadFailed: "ಆದಾಯದ ಡೇಟಾ ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
+      allVenues: "ಎಲ್ಲಾ ಸ್ಥಳಗಳು →",
+      title: "{venue} — ಆದಾಯ",
+      grossRevenue: "ಒಟ್ಟು ಆದಾಯ",
+      grossSub: "{byEventDate}, ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಪಾಲು ಇಲ್ಲ",
+      upcomingCompleted: "ಮುಂಬರುವ / ಪೂರ್ಣಗೊಂಡ (ಇದುವರೆಗೆ)",
+      pending: "ಬಾಕಿ (ದೃಢೀಕರಣಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ)",
+      atStake: "{amount} ಅಪಾಯದಲ್ಲಿದೆ",
+      noneRightNow: "ಸದ್ಯಕ್ಕೆ ಯಾವುದೂ ಇಲ್ಲ",
+      noConfirmedInRange: "ಈ ಅವಧಿಯಲ್ಲಿ ದೃಢೀಕೃತ ಬುಕಿಂಗ್‌ಗಳಿಲ್ಲ.",
+      recentBookings: "ಇತ್ತೀಚಿನ ಬುಕಿಂಗ್‌ಗಳು",
+      noLinkedEvent: "ಲಿಂಕ್ ಮಾಡಿದ ಈವೆಂಟ್ ಇಲ್ಲ",
+    },
   },
 }
 
