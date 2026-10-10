@@ -12,8 +12,9 @@ import { fillSolidTint, SELECTED, SELECTED_BG } from '@/lib/statusStyle'
 import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLockGlyph } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
 import { useModalSheet } from '@/lib/use-modal-sheet'
-import { countNoun } from '@/lib/i18n/plural'
-import { draftDecision, humaniseAge } from '@/lib/seatmap-draft'
+import { countNoun, countText } from '@/lib/i18n/plural'
+import { useLocale } from '@/lib/i18n/translate'
+import { draftDecision } from '@/lib/seatmap-draft'
 import { useConfirm, usePrompt } from '@/components/ConfirmDialog'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
@@ -522,6 +523,18 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const { showToast } = useToast()
   const confirm = useConfirm()
   const prompt = usePrompt()
+  const { locale, t: tr } = useLocale()
+  const sm = tr.venueDashboard.seatMap
+  const smCount = (n: number, one: string, other: string) => countText(locale, n, one, other)
+  // BUG-2609-086's humaniseAge, in the UI language.
+  const draftAge = (ms: number) => {
+    const minutes = Math.floor(Math.max(0, ms) / 60000)
+    if (minutes < 1) return sm.ageJustNow
+    if (minutes < 60) return smCount(minutes, sm.ageMinutesOne, sm.ageMinutesOther)
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return smCount(hours, sm.ageHoursOne, sm.ageHoursOther)
+    return smCount(Math.floor(hours / 24), sm.ageDaysOne, sm.ageDaysOther)
+  }
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -557,11 +570,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const toggleFreeze = async (next: boolean) => {
     // BUG-2609-086 - in-app confirm, not the browser's window.confirm().
     if (next && !(await confirm({
-      title: 'Freeze this seat map?',
-      body: 'It becomes read-only everywhere in this builder until you Unfreeze it. This does not affect any live event or booking - it just locks further edits here.',
-      confirmLabel: 'Freeze',
+      title: sm.freezeTitle,
+      body: sm.freezeBody,
+      confirmLabel: sm.freezeConfirm,
     }))) return
-    if (!next && !(await confirm({ title: 'Unfreeze this seat map?', body: 'It can be edited again.', confirmLabel: 'Unfreeze' }))) return
+    if (!next && !(await confirm({ title: sm.unfreezeTitle, body: sm.unfreezeBody, confirmLabel: sm.unfreeze }))) return
     setFreezing(true)
     try {
       const res = await fetch(`/api/venues/${id}/seats`, {
@@ -570,9 +583,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         body: JSON.stringify({ frozen: next }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to update freeze state')
+      if (!res.ok) throw new Error(data.error || sm.freezeFailed)
       setSeatMapFrozen(next)
-      showToast(next ? 'Seat map frozen.' : 'Seat map unfrozen - you can edit it again.', 'success')
+      showToast(next ? sm.frozenToast : sm.unfrozenToast, 'success')
     } catch (err: any) {
       showToast(err.message, 'error')
     } finally {
@@ -589,7 +602,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // LEVEL so each level gets its own independent layout.
   const [levels, setLevels] = useState<string[]>([''])
   const [activeLevel, setActiveLevel] = useState<string>('')
-  const levelLabel = (lvl: string) => lvl || 'Main'
+  const levelLabel = (lvl: string) => lvl || sm.mainLevel
 
   const [seatsByLevel, setSeatsByLevel] = useState<Record<string, SeatDraft[]>>({})
   const seats = seatsByLevel[activeLevel] || []
@@ -651,17 +664,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const addLevel = async () => {
     if (seatMapFrozen) return
-    const name = await prompt({ title: 'Add a level', inputLabel: 'Level name', placeholder: 'e.g. Ground Floor, Balcony, 1st Floor', confirmLabel: 'Add level' })
+    const name = await prompt({ title: sm.addLevelTitle, inputLabel: sm.levelName, placeholder: sm.levelPlaceholder, confirmLabel: sm.addLevelConfirm })
     if (name === null) return
     const trimmed = normalizeWhitespace(name).slice(0, 60)
-    if (!trimmed) { showToast('Level name cannot be empty.', 'error'); return }
-    if (levels.includes(trimmed)) { showToast('A level with that name already exists.', 'error'); return }
+    if (!trimmed) { showToast(sm.levelEmpty, 'error'); return }
+    if (levels.includes(trimmed)) { showToast(sm.levelExists, 'error'); return }
     setLevels((prev) => [...prev, trimmed])
     setActiveLevel(trimmed)
   }
   const removeLevel = async (name: string) => {
     if (levels.length <= 1 || seatMapFrozen) return
-    if (!(await confirm({ title: `Remove level "${levelLabel(name)}"?`, body: 'This clears its local layout - nothing is deleted server-side until you Save.', confirmLabel: 'Remove level', destructive: true }))) return
+    if (!(await confirm({ title: sm.removeLevelTitle.replace('{name}', levelLabel(name)), body: sm.removeLevelBody, confirmLabel: sm.removeLevelConfirm, destructive: true }))) return
     setLevels((prev) => prev.filter((l) => l !== name))
     setSeatsByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
     setGridConfigByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
@@ -1035,10 +1048,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           const d = draft
           const levelCount = Object.keys(d.seatsByLevel).length
           confirm({
-            title: 'Restore your unsaved draft?',
-            body: `You have an unsaved local draft from ${humaniseAge(Date.now() - d.savedAt)} (${countNoun(draftSeatCount, 'seat')} across ${countNoun(levelCount, 'level')}). Discard keeps what's saved on the server.`,
-            confirmLabel: 'Restore draft',
-            cancelLabel: 'Discard',
+            title: sm.restoreTitle,
+            body: sm.restoreBody
+              .replace('{age}', draftAge(Date.now() - d.savedAt))
+              .replace('{seats}', smCount(draftSeatCount, sm.seatsOne, sm.seatsOther))
+              .replace('{levels}', smCount(levelCount, sm.levelsOne, sm.levelsOther)),
+            confirmLabel: sm.restoreConfirm,
+            cancelLabel: sm.discard,
           }).then((restore) => {
             if (restore) {
               setSeatingMode(d.seatingMode)
@@ -1490,9 +1506,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 "Seat map frozen" and the rest into two cramped columns. */}
             <div data-afa-frozen-banner-text style={{ fontSize: 'var(--afa-text-ui)', color: seatMapFrozen ? 'var(--afa-amber)' : 'var(--afa-text-primary)', display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', flex: '1 1 240px', minWidth: 0 }}>
               {seatMapFrozen ? (
-                <><span style={{ flexShrink: 0, display: 'inline-flex', paddingTop: 'var(--afa-space-2px)' }}><IconLockGlyph size={15} /></span><span data-afa-frozen-message><strong data-afa-frozen-title>Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</span></>
+                <><span style={{ flexShrink: 0, display: 'inline-flex', paddingTop: 'var(--afa-space-2px)' }}><IconLockGlyph size={15} /></span><span data-afa-frozen-message><strong data-afa-frozen-title>{sm.frozenTitle}</strong> {sm.frozenRest}</span></>
               ) : (
-                'Once this layout is finished, freeze it to lock it against accidental edits.'
+                sm.freezeHint
               )}
             </div>
             {/* GEN-2609-121 - Save Seat Map is this page's one primary; Freeze is an outline in both states. */}
@@ -1504,7 +1520,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               disabled={freezing}
               data-afa-freeze-toggle={seatMapFrozen ? 'unfreeze' : 'freeze'}
             >
-              {freezing ? 'Working…' : seatMapFrozen ? 'Unfreeze' : 'Freeze this seat map'}
+              {freezing ? sm.working : seatMapFrozen ? sm.unfreeze : sm.freezeButton}
             </Button>
           </div>
         )}
@@ -1519,11 +1535,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           <div style={{ marginBottom: 'var(--afa-space-5)' }}>
             {levels.length === 1 ? (
               <Button variant="dashed" size="sm" fullWidth={false} onClick={addLevel} disabled={seatMapFrozen}>
-                + This venue has more than one level (e.g. Balcony, 1st Floor)
+                {sm.multiLevelButton}
               </Button>
             ) : (
               <div>
-                <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6px)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Level</div>
+                <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6px)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{sm.levelHeading}</div>
                 <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
                   {levels.map((lvl) => (
                     <div key={lvl} style={{ display: 'flex', alignItems: 'stretch' }}>
@@ -1540,8 +1556,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <Button
                         variant="icon"
                         onClick={() => removeLevel(lvl)}
-                        title={`Remove ${levelLabel(lvl)}`}
-                        aria-label={`Remove ${levelLabel(lvl)}`}
+                        title={sm.removeLevelAria.replace('{name}', levelLabel(lvl))}
+                        aria-label={sm.removeLevelAria.replace('{name}', levelLabel(lvl))}
                         style={{
                           padding: '7px var(--afa-space-2)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-md) var(--afa-radius-md) var(--afa-radius-sharp)', fontSize: 'var(--afa-text-ui)', // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
                           border: activeLevel === lvl ? `2px solid ${SELECTED}` : '1px solid var(--afa-border-resting)', borderLeft: 'none',
@@ -1554,11 +1570,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     </div>
                   ))}
                   <Button variant="dashed" size="sm" fullWidth={false} onClick={addLevel} disabled={seatMapFrozen}>
-                    + Add level
+                    {sm.addLevelButton}
                   </Button>
                 </div>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
-                  Each level has its own independent seat layout - build them one at a time using Guided Setup or Draw It Myself below.
+                  {sm.levelsNote}
                 </p>
               </div>
             )}
