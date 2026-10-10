@@ -665,9 +665,7 @@ export default function MyTicketsPage() {
   // tickets (QR drawn on the device by TicketQr, no request) or, with no
   // snapshot, how to get one. Never a redirect to /login.
   function renderOffline(snapshot: OfflineTicketsSnapshot | null) {
-    const savedAt = snapshot
-      ? `${formatDate(snapshot.savedAt, 'medium', locale)} ${new Date(snapshot.savedAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`
-      : ''
+    const savedAt = snapshot ? formatDate(snapshot.savedAt, 'dateTime', locale) : ''
     return (
       <>
         <SiteNav />
