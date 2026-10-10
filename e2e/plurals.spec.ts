@@ -73,7 +73,8 @@ test.describe("venue sales", () => {
   test("[BUG-2609-082] venue Sales: booking counts agree with their number", async ({ page, isMobile }) => {
     await useRuleViewport(page, isMobile);
     await gotoDashboard(page, "/dashboard/venue/sales/");
-    await expect(page.getByText("By organiser", { exact: false }).first()).toBeVisible();
+    // data-afa-* hook, not the English text: venue Sales follows the UI language (GEN-2610-007).
+    await expect(page.locator('[data-afa-section="by-organiser"] [data-afa-section-title]')).toHaveText("By organiser");
     expect(await badCounts(page)).toEqual([]);
   });
 });

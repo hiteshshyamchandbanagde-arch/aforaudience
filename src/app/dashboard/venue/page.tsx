@@ -17,6 +17,7 @@ import {
 } from '@/components/dashboard/VenuePortalUI'
 import { formatINR } from '@/lib/money-display'
 import { Icon } from '@/components/Icon'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 
 interface SeatSection {
   id: string
@@ -57,10 +58,12 @@ function priceRange(venue: Venue) {
   return min === max ? formatINR(min) : `${formatINR(min)}–${formatINR(max)}`
 }
 
-function rateLabel(venue: Venue) {
-  if (venue.rateType === 'HOURLY' && venue.hourlyRate) return `Hourly · ${formatINR(venue.hourlyRate)}/hr`
-  if (venue.rateType === 'DAILY' && venue.dailyRate) return `Daily · ${formatINR(venue.dailyRate)}/day`
-  return 'Flexible rate'
+type MyVenuesText = Dictionary['venueDashboard']['myVenues']
+
+function rateLabel(venue: Venue, v: MyVenuesText) {
+  if (venue.rateType === 'HOURLY' && venue.hourlyRate) return v.hourlyRate.replace('{amount}', formatINR(venue.hourlyRate))
+  if (venue.rateType === 'DAILY' && venue.dailyRate) return v.dailyRate.replace('{amount}', formatINR(venue.dailyRate))
+  return v.flexibleRate
 }
 
 // BUG-2608-083: priceRange() is only meaningful for NUMBERED venues (real
@@ -69,10 +72,10 @@ function rateLabel(venue: Venue) {
 // always showed a bare "—" for them. The actual rate for those venues is
 // already surfaced below via rateLabel(); this tile just needs to show
 // something venue-type-appropriate instead of a dash with no context.
-function rateTypeLabel(venue: Venue) {
-  if (venue.rateType === 'HOURLY') return 'Hourly'
-  if (venue.rateType === 'DAILY') return 'Daily'
-  return 'Flexible'
+function rateTypeLabel(venue: Venue, v: MyVenuesText) {
+  if (venue.rateType === 'HOURLY') return v.rateHourly
+  if (venue.rateType === 'DAILY') return v.rateDaily
+  return v.rateFlexible
 }
 
 // Hitesh's call (23 Aug): every venue card gets a flag next to city,
@@ -104,6 +107,9 @@ const COUNTRY_FLAGS: Record<string, ComponentType<{ title?: string; className?: 
 export default function VenueDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr } = useLocale()
+  const v = tr.venueDashboard.myVenues
+  const chrome = tr.dashboardChrome
   const [venues, setVenues] = useState<Venue[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -128,7 +134,7 @@ export default function VenueDashboard() {
     const fetchVenues = async () => {
       try {
         const res = await fetch('/api/venues/my-venues')
-        if (!res.ok) throw new Error('Failed to fetch venues')
+        if (!res.ok) throw new Error(v.loadFailed)
         const data = await res.json()
         setVenues(data)
       } catch (err: any) {
@@ -143,7 +149,7 @@ export default function VenueDashboard() {
     }
   }, [session])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={chrome.loading} /></>)
   if (!session) return <SiteNav />
 
   if (venueStatus && !venueStatus.isVenueOwner) {
@@ -153,9 +159,9 @@ export default function VenueDashboard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>You're not registered as a Venue Owner</h1>
-            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6)' }}>Apply to list your venue from your profile to start managing bookings.</p>
-            <BackLink href="/" label="Back to Home" />
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>{v.notOwnerTitle}</h1>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6)' }}>{v.notOwnerBody}</p>
+            <BackLink href="/" label={v.backToHome} />
           </div>
         </main>
         </DashboardShell>
@@ -171,9 +177,9 @@ export default function VenueDashboard() {
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}><Icon name="clock" size={32} /></div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>Your Venue Owner account is pending approval</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>{v.pendingTitle}</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-              Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.
+              {v.pendingBody}
             </p>
           </div>
         </main>
@@ -195,7 +201,7 @@ export default function VenueDashboard() {
               of an in-page CTA, per Hitesh's call. pendingBookings/
               pendingFlexRequests badges moved with Bookings/Flexible
               Requests into the sidebar (SidebarLink's own badge prop). */}
-          <PageHead eyebrow="Portfolio" title="Your Venues" titleSize="lg" />
+          <PageHead eyebrow={v.eyebrow} title={v.title} titleSize="lg" />
 
           {error && (
             <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
@@ -204,10 +210,10 @@ export default function VenueDashboard() {
           {venues.length === 0 ? (
             <EmptyState
               icon={<IconVenue size={56} strokeWidth={1} />}
-              caption="No venues yet — register your first space"
+              caption={v.emptyCaption}
               action={
                 <Link href="/dashboard/venue/create" className="avp-btn-primary" style={primaryLinkStyle}>
-                  <IconPlus /> Register Venue
+                  <IconPlus /> {chrome.registerVenue}
                 </Link>
               }
             />
@@ -257,7 +263,7 @@ export default function VenueDashboard() {
                         {venue.address}
                       </p>
                     </div>
-                    <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>{venue.isApproved ? 'Published' : 'Draft'}</StatusPill>
+                    <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>{venue.isApproved ? v.statusPublished : v.statusDraft}</StatusPill>
                   </div>
 
                   <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-08)', paddingTop: 'var(--afa-space-4)' }}>
@@ -265,7 +271,7 @@ export default function VenueDashboard() {
                       <IconUsers size={16} style={{ color: 'var(--afa-amber)' }} />
                       <div>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Capacity</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>{v.capacity}</p>
                       </div>
                     </div>
                     {venue.seatingMode === 'NUMBERED' ? (
@@ -273,32 +279,32 @@ export default function VenueDashboard() {
                         <IconTag size={16} style={{ color: 'var(--afa-amber)' }} />
                         <div>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>{v.perSeat}</p>
                         </div>
                       </div>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
                         <IconTag size={16} style={{ color: 'var(--afa-amber)' }} />
                         <div>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Rate Type</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue, v)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>{v.rateType}</p>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-amber)', marginTop: 'var(--afa-space-14px)', marginBottom: 0 }}>{rateLabel(venue)}</p>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-amber)', marginTop: 'var(--afa-space-14px)', marginBottom: 0 }}>{rateLabel(venue, v)}</p>
 
                   <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-4)' }} onClick={(e) => e.stopPropagation()}>
                     <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
-                      View
+                      {v.view}
                     </Link>
                     {/* GEN-2609-121 - a secondary action on every card, so the same outline as View. */}
                     <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
-                      Edit
+                      {v.edit}
                     </Link>
                     {venue.seatingMode === 'NUMBERED' && (
-                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} aria-label={v.seatMap} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                         <IconMap size={14} />
                       </Link>
                     )}

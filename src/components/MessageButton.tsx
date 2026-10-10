@@ -64,6 +64,7 @@ export default function MessageButton({ contextType, contextId, label = 'Message
       onClick={handleClick}
       disabled={loading}
       style={style}
+      data-afa-message-button={contextType}
     >
       {icon ?? <Icon name="message" size={14} style={INLINE_ICON_STYLE} />} {label}
     </Button>

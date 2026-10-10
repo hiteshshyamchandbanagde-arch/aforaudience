@@ -83,7 +83,9 @@ for (const p of VENUE_PAGES) {
   test(`[BUG-2610-028] ${p.title}: the page title is the shared display-serif PageTitle (Organiser/Artist style)`, async ({ page, isMobile }) => {
     await gotoDashboard(page, p.url);
     await hideFloatingOverlays(page);
-    const h1 = page.getByRole("heading", { level: 1, name: p.title, exact: true });
+    // data-afa-* hook, not the English text: the venue pages follow the UI language (GEN-2610-007).
+    const h1 = page.getByRole("main").locator("h1[data-afa-page-title]");
+    await expect(h1).toHaveText(p.title);
     const font = await fontOf(h1);
     expect(font.family, `${p.title}: font family = --font-display`).toBe(await displayFamily(page));
     expect(font.weight, `${p.title}: weight 700`).toBe("700");
@@ -95,15 +97,20 @@ for (const p of VENUE_PAGES) {
 test("[BUG-2610-028] the Organiser title the venue titles match is the same PageTitle", async ({ page, newContext, isMobile }) => {
   const ref = await organiserReference(newContext, isMobile);
   await gotoDashboard(page, "/dashboard/venue/sales");
-  const venue = await fontOf(page.getByRole("heading", { level: 1, name: "Revenue Overview", exact: true }));
+  // data-afa-* hooks, not the English text: venue Sales follows the UI language (GEN-2610-007).
+  const h1 = page.getByRole("main").locator("h1[data-afa-page-title]");
+  await expect(h1).toHaveText("Revenue Overview");
+  const venue = await fontOf(h1);
   expect(venue, "Revenue Overview (venue) = Sales Overview (organiser)").toEqual(ref.title);
 });
 
 test("[BUG-2610-028] venue Revenue Overview stat labels match the organiser stat labels", async ({ page, isMobile, newContext }) => {
   const ref = await organiserReference(newContext, isMobile);
   await gotoDashboard(page, "/dashboard/venue/sales");
-  for (const name of ["Total Revenue", "Confirmed Bookings", "Avg. Booking Value"]) {
-    const font = await fontOf(page.getByRole("main").getByText(name, { exact: true }).first());
+  for (const [stat, name] of [["total-revenue", "Total Revenue"], ["confirmed-bookings", "Confirmed Bookings"], ["avg-booking-value", "Avg. Booking Value"]]) {
+    const label = page.getByRole("main").locator(`[data-afa-stat="${stat}"] [data-afa-stat-label]`);
+    await expect(label).toHaveText(name);
+    const font = await fontOf(label);
     expect(font.family, `${name}: label font = organiser stat label's`).toBe(ref.label.family);
     expect(font.weight, `${name}: label weight = organiser's`).toBe(ref.label.weight);
     expect(font.transform, `${name}: uppercase like organiser's`).toBe(ref.label.transform);
@@ -113,10 +120,11 @@ test("[BUG-2610-028] venue Revenue Overview stat labels match the organiser stat
 test("[BUG-2610-028] Edit Your Profile: Change Photo is a secondary (outline) button, not CTA orange", async ({ page, isMobile }) => {
   await gotoDashboard(page, "/dashboard/venue/edit");
   await hideFloatingOverlays(page);
-  const photo = page.getByRole("main").locator("label").filter({ hasText: /^(Change Photo|Upload Photo)$/ });
-  const save = page.getByRole("button", { name: "Save Profile" });
-  await expect(photo).toBeVisible();
-  await expect(save).toBeVisible();
+  // data-afa-* hooks, not the English text: the venue pages follow the UI language (GEN-2610-007).
+  const photo = page.getByRole("main").locator("label[data-afa-photo-button]");
+  const save = page.locator("button[data-afa-save-profile]");
+  await expect(photo).toHaveText(/^(Change Photo|Upload Photo)$/);
+  await expect(save).toHaveText("Save Profile");
   const [photoBg, saveBg] = await Promise.all([
     photo.evaluate((n) => getComputedStyle(n).backgroundColor),
     save.evaluate((n) => getComputedStyle(n).backgroundColor),

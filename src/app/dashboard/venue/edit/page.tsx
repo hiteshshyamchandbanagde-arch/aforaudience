@@ -8,6 +8,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, Label, Field, outlineLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
 
 // Session 62, design.md §9.5. First edit surface for VenueOwner - the role
 // had no editable fields of its own at all until bio was added this
@@ -15,6 +16,8 @@ import Button from '@/components/ui/Button'
 // Avatar lives on User (shared account-level field), same two-request
 // pattern as the Organiser/Artist edit pages.
 export default function VenueOwnerEditPage() {
+  const { t: tr } = useLocale()
+  const v = tr.venueDashboard.editProfile
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -46,7 +49,7 @@ export default function VenueOwnerEditPage() {
           setAvatar(d.user?.avatar || '')
         }
       } catch {
-        setError('Failed to load profile')
+        setError(v.loadFailed)
       } finally {
         setLoading(false)
       }
@@ -66,12 +69,12 @@ export default function VenueOwnerEditPage() {
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || 'Upload failed - please try again.')
+        setError(data.error || v.uploadFailed)
         return
       }
       setAvatar(data.url)
     } catch {
-      setError('Upload failed - please try again.')
+      setError(v.uploadFailed)
     } finally {
       setUploadingAvatar(false)
     }
@@ -96,21 +99,21 @@ export default function VenueOwnerEditPage() {
       ])
       if (!ownerRes.ok) {
         const data = await ownerRes.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to save profile')
+        throw new Error(data.error || v.saveFailed)
       }
       if (!userRes.ok) {
         const data = await userRes.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to save profile picture')
+        throw new Error(data.error || v.savePhotoFailed)
       }
-      setMessage('Profile saved.')
+      setMessage(v.saved)
     } catch (err: any) {
-      setError(err.message || 'Failed to save profile')
+      setError(err.message || v.saveFailed)
     } finally {
       setSaving(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
@@ -120,7 +123,7 @@ export default function VenueOwnerEditPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
-            <PageHead eyebrow="Public profile" title="Edit Your Profile" titleSize="lg" description="This is what people see on your public Venue Owner page." />
+            <PageHead eyebrow={v.eyebrow} title={v.title} titleSize="lg" description={v.subtitle} />
           </div>
 
           {message && (
@@ -131,29 +134,30 @@ export default function VenueOwnerEditPage() {
           )}
 
           <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
-            <SectionTitle n="01" title="Basic Info" />
+            <SectionTitle n="01" title={v.basicInfo} />
             <div style={{ marginBottom: 'var(--afa-space-5)' }}>
-              <Label>Profile Picture</Label>
+              <Label>{v.profilePicture}</Label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-2)' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
+                  <img src={avatar} alt={v.photoAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
-                <label className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
-                  {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
+                <label data-afa-photo-button className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                  {uploadingAvatar ? v.uploading : avatar ? v.changePhoto : v.uploadPhoto}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
               </div>
             </div>
 
             <div>
-              <Label>Bio</Label>
-              <Field as="textarea" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder="Tell people about your venues" />
+              <Label>{v.bio}</Label>
+              <Field as="textarea" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder={v.bioPlaceholder} />
             </div>
           </Card>
 
           <Button
             data-afa-action-row
+            data-afa-save-profile
             variant="solid"
             size="lg"
             fullWidth={false}
@@ -161,7 +165,7 @@ export default function VenueOwnerEditPage() {
             disabled={saving}
             className="avp-btn-primary"
           >
-            {saving ? 'Saving...' : 'Save Profile'}
+            {saving ? tr.dashboardChrome.saving : v.saveProfile}
           </Button>
         </div>
       </main>

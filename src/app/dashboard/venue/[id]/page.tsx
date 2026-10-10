@@ -11,6 +11,8 @@ import BrandLoader from '@/components/BrandLoader'
 import { ErrorBanner, PageHead, Card, SectionTitle, StatusPill, Button } from '@/components/dashboard/VenuePortalUI'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 import { formatINR } from '@/lib/money-display'
+import { useLocale } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 
 interface SeatSection {
   id: string
@@ -46,6 +48,10 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
   const [error, setError] = useState('')
   const [toggling, setToggling] = useState(false)
   const { showToast } = useToast()
+  const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.venueView
+  const statusText = tr.venueDashboard.myVenues
+  const seatsText = (n: number) => countText(locale, n, v.seatsOne, v.seatsOther)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -57,8 +63,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
     try {
       const res = await fetch(`/api/venues/${id}/owner`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this venue')
-        throw new Error('Venue not found')
+        if (res.status === 403) throw new Error(v.accessDenied)
+        throw new Error(v.notFound)
       }
       const data = await res.json()
       setVenue(data)
@@ -91,20 +97,20 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
       // string here was throwing that away. Surfacing via toast instead of
       // the page-level `error` state, since that state blanks the entire
       // page (looked like a navigation/redirect, not an inline error).
-      if (!res.ok) throw new Error(data.error || 'Failed to update publish status')
+      if (!res.ok) throw new Error(data.error || v.publishFailed)
       setVenue(data)
-      showToast(data.isApproved ? 'Venue published.' : 'Venue unpublished.', 'success')
+      showToast(data.isApproved ? v.published : v.unpublished, 'success')
     } catch (err: any) {
-      showToast(err.message || 'Failed to update publish status', 'error')
+      showToast(err.message || v.publishFailed, 'error')
     } finally {
       setToggling(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Venue not found</div></>)
+  if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{v.notFound}</div></>)
 
   const sections = venue.seatMap?.sections || []
 
@@ -150,16 +156,16 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
-          <BackLink href="/dashboard/venue" label="Back to Venues" />
+          <BackLink href="/dashboard/venue" label={v.backToVenues} />
 
           <div style={{ marginTop: 'var(--afa-space-5)' }}>
             <PageHead
-              eyebrow="Venue"
+              eyebrow={v.eyebrow}
               title={venue.name}
               description={`${venue.address}, ${venue.city}${venue.state ? `, ${venue.state}` : ''}`}
             >
               <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>
-                {venue.isApproved ? 'Published' : 'Draft'}
+                {venue.isApproved ? statusText.statusPublished : statusText.statusDraft}
               </StatusPill>
             </PageHead>
           </div>
@@ -169,27 +175,27 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           )}
 
           <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
-            <SectionTitle n="01" title="Overview" />
+            <SectionTitle n="01" title={v.overview} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-6)' }}>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Total Capacity</p>
-                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{venue.capacity} seats</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{v.totalCapacity}</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{seatsText(venue.capacity)}</p>
               </div>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Price Range</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{v.priceRange}</p>
                 <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                   {minPrice !== null ? (minPrice === maxPrice ? formatINR(minPrice) : `${formatINR(minPrice)}–${formatINR(maxPrice!)}`) : '—'}
                 </p>
               </div>
               <div>
-                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Acoustic Rating</p>
-                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Not Rated Yet</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{v.acousticRating}</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{v.notRatedYet}</p>
               </div>
             </div>
 
             {venue.facilities && venue.facilities.length > 0 && (
               <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-                <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>Facilities</h2>
+                <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>{v.facilities}</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                   {venue.facilities.map((facility) => (
                     <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
@@ -202,12 +208,12 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
 
           <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
-            <SectionTitle n="02" title="Seating Sections" />
+            <SectionTitle n="02" title={v.seatingSections} />
             <div>
               {venue.seatingMode === 'NUMBERED' ? (
                 numberedZones.length === 0 ? (
                   <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                    No seat map built yet — use Seat Map Builder to add zones and seats.
+                    {v.noSeatMap}
                   </p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
@@ -226,7 +232,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>
                           {z.zoneName}{z.level ? ` · ${z.level}` : ''}
                         </span>
-                        <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{z.count} seats</span>
+                        <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{seatsText(z.count)}</span>
                         <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
                           {z.price === null ? (
                             '—'
@@ -248,7 +254,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                                 letterSpacing: '0.02em',
                               }}
                             >
-                              FREE
+                              {v.free}
                             </span>
                           )}
                         </span>
@@ -257,7 +263,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                   </div>
                 )
               ) : sections.length === 0 ? (
-                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No seating sections defined yet.</p>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{v.noSections}</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                   {sections.map((s) => (
@@ -273,7 +279,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                       }}
                     >
                       <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{s.name}</span>
-                      <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{s.seats} seats</span>
+                      <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{seatsText(s.seats)}</span>
                       <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
                         {Number(s.price) > 0 ? (
                           formatINR(s.price)
@@ -294,7 +300,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               letterSpacing: '0.02em',
                             }}
                           >
-                            FREE
+                            {v.free}
                           </span>
                         )}
                       </span>
@@ -310,13 +316,13 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               href={`/dashboard/venue/${venue.id}/edit`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              Edit Venue
+              {v.editVenue}
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
               style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> Revenue
+              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> {v.revenue}
             </Link>
             <Button
               onClick={togglePublish}
@@ -324,7 +330,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               variant={venue.isApproved ? 'outline' : 'primary'}
               style={{ opacity: toggling ? 0.6 : 1 }}
             >
-              {toggling ? 'Updating...' : venue.isApproved ? 'Unpublish' : 'Publish Venue'}
+              {toggling ? v.updating : venue.isApproved ? v.unpublish : v.publishVenue}
             </Button>
           </div>
         </div>

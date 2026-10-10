@@ -165,12 +165,16 @@ test.describe("Seat Map Builder dialogs", () => {
     const native = failOnNativeDialog(page);
     const marker = await plantDraft(page, GA_VENUE, 5 * 60_000);
     await gotoDashboard(page, `/dashboard/venue/${GA_VENUE}/seat-map/`);
-    const dialog = page.getByRole("dialog", { name: "Restore your unsaved draft?" });
+    // data-afa-* hooks, not the English text: the Seat Map Builder follows the UI language (GEN-2610-007).
+    const dialog = page.locator("[data-afa-confirm-dialog]").getByRole("dialog");
     await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("heading", { level: 2 })).toHaveText("Restore your unsaved draft?");
     await expect(dialog).toContainText("5 minutes ago");
     await expect(dialog).toContainText("1 seat across 1 level");
     await expect(dialog).toHaveScreenshot(`seatmap-draft-${isMobile ? 390 : 1440}.png`, { maxDiffPixelRatio: 0.02 });
-    await dialog.getByRole("button", { name: "Discard" }).click();
+    const discard = dialog.locator("[data-afa-confirm-cancel]");
+    await expect(discard).toHaveText("Discard");
+    await discard.click();
     await expect(dialog).toBeHidden();
     await expect.poll(() => storedDraft(page, GA_VENUE)).not.toContain(marker);
     expect(native).toEqual([]);
@@ -180,28 +184,33 @@ test.describe("Seat Map Builder dialogs", () => {
     const native = failOnNativeDialog(page);
     const marker = await plantDraft(page, FROZEN_VENUE, 2 * 60_000);
     await gotoDashboard(page, `/dashboard/venue/${FROZEN_VENUE}/seat-map/`);
-    const unfreeze = page.getByRole("button", { name: "Unfreeze" });
-    await expect(unfreeze).toBeVisible();
+    const unfreeze = page.locator('[data-afa-freeze-toggle="unfreeze"]');
+    await expect(unfreeze).toHaveText("Unfreeze");
     await page.waitForTimeout(1_000);
     await expect(page.locator("[data-afa-confirm-dialog]"), "no restore offer on a frozen map").toHaveCount(0);
     await expect.poll(() => storedDraft(page, FROZEN_VENUE)).not.toContain(marker);
 
     await unfreeze.click();
-    const dialog = page.getByRole("dialog", { name: "Unfreeze this seat map?" });
+    const dialog = page.locator("[data-afa-confirm-dialog]").getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog.getByRole("heading", { level: 2 })).toHaveText("Unfreeze this seat map?");
+    const cancel = dialog.locator("[data-afa-confirm-cancel]");
+    await expect(cancel).toHaveText("Cancel");
+    await cancel.click();
     await expect(dialog).toBeHidden();
-    await expect(page.getByText("Seat map frozen")).toBeVisible();
+    await expect(page.locator("[data-afa-frozen-title]")).toHaveText("Seat map frozen");
     expect(native).toEqual([]);
   });
 
   test("[BUG-2609-086] at 412 the frozen banner stacks: text in one block above Unfreeze", async ({ page }) => {
     await page.setViewportSize({ width: 412, height: 915 });
     await gotoDashboard(page, `/dashboard/venue/${FROZEN_VENUE}/seat-map/`);
-    const title = page.getByText("Seat map frozen", { exact: true });
-    const rest = page.getByText(/finalized and read-only/);
-    const unfreeze = page.getByRole("button", { name: "Unfreeze" });
-    await expect(unfreeze).toBeVisible();
+    const title = page.locator("[data-afa-frozen-title]");
+    const rest = page.locator("[data-afa-frozen-message]");
+    const unfreeze = page.locator('[data-afa-freeze-toggle="unfreeze"]');
+    await expect(title).toHaveText("Seat map frozen");
+    await expect(rest).toContainText("finalized and read-only");
+    await expect(unfreeze).toHaveText("Unfreeze");
     const t = (await title.boundingBox())!;
     const r = (await rest.boundingBox())!;
     const u = (await unfreeze.boundingBox())!;

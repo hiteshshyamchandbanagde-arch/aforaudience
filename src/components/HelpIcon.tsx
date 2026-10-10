@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
 
 // Feedback c6416be5 (Hitesh's decision, 26 Jul session 36): a small (i)
 // icon attached to a field's label, showing a short explanation on
@@ -10,6 +11,7 @@ import Button from '@/components/ui/Button'
 // intentionally - most fields are self-explanatory, only a genuine
 // handful need this (see call sites).
 export default function HelpIcon({ text }: { text: string }) {
+  const { t: tr } = useLocale()
   const [open, setOpen] = useState(false)
 
   return (
@@ -20,7 +22,7 @@ export default function HelpIcon({ text }: { text: string }) {
         onClick={() => setOpen((v) => !v)}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        aria-label="More info"
+        aria-label={tr.venueDashboard.venueForm.moreInfo}
         style={{
           width: '16px',
           height: '16px',

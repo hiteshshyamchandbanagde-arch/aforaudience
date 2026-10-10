@@ -17,6 +17,8 @@ import AddressAutocomplete from '@/components/AddressAutocomplete'
 import Button, { variantStyle } from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
+import { useLocale } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 
 interface Venue {
   id: string
@@ -60,6 +62,13 @@ const labelStyle = {
   color: 'var(--afa-text-primary)',
 }
 
+const WEEK_DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const
+
+/** The weekday's name in the UI language (5 Jan 2026 is a Monday). */
+function weekdayName(locale: string, index: number) {
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2026, 0, 5 + index)))
+}
+
 function makeId() {
   return Math.random().toString(36).slice(2, 10)
 }
@@ -72,6 +81,9 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const { showToast } = useToast()
+  const { locale, t: tr } = useLocale()
+  const ve = tr.venueDashboard.venueEdit
+  const view = tr.venueDashboard.venueView
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', lat: '', lng: '', placeId: '', acousticRating: '', mapsUrl: '' })
   const [facilities, setFacilities] = useState<string[]>([])
@@ -96,8 +108,8 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
       try {
         const res = await fetch(`/api/venues/${id}/owner`)
         if (!res.ok) {
-          if (res.status === 403) throw new Error('You do not have access to this venue')
-          throw new Error('Venue not found')
+          if (res.status === 403) throw new Error(view.accessDenied)
+          throw new Error(view.notFound)
         }
         const data: Venue = await res.json()
         setVenue(data)
@@ -159,13 +171,13 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
     // dropped at save time.
     if (venue?.seatingMode === 'GENERAL_ADMISSION') {
       if (sections.length === 0) {
-        showToast('Add at least one seating section with a name and seat count.', 'error')
+        showToast(ve.noSectionsError, 'error')
         setSaving(false)
         return
       }
       const incomplete = findIncompleteSections(sections)
       if (incomplete.length > 0) {
-        showToast(`${incomplete.length} section${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a name, seat count, or price (check "Free" for a free section) - fill ${incomplete.length === 1 ? 'it' : 'them'} in or remove ${incomplete.length === 1 ? 'it' : 'them'} with the ✕ button before saving.`, 'error')
+        showToast(countText(locale, incomplete.length, ve.incompleteSectionsOne, ve.incompleteSectionsOther), 'error')
         setSaving(false)
         return
       }
@@ -177,18 +189,18 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
     // section validation regardless of seatingMode.
     const duplicateSectionNames = findDuplicateSectionNames(sections)
     if (venue?.seatingMode === 'GENERAL_ADMISSION' && duplicateSectionNames.length > 0) {
-      showToast(`Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.`, 'error')
+      showToast(countText(locale, duplicateSectionNames.length, tr.venueDashboard.venueForm.duplicateNamesOne, tr.venueDashboard.venueForm.duplicateNamesOther).replace('{names}', duplicateSectionNames.join('", "')), 'error')
       setSaving(false)
       return
     }
 
     if (rateType === 'HOURLY' && (!hourlyRate || Number(hourlyRate) <= 0)) {
-      showToast('Set an hourly rental rate.', 'error')
+      showToast(ve.setHourlyRate, 'error')
       setSaving(false)
       return
     }
     if (rateType === 'DAILY' && (!dailyRate || Number(dailyRate) <= 0)) {
-      showToast('Set a daily rental rate.', 'error')
+      showToast(ve.setDailyRate, 'error')
       setSaving(false)
       return
     }
@@ -222,51 +234,51 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to update venue')
+        throw new Error(data.error || ve.updateFailed)
       }
 
-      showToast('Venue saved.', 'success')
+      showToast(ve.saved, 'success')
       router.push(`/dashboard/venue/${id}`)
     } catch (err: any) {
-      showToast(err.message || 'Failed to update venue', 'error')
+      showToast(err.message || ve.updateFailed, 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error && !venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Venue not found</div></>)
+  if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{view.notFound}</div></>)
 
   return (
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <BackLink href={`/dashboard/venue/${id}`} label="Back to Venue" />
+          <BackLink href={`/dashboard/venue/${id}`} label={ve.backToVenue} />
 
           <PageTitle size="lg" style={{ marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
-            Edit Venue
+            {ve.title}
           </PageTitle>
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
-            Update your venue details and seating layout.
+            {ve.subtitle}
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
-                Basic Details
+                {ve.basicDetails}
               </h2>
 
               <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={labelStyle}>Venue Name *</label>
+                <label style={labelStyle}>{ve.venueName}</label>
                 <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} required />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Address *</label>
+                  <label style={labelStyle}>{ve.address}</label>
                   <AddressAutocomplete
                     value={formData.address}
                     onChange={(address) => setFormData((prev) => ({ ...prev, address }))}
@@ -286,7 +298,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>City *</label>
+                  <label style={labelStyle}>{ve.city}</label>
                   <CityAutocomplete
                     value={formData.city}
                     onChange={(city) => setFormData((prev) => ({ ...prev, city, state: '', country: '' }))}
@@ -306,7 +318,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               {/* Moved directly after Address/City/State/Country (PR #212) -
                   see venue create page for the full rationale. */}
               <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={labelStyle}>Google Maps Link</label>
+                <label style={labelStyle}>{ve.mapsLink}</label>
                 {formData.lat && formData.lng ? (
                   <>
                     <a
@@ -321,32 +333,32 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                       rel="noopener noreferrer"
                       style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-fill-solid)', fontWeight: 600 }}
                     >
-                      <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />&nbsp;Directions
+                      <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />&nbsp;{ve.directions}
                     </a>
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
-                      Derived automatically from the address you picked above. Edit the address to change it.
+                      {ve.mapsDerived}
                     </p>
                   </>
                 ) : (
                   <>
-                    <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
+                    <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder={ve.mapsPlaceholder} style={inputStyle} />
                     <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
-                      Optional - improves accuracy. Get Directions still works from your address either way.
+                      {ve.mapsOptional}
                     </p>
                   </>
                 )}
               </div>
 
               <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={labelStyle}>Facilities</label>
+                <label style={labelStyle}>{view.facilities}</label>
                 <FacilitiesPicker value={facilities} onChange={setFacilities} />
               </div>
 
               <div>
-                <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
-                <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.5 }}>Not Rated Yet</p>
+                <label style={labelStyle}>{view.acousticRating} <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
+                <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.5 }}>{view.notRatedYet}</p>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>
-                  Based on real feedback from Artists and Organisers who've performed/booked here - not self-reported.
+                  {ve.acousticNote}
                 </p>
               </div>
             </section>
@@ -357,15 +369,15 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 venue creation. Mirrors venue create page's section exactly. */}
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
-                Rental Rate
+                {ve.rentalRate}
               </h2>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
-                What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
+                {ve.rentalRateNote}
               </p>
 
               <label style={{ ...labelStyle, display: 'flex', alignItems: 'center' }}>
-                Rate Type
-                <HelpIcon text={'Hourly and Daily publish a fixed rate. Flexible means no fixed rate - Organisers send you a date and duration, and you respond with a quote before it\'s confirmed.'} />
+                {ve.rateType}
+                <HelpIcon text={ve.rateTypeHelp} />
               </label>
               <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-18px)' }}>
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
@@ -379,7 +391,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                     onClick={() => setRateType(t)}
                     style={{ flex: 1 }}
                   >
-                    {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
+                    {t === 'HOURLY' ? ve.hourly : t === 'DAILY' ? ve.daily : ve.flexible}
                   </Button>
                 ))}
               </div>
@@ -387,26 +399,26 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               {rateType === 'HOURLY' && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-2)' }}>
                   <div>
-                    <label style={labelStyle}>Rate per hour (₹) *</label>
-                    <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" placeholder="e.g., 2500" style={inputStyle} />
+                    <label style={labelStyle}>{ve.ratePerHour}</label>
+                    <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" placeholder={ve.ratePerHourPlaceholder} style={inputStyle} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Minimum duration (hours)</label>
-                    <input type="number" value={minDurationHours} onChange={(e) => setMinDurationHours(e.target.value)} min="1" placeholder="e.g., 3" style={inputStyle} />
+                    <label style={labelStyle}>{ve.minDuration}</label>
+                    <input type="number" value={minDurationHours} onChange={(e) => setMinDurationHours(e.target.value)} min="1" placeholder={ve.minDurationPlaceholder} style={inputStyle} />
                   </div>
                 </div>
               )}
 
               {rateType === 'DAILY' && (
                 <div style={{ marginBottom: 'var(--afa-space-2)' }}>
-                  <label style={labelStyle}>Rate per day (₹) *</label>
-                  <input type="number" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} min="0" placeholder="e.g., 15000" style={{ ...inputStyle, maxWidth: '240px' }} />
+                  <label style={labelStyle}>{ve.ratePerDay}</label>
+                  <input type="number" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} min="0" placeholder={ve.ratePerDayPlaceholder} style={{ ...inputStyle, maxWidth: '240px' }} />
                 </div>
               )}
 
               {rateType === 'FLEXIBLE' && (
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                  No fixed rate published. Organisers will send you a duration and date, and you'll respond with a quote before it's confirmed.
+                  {ve.flexibleNote}
                 </p>
               )}
 
@@ -414,17 +426,17 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-06)' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? 'var(--afa-space-14px)' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
-                    Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
+                    {ve.dayOverrides} <span style={{ fontWeight: 400, opacity: 0.6 }}>{ve.dayOverridesHint}</span>
                   </label>
 
                   {useDayOverrides && (
                     <div>
                       <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-10px)' }}>
-                        Leave a day blank to use your base rate above for that day.
+                        {ve.dayOverridesNote}
                       </p>
-                      {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
+                      {WEEK_DAYS.map((day, dayIndex) => (
                         <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid var(--afa-tint-04)' }}>
-                          <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
+                          <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>{weekdayName(locale, dayIndex)}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
                             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>₹</span>
                             <input
@@ -446,21 +458,21 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
-                Seating & Pricing
+                {ve.seatingPricing}
               </h2>
 
               {venue.seatingMode === 'GENERAL_ADMISSION' && (
                 <>
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
-                    Add, edit, or remove sections freely — capacity updates automatically.
+                    {ve.sectionsNote}
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
 
                   <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-tint-04)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
                     <div>
-                      <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Have real numbered seats instead?</div>
+                      <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{ve.numberedInsteadTitle}</div>
                       <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                        Section pricing above is for General Admission. Use the Seat Map builder to lay out individual numbered seats on a canvas matching your venue's shape.
+                        {ve.numberedInsteadBody}
                       </div>
                     </div>
                     {/* GEN-2609-118 - outline (both links): Save is this screen's one primary action. */}
@@ -468,7 +480,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                       href={`/dashboard/venue/${id}/seat-map`}
                       style={{ ...variantStyle('outline-neutral', false, 'md'), flexShrink: 0, whiteSpace: 'nowrap' }}
                     >
-                      Open Seat Map Builder →
+                      {ve.openSeatMap}
                     </Link>
                   </div>
                 </>
@@ -477,16 +489,16 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               {venue.seatingMode === 'NUMBERED' && (
                 <div style={{ padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-tint-04)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
                   <div>
-                    <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>This venue uses Numbered Seating</div>
+                    <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{ve.numberedTitle}</div>
                     <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                      Seats, rows, and sections are managed entirely in the Seat Map Builder — nothing to fill in here. Capacity ({venue.capacity} seats) reflects your saved seat map.
+                      {countText(locale, venue.capacity, ve.numberedBodyOne, ve.numberedBodyOther)}
                     </div>
                   </div>
                   <Link
                     href={`/dashboard/venue/${id}/seat-map`}
                     style={{ ...variantStyle('outline-neutral', false, 'md'), flexShrink: 0, whiteSpace: 'nowrap' }}
                   >
-                    Open Seat Map Builder →
+                    {ve.openSeatMap}
                   </Link>
                 </div>
               )}
@@ -502,7 +514,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 onClick={() => save(true)}
                 style={{ opacity: saving ? 0.6 : 1 }}
               >
-                {saving ? 'Saving...' : venue.isApproved ? 'Save Changes' : 'Save & Publish'}
+                {saving ? tr.dashboardChrome.saving : venue.isApproved ? ve.saveChanges : ve.savePublish}
               </Button>
               {venue.isApproved ? (
                 <Button
@@ -513,7 +525,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   disabled={saving}
                   onClick={() => save(false)}
                 >
-                  Save & Unpublish
+                  {ve.saveUnpublish}
                 </Button>
               ) : (
                 <Button
@@ -524,11 +536,11 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   disabled={saving}
                   onClick={() => save(undefined)}
                 >
-                  Save as Draft
+                  {ve.saveDraft}
                 </Button>
               )}
               <Link href={`/dashboard/venue/${id}`} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
-                Cancel
+                {tr.dashboardChrome.cancel}
               </Link>
             </div>
           </form>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface PlacePrediction {
   placeId: string
@@ -37,6 +38,7 @@ interface CityAutocompleteProps {
 // what makes Google bill the whole search-and-pick as one cheap
 // session instead of per-keystroke (see src/lib/places.ts).
 export default function CityAutocomplete({ value, onChange, onResolved, inputStyle, placeholder }: CityAutocompleteProps) {
+  const f = useLocale().t.venueDashboard.venueForm
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -112,7 +114,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
         value={value}
         onChange={(e) => { onChange(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
-        placeholder={placeholder ?? 'Start typing a city...'}
+        placeholder={placeholder ?? f.cityPlaceholder}
         style={inputStyle}
         autoComplete="off"
       />
@@ -164,7 +166,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
             padding: 'var(--afa-space-1) var(--afa-space-2px)',
           }}
         >
-          Searching...
+          {f.searching}
         </div>
       )}
     </div>

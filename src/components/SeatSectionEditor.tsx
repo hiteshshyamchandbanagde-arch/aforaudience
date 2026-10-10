@@ -5,6 +5,8 @@ import { normalizeWhitespace, normalizeForCompare } from "@/lib/text"
 import { IconSection } from "@/components/dashboard/VenuePortalUI"
 import Button from "@/components/ui/Button"
 import { formatINR } from "@/lib/money-display"
+import { useLocale } from "@/lib/i18n/translate"
+import { countText } from "@/lib/i18n/plural"
 
 export type SeatSection = {
   id: string
@@ -130,13 +132,15 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
   }
 
   const duplicateNames = new Set(findDuplicateSectionNames(sections))
+  const { locale, t: tr } = useLocale()
+  const f = tr.venueDashboard.venueForm
 
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)" }}>
         {sections.length === 0 && (
           <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, fontStyle: "italic" }}>
-            No sections yet. Add one to start designing your seating layout — e.g. "VIP Front Row", "General", "Balcony".
+            {f.noSections}
           </p>
         )}
 
@@ -171,7 +175,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           >
             <input
               type="text"
-              placeholder={`Section name (e.g. Section ${i + 1})`}
+              placeholder={f.sectionNamePlaceholder.replace("{n}", String(i + 1))}
               value={section.name}
               onChange={(e) => updateSection(section.id, "name", e.target.value)}
               onBlur={(e) => {
@@ -187,7 +191,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             />
             <input
               type="number"
-              placeholder="Seats"
+              placeholder={f.seats}
               min={0}
               max={100000}
               maxLength={6}
@@ -200,7 +204,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-text-primary)", opacity: 0.5, fontSize: "var(--afa-text-body)" }}>₹</span>
                 <input
                   type="number"
-                  placeholder="Price"
+                  placeholder={f.price}
                   min={0}
                   max={10000000}
                   maxLength={8}
@@ -222,14 +226,14 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                   onChange={(e) => setSectionFree(section.id, e.target.checked)}
                   style={{ margin: 0 }}
                 />
-                Free
+                {f.free}
               </label>
             </div>
             <Button
               variant="icon"
               type="button"
               onClick={() => removeSection(section.id)}
-              aria-label="Remove section"
+              aria-label={f.removeSection}
               className="ga-remove-btn"
               style={{
                 color: "var(--afa-text-muted)",
@@ -247,7 +251,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
 
       {duplicateNames.size > 0 && (
         <p style={{ marginTop: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)", fontWeight: 600 }}>
-          Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
+          {countText(locale, duplicateNames.size, f.duplicateNamesOne, f.duplicateNamesOther).replace("{names}", Array.from(duplicateNames).join('", "'))}
         </p>
       )}
 
@@ -258,7 +262,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         }).length
         return partialCount > 0 ? (
           <p style={{ marginTop: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>
-            {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name, seat count, or price (check "Free" for a free section) — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
+            {countText(locale, partialCount, f.incompleteRowsOne, f.incompleteRowsOther)}
           </p>
         ) : null
       })()}
@@ -271,7 +275,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         className="ga-add-row"
         style={{ marginTop: "var(--afa-space-14px)" }}
       >
-        <IconSection size={16} /> Add another section
+        <IconSection size={16} /> {f.addSection}
       </Button>
 
       {sections.length > 0 && (
@@ -288,14 +292,14 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         >
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
-            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>total seats</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>{f.totalSeats}</div>
           </div>
           <div style={{ width: "1px", background: "var(--afa-tint-12)" }} />
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
               {prices.length ? (minPrice === maxPrice ? formatINR(minPrice) : `${formatINR(minPrice)}–${formatINR(maxPrice)}`) : "—"}
             </div>
-            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>per-seat range</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>{f.perSeatRange}</div>
           </div>
         </div>
       )}

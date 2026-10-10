@@ -149,8 +149,10 @@ test.describe("Vinayak", () => {
 
   test("[GEN-2609-114] venue bookings: the outline 'Message Organiser' button's text is --afa-sage-bright, at least 4.5:1", async ({ page }) => {
     await gotoDashboard(page, "/dashboard/venue/bookings/");
-    const message = page.getByRole("button", { name: /Message Organiser/ }).filter({ visible: true }).first();
+    // data-afa-* hook, not the English text: venue Bookings follows the UI language (GEN-2610-007).
+    const message = page.locator('[data-afa-message-button="VENUE_BOOKING"]').filter({ visible: true }).first();
     await expect(message, "Vinayak has a venue booking in the QA seed").toBeVisible();
+    await expect(message).toContainText("Message Organiser");
     await expectToneText(page, message, "--afa-sage-bright", null, "Message Organiser button");
   });
 });

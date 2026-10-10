@@ -9,7 +9,7 @@ import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import { formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
 
@@ -47,14 +47,15 @@ const POLL_MS = 20000
 
 const money = formatINR
 
-function timeAgo(iso: string) {
+// The "ago" words are Revenue Overview's (venueDashboard.sales).
+function timeAgo(iso: string, s: Dictionary['venueDashboard']['sales']) {
   const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 5) return 'just now'
-  if (secs < 60) return `${secs}s ago`
+  if (secs < 5) return s.justNow
+  if (secs < 60) return s.secondsAgo.replace('{n}', String(secs))
   const mins = Math.floor(secs / 60)
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 60) return s.minutesAgo.replace('{n}', String(mins))
   const hrs = Math.floor(mins / 60)
-  return `${hrs}h ago`
+  return s.hoursAgo.replace('{n}', String(hrs))
 }
 
 function shortDate(iso: string, locale: string) {
@@ -63,6 +64,8 @@ function shortDate(iso: string, locale: string) {
 
 function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
   const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.venueSales
+  const s = tr.venueDashboard.sales
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -84,8 +87,8 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     try {
       const res = await fetch(`/api/venues/${id}/sales?range=${r}`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this venue')
-        throw new Error('Could not load revenue data')
+        if (res.status === 403) throw new Error(tr.venueDashboard.venueView.accessDenied)
+        throw new Error(v.loadFailed)
       }
       const json = await res.json()
       setData(json)
@@ -96,7 +99,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, tr, v])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -109,10 +112,10 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [status, range, fetchSales])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
   if (error && !data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
-  if (!data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></>)
+  if (!data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{s.noData}</div></>)
 
   const { venue, totals, timeline, recentBookings } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
@@ -123,18 +126,18 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           <div style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
-            <BackLink href={`/dashboard/venue/${id}`} label="Back to Venue" />
+            <BackLink href={`/dashboard/venue/${id}`} label={tr.venueDashboard.venueEdit.backToVenue} />
             <Link href="/dashboard/venue/sales" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
-              All venues →
+              {v.allVenues}
             </Link>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
             <PageTitle>
-              {venue.name} — Revenue
+              {v.title.replace('{venue}', venue.name)}
             </PageTitle>
             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
-              {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
+              {refreshedAt ? s.updated.replace('{ago}', timeAgo(refreshedAt.toISOString(), s)).replace('{n}', String(POLL_MS / 1000)) : ''}
             </span>
           </div>
 
@@ -143,26 +146,26 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{s.staleData.replace('{error}', error)}</div>
           )}
 
           {/* Summary cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub={`${tr.common.byEventDate}, no platform cut`} />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} sub={tr.common.byEventDate} />
-            <SummaryCard label="Upcoming / Completed (all-time)" value={`${totals.upcomingCount} / ${totals.completedCount}`} />
+            <SummaryCard label={v.grossRevenue} value={money(totals.grossRevenue)} sub={v.grossSub.replace('{byEventDate}', tr.common.byEventDate)} />
+            <SummaryCard label={s.confirmedBookings} value={String(totals.confirmedBookingsCount)} sub={tr.common.byEventDate} />
+            <SummaryCard label={v.upcomingCompleted} value={`${totals.upcomingCount} / ${totals.completedCount}`} />
             <SummaryCard
-              label="Pending (awaiting confirmation)"
+              label={v.pending}
               value={String(totals.pendingCount)}
-              sub={totals.pendingCount > 0 ? `${money(totals.pendingValue)} at stake` : 'none right now'}
+              sub={totals.pendingCount > 0 ? v.atStake.replace('{amount}', money(totals.pendingValue)) : v.noneRightNow}
               muted
             />
           </div>
 
           {/* Timeline */}
-          <Section title="Revenue over time">
+          <Section title={s.revenueOverTime}>
             {timeline.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{v.noConfirmedInRange}</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
                 {timeline.map((t) => (
@@ -178,18 +181,18 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </Section>
 
           {/* Recent bookings */}
-          <Section title="Recent bookings">
+          <Section title={v.recentBookings}>
             {recentBookings.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{s.noBookingsInRangeDot}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                 {recentBookings.map((b) => (
                   <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--afa-space-1)', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-10px) var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
-                    <span style={{ color: 'var(--afa-text-secondary)' }}>{b.eventTitle || 'No linked event'}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{b.eventTitle || v.noLinkedEvent}</span>
                     <span style={{ color: 'var(--afa-text-secondary)' }}>{shortDate(b.fromDate, locale)} – {shortDate(b.toDate, locale)}</span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
-                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt)}</span>
+                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt, s)}</span>
                   </div>
                 ))}
               </div>

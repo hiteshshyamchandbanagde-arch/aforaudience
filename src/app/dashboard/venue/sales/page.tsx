@@ -14,8 +14,8 @@ import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/VenuePortalUI'
 import Button from '@/components/ui/Button'
 import { calendarDate, formatDate } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
-import { countNoun } from '@/lib/i18n/plural'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 import { chartTooltipProps } from '@/lib/chart-tooltip'
 import { StatLabel } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
@@ -83,14 +83,16 @@ function formatBucketLabel(key: string, locale: string) {
   return formatDate(d, 'short', locale)
 }
 
-function timeAgo(iso: string) {
+type SalesText = Dictionary['venueDashboard']['sales']
+
+function timeAgo(iso: string, v: SalesText) {
   const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secs < 5) return 'just now'
-  if (secs < 60) return `${secs}s ago`
+  if (secs < 5) return v.justNow
+  if (secs < 60) return v.secondsAgo.replace('{n}', String(secs))
   const mins = Math.floor(secs / 60)
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 60) return v.minutesAgo.replace('{n}', String(mins))
   const hrs = Math.floor(mins / 60)
-  return `${hrs}h ago`
+  return v.hoursAgo.replace('{n}', String(hrs))
 }
 
 // Guards the "0 -> any value reads as +Infinity%" case - both a genuinely
@@ -103,6 +105,7 @@ function delta(current: number, previous: number): number | null {
 
 export default function VenueOwnerSalesOverviewPage() {
   const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.sales
   const { data: session, status } = useSession()
   const router = useRouter()
   const [range, setRange] = useState('all')
@@ -123,8 +126,8 @@ export default function VenueOwnerSalesOverviewPage() {
     try {
       const res = await fetch(`/api/venues/sales-overview?range=${r}`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this page')
-        throw new Error('Could not load revenue overview')
+        if (res.status === 403) throw new Error(v.noAccess)
+        throw new Error(v.loadFailed)
       }
       const json = await res.json()
       setData(json)
@@ -135,7 +138,7 @@ export default function VenueOwnerSalesOverviewPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [v])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -150,10 +153,10 @@ export default function VenueOwnerSalesOverviewPage() {
 
   useEffect(() => { setShowAllVenues(false) }, [range])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
   if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
-  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>No data</div></DashboardShell></>)
+  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>{v.noData}</div></DashboardShell></>)
 
   const { totals, previousTotals, venues, organisers, timeline } = data
   const topVenues = venues.slice(0, TOP_VENUES_SHOWN)
@@ -161,7 +164,7 @@ export default function VenueOwnerSalesOverviewPage() {
   // BUG-2609-070 - with no revenue anywhere the bar chart was venue names
   // over a meaningless ₹0-₹4 axis; show the empty state instead (the
   // venue table below stays).
-  const noVenueRevenue = venues.every((v) => !v.revenue)
+  const noVenueRevenue = venues.every((row) => !row.revenue)
 
   return (
     <>
@@ -171,28 +174,28 @@ export default function VenueOwnerSalesOverviewPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
             <PageHead
-              eyebrow="Analytics"
-              title="Revenue Overview"
-              description={refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : undefined}
+              eyebrow={v.eyebrow}
+              title={v.title}
+              description={refreshedAt ? v.updated.replace('{ago}', timeAgo(refreshedAt.toISOString(), v)).replace('{n}', String(POLL_MS / 1000)) : undefined}
             >
               <RangePicker value={range} onChange={setRange} />
             </PageHead>
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{v.staleData.replace('{error}', error)}</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
-            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} />
-            <StatCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
-            <StatCard label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
-            <StatCard label="Venues" value={String(totals.venuesCount)} sub="no platform cut on rentals" />
+            <StatCard id="total-revenue" label={v.totalRevenue} value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} vs={v.vsLastPeriod} />
+            <StatCard id="confirmed-bookings" label={v.confirmedBookings} value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} vs={v.vsLastPeriod} />
+            <StatCard id="avg-booking-value" label={v.avgBookingValue} value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} vs={v.vsLastPeriod} />
+            <StatCard id="venues" label={v.venues} value={String(totals.venuesCount)} sub={v.venuesSub} />
           </div>
 
-          <Section title="Revenue over time">
+          <Section id="revenue-over-time" title={v.revenueOverTime}>
             {timeline.length < 3 ? (
-              <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption="Not enough bookings yet to show a trend" />
+              <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption={v.notEnoughTrend} />
             ) : (
               <div style={{ height: '260px', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -222,7 +225,7 @@ export default function VenueOwnerSalesOverviewPage() {
                       {...chartTooltipProps}
                       cursor={{ style: { stroke: 'var(--afa-amber-border)' }, strokeDasharray: '3 3' }}
                       labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label, locale) : String(label ?? ''))}
-                      formatter={(v: any) => [money(Number(v)), 'Revenue']}
+                      formatter={(value: any) => [money(Number(value)), v.revenue]}
                     />
                     <Area type="monotone" dataKey="revenue" style={{ stroke: 'var(--afa-amber)' }} strokeWidth={2} fill="url(#revFill)" dot={false} activeDot={{ r: 4, style: { fill: 'var(--afa-amber)' } }} />
                   </AreaChart>
@@ -231,30 +234,30 @@ export default function VenueOwnerSalesOverviewPage() {
             )}
           </Section>
 
-          <Section title="By venue">
+          <Section id="by-venue" title={v.byVenue}>
             {venues.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>{v.noVenues}</p>
             ) : (
               <>
                 {noVenueRevenue ? (
                   <div style={{ marginBottom: 'var(--afa-space-5)' }}>
-                    <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption="No bookings in this range" />
+                    <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption={v.noBookingsInRange} />
                   </div>
                 ) : (
                 <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: 'var(--afa-space-5)' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
                       <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} horizontal={false} />
-                      <XAxis type="number" {...moneyAxis(Math.max(0, ...topVenues.map((v) => v.revenue)))} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
+                      <XAxis type="number" {...moneyAxis(Math.max(0, ...topVenues.map((row) => row.revenue)))} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
                         {...chartTooltipProps}
                         cursor={{ style: { fill: 'var(--afa-tint-04)' } }}
-                        formatter={(v: any) => [money(Number(v)), 'Revenue']}
+                        formatter={(value: any) => [money(Number(value)), v.revenue]}
                       />
                       <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={22}>
-                        {topVenues.map((v, i) => (
-                          <Cell key={v.id} style={{ fill: i === 0 ? 'var(--afa-amber)' : 'var(--afa-amber-border)' }} />
+                        {topVenues.map((row, i) => (
+                          <Cell key={row.id} style={{ fill: i === 0 ? 'var(--afa-amber)' : 'var(--afa-amber-border)' }} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -268,25 +271,26 @@ export default function VenueOwnerSalesOverviewPage() {
                     size="md"
                     fullWidth={false}
                     onClick={() => setShowAllVenues(true)}
+                    data-afa-venues-toggle="all"
                     className="avp-hover-border"
                     style={{ marginBottom: showAllVenues ? 'var(--afa-space-4)' : 0 }}
                   >
-                    View all {venues.length} venues
+                    {v.viewAll.replace('{n}', String(venues.length))}
                   </Button>
                 )}
 
                 {(showAllVenues || !hasMoreVenues) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', marginTop: hasMoreVenues ? 'var(--afa-space-4)' : 0 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 var(--afa-space-3)' }}>
-                      <span>Venue</span>
-                      <span>City</span>
-                      <span>Revenue</span>
-                      <span>Bookings</span>
+                      <span>{v.colVenue}</span>
+                      <span>{v.colCity}</span>
+                      <span>{v.colRevenue}</span>
+                      <span>{v.colBookings}</span>
                     </div>
-                    {venues.map((v) => (
+                    {venues.map((row) => (
                       <Link
-                        key={v.id}
-                        href={`/dashboard/venue/${v.id}/sales?range=${range}`}
+                        key={row.id}
+                        href={`/dashboard/venue/${row.id}/sales?range=${range}`}
                         className="avp-hover-border"
                         style={{
                           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
@@ -294,10 +298,10 @@ export default function VenueOwnerSalesOverviewPage() {
                           border: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                         }}
                       >
-                        <span style={{ fontWeight: 600 }}>{v.name}</span>
-                        <span style={{ color: 'var(--afa-text-secondary)' }}>{v.city}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)' }}>{money(v.revenue)}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)' }}>{v.bookings}</span>
+                        <span style={{ fontWeight: 600 }}>{row.name}</span>
+                        <span style={{ color: 'var(--afa-text-secondary)' }}>{row.city}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)' }}>{money(row.revenue)}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)' }}>{row.bookings}</span>
                       </Link>
                     ))}
                     {showAllVenues && (
@@ -307,10 +311,11 @@ export default function VenueOwnerSalesOverviewPage() {
                         size="md"
                         fullWidth={false}
                         onClick={() => setShowAllVenues(false)}
+                        data-afa-venues-toggle="top"
                         className="avp-hover-border"
                         style={{ alignSelf: 'flex-start' }}
                       >
-                        Show top {TOP_VENUES_SHOWN} only
+                        {v.showTop.replace('{n}', String(TOP_VENUES_SHOWN))}
                       </Button>
                     )}
                   </div>
@@ -321,12 +326,12 @@ export default function VenueOwnerSalesOverviewPage() {
 
           {/* Demoted relative to "By venue" - secondary context for a
               venue owner (who they're renting to), not a primary metric. */}
-          <div style={{ padding: 'var(--afa-space-1) var(--afa-space-1) var(--afa-space-40px)' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-10px)' }}>
-              By organiser
+          <div data-afa-section="by-organiser" style={{ padding: 'var(--afa-space-1) var(--afa-space-1) var(--afa-space-40px)' }}>
+            <p data-afa-section-title style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-10px)' }}>
+              {v.byOrganiser}
             </p>
             {organisers.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{v.noBookingsInRangeDot}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden', border: '1px solid var(--afa-tint-06)' }}>
                 {organisers.map((o) => (
@@ -339,7 +344,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{money(o.revenue)}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{countNoun(o.bookings, 'booking')}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{countText(locale, o.bookings, v.bookingsOne, v.bookingsOther)}</span>
                   </div>
                 ))}
               </div>
@@ -352,14 +357,14 @@ export default function VenueOwnerSalesOverviewPage() {
   )
 }
 
-function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
+function StatCard({ id, label, value, delta, sub, vs = '' }: { id: string; label: string; value: string; delta?: number | null; sub?: string; vs?: string }) {
   return (
-    <Card style={{ padding: 'var(--afa-space-18px)' }}>
+    <Card data-afa-stat={id} style={{ padding: 'var(--afa-space-18px)' }}>
       <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{label}</StatLabel>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null && (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage-bright)' : 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)', marginBottom: 0 }}>
-          {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
+          {delta >= 0 ? '▲' : '▼'} {vs.replace('{pct}', Math.abs(delta).toFixed(1))}
         </p>
       )}
       {sub && (
@@ -369,10 +374,10 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <Card style={{ padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)' }}>
-      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-4)' }}>{title}</h2>
+    <Card data-afa-section={id} style={{ padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)' }}>
+      <h2 data-afa-section-title style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-4)' }}>{title}</h2>
       {children}
     </Card>
   )

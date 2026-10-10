@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface PlacePrediction {
   placeId: string
@@ -47,6 +48,7 @@ interface AddressAutocompleteProps {
 // text, since many real venues here (homes, informal spaces) won't
 // have a clean Google-indexed listing.
 export default function AddressAutocomplete({ value, onChange, onResolved, onManualEdit, inputStyle, placeholder }: AddressAutocompleteProps) {
+  const f = useLocale().t.venueDashboard.venueForm
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -123,7 +125,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
         value={value}
         onChange={(e) => { onManualEdit?.(); onChange(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
-        placeholder={placeholder ?? 'Start typing an address or venue name...'}
+        placeholder={placeholder ?? f.addressPlaceholder}
         style={inputStyle}
         autoComplete="off"
       />
@@ -166,7 +168,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
       )}
       {loading && open && predictions.length === 0 && (
         <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: 'var(--afa-space-1) var(--afa-space-2px)' }}>
-          Searching...
+          {f.searching}
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
 
 // Replaces the old free-text "comma separated" Facilities input, which
 // directly produced garbage public-facing data (Feedback 3213952d, session
@@ -48,6 +49,7 @@ const splitOther = (raw: string) =>
   raw.split(',').map((f) => f.trim()).filter(Boolean).slice(0, 10)
 
 export default function FacilitiesPicker({ value, onChange }: Props) {
+  const f = useLocale().t.venueDashboard.venueForm
   const presetSelected = value.filter((v) => PRESET_FACILITIES.includes(v))
   // Anything in `value` that isn't one of the presets is "Other" content -
   // this correctly round-trips existing venues that already have free-text
@@ -100,14 +102,14 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
         })}
       </div>
       <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: 'var(--afa-space-6px)' }}>
-        Other <span style={{ fontWeight: 400, opacity: 0.7 }}>(comma separated, optional)</span>
+        {f.otherFacilities} <span style={{ fontWeight: 400, opacity: 0.7 }}>{f.otherFacilitiesHint}</span>
       </label>
       <input
         type="text"
         value={otherText}
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
-        placeholder="e.g., Rooftop seating, Valet"
+        placeholder={f.otherFacilitiesPlaceholder}
         style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' }}
       />
     </div>
