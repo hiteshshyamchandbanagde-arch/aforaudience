@@ -2044,6 +2044,20 @@ const hi: Dictionary = {
       bioPlaceholder: "लोगों को अपने स्थलों के बारे में बताएँ",
       saveProfile: "प्रोफ़ाइल सेव करें",
     },
+    venueSales: {
+      loadFailed: "कमाई का डेटा लोड नहीं हो पाया",
+      allVenues: "सभी स्थल →",
+      title: "{venue} — कमाई",
+      grossRevenue: "कुल कमाई",
+      grossSub: "{byEventDate}, प्लेटफ़ॉर्म का कोई हिस्सा नहीं",
+      upcomingCompleted: "आने वाली / पूरी हुई (अब तक)",
+      pending: "लंबित (पुष्टि का इंतज़ार)",
+      atStake: "{amount} दाँव पर",
+      noneRightNow: "अभी कोई नहीं",
+      noConfirmedInRange: "इस अवधि में कोई पुष्टि हुई बुकिंग नहीं।",
+      recentBookings: "हाल की बुकिंग",
+      noLinkedEvent: "कोई जुड़ा इवेंट नहीं",
+    },
   },
 }
 
