@@ -2050,6 +2050,20 @@ const fr: Dictionary = {
       bioPlaceholder: "Parlez de vos lieux",
       saveProfile: "Enregistrer le profil",
     },
+    venueSales: {
+      loadFailed: "Impossible de charger les données de revenus",
+      allVenues: "Tous les lieux →",
+      title: "{venue} — Revenus",
+      grossRevenue: "Revenus bruts",
+      grossSub: "{byEventDate}, sans commission de la plateforme",
+      upcomingCompleted: "À venir / Terminées (depuis le début)",
+      pending: "En attente (de confirmation)",
+      atStake: "{amount} en jeu",
+      noneRightNow: "aucune pour l'instant",
+      noConfirmedInRange: "Aucune réservation confirmée sur cette période.",
+      recentBookings: "Réservations récentes",
+      noLinkedEvent: "Aucun événement lié",
+    },
   },
 }
 
