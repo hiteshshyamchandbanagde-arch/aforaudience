@@ -2045,6 +2045,20 @@ const te: Dictionary = {
       bioPlaceholder: "మీ వేదికల గురించి ప్రజలకు చెప్పండి",
       saveProfile: "ప్రొఫైల్ సేవ్ చేయండి",
     },
+    venueSales: {
+      loadFailed: "ఆదాయ డేటా లోడ్ కాలేదు",
+      allVenues: "అన్ని వేదికలు →",
+      title: "{venue} — ఆదాయం",
+      grossRevenue: "స్థూల ఆదాయం",
+      grossSub: "{byEventDate}, ప్లాట్‌ఫామ్ వాటా లేదు",
+      upcomingCompleted: "రాబోయేవి / పూర్తయినవి (ఇప్పటివరకు)",
+      pending: "పెండింగ్ (నిర్ధారణ కోసం వేచి ఉంది)",
+      atStake: "{amount} ప్రమాదంలో ఉంది",
+      noneRightNow: "ప్రస్తుతం ఏమీ లేదు",
+      noConfirmedInRange: "ఈ వ్యవధిలో నిర్ధారించిన బుకింగ్‌లు లేవు.",
+      recentBookings: "ఇటీవలి బుకింగ్‌లు",
+      noLinkedEvent: "లింక్ చేసిన ఈవెంట్ లేదు",
+    },
   },
 }
 
