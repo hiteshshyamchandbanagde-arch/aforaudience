@@ -2090,6 +2090,37 @@ const en = {
       addLevelButton: "+ Add level",
       levelsNote: "Each level has its own independent seat layout - build them one at a time using Guided Setup or Draw It Myself below.",
     },
+    // Bookings (/dashboard/venue/bookings): revenue cards, calendar, Pending and Past Requests.
+    bookings: {
+      loadFailed: "Failed to fetch booking requests",
+      updateFailed: "Failed to update booking",
+      confirmedToast: "Booking confirmed.",
+      rejectedToast: "Booking rejected.",
+      eyebrow: "Bookings & Revenue",
+      title: "Booking Requests",
+      description: "Revenue is gross rental income (not netted against the platform's flat booking fee). Multi-day bookings are marked on their start date only.",
+      thisMonth: "This month",
+      totalConfirmed: "Total confirmed",
+      pendingValue: "Pending value",
+      // The calendar's ← and → buttons (icon only; these are their accessible names).
+      prevMonth: "Previous month",
+      nextMonth: "Next month",
+      untitledEvent: "Untitled event",
+      // Status words, lower case as shown; the stored status stays English.
+      statusPending: "pending",
+      statusConfirmed: "confirmed",
+      statusCancelled: "cancelled",
+      statusRefunded: "refunded",
+      // Followed by the count in brackets when there are any, e.g. "Pending (2)".
+      pending: "Pending",
+      noPending: "No pending booking requests.",
+      // {venue}, {city}: the venue's; {organiser}: the Organiser's name.
+      requestLine: "for {venue}, {city} · requested by {organiser}",
+      confirm: "Confirm",
+      reject: "Reject",
+      pastRequests: "Past Requests",
+      messageOrganiser: "Message Organiser",
+    },
   },
 }
 

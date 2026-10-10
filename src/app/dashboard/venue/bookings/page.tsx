@@ -11,7 +11,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 import { calendarDate, formatDate, istMonthKey } from '@/lib/format-date'
-import { useLocale } from '@/lib/i18n/translate'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { StatLabel } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
@@ -35,8 +35,25 @@ const STATUS_TONE: Record<string, StatusPillTone> = {
   REFUNDED: 'muted',
 }
 
+// The status words, by the stored status (which stays English).
+function statusLabel(status: string, v: Dictionary['venueDashboard']['bookings']) {
+  if (status === 'PENDING') return v.statusPending
+  if (status === 'CONFIRMED') return v.statusConfirmed
+  if (status === 'CANCELLED') return v.statusCancelled
+  if (status === 'REFUNDED') return v.statusRefunded
+  return status.toLowerCase()
+}
+
+/** Sunday-first one-letter weekday names in the UI language (4 Jan 2026 is a Sunday). */
+function weekdayInitials(locale: string) {
+  const f = new Intl.DateTimeFormat(locale, { weekday: 'narrow', timeZone: 'UTC' })
+  return Array.from({ length: 7 }, (_, i) => f.format(new Date(Date.UTC(2026, 0, 4 + i))))
+}
+
 export default function VenueBookingsPage() {
   const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.bookings
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [bookings, setBookings] = useState<BookingRequest[]>([])
@@ -59,7 +76,7 @@ export default function VenueBookingsPage() {
   const fetchBookings = async () => {
     try {
       const res = await fetch('/api/venues/my-bookings')
-      if (!res.ok) throw new Error('Failed to fetch booking requests')
+      if (!res.ok) throw new Error(v.loadFailed)
       const data = await res.json()
       setBookings(data)
     } catch (err: any) {
@@ -84,17 +101,17 @@ export default function VenueBookingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       })
-      if (!res.ok) throw new Error('Failed to update booking')
+      if (!res.ok) throw new Error(v.updateFailed)
       await fetchBookings()
-      showToast(newStatus === 'CONFIRMED' ? 'Booking confirmed.' : 'Booking rejected.', 'success')
+      showToast(newStatus === 'CONFIRMED' ? v.confirmedToast : v.rejectedToast, 'success')
     } catch (err: any) {
-      showToast(err.message || 'Failed to update booking', 'error')
+      showToast(err.message || v.updateFailed, 'error')
     } finally {
       setActingOn(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   const pending = bookings.filter((b) => b.status === 'PENDING')
@@ -146,9 +163,9 @@ export default function VenueBookingsPage() {
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
           <div>
             <PageHead
-              eyebrow="Bookings & Revenue"
-              title="Booking Requests"
-              description="Revenue is gross rental income (not netted against the platform's flat booking fee). Multi-day bookings are marked on their start date only."
+              eyebrow={v.eyebrow}
+              title={v.title}
+              description={v.description}
             />
           </div>
 
@@ -159,9 +176,9 @@ export default function VenueBookingsPage() {
           {/* F3 - Revenue summary */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
             {[
-              { key: 'this-month', label: 'This month', value: thisMonthRevenue, sub: tr.common.byEventDate },
-              { key: 'total-confirmed', label: 'Total confirmed', value: totalRevenue, sub: null },
-              { key: 'pending-value', label: 'Pending value', value: pendingValue, sub: null },
+              { key: 'this-month', label: v.thisMonth, value: thisMonthRevenue, sub: tr.common.byEventDate },
+              { key: 'total-confirmed', label: v.totalConfirmed, value: totalRevenue, sub: null },
+              { key: 'pending-value', label: v.pendingValue, value: pendingValue, sub: null },
             ].map((s) => (
               <Card key={s.key} data-afa-stat={s.key} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
                 <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{s.label}</StatLabel>
@@ -177,6 +194,7 @@ export default function VenueBookingsPage() {
               <SharedButton
                 variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)); setSelectedDay(null) }}
+                aria-label={v.prevMonth}
                 style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-1) var(--afa-space-2)' }}
               >
                 ←
@@ -187,6 +205,7 @@ export default function VenueBookingsPage() {
               <SharedButton
                 variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)); setSelectedDay(null) }}
+                aria-label={v.nextMonth}
                 style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-1) var(--afa-space-2)' }}
               >
                 →
@@ -194,7 +213,7 @@ export default function VenueBookingsPage() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--afa-space-1)', marginBottom: 'var(--afa-space-1)' }}>
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+              {weekdayInitials(locale).map((d, i) => (
                 <div key={i} style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-muted)', padding: 'var(--afa-space-1) 0' }}>{d}</div>
               ))}
             </div>
@@ -235,7 +254,7 @@ export default function VenueBookingsPage() {
                 {bookingsByDate[selectedDay].map((b) => (
                   <div key={b.id} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-1) 0' }}>
                     <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: 'var(--afa-space-6px)' }} />
-                    {b.event?.title || 'Untitled event'} — {b.venue.name} · {formatINR(b.amount)} · <span style={{ color: 'var(--afa-text-secondary)' }}>{b.status.toLowerCase()}</span>
+                    {b.event?.title || v.untitledEvent} — {b.venue.name} · {formatINR(b.amount)} · <span style={{ color: 'var(--afa-text-secondary)' }}>{statusLabel(b.status, v)}</span>
                   </div>
                 ))}
               </div>
@@ -245,19 +264,19 @@ export default function VenueBookingsPage() {
           {/* Pending */}
           <div style={{ marginBottom: 'var(--afa-space-32px)' }}>
             <h2 data-afa-section="pending" style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
-              Pending {pending.length > 0 && `(${pending.length})`}
+              {v.pending} {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No pending booking requests.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>{v.noPending}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-3)' }}>
                 {pending.map((b) => (
                   <Card key={b.id} style={{ padding: 'var(--afa-space-5)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-10px)' }}>
                       <div>
-                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || 'Untitled event'}</p>
+                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || v.untitledEvent}</p>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>
-                          for {b.venue.name}, {b.venue.city} · requested by {b.organiser.orgName}
+                          {v.requestLine.replace('{venue}', b.venue.name).replace('{city}', b.venue.city).replace('{organiser}', b.organiser.orgName)}
                         </p>
                       </div>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>{formatINR(b.amount)}</span>
@@ -268,10 +287,10 @@ export default function VenueBookingsPage() {
                     </p>
                     <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                       <Button onClick={() => respond(b.id, 'CONFIRMED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
-                        <IconCheck /> Confirm
+                        <IconCheck /> {v.confirm}
                       </Button>
                       <Button variant="outline" onClick={() => respond(b.id, 'CANCELLED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
-                        <IconX /> Reject
+                        <IconX /> {v.reject}
                       </Button>
                     </div>
                   </Card>
@@ -284,7 +303,7 @@ export default function VenueBookingsPage() {
           {resolved.length > 0 && (
             <div>
               <h2 data-afa-section="past" style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
-                Past Requests
+                {v.pastRequests}
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {resolved.map((b) => {
@@ -292,7 +311,7 @@ export default function VenueBookingsPage() {
                   return (
                     <Card key={b.id} style={{ padding: 'var(--afa-space-4) var(--afa-space-5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-10px)' }}>
                       <div>
-                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || 'Untitled event'}</p>
+                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || v.untitledEvent}</p>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{b.venue.name} · {b.organiser.orgName} · {formatINR(b.amount)}</p>
                         {/* BUG-2608-091 - the booking's date (and end date if multi-day), same format as the Pending cards, so two past bookings of the same venue, organiser and amount can be told apart. */}
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)', marginBottom: 0 }}>
@@ -300,9 +319,9 @@ export default function VenueBookingsPage() {
                           {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
                         </p>
                       </div>
-                      <StatusPill tone={tone}>{b.status.toLowerCase()}</StatusPill>
+                      <StatusPill tone={tone}>{statusLabel(b.status, v)}</StatusPill>
                       {b.status === 'CONFIRMED' && (
-                        <MessageButton contextType="VENUE_BOOKING" contextId={b.id} label="Message Organiser" />
+                        <MessageButton contextType="VENUE_BOOKING" contextId={b.id} label={v.messageOrganiser} />
                       )}
                     </Card>
                   )
