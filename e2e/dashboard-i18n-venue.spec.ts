@@ -183,6 +183,11 @@ async function englishLeftIn(region: Locator, locale: Locale, data: Set<string>)
         for (let n = walker.nextNode(); n; n = walker.nextNode()) {
           const el = n.parentElement;
           if (!el || ["SCRIPT", "STYLE", "NOSCRIPT"].includes(el.tagName)) continue;
+          // Chart y-axis ticks: venue names on Revenue Overview's By venue
+          // bars (the page's data, which Recharts splits across lines, so
+          // they no longer match the /api strings whole), ₹ amounts on the
+          // other chart. Neither has anything to translate.
+          if (el.closest(".recharts-yAxis-tick-labels")) continue;
           if (!el.checkVisibility({ visibilityProperty: true, opacityProperty: false })) continue;
           if (n.textContent && n.textContent.trim()) texts.push(n.textContent.trim());
         }
