@@ -2202,6 +2202,26 @@ const en = {
       gaFootnote: "Published venues appear immediately on the public Explore Venues page. Drafts stay private until you publish them.",
       numberedFootnote: "Numbered venues save as a draft here. Once you've built and saved a real seat map in the Seat Map Builder, you can publish from the venue's Edit page — organisers need real sections to price against, so publishing happens after the map is real.",
     },
+    // Edit Your Profile (/dashboard/venue/edit): the Venue Owner's public bio and photo.
+    editProfile: {
+      loadFailed: "Failed to load profile",
+      uploadFailed: "Upload failed - please try again.",
+      saveFailed: "Failed to save profile",
+      savePhotoFailed: "Failed to save profile picture",
+      saved: "Profile saved.",
+      eyebrow: "Public profile",
+      title: "Edit Your Profile",
+      subtitle: "This is what people see on your public Venue Owner page.",
+      basicInfo: "Basic Info",
+      profilePicture: "Profile Picture",
+      photoAlt: "Profile preview",
+      uploading: "Uploading...",
+      changePhoto: "Change Photo",
+      uploadPhoto: "Upload Photo",
+      bio: "Bio",
+      bioPlaceholder: "Tell people about your venues",
+      saveProfile: "Save Profile",
+    },
   },
 }
 
