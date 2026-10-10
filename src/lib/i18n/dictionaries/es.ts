@@ -2049,6 +2049,20 @@ const es: Dictionary = {
       bioPlaceholder: "Cuéntale a la gente sobre tus recintos",
       saveProfile: "Guardar perfil",
     },
+    venueSales: {
+      loadFailed: "No se pudieron cargar los datos de ingresos",
+      allVenues: "Todos los recintos →",
+      title: "{venue} — Ingresos",
+      grossRevenue: "Ingresos brutos",
+      grossSub: "{byEventDate}, sin comisión de la plataforma",
+      upcomingCompleted: "Próximas / Completadas (desde siempre)",
+      pending: "Pendientes (esperando confirmación)",
+      atStake: "{amount} en juego",
+      noneRightNow: "ninguna por ahora",
+      noConfirmedInRange: "No hay reservas confirmadas en este periodo.",
+      recentBookings: "Reservas recientes",
+      noLinkedEvent: "Sin evento vinculado",
+    },
   },
 }
 
