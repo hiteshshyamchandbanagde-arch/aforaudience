@@ -138,6 +138,38 @@ async function main() {
     assert.equal(readOfflineTickets('u1', NOW, s), null)
   })
 
+  // sw-cache.ts reads the real localStorage; give Node one for these.
+  const ls = new MemoryStorage()
+  ;(globalThis as any).localStorage = ls
+  ;(globalThis as any).fetch = async () => new Response('{}', { status: 200 })
+  const swCache = await import('../src/lib/sw-cache')
+
+  await test('user change on this device clears the previous user snapshot', async () => {
+    ls.clear()
+    await swCache.clearSwRuntimeCacheOnUserChange('u1')
+    saveOfflineTickets('u1', [booking()], NOW, ls)
+    await swCache.clearSwRuntimeCacheOnUserChange('u1')
+    assert.ok(ls.getItem(OFFLINE_TICKETS_KEY), 'same user keeps it')
+    await swCache.clearSwRuntimeCacheOnUserChange('u2')
+    assert.equal(ls.getItem(OFFLINE_TICKETS_KEY), null)
+    assert.equal(swCache.lastSignedInUserId(), 'u2')
+  })
+
+  await test('sign-out clears the snapshot before the session goes', async () => {
+    ls.clear()
+    saveOfflineTickets('u1', [booking()], NOW, ls)
+    // next-auth's own signOut needs a browser; only the clearing is under test.
+    const p = swCache.signOutAndClearCache({ redirect: false }).catch(() => {})
+    assert.equal(ls.getItem(OFFLINE_TICKETS_KEY), null)
+    await p
+  })
+
+  await test('lastSignedInUserId is null when storage throws', () => {
+    ;(globalThis as any).localStorage = throwing
+    assert.equal(swCache.lastSignedInUserId(), null)
+    ;(globalThis as any).localStorage = ls
+  })
+
   console.log(`\n${passed} passed`)
 }
 
