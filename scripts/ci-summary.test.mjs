@@ -59,4 +59,17 @@ test('unbracketed ids and titles without ids add no ticket lines', () => {
   assert.match(out[0], /1 passed, 0 failed/)
 })
 
+test('CI shards: several reports add up, and a missing shard file is an error', () => {
+  const env = { ...process.env, GITHUB_STEP_SUMMARY: '' }
+  const a = path.join(dir, 'shard-1.json')
+  const b = path.join(dir, 'shard-2.json')
+  writeFileSync(a, JSON.stringify({ stats: { expected: 3, duration: 60000 }, suites: [{ title: 'a.spec.ts', specs: [spec('[BUG-2610-001] offline', 'expected')] }] }))
+  writeFileSync(b, JSON.stringify({ stats: { expected: 2, unexpected: 1, duration: 30000 }, suites: [{ title: 'b.spec.ts', specs: [spec('[BUG-2610-020] zero events', 'unexpected')] }] }))
+  const out = execFileSync('node', ['e2e/ci-summary.mjs', a, b, path.join(dir, 'shard-3.json')], { encoding: 'utf8', env }).trim().split('\n')
+  assert.ok(out.some((l) => l.startsWith('::error') && l.includes('shard-3.json was written')), out.join('\n'))
+  assert.ok(out.includes('::error title=e2e::5 passed, 1 failed, 0 flaky, 0 skipped in 1m 30s'), out.join('\n'))
+  assert.ok(out.includes('::notice title=e2e::TICKETS PASSED: BUG-2610-001'), out.join('\n'))
+  assert.ok(out.includes('::error title=e2e::TICKETS FAILED: BUG-2610-020'), out.join('\n'))
+})
+
 console.log(`\n${passed} passed`)

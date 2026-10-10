@@ -75,7 +75,10 @@ export default defineConfig({
     ...(isCI ? ([["github"]] as const) : []),
     ["list"],
     ["html", { open: "never" }],
-    ["json", { outputFile: "test-results/results.json" }],
+    // CI runs the suite as sequential shards (small chunks, Hitesh 11 Oct);
+    // each shard names its own file outside test-results/, which Playwright
+    // empties at the start of every run.
+    ["json", { outputFile: process.env.E2E_JSON_OUT ?? "test-results/results.json" }],
   ],
   // A whole test may take 60 s (multi-step flows on a cold function), but a
   // single missing element must fail in 10-15 s, not hang until the test

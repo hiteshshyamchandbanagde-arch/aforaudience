@@ -12,7 +12,8 @@
 // Never changes the job's result: the Playwright step already decides that.
 import fs from "node:fs";
 
-const file = process.argv[2] ?? "test-results/results.json";
+// One file, or several (CI shards): stats, errors and suites are added up.
+const files = process.argv.length > 2 ? process.argv.slice(2) : ["test-results/results.json"];
 const label = process.env.E2E_SUMMARY_LABEL ?? "e2e";
 
 function emit(level, message) {
@@ -22,12 +23,22 @@ function emit(level, message) {
   }
 }
 
-if (!fs.existsSync(file)) {
-  emit("error", `no ${file} was written - the suite did not start (see the global-setup error above) or the job was killed`);
-  process.exit(0);
+const missing = files.filter((f) => !fs.existsSync(f));
+for (const f of missing) {
+  emit("error", `no ${f} was written - the suite did not start (see the global-setup error above) or the job was killed`);
 }
+const present = files.filter((f) => fs.existsSync(f));
+if (present.length === 0) process.exit(0);
 
-const { stats = {}, errors = [], suites = [] } = JSON.parse(fs.readFileSync(file, "utf8"));
+const stats = {};
+const errors = [];
+const suites = [];
+for (const f of present) {
+  const r = JSON.parse(fs.readFileSync(f, "utf8"));
+  for (const k of ["expected", "unexpected", "flaky", "skipped", "duration"]) stats[k] = (stats[k] ?? 0) + (r.stats?.[k] ?? 0);
+  errors.push(...(r.errors ?? []));
+  suites.push(...(r.suites ?? []));
+}
 const passed = stats.expected ?? 0;
 const failed = stats.unexpected ?? 0;
 const flaky = stats.flaky ?? 0;
