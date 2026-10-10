@@ -1,4 +1,5 @@
 import { signOut } from 'next-auth/react'
+import { clearOfflineTickets } from './offline-tickets'
 
 // BUG-2609-088. The service worker's runtime cache (public/sw.js,
 // `afora-runtime-<CACHE_VERSION>`) holds the navigation HTML it falls
@@ -12,6 +13,17 @@ import { signOut } from 'next-auth/react'
 // every CACHE_VERSION - scripts/stamp-sw-version.js rewrites it per build.
 const RUNTIME_CACHE_PREFIX = 'afora-runtime-'
 const LAST_USER_KEY = 'afa-sw-last-user'
+
+// BUG-2610-001 - the last signed-in user on this device. Offline the
+// session fetch fails, so My Tickets uses this to decide whose saved
+// tickets (src/lib/offline-tickets.ts) it may show: only this user's.
+export function lastSignedInUserId(): string | null {
+  try {
+    return localStorage.getItem(LAST_USER_KEY)
+  } catch {
+    return null
+  }
+}
 
 export async function clearSwRuntimeCache(): Promise<void> {
   if (typeof caches === 'undefined') return
@@ -28,7 +40,10 @@ export async function clearSwRuntimeCache(): Promise<void> {
 // through this so the cache is gone before the session is.
 // BUG-2610-021 - the city cookie (afa_loc) goes with it, so the next
 // person on this device does not start in the last account's city.
+// BUG-2610-001 - and the offline tickets snapshot, so the next person
+// never sees the previous user's tickets.
 export async function signOutAndClearCache(options?: Parameters<typeof signOut>[0]) {
+  clearOfflineTickets()
   await Promise.all([
     clearSwRuntimeCache(),
     fetch('/api/user/location', { method: 'DELETE' }).catch(() => {
@@ -52,6 +67,8 @@ export async function clearSwRuntimeCacheOnUserChange(userId: string): Promise<v
     // localStorage unavailable - fall through and clear, the safe side.
   }
   if (lastUserId === userId) return
+  // BUG-2610-001 - a different user: the saved tickets go with the cache.
+  clearOfflineTickets()
   await clearSwRuntimeCache()
   try {
     localStorage.setItem(LAST_USER_KEY, userId)
