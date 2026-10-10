@@ -386,7 +386,7 @@ for (const locale of ["hi", "mr", "de"] as const) {
       if (!isMobile) {
         const sidebar = page.locator("aside").filter({ visible: true }).first();
         await expect(sidebar).toBeVisible();
-        await expect(sidebar.locator('a[href="/dashboard/venue/create"]').first()).toContainText(HEADINGS[locale].registerVenue);
+        await expect(sidebar.locator('a[href^="/dashboard/venue/create"]').first()).toContainText(HEADINGS[locale].registerVenue);
         expect(await englishLeftIn(sidebar, locale, data), "English left in the sidebar").toEqual([]);
         return;
       }
