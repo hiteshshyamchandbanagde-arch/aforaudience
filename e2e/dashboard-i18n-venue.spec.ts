@@ -86,8 +86,12 @@ async function gotoInLocale(page: Page, url: string, locale: Locale) {
 }
 
 const DICTS = { hi, mr, de } as const;
-// The Maps-link example is a URL, not a word.
-const PROPER_NOUNS = ["AforAudience", "AFA", "Google", "Google Maps", "Instagram", "YouTube", "https://maps.app.goo.gl/..."];
+
+// venueDashboard.venueEdit.daily: the Rate Type segment Register Venue's test picks.
+const DAILY_SEGMENT: Record<Locale, string> = { hi: "प्रति दिन", mr: "दिवसाला", de: "Täglich" };
+// The Maps-link example is a URL, not a word. "VIP" is how every
+// language's section examples write it (venueForm.noSections, venueCreate.gaIntro).
+const PROPER_NOUNS = ["AforAudience", "AFA", "Google", "Google Maps", "Instagram", "YouTube", "https://maps.app.goo.gl/...", "VIP"];
 
 // FacilitiesPicker's preset chips are the stored facility values (saved on
 // the venue and shown as is on its public page), not dictionary strings.
@@ -100,21 +104,22 @@ const PRESET_FACILITIES = [
 
 // venueDashboard.myVenues.title, venueView.editVenue, venueEdit.title;
 // 6c-2: bookings.title and bookings.pending, sales.title and sales.byVenue,
-// and organiserDashboard.venueRequests.title (the page both roles share).
+// organiserDashboard.venueRequests.title (the page both roles share) and
+// venueCreate.title.
 const HEADINGS: Record<Locale, {
-  venues: string; editLink: string; edit: string; bookings: string; pending: string; sales: string; byVenue: string; requests: string;
+  venues: string; editLink: string; edit: string; bookings: string; pending: string; sales: string; byVenue: string; requests: string; create: string;
 }> = {
   hi: {
     venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें", bookings: "बुकिंग अनुरोध", pending: "लंबित",
-    sales: "कमाई का सारांश", byVenue: "स्थल के अनुसार", requests: "वेन्यू बुकिंग अनुरोध",
+    sales: "कमाई का सारांश", byVenue: "स्थल के अनुसार", requests: "वेन्यू बुकिंग अनुरोध", create: "स्थल रजिस्टर करें",
   },
   mr: {
     venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला", bookings: "बुकिंग विनंत्या", pending: "प्रलंबित",
-    sales: "कमाईचा आढावा", byVenue: "स्थळानुसार", requests: "व्हेन्यू बुकिंग विनंत्या",
+    sales: "कमाईचा आढावा", byVenue: "स्थळानुसार", requests: "व्हेन्यू बुकिंग विनंत्या", create: "स्थळ नोंदवा",
   },
   de: {
     venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten", bookings: "Buchungsanfragen", pending: "Offen",
-    sales: "Einnahmenübersicht", byVenue: "Nach Veranstaltungsort", requests: "Buchungsanfragen für Locations",
+    sales: "Einnahmenübersicht", byVenue: "Nach Veranstaltungsort", requests: "Buchungsanfragen für Locations", create: "Veranstaltungsort registrieren",
   },
 };
 
@@ -336,6 +341,24 @@ for (const locale of ["hi", "mr", "de"] as const) {
 
       expect(await englishLeftIn(main, locale, data), "English left on Venue Booking Requests").toEqual([]);
       // Read-only: nothing is accepted, countered or declined.
+    });
+
+    test(`[GEN-2610-007] Register Venue in ${locale}: no English UI strings, on both seating paths`, async ({ page, isMobile }) => {
+      await gotoInLocale(page, "/dashboard/venue/create/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].create);
+      await page.waitForLoadState("networkidle");
+      const data = new Set(PRESET_FACILITIES);
+
+      // General Admission (the default), then Numbered Seats with a fixed rate,
+      // so the second path's text and the day-by-day rates are swept too.
+      expect(await englishLeftIn(main, locale, data), "English left on Register Venue (General Admission)").toEqual([]);
+      await main.locator("button.afa-path-card").nth(1).click();
+      await main.locator('button[type="button"]').filter({ hasText: DAILY_SEGMENT[locale] }).click();
+      await main.locator('input[type="checkbox"]').check();
+      expect(await englishLeftIn(main, locale, data), "English left on Register Venue (Numbered, daily rate)").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "venue-create-title", isMobile);
+      // Nothing was submitted, and the draft only lives in this test's own sessionStorage.
     });
 
     test(`[GEN-2610-007] Seat Map Builder in ${locale}: restore-draft dialog, level labels and freeze banner`, async ({ page, isMobile }) => {
