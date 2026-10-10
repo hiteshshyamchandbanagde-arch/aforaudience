@@ -12,7 +12,7 @@ import de from "../src/lib/i18n/dictionaries/de";
  * As Vinayak, at 390 and 1440, in Hindi, with Marathi and German spot
  * checks.
  *
- * My Venues, a venue's page and Edit Venue: no English UI strings are left
+ * My Venues, a venue's page, Edit Venue and (6c-2) Bookings: no English UI strings are left
  * in the page's main region, by the method of dashboard-i18n-organiser.spec.ts
  * on the venueDashboard namespace (an English dashboard string whose
  * translation differs, or, in hi/mr, a Latin-script word that is not the
@@ -97,11 +97,12 @@ const PRESET_FACILITIES = [
   "Bar / Refreshments", "Wheelchair Accessible", "Restrooms", "Power Backup", "Projector / Screen",
 ];
 
-// venueDashboard.myVenues.title, venueView.editVenue, venueEdit.title.
-const HEADINGS: Record<Locale, { venues: string; editLink: string; edit: string }> = {
-  hi: { venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें" },
-  mr: { venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला" },
-  de: { venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten" },
+// venueDashboard.myVenues.title, venueView.editVenue, venueEdit.title;
+// 6c-2: bookings.title and bookings.pending.
+const HEADINGS: Record<Locale, { venues: string; editLink: string; edit: string; bookings: string; pending: string }> = {
+  hi: { venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें", bookings: "बुकिंग अनुरोध", pending: "लंबित" },
+  mr: { venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला", bookings: "बुकिंग विनंत्या", pending: "प्रलंबित" },
+  de: { venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten", bookings: "Buchungsanfragen", pending: "Offen" },
 };
 
 const NAMESPACES = ["venueDashboard", "dashboardChrome", "nav"] as const;
@@ -277,6 +278,20 @@ for (const locale of ["hi", "mr", "de"] as const) {
       expect(await englishLeftIn(main, locale, data), "English left on Edit Venue").toEqual([]);
       if (locale === "hi") await shotTitle(page, "venue-edit-venue-title", isMobile);
       // Nothing was submitted: leaving the page changes nothing.
+    });
+
+    test(`[GEN-2610-007] Bookings in ${locale}: no English UI strings (revenue cards, calendar, Pending, Past Requests)`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue/bookings/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].bookings);
+      await expect(main.locator('h2[data-afa-section="pending"]')).toContainText(HEADINGS[locale].pending);
+      // Vinayak has confirmed bookings in the QA seed, so Past Requests and its Message Organiser buttons are there too.
+      await expect(main.locator('h2[data-afa-section="past"]')).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on Bookings").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "venue-bookings-title", isMobile);
     });
 
     test(`[GEN-2610-007] Seat Map Builder in ${locale}: restore-draft dialog, level labels and freeze banner`, async ({ page, isMobile }) => {
