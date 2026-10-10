@@ -2043,6 +2043,20 @@ const mr: Dictionary = {
       bioPlaceholder: "लोकांना तुमच्या स्थळांबद्दल सांगा",
       saveProfile: "प्रोफाइल सेव्ह करा",
     },
+    venueSales: {
+      loadFailed: "कमाईचा डेटा लोड झाला नाही",
+      allVenues: "सर्व स्थळे →",
+      title: "{venue} — कमाई",
+      grossRevenue: "एकूण कमाई",
+      grossSub: "{byEventDate}, प्लॅटफॉर्मचा कोणताही वाटा नाही",
+      upcomingCompleted: "येणारी / पूर्ण झालेली (आतापर्यंत)",
+      pending: "प्रलंबित (निश्चितीच्या प्रतीक्षेत)",
+      atStake: "{amount} पणाला",
+      noneRightNow: "सध्या काहीही नाही",
+      noConfirmedInRange: "या कालावधीत कोणतीही निश्चित बुकिंग नाही.",
+      recentBookings: "अलीकडील बुकिंग",
+      noLinkedEvent: "कोणताही जोडलेला इव्हेंट नाही",
+    },
   },
 }
 
