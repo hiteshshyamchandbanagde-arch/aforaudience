@@ -81,7 +81,6 @@ async function primeOffline(page: Page) {
   await page.waitForFunction(() => navigator.serviceWorker?.ready.then((r) => !!r.active), undefined, { timeout: 30_000 });
   await openTicketsOnline(page);
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
-  await expect.poll(() => page.evaluate((k) => localStorage.getItem(k), SNAPSHOT_KEY)).toContain(BOOKING_ID);
 }
 
 async function goOffline(context: BrowserContext, page: Page) {
@@ -94,14 +93,14 @@ test("[BUG-2610-001] offline, My Tickets shows the saved ticket and its QR, not 
   await primeOffline(page);
   await goOffline(context, page);
 
+  // A few seconds on, still here: no redirect to /login (the bug).
+  await page.waitForTimeout(3_000);
+  expect(new URL(page.url()).pathname).toBe("/tickets/");
   await expect(page.locator("[data-afa-offline-banner]")).toBeVisible();
   await expect(page.locator("[data-afa-offline-banner]")).toHaveText(/You're offline\. Showing your saved tickets, last updated .+\./);
   await expect(qr(page)).toBeVisible();
   expect(await decodeQr(qr(page)), "the QR is the booking id, as at the door").toBe(BOOKING_ID);
   await expect(page.getByText(EVENT_TITLE).first()).toBeVisible();
-  // A few seconds on, still here: no redirect to /login.
-  await page.waitForTimeout(3_000);
-  expect(new URL(page.url()).pathname).toBe("/tickets/");
   // Actions all need the network: none on a saved ticket.
   await expect(page.locator("[data-afa-offline-tickets]").getByRole("button", { name: /cancel ticket/i })).toHaveCount(0);
 
@@ -120,6 +119,8 @@ test("[BUG-2610-001] offline, My Tickets shows the saved ticket and its QR, not 
 test("[BUG-2610-001] after sign-out, offline My Tickets shows no ticket", async ({ page, context, isMobile }) => {
   await useRuleViewport(page, isMobile);
   await primeOffline(page);
+  // The snapshot is there, so its absence after sign-out means something.
+  await expect.poll(() => page.evaluate((k) => localStorage.getItem(k), SNAPSHOT_KEY)).toContain(BOOKING_ID);
 
   // Sign out with the app's own control.
   if (!isMobile) {
