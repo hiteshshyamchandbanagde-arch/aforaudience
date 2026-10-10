@@ -12,7 +12,8 @@ import de from "../src/lib/i18n/dictionaries/de";
  * As Vinayak, at 390 and 1440, in Hindi, with Marathi and German spot
  * checks.
  *
- * My Venues, a venue's page, Edit Venue and (6c-2) Bookings: no English UI strings are left
+ * My Venues, a venue's page, Edit Venue and (6c-2) Bookings, Revenue
+ * Overview and Venue Booking Requests: no English UI strings are left
  * in the page's main region, by the method of dashboard-i18n-organiser.spec.ts
  * on the venueDashboard namespace (an English dashboard string whose
  * translation differs, or, in hi/mr, a Latin-script word that is not the
@@ -98,14 +99,28 @@ const PRESET_FACILITIES = [
 ];
 
 // venueDashboard.myVenues.title, venueView.editVenue, venueEdit.title;
-// 6c-2: bookings.title and bookings.pending.
-const HEADINGS: Record<Locale, { venues: string; editLink: string; edit: string; bookings: string; pending: string }> = {
-  hi: { venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें", bookings: "बुकिंग अनुरोध", pending: "लंबित" },
-  mr: { venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला", bookings: "बुकिंग विनंत्या", pending: "प्रलंबित" },
-  de: { venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten", bookings: "Buchungsanfragen", pending: "Offen" },
+// 6c-2: bookings.title and bookings.pending, sales.title and sales.byVenue,
+// and organiserDashboard.venueRequests.title (the page both roles share).
+const HEADINGS: Record<Locale, {
+  venues: string; editLink: string; edit: string; bookings: string; pending: string; sales: string; byVenue: string; requests: string;
+}> = {
+  hi: {
+    venues: "आपके स्थल", editLink: "स्थल बदलें", edit: "स्थल बदलें", bookings: "बुकिंग अनुरोध", pending: "लंबित",
+    sales: "कमाई का सारांश", byVenue: "स्थल के अनुसार", requests: "वेन्यू बुकिंग अनुरोध",
+  },
+  mr: {
+    venues: "तुमची स्थळे", editLink: "स्थळ बदला", edit: "स्थळ बदला", bookings: "बुकिंग विनंत्या", pending: "प्रलंबित",
+    sales: "कमाईचा आढावा", byVenue: "स्थळानुसार", requests: "व्हेन्यू बुकिंग विनंत्या",
+  },
+  de: {
+    venues: "Deine Veranstaltungsorte", editLink: "Veranstaltungsort bearbeiten", edit: "Veranstaltungsort bearbeiten", bookings: "Buchungsanfragen", pending: "Offen",
+    sales: "Einnahmenübersicht", byVenue: "Nach Veranstaltungsort", requests: "Buchungsanfragen für Locations",
+  },
 };
 
-const NAMESPACES = ["venueDashboard", "dashboardChrome", "nav"] as const;
+// organiserDashboard: /dashboard/venue-requests is the Organiser's
+// venueRequests page, shared with the Venue Owner.
+const NAMESPACES = ["venueDashboard", "dashboardChrome", "nav", "organiserDashboard"] as const;
 
 type Tree = { [key: string]: string | Tree };
 function flatten(obj: Tree, prefix = "", out: Record<string, string> = {}): Record<string, string> {
@@ -292,6 +307,30 @@ for (const locale of ["hi", "mr", "de"] as const) {
 
       expect(await englishLeftIn(main, locale, data), "English left on Bookings").toEqual([]);
       if (locale === "hi") await shotTitle(page, "venue-bookings-title", isMobile);
+    });
+
+    test(`[GEN-2610-007] Revenue Overview in ${locale}: no English UI strings`, async ({ page, isMobile }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue/sales/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].sales);
+      await expect(main.locator('[data-afa-section="by-venue"] [data-afa-section-title]')).toHaveText(HEADINGS[locale].byVenue);
+      await expect(main.locator('[data-afa-section="by-organiser"]')).toBeVisible();
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on Revenue Overview").toEqual([]);
+      if (locale === "hi") await shotTitle(page, "venue-sales-title", isMobile);
+    });
+
+    test(`[GEN-2610-007] Venue Booking Requests in ${locale}: no English UI strings`, async ({ page }) => {
+      const data = collectApiStrings(page);
+      await gotoInLocale(page, "/dashboard/venue-requests/", locale);
+      const main = page.getByRole("main");
+      await expect(main.locator("h1[data-afa-page-title]")).toHaveText(HEADINGS[locale].requests);
+      await page.waitForLoadState("networkidle");
+
+      expect(await englishLeftIn(main, locale, data), "English left on Venue Booking Requests").toEqual([]);
+      // Read-only: nothing is accepted, countered or declined.
     });
 
     test(`[GEN-2610-007] Seat Map Builder in ${locale}: restore-draft dialog, level labels and freeze banner`, async ({ page, isMobile }) => {
