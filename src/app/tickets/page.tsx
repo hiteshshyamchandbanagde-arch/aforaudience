@@ -53,7 +53,7 @@ function TicketQr({ value, size = 64 }: { value: string; size?: number }) {
   }, [value, size])
   if (!dataUrl) return <div style={{ width: size, height: size, background: 'var(--afa-tint-08)', borderRadius: 'var(--afa-radius-sm)' }} />
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={dataUrl} alt="" data-afa-ticket-qr={value} width={size} height={size} style={{ display: 'block', borderRadius: 'var(--afa-radius-xs)' }} />
+  return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 'var(--afa-radius-xs)' }} />
 }
 
 // Companion Tagging Phase 1 (reputation epic §7) - tags where the
