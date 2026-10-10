@@ -139,7 +139,7 @@ export default function VenueOwnerEditPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
-                <label className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                <label data-afa-photo-button className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
@@ -154,6 +154,7 @@ export default function VenueOwnerEditPage() {
 
           <Button
             data-afa-action-row
+            data-afa-save-profile
             variant="solid"
             size="lg"
             fullWidth={false}

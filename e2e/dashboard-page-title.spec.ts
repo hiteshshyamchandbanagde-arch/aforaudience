@@ -120,10 +120,11 @@ test("[BUG-2610-028] venue Revenue Overview stat labels match the organiser stat
 test("[BUG-2610-028] Edit Your Profile: Change Photo is a secondary (outline) button, not CTA orange", async ({ page, isMobile }) => {
   await gotoDashboard(page, "/dashboard/venue/edit");
   await hideFloatingOverlays(page);
-  const photo = page.getByRole("main").locator("label").filter({ hasText: /^(Change Photo|Upload Photo)$/ });
-  const save = page.getByRole("button", { name: "Save Profile" });
-  await expect(photo).toBeVisible();
-  await expect(save).toBeVisible();
+  // data-afa-* hooks, not the English text: the venue pages follow the UI language (GEN-2610-007).
+  const photo = page.getByRole("main").locator("label[data-afa-photo-button]");
+  const save = page.locator("button[data-afa-save-profile]");
+  await expect(photo).toHaveText(/^(Change Photo|Upload Photo)$/);
+  await expect(save).toHaveText("Save Profile");
   const [photoBg, saveBg] = await Promise.all([
     photo.evaluate((n) => getComputedStyle(n).backgroundColor),
     save.evaluate((n) => getComputedStyle(n).backgroundColor),
