@@ -2121,6 +2121,48 @@ const en = {
       pastRequests: "Past Requests",
       messageOrganiser: "Message Organiser",
     },
+    // Revenue Overview (/dashboard/venue/sales).
+    sales: {
+      noAccess: "You do not have access to this page",
+      loadFailed: "Could not load revenue overview",
+      // {error}: one of the two errors above.
+      staleData: "{error} (showing last good data)",
+      noData: "No data",
+      eyebrow: "Analytics",
+      title: "Revenue Overview",
+      justNow: "just now",
+      secondsAgo: "{n}s ago",
+      minutesAgo: "{n}m ago",
+      hoursAgo: "{n}h ago",
+      // {ago}: one of the *Ago values above; {n}: seconds.
+      updated: "Updated {ago} · refreshes every {n}s",
+      totalRevenue: "Total Revenue",
+      confirmedBookings: "Confirmed Bookings",
+      avgBookingValue: "Avg. Booking Value",
+      venues: "Venues",
+      venuesSub: "no platform cut on rentals",
+      // After ▲ or ▼. {pct}: a percentage with one decimal, e.g. 12.5.
+      vsLastPeriod: "{pct}% vs last period",
+      revenueOverTime: "Revenue over time",
+      notEnoughTrend: "Not enough bookings yet to show a trend",
+      // Chart tooltip, before the ₹ amount.
+      revenue: "Revenue",
+      byVenue: "By venue",
+      noVenues: "No venues yet.",
+      noBookingsInRange: "No bookings in this range",
+      // {n}: how many venues.
+      viewAll: "View all {n} venues",
+      showTop: "Show top {n} only",
+      colVenue: "Venue",
+      colCity: "City",
+      colRevenue: "Revenue",
+      colBookings: "Bookings",
+      byOrganiser: "By organiser",
+      noBookingsInRangeDot: "No bookings in this range.",
+      // {n}: a booking count.
+      bookingsOne: "{n} booking",
+      bookingsOther: "{n} bookings",
+    },
   },
 }
 
