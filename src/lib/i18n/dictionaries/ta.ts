@@ -2045,6 +2045,20 @@ const ta: Dictionary = {
       bioPlaceholder: "உங்கள் அரங்குகளைப் பற்றி மக்களுக்குச் சொல்லுங்கள்",
       saveProfile: "சுயவிவரத்தைச் சேமி",
     },
+    venueSales: {
+      loadFailed: "வருவாய்த் தரவை ஏற்ற முடியவில்லை",
+      allVenues: "அனைத்து அரங்குகள் →",
+      title: "{venue} — வருவாய்",
+      grossRevenue: "மொத்த வருவாய்",
+      grossSub: "{byEventDate}, தளத்துக்குப் பங்கு இல்லை",
+      upcomingCompleted: "வரவிருப்பவை / முடிந்தவை (இதுவரை)",
+      pending: "நிலுவையில் (உறுதிப்படுத்தலுக்குக் காத்திருக்கிறது)",
+      atStake: "{amount} ஆபத்தில்",
+      noneRightNow: "இப்போது எதுவும் இல்லை",
+      noConfirmedInRange: "இந்தக் காலத்தில் உறுதியான முன்பதிவுகள் இல்லை.",
+      recentBookings: "சமீபத்திய முன்பதிவுகள்",
+      noLinkedEvent: "இணைக்கப்பட்ட நிகழ்வு இல்லை",
+    },
   },
 }
 
