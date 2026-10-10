@@ -184,13 +184,13 @@ export default function VenueOwnerSalesOverviewPage() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
-            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} />
-            <StatCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
-            <StatCard label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
-            <StatCard label="Venues" value={String(totals.venuesCount)} sub="no platform cut on rentals" />
+            <StatCard id="total-revenue" label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} />
+            <StatCard id="confirmed-bookings" label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
+            <StatCard id="avg-booking-value" label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
+            <StatCard id="venues" label="Venues" value={String(totals.venuesCount)} sub="no platform cut on rentals" />
           </div>
 
-          <Section title="Revenue over time">
+          <Section id="revenue-over-time" title="Revenue over time">
             {timeline.length < 3 ? (
               <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption="Not enough bookings yet to show a trend" />
             ) : (
@@ -231,7 +231,7 @@ export default function VenueOwnerSalesOverviewPage() {
             )}
           </Section>
 
-          <Section title="By venue">
+          <Section id="by-venue" title="By venue">
             {venues.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
             ) : (
@@ -268,6 +268,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     size="md"
                     fullWidth={false}
                     onClick={() => setShowAllVenues(true)}
+                    data-afa-venues-toggle="all"
                     className="avp-hover-border"
                     style={{ marginBottom: showAllVenues ? 'var(--afa-space-4)' : 0 }}
                   >
@@ -307,6 +308,7 @@ export default function VenueOwnerSalesOverviewPage() {
                         size="md"
                         fullWidth={false}
                         onClick={() => setShowAllVenues(false)}
+                        data-afa-venues-toggle="top"
                         className="avp-hover-border"
                         style={{ alignSelf: 'flex-start' }}
                       >
@@ -321,8 +323,8 @@ export default function VenueOwnerSalesOverviewPage() {
 
           {/* Demoted relative to "By venue" - secondary context for a
               venue owner (who they're renting to), not a primary metric. */}
-          <div style={{ padding: 'var(--afa-space-1) var(--afa-space-1) var(--afa-space-40px)' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-10px)' }}>
+          <div data-afa-section="by-organiser" style={{ padding: 'var(--afa-space-1) var(--afa-space-1) var(--afa-space-40px)' }}>
+            <p data-afa-section-title style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-10px)' }}>
               By organiser
             </p>
             {organisers.length === 0 ? (
@@ -352,9 +354,9 @@ export default function VenueOwnerSalesOverviewPage() {
   )
 }
 
-function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
+function StatCard({ id, label, value, delta, sub }: { id: string; label: string; value: string; delta?: number | null; sub?: string }) {
   return (
-    <Card style={{ padding: 'var(--afa-space-18px)' }}>
+    <Card data-afa-stat={id} style={{ padding: 'var(--afa-space-18px)' }}>
       <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{label}</StatLabel>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null && (
@@ -369,10 +371,10 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <Card style={{ padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)' }}>
-      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-4)' }}>{title}</h2>
+    <Card data-afa-section={id} style={{ padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)' }}>
+      <h2 data-afa-section-title style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-4)' }}>{title}</h2>
       {children}
     </Card>
   )

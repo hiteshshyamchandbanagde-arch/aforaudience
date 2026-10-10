@@ -22,12 +22,12 @@ test.beforeEach(async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
 });
 
+// data-afa-* hooks, not the English text: venue Sales follows the UI language (GEN-2610-007).
 function byVenueSection(page: import("@playwright/test").Page) {
   return page
     .getByRole("main")
-    .locator("div")
-    .filter({ has: page.getByRole("heading", { level: 2, name: "By venue", exact: true }) })
-    .last();
+    .locator('[data-afa-section="by-venue"]')
+    .filter({ has: page.locator("h2[data-afa-section-title]").getByText("By venue", { exact: true }) });
 }
 
 test("[BUG-2609-070] By venue with no revenue anywhere shows the empty state, not an empty ₹0 chart; the venue table stays", async ({ page }) => {
@@ -47,13 +47,14 @@ test("[BUG-2609-070] By venue with no revenue anywhere shows the empty state, no
   expect(venueCount, "Vinayak has venues on QA").toBeGreaterThan(0);
 
   // The venue table is still there (behind "View all" when there are more than 5).
-  const viewAll = section.getByRole("button", { name: /^View all \d+ venues$/ });
+  const viewAll = section.locator('[data-afa-venues-toggle="all"]');
   if (venueCount > 5) {
+    await expect(viewAll).toHaveText(/^View all \d+ venues$/);
     const expandClass = await viewAll.getAttribute("class");
     await viewAll.click();
     // The collapse control is the same outline button as the one that expanded.
-    const showTop = section.getByRole("button", { name: /^Show top \d+ only$/ });
-    await expect(showTop).toBeVisible();
+    const showTop = section.locator('[data-afa-venues-toggle="top"]');
+    await expect(showTop).toHaveText(/^Show top \d+ only$/);
     expect(await showTop.getAttribute("class")).toBe(expandClass);
   }
   await expect(section.getByRole("link").filter({ hasText: "₹0" })).toHaveCount(venueCount);

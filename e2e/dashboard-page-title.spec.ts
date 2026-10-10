@@ -97,15 +97,20 @@ for (const p of VENUE_PAGES) {
 test("[BUG-2610-028] the Organiser title the venue titles match is the same PageTitle", async ({ page, newContext, isMobile }) => {
   const ref = await organiserReference(newContext, isMobile);
   await gotoDashboard(page, "/dashboard/venue/sales");
-  const venue = await fontOf(page.getByRole("heading", { level: 1, name: "Revenue Overview", exact: true }));
+  // data-afa-* hooks, not the English text: venue Sales follows the UI language (GEN-2610-007).
+  const h1 = page.getByRole("main").locator("h1[data-afa-page-title]");
+  await expect(h1).toHaveText("Revenue Overview");
+  const venue = await fontOf(h1);
   expect(venue, "Revenue Overview (venue) = Sales Overview (organiser)").toEqual(ref.title);
 });
 
 test("[BUG-2610-028] venue Revenue Overview stat labels match the organiser stat labels", async ({ page, isMobile, newContext }) => {
   const ref = await organiserReference(newContext, isMobile);
   await gotoDashboard(page, "/dashboard/venue/sales");
-  for (const name of ["Total Revenue", "Confirmed Bookings", "Avg. Booking Value"]) {
-    const font = await fontOf(page.getByRole("main").getByText(name, { exact: true }).first());
+  for (const [stat, name] of [["total-revenue", "Total Revenue"], ["confirmed-bookings", "Confirmed Bookings"], ["avg-booking-value", "Avg. Booking Value"]]) {
+    const label = page.getByRole("main").locator(`[data-afa-stat="${stat}"] [data-afa-stat-label]`);
+    await expect(label).toHaveText(name);
+    const font = await fontOf(label);
     expect(font.family, `${name}: label font = organiser stat label's`).toBe(ref.label.family);
     expect(font.weight, `${name}: label weight = organiser's`).toBe(ref.label.weight);
     expect(font.transform, `${name}: uppercase like organiser's`).toBe(ref.label.transform);

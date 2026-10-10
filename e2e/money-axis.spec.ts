@@ -37,12 +37,15 @@ test.beforeEach(async ({ page, isMobile }) => {
   });
 });
 
+// data-afa-* hooks, not the English text: venue Sales follows the UI language (GEN-2610-007).
+const SECTION_IDS: Record<string, string> = { "By venue": "by-venue", "Revenue over time": "revenue-over-time" };
+
+/** The section card, by its hook; it still has to carry the English heading. */
 function section(page: Page, heading: string) {
   return page
     .getByRole("main")
-    .locator("div")
-    .filter({ has: page.getByRole("heading", { level: 2, name: heading, exact: true }) })
-    .last();
+    .locator(`[data-afa-section="${SECTION_IDS[heading]}"]`)
+    .filter({ has: page.locator("h2[data-afa-section-title]").getByText(heading, { exact: true }) });
 }
 
 async function tickLabels(page: Page, heading: string, axis: "x" | "y") {
