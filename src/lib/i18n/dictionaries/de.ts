@@ -2054,6 +2054,20 @@ const de: Dictionary = {
       bioPlaceholder: "Erzähl anderen von deinen Veranstaltungsorten",
       saveProfile: "Profil speichern",
     },
+    venueSales: {
+      loadFailed: "Einnahmedaten konnten nicht geladen werden",
+      allVenues: "Alle Orte →",
+      title: "{venue} — Einnahmen",
+      grossRevenue: "Bruttoeinnahmen",
+      grossSub: "{byEventDate}, kein Plattformanteil",
+      upcomingCompleted: "Anstehend / Abgeschlossen (gesamt)",
+      pending: "Offen (wartet auf Bestätigung)",
+      atStake: "{amount} stehen aus",
+      noneRightNow: "derzeit keine",
+      noConfirmedInRange: "Keine bestätigten Buchungen in diesem Zeitraum.",
+      recentBookings: "Letzte Buchungen",
+      noLinkedEvent: "Kein verknüpftes Event",
+    },
   },
 }
 
