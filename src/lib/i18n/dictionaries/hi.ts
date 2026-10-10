@@ -713,7 +713,7 @@ const hi: Dictionary = {
     scannedLabel: "स्कैन हो गया",
     offlineBannerTemplate: "आप ऑफ़लाइन हैं। आपके सेव किए गए टिकट दिखाए जा रहे हैं, आख़िरी अपडेट {savedAt}।",
     offlineNoSavedTitle: "इस डिवाइस पर कोई सेव किया गया टिकट नहीं",
-    offlineNoSavedBody: "ऑफ़लाइन इस्तेमाल के लिए टिकट सेव करने को इंटरनेट से जुड़ें और एक बार My Tickets खोलें।",
+    offlineNoSavedBody: "ऑफ़लाइन इस्तेमाल के लिए टिकट सेव करने को इंटरनेट से जुड़ें और एक बार मेरे टिकट खोलें।",
     stubTierLabel: "श्रेणी",
     stubQtyLabel: "मात्रा",
     stubRefLabel: "संदर्भ",
