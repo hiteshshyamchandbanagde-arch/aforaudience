@@ -1,4 +1,5 @@
 import type { BrowserContext, Locator, Page } from "@playwright/test";
+import jsQR from "jsqr";
 import { test, expect, AFTER_WRITE, hideFloatingOverlays } from "./helpers/test";
 import { useRuleViewport } from "./helpers/viewports";
 import { authFile } from "./helpers/personas";
@@ -44,8 +45,28 @@ test.afterEach(async ({ context, playwright, baseURL }) => {
   }
 });
 
+/** The QR on Atul's ticket card: TicketQr draws it on the device as a PNG data URL. */
 function qr(page: Page): Locator {
-  return page.locator(`img[data-afa-ticket-qr="${BOOKING_ID}"]`);
+  return page.locator(".afa-tickets-grid > div").filter({ hasText: EVENT_TITLE }).locator('img[src^="data:image/png"]');
+}
+
+/** What the QR image says, read from its pixels. */
+async function decodeQr(img: Locator): Promise<string | null> {
+  await expect(img).toHaveJSProperty("complete", true);
+  const { width, height, data } = await img.evaluate((el) => {
+    const image = el as HTMLImageElement;
+    const canvas = document.createElement("canvas");
+    // A white margin, so the finder patterns are found.
+    canvas.width = image.naturalWidth + 40;
+    canvas.height = image.naturalHeight + 40;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 20, 20);
+    const px = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    return { width: px.width, height: px.height, data: Array.from(px.data) };
+  });
+  return jsQR(Uint8ClampedArray.from(data), width, height)?.data ?? null;
 }
 
 /** My Tickets online, until Atul's ticket and its QR are on the page (the snapshot is saved then). */
@@ -76,8 +97,7 @@ test("[BUG-2610-001] offline, My Tickets shows the saved ticket and its QR, not 
   await expect(page.locator("[data-afa-offline-banner]")).toBeVisible();
   await expect(page.locator("[data-afa-offline-banner]")).toHaveText(/You're offline\. Showing your saved tickets, last updated .+\./);
   await expect(qr(page)).toBeVisible();
-  await expect(qr(page)).toHaveJSProperty("complete", true);
-  expect(await qr(page).evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  expect(await decodeQr(qr(page)), "the QR is the booking id, as at the door").toBe(BOOKING_ID);
   await expect(page.getByText(EVENT_TITLE).first()).toBeVisible();
   // A few seconds on, still here: no redirect to /login.
   await page.waitForTimeout(3_000);
@@ -85,7 +105,7 @@ test("[BUG-2610-001] offline, My Tickets shows the saved ticket and its QR, not 
   // Actions all need the network: none on a saved ticket.
   await expect(page.locator("[data-afa-offline-tickets]").getByRole("button", { name: /cancel ticket/i })).toHaveCount(0);
 
-  const card = page.locator(".afa-tickets-grid > div").filter({ has: qr(page) });
+  const card = page.locator(".afa-tickets-grid > div").filter({ hasText: EVENT_TITLE });
   // The chat button and the phone tab bar sit over the card's lower half.
   await hideFloatingOverlays(page);
   await page.addStyleTag({ content: "[data-afa-tab-bar] { visibility: hidden !important; }" });
@@ -122,7 +142,7 @@ test("[BUG-2610-001] after sign-out, offline My Tickets shows no ticket", async 
   await expect(empty).toBeVisible();
   await expect(empty).toContainText("No saved tickets on this device");
   await expect(empty).toContainText("open My Tickets once");
-  await expect(page.locator("img[data-afa-ticket-qr]")).toHaveCount(0);
+  await expect(page.locator('img[src^="data:image/png"]')).toHaveCount(0);
   await expect(page.getByText(EVENT_TITLE)).toHaveCount(0);
   await page.evaluate(() => document.fonts.ready);
   await expect(empty).toHaveScreenshot(`offline-tickets-none-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
