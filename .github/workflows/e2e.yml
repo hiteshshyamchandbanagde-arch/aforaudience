@@ -44,7 +44,7 @@ permissions:
 jobs:
   e2e-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v5
 
@@ -68,26 +68,86 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node e2e/ci-wait-for-deployment.mjs "${{ github.repository }}" "${{ github.sha }}"
 
-      - name: Run e2e suite
-        run: npx playwright test
+      # Small chunks (Hitesh, 11 Oct 2026): the suite outgrew one 30-min job
+      # (10 Oct: two nightlies and a PR run killed at 30m with no report).
+      # Six shards run one after another in this job - never in parallel,
+      # the QA fixtures are shared - each with its own 15-min limit, and a
+      # failed or timed-out shard does not stop the next. Test timeouts are
+      # unchanged; only the job envelope grew (6 x 15 + setup).
+      - name: e2e shard 1/6
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=1/6
         env:
           CI: true
           E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-1.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-1
 
-      - name: Summary annotation (pass/fail counts)
+      - name: e2e shard 2/6
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=2/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-2.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-2
+
+      - name: e2e shard 3/6
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=3/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-3.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-3
+
+      - name: e2e shard 4/6
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=4/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-4.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-4
+
+      - name: e2e shard 5/6
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=5/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-5.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-5
+
+      - name: e2e shard 6/6
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=6/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-6.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-6
+
+      - name: Summary annotation (pass/fail counts, all shards)
         if: always()
         env:
           E2E_SUMMARY_LABEL: e2e-qa
-        run: node e2e/ci-summary.mjs
+        run: node e2e/ci-summary.mjs e2e-results/shard-1.json e2e-results/shard-2.json e2e-results/shard-3.json e2e-results/shard-4.json e2e-results/shard-5.json e2e-results/shard-6.json
 
-      - name: Upload Playwright report and results.json
+      - name: Upload Playwright report and shard results
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: playwright-report
           path: |
             playwright-report/
-            test-results/results.json
+            e2e-results/
           retention-days: 14
 
       - name: Upload traces/videos on failure
