@@ -31,7 +31,7 @@ async function test(name: string, fn: () => void | Promise<void>) {
 const OTHER_LOCALES = ['hi', 'mr', 'te', 'ta', 'kn', 'ml', 'gu', 'bn', 'de', 'fr', 'es']
 
 /** GEN-2610-007 - the role dashboards' namespaces (6a: shared chrome + Artist; 6b: Organiser; 6c adds Venue Owner). */
-export const DASHBOARD_GROUPS = ['dashboardChrome', 'artistDashboard', 'eventTermsChecklist', 'organiserDashboard']
+export const DASHBOARD_GROUPS = ['dashboardChrome', 'artistDashboard', 'eventTermsChecklist', 'organiserDashboard', 'venueDashboard']
 
 /** Dictionary groups rendered on the homepage, /events, /venues, /artists, event detail and checkout, plus the dashboards'. */
 export const CHECKED_GROUPS = [
@@ -87,6 +87,9 @@ export const ALLOWED: Record<string, { locales: string[]; why: string }> = {
   'organiserDashboard.eventForm.durationHours': { locales: ['fr', 'es'], why: '"h" is the French and Spanish hour abbreviation' },
   'organiserDashboard.eventDetail.compBuyIn': { locales: OTHER_LOCALES, why: '"Buy-in" is the AFA slot-type name, kept in Latin script in every language' },
   'organiserDashboard.lineup.min': { locales: ['fr', 'es'], why: '"min" is the French and Spanish abbreviation for minutes' },
+  'venueDashboard.myVenues.eyebrow': { locales: ['de'], why: '"Portfolio" is the German word' },
+  'venueDashboard.myVenues.rateFlexible': { locales: ['fr', 'es'], why: '"Flexible" is the French and Spanish word' },
+  'venueDashboard.venueEdit.flexible': { locales: ['fr', 'es'], why: '"Flexible" is the French and Spanish word' },
 }
 
 /** Proper nouns that read the same in every language. */
@@ -162,6 +165,9 @@ async function main() {
       'dashboardChrome.myEvents', 'dashboardChrome.more', 'artistDashboard.applicationsTitle', 'artistDashboard.browseTitle',
       // 6b-1: Organiser Your Events, event detail, Create Event, Edit Event.
       'organiserDashboard.yourEvents.title', 'organiserDashboard.eventDetail.artistApplications',
+      // 6c-1: Venue Owner My Venues, venue page, Edit Venue, Seat Map Builder.
+      'venueDashboard.myVenues.eyebrow', 'venueDashboard.venueView.notFound', 'venueDashboard.venueEdit.title',
+      'venueDashboard.seatMap.restoreTitle', 'venueDashboard.seatMap.frozenTitle', 'venueDashboard.seatMap.mainLevel',
     ]) {
       assert.equal(typeof flatEn[key], 'string', `${key} is missing from en.ts`)
     }
