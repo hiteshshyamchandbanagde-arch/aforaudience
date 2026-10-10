@@ -1908,7 +1908,7 @@ const fr: Dictionary = {
       restoreBody: "Vous avez un brouillon local non enregistré d'il y a {age} ({seats} sur {levels}). Ignorer conserve ce qui est enregistré sur le serveur.",
       restoreConfirm: "Restaurer le brouillon",
       discard: "Ignorer",
-      ageJustNow: "à l'instant",
+      ageJustNow: "quelques secondes",
       ageMinutesOne: "{n} minute",
       ageMinutesOther: "{n} minutes",
       ageHoursOne: "{n} heure",
