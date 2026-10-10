@@ -2045,6 +2045,20 @@ const bn: Dictionary = {
       bioPlaceholder: "আপনার ভেন্যুগুলো সম্পর্কে লোকজনকে জানান",
       saveProfile: "প্রোফাইল সেভ করুন",
     },
+    venueSales: {
+      loadFailed: "আয়ের ডেটা লোড করা যায়নি",
+      allVenues: "সব ভেন্যু →",
+      title: "{venue} — আয়",
+      grossRevenue: "মোট আয়",
+      grossSub: "{byEventDate}, প্ল্যাটফর্মের কোনো ভাগ নেই",
+      upcomingCompleted: "আসন্ন / সম্পন্ন (এখন পর্যন্ত)",
+      pending: "বাকি (নিশ্চিতকরণের অপেক্ষায়)",
+      atStake: "{amount} ঝুঁকিতে",
+      noneRightNow: "এখন কিছু নেই",
+      noConfirmedInRange: "এই সময়ে কোনো নিশ্চিত বুকিং নেই।",
+      recentBookings: "সাম্প্রতিক বুকিং",
+      noLinkedEvent: "কোনো যুক্ত ইভেন্ট নেই",
+    },
   },
 }
 
