@@ -2222,6 +2222,25 @@ const en = {
       bioPlaceholder: "Tell people about your venues",
       saveProfile: "Save Profile",
     },
+    // One venue's revenue (/dashboard/venue/[id]/sales). The "ago" words, the
+    // stale-data note and the shared headings come from sales; Back to Venue from venueEdit.
+    venueSales: {
+      loadFailed: "Could not load revenue data",
+      allVenues: "All venues →",
+      // {venue}: the venue's name.
+      title: "{venue} — Revenue",
+      grossRevenue: "Gross Revenue",
+      // {byEventDate}: common.byEventDate.
+      grossSub: "{byEventDate}, no platform cut",
+      upcomingCompleted: "Upcoming / Completed (all-time)",
+      pending: "Pending (awaiting confirmation)",
+      // {amount}: a ₹ amount.
+      atStake: "{amount} at stake",
+      noneRightNow: "none right now",
+      noConfirmedInRange: "No confirmed bookings in this range.",
+      recentBookings: "Recent bookings",
+      noLinkedEvent: "No linked event",
+    },
   },
 }
 
