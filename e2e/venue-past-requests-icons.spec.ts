@@ -54,9 +54,10 @@ test.beforeEach(async ({ page, isMobile }) => {
 test("[BUG-2610-025] Past Requests: calendar and message icons are the app's SVG icons, not emoji, and the amount reads ₹37,417", async ({ page, isMobile }) => {
   await gotoDashboard(page, "/dashboard/venue/bookings");
   await hideFloatingOverlays(page);
-  await expect(page.getByRole("heading", { name: "Past Requests" })).toBeVisible();
+  // data-afa-* hooks, not the English text: venue Bookings follows the UI language (GEN-2610-007).
+  await expect(page.locator('h2[data-afa-section="past"]')).toHaveText("Past Requests");
 
-  const row = page.getByRole("main").locator("div").filter({ hasText: "E2E past icons" }).filter({ has: page.getByRole("button", { name: /Message Organiser/ }) }).last();
+  const row = page.getByRole("main").locator("div").filter({ hasText: "E2E past icons" }).filter({ has: page.locator('[data-afa-message-button="VENUE_BOOKING"]') }).last();
   await expect(row).toBeVisible();
 
   // Money: the shared formatter, the same as the summary cards above.
@@ -66,7 +67,8 @@ test("[BUG-2610-025] Past Requests: calendar and message icons are the app's SVG
   // Date line: the calendar icon, then the date; no emoji anywhere in the row.
   const dateLine = row.locator("p").filter({ hasText: "1 Oct 2026" });
   await expect(dateLine.locator('svg[data-afa-icon="calendar"]')).toHaveCount(1);
-  const button = row.getByRole("button", { name: /Message Organiser/ });
+  const button = row.locator('[data-afa-message-button="VENUE_BOOKING"]');
+  await expect(button).toContainText("Message Organiser");
   await expect(button.locator('svg[data-afa-icon="message"]')).toHaveCount(1);
   const text = (await row.innerText()).trim();
   expect(EMOJI.test(text), `no emoji in the row: ${JSON.stringify(text)}`).toBe(false);

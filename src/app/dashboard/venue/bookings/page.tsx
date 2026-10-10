@@ -159,11 +159,11 @@ export default function VenueBookingsPage() {
           {/* F3 - Revenue summary */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
             {[
-              { label: 'This month', value: thisMonthRevenue, sub: tr.common.byEventDate },
-              { label: 'Total confirmed', value: totalRevenue, sub: null },
-              { label: 'Pending value', value: pendingValue, sub: null },
+              { key: 'this-month', label: 'This month', value: thisMonthRevenue, sub: tr.common.byEventDate },
+              { key: 'total-confirmed', label: 'Total confirmed', value: totalRevenue, sub: null },
+              { key: 'pending-value', label: 'Pending value', value: pendingValue, sub: null },
             ].map((s) => (
-              <Card key={s.label} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
+              <Card key={s.key} data-afa-stat={s.key} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
                 <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{s.label}</StatLabel>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{formatINR(s.value)}</p>
                 {s.sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>{s.sub}</p>}
@@ -244,7 +244,7 @@ export default function VenueBookingsPage() {
 
           {/* Pending */}
           <div style={{ marginBottom: 'var(--afa-space-32px)' }}>
-            <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+            <h2 data-afa-section="pending" style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               Pending {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
@@ -283,7 +283,7 @@ export default function VenueBookingsPage() {
           {/* Resolved */}
           {resolved.length > 0 && (
             <div>
-              <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+              <h2 data-afa-section="past" style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
                 Past Requests
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>

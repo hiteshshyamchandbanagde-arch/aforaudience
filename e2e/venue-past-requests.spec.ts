@@ -54,7 +54,8 @@ test("[BUG-2608-091] Past Requests rows show the booking date, and the end date 
   });
   await gotoDashboard(page, "/dashboard/venue/bookings");
 
-  await expect(page.getByRole("heading", { name: "Past Requests" })).toBeVisible();
+  // data-afa-* hooks, not the English text: venue Bookings follows the UI language (GEN-2610-007).
+  await expect(page.locator('h2[data-afa-section="past"]')).toHaveText("Past Requests");
   const oneDay = page.getByRole("main").locator("div").filter({ hasText: "E2E past e2e-past-1" }).filter({ hasText: "₹4,321" }).last();
   const multiDay = page.getByRole("main").locator("div").filter({ hasText: "E2E past e2e-past-2" }).filter({ hasText: "₹4,321" }).last();
   await expect(oneDay).toContainText("15 Mar 2026");
