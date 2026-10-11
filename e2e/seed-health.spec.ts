@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { test, expect } from "./helpers/test";
 import { CLOCK_FORWARD_DAYS, HRITHIK_ARTIST_ID, HRITHIK_UPCOMING_EVENT_ID, UPCOMING_FIXTURES } from "./helpers/upcoming-fixtures";
 import { PERSONA_CITIES } from "./helpers/persona-cities";
@@ -60,6 +62,39 @@ test("[BUG-2610-013] seed health: every event the suite needs upcoming is upcomi
     problems,
     "The QA seed's upcoming-event assumptions do not hold, so specs that need an upcoming event will fail. " +
       "global-setup.ts moves these forward when E2E_DATABASE_URL is set; otherwise rerun `npm run db:seed:qa`. Problems"
+  ).toEqual([]);
+});
+
+/**
+ * BUG-2610-034 - events-search.spec.ts named a seed event ("Rajapalayam
+ * Comedy Jam #4") that is not a fixture, so nothing kept it upcoming and
+ * the spec went red when 10 Oct passed. A spec may name an upcoming event
+ * only if it is in UPCOMING_FIXTURES (global-setup keeps those ahead).
+ * Events already past are fine to name: past stays past. Titles are
+ * matched without a trailing "#N", the way specs usually match them.
+ */
+test("[BUG-2610-034] seed health: no spec names an upcoming event that is not a kept-upcoming fixture", async ({ request }) => {
+  const res = await request.get("/api/events/");
+  expect(res.ok(), `GET /api/events/ answered HTTP ${res.status()}`).toBeTruthy();
+  const events = (await res.json()) as ApiEvent[];
+  const fixtureIds = new Set(UPCOMING_FIXTURES.map((f) => f.id));
+  const dir = __dirname;
+  const sources = (readdirSync(dir, { recursive: true }) as string[])
+    .filter((f) => f.endsWith(".ts") && !f.endsWith("upcoming-fixtures.ts"))
+    .map((f) => ({ file: f, text: readFileSync(path.join(dir, f), "utf8").toLowerCase() }));
+
+  const problems: string[] = [];
+  for (const e of events) {
+    if (fixtureIds.has(e.id) || startOf(e).getTime() < Date.now()) continue;
+    const name = e.title.replace(/\s*#\d+$/, "").toLowerCase();
+    for (const s of sources) {
+      if (s.text.includes(name)) problems.push(`${s.file} names "${e.title}" (${e.id}, ${startOf(e).toISOString()}), which is not in UPCOMING_FIXTURES`);
+    }
+  }
+  expect(
+    problems,
+    "A spec relies on a seed event that nothing keeps upcoming; it goes red the day that event passes. " +
+      "Use an event from helpers/upcoming-fixtures.ts (or add it there). Problems"
   ).toEqual([]);
 });
 
