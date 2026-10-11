@@ -1,5 +1,6 @@
 import { PNG } from "pngjs";
 import jsQR from "jsqr";
+import type { Locator } from "@playwright/test";
 import { test, expect, hideFloatingOverlays } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { useRuleViewport } from "./helpers/viewports";
@@ -29,6 +30,28 @@ function startsAt(e: ApiEvent): number {
   return new Date(`${day}T${e.startTime.padStart(5, "0")}:00+05:30`).getTime();
 }
 
+/**
+ * Hides the Browse Events cards above the one holding `target`, so a
+ * screenshot of something on that card does not depend on how many events
+ * are listed before it. BUG-2610-034: the list changes as events pass, the
+ * card's top moved between whole and half pixels, and the baselines
+ * differed in anti-aliasing only (same render). The cards below stay, so
+ * the card is not left at the page's foot, and `target` is scrolled to
+ * the middle of the screen, clear of the phone tab bar (fixed at the
+ * bottom; a minimal scroll left it over the shot). Display only; nothing
+ * is written.
+ */
+async function hideCardsAbove(target: Locator) {
+  await target.evaluate((el) => {
+    const own = el.closest("[data-afa-browse-event]");
+    for (const card of document.querySelectorAll<HTMLElement>("[data-afa-browse-event]")) {
+      if (card === own) break;
+      card.style.display = "none";
+    }
+    el.scrollIntoView({ block: "center" });
+  });
+}
+
 test("[BUG-2610-023] artist Browse Events: Apply to Perform has the primary fill; no past events listed", async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
   let all: ApiEvent[] = [];
@@ -55,6 +78,8 @@ test("[BUG-2610-023] artist Browse Events: Apply to Perform has the primary fill
   expect(bg, "Apply to Perform has the primary fill").toBe(fill);
   expect(bg).not.toBe("rgba(0, 0, 0, 0)");
   expect(fg, "and the on-fill text colour").toBe(onFill);
+  // 2 reads the card ids from the DOM; hidden cards keep theirs.
+  await hideCardsAbove(apply);
   await hideFloatingOverlays(page);
   await expect(apply).toHaveScreenshot(`artist-apply-button-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 
@@ -125,6 +150,7 @@ test("[BUG-2610-023] artist share poster: no stray blocks; the link is this depl
   // The preview card itself (title, image, button): one baseline per width.
   await poster.evaluate((img: HTMLImageElement) => img.decode());
   const shareCard = poster.locator("xpath=..");
+  await hideCardsAbove(shareCard);
   await hideFloatingOverlays(page);
   await expect(shareCard).toHaveScreenshot(`artist-poster-card-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",

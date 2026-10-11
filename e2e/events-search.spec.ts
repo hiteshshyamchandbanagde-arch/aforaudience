@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import { test, expect } from "./helpers/test";
 import { authFile } from "./helpers/personas";
+import { OUT_OF_CITY_EVENT } from "./helpers/upcoming-fixtures";
 
 /**
  * BUG-2610-004 - arriving on /events with ?search= (from the homepage
@@ -10,13 +11,15 @@ import { authFile } from "./helpers/personas";
  * shows the search, a search is not narrowed by the auto-applied city, and
  * clearing the box clears the URL (BUG-2610-007, the test at the bottom).
  *
- * As Atul, whose saved city is Jaipur; the event searched for is in
- * Byasanagar. Read-only (his city is not changed).
+ * As Atul, whose saved city is Jaipur; the event searched for is an
+ * upcoming fixture in Pune (helpers/upcoming-fixtures.ts, kept upcoming by
+ * global-setup; BUG-2610-034: a dated seed event went past). Read-only
+ * (his city is not changed).
  */
 
 test.use({ storageState: authFile("atul") });
 
-const SEARCH = "rajapalayam";
+const SEARCH = OUT_OF_CITY_EVENT.title.toLowerCase();
 
 /** The /events search box: in the top bar on a phone, in the page on desktop. */
 function searchBox(page: Page, isMobile: boolean) {
@@ -26,15 +29,15 @@ function searchBox(page: Page, isMobile: boolean) {
 }
 
 test("[BUG-2610-004] a ?search= arrival shows in the search box and searches every city", async ({ page, isMobile }) => {
-  await page.goto(`/events?search=${SEARCH}`);
+  await page.goto(`/events?search=${encodeURIComponent(SEARCH)}`);
 
   const box = searchBox(page, isMobile);
   await expect(box).toHaveValue(SEARCH);
 
   // Found although it is not in Atul's city.
-  const hit = page.getByRole("link", { name: /Rajapalayam Comedy Jam/i }).first();
+  const hit = page.getByRole("link", { name: new RegExp(OUT_OF_CITY_EVENT.title, "i") }).first();
   await expect(hit).toBeVisible();
-  await expect(hit).toContainText("Byasanagar");
+  await expect(hit).toContainText(OUT_OF_CITY_EVENT.city);
   if (!isMobile) {
     // The city filter (the select listing "All Cities") was left alone.
     const citySelect = page
@@ -58,7 +61,7 @@ test("[BUG-2610-004] a ?search= arrival shows in the search box and searches eve
 // drops the param with the native History API. Quarantined from #723
 // until this fix.
 test("[BUG-2610-004] [BUG-2610-007] clearing the search box removes ?search= from the address", async ({ page, isMobile }) => {
-  await page.goto(`/events?search=${SEARCH}`);
+  await page.goto(`/events?search=${encodeURIComponent(SEARCH)}`);
   const box = searchBox(page, isMobile);
   await expect(box).toHaveValue(SEARCH);
 
