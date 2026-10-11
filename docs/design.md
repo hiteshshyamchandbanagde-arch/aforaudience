@@ -8259,3 +8259,10 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
 ## Process rule 9 Oct (Hitesh): run tasks in small chunks
 
 - Every CC dispatch has a small scope (about 2-4 tickets or one page group). Inside a run: one small edit, commit, push, then the next; never more than one dictionary/locale file per edit; never rewrite a whole large file. Pointer in `AGENTS.md` so every autopilot run reads it.
+
+## Offline tickets (11 Oct, PR #751, BUG-2610-001) + test chunks (BUG-2610-033/-034)
+- My Tickets saves a snapshot of the signed-in user's upcoming CONFIRMED tickets in localStorage (`src/lib/offline-tickets.ts`): event, date/time, venue + city, tier, qty, booking id (= QR payload), ticket code. No amounts, no payment data. Kept until 12 h after start.
+- Shown only for the last signed-in user on this device; cleared on sign-out (`signOutAndClearCache`) and on a user change. /api stays never-cached in the SW.
+- Offline (navigator.onLine false or a network error, not a 401): /tickets shows the saved cards, QR drawn on device, no actions, banner "last updated <savedAt>"; no snapshot -> "connect once to save your tickets". Online 401 still -> /login.
+- Standing rule: e2e specs never name a dated seed event; use `e2e/helpers/upcoming-fixtures.ts` (seed-health flags violations). Screenshot clips use whole-pixel boxes.
+- CI: e2e runs as 6 sequential shards (15 min each, job 110 min) per Hitesh's 11 Oct small-chunk rule.
