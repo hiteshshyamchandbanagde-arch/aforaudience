@@ -30,13 +30,20 @@ export type UpcomingFixture = { id: string; title: string; usedBy: string };
 export const UPCOMING_FIXTURES: UpcomingFixture[] = [
   { id: "qa-jaipur-event-0001", title: "Jaipur Mic Gala 100", usedBy: "smoke, seat-availability, seat-legend, seat-total, ticket-tier, registration, fonts, chat-bubble" },
   { id: "qa-demo-event-full-5", title: "Mixed Bag Comedy Lineup", usedBy: "colour-rules (Hrithik's upcoming show: he has an APPROVED performance on it)" },
-  { id: "qa-demo-event-full-9", title: "Improv Theatre Jam", usedBy: "contrast, organiser-tab-bar, chat-bubble (Omkar's event)" },
+  { id: "qa-demo-event-full-9", title: "Improv Theatre Jam", usedBy: "contrast, organiser-tab-bar, chat-bubble (Omkar's event), events-search (an upcoming event outside Atul's city)" },
   { id: "e2efixtureevt00001", title: "E2E Fixture: Waitlist/Wallet Flow", usedBy: "waitlist-wallet-credit" },
 ];
 
 /** The artist whose upcoming show colour-rules.spec.ts checks, and the fixture event that is it. */
 export const HRITHIK_ARTIST_ID = "qa-demo-artist-full-role";
 export const HRITHIK_UPCOMING_EVENT_ID = "qa-demo-event-full-5";
+
+/**
+ * The upcoming event events-search.spec.ts searches for: in Pune, so not in
+ * Atul's saved city (Jaipur). BUG-2610-034: the spec named a seed event
+ * ("Rajapalayam Comedy Jam #4") that the clock walked past on 10 Oct.
+ */
+export const OUT_OF_CITY_EVENT = { id: "qa-demo-event-full-9", title: "Improv Theatre Jam", city: "Pune" };
 
 export type MovedFixture = { id: string; title: string; from: Date; to: Date };
 
