@@ -187,10 +187,11 @@ export default function VenueOwnerSalesOverviewPage() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
-            <StatCard id="total-revenue" label={v.totalRevenue} value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={tr.common.byEventDate} vs={v.vsLastPeriod} />
+            {/* BUG-2608-090 - v.venuesSub ("no platform cut on rentals") is revenue copy; it now belongs to this card, not the Venues count card. */}
+            <StatCard id="total-revenue" label={v.totalRevenue} value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} sub={`${tr.common.byEventDate} · ${v.venuesSub}`} vs={v.vsLastPeriod} />
             <StatCard id="confirmed-bookings" label={v.confirmedBookings} value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} vs={v.vsLastPeriod} />
             <StatCard id="avg-booking-value" label={v.avgBookingValue} value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} vs={v.vsLastPeriod} />
-            <StatCard id="venues" label={v.venues} value={String(totals.venuesCount)} sub={v.venuesSub} />
+            <StatCard id="venues" label={v.venues} value={String(totals.venuesCount)} />
           </div>
 
           <Section id="revenue-over-time" title={v.revenueOverTime}>
