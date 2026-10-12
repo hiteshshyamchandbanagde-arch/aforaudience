@@ -2067,6 +2067,9 @@ const es: Dictionary = {
       noLinkedEvent: "Sin evento vinculado",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "Caducó el {date} — ahora desactivado.",
+  },
 }
 
 export default es

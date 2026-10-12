@@ -2063,6 +2063,9 @@ const bn: Dictionary = {
       noLinkedEvent: "কোনো যুক্ত ইভেন্ট নেই",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date} তারিখে মেয়াদ শেষ — এখন বন্ধ।",
+  },
 }
 
 export default bn

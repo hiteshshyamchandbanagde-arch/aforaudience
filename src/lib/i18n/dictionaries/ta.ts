@@ -2063,6 +2063,9 @@ const ta: Dictionary = {
       noLinkedEvent: "இணைக்கப்பட்ட நிகழ்வு இல்லை",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date} அன்று காலாவதியானது — தற்போது முடக்கப்பட்டுள்ளது.",
+  },
 }
 
 export default ta

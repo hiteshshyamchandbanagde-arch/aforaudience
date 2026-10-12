@@ -2061,6 +2061,9 @@ const mr: Dictionary = {
       noLinkedEvent: "कोणताही जोडलेला इव्हेंट नाही",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date} रोजी कालबाह्य — सध्या बंद.",
+  },
 }
 
 export default mr

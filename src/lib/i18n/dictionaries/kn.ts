@@ -2063,6 +2063,9 @@ const kn: Dictionary = {
       noLinkedEvent: "ಲಿಂಕ್ ಮಾಡಿದ ಈವೆಂಟ್ ಇಲ್ಲ",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date} ರಂದು ಅವಧಿ ಮುಗಿದಿದೆ — ಸದ್ಯ ಆಫ್ ಆಗಿದೆ.",
+  },
 }
 
 export default kn

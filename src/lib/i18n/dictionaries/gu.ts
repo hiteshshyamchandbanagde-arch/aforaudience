@@ -2063,6 +2063,9 @@ const gu: Dictionary = {
       noLinkedEvent: "કોઈ જોડાયેલી ઇવેન્ટ નથી",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date} ના રોજ સમાપ્ત — હાલમાં બંધ.",
+  },
 }
 
 export default gu
