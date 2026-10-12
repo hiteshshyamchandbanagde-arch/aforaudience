@@ -34,6 +34,8 @@ test("[BUG-2608-090] venue Sales: 'no platform cut on rentals' is on Total Reven
 
   // The Venues card's count is QA data; masked so the baseline is the card itself.
   await hideFloatingOverlays(page);
+  // Mid-screen, clear of the fixed phone tab bar at the bottom.
+  await venues.evaluate((el) => el.scrollIntoView({ block: "center" }));
   await expect(venues).toHaveScreenshot(`venue-sales-venues-card-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
     mask: [venues.locator("p:not([data-afa-stat-label])")],
