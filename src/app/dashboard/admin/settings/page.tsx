@@ -11,6 +11,9 @@ import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { useLocale } from '@/lib/i18n/translate'
+import { formatDate } from '@/lib/format-date'
+import { directPayoutsExpiredAt, isDirectPayoutsEnabled, type DirectPayoutsFlag } from '@/lib/direct-payouts'
 
 // /dashboard/admin/settings
 //
@@ -25,6 +28,20 @@ import { PageTitle } from '@/components/dashboard/PageTitle'
 // the UI shows/accepts rupees, since that's what a human types. The
 // two-way conversion is done here so backend stays paise-only.
 
+// BUG-2609-051 - the Direct payouts form shows the effective state, the
+// same isDirectPayoutsEnabled() check the payout API uses: a flag still ON
+// in the DB past its auto-disable time shows as OFF, with the lapsed time
+// noted under it. The lapsed time is not put back in the date field, so
+// switching it on again starts with no expiry rather than an instant lapse.
+// `until` is the datetime-local value; '' means no expiry set.
+function directPayoutsFormState(settings: DirectPayoutsFlag): { enabled: boolean; until: string; expiredAt: Date | null } {
+  const expiredAt = directPayoutsExpiredAt(settings)
+  const until = settings.directPayoutsEnabledUntil && !expiredAt
+    ? toLocalDatetimeInputValue(new Date(settings.directPayoutsEnabledUntil))
+    : ''
+  return { enabled: isDirectPayoutsEnabled(settings), until, expiredAt }
+}
+
 // datetime-local inputs need "YYYY-MM-DDTHH:mm" with no timezone suffix,
 // rendered in the browser's local time. Padding by hand rather than
 // pulling in a date lib for one formatting helper.
@@ -36,6 +53,7 @@ function toLocalDatetimeInputValue(d: Date): string {
 export default function AdminSettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { locale, t: tr } = useLocale()
 
   const [feeRupees, setFeeRupees] = useState<string>('')
   const [minFeeRupees, setMinFeeRupees] = useState<string>('')
@@ -80,6 +98,8 @@ export default function AdminSettingsPage() {
   const [directPayoutsUntil, setDirectPayoutsUntil] = useState<string>('') // datetime-local string, '' = no expiry
   const [initialDirectPayoutsUntil, setInitialDirectPayoutsUntil] = useState<string>('')
   const [directPayoutsSaving, setDirectPayoutsSaving] = useState(false)
+  // BUG-2609-051 - set when the stored flag is ON but its auto-disable time has passed.
+  const [directPayoutsExpired, setDirectPayoutsExpired] = useState<Date | null>(null)
 
   // Audience Choice voting default weights (§6, session 58)
   const [audienceWeight, setAudienceWeight] = useState<string>('')
@@ -158,16 +178,12 @@ export default function AdminSettingsPage() {
         setInitialEventWindow(evWindow)
         setEventWindow(String(evWindow))
 
-        const dpEnabled = !!data.settings.directPayoutsEnabled
-        setInitialDirectPayoutsEnabled(dpEnabled)
-        setDirectPayoutsEnabledState(dpEnabled)
-        // datetime-local input wants "YYYY-MM-DDTHH:mm" in local time, no
-        // seconds/Z. Empty string means no expiry set.
-        const dpUntilStr = data.settings.directPayoutsEnabledUntil
-          ? toLocalDatetimeInputValue(new Date(data.settings.directPayoutsEnabledUntil))
-          : ''
-        setInitialDirectPayoutsUntil(dpUntilStr)
-        setDirectPayoutsUntil(dpUntilStr)
+        const dp = directPayoutsFormState(data.settings)
+        setInitialDirectPayoutsEnabled(dp.enabled)
+        setDirectPayoutsEnabledState(dp.enabled)
+        setInitialDirectPayoutsUntil(dp.until)
+        setDirectPayoutsUntil(dp.until)
+        setDirectPayoutsExpired(dp.expiredAt)
 
         const aw = data.settings.audienceVoteWeightDefault
         const pw = data.settings.panelistVoteWeightDefault
@@ -426,12 +442,12 @@ export default function AdminSettingsPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
-      setInitialDirectPayoutsEnabled(!!data.settings.directPayoutsEnabled)
-      const savedUntilStr = data.settings.directPayoutsEnabledUntil
-        ? toLocalDatetimeInputValue(new Date(data.settings.directPayoutsEnabledUntil))
-        : ''
-      setInitialDirectPayoutsUntil(savedUntilStr)
-      setDirectPayoutsUntil(savedUntilStr)
+      const dp = directPayoutsFormState(data.settings)
+      setInitialDirectPayoutsEnabled(dp.enabled)
+      setDirectPayoutsEnabledState(dp.enabled)
+      setInitialDirectPayoutsUntil(dp.until)
+      setDirectPayoutsUntil(dp.until)
+      setDirectPayoutsExpired(dp.expiredAt)
       showToast('Saved.', 'success')
     } catch (err: any) {
       showToast(err.message || 'Save failed', 'error')
@@ -855,6 +871,11 @@ export default function AdminSettingsPage() {
               Enable direct payouts UI (dashboard link, linking form, API)
             </span>
           </label>
+          {directPayoutsExpired && !directPayoutsEnabled && (
+            <p data-afa-direct-payouts-expired style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'calc(-1 * var(--afa-space-2))', marginBottom: 'var(--afa-space-4)' }}>
+              {tr.adminSettings.directPayoutsExpired.replace('{date}', formatDate(directPayoutsExpired, 'dateTime', locale))}
+            </p>
+          )}
 
           <label
             style={{
