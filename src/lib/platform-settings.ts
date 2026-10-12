@@ -38,7 +38,7 @@ export type PlatformSettings = {
   // events/route.ts and events/[id]/route.ts for enforcement.
   eventCreationWindowMonths: number
   // Direct Payouts (Razorpay Route) admin toggle - session 65. See
-  // isDirectPayoutsEnabled() below for the lazy-expiry check.
+  // isDirectPayoutsEnabled() (src/lib/direct-payouts.ts) for the lazy-expiry check.
   directPayoutsEnabled: boolean
   directPayoutsEnabledUntil: Date | null
 }
@@ -283,19 +283,9 @@ export async function setEventCreationWindowMonths(months: number): Promise<Plat
   return row
 }
 
-/**
- * Direct Payouts (Razorpay Route) - session 65. Route is unavailable on
- * this account tier; this flag gates the pre-pivot linking UI/API. Lazy
- * expiry check, no cron: if directPayoutsEnabledUntil is set and has
- * passed, treat as disabled even though the bool is still true in the
- * DB. Callers just call this on every read - nothing self-heals the DB
- * row, which is fine since the check is cheap and always re-run.
- */
-export function isDirectPayoutsEnabled(settings: Pick<PlatformSettings, "directPayoutsEnabled" | "directPayoutsEnabledUntil">): boolean {
-  if (!settings.directPayoutsEnabled) return false
-  if (settings.directPayoutsEnabledUntil && settings.directPayoutsEnabledUntil.getTime() <= Date.now()) return false
-  return true
-}
+// Direct Payouts expiry check: lives in direct-payouts.ts (no Prisma) so
+// the admin Settings page can use it too (BUG-2609-051).
+export { isDirectPayoutsEnabled } from "@/lib/direct-payouts"
 
 /**
  * Admin-only setter. enabledUntil is optional - pass null/undefined to
