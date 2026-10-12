@@ -39,7 +39,8 @@ test("[BUG-2609-087] venue Bookings 'This month' and Sales 'Month' show the same
   await month.click();
   const totalRevenue = statValue(page, "total-revenue", "Total Revenue");
   await expect(totalRevenue).toHaveText(bookingsFigure);
-  await expect(totalRevenue.locator("xpath=following-sibling::p[1]")).toHaveText("by event date");
+  // BUG-2608-090 - the Sales card's sub line now also carries "no platform cut on rentals".
+  await expect(totalRevenue.locator("xpath=following-sibling::p[1]")).toHaveText("by event date · no platform cut on rentals");
 
   test.info().annotations.push({ type: "month revenue", description: bookingsFigure });
 });
