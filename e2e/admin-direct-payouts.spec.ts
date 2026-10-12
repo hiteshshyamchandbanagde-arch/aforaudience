@@ -1,4 +1,4 @@
-import { test, expect, gotoDashboard } from "./helpers/test";
+import { test, expect, gotoDashboard, hideFloatingOverlays } from "./helpers/test";
 import { ADMIN_AUTH_FILE } from "./helpers/temp-admin";
 import { withQaDb } from "./helpers/qa-db";
 import { useRuleViewport } from "./helpers/viewports";
@@ -12,7 +12,7 @@ import { useRuleViewport } from "./helpers/viewports";
  * the page writes nothing.
  *
  * With the run's temp admin (needs the QA database). The settings row is
- * set to "ON until yesterday" (effectively off, so nothing else on QA
+ * set to "ON until 2 Aug 2026, 11 pm IST" (effectively off, so nothing else on QA
  * changes) and put back to what it was afterwards. Nothing is saved.
  */
 test.use({ storageState: ADMIN_AUTH_FILE });
@@ -25,7 +25,7 @@ test.beforeEach(async () => {
     const { rows } = await db.query<Flag>(`SELECT "directPayoutsEnabled", "directPayoutsEnabledUntil" FROM "PlatformSettings" WHERE id = 'singleton'`);
     expect(rows.length, "the platform settings row exists on QA").toBe(1);
     original = rows[0];
-    await db.query(`UPDATE "PlatformSettings" SET "directPayoutsEnabled" = true, "directPayoutsEnabledUntil" = now() - interval '1 day' WHERE id = 'singleton'`);
+    await db.query(`UPDATE "PlatformSettings" SET "directPayoutsEnabled" = true, "directPayoutsEnabledUntil" = '2026-08-02T17:30:00Z' WHERE id = 'singleton'`);
   });
 });
 
@@ -51,8 +51,12 @@ test("[BUG-2609-051] Direct payouts past its auto-disable time shows OFF with an
   const save = card.getByRole("button", { name: "Save", exact: true });
 
   await expect(toggle).not.toBeChecked();
-  await expect(note).toHaveText(/^Expired on .+ — currently off\.$/);
+  await expect(note).toHaveText("Expired on 2 Aug 2026, 11:00 pm — currently off.");
   await expect(save).toBeDisabled();
+  await hideFloatingOverlays(page);
+  await toggle.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await expect(toggle.locator("xpath=ancestor::label")).toHaveScreenshot(`direct-payouts-toggle-expired-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+  await expect(note).toHaveScreenshot(`direct-payouts-expired-note-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 
   // Switching it on is a real change (the note goes, Save is offered);
   // switching it back off is no change at all.
