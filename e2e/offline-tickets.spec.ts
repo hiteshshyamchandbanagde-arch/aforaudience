@@ -125,14 +125,19 @@ async function openTicketsByTab(page: Page, isMobile: boolean) {
   expect(await page.evaluate(() => (window as unknown as { __afaSameDocument?: boolean }).__afaSameDocument), "a tab tap, not a page load").toBe(true);
   // The worker caches the HTML in the background. A build without the
   // fix never does; the offline open below then shows what Hitesh saw.
-  await page
-    .waitForFunction(async () => {
-      for (const key of await caches.keys()) {
-        if (key.startsWith("afora-runtime-") && (await (await caches.open(key)).match("/tickets/", { ignoreVary: true }))) return true;
-      }
-      return false;
-    }, undefined, { timeout: 15_000, polling: 500 })
-    .catch(() => {});
+  // Polled with evaluate, which awaits the check (waitForFunction took
+  // the async predicate's Promise as truthy and returned at once).
+  for (let waited = 0; waited < 15_000 && !(await shellCached(page)); waited += 500) await page.waitForTimeout(500);
+}
+
+/** Whether the service worker's runtime cache has the My Tickets HTML. */
+function shellCached(page: Page): Promise<boolean> {
+  return page.evaluate(async () => {
+    for (const key of await caches.keys()) {
+      if (key.startsWith("afora-runtime-") && (await (await caches.open(key)).match("/tickets/", { ignoreVary: true }))) return true;
+    }
+    return false;
+  });
 }
 
 async function goOffline(context: BrowserContext, page: Page) {
