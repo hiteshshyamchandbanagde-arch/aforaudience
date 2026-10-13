@@ -13,10 +13,14 @@ import { PERSONA_CITIES } from "./helpers/persona-cities";
  * signed-in user's upcoming confirmed tickets on every online load
  * (src/lib/offline-tickets.ts) and shows it with no network.
  *
- * As Atul, at 390 and 1440: open My Tickets online (twice, so the second
- * load goes through the service worker and its HTML is cached), go
- * offline, reload: still on /tickets/, an offline banner, and his
- * confirmed ticket with its QR drawn on the device. Then sign out with
+ * As Atul, at 390 and 1440, the way a phone gets there (reopened 13 Oct:
+ * the old spec used page.goto, a full load, which was the only path that
+ * cached the HTML): open home, tap the Tickets tab (the header's My
+ * Tickets icon at 1440) - a client-side navigation - wait for the
+ * snapshot, go offline, open My Tickets afresh: his saved ticket with its
+ * QR drawn on the device, an offline banner, no actions - not
+ * /offline.html. With the page open, losing signal switches it to the
+ * saved view and getting it back returns the live one. Then sign out with
  * the app's own control: offline My Tickets shows no ticket, only "connect
  * once to save your tickets", and nothing is left in storage.
  *
@@ -83,15 +87,55 @@ async function primeOffline(page: Page) {
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
 }
 
+/** The ticket's actions, which all need the network. */
+function actions(page: Page): Locator {
+  return page.locator(".afa-tickets-grid > div").filter({ hasText: EVENT_TITLE }).getByText(/^(Download PDF|Message Organiser|Cancel ticket)$/);
+}
+
+/**
+ * Home, then My Tickets by tapping the tab (the header icon at 1440): a
+ * client-side navigation, as on a phone. Waits until the snapshot is saved
+ * and the worker has the page's HTML, then a full load never happened.
+ */
+async function openTicketsByTab(page: Page, isMobile: boolean) {
+  await page.goto("/");
+  await page.waitForFunction(() => navigator.serviceWorker?.ready.then((r) => !!r.active), undefined, { timeout: 30_000 });
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await page.evaluate(() => ((window as unknown as { __afaSameDocument: boolean }).__afaSameDocument = true));
+  await page.locator(isMobile ? '[data-afa-tab-bar] [data-afa-tab="tickets"]' : 'a.sitenav-icon-link[href^="/tickets"]').click();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/tickets/");
+  await expect(qr(page)).toBeVisible(AFTER_WRITE);
+  await expect.poll(() => page.evaluate((k) => localStorage.getItem(k), SNAPSHOT_KEY)).toContain(BOOKING_ID);
+  expect(await page.evaluate(() => (window as unknown as { __afaSameDocument?: boolean }).__afaSameDocument), "a tab tap, not a page load").toBe(true);
+  // The worker caches the HTML in the background. A build without the
+  // fix never does; the offline open below then shows what Hitesh saw.
+  await page
+    .waitForFunction(async () => {
+      for (const key of await caches.keys()) {
+        if (key.startsWith("afora-runtime-") && (await (await caches.open(key)).match("/tickets/", { ignoreVary: true }))) return true;
+      }
+      return false;
+    }, undefined, { timeout: 15_000, polling: 500 })
+    .catch(() => {});
+}
+
 async function goOffline(context: BrowserContext, page: Page) {
   await context.setOffline(true);
   await page.goto("/tickets/");
 }
 
-test("[BUG-2610-001] offline, My Tickets shows the saved ticket and its QR, not the login page", async ({ page, context, isMobile }) => {
+test("[BUG-2610-001] reached by the Tickets tab, offline My Tickets reopens with the saved ticket and its QR", async ({ context, isMobile }) => {
+  const first = await context.newPage();
+  await useRuleViewport(first, isMobile);
+  await openTicketsByTab(first, isMobile);
+
+  // Airplane mode, the tab closed, My Tickets opened again.
+  await context.setOffline(true);
+  await first.close();
+  const page = await context.newPage();
   await useRuleViewport(page, isMobile);
-  await primeOffline(page);
-  await goOffline(context, page);
+  await page.goto("/tickets/");
+  await expect(page.locator("[data-afa-offline-tickets]"), "the saved tickets, not /offline.html").toBeVisible(AFTER_WRITE);
 
   // A few seconds on, still here: no redirect to /login (the bug).
   await page.waitForTimeout(3_000);
@@ -102,7 +146,7 @@ test("[BUG-2610-001] offline, My Tickets shows the saved ticket and its QR, not 
   expect(await decodeQr(qr(page)), "the QR is the booking id, as at the door").toBe(BOOKING_ID);
   await expect(page.getByText(EVENT_TITLE).first()).toBeVisible();
   // Actions all need the network: none on a saved ticket.
-  await expect(page.locator("[data-afa-offline-tickets]").getByRole("button", { name: /cancel ticket/i })).toHaveCount(0);
+  await expect(actions(page)).toHaveCount(0);
 
   const card = page.locator(".afa-tickets-grid > div").filter({ hasText: EVENT_TITLE });
   // The chat button and the phone tab bar sit over the card's lower half.
