@@ -22,7 +22,7 @@ import { useConfirm } from '@/components/ConfirmDialog'
 import { computeRefund, eventStartInstant as refundStartInstant, type RefundPreview } from '@/lib/refund-policy'
 import { splitUnfinishedCheckouts } from '@/lib/unfinished-checkout'
 import { readOfflineTickets, saveOfflineTickets, type OfflineTicket, type OfflineTicketsSnapshot } from '@/lib/offline-tickets'
-import { lastSignedInUserId } from '@/lib/sw-cache'
+import { lastSignedInUserId, requestOfflineShell } from '@/lib/sw-cache'
 
 // BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
 // Organiser / Cancel ticket): full-width buttons stacked under the QR,
@@ -386,7 +386,12 @@ export default function MyTicketsPage() {
       const data = await res.json()
       setBookings(data)
       setOffline(null)
-      if (userId) saveOfflineTickets(userId, data)
+      if (userId) {
+        saveOfflineTickets(userId, data)
+        // Reopened 13 Oct - the page itself kept offline too, however
+        // the user got here (a tab tap never caches its HTML).
+        requestOfflineShell('/tickets/')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {

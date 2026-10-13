@@ -25,6 +25,22 @@ export function lastSignedInUserId(): string | null {
   }
 }
 
+// BUG-2610-001 (reopened 13 Oct) - asks the service worker to keep a
+// page's HTML for offline (public/sw.js, CACHE_URL). A tab tap is a
+// client-side navigation, so without this My Tickets' HTML was only
+// cached after a full page load. Waits for an active worker, so it also
+// works on the first visit, before the worker controls the page.
+export function requestOfflineShell(url: string): void {
+  try {
+    if (typeof navigator === 'undefined' || !navigator.serviceWorker) return
+    navigator.serviceWorker.ready
+      .then((reg) => reg.active?.postMessage({ type: 'CACHE_URL', url }))
+      .catch(() => {})
+  } catch {
+    // No service worker here: nothing to cache into.
+  }
+}
+
 export async function clearSwRuntimeCache(): Promise<void> {
   if (typeof caches === 'undefined') return
   try {
