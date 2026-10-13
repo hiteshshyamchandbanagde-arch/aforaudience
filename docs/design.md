@@ -8266,3 +8266,8 @@ Feedback: all five → `BUILD_COMPLETE` / `DEPLOYED_QA`; `RESOLVED` after Hitesh
 - Offline (navigator.onLine false or a network error, not a 401): /tickets shows the saved cards, QR drawn on device, no actions, banner "last updated <savedAt>"; no snapshot -> "connect once to save your tickets". Online 401 still -> /login.
 - Standing rule: e2e specs never name a dated seed event; use `e2e/helpers/upcoming-fixtures.ts` (seed-health flags violations). Screenshot clips use whole-pixel boxes.
 - CI: e2e runs as 6 sequential shards (15 min each, job 110 min) per Hitesh's 11 Oct small-chunk rule.
+
+## Bug batch (13 Oct, PR #753: BUG-2608-090, BUG-2609-051, BUG-2609-085)
+- Venue Sales: "no platform cut on rentals" is revenue copy and lives on the Total Revenue card's sub line ("by event date · no platform cut on rentals"); the Venues count card has no sub. Key `venuesSub` kept.
+- Admin Settings → Direct payouts shows the effective state (`isDirectPayoutsEnabled()`, now in Prisma-free `src/lib/direct-payouts.ts`, re-exported from platform-settings). Flag ON past its auto-disable time → toggle OFF + "Expired on {date} — currently off." (`adminSettings.directPayoutsExpired`); the lapsed date is not put back in the date field, so re-enabling starts with no expiry.
+- "Check approval status" on organiser event detail: already fixed by #745 (6.05:1); now guarded by `e2e/organiser-check-approval.spec.ts`.

@@ -1,3 +1,16 @@
+## Part 57 — START HERE (13 Oct 23:55 IST), qa @ this commit
+
+- Delta on Part 56 (still valid for QA remaining, payments/tax, CA, billing check).
+- Merged #753 (squash, qa e27f8bf): BUG-2608-090 (no-cut line -> Total Revenue), BUG-2609-051 (Direct payouts effective state + expired note, 12 locales), BUG-2609-085 (already fixed by #745; spec only). Autopilot run 38291701938. Checks green on head 5380e99 (e2e-preview, design-tokens). Vercel qa READY, 0 runtime errors 1h.
+- Changed existing test (T2, chat-reviewed): e2e/venue-revenue.spec.ts Total Revenue sub now "by event date · no platform cut on rentals".
+- Tests added: scripts/direct-payouts.test.ts (6), e2e/venue-sales-cards, admin-direct-payouts (@needs-db), organiser-check-approval (@needs-db); baselines 390/1440.
+- Nightlies 12 Oct x2 + 13 Oct x2 GREEN (4 in a row). BUG-2610-033 flake not recurred since 11 Oct.
+- Branch fix/bug-batch-090-051-085 NOT deleted (proxy 403) - Hitesh may delete (also fix/offline-tickets, fix/e2e-red-034).
+- FEEDBACK NOT UPDATED: both execute_sql writes this session were cancelled at approval. Next session apply: BUG-2608-090/-2609-051/-2609-085 -> BUILD_COMPLETE (note: merged #753); BUG-2607-101 -> BUILD_COMPLETE (superseded: per-artist override buttons removed, card states declared terms; Hitesh confirm); GEN-2610-008 append the Part 56 payments/tax summary. BUG-2608-055 (Aug e2e failures) stale vs 530/0 green -> propose REJECTED/RESOLVED.
+- BUILD_QUEUE now empty. Next candidates (NEW LOW bugs): BUG-2609-064 hydration warning (layout splash), BUG-2609-069 Seat Map prompt(), BUG-2607-104 duplicate offline toast, BUG-2609-076 polish bundle. No run without Hitesh's "go".
+- Human check (new): venue Sales cards on phone (Vinayak); admin Settings Direct payouts card (expired note).
+- Project custom instructions on claude.ai still hold the stale 22 Sep tint-token handoff; Hitesh to replace with a pointer to HANDOFF.md.
+
 # Session Handoff — 4 Oct 2026, part 49 (CC — dispatch F, GEN-2609-107 spacing phase 2, pushed, NOT merged)
 
 (Part 48 is at the bottom of this file.)
