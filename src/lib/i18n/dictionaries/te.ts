@@ -2063,6 +2063,9 @@ const te: Dictionary = {
       noLinkedEvent: "లింక్ చేసిన ఈవెంట్ లేదు",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date}న గడువు ముగిసింది — ప్రస్తుతం ఆఫ్‌లో ఉంది.",
+  },
 }
 
 export default te

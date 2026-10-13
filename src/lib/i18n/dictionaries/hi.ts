@@ -2062,6 +2062,9 @@ const hi: Dictionary = {
       noLinkedEvent: "कोई जुड़ा इवेंट नहीं",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date} को समाप्त — अभी बंद है।",
+  },
 }
 
 export default hi

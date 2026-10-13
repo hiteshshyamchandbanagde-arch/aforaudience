@@ -2063,6 +2063,9 @@ const ml: Dictionary = {
       noLinkedEvent: "ബന്ധിപ്പിച്ച ഇവന്റില്ല",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "{date}-ന് കാലാവധി കഴിഞ്ഞു — ഇപ്പോൾ ഓഫാണ്.",
+  },
 }
 
 export default ml

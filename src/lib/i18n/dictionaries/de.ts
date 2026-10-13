@@ -2072,6 +2072,9 @@ const de: Dictionary = {
       noLinkedEvent: "Kein verknüpftes Event",
     },
   },
+  adminSettings: {
+    directPayoutsExpired: "Abgelaufen am {date} — derzeit aus.",
+  },
 }
 
 export default de

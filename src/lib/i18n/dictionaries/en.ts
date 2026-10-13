@@ -2246,6 +2246,12 @@ const en = {
       noLinkedEvent: "No linked event",
     },
   },
+  // Admin Settings (/dashboard/admin/settings). The rest of the page is
+  // English-only; BUG-2609-051's note was asked for as a translated key.
+  adminSettings: {
+    // {date}: when the Direct payouts flag auto-disabled.
+    directPayoutsExpired: "Expired on {date} — currently off.",
+  },
 }
 
 export default en
