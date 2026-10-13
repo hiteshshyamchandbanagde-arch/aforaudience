@@ -15,8 +15,8 @@ import { PERSONA_CITIES } from "./helpers/persona-cities";
  *
  * As Atul, at 390 and 1440, the way a phone gets there (reopened 13 Oct:
  * the old spec used page.goto, a full load, which was the only path that
- * cached the HTML): open home, tap the Tickets tab (the header's My
- * Tickets icon at 1440) - a client-side navigation - wait for the
+ * cached the HTML): open home, tap the Tickets tab (My Tickets in the
+ * account menu at 1440) - a client-side navigation - wait for the
  * snapshot, go offline, open My Tickets afresh: his saved ticket with its
  * QR drawn on the device, an offline banner, no actions - not
  * /offline.html. With the page open, losing signal switches it to the
@@ -87,13 +87,20 @@ async function primeOffline(page: Page) {
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
 }
 
-/** The ticket's actions, which all need the network. */
+/**
+ * The ticket's actions (Download PDF, Message Organiser, Cancel), which all
+ * need the network. By hook and the PDF link, not label: the UI language
+ * can differ between runs.
+ */
 function actions(page: Page): Locator {
-  return page.locator(".afa-tickets-grid > div").filter({ hasText: EVENT_TITLE }).getByText(/^(Download PDF|Message Organiser|Cancel ticket)$/);
+  return page
+    .locator(".afa-tickets-grid > div")
+    .filter({ hasText: EVENT_TITLE })
+    .locator('[data-afa-ticket-actions] > *, a[href^="/api/bookings/"]');
 }
 
 /**
- * Home, then My Tickets by tapping the tab (the header icon at 1440): a
+ * Home, then My Tickets by tapping the tab (the account menu at 1440): a
  * client-side navigation, as on a phone. Waits until the snapshot is saved
  * and the worker has the page's HTML, then a full load never happened.
  */
@@ -102,7 +109,16 @@ async function openTicketsByTab(page: Page, isMobile: boolean) {
   await page.waitForFunction(() => navigator.serviceWorker?.ready.then((r) => !!r.active), undefined, { timeout: 30_000 });
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   await page.evaluate(() => ((window as unknown as { __afaSameDocument: boolean }).__afaSameDocument = true));
-  await page.locator(isMobile ? '[data-afa-tab-bar] [data-afa-tab="tickets"]' : 'a.sitenav-icon-link[href^="/tickets"]').click();
+  if (isMobile) {
+    await page.locator('[data-afa-tab-bar] [data-afa-tab="tickets"]').click();
+  } else {
+    const menu = page.getByRole("menu");
+    await expect(async () => {
+      if (!(await menu.isVisible())) await page.locator(ACCOUNT_MENU).click();
+      await expect(menu).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
+    await menu.locator('a[href^="/tickets"]').click();
+  }
   await expect.poll(() => new URL(page.url()).pathname).toBe("/tickets/");
   await expect(qr(page)).toBeVisible(AFTER_WRITE);
   await expect.poll(() => page.evaluate((k) => localStorage.getItem(k), SNAPSHOT_KEY)).toContain(BOOKING_ID);
