@@ -432,6 +432,29 @@ export default function MyTicketsPage() {
     }
   }, [session])
 
+  // BUG-2610-001 (reopened 13 Oct) - losing signal with the page open
+  // switches to the saved view (no actions that need the network);
+  // getting it back refetches and returns to the live page.
+  useEffect(() => {
+    const goOffline = () => showOffline(userId ?? lastSignedInUserId())
+    const goOnline = () => {
+      if (!userId) {
+        // Opened offline, so there is no session yet: start over online.
+        window.location.reload()
+        return
+      }
+      load()
+      loadPendingTags()
+      loadAcceptedTags()
+    }
+    window.addEventListener('offline', goOffline)
+    window.addEventListener('online', goOnline)
+    return () => {
+      window.removeEventListener('offline', goOffline)
+      window.removeEventListener('online', goOnline)
+    }
+  }, [userId])
+
   const respondToTag = async (tagId: string, accept: boolean) => {
     setRespondingTag(tagId)
     try {
