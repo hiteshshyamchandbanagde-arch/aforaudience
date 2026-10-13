@@ -900,7 +900,7 @@ export default function MyTicketsPage() {
                           </div>
                         </div>
                         {!offlineView && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                        <div data-afa-ticket-actions style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                           {/* BUG-2610-012 - the actions used to share the narrow
                               column beside the QR (about 70px each at 390, and the
                               2-up desktop grid is narrower still), so every label
