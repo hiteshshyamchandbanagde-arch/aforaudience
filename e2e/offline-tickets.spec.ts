@@ -192,3 +192,22 @@ test("[BUG-2610-001] after sign-out, offline My Tickets shows no ticket", async 
   await page.evaluate(() => document.fonts.ready);
   await expect(empty).toHaveScreenshot(`offline-tickets-none-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 });
+
+test("[BUG-2610-001] losing signal with My Tickets open switches to the saved view, and back", async ({ page, context, isMobile }) => {
+  await useRuleViewport(page, isMobile);
+  await openTicketsOnline(page);
+  await expect(actions(page).first()).toBeVisible();
+  await expect(page.locator("[data-afa-offline-banner]")).toHaveCount(0);
+
+  await context.setOffline(true);
+  await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+  await expect(page.locator("[data-afa-offline-banner]")).toHaveText(/You're offline\. Showing your saved tickets, last updated .+\./);
+  await expect(qr(page)).toBeVisible();
+  await expect(actions(page)).toHaveCount(0);
+
+  await context.setOffline(false);
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  await expect(page.locator("[data-afa-offline-banner]")).toHaveCount(0, AFTER_WRITE);
+  await expect(actions(page).first()).toBeVisible(AFTER_WRITE);
+  await expect(qr(page)).toBeVisible();
+});
