@@ -70,3 +70,24 @@ test("[BUG-2610-024] with no signal, a new page shows the restyled offline page 
     await context.setOffline(false);
   }
 });
+
+// BUG-2610-001 follow-up (14 Oct) - the top banner said "You're offline -
+// showing saved content" on every page, true only on My Tickets, and in
+// English whatever the language. It is now plain "You're offline" from the
+// dictionaries (My Tickets' saved view has its own "showing your saved
+// tickets" notice; offline-tickets.spec.ts checks the banner there).
+test("[BUG-2610-001] losing signal on the home page: the banner says only You're offline, then Back online", async ({ page, context, isMobile }) => {
+  await page.goto("/");
+  const banner = page.locator("[data-afa-network-banner]");
+  await context.setOffline(true);
+  try {
+    await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+    await expect(banner).toHaveText("You're offline");
+    await page.evaluate(() => document.fonts.ready);
+    await expect(banner).toHaveScreenshot(`offline-banner-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+  } finally {
+    await context.setOffline(false);
+  }
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  await expect(banner).toHaveText("Back online");
+});
