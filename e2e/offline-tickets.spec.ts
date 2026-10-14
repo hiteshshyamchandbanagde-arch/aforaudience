@@ -272,5 +272,5 @@ test("[BUG-2610-001] offline, Show my saved tickets on the offline page opens th
 
   await hideFloatingOverlays(page);
   await page.evaluate(() => document.fonts.ready);
-  await expect(page.locator(isMobile ? "header" : "nav").first()).toHaveScreenshot(`offline-tickets-top-bar-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+  await expect(page.locator(isMobile ? "header" : "nav").filter({ visible: true }).first()).toHaveScreenshot(`offline-tickets-top-bar-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 });
