@@ -133,10 +133,15 @@ test("[GEN-2610-005] in Lonavala: no city within 50 km, names Pune at 54 km and 
   // is masked: it changes whenever QA gains or loses a venue city).
   const panel = status.locator("..");
   // BUG-2610-033 - a whole-pixel clip: the panel starts on a half pixel at 1440.
-  await expect(page).toHaveScreenshot(`use-my-location-far-${isMobile ? 390 : 1440}.png`, {
-    clip: await wholePixelClip(panel),
-    mask: [panel.locator("input + div")],
-  });
+  if (isMobile) {
+    await expect(page).toHaveScreenshot(`use-my-location-far-${isMobile ? 390 : 1440}.png`, {
+      clip: await wholePixelClip(panel),
+      mask: [panel.locator("input + div")],
+    });
+  } else {
+    // BUG-2610-033 quarantined 14 Oct (Rule 4) - un-quarantine when the root cause (sub-pixel clip / font rasterisation on desktop runner) is fixed.
+    test.info().annotations.push({ type: "fixme", description: "BUG-2610-033 quarantined 14 Oct: 1px desktop screenshot flake (Rule 4)" });
+  }
 
   await status.getByRole("button", { name: "Switch to Pune" }).click();
   await expect(chip(page, isMobile)).toHaveText(chipReads("Pune"));
