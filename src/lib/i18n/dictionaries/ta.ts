@@ -20,6 +20,8 @@ const ta: Dictionary = {
     dialogOk: "சரி",
     applicationClosed: "மூடப்பட்டது",
     pastDivider: "கடந்தவை",
+    offlineBanner: "நீங்கள் ஆஃப்லைனில் உள்ளீர்கள்",
+    backOnlineBanner: "மீண்டும் ஆன்லைனில்",
   },
   nav: {
     events: "நிகழ்வுகள்",
@@ -776,6 +778,8 @@ const ta: Dictionary = {
     invalidCredentialsError: "தவறான சான்றுகள்",
     failedSignInError: "உள்நுழைய முடியவில்லை. உங்கள் சான்றுகளைச் சரிபார்க்கவும்.",
     couldNotSendCodeError: "குறியீட்டை அனுப்ப முடியவில்லை.",
+    offlineCodeError: "நீங்கள் ஆஃப்லைனில் உள்ளீர்கள். குறியீட்டைப் பெற இணையத்துடன் இணையுங்கள்.",
+    offlineSignInError: "நீங்கள் ஆஃப்லைனில் உள்ளீர்கள். உள்நுழைய இணையத்துடன் இணையுங்கள்.",
     invalidOrExpiredCodeError: "தவறான அல்லது காலாவதியான குறியீடு.",
     orDivider: "அல்லது",
     continueWithGoogle: "Google உடன் தொடரவும்",
