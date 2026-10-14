@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale } from '@/lib/i18n/translate';
 
 /**
  * Offline / back-online status banner (YouTube-style top bar).
@@ -24,6 +25,12 @@ import { useEffect, useState } from 'react';
  * still reports true) - that's a known limitation of the browser API,
  * not something worth working around here. Good enough for the venue-door
  * patchy-signal case this exists for.
+ *
+ * BUG-2610-001 follow-up (14 Oct): the text is translated, and is plain
+ * "You're offline" on every page. It used to say "showing saved content",
+ * true only on My Tickets, and My Tickets' saved view already has its own
+ * notice ("Showing your saved tickets, last updated ..."), so saying it
+ * twice there adds nothing.
  */
 
 const BACK_ONLINE_DISPLAY_MS = 3000;
@@ -31,6 +38,7 @@ const BACK_ONLINE_DISPLAY_MS = 3000;
 export default function OfflineBanner() {
   const [isOffline, setIsOffline] = useState(false);
   const [showBackOnline, setShowBackOnline] = useState(false);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
@@ -76,6 +84,7 @@ export default function OfflineBanner() {
     <div
       role="status"
       aria-live="polite"
+      data-afa-network-banner
       style={{
         background: offline ? 'var(--afa-error)' : 'var(--afa-green-bright)',
         color: 'white',
@@ -86,7 +95,7 @@ export default function OfflineBanner() {
         letterSpacing: '0.01em',
       }}
     >
-      {offline ? "You're offline — showing saved content" : 'Back online'}
+      {offline ? t.common.offlineBanner : t.common.backOnlineBanner}
     </div>
   );
 }
