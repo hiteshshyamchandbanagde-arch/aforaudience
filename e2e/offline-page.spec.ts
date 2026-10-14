@@ -38,6 +38,8 @@ async function looks(page: Page) {
 async function expectOfflinePage(page: Page) {
   await expect(page.getByRole("heading", { level: 1, name: "You're offline" })).toBeVisible();
   await expect(page.getByText("No signal right now — but any tickets you've already opened are still saved for the door.")).toBeVisible();
+  // BUG-2610-001 follow-up (14 Oct): a way back to the saved tickets.
+  await expect(page.getByRole("link", { name: "Show my saved tickets" })).toHaveAttribute("href", "/tickets/");
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   await expect(page.getByText(/Tip: open your tickets from the "My Tickets" screen/)).toBeVisible();
   const l = await looks(page);
@@ -50,7 +52,7 @@ async function expectOfflinePage(page: Page) {
   expect(l.displayLoaded && l.sansLoaded, "both AFA fonts loaded from the page itself").toBe(true);
 }
 
-test("[BUG-2610-024] the offline page uses the dark surface, the AFA fonts, and keeps its copy, Try again and the tip", async ({ page, isMobile }) => {
+test("[BUG-2610-024] the offline page uses the dark surface, the AFA fonts, and keeps its copy, Show my saved tickets, Try again and the tip", async ({ page, isMobile }) => {
   await page.goto("/offline.html");
   await expectOfflinePage(page);
   await expect(page).toHaveScreenshot(`offline-page-${isMobile ? 390 : 1440}.png`, { animations: "disabled", fullPage: true });
