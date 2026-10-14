@@ -20,6 +20,8 @@ const kn: Dictionary = {
     dialogOk: "ಸರಿ",
     applicationClosed: "ಮುಚ್ಚಲಾಗಿದೆ",
     pastDivider: "ಹಿಂದಿನವು",
+    offlineBanner: "ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ",
+    backOnlineBanner: "ಮತ್ತೆ ಆನ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ",
   },
   nav: {
     events: "ಈವೆಂಟ್‌ಗಳು",
@@ -776,6 +778,8 @@ const kn: Dictionary = {
     invalidCredentialsError: "ಅಮಾನ್ಯ ರುಜುವಾತುಗಳು",
     failedSignInError: "ಸೈನ್ ಇನ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ರುಜುವಾತುಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.",
     couldNotSendCodeError: "ಕೋಡ್ ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    offlineCodeError: "ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ. ಕೋಡ್ ಪಡೆಯಲು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ.",
+    offlineSignInError: "ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ. ಸೈನ್ ಇನ್ ಮಾಡಲು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ.",
     invalidOrExpiredCodeError: "ಅಮಾನ್ಯ ಅಥವಾ ಅವಧಿ ಮುಗಿದ ಕೋಡ್.",
     orDivider: "ಅಥವಾ",
     continueWithGoogle: "Google ನೊಂದಿಗೆ ಮುಂದುವರಿಸಿ",
