@@ -46,7 +46,9 @@
 // same handler also resolved respondWith() to undefined when the network
 // failed with nothing cached ("Failed to convert value to Response").
 // This bump drops every client's poisoned runtime cache on activate.
-const CACHE_VERSION = 'v3-2026-10-01';
+// BUG-2610-001 (13 Oct): bumped with the CACHE_URL handler below, so
+// every phone picks up the worker that caches the My Tickets shell.
+const CACHE_VERSION = 'v4-2026-10-13';
 const PRECACHE = `afora-precache-${CACHE_VERSION}`;
 const RUNTIME = `afora-runtime-${CACHE_VERSION}`;
 
@@ -189,6 +191,8 @@ async function networkFirstWithOfflineFallback(request) {
   } catch (err) {
     const cached = await cache.match(request);
     if (cached) return cached;
+    const shell = await matchCachedShell(cache, new URL(request.url));
+    if (shell) return shell;
     const offline = await caches.match('/offline.html');
     if (offline) return offline;
     // Last resort — synthetic 503. Should be rare.
@@ -236,7 +240,60 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  if (event.data && event.data.type === 'CACHE_URL') {
+    event.waitUntil(cacheShell(event.data.url));
+  }
 });
+
+// BUG-2610-001 (reopened 13 Oct) - pages the app asks to keep offline.
+// A phone reaches My Tickets by tapping the tab: a client-side
+// navigation, which never goes through networkFirstWithOfflineFallback,
+// so its HTML was only cached after a full page load and offline the
+// door got /offline.html. My Tickets now posts { type: 'CACHE_URL' }
+// whenever it saves its tickets snapshot (src/lib/sw-cache.ts).
+const SHELL_PATHS = ['/tickets/'];
+
+function shellPath(pathname) {
+  const withSlash = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  return SHELL_PATHS.includes(withSlash) ? withSlash : null;
+}
+
+// Fetched with credentials: 'omit', so the server renders it signed out
+// and the cached HTML holds nobody's data; the page fills itself in from
+// /api, or offline from its own snapshot. Same rules as a navigation:
+// only ok, basic responses. The /_next/static files the HTML names go
+// in too - after a tab tap only the chunks the client needed were seen.
+async function cacheShell(url) {
+  try {
+    const target = new URL(url, self.location.origin);
+    const path = target.origin === self.location.origin ? shellPath(target.pathname) : null;
+    if (!path) return;
+    const response = await fetch(path, { credentials: 'omit', cache: 'no-store' });
+    if (!response || !response.ok || response.type !== 'basic' || response.redirected) return;
+    const html = await response.clone().text();
+    const cache = await caches.open(RUNTIME);
+    await cache.put(path, response);
+    const assets = new Set(html.match(/\/_next\/static\/[^"'\s)\\]+/g) || []);
+    await Promise.all(
+      [...assets].map(async (asset) => {
+        if (await cache.match(asset)) return;
+        const res = await fetch(asset);
+        if (res && res.ok) await cache.put(asset, res);
+      }).map((p) => p.catch(() => {}))
+    );
+  } catch (err) {
+    // Offline or a failed fetch: keep whatever copy is already cached.
+  }
+}
+
+// Offline fallback for a shell path: the cached copy whatever the slash
+// form or query string the navigation used.
+async function matchCachedShell(cache, url) {
+  if (url.origin !== self.location.origin) return null;
+  const path = shellPath(url.pathname);
+  if (!path) return null;
+  return (await cache.match(path, { ignoreSearch: true, ignoreVary: true })) || null;
+}
 
 // Web Push. Payload shape is { title, body, url } - see src/lib/push.ts,
 // which is the only place that sends notifications, so this stays in

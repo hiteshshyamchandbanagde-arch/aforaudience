@@ -25,6 +25,26 @@ export function lastSignedInUserId(): string | null {
   }
 }
 
+// BUG-2610-001 (reopened 13 Oct) - asks the service worker to keep a
+// page's HTML for offline (public/sw.js, CACHE_URL). A tab tap is a
+// client-side navigation, so without this My Tickets' HTML was only
+// cached after a full page load. Waits for an active worker, so it also
+// works on the first visit, before the worker controls the page. Also
+// waits for a user-change wipe still in flight (first sign-in on a
+// device): one that lands after the worker stores the page deletes it.
+let pendingUserChangeClear: Promise<void> = Promise.resolve()
+
+export function requestOfflineShell(url: string): void {
+  try {
+    if (typeof navigator === 'undefined' || !navigator.serviceWorker) return
+    Promise.all([navigator.serviceWorker.ready, pendingUserChangeClear])
+      .then(([reg]) => reg.active?.postMessage({ type: 'CACHE_URL', url }))
+      .catch(() => {})
+  } catch {
+    // No service worker here: nothing to cache into.
+  }
+}
+
 export async function clearSwRuntimeCache(): Promise<void> {
   if (typeof caches === 'undefined') return
   try {
@@ -69,7 +89,11 @@ export async function clearSwRuntimeCacheOnUserChange(userId: string): Promise<v
   if (lastUserId === userId) return
   // BUG-2610-001 - a different user: the saved tickets go with the cache.
   clearOfflineTickets()
-  await clearSwRuntimeCache()
+  // Chained, not replaced: two loads can each start a wipe before
+  // either has remembered the user.
+  const clear = clearSwRuntimeCache()
+  pendingUserChangeClear = Promise.all([pendingUserChangeClear, clear]).then(() => {})
+  await clear
   try {
     localStorage.setItem(LAST_USER_KEY, userId)
   } catch {

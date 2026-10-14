@@ -22,7 +22,7 @@ import { useConfirm } from '@/components/ConfirmDialog'
 import { computeRefund, eventStartInstant as refundStartInstant, type RefundPreview } from '@/lib/refund-policy'
 import { splitUnfinishedCheckouts } from '@/lib/unfinished-checkout'
 import { readOfflineTickets, saveOfflineTickets, type OfflineTicket, type OfflineTicketsSnapshot } from '@/lib/offline-tickets'
-import { lastSignedInUserId } from '@/lib/sw-cache'
+import { lastSignedInUserId, requestOfflineShell } from '@/lib/sw-cache'
 
 // BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
 // Organiser / Cancel ticket): full-width buttons stacked under the QR,
@@ -386,7 +386,12 @@ export default function MyTicketsPage() {
       const data = await res.json()
       setBookings(data)
       setOffline(null)
-      if (userId) saveOfflineTickets(userId, data)
+      if (userId) {
+        saveOfflineTickets(userId, data)
+        // Reopened 13 Oct - the page itself kept offline too, however
+        // the user got here (a tab tap never caches its HTML).
+        requestOfflineShell('/tickets/')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -426,6 +431,29 @@ export default function MyTicketsPage() {
       loadAcceptedTags()
     }
   }, [session])
+
+  // BUG-2610-001 (reopened 13 Oct) - losing signal with the page open
+  // switches to the saved view (no actions that need the network);
+  // getting it back refetches and returns to the live page.
+  useEffect(() => {
+    const goOffline = () => showOffline(userId ?? lastSignedInUserId())
+    const goOnline = () => {
+      if (!userId) {
+        // Opened offline, so there is no session yet: start over online.
+        window.location.reload()
+        return
+      }
+      load()
+      loadPendingTags()
+      loadAcceptedTags()
+    }
+    window.addEventListener('offline', goOffline)
+    window.addEventListener('online', goOnline)
+    return () => {
+      window.removeEventListener('offline', goOffline)
+      window.removeEventListener('online', goOnline)
+    }
+  }, [userId])
 
   const respondToTag = async (tagId: string, accept: boolean) => {
     setRespondingTag(tagId)
@@ -872,7 +900,7 @@ export default function MyTicketsPage() {
                           </div>
                         </div>
                         {!offlineView && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                        <div data-afa-ticket-actions style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                           {/* BUG-2610-012 - the actions used to share the narrow
                               column beside the QR (about 70px each at 390, and the
                               2-up desktop grid is narrower still), so every label
