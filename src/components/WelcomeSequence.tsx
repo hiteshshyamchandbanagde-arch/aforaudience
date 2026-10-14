@@ -70,7 +70,7 @@ export default function WelcomeSequence() {
   useEffect(() => {
     if (step !== 2 || !user) return;
     if (!user.isVerified && user.phone) {
-      otp.sendCode(user.phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>);
+      otp.sendCode(user.phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>, tr.loginPage.offlineCodeError);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, user?.isVerified, user?.phone]);
@@ -233,7 +233,7 @@ export default function WelcomeSequence() {
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => user.phone && otp.sendCode(user.phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>)}
+                  onClick={() => user.phone && otp.sendCode(user.phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>, tr.loginPage.offlineCodeError)}
                   disabled={otp.submitting}
                 >
                   {tr.loginPage.resendCodeButton}

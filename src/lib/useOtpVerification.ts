@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { isOfflineFailure } from '@/lib/network-error'
 
 // GEN-2609-042 - extracted from verify-phone/page.tsx so the onboarding
 // welcome sequence's phone-verify screen reuses the exact same
@@ -22,7 +23,13 @@ export function useOtpVerification() {
   // over the raw English `error` string). Optional so a caller without its
   // own code map (e.g. the welcome sequence, which doesn't need per-code
   // granularity) can just pass the fallback string.
-  const sendCode = async (phone: string, fallbackError: string, errorCodeMap?: Record<string, string>) => {
+  // BUG-2610-001 follow-up - `offlineError`, when given, replaces the
+  // fallback (or the raw "Failed to fetch") when there is no signal.
+  const sendCode = async (phone: string, fallbackError: string, errorCodeMap?: Record<string, string>, offlineError?: string) => {
+    if (offlineError && isOfflineFailure(null)) {
+      setError(offlineError)
+      return false
+    }
     setSubmitting(true)
     setError('')
     try {
@@ -40,7 +47,7 @@ export function useOtpVerification() {
       setCodeSent(true)
       return true
     } catch (err: any) {
-      setError(err.message || fallbackError)
+      setError((offlineError && isOfflineFailure(err) ? offlineError : err.message) || fallbackError)
       return false
     } finally {
       setSubmitting(false)
