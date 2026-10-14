@@ -1,3 +1,8 @@
+## Part 59 (14 Oct 17:00 IST), qa @ this commit
+- Merged #755 (qa ecbc5e2): offline.html "Show my saved tickets" + outline Try again (CACHE_VERSION v5); top bars hide Sign in/up offline (useIsOffline); offline OTP/password message (isOfflineFailure, 12 locales); OfflineBanner translated, plain "You're offline". Amends: nudge-banners spec -> data-afa-network-banner (T2, copy change); BUG-2610-033 Rule 4 QUARANTINE: desktop screenshot assertions only in city-picker-loading:57 + use-my-location:118 (annotation fixme; mobile shots + all other asserts live). Recurred 11 Oct nightly + 2 PR runs 14 Oct. Ticket BUG-2610-033 -> reopen (Feedback write pending).
+- Gotcha: pushes by the CC autopilot bot leave Design Token Check "action_required" -> chat approves via POST actions/runs/{id}/approve.
+- Human check: offline retest (Tickets tab online -> airplane -> Discover -> offline page -> Show my saved tickets -> saved tickets, no Sign in/up; sign-in offline message). Items 10-16 still open.
+
 ## Part 58 — START HERE (14 Oct 08:10 IST), qa @ this commit
 
 - Delta on Parts 56-57. Hitesh phone pass (Atul, Amit, new signup, Hrithik) 13-14 Oct night.
