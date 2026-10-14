@@ -20,6 +20,9 @@ const en = {
     dialogOk: "OK",
     applicationClosed: "Closed",
     pastDivider: "Past",
+    // BUG-2610-001 follow-up - OfflineBanner.tsx, every page.
+    offlineBanner: "You're offline",
+    backOnlineBanner: "Back online",
   },
   nav: {
     events: "Events",
@@ -826,6 +829,9 @@ const en = {
     invalidCredentialsError: "Invalid credentials",
     failedSignInError: "Failed to sign in. Please check your credentials.",
     couldNotSendCodeError: "Could not send code.",
+    // BUG-2610-001 follow-up - the request failed for want of signal.
+    offlineCodeError: "You're offline. Connect to the internet to get your code.",
+    offlineSignInError: "You're offline. Connect to the internet to sign in.",
     invalidOrExpiredCodeError: "Invalid or expired code.",
     orDivider: "or",
     continueWithGoogle: "Continue with Google",
