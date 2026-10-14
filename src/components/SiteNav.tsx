@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { signOutAndClearCache } from "@/lib/sw-cache"
+import { useIsOffline } from "@/lib/use-is-offline"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
@@ -181,6 +182,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   const { data: session, status } = useSession()
   const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
   const dashboardLink = user ? getDashboardLink(user.role) : null
+  // BUG-2610-001 follow-up - offline, a failed session fetch is not a
+  // sign-out: no Sign in / Sign up over the saved tickets.
+  const offline = useIsOffline()
+  const hideAuth = status === "loading" || (!user && offline)
 
   // Feedback cms1ibqtf - Venue Owner/Organiser dashboards already show
   // per-page pending-request badges, but only once you're already on that
@@ -463,7 +468,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 )}
               </div>
 
-              {status === "loading" ? null : user ? (
+              {hideAuth ? null : user ? (
                 <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)" }}>
                   <span
                     className="sitenav-greeting"
@@ -606,7 +611,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                         ))}
                         <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                       </>
-                    ) : (
+                    ) : hideAuth ? null : (
                       <>
                         <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
                           {t.nav.signIn}
@@ -649,7 +654,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 )}
               </div>
 
-              {!user && status !== "loading" && (
+              {!user && !hideAuth && (
                 <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-2) var(--afa-space-5)", borderRadius: "var(--afa-radius-sm)", flexShrink: 0 }}>
                   {t.nav.signUp}
                 </Link>
