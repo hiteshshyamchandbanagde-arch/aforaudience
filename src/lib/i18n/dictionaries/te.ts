@@ -20,6 +20,8 @@ const te: Dictionary = {
     dialogOk: "సరే",
     applicationClosed: "మూసివేయబడింది",
     pastDivider: "గతం",
+    offlineBanner: "మీరు ఆఫ్‌లైన్‌లో ఉన్నారు",
+    backOnlineBanner: "మళ్లీ ఆన్‌లైన్‌లోకి వచ్చారు",
   },
   nav: {
     events: "ఈవెంట్‌లు",
@@ -776,6 +778,8 @@ const te: Dictionary = {
     invalidCredentialsError: "చెల్లని ఆధారాలు",
     failedSignInError: "సైన్ ఇన్ చేయడంలో విఫలమైంది. దయచేసి మీ ఆధారాలను తనిఖీ చేయండి.",
     couldNotSendCodeError: "కోడ్ పంపలేకపోయాము.",
+    offlineCodeError: "మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. కోడ్ పొందడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి.",
+    offlineSignInError: "మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. సైన్ ఇన్ చేయడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి.",
     invalidOrExpiredCodeError: "చెల్లని లేదా గడువు ముగిసిన కోడ్.",
     orDivider: "లేదా",
     continueWithGoogle: "Googleతో కొనసాగించండి",
