@@ -115,8 +115,8 @@ test("[BUG-2610-017] the offline banner stays pinned while the page scrolls @nee
   await expect(page.getByRole("status", { name: "Verify your phone", exact: true })).toBeVisible();
 
   await context.setOffline(true);
-  const offline = page.getByText("You're offline — showing saved content");
-  await expect(offline).toBeVisible();
+  const offline = page.locator("[data-afa-network-banner]");
+  await expect(offline).toHaveText("You're offline");
   // Far enough that a banner in the flow (under 52 px) is off screen.
   await page.evaluate(() => window.scrollTo(0, 600));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(120);
