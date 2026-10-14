@@ -20,6 +20,8 @@ const bn: Dictionary = {
     dialogOk: "ঠিক আছে",
     applicationClosed: "বন্ধ",
     pastDivider: "অতীত",
+    offlineBanner: "আপনি অফলাইনে আছেন",
+    backOnlineBanner: "আবার অনলাইনে",
   },
   nav: {
     events: "ইভেন্ট",
@@ -776,6 +778,8 @@ const bn: Dictionary = {
     invalidCredentialsError: "অবৈধ পরিচয়পত্র",
     failedSignInError: "সাইন ইন করতে ব্যর্থ। দয়া করে আপনার পরিচয়পত্র পরীক্ষা করুন।",
     couldNotSendCodeError: "কোড পাঠানো যায়নি।",
+    offlineCodeError: "আপনি অফলাইনে আছেন। কোড পেতে ইন্টারনেটে সংযোগ করুন।",
+    offlineSignInError: "আপনি অফলাইনে আছেন। সাইন ইন করতে ইন্টারনেটে সংযোগ করুন।",
     invalidOrExpiredCodeError: "অবৈধ বা মেয়াদোত্তীর্ণ কোড।",
     orDivider: "অথবা",
     continueWithGoogle: "Google দিয়ে চালিয়ে যান",

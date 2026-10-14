@@ -25,6 +25,8 @@ const fr: Dictionary = {
     dialogOk: "OK",
     applicationClosed: "Clôturée",
     pastDivider: "Passés",
+    offlineBanner: "Vous êtes hors ligne",
+    backOnlineBanner: "De nouveau en ligne",
   },
   nav: {
     events: "Événements",
@@ -781,6 +783,8 @@ const fr: Dictionary = {
     invalidCredentialsError: "Identifiants invalides",
     failedSignInError: "Échec de la connexion. Veuillez vérifier vos identifiants.",
     couldNotSendCodeError: "Impossible d'envoyer le code.",
+    offlineCodeError: "Vous êtes hors ligne. Connectez-vous à Internet pour recevoir votre code.",
+    offlineSignInError: "Vous êtes hors ligne. Connectez-vous à Internet pour vous identifier.",
     invalidOrExpiredCodeError: "Code invalide ou expiré.",
     orDivider: "ou",
     continueWithGoogle: "Continuer avec Google",

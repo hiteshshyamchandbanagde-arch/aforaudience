@@ -24,6 +24,8 @@ const es: Dictionary = {
     dialogOk: "Aceptar",
     applicationClosed: "Cerrada",
     pastDivider: "Pasados",
+    offlineBanner: "Estás sin conexión",
+    backOnlineBanner: "Conexión restablecida",
   },
   nav: {
     events: "Eventos",
@@ -780,6 +782,8 @@ const es: Dictionary = {
     invalidCredentialsError: "Credenciales no válidas",
     failedSignInError: "Error al iniciar sesión. Verifica tus credenciales.",
     couldNotSendCodeError: "No se pudo enviar el código.",
+    offlineCodeError: "Estás sin conexión. Conéctate a internet para recibir tu código.",
+    offlineSignInError: "Estás sin conexión. Conéctate a internet para iniciar sesión.",
     invalidOrExpiredCodeError: "Código no válido o caducado.",
     orDivider: "o",
     continueWithGoogle: "Continuar con Google",

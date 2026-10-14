@@ -19,6 +19,8 @@ const hi: Dictionary = {
     dialogOk: "ठीक है",
     applicationClosed: "बंद",
     pastDivider: "पिछले",
+    offlineBanner: "आप ऑफ़लाइन हैं",
+    backOnlineBanner: "फिर से ऑनलाइन",
   },
   nav: {
     events: "इवेंट्स",
@@ -775,6 +777,8 @@ const hi: Dictionary = {
     invalidCredentialsError: "गलत जानकारी",
     failedSignInError: "साइन इन नहीं हो सका। कृपया अपनी जानकारी जांचें।",
     couldNotSendCodeError: "कोड नहीं भेजा जा सका।",
+    offlineCodeError: "आप ऑफ़लाइन हैं। कोड पाने के लिए इंटरनेट से जुड़ें।",
+    offlineSignInError: "आप ऑफ़लाइन हैं। साइन इन करने के लिए इंटरनेट से जुड़ें।",
     invalidOrExpiredCodeError: "कोड गलत है या समय समाप्त हो गया।",
     orDivider: "या",
     continueWithGoogle: "Google से जारी रखें",

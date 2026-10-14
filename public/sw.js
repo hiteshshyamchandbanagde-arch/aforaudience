@@ -48,7 +48,7 @@
 // This bump drops every client's poisoned runtime cache on activate.
 // BUG-2610-001 (13 Oct): bumped with the CACHE_URL handler below, so
 // every phone picks up the worker that caches the My Tickets shell.
-const CACHE_VERSION = 'v4-2026-10-13';
+const CACHE_VERSION = 'v5-2026-10-14';
 const PRECACHE = `afora-precache-${CACHE_VERSION}`;
 const RUNTIME = `afora-runtime-${CACHE_VERSION}`;
 

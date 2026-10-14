@@ -75,19 +75,34 @@ test('the AFA display and body fonts are embedded, and nothing loads from the ne
   assert.doesNotMatch(html, /https?:\/\/|\/_next\//)
 })
 
-test('the copy, Try again and the My Tickets tip are unchanged', () => {
+// BUG-2610-001 follow-up (14 Oct) - "Show my saved tickets" is now the
+// primary action and Try again the outline secondary, so these two tests
+// check the new markup and both buttons' contrast (was: Try again solid).
+test('the copy, the My Tickets tip and Try again are unchanged', () => {
   assert.match(body, /<h1>You're offline<\/h1>/)
   assert.match(body, /No signal right now — but any tickets you've already opened are still saved for the door\./)
-  assert.match(body, /<button onclick="location\.reload\(\)">Try again<\/button>/)
+  assert.match(body, /<button class="btn btn-secondary" onclick="location\.reload\(\)">Try again<\/button>/)
   assert.match(body, /Tip: open your tickets from the "My Tickets" screen — they'll show even without a connection once you've viewed them once\./)
 })
 
-test('Try again is the solid action colour with its on-fill text (AA)', () => {
+test('"Show my saved tickets" is the primary action, before Try again, and opens /tickets/', () => {
+  assert.match(body, /<a class="btn btn-primary" href="\/tickets\/">Show my saved tickets<\/a>/)
+  assert.ok(body.indexOf('Show my saved tickets') < body.indexOf('Try again'), 'saved tickets first')
+})
+
+function contrast(fg: string, bg: string) {
+  const [a, b] = [luminance(fg), luminance(bg)]
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+}
+
+test('the primary is the solid action colour with its on-fill text, the secondary is light text on the page (AA)', () => {
   const inline = inlineTokens()
-  assert.match(style, /button \{[^}]*background: var\(--afa-fill-solid\);[^}]*color: var\(--afa-on-fill-solid\)/)
-  const [a, b] = [luminance(inline.get('--afa-fill-solid')!), luminance(inline.get('--afa-on-fill-solid')!)]
-  const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
-  assert.ok(ratio >= 4.5, `button text contrast ${ratio.toFixed(2)}:1`)
+  assert.match(style, /\.btn-primary \{[^}]*background: var\(--afa-fill-solid\);[^}]*color: var\(--afa-on-fill-solid\)/)
+  assert.match(style, /\.btn-secondary \{[^}]*background: transparent;[^}]*color: var\(--afa-text-primary\)/)
+  const primary = contrast(inline.get('--afa-fill-solid')!, inline.get('--afa-on-fill-solid')!)
+  assert.ok(primary >= 4.5, `primary text contrast ${primary.toFixed(2)}:1`)
+  const secondary = contrast(inline.get('--afa-text-primary')!, inline.get('--afa-surface-page')!)
+  assert.ok(secondary >= 4.5, `secondary text contrast ${secondary.toFixed(2)}:1`)
 })
 
 test('the build runs before every next build (prebuild)', () => {

@@ -38,6 +38,8 @@ async function looks(page: Page) {
 async function expectOfflinePage(page: Page) {
   await expect(page.getByRole("heading", { level: 1, name: "You're offline" })).toBeVisible();
   await expect(page.getByText("No signal right now — but any tickets you've already opened are still saved for the door.")).toBeVisible();
+  // BUG-2610-001 follow-up (14 Oct): a way back to the saved tickets.
+  await expect(page.getByRole("link", { name: "Show my saved tickets" })).toHaveAttribute("href", "/tickets/");
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   await expect(page.getByText(/Tip: open your tickets from the "My Tickets" screen/)).toBeVisible();
   const l = await looks(page);
@@ -50,7 +52,7 @@ async function expectOfflinePage(page: Page) {
   expect(l.displayLoaded && l.sansLoaded, "both AFA fonts loaded from the page itself").toBe(true);
 }
 
-test("[BUG-2610-024] the offline page uses the dark surface, the AFA fonts, and keeps its copy, Try again and the tip", async ({ page, isMobile }) => {
+test("[BUG-2610-024] the offline page uses the dark surface, the AFA fonts, and keeps its copy, Show my saved tickets, Try again and the tip", async ({ page, isMobile }) => {
   await page.goto("/offline.html");
   await expectOfflinePage(page);
   await expect(page).toHaveScreenshot(`offline-page-${isMobile ? 390 : 1440}.png`, { animations: "disabled", fullPage: true });
@@ -67,4 +69,25 @@ test("[BUG-2610-024] with no signal, a new page shows the restyled offline page 
   } finally {
     await context.setOffline(false);
   }
+});
+
+// BUG-2610-001 follow-up (14 Oct) - the top banner said "You're offline -
+// showing saved content" on every page, true only on My Tickets, and in
+// English whatever the language. It is now plain "You're offline" from the
+// dictionaries (My Tickets' saved view has its own "showing your saved
+// tickets" notice; offline-tickets.spec.ts checks the banner there).
+test("[BUG-2610-001] losing signal on the home page: the banner says only You're offline, then Back online", async ({ page, context, isMobile }) => {
+  await page.goto("/");
+  const banner = page.locator("[data-afa-network-banner]");
+  await context.setOffline(true);
+  try {
+    await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+    await expect(banner).toHaveText("You're offline");
+    await page.evaluate(() => document.fonts.ready);
+    await expect(banner).toHaveScreenshot(`offline-banner-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+  } finally {
+    await context.setOffline(false);
+  }
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  await expect(banner).toHaveText("Back online");
 });

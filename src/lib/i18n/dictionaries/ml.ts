@@ -20,6 +20,8 @@ const ml: Dictionary = {
     dialogOk: "ശരി",
     applicationClosed: "അടച്ചു",
     pastDivider: "കഴിഞ്ഞവ",
+    offlineBanner: "നിങ്ങൾ ഓഫ്‌ലൈനാണ്",
+    backOnlineBanner: "വീണ്ടും ഓൺലൈനിൽ",
   },
   nav: {
     events: "ഇവന്റുകൾ",
@@ -776,6 +778,8 @@ const ml: Dictionary = {
     invalidCredentialsError: "അസാധുവായ ക്രെഡൻഷ്യലുകൾ",
     failedSignInError: "സൈൻ ഇൻ ചെയ്യാൻ കഴിഞ്ഞില്ല. ദയവായി നിങ്ങളുടെ ക്രെഡൻഷ്യലുകൾ പരിശോധിക്കുക.",
     couldNotSendCodeError: "കോഡ് അയയ്ക്കാൻ കഴിഞ്ഞില്ല.",
+    offlineCodeError: "നിങ്ങൾ ഓഫ്‌ലൈനാണ്. കോഡ് ലഭിക്കാൻ ഇന്റർനെറ്റുമായി കണക്റ്റ് ചെയ്യുക.",
+    offlineSignInError: "നിങ്ങൾ ഓഫ്‌ലൈനാണ്. സൈൻ ഇൻ ചെയ്യാൻ ഇന്റർനെറ്റുമായി കണക്റ്റ് ചെയ്യുക.",
     invalidOrExpiredCodeError: "അസാധുവായതോ കാലഹരണപ്പെട്ടതോ ആയ കോഡ്.",
     orDivider: "അല്ലെങ്കിൽ",
     continueWithGoogle: "Google ഉപയോഗിച്ച് തുടരുക",

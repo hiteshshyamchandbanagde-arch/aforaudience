@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { signOutAndClearCache } from '@/lib/sw-cache'
+import { useIsOffline } from '@/lib/use-is-offline'
 import { useLocale } from '@/lib/i18n/translate'
 import { LOCALES } from '@/lib/i18n/locales'
 import LocationChip from '@/components/LocationChip'
@@ -55,6 +56,9 @@ export default function MobileTopBar() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const { locale, setLocale, t } = useLocale()
+  // BUG-2610-001 follow-up - offline, a failed session fetch is not a
+  // sign-out: no Sign in / Sign up over the saved tickets.
+  const offline = useIsOffline()
 
   const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
   const onEventsRoute = normalizedPathname === '/events'
@@ -238,7 +242,7 @@ export default function MobileTopBar() {
       </div>
 
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? 'var(--afa-space-2)' : '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token; ternary, unseen by the checker (GEN-2609-107) */}
-        {status === 'loading' ? null : user ? (
+        {status === 'loading' || (!user && offline) ? null : user ? (
           <Button
             // bare-reason: must match the Sign in / Register <Link>s it swaps with in the same top-bar slot (mono caption type); those are links, not Buttons
             variant="bare"

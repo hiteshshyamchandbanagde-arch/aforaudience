@@ -69,7 +69,7 @@ function VerifyPhoneInner() {
 
   const sendCode = async () => {
     if (!phone) return
-    await hookSendCode(phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>)
+    await hookSendCode(phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>, tr.loginPage.offlineCodeError)
   }
 
   // BUG-2609-063 - Verify no longer disables on a short code (SMS autofill

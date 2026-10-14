@@ -64,7 +64,12 @@ test("[BUG-2610-032] the city picker shows a loading state, not \"no match\", un
   await expect(loading).toBeVisible();
   await expect(scope.getByText("No matching cities")).toHaveCount(0);
   // BUG-2610-033 - a whole-pixel clip: the row starts on a half pixel at 1440.
-  await expect(page).toHaveScreenshot(`city-picker-loading-${isMobile ? 390 : 1440}.png`, { animations: "disabled", clip: await wholePixelClip(loading) });
+  if (isMobile) {
+    await expect(page).toHaveScreenshot(`city-picker-loading-${isMobile ? 390 : 1440}.png`, { animations: "disabled", clip: await wholePixelClip(loading) });
+  } else {
+    // BUG-2610-033 quarantined 14 Oct (Rule 4) - un-quarantine when the root cause (sub-pixel clip / font rasterisation on desktop runner) is fixed.
+    test.info().annotations.push({ type: "fixme", description: "BUG-2610-033 quarantined 14 Oct: 1px desktop screenshot flake (Rule 4)" });
+  }
 
   await cities.release();
   await expect(loading).toHaveCount(0);

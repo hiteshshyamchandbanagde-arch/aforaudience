@@ -20,6 +20,8 @@ const gu: Dictionary = {
     dialogOk: "બરાબર",
     applicationClosed: "બંધ",
     pastDivider: "પાછલા",
+    offlineBanner: "તમે ઑફલાઇન છો",
+    backOnlineBanner: "ફરી ઑનલાઇન",
   },
   nav: {
     events: "ઇવેન્ટ્સ",
@@ -776,6 +778,8 @@ const gu: Dictionary = {
     invalidCredentialsError: "અમાન્ય ઓળખપત્રો",
     failedSignInError: "સાઇન ઇન કરવામાં નિષ્ફળ. કૃપા કરીને તમારા ઓળખપત્રો તપાસો.",
     couldNotSendCodeError: "કોડ મોકલી શકાયો નથી.",
+    offlineCodeError: "તમે ઑફલાઇન છો. કોડ મેળવવા માટે ઇન્ટરનેટ સાથે જોડાઓ.",
+    offlineSignInError: "તમે ઑફલાઇન છો. સાઇન ઇન કરવા માટે ઇન્ટરનેટ સાથે જોડાઓ.",
     invalidOrExpiredCodeError: "અમાન્ય અથવા સમાપ્ત થયેલ કોડ.",
     orDivider: "અથવા",
     continueWithGoogle: "Google સાથે ચાલુ રાખો",

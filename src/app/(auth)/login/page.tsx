@@ -8,6 +8,7 @@ import BrandLoader from '@/components/BrandLoader'
 import AuthLayout from '@/components/AuthLayout'
 import { useLocale } from '@/lib/i18n/translate'
 import Button from '@/components/ui/Button'
+import { isOfflineFailure } from '@/lib/network-error'
 
 type Mode = "password" | "otp-request" | "otp-verify"
 
@@ -89,6 +90,8 @@ function LoginForm() {
     setInvalidField(null)
     if (!id) return flagEmpty("identifier", identifierRef, tr.authCommon.enterIdentifier)
     if (!pw) return flagEmpty("password", passwordRef, tr.authCommon.enterPassword)
+    // BUG-2610-001 follow-up - no signal: say so, not "Failed to sign in".
+    if (isOfflineFailure(null)) return setError(tr.loginPage.offlineSignInError)
     setLoading(true); setError("")
     try {
       const result = await signIn("credentials", {
@@ -109,8 +112,8 @@ function LoginForm() {
         setLoading(false); return
       }
       postLoginRedirect()
-    } catch {
-      setError(tr.authCommon.somethingWentWrong)
+    } catch (err) {
+      setError(isOfflineFailure(err) ? tr.loginPage.offlineSignInError : tr.authCommon.somethingWentWrong)
       setLoading(false)
     }
   }
@@ -120,6 +123,8 @@ function LoginForm() {
     const id = readInput(identifierRef, identifier, setIdentifier).trim()
     setInvalidField(null)
     if (!id) return flagEmpty("identifier", identifierRef, tr.authCommon.enterIdentifier)
+    // BUG-2610-001 follow-up - no signal: say so, not "Could not send code."
+    if (isOfflineFailure(null)) return setError(tr.loginPage.offlineCodeError)
     setLoading(true); setError("")
     try {
       const res = await fetch("/api/auth/otp/request", {
@@ -141,8 +146,8 @@ function LoginForm() {
       setDevOtp(data.devOtp ?? null)
       setMode("otp-verify")
       setLoading(false)
-    } catch {
-      setError(tr.loginPage.couldNotSendCodeError)
+    } catch (err) {
+      setError(isOfflineFailure(err) ? tr.loginPage.offlineCodeError : tr.loginPage.couldNotSendCodeError)
       setLoading(false)
     }
   }
