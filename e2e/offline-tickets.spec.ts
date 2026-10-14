@@ -232,3 +232,45 @@ test("[BUG-2610-001] losing signal with My Tickets open switches to the saved vi
   await expect(actions(page).first()).toBeVisible(AFTER_WRITE);
   await expect(qr(page)).toBeVisible();
 });
+
+/**
+ * BUG-2610-001 follow-ups from Hitesh's phone (14 Oct): offline, any other
+ * tab showed /offline.html with only "Try again", so a person at the door
+ * was stuck; and the saved view's top bar showed Sign in / Sign up, which
+ * looks like being signed out. Now /offline.html leads back to the saved
+ * tickets, the top bars hide the auth links while offline, and the top
+ * banner says only "You're offline" (the page's own notice says the rest).
+ */
+test("[BUG-2610-001] offline, Show my saved tickets on the offline page opens the saved tickets, with no Sign in / Sign up", async ({ context, isMobile }) => {
+  const first = await context.newPage();
+  await useRuleViewport(first, isMobile);
+  await openTicketsByTab(first, isMobile);
+
+  // Airplane mode, then another tab: the offline page.
+  await context.setOffline(true);
+  await first.close();
+  const page = await context.newPage();
+  await useRuleViewport(page, isMobile);
+  await page.goto(`/e2e-offline-probe-${Date.now()}/`);
+  const back = page.getByRole("link", { name: "Show my saved tickets" });
+  await expect(back).toBeVisible();
+  await back.click();
+
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/tickets/");
+  await expect(page.locator("[data-afa-offline-tickets]"), "the saved tickets").toBeVisible(AFTER_WRITE);
+  await expect(qr(page)).toBeVisible();
+  expect(await decodeQr(qr(page))).toBe(BOOKING_ID);
+
+  // Not signed out: no Sign in / Sign up in either top bar (or its menu).
+  await page.waitForTimeout(2_000);
+  await expect(page.locator('a[href^="/login"], a[href^="/register"]').filter({ visible: true })).toHaveCount(0);
+  await expect(page.getByText(/^(Sign in|Sign up|Register)$/i).filter({ visible: true })).toHaveCount(0);
+
+  // The top banner says only that; the page's notice says what is shown.
+  await expect(page.locator("[data-afa-network-banner]")).toHaveText("You're offline");
+  await expect(page.locator("[data-afa-offline-banner]")).toHaveText(/You're offline\. Showing your saved tickets, last updated .+\./);
+
+  await hideFloatingOverlays(page);
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator(isMobile ? "header" : "nav").first()).toHaveScreenshot(`offline-tickets-top-bar-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+});
