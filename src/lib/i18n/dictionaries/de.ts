@@ -29,6 +29,8 @@ const de: Dictionary = {
     dialogOk: "OK",
     applicationClosed: "Geschlossen",
     pastDivider: "Vergangen",
+    offlineBanner: "Du bist offline",
+    backOnlineBanner: "Wieder verbunden",
   },
   nav: {
     events: "Events",
@@ -785,6 +787,8 @@ const de: Dictionary = {
     invalidCredentialsError: "Ungültige Anmeldedaten",
     failedSignInError: "Anmeldung fehlgeschlagen. Bitte überprüfe deine Anmeldedaten.",
     couldNotSendCodeError: "Code konnte nicht gesendet werden.",
+    offlineCodeError: "Du bist offline. Verbinde dich mit dem Internet, um deinen Code zu erhalten.",
+    offlineSignInError: "Du bist offline. Verbinde dich mit dem Internet, um dich anzumelden.",
     invalidOrExpiredCodeError: "Ungültiger oder abgelaufener Code.",
     orDivider: "oder",
     continueWithGoogle: "Mit Google fortfahren",
