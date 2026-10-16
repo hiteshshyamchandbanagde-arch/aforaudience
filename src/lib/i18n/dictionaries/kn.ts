@@ -1055,6 +1055,7 @@ const kn: Dictionary = {
     myEvents: "ನನ್ನ ಈವೆಂಟ್‌ಗಳು",
     overview: "ಅವಲೋಕನ",
     findGigs: "ಗಿಗ್ ಹುಡುಕಿ",
+    profileTab: "ಪ್ರೊಫೈಲ್ ಸಂಪಾದನೆ",
     createEvent: "ಈವೆಂಟ್ ರಚಿಸಿ",
     create: "ರಚಿಸಿ",
     tours: "ಪ್ರವಾಸಗಳು",
