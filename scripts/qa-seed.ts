@@ -17,6 +17,7 @@ import { fakerEN_IN as faker } from "@faker-js/faker"
 import bcrypt from "bcryptjs"
 import { generateTicketCode } from "../src/lib/ticket-code"
 import { keepFixturesUpcoming } from "../e2e/helpers/upcoming-fixtures"
+import { buildSeedBooking, DEMO_EVENT_DESCRIPTIONS, generalEventDescription } from "./qa-seed-data"
 
 // ---------------------------------------------------------------------------
 // Hard guard — must run before any DB connection object is constructed.
@@ -401,7 +402,7 @@ async function seedGeneralEvents(
         organiserId: organiser.organiserId,
         venueId: venueOwner.venueId,
         title,
-        description: faker.lorem.paragraph(),
+        description: generalEventDescription(type, i),
         type,
         status: plan.status,
         date: daysFromNow(plan.dateOffsetDays),
@@ -438,23 +439,22 @@ async function seedGeneralEvents(
       const bookers = pickMany(pools.audiences, faker.number.int({ min: 2, max: 5 }))
       for (let b = 0; b < bookers.length; b++) {
         const bookingId = `${eventId}-booking-${b + 1}`
-        const subtotal = isFree ? 0 : faker.number.int({ min: 150, max: 600 })
         const isPastEvent = plan.status === EventStatus.COMPLETED
         await prisma.booking.upsert({
           where: { id: bookingId },
           update: {},
           create: {
-            id: bookingId,
-            userId: bookers[b].id,
-            eventId,
-            seats: isFree ? {} : { General: 1 },
-            totalAmount: subtotal,
-            subtotalAmount: subtotal,
-            bookingFeeAmount: 0,
+            ...buildSeedBooking({
+              id: bookingId,
+              userId: bookers[b].id,
+              eventId,
+              eventDate: daysFromNow(plan.dateOffsetDays),
+              ticketPrice: isFree ? null : faker.number.int({ min: 150, max: 600 }),
+              isPast: isPastEvent,
+              checkedInByUserId: organiser.id,
+            }),
             status: BookingStatus.CONFIRMED,
             ticketCode: generateTicketCode(),
-            checkedInAt: isPastEvent ? daysFromNow(plan.dateOffsetDays) : null,
-            checkedInByUserId: isPastEvent ? organiser.id : null,
           },
         })
         if (isPastEvent && b < 3) {
@@ -820,17 +820,17 @@ async function seedGoldenScenario(
     where: { id: `${goldenEventId}-booking-checkedin` },
     update: { checkedInAt: eventDate },
     create: {
-      id: `${goldenEventId}-booking-checkedin`,
-      userId: checkedInBooker.id,
-      eventId: goldenEventId,
-      seats: { General: 1 },
-      totalAmount: 400,
-      subtotalAmount: 400,
-      bookingFeeAmount: 0,
+      ...buildSeedBooking({
+        id: `${goldenEventId}-booking-checkedin`,
+        userId: checkedInBooker.id,
+        eventId: goldenEventId,
+        eventDate,
+        ticketPrice: 400,
+        isPast: true,
+        checkedInByUserId: goldenOrganiser.id,
+      }),
       status: BookingStatus.CONFIRMED,
       ticketCode: generateTicketCode(),
-      checkedInAt: eventDate,
-      checkedInByUserId: goldenOrganiser.id,
     },
   })
 
@@ -1186,7 +1186,7 @@ async function seedDemoPersonas(
         organiserId: omkarRoleId,
         venueId: e.venueId,
         title: e.title,
-        description: faker.lorem.paragraph(),
+        description: DEMO_EVENT_DESCRIPTIONS[e.id],
         type: e.type,
         status: e.status,
         date: daysFromNow(e.dayOffset),
@@ -1361,23 +1361,21 @@ async function seedDemoPersonas(
   ]
   for (let i = 0; i < atulBookings.length; i++) {
     const b = atulBookings[i]
-    const bookingId = `qa-demo-booking-full-atul-${i + 1}`
-    const subtotal = b.ticketPrice ?? 0
     await prisma.booking.upsert({
-      where: { id: bookingId },
+      where: { id: `qa-demo-booking-full-atul-${i + 1}` },
       update: {},
       create: {
-        id: bookingId,
-        userId: atulId,
-        eventId: b.eventId,
-        seats: b.ticketPrice === null ? {} : { General: 1 },
-        totalAmount: subtotal,
-        subtotalAmount: subtotal,
-        bookingFeeAmount: 0,
+        ...buildSeedBooking({
+          id: `qa-demo-booking-full-atul-${i + 1}`,
+          userId: atulId,
+          eventId: b.eventId,
+          eventDate: daysFromNow(b.dayOffset),
+          ticketPrice: b.ticketPrice,
+          isPast: b.isPast,
+          checkedInByUserId: omkarId,
+        }),
         status: BookingStatus.CONFIRMED,
         ticketCode: generateTicketCode(),
-        checkedInAt: b.isPast ? daysFromNow(b.dayOffset) : null,
-        checkedInByUserId: b.isPast ? omkarId : null,
       },
     })
   }
