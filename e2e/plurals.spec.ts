@@ -55,7 +55,8 @@ for (const n of [1, 2]) {
     await serveEvents(page, n);
     await page.goto("/events/");
 
-    await expect(page.getByText(`${n} ${noun} happening near you`, { exact: true })).toBeVisible();
+    // Events copy A: the page has one count line, and "near you" only with a city picked (a guest here has none).
+    await expect(page.getByTestId("events-count-eyebrow")).toHaveText(`Showing ${n} ${noun}`);
     if (isMobile) {
       // The count is on the filter sheet's Apply button at phone width.
       await page.getByRole("banner").getByRole("button", { name: "Open filters" }).click();
