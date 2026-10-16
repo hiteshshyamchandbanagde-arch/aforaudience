@@ -1122,6 +1122,10 @@ const en = {
   // role bars and More sheet, loading/empty states, PosterShareCard).
   dashboardChrome: {
     myEvents: "My Events",
+    // Artist bar + sidebar (run E): the role's home, and the gig browser
+    // (/dashboard/artist/events) - not myEvents, which is the organiser's.
+    overview: "Overview",
+    findGigs: "Find gigs",
     createEvent: "Create Event",
     // Phone role bar: one short word per slot.
     create: "Create",
