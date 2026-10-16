@@ -1053,6 +1053,8 @@ const ta: Dictionary = {
   // GEN-2610-007 - role dashboards: shared chrome + Artist (6a).
   dashboardChrome: {
     myEvents: "என் நிகழ்வுகள்",
+    overview: "மேலோட்டம்",
+    findGigs: "கிக் தேடு",
     createEvent: "நிகழ்வை உருவாக்கு",
     create: "உருவாக்கு",
     tours: "டூர்கள்",
