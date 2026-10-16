@@ -9,8 +9,9 @@ import { useRuleViewport } from "./helpers/viewports";
  * ticket shows a real, scannable QR that encodes its raw bookingId (the
  * same value as the ticket PDF's QR; src/app/tickets/page.tsx TicketQr),
  * and each status keeps its own actions:
- *   CONFIRMED  QR, Download PDF, Message Organiser; Cancel ticket while
- *              the event is still ahead
+ *   CONFIRMED  Download PDF, Message Organiser; QR and Cancel ticket
+ *              while the event is still ahead (Tickets B, 14 Oct: no QR
+ *              on a past ticket)
  *   PENDING    Pay now (to its checkout), Cancel; no QR
  *   EXPIRED    no card at all (BUG-2610-018: an expired PENDING hold
  *              is not a ticket)
@@ -123,17 +124,23 @@ test("[GEN-2609-006] My Tickets: each confirmed card's QR encodes its bookingId;
         const id = (await pdf.getAttribute("href"))!.match(/\/api\/bookings\/([^/]+)\/ticket/)![1];
         expect(byId.get(id)?.status, `${where}: ${id} is a confirmed booking of Atul's`).toBe("CONFIRMED");
         seenConfirmed.add(id);
+        const eventAt = new Date(byId.get(id)!.event.date).getTime();
 
-        await expect(qr, `${where}: one QR`).toHaveCount(1);
-        const symbol = symbolFor(id);
-        const read = await readQr(qr, symbol.length);
-        expect(read.join("\n"), `${where}: the QR is the symbol for bookingId ${id}`).toBe(symbol.join("\n"));
-        const other = ids.find((x) => x !== id && symbolFor(x).length === symbol.length);
-        if (other) expect(read.join("\n"), `${where}: and not for ${other}`).not.toBe(symbolFor(other).join("\n"));
+        // Tickets B (Hitesh, 14 Oct): a past ticket has no QR (checked in
+        // e2e/ticket-past-free.spec.ts); a day either side keeps the start time out of it.
+        if (eventAt < Date.now() - 86_400_000) {
+          await expect(qr, `${where}: past, no QR`).toHaveCount(0);
+        } else if (eventAt > Date.now() + 86_400_000) {
+          await expect(qr, `${where}: one QR`).toHaveCount(1);
+          const symbol = symbolFor(id);
+          const read = await readQr(qr, symbol.length);
+          expect(read.join("\n"), `${where}: the QR is the symbol for bookingId ${id}`).toBe(symbol.join("\n"));
+          const other = ids.find((x) => x !== id && symbolFor(x).length === symbol.length);
+          if (other) expect(read.join("\n"), `${where}: and not for ${other}`).not.toBe(symbolFor(other).join("\n"));
+        }
 
         await expect(card.getByRole("button", { name: "Message Organiser" }), `${where}: Message Organiser`).toBeVisible();
         const cancel = card.getByRole("button", { name: "Cancel ticket" });
-        const eventAt = new Date(byId.get(id)!.event.date).getTime();
         // Cancel goes once the event has started; a day either side keeps the start time out of it.
         if (eventAt > Date.now() + 86_400_000) await expect(cancel, `${where}: upcoming, Cancel ticket`).toBeVisible();
         if (eventAt < Date.now() - 86_400_000) await expect(cancel, `${where}: past, no Cancel ticket`).toHaveCount(0);
