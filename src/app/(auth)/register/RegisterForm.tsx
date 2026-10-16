@@ -348,18 +348,18 @@ export default function RegisterForm() {
     setLoading(true)
     setError("")
     try {
-      const res = await fetch("/api/auth/otp/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: fullPhone, userId, code }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error || tr.registerPage.invalidCodeFallback)
+      // Run C item 2 - the sign-up code is checked by the "signup-otp"
+      // provider (lib/auth.ts), which signs this new account in on the
+      // same step, so there's no second code at /login. Onboarding
+      // (WelcomeSequence) takes over on the first page; its last card
+      // carries intendedRole on to /profile?role=.
+      const result = await signIn("signup-otp", { userId, code, redirect: false })
+      if (!result || result.error) {
+        setError(result?.error === "SUSPENDED" ? tr.authCommon.accountSuspendedMessage : tr.loginPage.invalidOrExpiredCodeError)
         setLoading(false)
         return
       }
-      router.push(`/login?registered=true${intendedRole ? `&role=${intendedRole}` : ""}`)
+      router.push("/")
     } catch {
       setError(tr.authCommon.somethingWentWrong)
       setLoading(false)

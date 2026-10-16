@@ -172,6 +172,51 @@ export const authOptions: NextAuthOptions = {
         }
       }
     }),
+    // Run C item 2 (Hitesh phone pass, 13-14 Oct) - sign-up used to verify
+    // the phone, then send the person to /login for a second code. The
+    // sign-up OTP already proves the phone, so RegisterForm now submits it
+    // here instead of to /api/auth/otp/verify: this provider checks the
+    // code itself and only then issues a session, in one server-side step.
+    // Bound to the account just created: the phone the code is checked
+    // against is read from that userId's own row (never taken from the
+    // request), and only an account that isn't verified yet qualifies, so
+    // this can't sign into any existing, already-verified account. No
+    // token or flag is handed out between verify and sign-in - a wrong,
+    // expired, reused or missing code returns null like otp-login does.
+    CredentialsProvider({
+      id: "signup-otp",
+      name: "signup-otp",
+      credentials: {
+        userId: { label: "User id", type: "text" },
+        code: { label: "OTP", type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.userId || !credentials?.code) return null
+
+        const user = await prisma.user.findUnique({ where: { id: credentials.userId } })
+        if (!user || !user.phone || user.isVerified) return null
+
+        if (user.isSuspended) {
+          throw new Error("SUSPENDED")
+        }
+
+        const result = await verifyOtp(user.phone, credentials.code, "SIGNUP_VERIFY")
+        if (!result.ok) return null
+
+        await prisma.user.update({ where: { id: user.id }, data: { isVerified: true } })
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          displayName: user.displayName,
+          role: user.role,
+          tokenVersion: user.tokenVersion,
+          code: user.code,
+          phone: user.phone,
+        }
+      }
+    }),
     // QST-2607-009 (10 Aug) - Google Sign-In, additive alongside credentials/OTP,
     // not a replacement. Conditionally included so a QA/preview environment
     // without GOOGLE_CLIENT_ID/SECRET set yet still boots normally with the

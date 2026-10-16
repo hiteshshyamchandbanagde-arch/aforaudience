@@ -2,7 +2,7 @@
 // the one spec that meets the app as a first-time visitor, with none of the
 // first-visit state pre-set (see helpers/first-visit.ts).
 import { test, expect } from "@playwright/test";
-import { registerTestAudience, loginTestAudience } from "./helpers/auth";
+import { registerTestAudience } from "./helpers/auth";
 import { JAIPUR_EVENT_TITLE, openEventFromListing, pickAvailableSeat } from "./helpers/events";
 import { deleteRegisteredTestUsers } from "./helpers/cleanup";
 
@@ -10,8 +10,8 @@ import { deleteRegisteredTestUsers } from "./helpers/cleanup";
  * A brand-new visitor's whole first run, on a NUMBERED venue event
  * ("Jaipur Mic Gala 100"):
  *
- *   intro splash -> register -> phone OTP -> sign in -> welcome sequence
- *   -> browse -> pick a seat -> checkout.
+ *   intro splash -> register -> phone OTP (signs in, run C item 2) ->
+ *   welcome sequence -> browse -> pick a seat -> checkout.
  *
  * Auth + phone verification use the real on-screen QA dev-OTP mechanism
  * (OTP_PROVIDER=mock) - the actual code the app generated, read off the DOM
@@ -45,30 +45,21 @@ test("first visit: the intro splash plays once, then gets out of the way", async
   await expect(splash).toBeHidden();
 });
 
-test("new audience member registers, verifies, signs in, passes the welcome sequence, picks a seat and reaches checkout", async ({
+test("new audience member registers, verifies (signed in by the code), passes the welcome sequence, picks a seat and reaches checkout", async ({
   page,
   isMobile,
 }) => {
-  const account = await test.step("Register and verify the phone with the QA dev OTP", async () => {
-    const created = await registerTestAudience(page);
-    registeredEmails.push(created.email);
-    return created;
-  });
-
-  await test.step("Sign in", async () => {
-    // registerTestAudience ends on /login?registered=true - the account
-    // exists and is phone-verified, but this browser is not signed in yet.
-    await loginTestAudience(page, account.email, account.password);
+  await test.step("Register and verify the phone with the QA dev OTP: signed in, no second code", async () => {
+    await registerTestAudience(page, (created) => registeredEmails.push(created.email));
   });
 
   await test.step("Welcome sequence: shown once, every step has a way through", async () => {
     await expect(page.getByRole("heading", { name: /welcome to aforaudience/i })).toBeVisible();
     await page.getByRole("button", { name: /^get started$/i }).click();
 
-    // Step 2: registration already verified the phone, so there is nothing
-    // to enter - just an acknowledgment and a way on.
-    await expect(page.getByRole("heading", { name: /verify your phone/i })).toBeVisible();
-    await page.getByRole("button", { name: /^continue/i }).click();
+    // Run C item 3 - registration already verified the phone, so the
+    // Verify phone step is skipped altogether.
+    await expect(page.getByRole("heading", { name: /verify your phone/i })).toBeHidden();
 
     // Step 3 (notifications) only shows when the browser can still be
     // asked; it steps itself over otherwise. Either way step 4 follows.

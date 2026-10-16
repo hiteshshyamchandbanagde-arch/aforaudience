@@ -145,6 +145,12 @@ registration's own OTP step and comes back later, and (b) Google sign-ups
 on `session.user.isVerified` accordingly - already-verified users get a
 one-line acknowledgment and a single "Continue," not a redundant OTP form.
 
+**Update, run C (16 Oct 2026):** registration's OTP step now goes through
+the `signup-otp` NextAuth provider (`src/lib/auth.ts`), which verifies the
+code and signs the new account in on the same step - no `/login` and no
+second code. And an already-verified user skips Screen 2 altogether
+("Get started" goes straight to Screen 3); only unverified accounts see it.
+
 ### 3.3 Google sign-up never collects a phone at all
 
 Not in the dispatch's findings. `src/lib/auth.ts`'s custom
