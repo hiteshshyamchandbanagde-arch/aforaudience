@@ -1053,6 +1053,8 @@ const gu: Dictionary = {
   // GEN-2610-007 - role dashboards: shared chrome + Artist (6a).
   dashboardChrome: {
     myEvents: "મારા ઇવેન્ટ્સ",
+    overview: "ઝાંખી",
+    findGigs: "ગિગ શોધો",
     createEvent: "ઇવેન્ટ બનાવો",
     create: "બનાવો",
     tours: "ટૂર્સ",
