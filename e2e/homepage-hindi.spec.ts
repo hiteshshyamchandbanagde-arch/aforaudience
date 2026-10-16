@@ -113,6 +113,15 @@ test("[BUG-2610-030] Hindi: the homepage eyebrow has no letter-spacing", async (
   const eyebrow = page.getByTestId("hero-live-tag").locator("span").last();
   await expect(eyebrow).toHaveText(/^अभी लाइव/);
   expect(await tracking(eyebrow)).toEqual(UNTRACKED);
+  // Run D amend: the tag sits at a fractional offset that changes run to
+  // run, so its glyphs rastered a few pixels apart. Pinned at the viewport's
+  // top-left corner (same width, opaque page background) for the shot.
+  await eyebrow.evaluate((node: HTMLElement) => {
+    let bg = "rgba(0, 0, 0, 0)";
+    for (let el: HTMLElement | null = node; el && bg === "rgba(0, 0, 0, 0)"; el = el.parentElement) bg = getComputedStyle(el).backgroundColor;
+    const width = node.getBoundingClientRect().width;
+    Object.assign(node.style, { position: "fixed", top: "0", left: "0", width: `${width}px`, zIndex: "2147483647", background: bg, margin: "0" });
+  });
   await expect(eyebrow).toHaveScreenshot(`hi-eyebrow-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
 });
 
