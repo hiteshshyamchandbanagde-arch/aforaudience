@@ -61,6 +61,15 @@ test('the shared requests page follows the role, and never falls back to no bar'
   assert.deepEqual(deriveBarState('/dashboard/venue-requests', 'ARTIST'), { kind: 'primary', active: null })
 })
 
+// Run E (Hitesh 13-14 Oct) - the artist overview had no bar item (active
+// null), so once you left it the bar had no way back; "My Events" opened
+// the gig browser. Overview is now the first item, the browser is Find gigs.
+test('the artist overview has its own active item; the gig browser is Find gigs', () => {
+  assert.deepEqual(deriveBarState('/dashboard/artist', 'ARTIST'), { kind: 'role', role: 'ARTIST', active: 'overview' })
+  assert.deepEqual(deriveBarState('/dashboard/artist/', 'ARTIST'), { kind: 'role', role: 'ARTIST', active: 'overview' })
+  assert.deepEqual(deriveBarState('/dashboard/artist/events', 'ARTIST'), { kind: 'role', role: 'ARTIST', active: 'find-gigs' })
+})
+
 test('pushed public pages and a message thread still have no bar', () => {
   for (const p of ['/events/e1', '/events/e1/seats', '/checkout/b1', '/venues/v1', '/artists/a1', '/dashboard/messages/m1', '/login']) {
     assert.equal(unifiedTabBarShows(p, 'AUDIENCE'), false, p)
