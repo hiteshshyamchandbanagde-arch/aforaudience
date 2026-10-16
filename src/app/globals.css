@@ -512,8 +512,18 @@ html {
   --font-mono: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif !important;
   --font-geist-mono: var(--font-mono) !important;
 }
-:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="--font-mono"], .font-mono) {
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="--font-mono"], .font-mono):not(nav *) {
   font-variant-numeric: tabular-nums;
+}
+/* Run D amend - nav chrome keeps the mono metrics. The phone tab bars and
+   the desktop header nav were sized for the mono fallback: in sans,
+   Malayalam's "Saved" wraps in its fifth of 390 px and the Marathi and
+   Hindi nav baselines shift (e2e tab-bar-labels, marathi-locale,
+   dashboard-i18n-artist). Inside nav the variables go back to what English
+   has; body text and labels elsewhere keep the sans swap above. */
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) nav {
+  --font-mono: var(--font-phys-jetbrains-mono) !important;
+  --font-geist-mono: initial !important;
 }
 .hero-rotator {
   height: 100%;
