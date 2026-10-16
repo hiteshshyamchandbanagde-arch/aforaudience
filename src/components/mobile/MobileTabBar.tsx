@@ -214,11 +214,15 @@ export default function MobileTabBar() {
     { id: 'dashboard', href: dashboardHref, label: t.nav.tabDashboard, Icon: DashboardMorphTabIcon, nav: 'push' },
   ]
 
-  // Artist - 3 items, no "More" (nothing to overflow). Icons match
+  // Artist - 4 items, no "More" (nothing to overflow). Icons match
   // ROLE_SECTIONS' own choices for these exact items in the desktop
-  // sidebar (calendar/user/briefcase) via the roleIcon() adapter above.
+  // sidebar (dashboard/calendar/user/briefcase) via the roleIcon() adapter above.
+  // Run E (Hitesh 13-14 Oct): Overview first, so the bar can take you back
+  // to /dashboard/artist; the gig browser is "Find gigs", not "My Events"
+  // (it lists events to apply to, not the artist's own).
   const artistItems: ItemDef[] = [
-    { id: 'my-events', href: '/dashboard/artist/events', label: chrome.myEvents, Icon: roleIcon('calendar'), nav: 'replace' },
+    { id: 'overview', href: '/dashboard/artist', label: chrome.overview, Icon: roleIcon('dashboard'), nav: 'replace' },
+    { id: 'find-gigs', href: '/dashboard/artist/events', label: chrome.findGigs, Icon: roleIcon('calendar'), nav: 'replace' },
     // Label fix (caught live, not in the original brief): this is
     // /dashboard/artist/edit, the artist's public performer profile -
     // a different page from the primary bar's own "Profile" (/profile,
