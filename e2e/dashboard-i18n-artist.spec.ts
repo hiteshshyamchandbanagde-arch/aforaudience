@@ -45,8 +45,9 @@ const HEADINGS: Record<Locale, { applications: string; browse: string; more: str
   de: { applications: "Meine Bewerbungen", browse: "Events durchsuchen", more: "Mehr" },
 };
 
-// The Artist bar's labels in Hindi (dashboardChrome.myEvents / editProfile / inquiries).
-const HI_ARTIST_BAR = ["मेरे इवेंट्स", "प्रोफ़ाइल एडिट", "पूछताछ"];
+// The Artist bar's labels in Hindi (dashboardChrome.overview / findGigs / editProfile / inquiries).
+// Run E: Overview added first, "My Events" renamed "Find gigs".
+const HI_ARTIST_BAR = ["अवलोकन", "गिग खोजें", "प्रोफ़ाइल एडिट", "पूछताछ"];
 
 const NAMESPACES = ["dashboardChrome", "artistDashboard", "nav"] as const;
 

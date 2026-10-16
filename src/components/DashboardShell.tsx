@@ -88,9 +88,14 @@ const ROLE_SECTIONS: (Omit<RoleSectionDef, 'role'> & { role: 'ORGANISER' | 'ARTI
   {
     role: 'ARTIST',
     icon: 'music',
+    // Run E (Hitesh 13-14 Oct), same as the phone bar: Overview, so a
+    // user whose session role isn't ARTIST (whose top "Dashboard" goes
+    // elsewhere) can still reach /dashboard/artist; and the gig browser
+    // reads "Find gigs", not "My Events".
     items: [
+      { labelKey: 'overview', icon: 'dashboard', href: '/dashboard/artist' },
       { labelKey: 'editProfile', icon: 'user', href: '/dashboard/artist/edit' },
-      { labelKey: 'myEvents', icon: 'calendar', href: '/dashboard/artist/events' },
+      { labelKey: 'findGigs', icon: 'calendar', href: '/dashboard/artist/events' },
       { labelKey: 'corporateInquiries', icon: 'briefcase', href: '/dashboard/artist/corporate-inquiries' },
     ],
   },

@@ -50,14 +50,15 @@ export function deriveBarState(pathname: string | null, role: string | undefined
     case '/wall-of-fame':
       return { kind: 'discover', active: 'wall-of-fame' }
 
-    // Artist - base /dashboard/artist overview isn't any of the 3 bar
-    // items' own href (none of them point there, same as none of
-    // ORGANISER/VENUE_OWNER's items point at a bare "overview" route
-    // either) - bar shows, nothing highlighted, same treatment as '/'.
+    // Artist - run E (Hitesh 13-14 Oct): the overview used to have no bar
+    // item (active null), so once you left it the bar had no way back.
+    // It is now the bar's first item, "Overview", like Admin's. The gig
+    // browser (/dashboard/artist/events) was labelled "My Events" and is
+    // now "Find gigs".
     case '/dashboard/artist':
-      return { kind: 'role', role: 'ARTIST', active: null }
+      return { kind: 'role', role: 'ARTIST', active: 'overview' }
     case '/dashboard/artist/events':
-      return { kind: 'role', role: 'ARTIST', active: 'my-events' }
+      return { kind: 'role', role: 'ARTIST', active: 'find-gigs' }
     case '/dashboard/artist/edit':
       return { kind: 'role', role: 'ARTIST', active: 'edit-profile' }
     case '/dashboard/artist/corporate-inquiries':

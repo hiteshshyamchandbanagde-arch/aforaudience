@@ -1058,6 +1058,10 @@ const fr: Dictionary = {
   // GEN-2610-007 - role dashboards: shared chrome + Artist (6a).
   dashboardChrome: {
     myEvents: "Mes événements",
+    overview: "Aperçu",
+    // "Trouver des dates" wrapped in the phone bar's quarter-width slot.
+    findGigs: "Candidater",
+    profileTab: "Profil",
     createEvent: "Créer un événement",
     create: "Créer",
     tours: "Tournées",

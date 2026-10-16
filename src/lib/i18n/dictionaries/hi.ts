@@ -1052,6 +1052,9 @@ const hi: Dictionary = {
   // GEN-2610-007 - role dashboards: shared chrome + Artist (6a).
   dashboardChrome: {
     myEvents: "मेरे इवेंट्स",
+    overview: "अवलोकन",
+    findGigs: "गिग खोजें",
+    profileTab: "प्रोफ़ाइल एडिट",
     createEvent: "इवेंट बनाएं",
     create: "बनाएं",
     tours: "टूर",
