@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { test, expect } from "./helpers/test";
+import { test, expect, hideFloatingOverlays } from "./helpers/test";
 import { useRuleViewport } from "./helpers/viewports";
 
 /**
@@ -129,9 +129,52 @@ for (const locale of ["mr", "hi"]) {
       await page.evaluate(() => document.fonts.ready);
       const w = isMobile ? 390 : 1440;
       // A mono label area (the eyebrow) and the first room row.
-      await expect(section.getByText(EYEBROW.mr, { exact: true })).toHaveScreenshot(`mr-mono-eyebrow-${w}.png`, { animations: "disabled" });
-      const firstRow = section.locator(".four-rooms-row").first();
-      await expect(firstRow.locator(".four-rooms-copy")).toHaveScreenshot(`mr-four-rooms-house-${w}.png`, { animations: "disabled" });
+      // The eyebrow's glyphs raster differently from one deployment to the
+      // next (half-pixel line box), so it is checked on computed metrics, not
+      // pixels: one line, no spacing added, and exactly as wide as the same
+      // text in the sans font (the mono grid made it wider).
+      const eyebrow = section.getByText(EYEBROW.mr, { exact: true });
+      const m = await eyebrow.evaluate((node) => {
+        const cs = getComputedStyle(node);
+        const measure = (font: string) => {
+          const span = document.createElement("span");
+          span.style.cssText = `font-family:${font};font-size:${cs.fontSize};font-weight:${cs.fontWeight};letter-spacing:${cs.letterSpacing};white-space:nowrap;position:absolute`;
+          span.textContent = node.textContent;
+          document.body.appendChild(span);
+          const width = span.getBoundingClientRect().width;
+          span.remove();
+          return width;
+        };
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        return {
+          lines: new Set(Array.from(range.getClientRects()).map((r) => Math.round(r.top))).size,
+          letterSpacing: cs.letterSpacing,
+          textTransform: cs.textTransform,
+          width: range.getBoundingClientRect().width,
+          sans: measure("var(--font-sans), var(--font-devanagari)"),
+          mono: measure("var(--font-phys-jetbrains-mono), var(--font-devanagari)"),
+        };
+      });
+      expect(m.lines, "eyebrow on one line").toBe(1);
+      expect(["normal", "0px"]).toContain(m.letterSpacing);
+      expect(m.textTransform).toBe("none");
+      expect(Math.abs(m.width - m.sans), `eyebrow ${m.width}px vs sans ${m.sans}px`).toBeLessThan(1);
+      expect(m.width, "narrower than the mono grid").toBeLessThan(m.mono);
+
+      const copy = section.locator(".four-rooms-row").first().locator(".four-rooms-copy");
+      // The copy is about 536.7 px tall at an offset whose fraction changes
+      // with scroll and with what loads above it, so an element shot came out
+      // 537 or 538 px. For the shot it is pinned at the viewport's top-left
+      // corner (same width, opaque page background): a box on whole pixels.
+      await hideFloatingOverlays(page);
+      await copy.evaluate((node: HTMLElement) => {
+        let bg = "rgba(0, 0, 0, 0)";
+        for (let el: HTMLElement | null = node; el && bg === "rgba(0, 0, 0, 0)"; el = el.parentElement) bg = getComputedStyle(el).backgroundColor;
+        const width = node.getBoundingClientRect().width;
+        Object.assign(node.style, { position: "fixed", top: "0", left: "0", width: `${width}px`, zIndex: "2147483647", background: bg, margin: "0" });
+      });
+      await expect(copy).toHaveScreenshot(`mr-four-rooms-house-${w}.png`, { animations: "disabled" });
     }
   });
 }
