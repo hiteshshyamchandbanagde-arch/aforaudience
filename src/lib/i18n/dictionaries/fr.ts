@@ -1059,7 +1059,9 @@ const fr: Dictionary = {
   dashboardChrome: {
     myEvents: "Mes événements",
     overview: "Aperçu",
-    findGigs: "Trouver des dates",
+    // "Trouver des dates" wrapped in the phone bar's quarter-width slot.
+    findGigs: "Candidater",
+    profileTab: "Profil",
     createEvent: "Créer un événement",
     create: "Créer",
     tours: "Tournées",
