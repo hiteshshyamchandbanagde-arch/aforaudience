@@ -947,7 +947,10 @@ const en = {
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
     feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
-    heroIssueTag: "Live, right now — six cities and counting",
+    // Events copy A (Hitesh, 14 Oct) - the hero tag counts the cities with an
+    // upcoming APPROVED show (src/lib/live-cities.ts): 2+ cities, exactly 1, hidden at 0.
+    heroLiveCities: "Live, right now — {n} cities and counting",
+    heroLiveInCity: "Live, right now in {city}",
     heroInlineCtaPrefix: "Start with ",
     heroInlineCtaLink: "tonight's shows →",
     heroInlineCtaOr: " or ",
