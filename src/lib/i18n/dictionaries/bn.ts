@@ -1055,6 +1055,7 @@ const bn: Dictionary = {
     myEvents: "আমার ইভেন্ট",
     overview: "ওভারভিউ",
     findGigs: "গিগ খুঁজুন",
+    profileTab: "প্রোফাইল এডিট",
     createEvent: "ইভেন্ট তৈরি করুন",
     create: "তৈরি",
     tours: "ট্যুর",
