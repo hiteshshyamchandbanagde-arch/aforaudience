@@ -1126,6 +1126,9 @@ const en = {
     // (/dashboard/artist/events) - not myEvents, which is the organiser's.
     overview: "Overview",
     findGigs: "Find gigs",
+    // Artist phone bar's editProfile slot: a quarter of 390 px, so a
+    // shorter word where editProfile wraps (de, fr, ml).
+    profileTab: "Edit Profile",
     createEvent: "Create Event",
     // Phone role bar: one short word per slot.
     create: "Create",
