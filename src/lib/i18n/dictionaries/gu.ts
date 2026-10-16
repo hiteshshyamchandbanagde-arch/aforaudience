@@ -149,6 +149,7 @@ const gu: Dictionary = {
     emptySearchAllCities: "બધાં શહેરોમાં શોધો",
     emptyShowAllCities: "બધાં શહેરો બતાવો",
     emptyCityYet: "{city}માં હજી કોઈ શો નથી",
+    emptyPastInCity: "{city}માં કોઈ ભૂતકાળના શો નથી",
     artistBrowseEmpty: "હજી કોઈ પ્રકાશિત ઇવેન્ટ નથી. જલદી ફરી જુઓ!",
     artistBrowseEmptyInCity: "{city}માં હજી કોઈ પ્રકાશિત ઇવેન્ટ નથી",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
@@ -893,7 +894,8 @@ const gu: Dictionary = {
     feeBookingFeeLabel: "બુકિંગ ફી",
     feeYouPayLabel: "તમે ચૂકવો છો",
     feeTaxDisclaimer: "AFA 0% કમિશન લે છે. સરકારી કર, જ્યાં લાગુ પડે, અલગ છે અને ચૂકવણી પહેલાં બતાવવામાં આવે છે.",
-    heroIssueTag: "લાઇવ કલા, વાસ્તવિક ક્ષણો",
+    heroLiveCities: "અત્યારે લાઇવ — {n} શહેરો અને વધી રહ્યા છે",
+    heroLiveInCity: "અત્યારે લાઇવ, {city}માં",
     heroInlineCtaPrefix: "તેની સાથે શરૂ કરો ",
     heroInlineCtaLink: "આજ રાત્રિના શો →",
     heroInlineCtaOr: " અથવા ",

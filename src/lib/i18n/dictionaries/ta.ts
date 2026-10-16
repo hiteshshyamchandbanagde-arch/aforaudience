@@ -149,6 +149,7 @@ const ta: Dictionary = {
     emptySearchAllCities: "எல்லா நகரங்களிலும் தேடு",
     emptyShowAllCities: "எல்லா நகரங்களையும் காட்டு",
     emptyCityYet: "{city}-இல் இன்னும் நிகழ்ச்சிகள் இல்லை",
+    emptyPastInCity: "{city}-இல் கடந்த நிகழ்ச்சிகள் இல்லை",
     artistBrowseEmpty: "இன்னும் வெளியிடப்பட்ட நிகழ்வுகள் இல்லை. விரைவில் மீண்டும் பாருங்கள்!",
     artistBrowseEmptyInCity: "{city}-இல் இன்னும் வெளியிடப்பட்ட நிகழ்வுகள் இல்லை",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
@@ -893,7 +894,8 @@ const ta: Dictionary = {
     feeBookingFeeLabel: "முன்பதிவுக் கட்டணம்",
     feeYouPayLabel: "நீங்கள் செலுத்துவது",
     feeTaxDisclaimer: "AFA 0% கமிஷன் எடுக்கிறது. அரசு வரிகள், பொருந்தும் இடங்களில், தனியானவை; நீங்கள் செலுத்தும் முன் காட்டப்படும்.",
-    heroIssueTag: "லைவ் கலை, உண்மையான தருணங்கள்",
+    heroLiveCities: "இப்போது லைவ் — {n} நகரங்கள், இன்னும் வளர்கிறது",
+    heroLiveInCity: "இப்போது லைவ், {city}-இல்",
     heroInlineCtaPrefix: "தொடங்குங்கள் ",
     heroInlineCtaLink: "இன்றிரவு நிகழ்ச்சிகளுடன் →",
     heroInlineCtaOr: " அல்லது ",

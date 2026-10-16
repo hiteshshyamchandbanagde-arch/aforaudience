@@ -158,6 +158,7 @@ const de: Dictionary = {
     emptySearchAllCities: "In allen Städten suchen",
     emptyShowAllCities: "Alle Städte anzeigen",
     emptyCityYet: "Noch keine Shows in {city}",
+    emptyPastInCity: "Keine vergangenen Shows in {city}",
     artistBrowseEmpty: "Noch keine veröffentlichten Events. Schau bald wieder vorbei!",
     artistBrowseEmptyInCity: "Noch keine veröffentlichten Events in {city}",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
@@ -902,7 +903,8 @@ const de: Dictionary = {
     feeBookingFeeLabel: "Buchungsgebühr",
     feeYouPayLabel: "Du zahlst",
     feeTaxDisclaimer: "AFA nimmt 0 % Provision. Staatliche Steuern, wo sie anfallen, kommen gesondert hinzu und werden vor der Zahlung angezeigt.",
-    heroIssueTag: "Live-Kunst, echte Momente",
+    heroLiveCities: "Jetzt live — {n} Städte und es werden mehr",
+    heroLiveInCity: "Jetzt live in {city}",
     heroInlineCtaPrefix: "Starte mit ",
     heroInlineCtaLink: "den heutigen Shows →",
     heroInlineCtaOr: " oder ",

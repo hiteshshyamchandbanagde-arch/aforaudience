@@ -149,6 +149,7 @@ const kn: Dictionary = {
     emptySearchAllCities: "ಎಲ್ಲಾ ನಗರಗಳಲ್ಲಿ ಹುಡುಕಿ",
     emptyShowAllCities: "ಎಲ್ಲಾ ನಗರಗಳನ್ನು ತೋರಿಸಿ",
     emptyCityYet: "{city}ನಲ್ಲಿ ಇನ್ನೂ ಯಾವುದೇ ಶೋಗಳಿಲ್ಲ",
+    emptyPastInCity: "{city}ನಲ್ಲಿ ಹಿಂದಿನ ಶೋಗಳಿಲ್ಲ",
     artistBrowseEmpty: "ಇನ್ನೂ ಯಾವುದೇ ಪ್ರಕಟಿತ ಈವೆಂಟ್‌ಗಳಿಲ್ಲ. ಶೀಘ್ರದಲ್ಲೇ ಮತ್ತೆ ನೋಡಿ!",
     artistBrowseEmptyInCity: "{city}ನಲ್ಲಿ ಇನ್ನೂ ಯಾವುದೇ ಪ್ರಕಟಿತ ಈವೆಂಟ್‌ಗಳಿಲ್ಲ",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
@@ -893,7 +894,8 @@ const kn: Dictionary = {
     feeBookingFeeLabel: "ಬುಕಿಂಗ್ ಶುಲ್ಕ",
     feeYouPayLabel: "ನೀವು ಪಾವತಿಸುವುದು",
     feeTaxDisclaimer: "AFA 0% ಕಮಿಷನ್ ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ. ಸರ್ಕಾರಿ ತೆರಿಗೆಗಳು, ಅನ್ವಯವಾಗುವಲ್ಲಿ, ಪ್ರತ್ಯೇಕವಾಗಿರುತ್ತವೆ ಮತ್ತು ಪಾವತಿಸುವ ಮೊದಲೇ ತೋರಿಸಲಾಗುತ್ತದೆ.",
-    heroIssueTag: "ಲೈವ್ ಕಲೆ, ನೈಜ ಕ್ಷಣಗಳು",
+    heroLiveCities: "ಈಗ ಲೈವ್ — {n} ನಗರಗಳು, ಇನ್ನೂ ಹೆಚ್ಚುತ್ತಿವೆ",
+    heroLiveInCity: "ಈಗ ಲೈವ್, {city}ನಲ್ಲಿ",
     heroInlineCtaPrefix: "ಇದರೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸಿ ",
     heroInlineCtaLink: "ಇಂದು ರಾತ್ರಿಯ ಶೋಗಳು →",
     heroInlineCtaOr: " ಅಥವಾ ",

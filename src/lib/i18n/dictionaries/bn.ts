@@ -149,6 +149,7 @@ const bn: Dictionary = {
     emptySearchAllCities: "সব শহরে খুঁজুন",
     emptyShowAllCities: "সব শহর দেখান",
     emptyCityYet: "{city}-এ এখনও কোনো শো নেই",
+    emptyPastInCity: "{city}-এ কোনো অতীত শো নেই",
     artistBrowseEmpty: "এখনও কোনো প্রকাশিত ইভেন্ট নেই। শীঘ্রই আবার দেখুন!",
     artistBrowseEmptyInCity: "{city}-এ এখনও কোনো প্রকাশিত ইভেন্ট নেই",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
@@ -893,7 +894,8 @@ const bn: Dictionary = {
     feeBookingFeeLabel: "বুকিং ফি",
     feeYouPayLabel: "আপনি দেবেন",
     feeTaxDisclaimer: "AFA 0% কমিশন নেয়। সরকারি কর, যেখানে প্রযোজ্য, আলাদা এবং পেমেন্টের আগেই দেখানো হয়।",
-    heroIssueTag: "লাইভ আর্ট, বাস্তব মুহূর্ত",
+    heroLiveCities: "এখন লাইভ — {n}টি শহর, আরও বাড়ছে",
+    heroLiveInCity: "এখন লাইভ, {city}-এ",
     heroInlineCtaPrefix: "এটি দিয়ে শুরু করুন ",
     heroInlineCtaLink: "আজ রাতের শো →",
     heroInlineCtaOr: " অথবা ",

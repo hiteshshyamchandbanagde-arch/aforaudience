@@ -369,7 +369,8 @@ function EventsPageContent() {
   const activeCity = selectedCity !== "All Cities" ? selectedCity : null
   // BUG-2610-020 - "Try adjusting your filters" only when a search or a
   // filter is actually applied; a city with no events and nothing else
-  // set reads "No shows in Mumbai yet" with "Show all cities".
+  // set reads "No shows in Mumbai yet" with "Show all cities". The Past
+  // tab says "No past shows in Mumbai" (events copy A).
   const filterApplied = activeQuery !== "" || selectedType !== null || priceFilter !== "All"
   const emptyNamedTitle =
     activeQuery && activeCity
@@ -377,7 +378,7 @@ function EventsPageContent() {
       : activeQuery
       ? tr.eventsPage.emptySearch.replace("{query}", activeQuery)
       : activeCity
-      ? (filterApplied || tab === "past" ? tr.eventsPage.emptyInCity : tr.eventsPage.emptyCityYet).replace("{city}", activeCity)
+      ? (tab === "past" ? tr.eventsPage.emptyPastInCity : filterApplied ? tr.eventsPage.emptyInCity : tr.eventsPage.emptyCityYet).replace("{city}", activeCity)
       : null
   const emptySub = loadFailed
     ? tr.eventsPage.loadErrorSub
@@ -478,12 +479,13 @@ function EventsPageContent() {
             separate boxed/inverse hero background in the export - the hero
             sits directly on the page. */}
         <header style={{ maxWidth: "760px" }}>
-          {/* BUG-2610-020 - no eyebrow at zero: "0 events happening near you" advertised the emptiness. */}
+          {/* BUG-2610-020 - no eyebrow at zero: "0 events happening near you" advertised the emptiness.
+              This is the page's only count line: "near you" only while a city is picked, else "Showing {n} events". */}
           {(contentMode === "organisers" || loading || loadFailed || filtered.length > 0) && (
             <span data-testid="events-count-eyebrow" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
               {contentMode === "organisers"
                 ? tr.eventsPage.heroSubtitleOrganisers
-                : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "upcoming" ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast)}
+                : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "past" ? countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast) : activeCity ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
             </span>
           )}
           <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
@@ -712,10 +714,9 @@ function EventsPageContent() {
               </div>
             </div>
 
-            <div style={{ marginTop: "var(--afa-space-4)", marginBottom: "var(--afa-space-4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
-              {/* BUG-2610-009: no count until this load has answered - "Showing 0 events" while loading read as an empty city. */}
-              {loading || loadFailed ? "\u00A0" : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
-            </div>
+            {/* BUG-2610-009 / events copy A: the "Showing {n} events" line that sat here was a second count under the
+                hero eyebrow, and it still said "Showing 0 events" at zero. The eyebrow is the one count now; this keeps the gap. */}
+            <div aria-hidden="true" style={{ height: "var(--afa-space-6)" }} />
 
             {/* EVENTS GRID */}
             {loading ? (

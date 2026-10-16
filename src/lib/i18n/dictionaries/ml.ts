@@ -149,6 +149,7 @@ const ml: Dictionary = {
     emptySearchAllCities: "എല്ലാ നഗരങ്ങളിലും തിരയുക",
     emptyShowAllCities: "എല്ലാ നഗരങ്ങളും കാണിക്കുക",
     emptyCityYet: "{city}-ൽ ഇതുവരെ ഷോകളൊന്നുമില്ല",
+    emptyPastInCity: "{city}-ൽ കഴിഞ്ഞ ഷോകളൊന്നുമില്ല",
     artistBrowseEmpty: "ഇതുവരെ പ്രസിദ്ധീകരിച്ച ഇവന്റുകളൊന്നുമില്ല. ഉടൻ വീണ്ടും നോക്കൂ!",
     artistBrowseEmptyInCity: "{city}-ൽ ഇതുവരെ പ്രസിദ്ധീകരിച്ച ഇവന്റുകളൊന്നുമില്ല",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.
@@ -893,7 +894,8 @@ const ml: Dictionary = {
     feeBookingFeeLabel: "ബുക്കിംഗ് ഫീസ്",
     feeYouPayLabel: "നിങ്ങൾ നൽകുന്നത്",
     feeTaxDisclaimer: "AFA 0% കമ്മീഷൻ എടുക്കുന്നു. ബാധകമായിടത്ത് സർക്കാർ നികുതികൾ വേറെയാണ്, പണം നൽകുന്നതിന് മുമ്പ് കാണിക്കും.",
-    heroIssueTag: "ലൈവ് കല, യഥാർത്ഥ നിമിഷങ്ങൾ",
+    heroLiveCities: "ഇപ്പോൾ ലൈവ് — {n} നഗരങ്ങൾ, ഇനിയും കൂടുന്നു",
+    heroLiveInCity: "ഇപ്പോൾ ലൈവ്, {city}-ൽ",
     heroInlineCtaPrefix: "ഇതിലൂടെ ആരംഭിക്കുക ",
     heroInlineCtaLink: "ഇന്നത്തെ രാത്രി ഷോകൾ →",
     heroInlineCtaOr: " അല്ലെങ്കിൽ ",
