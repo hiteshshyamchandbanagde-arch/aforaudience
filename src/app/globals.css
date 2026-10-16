@@ -496,6 +496,35 @@ html {
 :is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="text-transform"], .uppercase) {
   text-transform: none !important;
 }
+
+/* Run D (Hitesh phone pass, 13 Oct) - mono labels in Indic scripts. The
+   mono font has no Indic glyphs, so the fallback was set on the mono grid
+   and labels read with double-width gaps. In an Indic locale the mono
+   variable itself becomes the sans stack, so every inline
+   fontFamily: "var(--font-mono)" and the Tailwind font-mono class (which
+   compiles to var(--font-geist-mono)) follow without touching call sites.
+   It sits on html and body with !important to outrank next/font's class
+   on <html> and the design-token runtime style's
+   body{--font-mono: ... !important} (design-tokens.ts).
+   Former mono labels keep tabular digits so counts and prices don't jump.
+   e2e/indic-mono-font.spec.ts checks it; English keeps the mono font. */
+:is(html, body):is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) {
+  --font-mono: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif !important;
+  --font-geist-mono: var(--font-mono) !important;
+}
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="--font-mono"], .font-mono):not(nav *) {
+  font-variant-numeric: tabular-nums;
+}
+/* Run D amend - nav chrome keeps the mono metrics. The phone tab bars and
+   the desktop header nav were sized for the mono fallback: in sans,
+   Malayalam's "Saved" wraps in its fifth of 390 px and the Marathi and
+   Hindi nav baselines shift (e2e tab-bar-labels, marathi-locale,
+   dashboard-i18n-artist). Inside nav the variables go back to what English
+   has; body text and labels elsewhere keep the sans swap above. */
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) nav {
+  --font-mono: var(--font-phys-jetbrains-mono) !important;
+  --font-geist-mono: initial !important;
+}
 .hero-rotator {
   height: 100%;
   min-height: 360px;
