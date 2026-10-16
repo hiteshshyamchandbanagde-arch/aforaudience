@@ -157,7 +157,7 @@ function RefundLines({ p, tr }: { p: RefundPreview; tr: Dictionary }) {
     <div data-afa-refund-lines>
       <div style={row} data-afa-refund-line="paid">
         <span>{tr.ticketsPage.cancelSheetPaidLabel}</span>
-        <span style={{ color: 'var(--afa-text-primary)', fontWeight: 600 }}>{rupees(p.paid)}</span>
+        <span style={{ color: 'var(--afa-text-primary)', fontWeight: 600 }}>{p.paid > 0 ? rupees(p.paid) : tr.eventDetailPage.freeAmount}</span>
       </div>
       <div style={row} data-afa-refund-line="refund">
         <span>
@@ -768,8 +768,15 @@ export default function MyTicketsPage() {
               // CONFIRMED (matches the existing "Download ticket PDF"
               // button's own gating below) - a PENDING/CANCELLED/
               // REFUNDED booking has nothing to scan at a door.
-              const showQr = eff === 'CONFIRMED'
-              const used = showQr && !!b.checkedInAt
+              // Tickets B (Hitesh, 14 Oct) - nor once the event is past
+              // (the page's own isPastEvent rule, offline view included):
+              // no QR, no "Scan at door"; Download PDF stays.
+              const showQr = eff === 'CONFIRMED' && !isPastEvent(b)
+              const used = eff === 'CONFIRMED' && !!b.checkedInAt
+              // A free booking reads "Free" rather than hiding the amount.
+              // Offline tickets carry no amounts (src/lib/offline-tickets.ts),
+              // so their 0 is unknown, not free.
+              const showPaid = !offlineView
               return (
                 <div
                   key={b.id}
@@ -881,8 +888,10 @@ export default function MyTicketsPage() {
                         <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-14px) 0' }}>
                           <PerfDivider />
                         </div>
+                        {(showQr || showPaid) && (
                         <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)', alignItems: 'flex-start' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
+                          {showQr && (
+                          <div data-afa-ticket-qr style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-cream)' }}>
                               <TicketQr value={b.id} size={60} />
                             </div>
@@ -890,15 +899,21 @@ export default function MyTicketsPage() {
                               {used ? tr.ticketsPage.scannedLabel : tr.ticketsPage.scanAtDoor}
                             </span>
                           </div>
+                          )}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            {b.totalAmount > 0 && (
+                            {showPaid && (
                               <div style={{ marginBottom: 'var(--afa-space-2)' }}>
-                                <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
-                                <p style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
+                                {b.totalAmount > 0 && (
+                                  <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
+                                )}
+                                <p data-afa-ticket-paid style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+                                  {b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}
+                                </p>
                               </div>
                             )}
                           </div>
                         </div>
+                        )}
                         {!offlineView && (
                         <div data-afa-ticket-actions style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                           {/* BUG-2610-012 - the actions used to share the narrow

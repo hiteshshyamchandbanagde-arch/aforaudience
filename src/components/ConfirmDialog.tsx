@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets'
 import { useModalSheet } from '@/lib/use-modal-sheet'
+import { useScrollLock } from '@/lib/use-scroll-lock'
 import { useLocale } from '@/lib/i18n/translate'
 
 /**
@@ -98,6 +99,8 @@ function ConfirmDialogView({ options, onClose }: { options: DialogRequest; onClo
   const panelRef = useRef<HTMLDivElement>(null)
   const [text, setText] = useState('')
   useModalSheet(true, panelRef, () => onClose(null))
+  // The page behind the dialog stays put while it is open (Tickets B).
+  useScrollLock(true)
   const { title, body, destructive, alertOnly, input } = options
   const confirmLabel = options.confirmLabel ?? (alertOnly ? t.common.dialogOk : t.common.dialogConfirm)
   const cancelLabel = options.cancelLabel ?? t.common.dialogCancel
