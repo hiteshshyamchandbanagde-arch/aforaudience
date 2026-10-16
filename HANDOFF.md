@@ -1,3 +1,20 @@
+## Part 62 — START HERE (16 Oct 18:30 IST, chat), qa @ this commit
+Supersedes 60-61 as entry point. Six-run follow-up batch (Hitesh "go" 07:29) built.
+### State
+- MERGED today: #756 events copy A (241f700), #757 tickets B (80866bf), #758 auth C (62b0627), #759 i18n D (ddbfd21). All deploys READY; runtime errors only the known pg DeprecationWarning (+1 transient EAUTHTIMEOUT on admin diary design-tokens cache, seen since 2 Oct).
+- OPEN: #760 artist nav E (565e187, reviewed OK; e2e-preview re-run after a queue cancel), #761 seed F (1bf282a, code only, reviewed OK; e2e cancelled by the same queue -> re-run after #760's finishes).
+- Gotcha (new): e2e-preview shares concurrency group e2e-qa-shared-fixtures (cancel-in-progress false) but GitHub keeps only ONE pending run per group: a 3rd queued run cancels the pending one. Don't open two PRs back to back; re-run the cancelled one (POST actions/runs/{id}/rerun).
+- QA DATA, NEEDS HITESH OK: 21 rows. Booking qa-demo-booking-full-atul-1 seats {} -> {"General":1}, createdAt 10 Sep -> 1 Sep (event 6 Sep). 20 events with faker Latin descriptions (qa-demo-event-full-1..10, qa-general-event-01..10) -> copy from scripts/qa-seed-data.ts (DEMO_EVENT_DESCRIPTIONS; general by type/index). SQL generated from the builders, 21 UPDATEs in one transaction (regenerate from qa-seed-data.ts on #761 if lost). Earlier "3 events" count was a keyword miss.
+- Feedback table still NOT updated (writes cancelled at approval twice this session). Part 60 list + new: run A-E tickets; BUG follow-up "/api/auth/otp/verify doesn't check phone belongs to userId"; FEATURE_IDEA "Indic nav labels still mono (run D excluded nav) - resize to fit sans" if Hitesh confirms gaps were in nav.
+- Branches to delete in GitHub UI (proxy 403 here): fix/bug-batch-090-051-085, fix/offline-tickets-tab-nav, fix/offline-polish, fix/e2e-red-034, fix/offline-tickets, fix/events-copy-a, fix/tickets-b, fix/auth-onboarding-c, fix/i18n-fonts-d (+ fix/artist-nav-e, fix/seed-f after merge).
+### Human checks (Hitesh, phone)
+- A: home hero city count; /events Upcoming + Past in Pune, then Show all cities; one Indic locale.
+- B (Atul): past ticket no QR; free ticket "Free"; no background scroll behind cancel sheet.
+- C: fresh-number signup -> signed in, no 2nd code, no Verify phone step; usernames valid.
+- D: mr/hi home - room names; no double-width gaps (say where gaps were if still seen: nav?).
+- E (Hrithik): Overview / Find gigs / Edit Profile / Inquiries, each goes where named; hi or mr.
+- Still open from Part 60: offline retest, items 10-16, payments decisions (R4-R8, GST on Rs20, Razorpay 2%, CA PDF), 3 open Qs, billing check, Project instructions.
+
 ## Part 61 (16 Oct 08:25 IST, chat), qa @ this commit
 - Delta on Part 60 (still START HERE for the backlog). Hitesh "go" 07:29.
 - Run A dispatched: `docs/cc-dispatches/cc-prompt-events-copy-a.md` (d90beba), autopilot run 38838226441 SUCCESS, PUSHED fix/events-copy-a @ bd59002 (6 commits). PR #756 open. design-tokens GREEN; e2e-preview running. Not merged.
