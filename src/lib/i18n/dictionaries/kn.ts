@@ -1053,6 +1053,8 @@ const kn: Dictionary = {
   // GEN-2610-007 - role dashboards: shared chrome + Artist (6a).
   dashboardChrome: {
     myEvents: "ನನ್ನ ಈವೆಂಟ್‌ಗಳು",
+    overview: "ಅವಲೋಕನ",
+    findGigs: "ಗಿಗ್ ಹುಡುಕಿ",
     createEvent: "ಈವೆಂಟ್ ರಚಿಸಿ",
     create: "ರಚಿಸಿ",
     tours: "ಪ್ರವಾಸಗಳು",
