@@ -1,3 +1,13 @@
+## Part 61 (16 Oct 08:25 IST, chat), qa @ this commit
+- Delta on Part 60 (still START HERE for the backlog). Hitesh "go" 07:29.
+- Run A dispatched: `docs/cc-dispatches/cc-prompt-events-copy-a.md` (d90beba), autopilot run 38838226441 SUCCESS, PUSHED fix/events-copy-a @ bd59002 (6 commits). PR #756 open. design-tokens GREEN; e2e-preview running. Not merged.
+- Built: /events one count line (none at 0; "near you" only with a city picked); Past empty "No past shows in {city}" (chat-chosen copy, Hitesh may change); home hero live city count (server, unstable_cache 300 s, page revalidate 300; APPROVED + approved venue; 0 hidden / 1 "in {city}" / 2+ "{n} cities"), 12 locales. page.tsx split into server page + HomePageClient.tsx.
+- BUG-2610-020 regression cause: fix only hid the hero eyebrow; grid "Showing {n}" line (BUG-2610-009) still rendered at 0; zero-events-copy.spec checked only the eyebrow.
+- Tests: e2e/events-count-copy.spec.ts (4, 6 baselines), e2e/home-hero-live-cities.spec.ts @needs-db, scripts/live-cities.test.ts. T2 changes reviewed by chat (copy change, justified): plurals.spec, homepage-hindi.spec (+ hi-eyebrow baselines). Gap: Hindi letter-spacing check on the "near you" form dropped (now city-only) -> follow-up.
+- Human check: home hero city count; /events Upcoming + Past in Pune, then Show all cities; one Indic locale.
+- Still blocked: branch deletes (API + git push 403 on delete) -> Hitesh deletes the 5 merged branches (#751-#755) in GitHub UI. Feedback UPDATE cancelled at approval again (Part 60 list unchanged).
+- Next: merge #756 when e2e-preview green on bd59002, then run B (Tickets: past no QR, ₹0 "Free", cancel sheet scroll lock).
+
 ## Part 60 — START HERE (16 Oct 07:00 IST, end of session), qa @ this commit
 
 Supersedes 56-59 as entry point (they stay as detail). GOAL unchanged: Pune launch; Phase 1 finish QA, Phase 2 production after QA.
