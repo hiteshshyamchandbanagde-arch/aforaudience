@@ -1055,6 +1055,7 @@ const gu: Dictionary = {
     myEvents: "મારા ઇવેન્ટ્સ",
     overview: "ઝાંખી",
     findGigs: "ગિગ શોધો",
+    profileTab: "પ્રોફાઇલ સંપાદન",
     createEvent: "ઇવેન્ટ બનાવો",
     create: "બનાવો",
     tours: "ટૂર્સ",
