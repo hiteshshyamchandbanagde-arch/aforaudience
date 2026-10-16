@@ -2,11 +2,11 @@
 Supersedes 60-61 as entry point. Six-run follow-up batch (Hitesh "go" 07:29) built.
 ### State
 - MERGED today: #756 events copy A (241f700), #757 tickets B (80866bf), #758 auth C (62b0627), #759 i18n D (ddbfd21). All deploys READY; runtime errors only the known pg DeprecationWarning (+1 transient EAUTHTIMEOUT on admin diary design-tokens cache, seen since 2 Oct).
-- OPEN: #760 artist nav E (565e187, reviewed OK; e2e-preview re-run after a queue cancel), #761 seed F (1bf282a, code only, reviewed OK; e2e cancelled by the same queue -> re-run after #760's finishes).
+- BATCH COMPLETE: #760 artist nav E MERGED (bbdcfac, deploy READY, no new errors); #761 seed F MERGED (49eff87, scripts only). No open PRs.
 - Gotcha (new): e2e-preview shares concurrency group e2e-qa-shared-fixtures (cancel-in-progress false) but GitHub keeps only ONE pending run per group: a 3rd queued run cancels the pending one. Don't open two PRs back to back; re-run the cancelled one (POST actions/runs/{id}/rerun).
 - QA DATA, NEEDS HITESH OK: 21 rows. Booking qa-demo-booking-full-atul-1 seats {} -> {"General":1}, createdAt 10 Sep -> 1 Sep (event 6 Sep). 20 events with faker Latin descriptions (qa-demo-event-full-1..10, qa-general-event-01..10) -> copy from scripts/qa-seed-data.ts (DEMO_EVENT_DESCRIPTIONS; general by type/index). SQL generated from the builders, 21 UPDATEs in one transaction (regenerate from qa-seed-data.ts on #761 if lost). Earlier "3 events" count was a keyword miss.
 - Feedback table still NOT updated (writes cancelled at approval twice this session). Part 60 list + new: run A-E tickets; BUG follow-up "/api/auth/otp/verify doesn't check phone belongs to userId"; FEATURE_IDEA "Indic nav labels still mono (run D excluded nav) - resize to fit sans" if Hitesh confirms gaps were in nav.
-- Branches to delete in GitHub UI (proxy 403 here): fix/bug-batch-090-051-085, fix/offline-tickets-tab-nav, fix/offline-polish, fix/e2e-red-034, fix/offline-tickets, fix/events-copy-a, fix/tickets-b, fix/auth-onboarding-c, fix/i18n-fonts-d (+ fix/artist-nav-e, fix/seed-f after merge).
+- Branches to delete in GitHub UI (proxy 403 here): fix/bug-batch-090-051-085, fix/offline-tickets-tab-nav, fix/offline-polish, fix/e2e-red-034, fix/offline-tickets, fix/events-copy-a, fix/tickets-b, fix/auth-onboarding-c, fix/i18n-fonts-d, fix/artist-nav-e, fix/seed-f.
 ### Human checks (Hitesh, phone)
 - A: home hero city count; /events Upcoming + Past in Pune, then Show all cities; one Indic locale.
 - B (Atul): past ticket no QR; free ticket "Free"; no background scroll behind cancel sheet.
