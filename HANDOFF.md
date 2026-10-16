@@ -10,6 +10,9 @@
 - Run B dispatched: docs/cc-dispatches/cc-prompt-tickets-b.md (past tickets no QR, Rs0 -> "Free", cancel sheet scroll lock).
 - #757 MERGED 16 Oct ~12:00 IST (squash 80866bf, head 1602900, all green first pass): past tickets no QR/"Scan at door" (PDF kept), Rs0 -> "Free" card + cancel sheet, shared src/lib/use-scroll-lock.ts in ConfirmDialog (all confirm dialogs). T2: ticket-qr.spec expects no QR on past (chat-reviewed). Branch fix/tickets-b -> Hitesh to delete.
 - Run C dispatched: docs/cc-dispatches/cc-prompt-auth-onboarding-c.md (valid username suggestions; signup auto sign-in, review the mechanism closely; skip Verify phone when verified). "No account found -> create" left out (Hitesh undecided).
+- #758 MERGED 16 Oct ~13:30 IST (squash 62b0627, head 254bf43, green first pass). New NextAuth provider `signup-otp` (src/lib/auth.ts): user by id, needs phone + isVerified=false + not suspended, phone from DB, verifyOtp(SIGNUP_VERIFY) (expiry/attempts/single-use), then isVerified + session. Chat reviewed; Hitesh told. Username suggestions filtered through the submit validator (src/lib/username-suggestions.ts). WelcomeSequence skips step 2 when verified. T2: registration.spec + helpers/auth (no /login hop). Branch fix/auth-onboarding-c -> Hitesh to delete.
+- FOLLOW-UP TICKET (log as BUG when Feedback writes work): /api/auth/otp/verify doesn't check the phone belongs to userId (pre-existing; lets a code from one phone mark another unverified account verified; no sign-in).
+- Run D dispatched: docs/cc-dispatches/cc-prompt-i18n-fonts-d.md (Indic :lang mono -> sans; mr/hi four-room names per 14 Oct decision).
 - (was) Next: merge #756 when e2e-preview green on bd59002, then run B (Tickets: past no QR, ₹0 "Free", cancel sheet scroll lock).
 
 ## Part 60 — START HERE (16 Oct 07:00 IST, end of session), qa @ this commit
