@@ -503,12 +503,14 @@ html {
    variable itself becomes the sans stack, so every inline
    fontFamily: "var(--font-mono)" and the Tailwind font-mono class (which
    compiles to var(--font-geist-mono)) follow without touching call sites.
-   html: outranks next/font's class that sets --font-mono on <html>.
+   It sits on html and body with !important to outrank next/font's class
+   on <html> and the design-token runtime style's
+   body{--font-mono: ... !important} (design-tokens.ts).
    Former mono labels keep tabular digits so counts and prices don't jump.
    e2e/indic-mono-font.spec.ts checks it; English keeps the mono font. */
-html:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) {
-  --font-mono: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif;
-  --font-geist-mono: var(--font-mono);
+:is(html, body):is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) {
+  --font-mono: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif !important;
+  --font-geist-mono: var(--font-mono) !important;
 }
 :is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="--font-mono"], .font-mono) {
   font-variant-numeric: tabular-nums;
