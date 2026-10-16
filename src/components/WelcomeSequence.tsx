@@ -169,7 +169,9 @@ export default function WelcomeSequence() {
             <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 'var(--afa-space-28px)' }}>
               {tr.welcomeSequence.step1Subtitle}
             </p>
-            <Button variant="primary" onClick={() => setStep(2)}>
+            {/* Run C item 3 - an already-verified phone (sign-up verifies
+                it) skips the Verify phone step entirely. */}
+            <Button variant="primary" onClick={() => setStep(user.isVerified ? 3 : 2)}>
               {tr.welcomeSequence.getStartedButton}
             </Button>
           </>
