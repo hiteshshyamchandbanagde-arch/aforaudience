@@ -8,10 +8,7 @@ import { useRuleViewport } from "./helpers/viewports";
  * 1. Mono labels in Indic locales: the mono font has no Devanagari, so on
  *    Hitesh's Marathi phone the fallback was set on the mono grid and labels
  *    read with double-width gaps. In an Indic locale globals.css turns the
- *    mono variable into the sans stack; English keeps the mono font. Both
- *    ways a label picks the mono font are checked: inline
- *    fontFamily: "var(--font-mono)" (how the homepage labels do it) and the
- *    Tailwind font-mono class.
+ *    mono variable into the sans stack; English keeps the mono font.
  * 2. Marathi and Hindi four-room names (Hitesh decision, 14 Oct).
  *
  * Expected strings are literals on purpose, not imported from the
@@ -61,18 +58,19 @@ async function families(el: Locator) {
   });
 }
 
-/** Adds a label using the Tailwind font-mono class and one using the inline var. */
+/**
+ * Adds a label using the inline var, the way every mono label in src/ does.
+ * No component uses the Tailwind font-mono class, so Tailwind leaves the
+ * utility out of the built CSS and there is nothing to probe; globals.css
+ * remaps its variable (--font-geist-mono) too, for when one does.
+ */
 async function addProbeLabels(page: Page) {
   await page.evaluate(() => {
-    const tw = document.createElement("span");
-    tw.className = "font-mono";
-    tw.dataset.testid = "probe-tw-mono";
-    tw.textContent = "चार";
     const inline = document.createElement("span");
     inline.style.fontFamily = "var(--font-mono)";
     inline.dataset.testid = "probe-inline-mono";
     inline.textContent = "चार";
-    document.querySelector("main")?.append(tw, inline);
+    document.querySelector("main")?.append(inline);
   });
 }
 
@@ -96,7 +94,6 @@ for (const locale of ["mr", "hi"]) {
 
     await addProbeLabels(page);
     expect((await families(page.getByTestId("probe-inline-mono"))).el, "inline var(--font-mono)").toBe(f.sans);
-    expect((await families(page.getByTestId("probe-tw-mono"))).el, "Tailwind font-mono").toBe(f.sans);
   });
 }
 
