@@ -1,3 +1,38 @@
+## Part 60 — START HERE (16 Oct 07:00 IST, end of session), qa @ this commit
+
+Supersedes 56-59 as entry point (they stay as detail). GOAL unchanged: Pune launch; Phase 1 finish QA, Phase 2 production after QA.
+
+### State
+- Merged this session: #753 (BUG-2608-090 no-cut line -> Total Revenue; BUG-2609-051 Direct payouts effective state + "Expired on" note; BUG-2609-085 spec only), #754 (BUG-2610-001 offline My Tickets via tab tap: SW CACHE_URL shell), #755 (offline.html "Show my saved tickets", top bars hide Sign in/up offline, offline OTP/password message, OfflineBanner translated "You're offline"; CACHE_VERSION v5). No open PRs. No run without Hitesh's "go".
+- CI: nightlies 15 Oct x2 GREEN. 14 Oct 15:13 IST nightly red = only BUG-2610-033 desktop shots (pre-quarantine). BUG-2610-033 QUARANTINED (Rule 4) 14 Oct: desktop screenshot asserts only in city-picker-loading:57 + use-my-location:118 (annotation fixme); mobile shots + other asserts live. Root cause open (sub-pixel clip / desktop font raster).
+- Gotchas: CC autopilot bot pushes leave "Design Token Check" action_required -> POST actions/runs/{id}/approve. Container may be reclaimed: clone with add_repo (push) then git clone --depth 1. Branches left on origin (proxy 403 on delete): fix/bug-batch-090-051-085, fix/offline-tickets-tab-nav, fix/offline-polish, fix/e2e-red-034, fix/offline-tickets.
+- Use send_later check-ins after every dispatch (a finished run sat unreviewed 3.5 h on 14 Oct).
+
+### FEEDBACK (QA DB) - NOT UPDATED; every execute_sql write this session was cancelled at approval. Apply first (ask Hitesh to approve):
+- BUILD_COMPLETE: BUG-2608-090, BUG-2609-051, BUG-2609-085 (#753); BUG-2610-001 (#754+#755). BUG-2607-101 BUILD_COMPLETE note "superseded: per-artist override buttons removed; card states declared terms". BUG-2610-033 REOPENED note "quarantined 14 Oct Rule 4". GEN-2610-008 append payments/tax summary (Part 56). BUG-2608-055 propose REJECTED (stale vs 530+/0 green). Log the follow-up batch items below as BUG/FEATURE_IDEA rows (CodeCounter displayIds).
+
+### Hitesh phone pass (13-14 Oct) results
+- PASS: 1-2 offline (retest of #755 pending), 3 cancel sheet, 5 bubble, 6 Marathi persists, 7 city chip / use-my-location / "No shows in Mumbai yet", 8 applications order + CLOSED + half stars, 9 poster (QR bottom-right; confirm not clipped). 4 banners untestable on phone (signup fills name+phone) -> e2e covers.
+- OPEN (Hitesh): #755 offline retest; 10 artist dashboard hi/mr read; 11-12 Omkar (Check approval status, applications terms, hi/mr); 13-14 Vinayak (Sales cards, chart axis/tooltip, hi/mr); 15-16 admin (Direct payouts expired note, Revenue tables 390).
+
+### DECIDED (Hitesh 14 Oct) - not built
+- mr/hi four-room names: House प्रेक्षागृह, Stage रंगमंच, Booth सूत्रधार कक्ष, Room दालन (mr) / कक्ष (hi).
+- Hero city count dynamic: cities with >=1 upcoming APPROVED show; >=2 "Live, right now — {n} cities and counting" (digits); 1 "Live, right now in {city}"; 0 hidden; server-side, cached minutes.
+- Past tickets: drop QR + "Scan at door", keep Download PDF.
+
+### FOLLOW-UP BATCH (on "go"; split into small dispatches)
+- A Events/copy: zero-count eyebrow "Showing 0 events" (BUG-2610-020 regression); duplicate count ("N events happening near you" + "Showing N events"); "near you" wrong after Show all cities; Past empty "No events in X" vs Upcoming "No shows in X yet"; hero dynamic city count.
+- B Tickets: past tickets no QR; ₹0 ticket shows "Free"; cancel sheet locks background scroll.
+- C Auth/onboarding: username suggestions invalid ("tq" <3 chars, "tq.matinee" dot); signup -> auto sign-in (no 2nd OTP); onboarding skips "Verify your phone" when verified; (Q) "No account found" -> offer create account prefilled.
+- D i18n/fonts: Indic locales mono-font labels -> sans (double-width spaces); four-room names mr/hi.
+- E Artist nav: "My Events" tab opens Browse -> rename (Find gigs) + add Overview item to artist bar.
+- F Seed: qa-demo-booking-full-atul-1 seats {} (no tier/qty), createdAt 10 Sep after 6 Sep check-in -> fix scripts/qa-seed.ts + 1-row QA update (show Hitesh rows first); Latin lorem event descriptions -> realistic copy.
+- Open Qs to Hitesh: role users land on dashboard after sign-in?; genre chip unstyled vs style pills intended?; poster empty middle intended?
+
+### Payments / tax (unchanged, nothing built) - Part 56
+- Cancellation code today: >=14 days full minus ₹20 fee, 7-14 days 50%, <7 none. Hitesh 11 Oct: >=15 days full. Change waits on R4-R8 confirm. Also pending: ₹20 fee GST-exclusive?, who bears Razorpay ~2%, CA PDF to send (docs/finance/AFA-GST-TCS-TDS-CA-Questions.pdf).
+- Still outstanding: Razorpay + Google Maps billing check (session-start item 1). claude.ai Project custom instructions still hold the 22 Sep tint-token text -> Hitesh to replace with pointer to HANDOFF.md.
+
 ## Part 59 (14 Oct 17:00 IST), qa @ this commit
 - Merged #755 (qa ecbc5e2): offline.html "Show my saved tickets" + outline Try again (CACHE_VERSION v5); top bars hide Sign in/up offline (useIsOffline); offline OTP/password message (isOfflineFailure, 12 locales); OfflineBanner translated, plain "You're offline". Amends: nudge-banners spec -> data-afa-network-banner (T2, copy change); BUG-2610-033 Rule 4 QUARANTINE: desktop screenshot assertions only in city-picker-loading:57 + use-my-location:118 (annotation fixme; mobile shots + all other asserts live). Recurred 11 Oct nightly + 2 PR runs 14 Oct. Ticket BUG-2610-033 -> reopen (Feedback write pending).
 - Gotcha: pushes by the CC autopilot bot leave Design Token Check "action_required" -> chat approves via POST actions/runs/{id}/approve.
