@@ -1055,6 +1055,7 @@ const ta: Dictionary = {
     myEvents: "என் நிகழ்வுகள்",
     overview: "மேலோட்டம்",
     findGigs: "கிக் தேடு",
+    profileTab: "சுயவிவரம் திருத்து",
     createEvent: "நிகழ்வை உருவாக்கு",
     create: "உருவாக்கு",
     tours: "டூர்கள்",
