@@ -228,7 +228,9 @@ export default function MobileTabBar() {
     // a different page from the primary bar's own "Profile" (/profile,
     // the account page). "Edit Profile" matches ROLE_SECTIONS' own label
     // for this exact item, not a new label invented for this bar.
-    { id: 'edit-profile', href: '/dashboard/artist/edit', label: chrome.editProfile, Icon: roleIcon('user'), nav: 'replace' },
+    // Run E: with 4 items, editProfile wrapped in de/fr/ml; profileTab is
+    // the same label, shortened where it has to be.
+    { id: 'edit-profile', href: '/dashboard/artist/edit', label: chrome.profileTab, Icon: roleIcon('user'), nav: 'replace' },
     { id: 'inquiries', href: '/dashboard/artist/corporate-inquiries', label: chrome.inquiries, Icon: roleIcon('briefcase'), nav: 'replace' },
   ]
 
