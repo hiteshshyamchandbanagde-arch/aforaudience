@@ -7,7 +7,8 @@ import { Page, expect } from "@playwright/test";
  * programmatically instead of by eye. Not a bypass: this is the actual
  * verification code the app itself generated and would accept from anyone.
  *
- * Ends on /login?registered=true, matching real user behavior.
+ * Ends signed in (run C item 2: the sign-up code signs the new account in,
+ * no second code at /login), matching real user behavior.
  *
  * Every call generates a unique phone/email/username so repeated test runs
  * never collide with each other or leave stale duplicate-detection errors.
@@ -54,9 +55,9 @@ export async function registerTestAudience(page: Page) {
   await otpInput.fill(code);
   await page.getByRole("button", { name: /verify/i }).click();
 
-  // Next.js appends a trailing slash before the query string here
-  // ("/login/?registered=true", confirmed via a real QA run) - allow it.
-  await expect(page).toHaveURL(/\/login\/?\?registered=true/, { timeout: 15_000 });
+  // Run C item 2 - verifying the sign-up code signs the account in on the
+  // same step: no /login, no second code.
+  await expectSignedIn(page);
 
   return { username, email, phone: `+91${phoneDigits}`, password, fullName };
 }
