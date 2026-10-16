@@ -6,7 +6,9 @@
 - Tests: e2e/events-count-copy.spec.ts (4, 6 baselines), e2e/home-hero-live-cities.spec.ts @needs-db, scripts/live-cities.test.ts. T2 changes reviewed by chat (copy change, justified): plurals.spec, homepage-hindi.spec (+ hi-eyebrow baselines). Gap: Hindi letter-spacing check on the "near you" form dropped (now city-only) -> follow-up.
 - Human check: home hero city count; /events Upcoming + Past in Pune, then Show all cities; one Indic locale.
 - Still blocked: branch deletes (API + git push 403 on delete) -> Hitesh deletes the 5 merged branches (#751-#755) in GitHub UI. Feedback UPDATE cancelled at approval again (Part 60 list unchanged).
-- Next: merge #756 when e2e-preview green on bd59002, then run B (Tickets: past no QR, ₹0 "Free", cancel sheet scroll lock).
+- #756 MERGED 16 Oct 10:27 IST (squash 241f700, pinned head 22ede92). Amend run 38846429135: only events-zero-city-390 baseline refreshed (T2, chat-reviewed: box 24px higher because the zero-count line is gone; no code change). Bot push left Design Token Check action_required -> approved. Branch fix/events-copy-a not deletable here (proxy 403) -> Hitesh.
+- Run B dispatched: docs/cc-dispatches/cc-prompt-tickets-b.md (past tickets no QR, Rs0 -> "Free", cancel sheet scroll lock).
+- (was) Next: merge #756 when e2e-preview green on bd59002, then run B (Tickets: past no QR, ₹0 "Free", cancel sheet scroll lock).
 
 ## Part 60 — START HERE (16 Oct 07:00 IST, end of session), qa @ this commit
 
