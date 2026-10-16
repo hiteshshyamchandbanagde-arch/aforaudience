@@ -1064,6 +1064,7 @@ const de: Dictionary = {
     myEvents: "Meine Events",
     overview: "Übersicht",
     findGigs: "Gigs finden",
+    profileTab: "Profil",
     createEvent: "Event erstellen",
     create: "Erstellen",
     tours: "Touren",
