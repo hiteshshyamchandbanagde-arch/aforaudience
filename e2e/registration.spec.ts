@@ -50,8 +50,7 @@ test("new audience member registers, verifies (signed in by the code), passes th
   isMobile,
 }) => {
   await test.step("Register and verify the phone with the QA dev OTP: signed in, no second code", async () => {
-    const created = await registerTestAudience(page);
-    registeredEmails.push(created.email);
+    await registerTestAudience(page, (created) => registeredEmails.push(created.email));
   });
 
   await test.step("Welcome sequence: shown once, every step has a way through", async () => {
