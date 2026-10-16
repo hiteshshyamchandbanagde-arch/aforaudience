@@ -1054,6 +1054,7 @@ const hi: Dictionary = {
     myEvents: "मेरे इवेंट्स",
     overview: "अवलोकन",
     findGigs: "गिग खोजें",
+    profileTab: "प्रोफ़ाइल एडिट",
     createEvent: "इवेंट बनाएं",
     create: "बनाएं",
     tours: "टूर",
