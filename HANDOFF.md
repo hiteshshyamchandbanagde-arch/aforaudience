@@ -15,6 +15,8 @@
 - Run D dispatched: docs/cc-dispatches/cc-prompt-i18n-fonts-d.md (Indic :lang mono -> sans; mr/hi four-room names per 14 Oct decision).
 - #759 MERGED 16 Oct ~16:45 IST (squash ddbfd21, head 517130b). First head b6c90d3 RED (6): sans wider than mono fallback -> ml "Saved" tab wrap, mr nav shift, hi artist role bar; plus new-spec 1px flakes; gu language-rollout = pre-existing flake (passed on retry). Amend run 38880790277: swap excluded inside `nav` (tab bars + desktop header keep mono vars), flaky shots pinned to whole pixels / eyebrow checked on computed metrics (no thresholds). OPEN Q Hitesh: were the gaps he saw in nav labels? If so they remain -> follow-up (resize nav labels to fit sans). Branch fix/i18n-fonts-d -> Hitesh to delete.
 - Run E dispatched: docs/cc-dispatches/cc-prompt-artist-nav-e.md (artist bar "My Events" -> "Find gigs", own key; add Overview first item; fit at 390 all locales).
+- Run E PUSHED (fix/artist-nav-e @ 565e187), PR #760 open, diff reviewed OK (Overview first + active on /dashboard/artist; findGigs own key; profileTab short label for de/fr/ml; fit helper unchanged logic; T2 dashboard-i18n-artist hi labels/baselines).
+- Run F dispatched: docs/cc-dispatches/cc-prompt-seed-f.md - seed script fix + test, CODE ONLY; QA rows (booking qa-demo-booking-full-atul-1 seats {} + createdAt after checkedInAt; 3/30 events lorem) prepared as before/after + SQL, applied by chat ONLY after Hitesh OK.
 - (was) Next: merge #756 when e2e-preview green on bd59002, then run B (Tickets: past no QR, ₹0 "Free", cancel sheet scroll lock).
 
 ## Part 60 — START HERE (16 Oct 07:00 IST, end of session), qa @ this commit
