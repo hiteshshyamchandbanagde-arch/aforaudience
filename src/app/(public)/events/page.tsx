@@ -369,7 +369,8 @@ function EventsPageContent() {
   const activeCity = selectedCity !== "All Cities" ? selectedCity : null
   // BUG-2610-020 - "Try adjusting your filters" only when a search or a
   // filter is actually applied; a city with no events and nothing else
-  // set reads "No shows in Mumbai yet" with "Show all cities".
+  // set reads "No shows in Mumbai yet" with "Show all cities". The Past
+  // tab says "No past shows in Mumbai" (events copy A).
   const filterApplied = activeQuery !== "" || selectedType !== null || priceFilter !== "All"
   const emptyNamedTitle =
     activeQuery && activeCity
@@ -377,7 +378,7 @@ function EventsPageContent() {
       : activeQuery
       ? tr.eventsPage.emptySearch.replace("{query}", activeQuery)
       : activeCity
-      ? (filterApplied || tab === "past" ? tr.eventsPage.emptyInCity : tr.eventsPage.emptyCityYet).replace("{city}", activeCity)
+      ? (tab === "past" ? tr.eventsPage.emptyPastInCity : filterApplied ? tr.eventsPage.emptyInCity : tr.eventsPage.emptyCityYet).replace("{city}", activeCity)
       : null
   const emptySub = loadFailed
     ? tr.eventsPage.loadErrorSub

@@ -149,6 +149,7 @@ const te: Dictionary = {
     emptySearchAllCities: "అన్ని నగరాల్లో వెతకండి",
     emptyShowAllCities: "అన్ని నగరాలు చూపించు",
     emptyCityYet: "{city}లో ఇంకా షోలు లేవు",
+    emptyPastInCity: "{city}లో గత షోలు లేవు",
     artistBrowseEmpty: "ఇంకా ప్రచురించిన ఈవెంట్‌లు లేవు. త్వరలో మళ్లీ చూడండి!",
     artistBrowseEmptyInCity: "{city}లో ఇంకా ప్రచురించిన ఈవెంట్‌లు లేవు",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.

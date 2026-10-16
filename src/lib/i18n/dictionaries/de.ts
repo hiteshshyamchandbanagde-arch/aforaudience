@@ -158,6 +158,7 @@ const de: Dictionary = {
     emptySearchAllCities: "In allen Städten suchen",
     emptyShowAllCities: "Alle Städte anzeigen",
     emptyCityYet: "Noch keine Shows in {city}",
+    emptyPastInCity: "Keine vergangenen Shows in {city}",
     artistBrowseEmpty: "Noch keine veröffentlichten Events. Schau bald wieder vorbei!",
     artistBrowseEmptyInCity: "Noch keine veröffentlichten Events in {city}",
     // BUG-2609-079 - a tiered event's card: its cheapest tier.

@@ -154,6 +154,8 @@ const en = {
     emptyShowAllCities: "Show all cities",
     // BUG-2610-020 - a city with no events and no filter applied.
     emptyCityYet: "No shows in {city} yet",
+    // Events copy A - the Past tab with a city picked and nothing in it.
+    emptyPastInCity: "No past shows in {city}",
     // BUG-2610-020 - the artist dashboard's Browse Events empty state.
     artistBrowseEmpty: "No published events yet. Check back soon!",
     artistBrowseEmptyInCity: "No published events in {city} yet",
