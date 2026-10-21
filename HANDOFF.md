@@ -1,3 +1,27 @@
+## Part 63 — START HERE (21 Oct 12:25 IST, chat), qa @ this commit
+Supersedes 62 as entry point (62 = detail of the 16 Oct six-run batch, all merged #756-#761). GOAL unchanged: Pune launch; Phase 1 finish QA, Phase 2 production after QA. No open PRs. No run without Hitesh's "go".
+### FIRST: red nightly (T3)
+- E2E (QA) schedule 21 Oct 06:07 UTC, run 39553498341: 589 passed, 4 failed, 1 flaky. Previous 6 nightlies (17-20 Oct) GREEN; no code change since 16 Oct (qa 3337f67) -> time-dependent tests, not a product change (unconfirmed).
+  - e2e/offline-tickets.spec.ts:148 [BUG-2610-001] (390 + 1440): toHaveScreenshot offline-ticket-card-{390,1440}, card "Mixed Bag Comedy Lineup" (Atul, qa-demo-booking-full-atul-4, event 21 Dec = exactly 2 months from 21 Oct), 461 px / 1%.
+  - e2e/unfinished-checkout.spec.ts:54 [BUG-2610-018] @needs-db (390 + 1440): toHaveScreenshot unfinished-checkout-{390,1440} ([data-afa-unfinished-checkouts]), 78 px / 1%.
+  - mobile language-rollout.spec.ts:96 bn (lang stayed "en", 10 s timeout) = known intermittent flake (gu variant seen 16 Oct).
+  - Hypothesis: relative-time text ("in 2 months" / "N h left") inside the shots. Proposed fix (awaiting go): small CC dispatch on fix/e2e-clock-ticket-shots - freeze the clock (page.clock.setFixedTime / install) in both specs, keep pixel shots, no threshold change; if the diff isn't time-related, fix code. If the afternoon nightly is also red -> Rule 4: quarantine both with test.fixme + Feedback ticket in the same PR.
+### Waiting on Hitesh
+- QA DATA FIX (needs his OK, NOT applied; verified 19 Oct still {}): 21 UPDATEs in one transaction. Booking qa-demo-booking-full-atul-1 seats {} -> {"General":1}, createdAt 2026-09-10 -> 2026-09-01 01:45:03.35 (event 6 Sep). 20 events (qa-demo-event-full-1..10, qa-general-event-01..10) faker Latin -> copy from scripts/qa-seed-data.ts: demo by id (DEMO_EVENT_DESCRIPTIONS), general by type pool[(n-1) % 2] (GENERAL_EVENT_DESCRIPTIONS; types: 01 OPEN_MIC, 02 POETRY, 03 OPEN_MIC, 04 OPEN_MIC, 05 THEATER, 06 STAND_UP, 07 STAND_UP, 08 LINEUP, 09 LINEUP, 10 POETRY). Regenerate SQL from that file; apply via Supabase execute_sql only after his OK.
+- Phone checks (Human check, T4): A home hero city count + /events Upcoming/Past in Pune + Show all cities + one Indic locale; B (Atul) past ticket no QR, free ticket "Free", no background scroll behind cancel sheet; C fresh-number signup -> signed in, no 2nd code, no Verify phone step, usernames valid; D mr/hi room names + where any double-width gaps still are (nav tab bar / header nav still mono by design of #759 amend -> follow-up resize if so); E (Hrithik) Overview / Find gigs / Edit Profile / Inquiries.
+- Branches to delete in GitHub UI (proxy 403 from chat, API and git push): 11 merged this week (fix/bug-batch-090-051-085, fix/offline-tickets-tab-nav, fix/offline-polish, fix/e2e-red-034, fix/offline-tickets, fix/events-copy-a, fix/tickets-b, fix/auth-onboarding-c, fix/i18n-fonts-d, fix/artist-nav-e, fix/seed-f) + 8 older (feat/dashboard-i18n-6a/6b/6c, fix/uiux-bundle-2/3a/3b/4/5) -> chat to confirm the 8 older are merged before he deletes. Keep main, qa.
+- Feedback table: NOT updated (execute_sql writes cancelled at approval 16 Oct x2). Apply first if he approves: Part 60 list (BUG-2608-090/-2609-051/-2609-085/-2607-101 BUILD_COMPLETE, BUG-2610-033 REOPENED, GEN-2610-008 append, BUG-2608-055 propose REJECTED) + this week's runs A-F as BUILD_COMPLETE rows + new BUG "/api/auth/otp/verify doesn't check phone belongs to userId" + nightly-flake ticket if quarantined.
+- Unchanged from Part 60: offline retest; phone items 10-16; payments (R4-R8; cancellation code still >=14 days full vs his 15; GST on Rs20 fee; who bears Razorpay ~2%; then CA PDF docs/finance/AFA-GST-TCS-TDS-CA-Questions.pdf); open Qs (role users land on dashboard?; genre chip unstyled intended?; poster empty middle intended?; "No account found" -> offer create?); Razorpay + Google Maps billing check; replace claude.ai Project instructions (still the 22 Sep tint-token text) with a pointer to HANDOFF.md.
+### Ready to build on "go"
+- Red-nightly fix above (first).
+- Security: /api/auth/otp/verify must check the phone belongs to userId (pre-existing; a code from one phone can mark another unverified account verified; no sign-in).
+- NEW LOW bugs: BUG-2609-064 hydration warning (layout splash), BUG-2609-069 Seat Map prompt(), BUG-2607-104 duplicate offline toast, BUG-2609-076 polish bundle.
+### Gotchas
+- Session start: add_repo (push) -> git clone --depth 1; no PAT needed (gh works through the session proxy). Branch delete is blocked (403) on every route.
+- Autopilot: dispatch file on qa -> POST actions/workflows/cc-autopilot.yml/dispatches {ref: qa, inputs.dispatch}; status comes back as check-run annotations ("RESULT:" line, may be truncated). Bot pushes leave Design Token Check action_required -> POST actions/runs/{id}/approve.
+- e2e queue: group e2e-qa-shared-fixtures keeps ONE pending run; a third cancels the pending one (incl. after a docs push to qa). Re-run with POST actions/runs/{id}/rerun; never count a green run on an older head.
+- Use send_later check-ins after every dispatch.
+
 ## Part 62 — START HERE (16 Oct 18:30 IST, chat), qa @ this commit
 Supersedes 60-61 as entry point. Six-run follow-up batch (Hitesh "go" 07:29) built.
 ### State
