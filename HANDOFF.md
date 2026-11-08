@@ -22,6 +22,8 @@ Supersedes 66 as entry point (66 = legal pages live on prod, #762-#765 merged).
 - D2 = PR #769 (D2+D2b+D2c; status file removed from branch, kept in PR body). Needs BLOB_READ_WRITE_TOKEN env for QR upload. Merge when green, then dispatch D3 (docs/cc-dispatches/cc-prompt-artist-direct-pay-d3.md: PAID organiser->artist, BUY_IN artist->organiser, reuse D2 enum/panel).
 - #769 D2 MERGED (qa 0e2c744; e2e 632 pass; D2d fixed raw-button design-token failure).
 - D3 = PR #770 (feat/artist-direct-pay-d3); migration 20261110120000_add_performance_direct_pay APPLIED to QA (additive). First e2e ran before migration -> 12 fails expected; rerun requested. Next: D4 legal 'Direct payments' + 'Pay at entry' text (qa + prod port), then S1b wave flags, nightly x3, S3 audit, S5 clean prod DB.
+- #771 D4 legal (pay at entry + direct payments) MERGED (qa a27b88b; e2e 636 pass). P2 prod port dispatched (fix/legal-prod-port-p2 off main; terms + refund only) -> PR to main, needs Hitesh OK.
+- D3 PR #770 (D3b fixed hi/mr organiser i18n: only UPI terms) e2e running.
 - Razorpay must stay switchable (Hitesh 17:00): D1 dispatch has explicit rule.
 - S7 Support AFA (Hitesh 17:02, agreed): voluntary contribution page via AFA's own Razorpay (not aggregation), separate switch supportAfaEnabled default OFF, wording 'Support AforAudience — voluntary contribution, not a donation, not tax-deductible, non-refundable', fixed amounts 49/99/249 + custom, optional Supporter badge. CA Q: GST on contributions + before registration. Build after D1-D4.
 - Hitesh non-code: Shops & Establishments + PTEC registrations (CA Q19). GST not needed for free-only.
