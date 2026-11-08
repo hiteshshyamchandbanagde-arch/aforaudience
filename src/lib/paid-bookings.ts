@@ -52,3 +52,26 @@ export class PaidBookingsDisabledError extends Error {
 export function assertPaidAllowed(amountPaise: number, enabled: boolean): void {
   if (paidBookingBlock(amountPaise, enabled)) throw new PaidBookingsDisabledError()
 }
+
+/**
+ * S1a - does an event create/edit body ask for paid tickets? True when the
+ * event is not marked free (isFree omitted counts as "not saying") and a
+ * flat ticketPrice or any section tier price is above 0. Only values the
+ * body actually sends are checked, so a publish-only PATCH is unaffected.
+ */
+export function requestsPaidTickets(body: {
+  isFree?: unknown
+  ticketPrice?: unknown
+  ticketTiers?: unknown
+}): boolean {
+  if (body.isFree === true) return false
+  const positive = (v: unknown) =>
+    v !== undefined && v !== null && v !== "" && Number.isFinite(Number(v)) && Number(v) > 0
+  if (positive(body.ticketPrice)) return true
+  if (Array.isArray(body.ticketTiers)) {
+    return body.ticketTiers.some((t: unknown) =>
+      positive(t && typeof t === "object" ? (t as { price?: unknown }).price : undefined)
+    )
+  }
+  return false
+}

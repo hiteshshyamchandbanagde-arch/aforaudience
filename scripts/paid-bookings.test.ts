@@ -10,6 +10,7 @@ import {
   assertPaidAllowed,
   isPaidBookingsEnabled,
   paidBookingBlock,
+  requestsPaidTickets,
 } from '../src/lib/paid-bookings'
 
 let passed = 0
@@ -59,6 +60,23 @@ test('[S1a] choke-point assert throws a typed error when OFF', () => {
     () => assertPaidAllowed(100, false),
     (e: unknown) => e instanceof PaidBookingsDisabledError && e.code === PAID_BOOKINGS_DISABLED
   )
+})
+
+test('[S1a] event body with a flat ticket price > 0 asks for paid tickets', () => {
+  assert.equal(requestsPaidTickets({ isFree: false, ticketPrice: '299' }), true)
+  assert.equal(requestsPaidTickets({ ticketPrice: 1 }), true)
+})
+
+test('[S1a] event body with any priced section asks for paid tickets', () => {
+  assert.equal(requestsPaidTickets({ ticketTiers: [{ price: 0 }, { price: '150' }] }), true)
+})
+
+test('[S1a] free event, zero prices, or no prices sent: not paid', () => {
+  assert.equal(requestsPaidTickets({ isFree: true, ticketPrice: '299' }), false)
+  assert.equal(requestsPaidTickets({ isFree: false, ticketPrice: '0' }), false)
+  assert.equal(requestsPaidTickets({ ticketPrice: '' }), false)
+  assert.equal(requestsPaidTickets({ ticketTiers: [{ price: 0 }, { price: '' }, null] }), false)
+  assert.equal(requestsPaidTickets({}), false)
 })
 
 console.log(`\n${passed} passed`)
