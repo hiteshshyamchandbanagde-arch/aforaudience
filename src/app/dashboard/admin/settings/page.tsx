@@ -452,8 +452,8 @@ export default function AdminSettingsPage() {
       setInitialPaidBookingsEnabled(on)
       setPaidBookingsEnabledState(on)
       showToast('Saved.', 'success')
-    } catch (err: any) {
-      showToast(err.message || 'Save failed', 'error')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
     } finally {
       setPaidBookingsSaving(false)
     }
@@ -606,7 +606,7 @@ export default function AdminSettingsPage() {
             Paid bookings
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
-            OFF = free-only launch: paid tickets can't be created or booked, and paid events show "Booking opens soon". Enforced on the server. Free events are never affected.
+            OFF = free-only launch: paid tickets can&apos;t be created or booked, and paid events show &ldquo;Booking opens soon&rdquo;. Enforced on the server. Free events are never affected.
           </p>
           <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', cursor: 'pointer' }}>
             <input
