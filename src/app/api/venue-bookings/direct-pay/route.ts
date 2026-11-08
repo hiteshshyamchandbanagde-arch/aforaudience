@@ -50,7 +50,7 @@ export async function GET() {
           id: true,
           name: true,
           city: true,
-          owner: { select: { upiId: true, user: { select: { name: true } } } },
+          owner: { select: { upiId: true, upiQrUrl: true, user: { select: { name: true } } } },
         },
       },
       organiser: { select: { orgName: true } },
@@ -81,6 +81,7 @@ export async function GET() {
         name: b.venue.owner.user.name || b.venue.name,
         venueName: b.venue.name,
         upiId: b.venue.owner.upiId,
+        upiQrUrl: b.venue.owner.upiQrUrl,
       },
     })
     return NextResponse.json({ asOrganiser: asOrganiser.map(shape), asOwner: asOwner.map(shape) })
