@@ -140,7 +140,8 @@ test("[D1] pay-at-entry: reserve 2 seats, ticket says pay at entry, check-in = A
   } finally {
     if (eventId) {
       await withQaDb(async (db) => {
-        await db.query(`DELETE FROM "Notification" WHERE link LIKE $1`, [`%${eventId}%`]).catch(() => undefined);
+        // No Notification table on QA: a failing DELETE there would abort this
+        // transaction and roll the whole cleanup back.
         await db.query(`DELETE FROM "Booking" WHERE "eventId" = $1`, [eventId]);
         await db.query(`DELETE FROM "TicketTier" WHERE "eventId" = $1`, [eventId]);
         await db.query(`DELETE FROM "Event" WHERE id = $1`, [eventId]);
