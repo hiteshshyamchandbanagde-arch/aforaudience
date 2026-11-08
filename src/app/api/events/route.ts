@@ -7,7 +7,8 @@ import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
-import { getPlatformSettings } from '@/lib/platform-settings'
+import { getPlatformSettings, getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 import { recomputeTourStatus } from '@/lib/tours'
 import { formatDate } from '@/lib/format-date'
@@ -205,6 +206,14 @@ export async function POST(req: Request) {
       if (!Number.isFinite(mp) || !Number.isInteger(mp) || mp < 1 || mp > MAX_PERFORMERS) {
         return NextResponse.json({ error: `Max performers must be a whole number between 1 and ${MAX_PERFORMERS}.` }, { status: 400 })
       }
+    }
+    // S1a - "paid bookings" master switch: while it is off, refuse any
+    // ticket price above 0 on the server (UI hiding is not enough).
+    if (requestsPaidTickets({ isFree, ticketPrice, ticketTiers }) && !(await getPaidBookingsEnabled())) {
+      return NextResponse.json(
+        { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED },
+        { status: 403 }
+      )
     }
     if (!isFree && ticketPrice !== undefined && ticketPrice !== null && ticketPrice !== '') {
       const price = Number(ticketPrice)
