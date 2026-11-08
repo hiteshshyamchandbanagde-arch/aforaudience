@@ -25,6 +25,11 @@ export const TAX_DEDUCTION_PLACEHOLDER = 0
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
+// Day thresholds, exported so /refund-policy (and its e2e spec) state the
+// same tiers the refund API applies.
+export const REFUND_FULL_MIN_DAYS = 14
+export const REFUND_HALF_MIN_DAYS = 7
+
 export type RefundTier = 'past' | 'free' | '14plus' | '50pct' | 'under7'
 
 export type RefundPreview = {
@@ -60,10 +65,10 @@ export function computeRefund(
   const daysBefore = (eventStart.getTime() - now.getTime()) / MS_PER_DAY
   if (daysBefore <= 0) return { ...base, tier: 'past', refund: 0 }
   if (paid <= 0) return { ...base, tier: 'free', refund: 0 }
-  if (daysBefore >= 14) {
+  if (daysBefore >= REFUND_FULL_MIN_DAYS) {
     const refund = Math.max(0, paid - bookingFee - TAX_DEDUCTION_PLACEHOLDER)
     return { ...base, tier: '14plus', refund, feeWithheld: bookingFee > 0 }
   }
-  if (daysBefore >= 7) return { ...base, tier: '50pct', refund: paid * 0.5 }
+  if (daysBefore >= REFUND_HALF_MIN_DAYS) return { ...base, tier: '50pct', refund: paid * 0.5 }
   return { ...base, tier: 'under7', refund: 0 }
 }
