@@ -2131,6 +2131,11 @@ const kn: Dictionary = {
     upiSaved: "UPI ID ಉಳಿಸಲಾಗಿದೆ",
     acceptCashOnly: "ನಗದು ಮಾತ್ರ ಎಂದು ಸ್ವೀಕರಿಸಿ",
     upiRequired: "ಮೊದಲು ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ನಿಮ್ಮ UPI ID ಸೇರಿಸಿ, ಅಥವಾ ನಗದು ಮಾತ್ರ ಎಂದು ಸ್ವೀಕರಿಸಿ.",
+    upiQrLabel: "UPI QR ಕೋಡ್ (ಐಚ್ಛಿಕ)",
+    upiQrUpload: "QR ಚಿತ್ರವನ್ನು ಅಪ್\u200cಲೋಡ್ ಮಾಡಿ",
+    upiQrRemove: "QR ತೆಗೆದುಹಾಕಿ",
+    // {payee}: venue name.
+    upiQrAlt: "{payee} ಗಾಗಿ UPI QR ಕೋಡ್",
   },
 }
 
