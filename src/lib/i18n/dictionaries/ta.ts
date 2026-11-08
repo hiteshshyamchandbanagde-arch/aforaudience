@@ -2137,6 +2137,20 @@ const ta: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "{payee}-க்கான UPI QR குறியீடு",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "நிகழ்ச்சி கட்டணம் · நேரடி பணம்",
+    fee: "நிகழ்ச்சி கட்டணம்",
+    buyIn: "பை-இன்",
+    cashOnly: "ரொக்கம் மட்டும் — UPI ID இல்லை. நேரில் செலுத்துங்கள்.",
+    cancel: "ஸ்லாட்டை ரத்து செய்",
+    decline: "நிராகரி",
+    waitingPayee: "பணம் கிடைத்ததை அவர்கள் உறுதிசெய்யக் காத்திருக்கிறது.",
+    waitingPayer: "அவர்கள் செலுத்தக் காத்திருக்கிறது.",
+    upiSettingLabel: "நேரடி பணத்துக்கான UPI ID",
+    upiSettingHelpArtist: "ஏற்பாட்டாளர்கள் உங்கள் நிகழ்ச்சி கட்டணத்தை இந்த UPI ID-க்கு நேரடியாக செலுத்துவார்கள். AforAudience இந்தப் பணத்தை ஒருபோதும் வசூலிப்பதில்லை.",
+    upiSettingHelpOrganiser: "கலைஞர்கள் ஓபன்-மைக் பை-இன் தொகையை இந்த UPI ID-க்கு நேரடியாக உங்களுக்குச் செலுத்துவார்கள். AforAudience இந்தப் பணத்தை ஒருபோதும் வசூலிப்பதில்லை.",
+  },
 }
 
 export default ta
