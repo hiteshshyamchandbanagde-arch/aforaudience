@@ -2080,6 +2080,19 @@ const gu: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} ના રોજ સમાપ્ત — હાલમાં બંધ.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · પ્રવેશ સમયે {organiser}ને ચૂકવો (રોકડ/UPI)",
+    noCollect: "AforAudience આ ચુકવણી લેતું નથી.",
+    reserveCta: "રિઝર્વ કરો",
+    badge: "પ્રવેશ પર ચુકવણી · ₹{amount}",
+    attended: "હાજર",
+    noShow: "ગેરહાજર",
+    reserved: "રિઝર્વ્ડ",
+    dueAtEntry: "પ્રવેશ પર ચૂકવવાના: ₹{amount}",
+    markNoShow: "ગેરહાજર ચિહ્નિત કરો",
+    checkIn: "ચેક ઇન",
+  },
 }
 
 export default gu
