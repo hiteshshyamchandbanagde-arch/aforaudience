@@ -15,6 +15,8 @@ Supersedes 66 as entry point (66 = legal pages live on prod, #762-#765 merged).
 ### Progress (8 Nov evening)
 - #766 S2 OTP fix MERGED (qa 87d243c; e2e 616 pass). Feedback ticket still to log (S4).
 - #767 S1a paid switch: migration applied to QA + QA row paidBookingsEnabled=true. First e2e: 1 real regression (BUG-2609-051 Direct payouts toggle 390 shot, sub-pixel shift from new card) -> amend 702d450 rounds line heights (product fix, reviewed; autopilot wrote no status file). Merge when green, then dispatch D1.
+- #767 S1a MERGED (qa 33ff91d; e2e 620 pass).
+- D1+D1b (pay at entry + attendance + organiser picker) = PR #768; migration 20261108180000_add_pay_at_entry_attendance APPLIED to QA (18 ev ONLINE / 28 bk ONLINE / 10 ATTENDED). Merge when green, then dispatch D2 (docs/cc-dispatches/cc-prompt-venue-direct-pay-d2.md, written: direct UPI/cash, AWAITING_PAYMENT -> PAID_MARKED -> CONFIRMED, 48 h expiry, fee 0 for direct, owner upiId).
 - Razorpay must stay switchable (Hitesh 17:00): D1 dispatch has explicit rule.
 - S7 Support AFA (Hitesh 17:02, agreed): voluntary contribution page via AFA's own Razorpay (not aggregation), separate switch supportAfaEnabled default OFF, wording 'Support AforAudience — voluntary contribution, not a donation, not tax-deductible, non-refundable', fixed amounts 49/99/249 + custom, optional Supporter badge. CA Q: GST on contributions + before registration. Build after D1-D4.
 - Hitesh non-code: Shops & Establishments + PTEC registrations (CA Q19). GST not needed for free-only.
