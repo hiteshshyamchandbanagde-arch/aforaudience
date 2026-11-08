@@ -2090,6 +2090,14 @@ const mr: Dictionary = {
     dueAtEntry: "प्रवेशावेळी देय: ₹{amount}",
     markNoShow: "आले नाहीत म्हणून नोंदवा",
     checkIn: "चेक इन",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "प्रेक्षक पैसे कसे देतील?",
+    modeFree: "मोफत",
+    modePayAtEntry: "प्रवेशावेळी पेमेंट",
+    modePayAtEntryHelp: "प्रेक्षक AforAudience वर जागा राखून ठेवतात आणि ठिकाणी थेट तुम्हाला पैसे देतात — रोख किंवा UPI. AforAudience हे पेमेंट घेत नाही.",
+    modeOnline: "ऑनलाइन पेमेंट",
+    modeOnlineComingSoon: "लवकरच येत आहे",
+    modeOnlineKept: "ऑनलाइन पेमेंट सध्या थांबवले आहेत. हा इव्हेंट ऑनलाइन पेमेंट मोडमध्येच राहील; बुकिंग घेण्यासाठी प्रवेशावेळी पेमेंट निवडा.",
   },
 }
 
