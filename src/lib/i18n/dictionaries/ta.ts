@@ -2131,6 +2131,11 @@ const ta: Dictionary = {
     upiSaved: "UPI ID சேமிக்கப்பட்டது",
     acceptCashOnly: "ரொக்கம் மட்டும் என ஏற்கவும்",
     upiRequired: "முதலில் சுயவிவரத்தில் உங்கள் UPI ID-ஐச் சேர்க்கவும், அல்லது ரொக்கம் மட்டும் என ஏற்கவும்.",
+    upiQrLabel: "UPI QR குறியீடு (விருப்பத்தேர்வு)",
+    upiQrUpload: "QR படத்தைப் பதிவேற்று",
+    upiQrRemove: "QR-ஐ நீக்கு",
+    // {payee}: venue name.
+    upiQrAlt: "{payee}-க்கான UPI QR குறியீடு",
   },
 }
 
