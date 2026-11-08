@@ -2092,6 +2092,14 @@ const te: Dictionary = {
     dueAtEntry: "ప్రవేశం వద్ద చెల్లించాల్సింది: ₹{amount}",
     markNoShow: "రాలేదని గుర్తించండి",
     checkIn: "చెక్ ఇన్",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "ప్రేక్షకులు ఎలా చెల్లిస్తారు?",
+    modeFree: "ఉచితం",
+    modePayAtEntry: "ప్రవేశం వద్ద చెల్లింపు",
+    modePayAtEntryHelp: "ప్రేక్షకులు AforAudienceలో సీటు రిజర్వ్ చేసుకుని, వేదిక వద్ద నేరుగా మీకు చెల్లిస్తారు — నగదు లేదా UPI. AforAudience ఈ చెల్లింపును వసూలు చేయదు.",
+    modeOnline: "ఆన్‌లైన్ చెల్లింపు",
+    modeOnlineComingSoon: "త్వరలో",
+    modeOnlineKept: "ఆన్‌లైన్ చెల్లింపులు ప్రస్తుతం నిలిపివేయబడ్డాయి. ఈ ఈవెంట్ తన ఆన్‌లైన్ చెల్లింపు మోడ్‌లోనే ఉంటుంది; బుకింగ్‌లు తీసుకోవడానికి ప్రవేశం వద్ద చెల్లింపును ఎంచుకోండి.",
   },
 }
 
