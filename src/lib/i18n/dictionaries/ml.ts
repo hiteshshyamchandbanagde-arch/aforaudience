@@ -2131,6 +2131,11 @@ const ml: Dictionary = {
     upiSaved: "UPI ID സേവ് ചെയ്തു",
     acceptCashOnly: "പണം മാത്രമായി സ്വീകരിക്കുക",
     upiRequired: "ആദ്യം പ്രൊഫൈലിൽ നിങ്ങളുടെ UPI ID ചേർക്കുക, അല്ലെങ്കിൽ പണം മാത്രമായി സ്വീകരിക്കുക.",
+    upiQrLabel: "UPI QR കോഡ് (ഐച്ഛികം)",
+    upiQrUpload: "QR ചിത്രം അപ്\u200cലോഡ് ചെയ്യുക",
+    upiQrRemove: "QR നീക്കം ചെയ്യുക",
+    // {payee}: venue name.
+    upiQrAlt: "{payee}-നുള്ള UPI QR കോഡ്",
   },
 }
 
