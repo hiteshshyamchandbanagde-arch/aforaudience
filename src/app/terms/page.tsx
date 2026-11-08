@@ -66,7 +66,7 @@ export default function TermsPage() {
       <P>
         AforAudience sells no physical goods. Tickets are delivered electronically: on confirmation they appear in
         My Tickets in the app and a confirmation is sent to the email address on the account, normally within
-        minutes. If you don't receive it, contact{" "}
+        minutes. If you don&apos;t receive it, contact{" "}
         <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>.
       </P>
 
