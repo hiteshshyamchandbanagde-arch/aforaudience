@@ -1,3 +1,34 @@
+## Part 65 — START HERE (8 Nov 08:20 IST, chat, end of session), qa @ this commit
+Supersedes 64 as entry point (64 = decisions detail; still valid). Hitesh's 4 actions for the next session, in order:
+
+### ACTION 1 — Razorpay registration + query (Hitesh, today)
+- Merchant signup started 8 Nov on accounts.razorpay.com with info@shyamkasturiproductions.com (country India; "Accept payments on" = Website only, https://aforaudience.com). Entity: Shyamkasturi Productions Private Limited (Pvt Ltd), company PAN, company current account (open). GST: in progress (leave blank / applied). Udyam: in progress.
+- A Partner Program account was created by mistake earlier: keep it (may serve as technology-partner account for organiser onboarding); don't fill its onboarding.
+- Query: Razorpay has no merchant support email -> Dashboard > Account & Settings > Support tickets > Raise New Query (topic Route / Account). Text = the 6-question email drafted in chat 8 Nov (Route Rs40L turnover basis; collect-and-payout model in writing; organisers' own accounts via technology partner/OAuth + webhooks + refunds + platform fee; small sellers KYC without GST; activation with GST pending; pricing). Signature: Shyamchand Bangade, Director, Shyamkasturi Productions Private Limited, AforAudience - aforaudience.com, +91 92251 39690, info@shyamkasturiproductions.com. Ask to be connected to partnerships/sales.
+- Website verification needs the legal pages LIVE on aforaudience.com (prod = July build: footer has no Terms/Refund/Contact, no company name) -> Action 2 item c.
+- Support inbox info@aforaudience.com verified both directions 8 Nov; display name "AforAudience Support". Hitesh's name must NOT appear in site content; Director = Shyamchand Bangade (this spelling).
+
+### ACTION 2 — fix QA completely (chat + CC)
+a) PR #762 run R (fix/e2e-date-drift-r @ 681a938): 5 nightly specs fixed, spec/fixture only, no product bug. design-tokens green; e2e-preview re-run requested (run 42437777702, queued behind #763's e2e). T2 review point: venue-revenue locator now takes the card's last line (from 1 Nov a "vs last period" delta line sits between label and sub-line); expectation unchanged -> acceptable. Seed re-dating in code only (not run). Merge when green on pinned head; approve Design Token Check if action_required.
+b) PR #763 run L1 (fix/legal-pages-l1 @ 672b360): Terms/Privacy placeholders filled, /refund-policy/ (tiers from refund-policy.ts: >=14 d full minus fee, 7-14 d 50%, <7 none; organiser cancel = full incl. fee), /contact/; e2e/legal-pages.spec.ts + baselines. e2e-preview running (42438723855). Known: 31 pre-existing react/no-unescaped-entities eslint errors in terms/privacy (not new). Read the status file fully before merge (annotation truncated: check booking-fee vs checkout note).
+c) Then: L2 dispatch (footer links Terms/Refund/Contact + "(c) 2026 Shyamkasturi Productions Private Limited · AforAudience is a product of..." + 12 locale labels, one file per call; copyright still says (c) 2025) -> legal port to prod: branch off origin/main (July; no /terms page; footer in src/app/page.tsx), legal pages + footer only, PR to main, deploy (Hitesh-approved docs-only freeze exception, 8 Nov).
+d) S2 OTP: /api/auth/otp/verify must check phone belongs to userId (+ regression test).
+e) S4 Feedback table catch-up (Part 60/62 lists + runs A-F, R, L1) - SQL needs Hitesh OK at approval.
+f) Waiting on Hitesh: QA data fix (21 UPDATEs, Part 63); phone checks A-E + items 10-16 + offline retest; delete 19+2 merged branches in GitHub UI (proxy 403).
+g) Open product Qs (Part 60): role users land on dashboard?; genre chip unstyled?; poster empty middle?; "No account found" -> offer create?
+
+### ACTION 3 — decide: payments engineering vs AFA as a free discovery app
+- Facts: CA reply 31 Oct (claude.ai Project doc finance/ca-responses-2026-10-31.md; NOT in repo, restricted use): collect-all-then-payout = HIGH RISK (RBI PA Directions 15 Sep 2025); GST registration mandatory before first paid booking (ECO + TCS/GSTR-8); Rs500 exemption only plausibly theatre; Rs20 fee valuation risk; 194-O TDS on gross incl. GST (0.1%) - applies even when buyer pays seller directly (deemed); booking-fee SAC 998599 @18%; refund rules need consumer-law review. Razorpay Route needs > Rs40L domestic turnover + payer-payee transparency (AFA = new, ineligible for years).
+- Options to put to Hitesh: (A) free discovery + free-event ticketing only, no money flow (zero compliance, fastest launch; revenue later); (B) organisers collect directly (own Razorpay via partner/OAuth if Razorpay allows), AFA earns platform fee: launch free then prepaid credits per ticket (chat's earlier pick "3 then 2"); (C) AFA as principal seller of tickets (heavy GST/refund liability - not recommended). Chat leans A for launch, B once Razorpay answers Q3. Decide after Razorpay reply; paid switch stays OFF regardless. Note cancellation code 14 d vs Hitesh's 11 Oct 15 d still pending.
+
+### ACTION 4 — right moment to move QA -> prod
+- Plan (Part 64 / task list): deploy QA once, release by switches in waves (W1 discovery+signup, W2 organiser/venue/artist onboarding, W3 free-event tickets, W4 messaging/Wall of Fame/extras); no per-feature cherry-picks (1,341 commits, 68 new migrations vs main; 75 total).
+- Gate = all true: nightly green 3 runs in a row; #762/#763/L2/OTP merged; S1 launch switches (paid off + wave flags) built and tested; S3 read-only prod readiness audit done (env vars, webhooks/cron, Resend domain, Google Maps key dead since Aug, no QA personas/demo data); S5 clean prod DB (Hitesh 8 Nov: START CLEAN + one-time backup approved; show sample rows before wipe; rehearse 75 migrations on empty scratch DB; recreate Admin = Hitesh Google account); Hitesh phone pass on QA. Payments NOT a gate (switch off). Realistic: ~1-2 weeks.
+
+### Housekeeping
+- Scheduled check-in "Review CC runs R + L1" (trig_01FrmWnaBnk3HsmAXeYuvCwa) fires ~08:21 IST 8 Nov into the OLD session; Hitesh declined deleting it - harmless.
+- claude.ai Project instructions still hold the 22 Sep tint-token text -> Hitesh to replace with "Read HANDOFF.md Part 65 on qa first".
+
 ## Part 64 — START HERE (8 Nov 08:05 IST, chat), qa @ this commit
 Supersedes 63 as entry point. GOAL: Pune soft launch (all QA features to prod behind switches, paid bookings OFF); payments = separate track.
 ### Decided (Hitesh 8 Nov)
