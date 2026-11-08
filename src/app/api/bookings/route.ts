@@ -16,6 +16,7 @@ import {
 } from '@/lib/paid-bookings'
 import { deliverTicket } from '@/lib/ticket-delivery'
 import { ensureTicketCode } from '@/lib/assign-ticket-code'
+import { payAtEntrySeatCapError } from '@/lib/pay-at-entry'
 
 // PENDING bookings expire after this window if payment doesn't complete.
 // Keeps abandoned checkouts from permanently eating capacity. 15 minutes
@@ -166,6 +167,10 @@ export async function POST(req: Request) {
     // against those organisers fall back to the pre-K2 behavior (full
     // amount stays on the platform account) rather than failing.
     let payoutAccountId: string | null = null
+    // D1 - PAY_AT_ENTRY event: seat reserved instantly, paid to the
+    // organiser at the venue. No Razorpay order, no booking fee, and not
+    // gated by the S1a switch (which guards online money only).
+    let atEntry = false
 
     const booking = await prisma.$transaction(async (tx: any) => {
       const event = await tx.event.findUnique({
@@ -190,6 +195,10 @@ export async function POST(req: Request) {
       if (event.organiser?.razorpayAccountId && event.organiser.razorpayAccountStatus === 'activated') {
         payoutAccountId = event.organiser.razorpayAccountId
       }
+
+      atEntry = event.paymentMode === 'PAY_AT_ENTRY'
+      const capError = payAtEntrySeatCapError(event.paymentMode, totalRequested)
+      if (capError) throw new Error(capError)
 
       if (totalRequested > event.maxSeatsPerBooking) {
         throw new Error(
@@ -247,12 +256,12 @@ export async function POST(req: Request) {
         }
 
         const bookingFeeRupees =
-          subtotalAmount > 0
+          subtotalAmount > 0 && !atEntry
             ? (bookingFeeOverrideRupees !== null ? bookingFeeOverrideRupees : feeSettings.audienceBookingFee / 100)
             : 0
         const totalAmount = subtotalAmount + bookingFeeRupees
-        // S1a - refuse a paid booking (rolls the tx back) while the switch is off.
-        assertPaidAllowed(Math.round(totalAmount * 100), paidBookingsEnabled)
+        // S1a - refuse a paid ONLINE booking while the switch is off (D1: not pay-at-entry).
+        if (!atEntry) assertPaidAllowed(Math.round(totalAmount * 100), paidBookingsEnabled)
 
         return tx.booking.create({
           data: {
@@ -262,11 +271,16 @@ export async function POST(req: Request) {
             subtotalAmount,
             bookingFeeAmount: bookingFeeRupees,
             totalAmount,
-            status: 'PENDING',
-            expiresAt:
-              razorpayReady && totalAmount > 0
-                ? new Date(now.getTime() + PENDING_TTL_MS)
-                : null,
+            ...(atEntry && totalAmount > 0
+              ? { status: 'CONFIRMED', paymentMethod: 'AT_ENTRY', expiresAt: null }
+              : {
+                  status: 'PENDING',
+                  paymentMethod: totalAmount > 0 ? 'ONLINE' : 'NONE',
+                  expiresAt:
+                    razorpayReady && totalAmount > 0
+                      ? new Date(now.getTime() + PENDING_TTL_MS)
+                      : null,
+                }),
             bookingSeats: { create: seatIds.map((seatId: string) => ({ seatId })) },
           },
         })
@@ -332,12 +346,13 @@ export async function POST(req: Request) {
       // override (validated above) takes priority over the platform
       // default when present — see comment at the top of this handler.
       const bookingFeeRupees =
-        subtotalAmount > 0
+        subtotalAmount > 0 && !atEntry
           ? (bookingFeeOverrideRupees !== null ? bookingFeeOverrideRupees : feeSettings.audienceBookingFee / 100)
           : 0
       const totalAmount = subtotalAmount + bookingFeeRupees
-      // S1a - refuse a paid booking (rolls the tx back) while the switch is off.
-      assertPaidAllowed(Math.round(totalAmount * 100), paidBookingsEnabled)
+      // S1a - refuse a paid ONLINE booking (rolls the tx back) while the
+      // switch is off. D1: pay-at-entry moves no money through AFA.
+      if (!atEntry) assertPaidAllowed(Math.round(totalAmount * 100), paidBookingsEnabled)
 
       return tx.booking.create({
         data: {
@@ -347,14 +362,33 @@ export async function POST(req: Request) {
           subtotalAmount,
           bookingFeeAmount: bookingFeeRupees,
           totalAmount,
-          status: 'PENDING',
-          expiresAt:
-            razorpayReady && totalAmount > 0
-              ? new Date(now.getTime() + PENDING_TTL_MS)
-              : null,
+          ...(atEntry && totalAmount > 0
+            ? { status: 'CONFIRMED', paymentMethod: 'AT_ENTRY', expiresAt: null }
+            : {
+                status: 'PENDING',
+                paymentMethod: totalAmount > 0 ? 'ONLINE' : 'NONE',
+                expiresAt:
+                  razorpayReady && totalAmount > 0
+                    ? new Date(now.getTime() + PENDING_TTL_MS)
+                    : null,
+              }),
         },
       })
     })
+
+    // D1 - pay-at-entry: already CONFIRMED in the tx. Ticket issued like a
+    // free ticket; the amount is paid to the organiser at the venue.
+    if (booking.paymentMethod === 'AT_ENTRY') {
+      const ticketCode = await ensureTicketCode(booking.id)
+      after(() => deliverTicket(booking.id))
+      return NextResponse.json(
+        {
+          booking: { ...booking, ticketCode },
+          message: 'Seats reserved. Pay the organiser at entry (cash/UPI).',
+        },
+        { status: 201 }
+      )
+    }
 
     // Free event — no payment needed. Confirm immediately.
     if (booking.totalAmount === 0) {
