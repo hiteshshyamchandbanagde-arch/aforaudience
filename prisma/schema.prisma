@@ -1332,6 +1332,8 @@ model VenueBooking {
   payerReference  String?
   confirmedAt     DateTime?
   expiresAt       DateTime?
+
+  @@index([directPayStatus, expiresAt])
 }
 
 model Event {
