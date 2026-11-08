@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { formatSeatLabels } from '@/lib/seat-labels'
+import { canMarkNoShow, effectiveAttendance } from '@/lib/pay-at-entry'
 
 // Attendee list for the check-in screen - "who's checked in / who's still
 // pending" for an Organiser or Admin. Only CONFIRMED bookings count as real
@@ -52,6 +53,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       orderBy: [{ checkedInAt: 'asc' }, { createdAt: 'asc' }],
     })
 
+    const now = new Date()
     const attendees = bookings.map((b) => {
       // Display-only "who's roughly sitting where" for NUMBERED bookings
       // (Hitesh, session 54 - people move seats after the interval anyway,
@@ -73,6 +75,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         seats: b.seats,
         seatLabel: bookerSeatLabel ?? null,
         checkedInAt: b.checkedInAt,
+        // D1 - attendance (lazy auto no-show 24 h after the end) and the
+        // amount the guest pays the organiser at the door.
+        attendance: effectiveAttendance(b, event, now),
+        paymentMethod: b.paymentMethod,
+        amountDueAtEntry: b.paymentMethod === 'AT_ENTRY' ? b.totalAmount : 0,
         companions: b.companionTags.map((t, i) => ({
           id: t.id,
           name: t.taggedUser.displayName || t.taggedUser.name,
@@ -85,6 +92,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({
       total: attendees.length,
       checkedIn: attendees.filter((a) => a.checkedInAt).length,
+      // D1 - counts for the guest-list header.
+      reserved: attendees.filter((a) => a.attendance === 'RESERVED').length,
+      attended: attendees.filter((a) => a.attendance === 'ATTENDED').length,
+      noShow: attendees.filter((a) => a.attendance === 'NO_SHOW').length,
+      canMarkNoShow: canMarkNoShow(event, now),
       attendees,
     })
   } catch (err) {
