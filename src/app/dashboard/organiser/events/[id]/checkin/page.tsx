@@ -30,6 +30,9 @@ type Attendee = {
   // per-seat labels at all.
   seatLabel: string | null
   checkedInAt: string | null
+  // D1 - attendance and the amount the guest pays at the door.
+  attendance?: 'RESERVED' | 'ATTENDED' | 'NO_SHOW'
+  amountDueAtEntry?: number
   // Companion Tagging Phase 2 (step 6) - ACCEPTED companions only,
   // each individually checkable at the door.
   companions: { id: string; name: string; seatLabel: string | null; checkedInAt: string | null }[]
@@ -85,6 +88,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
   const [listOpen, setListOpen] = useState(false)
   const [attendees, setAttendees] = useState<Attendee[] | null>(null)
+  // D1 - Reserved / Attended / No-show counts and the no-show window.
+  const [attendanceMeta, setAttendanceMeta] = useState<{ reserved: number; attended: number; noShow: number; canMarkNoShow: boolean } | null>(null)
+  const [rowBusy, setRowBusy] = useState<string | null>(null)
   const [listFilter, setListFilter] = useState<'all' | 'checked_in' | 'pending'>('all')
   const [checkingInCompanion, setCheckingInCompanion] = useState<string | null>(null)
 
@@ -111,11 +117,35 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       if (res.ok) {
         const data = await res.json()
         setAttendees(data.attendees)
+        setAttendanceMeta({
+          reserved: data.reserved ?? 0,
+          attended: data.attended ?? 0,
+          noShow: data.noShow ?? 0,
+          canMarkNoShow: data.canMarkNoShow === true,
+        })
       }
     } catch {
       // non-critical - list just won't refresh this round
     }
   }, [eventId])
+
+  // D1 - guest-list row actions: Check in (= Attended) and Mark no-show.
+  const rowAction = useCallback(async (bookingId: string, action: 'checkin' | 'no-show') => {
+    setRowBusy(bookingId)
+    try {
+      await fetch(`/api/events/${eventId}/${action === 'checkin' ? 'checkin' : 'no-show'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(action === 'checkin' ? { code: bookingId } : { bookingId }),
+      })
+    } catch {
+      // the refreshed list below shows the real state either way
+    } finally {
+      setRowBusy(null)
+      refreshAttendees()
+      refreshCounts()
+    }
+  }, [eventId, refreshAttendees, refreshCounts])
 
   const checkInCompanion = useCallback(async (companionTagId: string) => {
     setCheckingInCompanion(companionTagId)
@@ -365,6 +395,11 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                   ))}
                 </div>
 
+                {attendanceMeta && (
+                  <p data-afa-attendance-counts style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-3)' }}>
+                    {tr.payAtEntry.reserved} {attendanceMeta.reserved} · {tr.payAtEntry.attended} {attendanceMeta.attended} · {tr.payAtEntry.noShow} {attendanceMeta.noShow}
+                  </p>
+                )}
                 {attendees === null ? (
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{tr.dashboardChrome.loading}</p>
                 ) : (
@@ -397,10 +432,27 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                 {a.ticketCode && (
                                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-mono)' }}>{a.ticketCode}</p>
                                 )}
+                                {(a.amountDueAtEntry ?? 0) > 0 && (
+                                  <p data-afa-due-at-entry style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)' }}>
+                                    {tr.payAtEntry.dueAtEntry.replace('{amount}', (a.amountDueAtEntry ?? 0).toLocaleString('en-IN'))}
+                                  </p>
+                                )}
                               </div>
-                              <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage-bright)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>
-                                {a.checkedInAt ? c.in : c.pending}
-                              </span>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--afa-space-1)' }}>
+                                <span data-afa-attendance={a.checkedInAt ? 'ATTENDED' : a.attendance || 'RESERVED'} style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage-bright)' : 'var(--afa-text-primary)', opacity: a.checkedInAt || a.attendance === 'NO_SHOW' ? 1 : 0.4 }}>
+                                  {a.checkedInAt ? c.in : a.attendance === 'NO_SHOW' ? tr.payAtEntry.noShow : c.pending}
+                                </span>
+                                {!a.checkedInAt && (
+                                  <Button variant="secondary" size="sm" fullWidth={false} disabled={rowBusy === a.bookingId} onClick={() => rowAction(a.bookingId, 'checkin')} data-afa-row-checkin>
+                                    {tr.payAtEntry.checkIn}
+                                  </Button>
+                                )}
+                                {!a.checkedInAt && a.attendance !== 'NO_SHOW' && attendanceMeta?.canMarkNoShow && (
+                                  <Button variant="outline-neutral" size="sm" fullWidth={false} disabled={rowBusy === a.bookingId} onClick={() => rowAction(a.bookingId, 'no-show')} data-afa-row-no-show>
+                                    {tr.payAtEntry.markNoShow}
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                             {/* Companion Tagging Phase 2 (step 6) - accepted
                                 companions get their own check-in row, indented
