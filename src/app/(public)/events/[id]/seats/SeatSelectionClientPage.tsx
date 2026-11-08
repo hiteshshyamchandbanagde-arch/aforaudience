@@ -40,6 +40,8 @@ interface EventData {
   endTime: string
   isFree: boolean
   ticketPrice: number | null
+  // D1 - FREE | PAY_AT_ENTRY | ONLINE
+  paymentMode?: string
   totalSeats: number
   availableSeats: number
   maxSeatsPerBooking: number
@@ -372,6 +374,8 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                       <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
                       <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
                     </div>
+                    {/* D1 - pay at entry: no booking fee (AFA collects nothing). */}
+                    {event.paymentMode !== "PAY_AT_ENTRY" && (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--afa-space-10px)", gap: "var(--afa-space-3)" }}>
                       <div>
                         <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
@@ -396,9 +400,10 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                         />
                       </div>
                     </div>
+                    )}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid var(--afa-tint-10)" }}>
                       <span style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
-                      <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
+                      <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(event.paymentMode === "PAY_AT_ENTRY" ? totalAmount : totalAmount + feeInput).toLocaleString("en-IN")}</span>
                     </div>
                   </div>
                 ) : (
@@ -411,11 +416,11 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
 
                 <Button variant="primary" onClick={handleBookClick} disabled={reserving || status === "loading"}>
                   <TicketIcon style={{ width: "18px", height: "18px" }} />
-                  {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}
+                  {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : event.paymentMode === "PAY_AT_ENTRY" ? tr.payAtEntry.reserveCta : tr.eventDetailPage.continueToCheckout}
                 </Button>
 
                 <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
-                  {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
+                  {event.isFree ? tr.eventDetailPage.freeEntryFooter : event.paymentMode === "PAY_AT_ENTRY" ? tr.payAtEntry.noCollect : tr.eventDetailPage.securePaymentFooter}
                 </div>
               </div>
             </>
