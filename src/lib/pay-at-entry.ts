@@ -146,3 +146,41 @@ export function effectiveAttendance(
   if (shouldAutoNoShow(booking, ev, now)) return 'NO_SHOW'
   return (booking.attendance as AttendanceStatus) || 'RESERVED'
 }
+
+// --- D1b: organiser payment-mode picker (event create/edit) ---
+
+/**
+ * The picker's starting choice when an organiser opens Edit Event.
+ * The stored mode wins (an ONLINE event stays ONLINE even while the
+ * switch is off - never silently converted). Rows without a usable mode
+ * fall back on isFree, and a priced row with no mode gets what the
+ * server would resolve (ONLINE when the switch is ON, else PAY_AT_ENTRY).
+ */
+export function initialPickerMode(
+  event: { paymentMode?: unknown; isFree?: boolean | null },
+  paidEnabled: boolean
+): EventPaymentMode {
+  if (isPaymentMode(event.paymentMode)) return event.paymentMode
+  if (event.isFree !== false) return 'FREE'
+  return paidEnabled ? 'ONLINE' : 'PAY_AT_ENTRY'
+}
+
+/** The paid mode a priced choice lands on by default (Pay at entry while the switch is off). */
+export function defaultPaidPickerMode(paidEnabled: boolean): EventPaymentMode {
+  return paidEnabled ? 'ONLINE' : 'PAY_AT_ENTRY'
+}
+
+/**
+ * How the picker shows its Online payment option.
+ *   selectable - the switch is ON
+ *   disabled   - OFF: greyed out with "Coming soon"
+ *   kept       - OFF, but the event is already ONLINE: stays checked and
+ *                visible (with a note) but can't be re-selected once left
+ */
+export function onlineOptionState(
+  paidEnabled: boolean,
+  current: EventPaymentMode
+): 'selectable' | 'disabled' | 'kept' {
+  if (paidEnabled) return 'selectable'
+  return current === 'ONLINE' ? 'kept' : 'disabled'
+}

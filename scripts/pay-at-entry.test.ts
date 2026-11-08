@@ -10,8 +10,11 @@ import {
   PAY_AT_ENTRY_MAX_SEATS,
   bookingPlan,
   canMarkNoShow,
+  defaultPaidPickerMode,
   effectiveAttendance,
   eventEndAt,
+  initialPickerMode,
+  onlineOptionState,
   payAtEntrySeatCapError,
   resolveEventPaymentMode,
   shouldAutoNoShow,
@@ -120,6 +123,33 @@ test('[D1] mark no-show window: event start until 48 h after end', () => {
   assert.equal(canMarkNoShow(ev, at(20, 19, 0)), true)
   assert.equal(canMarkNoShow(ev, at(22, 21, 0)), true)
   assert.equal(canMarkNoShow(ev, at(22, 21, 1)), false)
+})
+
+// --- D1b: organiser payment-mode picker ---
+test('[D1b] edit: stored ONLINE stays ONLINE while the switch is OFF (no silent convert)', () => {
+  assert.equal(initialPickerMode({ paymentMode: 'ONLINE', isFree: false }, false), 'ONLINE')
+  assert.equal(initialPickerMode({ paymentMode: 'PAY_AT_ENTRY', isFree: false }, true), 'PAY_AT_ENTRY')
+  assert.equal(initialPickerMode({ paymentMode: 'FREE', isFree: true }, true), 'FREE')
+})
+test('[D1b] edit: missing/invalid mode falls back on isFree and the switch', () => {
+  assert.equal(initialPickerMode({ paymentMode: null, isFree: true }, false), 'FREE')
+  assert.equal(initialPickerMode({ paymentMode: undefined, isFree: false }, false), 'PAY_AT_ENTRY')
+  assert.equal(initialPickerMode({ paymentMode: 'BOGUS', isFree: false }, true), 'ONLINE')
+  assert.equal(initialPickerMode({}, true), 'FREE')
+})
+test('[D1b] new priced event defaults to Pay at entry while the switch is OFF', () => {
+  assert.equal(defaultPaidPickerMode(false), 'PAY_AT_ENTRY')
+  assert.equal(defaultPaidPickerMode(true), 'ONLINE')
+  // the server agrees: priced, no mode, switch OFF -> PAY_AT_ENTRY
+  const r = resolveEventPaymentMode(undefined, true, false)
+  assert.ok(r.ok && r.mode === 'PAY_AT_ENTRY')
+})
+test('[D1b] Online option: selectable ON, disabled OFF, kept for an existing ONLINE event', () => {
+  assert.equal(onlineOptionState(true, 'FREE'), 'selectable')
+  assert.equal(onlineOptionState(true, 'ONLINE'), 'selectable')
+  assert.equal(onlineOptionState(false, 'FREE'), 'disabled')
+  assert.equal(onlineOptionState(false, 'PAY_AT_ENTRY'), 'disabled')
+  assert.equal(onlineOptionState(false, 'ONLINE'), 'kept')
 })
 
 console.log(`\n${passed} passed`)
