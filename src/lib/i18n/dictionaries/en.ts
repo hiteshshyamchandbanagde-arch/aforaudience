@@ -2297,6 +2297,40 @@ const en = {
     modeOnlineComingSoon: "Coming soon",
     modeOnlineKept: "Online payments are paused for now. This event keeps its online payment mode; choose Pay at entry to take bookings.",
   },
+  // D2 (Hitesh, 8 Nov) - Organiser -> Venue owner bookings, paid directly.
+  venueDirectPay: {
+    title: "Venue bookings · direct payment",
+    chipRequested: "Requested",
+    chipAwaitingPayment: "Accepted – awaiting payment",
+    chipPaymentMarked: "Payment marked",
+    chipConfirmed: "Confirmed",
+    chipDeclined: "Declined",
+    chipExpired: "Expired",
+    chipCancelled: "Cancelled",
+    // {payee}: venue owner / venue name.
+    payNote: "Pay {payee} directly. AforAudience does not collect or hold this payment.",
+    amount: "Amount",
+    upiLabel: "UPI ID",
+    copy: "Copy",
+    copied: "Copied",
+    cashOnly: "Cash only — no UPI ID on file. Pay the owner in person.",
+    referenceLabel: "UPI reference (optional)",
+    iPaid: "I've paid",
+    confirmReceived: "Confirm payment received",
+    cancel: "Cancel booking",
+    // {date}: when the waiting step expires.
+    expires: "Expires {date}",
+    waitingOwner: "Waiting for the venue owner to confirm they received it.",
+    waitingOrganiser: "Waiting for the organiser to pay.",
+    // {ref}: the organiser's UPI reference.
+    reference: "Reference: {ref}",
+    upiSettingLabel: "UPI ID for venue bookings",
+    upiSettingHelp: "Organisers pay you directly at this UPI ID. AforAudience never collects venue payments.",
+    upiSave: "Save UPI ID",
+    upiSaved: "UPI ID saved",
+    acceptCashOnly: "Accept as cash only",
+    upiRequired: "Add your UPI ID in your profile first, or accept as cash only.",
+  },
 }
 
 export default en
