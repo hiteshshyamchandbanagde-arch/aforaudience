@@ -162,7 +162,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   // S1a - "paid bookings" master switch: while it is off, a paid event
   // shows "Booking opens soon" instead of the booking button. The server
   // routes refuse paid bookings regardless; this is the UI side.
+  // D1 - a PAY_AT_ENTRY event moves no money through AFA, so it is
+  // never paused by the switch.
   const bookingPaused =
+    event.paymentMode !== 'PAY_AT_ENTRY' &&
     requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) &&
     !(await getPaidBookingsEnabled())
 
