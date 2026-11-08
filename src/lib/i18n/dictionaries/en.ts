@@ -2336,6 +2336,20 @@ const en = {
     // {payee}: venue name.
     upiQrAlt: "UPI QR code for {payee}",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "Performance fees · direct payment",
+    fee: "Performance fee",
+    buyIn: "Buy-in",
+    cashOnly: "Cash only — no UPI ID on file. Pay in person.",
+    cancel: "Cancel slot",
+    decline: "Decline",
+    waitingPayee: "Waiting for them to confirm they received it.",
+    waitingPayer: "Waiting for them to pay.",
+    upiSettingLabel: "UPI ID for direct payments",
+    upiSettingHelpArtist: "Organisers pay your performance fees directly at this UPI ID. AforAudience never collects these payments.",
+    upiSettingHelpOrganiser: "Artists pay open-mic buy-ins directly to you at this UPI ID. AforAudience never collects these payments.",
+  },
 }
 
 export default en
