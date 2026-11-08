@@ -7,6 +7,11 @@ Supersedes 66 as entry point (66 = legal pages live on prod, #762-#765 merged).
 - Razorpay brand name: Hitesh chose SHYAMKASTURI PRODUCTIONS (not AforAudience) deliberately.
 ### Path to go-live (order)
 1. S2 OTP verify fix (dispatched, fix/otp-verify-s2). 2. S1a paid switch (dispatched, feat/paid-switch-s1a; chat applies migration to QA via Supabase + sets QA row paidBookingsEnabled=true; prod clean DB gets default false). 3. S1b wave flags W1-W4. 4. Rule 4 for language-rollout kn/bn/gu flake. 5. Nightly green x3. 6. S3 read-only prod readiness audit. 7. Hitesh rotates Google Maps + Razorpay keys. 8. S5 clean prod DB (backup, rehearse 75 migrations on scratch, show sample rows, reset, recreate Admin). 9. Hitesh phone pass on QA. 10. Promote qa->main, W1 on.
+### DECIDED (Hitesh 8 Nov 16:38-16:52): direct offline payments, AFA never collects
+- One flow for all three: Request -> receiver accepts (shows receiver's own UPI/QR + amount, payee named; 'AforAudience does not collect this payment') -> payer pays cash/UPI directly -> payer taps 'I've paid' (+ optional UPI ref) -> receiver confirms. Decline / expire / cancel. Expiry: 48 h venue + artist (chat default, Hitesh didn't object).
+- Audience: default 'Pay at entry' = instant reservation (capacity-capped, max 4 seats/booking), pay organiser at the door; attendance tracked Reserved -> Attended / No-show (Hitesh asked). 'Confirm after payment' per-event mode = later, not in D1.
+- Runs: D1 audience pay-at-entry + attendance (after #767), D2 venue direct payment, D3 artist direct payment, D4 Terms/Refund 'Direct payments' section on qa + prod port. Ask CA: any GST/TCS/TDS on AFA when it collects nothing.
+- Go-live 17-19 Nov unchanged (W1/W2/W3 free); direct-payment bookings = next wave ~3-5 days after.
 - Hitesh non-code: Shops & Establishments + PTEC registrations (CA Q19). GST not needed for free-only.
 
 ## Part 66 — START HERE (8 Nov 14:45 IST, chat), qa @ this commit
