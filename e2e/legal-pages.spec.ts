@@ -75,3 +75,23 @@ test("terms links its refund section to /refund-policy/", async ({ page, isMobil
   await page.goto("/terms/");
   await expect(page.locator('main a[href="/refund-policy/"]')).toBeVisible();
 });
+
+/**
+ * D4 (8 Nov 2026) - launch moves no money through AFA. Priced shows are Pay
+ * at entry and Organiser<->Venue Owner / Organiser<->Artist deals are paid
+ * directly between the parties. Terms and Refund policy described only
+ * online payment and a booking fee; they must now cover both.
+ */
+test("terms cover pay at entry and direct payments between users", async ({ page, isMobile }) => {
+  await useRuleViewport(page, isMobile);
+  await page.goto("/terms/");
+  const main = page.locator("main");
+  await expect(main).toContainText("Direct payments between users");
+  await expect(main).toContainText("pay the Organiser directly at the venue");
+});
+
+test("refund page covers pay at entry", async ({ page, isMobile }) => {
+  await useRuleViewport(page, isMobile);
+  await page.goto("/refund-policy/");
+  await expect(page.locator("main")).toContainText("Pay at entry");
+});
