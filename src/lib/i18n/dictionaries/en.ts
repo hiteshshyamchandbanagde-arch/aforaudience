@@ -1059,7 +1059,12 @@ const en = {
     footerBlog: "Blog",
     footerCareers: "Careers",
     footerPrivacyPolicy: "Privacy Policy",
-    footerCopyright: "© 2025 AforAudience. All rights reserved.",
+    footerTerms: "Terms of Service",
+    footerRefundPolicy: "Refund & Cancellation",
+    footerContact: "Contact Us",
+    // Company name stays in Latin script in every locale (legal entity name).
+    footerCopyright: "© 2026 Shyamkasturi Productions Private Limited. All rights reserved.",
+    footerProductOf: "AforAudience is a product of Shyamkasturi Productions Private Limited.",
     footerMadeWith: "Made with ❤️ for the art world",
     heroRotatorEyebrow: "For artists",
     heroRotatorTagline: "Your best performance, featured here.",

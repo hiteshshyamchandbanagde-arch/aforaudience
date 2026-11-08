@@ -14,7 +14,10 @@ import { REFUND_FULL_MIN_DAYS, REFUND_HALF_MIN_DAYS } from "../src/lib/refund-po
  */
 
 const COMPANY = "Shyamkasturi Productions Private Limited";
-const PLACEHOLDER_TEXT = /to be finalized|once registered|placeholder|to be set on publish|to be defined/i;
+// L2b (8 Nov 2026): the "Draft — pending legal review ... once the company is
+// formally registered" banner was false once the company was registered.
+const PLACEHOLDER_TEXT =
+  /to be finalized|once registered|placeholder|to be set on publish|to be defined|pending legal review|formally registered/i;
 const PAGES = ["/terms/", "/privacy/", "/refund-policy/", "/contact/"];
 // The sticky site header, chat button and Vercel toolbar float over the
 // content box depending on scroll; they are not part of the page under test.

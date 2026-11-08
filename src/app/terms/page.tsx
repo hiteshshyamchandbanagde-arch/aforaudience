@@ -62,7 +62,15 @@ export default function TermsPage() {
         </LI>
       </UL>
 
-      <H2>4. Listing events (Organisers) and venues (Venue Owners)</H2>
+      <H2 id="delivery">4. Delivery of tickets</H2>
+      <P>
+        AforAudience sells no physical goods. Tickets are delivered electronically: on confirmation they appear in
+        My Tickets in the app and a confirmation is sent to the email address on the account, normally within
+        minutes. If you don&apos;t receive it, contact{" "}
+        <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>.
+      </P>
+
+      <H2>5. Listing events (Organisers) and venues (Venue Owners)</H2>
       <UL>
         <LI>
           Organisers are responsible for the accuracy of their event listings (date, time, venue, pricing, age
@@ -79,13 +87,13 @@ export default function TermsPage() {
         </LI>
       </UL>
 
-      <H2>5. Payments</H2>
+      <H2>6. Payments</H2>
       <P>
         All payments are processed through Razorpay. We don't store your card, UPI, or bank details on our servers.
         Payouts to Organisers and Venue Owners are made as set out in the payout terms agreed when they join.
       </P>
 
-      <H2>6. Check-in</H2>
+      <H2>7. Check-in</H2>
       <P>
         Tickets are validated at the door via QR scan or manual booking-ID entry by the Organiser or their staff. A
         ticket can only be used once; once checked in, it can't be reused, including by someone else with the same
@@ -93,7 +101,7 @@ export default function TermsPage() {
         used by someone other than the original purchaser.
       </P>
 
-      <H2>7. Acceptable use</H2>
+      <H2>8. Acceptable use</H2>
       <P>You agree not to:</P>
       <UL>
         <LI>Use the platform for any unlawful purpose, or to harass, threaten, or defraud other users.</LI>
@@ -103,14 +111,14 @@ export default function TermsPage() {
       </UL>
       <P>We may suspend or terminate accounts that violate these Terms.</P>
 
-      <H2>8. Content ownership</H2>
+      <H2>9. Content ownership</H2>
       <P>
         You retain ownership of the content you post (event descriptions, artist bios, photos, etc.), but grant us a
         license to display it on the platform as needed to operate the service. You're responsible for having the
         rights to anything you upload.
       </P>
 
-      <H2>9. Disclaimers &amp; limitation of liability</H2>
+      <H2>10. Disclaimers &amp; limitation of liability</H2>
       <P>
         The platform is provided "as is." We facilitate discovery, booking, and payment for live events, but we are
         not the organiser, performer, or venue for any given event, and we're not responsible for the quality,
@@ -119,19 +127,19 @@ export default function TermsPage() {
         booking fee(s) you paid in the relevant transaction.
       </P>
 
-      <H2>10. Governing law</H2>
+      <H2>11. Governing law</H2>
       <P>
         These Terms are governed by the laws of India, and any disputes will be subject to the exclusive
         jurisdiction of the courts at Pune, Maharashtra.
       </P>
 
-      <H2>11. Changes to these Terms</H2>
+      <H2>12. Changes to these Terms</H2>
       <P>
         We may update these Terms from time to time. Continued use of the platform after changes take effect
         constitutes acceptance of the updated Terms.
       </P>
 
-      <H2>12. Contact us</H2>
+      <H2>13. Contact us</H2>
       <P>
         Questions about these Terms: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>. Our
         registered office and Grievance Officer are listed on the <Link href="/contact/">Contact</Link> page.
