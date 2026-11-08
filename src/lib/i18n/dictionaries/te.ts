@@ -2080,6 +2080,19 @@ const te: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date}న గడువు ముగిసింది — ప్రస్తుతం ఆఫ్‌లో ఉంది.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · ప్రవేశం వద్ద {organiser}కి చెల్లించండి (నగదు/UPI)",
+    noCollect: "AforAudience ఈ చెల్లింపును వసూలు చేయదు.",
+    reserveCta: "రిజర్వ్ చేయండి",
+    badge: "ప్రవేశం వద్ద చెల్లింపు · ₹{amount}",
+    attended: "హాజరయ్యారు",
+    noShow: "రాలేదు",
+    reserved: "రిజర్వ్ అయింది",
+    dueAtEntry: "ప్రవేశం వద్ద చెల్లించాల్సింది: ₹{amount}",
+    markNoShow: "రాలేదని గుర్తించండి",
+    checkIn: "చెక్ ఇన్",
+  },
 }
 
 export default te
