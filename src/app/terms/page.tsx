@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
-import LegalDocLayout, { H2, P, UL, LI, Placeholder } from "@/components/LegalDocLayout"
+import Link from "next/link"
+import LegalDocLayout, { H2, P, UL, LI } from "@/components/LegalDocLayout"
 
 export const metadata: Metadata = {
   title: "Terms of Service — AforAudience",
@@ -8,10 +9,11 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalDocLayout title="Terms of Service" lastUpdated={<Placeholder>date to be set on publish</Placeholder>}>
+    <LegalDocLayout title="Terms of Service" lastUpdated="8 November 2026">
       <P>
-        These Terms of Service ("Terms") govern your use of AforAudience (the "platform"), operated by{" "}
-        <Placeholder>Legal entity name, once registered</Placeholder>. By creating an account or using the platform,
+        These Terms of Service ("Terms") govern your use of AforAudience (the "platform"), operated by
+        Shyamkasturi Productions Private Limited. AforAudience is a product of Shyamkasturi Productions Private
+        Limited. By creating an account or using the platform,
         you agree to these Terms. If you don't agree, please don't use the platform.
       </P>
       <P>
@@ -23,8 +25,7 @@ export default function TermsPage() {
 
       <H2>1. Eligibility</H2>
       <P>
-        You must be at least <Placeholder>13 / 16 / 18</Placeholder> years old to create an account. If you're under
-        18, you confirm you have a parent or guardian's permission to use the platform.
+        You must be at least 18 years old to create an account.
       </P>
 
       <H2>2. Accounts</H2>
@@ -38,8 +39,8 @@ export default function TermsPage() {
       <H2 id="booking">3. Booking tickets (Audience)</H2>
       <UL>
         <LI>
-          Prices shown at checkout include the ticket price plus a small platform booking fee (
-          <Placeholder>exact amount to be finalized — currently described publicly as "e.g., ₹10–15"</Placeholder>).
+          Prices shown at checkout include the ticket price plus a small platform booking fee (currently
+          ₹20 per booking, plus GST where applicable), shown separately before you pay.
           We do not take a cut of the ticket price itself or of venue rental.
         </LI>
         <LI>
@@ -48,9 +49,10 @@ export default function TermsPage() {
           in at the venue in your place, and check-in is first-come, first-served.
         </LI>
         <LI>
-          <strong>Refund policy: <Placeholder>to be finalized</Placeholder>.</strong> Once decided, this section will
-          state whether refunds are available, any cutoff window before the event, and whether the booking fee is
-          refundable alongside the ticket price.
+          <strong>Refunds and cancellations:</strong> you can cancel a paid booking from My Tickets. What you get
+          back depends on how far ahead of the show you cancel, and if the Organiser cancels the event you get a
+          full refund including the booking fee. The full rules are in our{" "}
+          <Link href="/refund-policy/">Refund &amp; Cancellation Policy</Link>.
         </LI>
         <LI>Free events are ticketed the same way (PDF + QR) but are never charged a platform fee.</LI>
         <LI>
@@ -80,8 +82,7 @@ export default function TermsPage() {
       <H2>5. Payments</H2>
       <P>
         All payments are processed through Razorpay. We don't store your card, UPI, or bank details on our servers.
-        Payouts to Organisers and Venue Owners for confirmed bookings follow{" "}
-        <Placeholder>payout schedule/mechanism — to be defined</Placeholder>.
+        Payouts to Organisers and Venue Owners are made as set out in the payout terms agreed when they join.
       </P>
 
       <H2>6. Check-in</H2>
@@ -121,7 +122,7 @@ export default function TermsPage() {
       <H2>10. Governing law</H2>
       <P>
         These Terms are governed by the laws of India, and any disputes will be subject to the exclusive
-        jurisdiction of the courts of <Placeholder>city, once registered — likely Pune</Placeholder>.
+        jurisdiction of the courts at Pune, Maharashtra.
       </P>
 
       <H2>11. Changes to these Terms</H2>
@@ -132,7 +133,8 @@ export default function TermsPage() {
 
       <H2>12. Contact us</H2>
       <P>
-        Questions about these Terms: <Placeholder>contact email</Placeholder>
+        Questions about these Terms: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>. Our
+        registered office and Grievance Officer are listed on the <Link href="/contact/">Contact</Link> page.
       </P>
     </LegalDocLayout>
   )
