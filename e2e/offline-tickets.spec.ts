@@ -173,11 +173,16 @@ test("[BUG-2610-001] reached by the Tickets tab, offline My Tickets reopens with
   // The chat button and the phone tab bar sit over the card's lower half.
   await hideFloatingOverlays(page);
   await page.addStyleTag({ content: "[data-afa-tab-bar] { visibility: hidden !important; }" });
+  // The fixture event is re-dated by global-setup; the date line is not the
+  // subject, so it is masked. The mask is as wide as the date text, though,
+  // and a new date ("Sun, 4 Jan" vs "Mon, 21 Dec") moved the venue beside it:
+  // red nightly 21 Oct-8 Nov. Pinned to one fixed text before the shot.
+  const dateLine = card.locator("span").filter({ hasText: /\d{1,2}:\d{2}/ }).first();
+  await dateLine.evaluate((el) => (el.textContent = "Sat, 20 Dec 2026 · 19:30"));
   await page.evaluate(() => document.fonts.ready);
   await expect(card).toHaveScreenshot(`offline-ticket-card-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
-    // The fixture event is re-dated by global-setup; the date line is not the subject.
-    mask: [card.locator("span").filter({ hasText: /\d{1,2}:\d{2}/ }).first()],
+    mask: [dateLine],
   });
 });
 

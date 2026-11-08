@@ -63,8 +63,20 @@ const LOCALE_STORAGE_KEY = "afa-locale";
  */
 async function switchLocale(page: Page, isMobile: boolean, locale: { id: string; nativeLabel: string }) {
   if (isMobile) {
-    await page.getByRole("banner").getByRole("button", { name: "Language", exact: true }).click();
-    await page.getByRole("banner").getByRole("button", { name: locale.nativeLabel, exact: true }).click();
+    // Intermittent on mobile (bn, gu): lang stayed "en" after 10 s. Each step
+    // now waits for the app's own signal instead of firing blind: the menu is
+    // open (aria-expanded, set only by the hydrated click handler; a tap that
+    // landed before hydration is tapped again), then the pick closed it (the
+    // row's handler ran, which is what calls setLocale).
+    const banner = page.getByRole("banner");
+    const trigger = banner.getByRole("button", { name: "Language", exact: true });
+    await expect(async () => {
+      if ((await trigger.getAttribute("aria-expanded")) !== "true") await trigger.click();
+      await expect(trigger).toHaveAttribute("aria-expanded", "true", { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
+    const row = banner.getByRole("button", { name: locale.nativeLabel, exact: true });
+    await row.click();
+    await expect(row, "the pick closed the menu: its handler ran").toBeHidden();
   } else {
     // The account-menu trigger: unnamed on the homepage header, "Account
     // menu" in SiteNav; aria-haspopup="menu" on both.

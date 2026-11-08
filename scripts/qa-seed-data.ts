@@ -101,3 +101,17 @@ export function generalEventDescription(type: string, index: number): string {
 }
 
 export const PLACEHOLDER_TEXT = /lorem|ipsum|dolor sit|consectetur/i
+
+// Run R (8 Nov 2026) - a re-seed only updated an existing event's status, so
+// "upcoming" plans kept the date of the first seed and the clock walked past
+// them (the last free upcoming event, qa-general-event-05, went past on
+// 25 Oct and the nightly went red). The upsert's update now re-dates every
+// future-dated plan relative to this seed run; past plans keep their date.
+
+export function reseedEventUpdate<S extends string>(
+  plan: { status: S; dateOffsetDays: number },
+  now: Date = new Date(),
+): { status: S; date?: Date } {
+  if (plan.dateOffsetDays <= 0) return { status: plan.status }
+  return { status: plan.status, date: new Date(now.getTime() + plan.dateOffsetDays * 24 * 60 * 60 * 1000) }
+}
