@@ -1,3 +1,14 @@
+## Part 67 — START HERE (8 Nov 16:15 IST, chat), qa @ this commit
+Supersedes 66 as entry point (66 = legal pages live on prod, #762-#765 merged).
+### DECIDED (Hitesh 8 Nov 16:06): OPTION A — launch free-only
+- Soft launch = free discovery + free-event tickets; NO money through AFA. Paid bookings OFF by a server-enforced switch (S1a). Target go-live 17-19 Nov.
+- Why: Razorpay chat (ticket 21740823, MID TxVQjSFVLDVx2J, account under review) confirmed Route needs >Rs40L turnover + payer-payee transparency -> not available; collect-and-payout = CA HIGH RISK. Summary in claude.ai Project doc finance/razorpay-2026-11-08.md.
+- Payments later (proposed, not decided): Razorpay Technology Partner (OAuth; organiser's own account receives money, AFA platform fee split at payment; Hitesh already has a Partner account from 8 Nov -> request switch to Technology Partner). Open Qs to Razorpay: does Rs40L check apply to TP; non-GST individual KYC; RBI fit; pricing. Then CA on Rs20 fee GST (SAC 998599).
+- Razorpay brand name: Hitesh chose SHYAMKASTURI PRODUCTIONS (not AforAudience) deliberately.
+### Path to go-live (order)
+1. S2 OTP verify fix (dispatched, fix/otp-verify-s2). 2. S1a paid switch (dispatched, feat/paid-switch-s1a; chat applies migration to QA via Supabase + sets QA row paidBookingsEnabled=true; prod clean DB gets default false). 3. S1b wave flags W1-W4. 4. Rule 4 for language-rollout kn/bn/gu flake. 5. Nightly green x3. 6. S3 read-only prod readiness audit. 7. Hitesh rotates Google Maps + Razorpay keys. 8. S5 clean prod DB (backup, rehearse 75 migrations on scratch, show sample rows, reset, recreate Admin). 9. Hitesh phone pass on QA. 10. Promote qa->main, W1 on.
+- Hitesh non-code: Shops & Establishments + PTEC registrations (CA Q19). GST not needed for free-only.
+
 ## Part 66 — START HERE (8 Nov 14:45 IST, chat), qa @ this commit
 Supersedes 65 as entry point (65 = Hitesh's 4 actions; still valid except as below).
 ### Done this session
