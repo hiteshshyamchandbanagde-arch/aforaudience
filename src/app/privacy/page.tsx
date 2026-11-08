@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import LegalDocLayout, { H2, P, UL, LI, Placeholder } from "@/components/LegalDocLayout"
+import LegalDocLayout, { H2, P, UL, LI } from "@/components/LegalDocLayout"
 
 export const metadata: Metadata = {
   title: "Privacy Policy — AforAudience",
@@ -8,18 +8,20 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalDocLayout title="Privacy Policy" lastUpdated={<Placeholder>date to be set on publish</Placeholder>}>
+    <LegalDocLayout title="Privacy Policy" lastUpdated="8 November 2026">
       <P>
         AforAudience ("we", "us", "the platform") connects comedians, poets, musicians, and other live performers with
         venues, event organisers, and audiences, starting in Pune, India. This policy explains what personal data we
         collect, why, and what rights you have over it.
       </P>
       <P>
-        Operated by: <Placeholder>Legal entity name, once registered</Placeholder>
+        AforAudience is a product of Shyamkasturi Productions Private Limited.
         <br />
-        Registered address: <Placeholder>Address, once registered</Placeholder>
+        Operated by: Shyamkasturi Productions Private Limited
         <br />
-        Contact for privacy questions: <Placeholder>privacy@aforaudience.com</Placeholder>
+        Registered address: A-504, The Nest Co-op Housing Society, Sr. No. 76/2, Chandrabhaga Corner, Ravet, Haveli, Pune 412101, Maharashtra, India
+        <br />
+        Contact for privacy questions: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>
       </P>
 
       <H2>1. What we collect</H2>
@@ -47,8 +49,8 @@ export default function PrivacyPage() {
         visited) collected automatically to keep the service secure and working.
       </P>
       <P>
-        We do not knowingly collect information from anyone under the age of <Placeholder>13 / 16 / 18</Placeholder>{" "}
-        without appropriate consent, and the platform is not directed at children.
+        We do not knowingly collect information from anyone under the age of 18. You must be
+        18 or older to create an account, and the platform is not directed at children.
       </P>
 
       <H2>2. How we use it</H2>
@@ -101,15 +103,14 @@ export default function PrivacyPage() {
         </LI>
       </UL>
       <P>
-        To exercise these rights, contact <Placeholder>privacy email</Placeholder>. We aim to respond within{" "}
-        <Placeholder>30 days</Placeholder>.
+        To exercise these rights, contact <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>. We aim to respond within 30 days.
       </P>
 
       <H2>5. Data retention</H2>
       <P>
-        We keep account and booking data for as long as your account is active, and for a reasonable period
-        afterward to comply with tax, accounting, and legal obligations (typically <Placeholder>X years</Placeholder>{" "}
-        for financial records under Indian law). Verification codes (OTPs) expire and are discarded within minutes of
+        We keep account data for as long as your account is active. When you close your account, we delete your
+        account data within 90 days, except booking, payment and tax records, which we keep for as long as Indian
+        law requires (currently up to 8 years). Verification codes (OTPs) expire and are discarded within minutes of
         issuance.
       </P>
 
@@ -133,11 +134,13 @@ export default function PrivacyPage() {
         AforAudience is:
       </P>
       <P>
-        <Placeholder>Name</Placeholder>
+        Shyamchand Bangade, Director
         <br />
-        <Placeholder>Email</Placeholder>
+        Email: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>
         <br />
-        <Placeholder>Address</Placeholder>
+        Phone: <a href="tel:+919225139690">+91 92251 39690</a>
+        <br />
+        Address: A-504, The Nest Co-op Housing Society, Sr. No. 76/2, Chandrabhaga Corner, Ravet, Haveli, Pune 412101, Maharashtra, India
       </P>
 
       <H2>9. Changes to this policy</H2>
@@ -148,7 +151,7 @@ export default function PrivacyPage() {
 
       <H2>10. Contact us</H2>
       <P>
-        Questions about this policy: <Placeholder>privacy email</Placeholder>
+        Questions about this policy: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>
       </P>
     </LegalDocLayout>
   )
