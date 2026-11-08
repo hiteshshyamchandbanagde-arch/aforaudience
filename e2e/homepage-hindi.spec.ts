@@ -113,6 +113,14 @@ test("[BUG-2610-030] Hindi: the homepage eyebrow has no letter-spacing", async (
   const eyebrow = page.getByTestId("hero-live-tag").locator("span").last();
   await expect(eyebrow).toHaveText(/^अभी लाइव/);
   expect(await tracking(eyebrow)).toEqual(UNTRACKED);
+  // Run R2: the tag's city count is live QA data, and in Hindi the mono label
+  // falls back to a proportional sans (globals.css), so each digit has its own
+  // width: the shot drifted (144 -> 143 px) whenever the count changed. Pin the
+  // text to the baseline's own string (5 cities) so only the glyph rendering
+  // of the Devanagari under the real styles is compared, pixel for pixel.
+  await eyebrow.evaluate((node: HTMLElement) => {
+    node.textContent = "अभी लाइव — 5 शहर और बढ़ रहे हैं";
+  });
   // Run D amend: the tag sits at a fractional offset that changes run to
   // run, so its glyphs rastered a few pixels apart. Pinned at the viewport's
   // top-left corner (same width, opaque page background) for the shot.
