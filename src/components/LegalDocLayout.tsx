@@ -16,10 +16,9 @@ type LegalDocLayoutProps = {
   children: React.ReactNode
 }
 
-// Shared shell for /privacy and /terms. Both are marked as drafts pending
-// legal review (see design doc §9.1) - not final, but published to QA so
-// Hitesh can review the actual rendered page before the CA/lawyer pass and
-// eventual prod promotion once the company is registered.
+// Shared shell for /terms, /privacy, /refund-policy and /contact. The old
+// "Draft — pending legal review" banner was removed in L2b (8 Nov 2026): the
+// company is registered and these pages are the published policies.
 export default function LegalDocLayout({ title, lastUpdated, children }: LegalDocLayoutProps) {
   return (
     <main style={{ minHeight: "100vh", background: PAPER, fontFamily: SANS }}>
@@ -29,27 +28,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
           ← Back to AforAudience
         </Link>
 
-        <div
-          style={{
-            marginTop: "var(--afa-space-6)",
-            marginBottom: "var(--afa-space-32px)",
-            padding: "var(--afa-space-4) var(--afa-space-5)",
-            borderRadius: "var(--afa-radius-lg)",
-            background: "var(--afa-amber-tint)",
-            border: "1px solid var(--afa-amber)",
-          }}
-        >
-          <p style={{ fontSize: "var(--afa-text-ui)", fontWeight: 700, color: "var(--afa-amber)", marginBottom: "var(--afa-space-1)" }}>
-            Draft — pending legal review
-          </p>
-          <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
-            This page reflects our current plan, not a finalized legal document. It will be reviewed with our CA and a
-            lawyer once the company is formally registered, and this notice will be removed once that review is
-            complete.
-          </p>
-        </div>
-
-        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "var(--afa-space-2)" }}>
+        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginTop: "var(--afa-space-32px)", marginBottom: "var(--afa-space-2)" }}>
           {title}
         </h1>
         <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "var(--afa-space-40px)" }}>Last updated: {lastUpdated}</p>
