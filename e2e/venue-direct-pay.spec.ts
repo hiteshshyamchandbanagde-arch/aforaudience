@@ -22,11 +22,13 @@ import { useRuleViewport } from "./helpers/viewports";
  *
  * Needs migration 20261109120000_add_venue_direct_pay on QA.
  * Writes data: two events + their venue bookings (deleted in finally), and
- * Vinayak's UPI ID (restored to its previous value in finally, T6).
+ * Vinayak's UPI ID and QR (restored to its previous value in finally, T6).
  */
 test.use({ storageState: authFile("omkar") });
 
 const TEST_UPI = "vinayak.e2e@okaxis";
+// D2b - optional owner UPI QR (an https image URL from the existing upload).
+const TEST_QR = "https://example.com/e2e-d2b-upi-qr.png";
 
 function ymd(d: Date) {
   const p = (n: number) => String(n).padStart(2, "0");
@@ -39,15 +41,15 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
   const stamp = Date.now();
   const eventIds: string[] = [];
 
-  const { venueId, ownerId, prevUpi } = await withQaDb(async (db) => {
-    const { rows } = await db.query<{ venueId: string; ownerId: string; upiId: string | null }>(
-      `SELECT v.id AS "venueId", vo.id AS "ownerId", vo."upiId"
+  const { venueId, ownerId, prevUpi, prevQr } = await withQaDb(async (db) => {
+    const { rows } = await db.query<{ venueId: string; ownerId: string; upiId: string | null; upiQrUrl: string | null }>(
+      `SELECT v.id AS "venueId", vo.id AS "ownerId", vo."upiId", vo."upiQrUrl"
          FROM "Venue" v JOIN "VenueOwner" vo ON vo.id = v."ownerId" JOIN "User" u ON u.id = vo."userId"
         WHERE u.email = 'vinayak.venue@aforaudience.qa' AND v."isApproved" = true AND vo."isApproved" = true
         ORDER BY v."createdAt" ASC LIMIT 1`
     );
     expect(rows.length, "Vinayak needs an approved venue on QA").toBe(1);
-    return { venueId: rows[0].venueId, ownerId: rows[0].ownerId, prevUpi: rows[0].upiId };
+    return { venueId: rows[0].venueId, ownerId: rows[0].ownerId, prevUpi: rows[0].upiId, prevQr: rows[0].upiQrUrl };
   });
 
   // Far-future, per-run dates so no confirmed booking overlaps.
@@ -62,6 +64,12 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
     expect(upi.status(), await upi.text()).toBe(200);
     const badUpi = await vin.request.patch("/api/venue-owners/me", { data: { upiId: "not a upi" } });
     expect(badUpi.status()).toBe(400);
+    // D2b - optional QR: https only, read back from the profile API.
+    const qr = await vin.request.patch("/api/venue-owners/me", { data: { upiQrUrl: TEST_QR } });
+    expect(qr.status(), await qr.text()).toBe(200);
+    expect((await qr.json()).upiQrUrl).toBe(TEST_QR);
+    const badQr = await vin.request.patch("/api/venue-owners/me", { data: { upiQrUrl: "javascript:alert(1)" } });
+    expect(badQr.status()).toBe(400);
 
     // --- Omkar: two draft events + two venue requests ---
     const request = async (label: string, offset: number) => {
@@ -122,6 +130,7 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
     await expect(payee.locator("[data-afa-payee-upi]")).toHaveText(TEST_UPI);
     await expect(payee.locator("[data-afa-payee-amount]")).toHaveText("₹4,500");
     await expect(payee.locator("[data-afa-payee-note]")).toContainText("directly. AforAudience does not collect or hold this payment.");
+    await expect(payee.locator("[data-afa-payee-qr]")).toHaveAttribute("src", TEST_QR);
     await payee.scrollIntoViewIfNeeded();
     await payee.screenshot({ path: `test-results/d2-payee-block-${vp}.png` });
 
@@ -166,7 +175,7 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
         await db.query(`DELETE FROM "TicketTier" WHERE "eventId" = ANY($1)`, [eventIds]);
         await db.query(`DELETE FROM "Event" WHERE id = ANY($1)`, [eventIds]);
       }
-      await db.query(`UPDATE "VenueOwner" SET "upiId" = $2 WHERE id = $1`, [ownerId, prevUpi]);
+      await db.query(`UPDATE "VenueOwner" SET "upiId" = $2, "upiQrUrl" = $3 WHERE id = $1`, [ownerId, prevUpi, prevQr]);
     });
   }
 });
