@@ -7,6 +7,7 @@ Supersedes 65 as entry point (65 = Hitesh's 4 actions; still valid except as bel
 ### In flight
 - #764 (fix/legal-footer-l2 -> qa): L2 footer + delivery clause; L2 amend (footer-legal 390 shot pinned, 1px drift) + L2b (remove Draft banner + forbidden-text test) runs. Merge when e2e green on pinned head.
 ### Hitesh next
+- RAZORPAY 8 Nov 15:40 (chat): MID TxVQjSFVLDVx2J under review; activation ticket 21740823 (email only, info@shyamkasturiproductions.com, 24-48 h). Route confirmed OUT for now (>Rs40L turnover; first-year declaration must still confirm the threshold, not a waiver; apply via routepriority@razorpay.com). Agent answered only Route + activation: Q2 collect-and-payout, Q3 organisers' own accounts / tech partner, Q4 non-GST seller KYC, Q6 pricing STILL OPEN -> re-ask by replying on the ticket email. Detail: Project doc finance/razorpay-2026-11-08.md. Never submit a turnover declaration AFA can't meet.
 - Submit aforaudience.com for Razorpay website verification now; raise the 6-question support ticket. Rest of Part 65 list unchanged (key rotation, QA data fix OK, Feedback catch-up OK, branch deletes, payments decision, 14 vs 15 d).
 - Note: prod still says refund tiers 14/7 d (code); if Hitesh picks 15 d, change code + both pages.
 
