@@ -1,3 +1,15 @@
+## Part 66 — START HERE (8 Nov 14:45 IST, chat), qa @ this commit
+Supersedes 65 as entry point (65 = Hitesh's 4 actions; still valid except as below).
+### Done this session
+- #762 merged (qa 7808a78): run R + R2 (hi eyebrow shot pins text to baseline string; data drift, reviewed OK). Nightly reds 087/001/018/030 all fixed on PR e2e (608 pass).
+- #763 merged (qa 5010c86): legal pages L1. Hitesh chose STRICT T2 (no waiver) -> merged only after #762.
+- **#765 merged to MAIN (be810e9) = PROD, Hitesh "OK merge #765"**: legal pages + footer (Terms incl. §4 Delivery, Privacy full, /refund-policy/, /contact/, LegalDocLayout literal styles, footer links + "© 2026 Shyamkasturi Productions Private Limited" + "product of"). Prod deploy dpl_44dmzVANuoGgYxAyGHTcb2Qbq19A READY; verified live on www.aforaudience.com. "Draft — pending legal review" banner removed (P1b).
+### In flight
+- #764 (fix/legal-footer-l2 -> qa): L2 footer + delivery clause; L2 amend (footer-legal 390 shot pinned, 1px drift) + L2b (remove Draft banner + forbidden-text test) runs. Merge when e2e green on pinned head.
+### Hitesh next
+- Submit aforaudience.com for Razorpay website verification now; raise the 6-question support ticket. Rest of Part 65 list unchanged (key rotation, QA data fix OK, Feedback catch-up OK, branch deletes, payments decision, 14 vs 15 d).
+- Note: prod still says refund tiers 14/7 d (code); if Hitesh picks 15 d, change code + both pages.
+
 ## Part 65 — START HERE (8 Nov 08:20 IST, chat, end of session), qa @ this commit
 Supersedes 64 as entry point (64 = decisions detail; still valid). Hitesh's 4 actions for the next session, in order:
 
