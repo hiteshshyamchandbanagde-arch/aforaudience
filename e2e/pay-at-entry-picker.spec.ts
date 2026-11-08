@@ -93,8 +93,9 @@ test("[D1b] create a Pay at entry event through the form -> event page says pay 
     await page.getByPlaceholder("e.g., 199").fill("300");
 
     await page.getByRole("button", { name: "Save as Draft" }).click();
-    await page.waitForURL(/\/dashboard\/organiser\/events\/[^/]+$/, { timeout: 30_000 });
-    eventId = new URL(page.url()).pathname.split("/").pop() ?? null;
+    // The site uses trailing slashes: /dashboard/organiser/events/<id>/
+    await page.waitForURL(/\/dashboard\/organiser\/events\/(?!create)[^/]+\/?$/, { timeout: 30_000 });
+    eventId = new URL(page.url()).pathname.split("/").filter(Boolean).pop() ?? null;
     expect(eventId).toBeTruthy();
 
     const orgName = await withQaDb(async (db) => {
@@ -121,13 +122,17 @@ test("[D1b] create a Pay at entry event through the form -> event page says pay 
       await atulCtx.close();
     }
   } finally {
-    if (eventId) {
-      await withQaDb(async (db) => {
-        await db.query(`DELETE FROM "Notification" WHERE link LIKE $1`, [`%${eventId}%`]).catch(() => undefined);
-        await db.query(`DELETE FROM "Booking" WHERE "eventId" = $1`, [eventId]);
-        await db.query(`DELETE FROM "TicketTier" WHERE "eventId" = $1`, [eventId]);
-        await db.query(`DELETE FROM "Event" WHERE id = $1`, [eventId]);
-      });
-    }
+    // By title as well as id: if the form saved but the test failed before
+    // reading the id, the event is still cleaned up (T6).
+    await withQaDb(async (db) => {
+      const { rows } = await db.query<{ id: string }>(`SELECT id FROM "Event" WHERE title = $1`, [title]);
+      const ids = new Set(rows.map((r) => r.id));
+      if (eventId) ids.add(eventId);
+      for (const id of ids) {
+        await db.query(`DELETE FROM "Booking" WHERE "eventId" = $1`, [id]);
+        await db.query(`DELETE FROM "TicketTier" WHERE "eventId" = $1`, [id]);
+        await db.query(`DELETE FROM "Event" WHERE id = $1`, [id]);
+      }
+    });
   }
 });
