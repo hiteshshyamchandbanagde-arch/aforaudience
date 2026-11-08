@@ -40,9 +40,14 @@ type Locale = keyof typeof DICTS;
 // Hitesh's Hindi/Marathi read.
 // Payouts keeps Razorpay's own menu path, ID format and "KYC" as on
 // Razorpay; check-in's ticket-ref example is a code, not a word.
+// Edit Profile's direct-pay setting (D3): "UPI"/"QR" (and "UPI ID") are read
+// in Latin script in hi/mr, as on every UPI app, and "name@bank" is the UPI ID
+// format example: the same set dashboard-i18n-venue.spec.ts allows (D2c),
+// as LATIN_ALLOWED in marathi-locale.spec.ts does. Nothing beyond that set.
 const PROPER_NOUNS = [
   "AforAudience", "AFA", "Instagram", "YouTube", "Google", "Buy-in",
   "Razorpay", "Route → Accounts → Add Account", "acc_XXXXXXXXXXXXXX", "acc_", "KYC", "ID", "AFA-7K3M-Q9TX",
+  "UPI ID", "UPI", "QR", "name@bank",
 ];
 
 // Expected headings per language (organiserDashboard.yourEvents.title,
