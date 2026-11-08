@@ -2080,6 +2080,19 @@ const ta: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} அன்று காலாவதியானது — தற்போது முடக்கப்பட்டுள்ளது.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · நுழைவில் {organiser}-க்கு செலுத்தவும் (பணம்/UPI)",
+    noCollect: "AforAudience இந்தக் கட்டணத்தை வசூலிப்பதில்லை.",
+    reserveCta: "முன்பதிவு செய்",
+    badge: "நுழைவில் கட்டணம் · ₹{amount}",
+    attended: "வந்தார்",
+    noShow: "வரவில்லை",
+    reserved: "முன்பதிவு",
+    dueAtEntry: "நுழைவில் செலுத்த வேண்டியது: ₹{amount}",
+    markNoShow: "வரவில்லை எனக் குறி",
+    checkIn: "செக் இன்",
+  },
 }
 
 export default ta
