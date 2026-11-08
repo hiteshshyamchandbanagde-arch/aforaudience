@@ -2130,6 +2130,11 @@ const hi: Dictionary = {
     upiSaved: "UPI ID सेव हो गई",
     acceptCashOnly: "सिर्फ़ नकद पर स्वीकार करें",
     upiRequired: "पहले अपनी प्रोफ़ाइल में UPI ID जोड़ें, या सिर्फ़ नकद पर स्वीकार करें।",
+    upiQrLabel: "UPI QR कोड (वैकल्पिक)",
+    upiQrUpload: "QR इमेज अपलोड करें",
+    upiQrRemove: "QR हटाएँ",
+    // {payee}: venue name.
+    upiQrAlt: "{payee} के लिए UPI QR कोड",
   },
 }
 
