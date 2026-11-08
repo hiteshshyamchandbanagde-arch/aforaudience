@@ -44,6 +44,21 @@ test("homepage footer links every legal page and names the company", async ({ pa
   const productOf = footer.getByText(`AforAudience is a product of ${COMPANY}.`);
   await expect.poll(() => isTopmostAtCentre(productOf)).toBe(true);
   await page.addStyleTag({ content: HIDE_OVERLAYS });
+  // Run L2 amend: the footer's height (1147.78 px at 390) and its top on the
+  // page are fractional (line-heights like 23.1 px above and inside it), and
+  // the top's fraction differs between builds, so the screenshot clip spanned
+  // 1148 px on the preview and 1149 px locally. Pin the box to a whole-pixel
+  // height and shift it onto the pixel grid (same content, same styles) so
+  // the shot always covers the same pixels.
+  await footer.evaluate((node: HTMLElement) => {
+    const rect = node.getBoundingClientRect();
+    const frac = (rect.top + window.scrollY) % 1;
+    Object.assign(node.style, {
+      boxSizing: "border-box",
+      height: `${Math.ceil(rect.height)}px`,
+      transform: frac ? `translateY(${-frac}px)` : "none",
+    });
+  });
   await expect(footer).toHaveScreenshot(`footer-legal-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
     maxDiffPixelRatio: 0.02,
