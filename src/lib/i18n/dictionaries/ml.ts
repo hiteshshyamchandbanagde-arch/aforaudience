@@ -2080,6 +2080,19 @@ const ml: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date}-ന് കാലാവധി കഴിഞ്ഞു — ഇപ്പോൾ ഓഫാണ്.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · പ്രവേശനസമയത്ത് {organiser}-ന് പണം നൽകുക (കാഷ്/UPI)",
+    noCollect: "AforAudience ഈ പേയ്‌മെന്റ് സ്വീകരിക്കുന്നില്ല.",
+    reserveCta: "റിസർവ് ചെയ്യുക",
+    badge: "പ്രവേശനത്തിൽ പേയ്‌മെന്റ് · ₹{amount}",
+    attended: "പങ്കെടുത്തു",
+    noShow: "വന്നില്ല",
+    reserved: "റിസർവ് ചെയ്തു",
+    dueAtEntry: "പ്രവേശനത്തിൽ നൽകേണ്ടത്: ₹{amount}",
+    markNoShow: "വന്നില്ല എന്ന് അടയാളപ്പെടുത്തുക",
+    checkIn: "ചെക്ക് ഇൻ",
+  },
 }
 
 export default ml
