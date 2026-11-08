@@ -100,6 +100,25 @@ export function parseUpiId(v: unknown): { ok: true; value: string | null } | { o
   return { ok: true, value: t }
 }
 
+/**
+ * D2b - optional UPI QR image (uploaded via the existing image upload,
+ * so it is an https URL). Returns the URL, null for empty, or an error.
+ * Only https so a QR can never be a javascript:/data: URL.
+ */
+export function parseUpiQrUrl(v: unknown): { ok: true; value: string | null } | { ok: false; error: string } {
+  if (v === undefined || v === null) return { ok: true, value: null }
+  if (typeof v !== 'string') return { ok: false, error: 'QR image must be a URL' }
+  const t = v.trim()
+  if (!t) return { ok: true, value: null }
+  if (t.length > 2048) return { ok: false, error: 'QR image URL is too long' }
+  try {
+    if (new URL(t).protocol !== 'https:') return { ok: false, error: 'QR image must be an https URL' }
+  } catch {
+    return { ok: false, error: 'QR image must be a URL' }
+  }
+  return { ok: true, value: t }
+}
+
 export type VenueBookingChip =
   | 'requested'
   | 'awaitingPayment'

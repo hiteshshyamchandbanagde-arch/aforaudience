@@ -15,6 +15,7 @@ import {
   isDirectPayExpired,
   normalisePayerReference,
   parseUpiId,
+  parseUpiQrUrl,
   shouldUseDirectPay,
   venueBookingChip,
 } from '../src/lib/venue-direct-pay'
@@ -114,6 +115,17 @@ test('UPI ID validation', () => {
   assert.equal(parseUpiId('no-at-sign').ok, false)
   assert.equal(parseUpiId('a@b').ok, false)
   assert.equal(parseUpiId('name@bank space').ok, false)
+})
+test('UPI QR URL validation (D2b)', () => {
+  assert.deepEqual(parseUpiQrUrl(' https://x.public.blob.vercel-storage.com/avatars/qr.png '), { ok: true, value: 'https://x.public.blob.vercel-storage.com/avatars/qr.png' })
+  assert.deepEqual(parseUpiQrUrl(''), { ok: true, value: null })
+  assert.deepEqual(parseUpiQrUrl(null), { ok: true, value: null })
+  assert.equal(parseUpiQrUrl('http://example.com/qr.png').ok, false)
+  assert.equal(parseUpiQrUrl('javascript:alert(1)').ok, false)
+  assert.equal(parseUpiQrUrl('data:image/png;base64,AAAA').ok, false)
+  assert.equal(parseUpiQrUrl('not a url').ok, false)
+  assert.equal(parseUpiQrUrl(42).ok, false)
+  assert.equal(parseUpiQrUrl('https://x.com/' + 'a'.repeat(3000)).ok, false)
 })
 test('payee note names the payee and says AFA does not collect', () => {
   assert.equal(directPayNote('Vinayak Hall'), 'Pay Vinayak Hall directly. AforAudience does not collect or hold this payment.')
