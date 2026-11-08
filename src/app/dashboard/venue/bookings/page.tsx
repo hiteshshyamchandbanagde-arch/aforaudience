@@ -8,6 +8,7 @@ import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
 import DashboardShell from '@/components/DashboardShell'
+import DirectPayBookings from '@/components/dashboard/DirectPayBookings'
 import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 import { calendarDate, formatDate, istMonthKey } from '@/lib/format-date'
@@ -26,6 +27,8 @@ interface BookingRequest {
   venue: { id: string; name: string; city: string }
   organiser: { orgName: string }
   event: { id: string; title: string; date: string } | null
+  // D2 - set on direct-payment bookings (shown in the DirectPayBookings panel).
+  directPayStatus?: string | null
 }
 
 const STATUS_TONE: Record<string, StatusPillTone> = {
@@ -61,6 +64,8 @@ export default function VenueBookingsPage() {
   const [loadError, setLoadError] = useState('')
   const { showToast } = useToast()
   const [actingOn, setActingOn] = useState<string | null>(null)
+  const [cashOnlyFor, setCashOnlyFor] = useState<string | null>(null)
+  const [directPayTick, setDirectPayTick] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date()
     return new Date(d.getFullYear(), d.getMonth(), 1)
@@ -93,16 +98,26 @@ export default function VenueBookingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
-  const respond = async (bookingId: string, newStatus: 'CONFIRMED' | 'CANCELLED') => {
+  const respond = async (bookingId: string, newStatus: 'CONFIRMED' | 'CANCELLED', cashOnly = false) => {
     setActingOn(bookingId)
     try {
       const res = await fetch(`/api/venue-bookings/${bookingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, ...(cashOnly ? { cashOnly: true } : {}) }),
       })
-      if (!res.ok) throw new Error(v.updateFailed)
+      if (!res.ok) {
+        // D2 - accepting with payments off needs a UPI ID, or cash only.
+        const body = await res.json().catch(() => ({}))
+        if (body.code === 'UPI_REQUIRED') {
+          setCashOnlyFor(bookingId)
+          throw new Error(tr.venueDirectPay.upiRequired)
+        }
+        throw new Error(v.updateFailed)
+      }
+      setCashOnlyFor(null)
       await fetchBookings()
+      setDirectPayTick((n) => n + 1)
       showToast(newStatus === 'CONFIRMED' ? v.confirmedToast : v.rejectedToast, 'success')
     } catch (err: any) {
       showToast(err.message || v.updateFailed, 'error')
@@ -114,7 +129,9 @@ export default function VenueBookingsPage() {
   if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
-  const pending = bookings.filter((b) => b.status === 'PENDING')
+  // D2 - an accepted direct-payment booking is still PENDING until the
+  // owner confirms receipt; it lives in the DirectPayBookings panel.
+  const pending = bookings.filter((b) => b.status === 'PENDING' && !b.directPayStatus)
   const resolved = bookings.filter((b) => b.status !== 'PENDING')
 
   // F3 - revenue summary. Gross amounts only (the rental fee the Organiser
@@ -172,6 +189,8 @@ export default function VenueBookingsPage() {
           {loadError && (
             <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{loadError}</ErrorBanner>
           )}
+
+          <DirectPayBookings key={directPayTick} side="VENUE_OWNER" />
 
           {/* F3 - Revenue summary */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
@@ -292,6 +311,11 @@ export default function VenueBookingsPage() {
                       <Button variant="outline" onClick={() => respond(b.id, 'CANCELLED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
                         <IconX /> {v.reject}
                       </Button>
+                      {cashOnlyFor === b.id && (
+                        <Button variant="outline" data-afa-accept-cash-only onClick={() => respond(b.id, 'CONFIRMED', true)} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)' }}>
+                          {tr.venueDirectPay.acceptCashOnly}
+                        </Button>
+                      )}
                     </div>
                   </Card>
                 ))}
