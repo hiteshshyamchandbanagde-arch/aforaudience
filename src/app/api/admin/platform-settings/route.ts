@@ -11,6 +11,7 @@ import {
   setAudienceChoiceWeightDefaults,
   setEventCreationWindowMonths,
   setDirectPayoutsEnabled,
+  setPaidBookingsEnabled,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
@@ -81,12 +82,13 @@ export async function PATCH(req: Request) {
     Object.prototype.hasOwnProperty.call(body, 'celebrityVoteWeightDefault')
   const hasEventWindow = Object.prototype.hasOwnProperty.call(body, 'eventCreationWindowMonths')
   const hasDirectPayouts = Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabled')
+  const hasPaidBookings = Object.prototype.hasOwnProperty.call(body, 'paidBookingsEnabled')
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts && !hasPaidBookings) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, or all three vote weight defaults together is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, paidBookingsEnabled, or all three vote weight defaults together is required',
       },
       { status: 400 }
     )
@@ -175,6 +177,14 @@ export async function PATCH(req: Request) {
         enabledUntil = parsed
       }
       updated = await setDirectPayoutsEnabled({ enabled, enabledUntil })
+    }
+
+    // S1a - "paid bookings" master switch (turns on real payments).
+    if (hasPaidBookings) {
+      if (typeof body.paidBookingsEnabled !== 'boolean') {
+        return NextResponse.json({ error: 'paidBookingsEnabled must be a boolean' }, { status: 400 })
+      }
+      updated = await setPaidBookingsEnabled(body.paidBookingsEnabled)
     }
 
     return NextResponse.json({ settings: updated })

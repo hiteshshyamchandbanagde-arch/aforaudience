@@ -5,7 +5,8 @@ import prisma from '@/lib/prisma'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { parseAmount } from '@/lib/money-validation'
 import { requireVerifiedPhone } from '@/lib/verification'
-import { getPlatformSettings } from '@/lib/platform-settings'
+import { getPlatformSettings, getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 import { isTourStopBookable, recomputeTourStatus } from '@/lib/tours'
 
@@ -170,6 +171,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         }
         voteWeightsUpdate = { audienceVoteWeight: a, panelistVoteWeight: p, celebrityVoteWeight: c }
       }
+    }
+
+    // S1a - "paid bookings" master switch: while it is off, refuse any
+    // ticket price above 0 on the server (UI hiding is not enough).
+    if (requestsPaidTickets({ isFree, ticketPrice, ticketTiers }) && !(await getPaidBookingsEnabled())) {
+      return NextResponse.json(
+        { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED },
+        { status: 403 }
+      )
     }
 
     // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at

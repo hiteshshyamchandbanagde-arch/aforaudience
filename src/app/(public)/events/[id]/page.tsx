@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import EventDetailClientPage from './EventDetailClientPage'
 import { computeHypeScore } from '@/lib/hype-score'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { requestsPaidTickets } from '@/lib/paid-bookings'
 
 // GEN-2608-027 - same eventStartInstant convention used in
 // bookings/[id]/route.ts, performances/[id]/cancel/route.ts, and
@@ -157,7 +159,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     canReview = !!checkedInBooking && eventStartInstant(event.date, event.startTime).getTime() <= Date.now()
   }
 
-  return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} />
+  // S1a - "paid bookings" master switch: while it is off, a paid event
+  // shows "Booking opens soon" instead of the booking button. The server
+  // routes refuse paid bookings regardless; this is the UI side.
+  const bookingPaused =
+    requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) &&
+    !(await getPaidBookingsEnabled())
+
+  return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} bookingPaused={bookingPaused} />
 }
 
 // Same reasoning as venues/page.tsx - no dynamic API is used here otherwise,

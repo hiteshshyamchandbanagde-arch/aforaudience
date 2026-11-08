@@ -7,6 +7,8 @@ import {
   razorpayCredentialsPresent,
   getPublicKeyId,
 } from "@/lib/razorpay"
+import { getPaidBookingsEnabled } from "@/lib/platform-settings"
+import { paidBookingBlock } from "@/lib/paid-bookings"
 
 // ---------------------------------------------------------------------------
 // POST /api/payments/create-order
@@ -99,6 +101,13 @@ export async function POST(request: Request) {
       },
       { status: 400 }
     )
+  }
+
+  // S1a - "paid bookings" master switch. Every amount here is paid (>= 100
+  // paise), so this refuses the whole route while the switch is off.
+  const block = paidBookingBlock(amount, await getPaidBookingsEnabled())
+  if (block) {
+    return NextResponse.json(block.body, { status: block.status })
   }
 
   const currency = typeof body.currency === "string" ? body.currency : "INR"

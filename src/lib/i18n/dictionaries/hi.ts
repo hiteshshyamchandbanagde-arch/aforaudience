@@ -608,6 +608,7 @@ const hi: Dictionary = {
     reserveFailed: "सीटें आरक्षित करने में विफल",
     reviewFailed: "समीक्षा सबमिट करने में विफल",
     selectTicketsCta: "टिकट चुनें",
+    bookingOpensSoon: "बुकिंग जल्द शुरू होगी",
   },
   checkoutPage: {
     loadingCheckout: "आपका चेकआउट लोड हो रहा है…",

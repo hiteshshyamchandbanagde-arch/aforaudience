@@ -1,4 +1,7 @@
+import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { requestsPaidTickets } from '@/lib/paid-bookings'
 import SeatSelectionClientPage from './SeatSelectionClientPage'
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - the seat/ticket-tier picker,
@@ -17,6 +20,13 @@ export default async function SeatSelectionPage({ params }: { params: Promise<{ 
 
   if (!event || !['APPROVED', 'COMPLETED'].includes(event.status)) {
     return <SeatSelectionClientPage event={null} />
+  }
+
+  // S1a - "paid bookings" switch off: no booking panel (no Pay/Book) for a
+  // paid event. Back to the event page, which shows "Booking opens soon".
+  // POST /api/bookings refuses these anyway; this keeps a deep link honest.
+  if (requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
+    redirect(`/events/${id}`)
   }
 
   // Same NUMBERED-venue live-occupancy correction as EventDetailPage

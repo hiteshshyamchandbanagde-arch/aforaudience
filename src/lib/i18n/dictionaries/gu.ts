@@ -609,6 +609,7 @@ const gu: Dictionary = {
     reserveFailed: "સીટો રિઝર્વ કરવામાં નિષ્ફળ",
     reviewFailed: "સમીક્ષા સબમિટ કરવામાં નિષ્ફળ",
     selectTicketsCta: "ટિકિટ પસંદ કરો",
+    bookingOpensSoon: "બુકિંગ ટૂંક સમયમાં શરૂ થશે",
   },
   checkoutPage: {
     loadingCheckout: "તમારું ચેકઆઉટ લોડ થઈ રહ્યું છે…",

@@ -93,6 +93,10 @@ export default function AdminSettingsPage() {
   const [initialEventWindow, setInitialEventWindow] = useState<number>(3)
   const [eventWindowSaving, setEventWindowSaving] = useState(false)
 
+  // S1a - "paid bookings" master switch (default OFF = free-only launch).
+  const [paidBookingsEnabled, setPaidBookingsEnabledState] = useState<boolean>(false)
+  const [initialPaidBookingsEnabled, setInitialPaidBookingsEnabled] = useState<boolean>(false)
+  const [paidBookingsSaving, setPaidBookingsSaving] = useState(false)
   const [directPayoutsEnabled, setDirectPayoutsEnabledState] = useState<boolean>(false)
   const [initialDirectPayoutsEnabled, setInitialDirectPayoutsEnabled] = useState<boolean>(false)
   const [directPayoutsUntil, setDirectPayoutsUntil] = useState<string>('') // datetime-local string, '' = no expiry
@@ -177,6 +181,10 @@ export default function AdminSettingsPage() {
         const evWindow = data.settings.eventCreationWindowMonths
         setInitialEventWindow(evWindow)
         setEventWindow(String(evWindow))
+
+        const paidOn = data.settings.paidBookingsEnabled === true
+        setInitialPaidBookingsEnabled(paidOn)
+        setPaidBookingsEnabledState(paidOn)
 
         const dp = directPayoutsFormState(data.settings)
         setInitialDirectPayoutsEnabled(dp.enabled)
@@ -430,6 +438,27 @@ export default function AdminSettingsPage() {
   const isEventWindowDirty = Math.round(Number(eventWindow || 0)) !== initialEventWindow
   const isEventWindowValid = Number.isInteger(Number(eventWindow)) && Number(eventWindow) >= 1 && Number(eventWindow) <= 24
 
+  const savePaidBookings = async () => {
+    setPaidBookingsSaving(true)
+    try {
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paidBookingsEnabled }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const on = data.settings.paidBookingsEnabled === true
+      setInitialPaidBookingsEnabled(on)
+      setPaidBookingsEnabledState(on)
+      showToast('Saved.', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
+    } finally {
+      setPaidBookingsSaving(false)
+    }
+  }
+
   const saveDirectPayouts = async () => {
     setDirectPayoutsSaving(true)
     try {
@@ -562,6 +591,46 @@ export default function AdminSettingsPage() {
         {loadError && (
           <ErrorBanner style={{ padding: 'var(--afa-space-3) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
         )}
+
+        <div
+          data-afa-paid-bookings-card
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          {/* Line heights snapped to whole pixels: a fractional card height
+              (1.6 x 13px = 20.8px per line) moved every card below by a
+              sub-pixel and changed how the Direct payouts toggle's text
+              rasterised at 390 (BUG-2609-051 baseline). */}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Paid bookings
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
+            OFF = free-only launch: paid tickets can&apos;t be created or booked, and paid events show &ldquo;Booking opens soon&rdquo;. Enforced on the server. Free events are never affected.
+          </p>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              data-afa-paid-bookings-toggle
+              checked={paidBookingsEnabled}
+              onChange={(e) => setPaidBookingsEnabledState(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+              Enable paid bookings
+            </span>
+          </label>
+          <p data-afa-paid-bookings-warning style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
+            Turns on real payments. Needs Razorpay live keys + GST/compliance sign-off.
+          </p>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={savePaidBookings} disabled={paidBookingsSaving || paidBookingsEnabled === initialPaidBookingsEnabled}>
+            {paidBookingsSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
 
         <div
           style={{

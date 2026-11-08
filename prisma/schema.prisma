@@ -1221,7 +1221,13 @@ model PlatformSettings {
   directPayoutsEnabled       Boolean   @default(false)
   directPayoutsEnabledUntil  DateTime?
 
-  updatedAt                    DateTime @updatedAt
+  // S1a (Hitesh, 8 Nov) - soft launch is free-only: no money flows through
+  // AFA until an admin turns this on. Enforced on the server at every
+  // payable path (see src/lib/paid-bookings.ts). Default OFF; the
+  // migration never sets it true (prod's clean DB is built from them).
+  paidBookingsEnabled        Boolean   @default(false)
+
+  updatedAt                   DateTime @updatedAt
 }
 
 // Display-only currency preference (Option A, session 47, 30 Jul). One row

@@ -609,6 +609,7 @@ const bn: Dictionary = {
     reserveFailed: "সিট সংরক্ষণ করতে ব্যর্থ",
     reviewFailed: "রিভিউ জমা দিতে ব্যর্থ",
     selectTicketsCta: "টিকিট নির্বাচন করুন",
+    bookingOpensSoon: "বুকিং শীঘ্রই খুলবে",
   },
   checkoutPage: {
     loadingCheckout: "আপনার চেকআউট লোড হচ্ছে…",
