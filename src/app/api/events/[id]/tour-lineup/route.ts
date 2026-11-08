@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { recomputeTourStatus } from '@/lib/tours'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { performanceDirectPayCreateData } from '@/lib/performance-direct-pay'
 
 // POST /api/events/[id]/tour-lineup
 // body: { artistId: string }
@@ -67,6 +69,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const lineupCount = await prisma.performance.count({ where: { eventId, cancelledAt: null } })
 
+    const paidEnabled = await getPaidBookingsEnabled()
     const [, performance] = await prisma.$transaction([
       prisma.application.create({
         data: {
@@ -85,6 +88,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           compensationType: event.defaultCompensationType,
           feeAmount: event.defaultCompensationType === 'PAID' ? event.defaultFeeAmount : null,
           buyInAmount: event.defaultCompensationType === 'BUY_IN' ? event.defaultBuyInAmount : null,
+          // D3 - PAID/BUY_IN with online payments off: 48 h direct payment.
+          ...performanceDirectPayCreateData(
+            {
+              compensationType: event.defaultCompensationType,
+              feeAmount: event.defaultFeeAmount,
+              buyInAmount: event.defaultBuyInAmount,
+            },
+            paidEnabled
+          ),
         },
       }),
     ])

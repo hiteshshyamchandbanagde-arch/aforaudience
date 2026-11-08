@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { performanceDirectPayCreateData } from '@/lib/performance-direct-pay'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -33,7 +35,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
     }
 
-    const { status, compensationType, feeAmount, buyInAmount } = await req.json()
+    const { status, compensationType, feeAmount, buyInAmount, paymentMethod } = await req.json()
     if (!['APPROVED', 'REJECTED', 'PENDING'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
@@ -73,8 +75,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const resolvedBuyInAmount = compensationType
           ? (validCompType === 'BUY_IN' && buyInAmount ? parseFloat(buyInAmount) : null)
           : application.event.defaultBuyInAmount
+        // D3 - a PAID/BUY_IN slot agreed while online payments are off (or
+        // the organiser chose DIRECT) waits 48 h on a direct payment.
+        const direct = performanceDirectPayCreateData(
+          { compensationType: validCompType, feeAmount: resolvedFeeAmount, buyInAmount: resolvedBuyInAmount },
+          await getPaidBookingsEnabled(),
+          paymentMethod
+        )
         await prisma.performance.create({
           data: {
+            ...direct,
             eventId: application.eventId,
             artistId: application.artistId,
             slot: lineupCount + 1,

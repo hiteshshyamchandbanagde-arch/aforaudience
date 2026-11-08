@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { performanceDirectPayCreateData } from '@/lib/performance-direct-pay'
 
 // "Book for your event" card (11 Aug, Hitesh: "keep it invite for
 // published event") - the card previously promised an invite action
@@ -77,6 +79,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const lineupCount = await prisma.performance.count({ where: { eventId, cancelledAt: null } })
 
+    const paidEnabled = await getPaidBookingsEnabled()
     const [application] = await prisma.$transaction([
       prisma.application.create({
         data: {
@@ -99,6 +102,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           compensationType: event.defaultCompensationType,
           feeAmount: event.defaultCompensationType === 'PAID' ? event.defaultFeeAmount : null,
           buyInAmount: event.defaultCompensationType === 'BUY_IN' ? event.defaultBuyInAmount : null,
+          // D3 - PAID/BUY_IN with online payments off: 48 h direct payment.
+          ...performanceDirectPayCreateData(
+            {
+              compensationType: event.defaultCompensationType,
+              feeAmount: event.defaultFeeAmount,
+              buyInAmount: event.defaultBuyInAmount,
+            },
+            paidEnabled
+          ),
         },
       }),
     ])
