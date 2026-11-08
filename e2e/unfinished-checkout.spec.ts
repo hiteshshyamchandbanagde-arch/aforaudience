@@ -86,9 +86,13 @@ test("[BUG-2610-018] My Tickets: an expired unpaid hold is never a ticket card; 
   expect(box.height, "the row is compact, not a ticket card").toBeLessThan(80);
 
   await hideFloatingOverlays(page);
+  // The fixture event is re-dated forward as the clock walks on, so the date
+  // is masked; the mask is as wide as the text, and a new date changed the
+  // shot (red nightly 21 Oct-8 Nov). Pinned to one fixed text before the shot.
+  const date = page.locator("[data-afa-unfinished-date]");
+  await date.evaluate((el) => (el.textContent = "20 Dec"));
   await expect(page.locator("[data-afa-unfinished-checkouts]")).toHaveScreenshot(`unfinished-checkout-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
-    // The fixture event is re-dated forward as the clock walks on.
-    mask: [page.locator("[data-afa-unfinished-date]")],
+    mask: [date],
   });
 });
