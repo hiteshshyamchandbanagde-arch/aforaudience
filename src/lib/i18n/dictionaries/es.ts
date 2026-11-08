@@ -2135,6 +2135,11 @@ const es: Dictionary = {
     upiSaved: "ID de UPI guardado",
     acceptCashOnly: "Aceptar solo en efectivo",
     upiRequired: "Primero añade tu ID de UPI en tu perfil o acepta solo en efectivo.",
+    upiQrLabel: "Código QR de UPI (opcional)",
+    upiQrUpload: "Subir imagen QR",
+    upiQrRemove: "Quitar QR",
+    // {payee}: venue name.
+    upiQrAlt: "Código QR de UPI para {payee}",
   },
 }
 
