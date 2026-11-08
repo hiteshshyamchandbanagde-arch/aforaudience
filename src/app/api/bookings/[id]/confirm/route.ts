@@ -35,6 +35,13 @@ import { ensureTicketCode } from '@/lib/assign-ticket-code'
 // Deliberately does NOT trigger PDF/SMS/email — those slot in at
 // Checkpoint 3, wired to the CONFIRMED transition once we have real
 // user-facing outputs to send. For now, confirmation is DB-only.
+//
+// S1a (8 Nov) - deliberately NOT blocked by the "paid bookings" switch.
+// This route only settles a payment Razorpay has already taken (same as
+// verify/webhook/refund). New paid orders are refused upstream in
+// createRazorpayOrder and POST /api/bookings, so no new payment can reach
+// here while the switch is off; blocking it would strand a captured
+// payment (money taken, no ticket) if the switch is turned off mid-checkout.
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
