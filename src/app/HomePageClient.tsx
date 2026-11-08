@@ -260,7 +260,7 @@ export default function HomePageClient({ liveCities }: { liveCities: string[] })
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "var(--afa-space-32px)", borderTop: "1px solid var(--afa-tint-08)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-1)" }}>
               <span>{tr.homePage.footerCopyright}</span>
-              <span style={{ fontSize: "var(--afa-text-caption)" }}>{tr.homePage.footerProductOf}</span>
+              <span style={{ fontSize: "var(--afa-text-small)" }}>{tr.homePage.footerProductOf}</span>
             </div>
             <span>{tr.homePage.footerMadeWith}</span>
           </div>

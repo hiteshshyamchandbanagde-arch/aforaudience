@@ -1,5 +1,5 @@
 import { test, expect } from "./helpers/test";
-import { useRuleViewport } from "./helpers/viewports";
+import { isTopmostAtCentre, useRuleViewport } from "./helpers/viewports";
 
 /**
  * L2 (8 Nov 2026) - footer legal links for Razorpay website verification.
@@ -17,6 +17,9 @@ import { useRuleViewport } from "./helpers/viewports";
 const COMPANY = "Shyamkasturi Productions Private Limited";
 const LEGAL_HREFS = ["/privacy/", "/terms/", "/refund-policy/", "/contact/"];
 const LOCALE_STORAGE_KEY = "afa-locale";
+// The sticky header, phone tab bar (a <nav>), chat button and Vercel toolbar
+// float over the footer depending on scroll; they are not the footer.
+const HIDE_OVERLAYS = "header, nav, .afa-support-chat-btn, vercel-live-feedback { visibility: hidden !important; }";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -36,6 +39,15 @@ test("homepage footer links every legal page and names the company", async ({ pa
   await expect(footer).toContainText("© 2026");
   await expect(footer).toContainText(`AforAudience is a product of ${COMPANY}.`);
   await expect(footer).not.toContainText("2025");
+  // At the very bottom of the page the company line is not under the phone tab bar.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const productOf = footer.getByText(`AforAudience is a product of ${COMPANY}.`);
+  await expect.poll(() => isTopmostAtCentre(productOf)).toBe(true);
+  await page.addStyleTag({ content: HIDE_OVERLAYS });
+  await expect(footer).toHaveScreenshot(`footer-legal-${isMobile ? 390 : 1440}.png`, {
+    animations: "disabled",
+    maxDiffPixelRatio: 0.02,
+  });
 });
 
 test("hi footer keeps the company name in Latin script", async ({ page, isMobile }) => {
