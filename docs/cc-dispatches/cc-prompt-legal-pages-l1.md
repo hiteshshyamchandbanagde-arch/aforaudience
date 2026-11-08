@@ -8,11 +8,11 @@
 
 ## Company facts (use exactly these)
 - Operator: **Shyamkasturi Productions Private Limited**. Use the sentence "AforAudience is a product of Shyamkasturi Productions Private Limited" where the operator is named.
-- Registered office: Sr No 76/2, Flat No A/504, The Nest Co-op Housing Society, Ravet, Haveli, Pune 412101, Maharashtra, India.
-- Contact email: info@aforaudience.com (use it for support, privacy and grievance contact).
+- Registered office: A-504, The Nest Co-op Housing Society, Sr. No. 76/2, Chandrabhaga Corner, Ravet, Haveli, Pune 412101, Maharashtra, India.
+- Customer support / privacy email: info@aforaudience.com. Company email: info@shyamkasturiproductions.com (show it on Contact as the company contact).
+- Phone: +91 92251 39690 (Contact page as a tel: link, and in the Grievance Officer block).
 - Grievance Officer: Shyamchand Bangade, Director, info@aforaudience.com, at the registered office address above. Use this spelling exactly.
 - No other person is named anywhere in page content (only the Director above as Grievance Officer).
-- Phone: none yet. Don't invent one, and leave no placeholder; Hitesh adds it later.
 - Last updated: the date of the commit.
 
 ## Defaults chosen by chat (Hitesh can change; list them in the status file)
@@ -42,5 +42,5 @@
 - tsc, unit self-tests, eslint (touched files), checker/ratchet green on the pushed head.
 
 ## Finish
-- Status file `cc-autopilot-status.md` (T7). Human check for Hitesh: read Terms, Privacy, Refund and Contact once on the preview (wording, address); confirm the defaults (age 18, 90-day deletion, ₹20 + GST, Pune courts); add a phone number when one exists.
+- Status file `cc-autopilot-status.md` (T7). Human check for Hitesh: read Terms, Privacy, Refund and Contact once on the preview (wording, address); confirm the defaults (age 18, 90-day deletion, ₹20 + GST, Pune courts).
 - Do not touch the Feedback table. No data changes.
