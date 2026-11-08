@@ -132,7 +132,7 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
   return eventStart.getTime() <= Date.now()
 }
 
-export default function EventDetailPage({ event, canReview }: { event: EventData | null; canReview: boolean }) {
+export default function EventDetailPage({ event, canReview, bookingPaused = false }: { event: EventData | null; canReview: boolean; bookingPaused?: boolean }) {
   const { t: tr, locale } = useLocale()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -372,13 +372,22 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     {tr.eventDetailPage.seatsAvailableSummary.replace("{available}", String(event.availableSeats)).replace("{total}", String(event.totalSeats)).replace("{max}", String(event.maxSeatsPerBooking))}
                   </div>
 
-                  <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ textDecoration: "none" }}>
-                    {tr.eventDetailPage.selectTicketsCta}
-                  </Link>
+                  {bookingPaused ? (
+                    // S1a - paid bookings switched off: neutral state, no Pay/Book button.
+                    <div data-afa-booking-opens-soon role="status" style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", textAlign: "center", padding: "var(--afa-space-3)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-xs)" }}>
+                      {tr.eventDetailPage.bookingOpensSoon}
+                    </div>
+                  ) : (
+                    <>
+                      <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ textDecoration: "none" }}>
+                        {tr.eventDetailPage.selectTicketsCta}
+                      </Link>
 
-                  <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
-                    {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
-                  </div>
+                      <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
+                        {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -693,9 +702,15 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               {priceLabel}
             </div>
           </div>
-          <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ width: "auto", padding: "var(--afa-space-3) var(--afa-space-6)", textDecoration: "none", flexShrink: 0 }}>
-            {tr.eventDetailPage.selectTicketsCta}
-          </Link>
+          {bookingPaused ? (
+            <span data-afa-booking-opens-soon style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", flexShrink: 0 }}>
+              {tr.eventDetailPage.bookingOpensSoon}
+            </span>
+          ) : (
+            <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ width: "auto", padding: "var(--afa-space-3) var(--afa-space-6)", textDecoration: "none", flexShrink: 0 }}>
+              {tr.eventDetailPage.selectTicketsCta}
+            </Link>
+          )}
         </div>
       )}
 
