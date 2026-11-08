@@ -28,6 +28,7 @@ import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import PerformanceDirectPay from '@/components/dashboard/PerformanceDirectPay'
 import { formatINR } from '@/lib/money-display'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { countText } from '@/lib/i18n/plural'
@@ -312,6 +313,9 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           {error && (
             <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error}</div>
           )}
+
+          {/* D3 - artist fees I owe / buy-ins owed to me, paid directly (renders nothing when none) */}
+          <PerformanceDirectPay side="ORGANISER" eventId={id} />
 
           {lineup.length > 0 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)' }}>
