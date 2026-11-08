@@ -212,9 +212,18 @@ export default function VenueOwnerEditPage() {
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleQrUpload} disabled={uploadingQr} style={{ display: 'none' }} />
                 </label>
                 {upiQrUrl && (
-                  <button type="button" data-afa-upi-qr-remove className="avp-btn-outline" onClick={() => setUpiQrUrl('')} style={{ ...outlineLinkStyle, cursor: 'pointer' }}>
+                  <Button
+                    variant="outline-neutral"
+                    size="lg"
+                    fullWidth={false}
+                    type="button"
+                    data-afa-upi-qr-remove
+                    className="avp-btn-outline"
+                    onClick={() => setUpiQrUrl('')}
+                    style={{ ...outlineLinkStyle, cursor: 'pointer' }}
+                  >
                     {tr.venueDirectPay.upiQrRemove}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
