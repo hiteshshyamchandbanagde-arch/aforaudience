@@ -2092,6 +2092,14 @@ const kn: Dictionary = {
     dueAtEntry: "ಪ್ರವೇಶದಲ್ಲಿ ಪಾವತಿಸಬೇಕು: ₹{amount}",
     markNoShow: "ಬರಲಿಲ್ಲ ಎಂದು ಗುರುತಿಸಿ",
     checkIn: "ಚೆಕ್ ಇನ್",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "ಪ್ರೇಕ್ಷಕರು ಹೇಗೆ ಪಾವತಿಸುತ್ತಾರೆ?",
+    modeFree: "ಉಚಿತ",
+    modePayAtEntry: "ಪ್ರವೇಶದಲ್ಲಿ ಪಾವತಿ",
+    modePayAtEntryHelp: "ಪ್ರೇಕ್ಷಕರು AforAudience ನಲ್ಲಿ ಸೀಟು ಕಾಯ್ದಿರಿಸುತ್ತಾರೆ ಮತ್ತು ಸ್ಥಳದಲ್ಲಿ ನೇರವಾಗಿ ನಿಮಗೆ ಪಾವತಿಸುತ್ತಾರೆ — ನಗದು ಅಥವಾ UPI. AforAudience ಈ ಪಾವತಿಯನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+    modeOnline: "ಆನ್‌ಲೈನ್ ಪಾವತಿ",
+    modeOnlineComingSoon: "ಶೀಘ್ರದಲ್ಲೇ",
+    modeOnlineKept: "ಆನ್‌ಲೈನ್ ಪಾವತಿಗಳು ಸದ್ಯಕ್ಕೆ ಸ್ಥಗಿತಗೊಂಡಿವೆ. ಈ ಈವೆಂಟ್ ತನ್ನ ಆನ್‌ಲೈನ್ ಪಾವತಿ ಮೋಡ್ ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ; ಬುಕಿಂಗ್ ಪಡೆಯಲು ಪ್ರವೇಶದಲ್ಲಿ ಪಾವತಿ ಆಯ್ಕೆಮಾಡಿ.",
   },
 }
 
