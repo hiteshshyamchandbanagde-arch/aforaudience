@@ -7,6 +7,7 @@
 - Default audience mode = **Pay at entry**: the seat is reserved instantly (capacity-limited), no approval step.
 - **Attendance is tracked per booking**: Reserved → Attended / No-show (and Cancelled).
 - AFA never shows its own UPI/QR and never collects; the payee is always named.
+- **Razorpay online payments must stay fully working and switchable (Hitesh, 8 Nov 17:00: "keep our Razorpay option switchable at configuration, if needed tomorrow").** Do not remove, weaken or refactor the existing online checkout / Razorpay order / verify / webhook / refund paths. With `paidBookingsEnabled` ON, an ONLINE event must behave exactly as today (existing paid e2e specs must stay green unchanged); with it OFF, only online money is blocked. Turning it on later must need no code change — only the admin toggle (plus live keys in env).
 
 ## 1. Data (one additive migration file; chat applies to QA)
 - `Event.paymentMode` enum `EventPaymentMode { FREE, PAY_AT_ENTRY, ONLINE }`, default derived for existing rows: free events → FREE, priced → ONLINE (backfill in the same migration with a WHERE on the existing free/price fields — read the schema for the real field names). New priced events created while online payments are OFF default to PAY_AT_ENTRY.
