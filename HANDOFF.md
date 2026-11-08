@@ -4,7 +4,9 @@ Supersedes 65 as entry point (65 = Hitesh's 4 actions; still valid except as bel
 - #762 merged (qa 7808a78): run R + R2 (hi eyebrow shot pins text to baseline string; data drift, reviewed OK). Nightly reds 087/001/018/030 all fixed on PR e2e (608 pass).
 - #763 merged (qa 5010c86): legal pages L1. Hitesh chose STRICT T2 (no waiver) -> merged only after #762.
 - **#765 merged to MAIN (be810e9) = PROD, Hitesh "OK merge #765"**: legal pages + footer (Terms incl. §4 Delivery, Privacy full, /refund-policy/, /contact/, LegalDocLayout literal styles, footer links + "© 2026 Shyamkasturi Productions Private Limited" + "product of"). Prod deploy dpl_44dmzVANuoGgYxAyGHTcb2Qbq19A READY; verified live on www.aforaudience.com. "Draft — pending legal review" banner removed (P1b).
-### In flight
+### Merged after
+- #764 merged (qa 5bdea7d, 10:20 UTC): L2 footer + delivery clause + Draft banner removed on qa; e2e 613 pass, 1 flaky = language-rollout.spec.ts:108 kn switcher (same intermittent family as bn 21 Oct / gu 16 Oct -> needs a Rule 4 ticket: fix or quarantine with test.fixme + Feedback ticket).
+### (was in flight)
 - #764 (fix/legal-footer-l2 -> qa): L2 footer + delivery clause; L2 amend (footer-legal 390 shot pinned, 1px drift) + L2b (remove Draft banner + forbidden-text test) runs. Merge when e2e green on pinned head.
 ### Hitesh next
 - RAZORPAY 8 Nov 15:40 (chat): MID TxVQjSFVLDVx2J under review; activation ticket 21740823 (email only, info@shyamkasturiproductions.com, 24-48 h). Route confirmed OUT for now (>Rs40L turnover; first-year declaration must still confirm the threshold, not a waiver; apply via routepriority@razorpay.com). Agent answered only Route + activation: Q2 collect-and-payout, Q3 organisers' own accounts / tech partner, Q4 non-GST seller KYC, Q6 pricing STILL OPEN -> re-ask by replying on the ticket email. Detail: Project doc finance/razorpay-2026-11-08.md. Never submit a turnover declaration AFA can't meet.
