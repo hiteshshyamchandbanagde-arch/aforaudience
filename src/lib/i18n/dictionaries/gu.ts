@@ -2092,6 +2092,14 @@ const gu: Dictionary = {
     dueAtEntry: "પ્રવેશ પર ચૂકવવાના: ₹{amount}",
     markNoShow: "ગેરહાજર ચિહ્નિત કરો",
     checkIn: "ચેક ઇન",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "દર્શકો કેવી રીતે ચૂકવણી કરશે?",
+    modeFree: "મફત",
+    modePayAtEntry: "પ્રવેશ સમયે ચુકવણી",
+    modePayAtEntryHelp: "દર્શકો AforAudience પર સીટ રિઝર્વ કરે છે અને વેન્યૂ પર સીધા તમને ચૂકવે છે — રોકડ અથવા UPI. AforAudience આ ચુકવણી લેતું નથી.",
+    modeOnline: "ઓનલાઇન ચુકવણી",
+    modeOnlineComingSoon: "ટૂંક સમયમાં",
+    modeOnlineKept: "ઓનલાઇન ચુકવણી હાલ થોભાવેલી છે. આ ઇવેન્ટ ઓનલાઇન ચુકવણી મોડમાં જ રહેશે; બુકિંગ લેવા માટે પ્રવેશ સમયે ચુકવણી પસંદ કરો.",
   },
 }
 
