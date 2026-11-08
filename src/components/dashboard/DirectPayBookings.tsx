@@ -24,7 +24,7 @@ type Item = {
   expiresAt: string | null
   venue: { name: string; city: string }
   organiser: { orgName: string }
-  payee: { name: string; venueName: string; upiId: string | null }
+  payee: { name: string; venueName: string; upiId: string | null; upiQrUrl?: string | null }
 }
 
 type Strings = Dictionary['venueDirectPay']
@@ -150,6 +150,16 @@ export default function DirectPayBookings({ side }: { side: 'ORGANISER' | 'VENUE
                     </div>
                   ) : (
                     <div data-afa-payee-cash-only style={muted}>{s.cashOnly}</div>
+                  )}
+                  {b.payee.upiQrUrl && (
+                    // D2b - the owner's own UPI QR (never AFA's). Plain img: Blob URL, no next/image domain config.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      data-afa-payee-qr
+                      src={b.payee.upiQrUrl}
+                      alt={s.upiQrAlt.replace('{payee}', b.payee.venueName)}
+                      style={{ width: '160px', height: '160px', objectFit: 'contain', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)' }}
+                    />
                   )}
                   <div data-afa-payee-note style={muted}>{s.payNote.replace('{payee}', b.payee.venueName)}</div>
                   {b.payerReference && <div style={muted}>{s.reference.replace('{ref}', b.payerReference)}</div>}
