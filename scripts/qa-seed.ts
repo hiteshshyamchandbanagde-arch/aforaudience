@@ -17,7 +17,7 @@ import { fakerEN_IN as faker } from "@faker-js/faker"
 import bcrypt from "bcryptjs"
 import { generateTicketCode } from "../src/lib/ticket-code"
 import { keepFixturesUpcoming } from "../e2e/helpers/upcoming-fixtures"
-import { buildSeedBooking, DEMO_EVENT_DESCRIPTIONS, generalEventDescription } from "./qa-seed-data"
+import { buildSeedBooking, DEMO_EVENT_DESCRIPTIONS, generalEventDescription, reseedEventUpdate } from "./qa-seed-data"
 
 // ---------------------------------------------------------------------------
 // Hard guard — must run before any DB connection object is constructed.
@@ -396,7 +396,7 @@ async function seedGeneralEvents(
 
     await prisma.event.upsert({
       where: { id: eventId },
-      update: { status: plan.status },
+      update: reseedEventUpdate(plan),
       create: {
         id: eventId,
         organiserId: organiser.organiserId,

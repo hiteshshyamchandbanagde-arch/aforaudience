@@ -10,6 +10,7 @@ import {
   GENERAL_EVENT_DESCRIPTIONS,
   generalEventDescription,
   PLACEHOLDER_TEXT,
+  reseedEventUpdate,
 } from './qa-seed-data'
 
 let passed = 0
@@ -126,6 +127,20 @@ test('qa-seed.ts builds bookings and descriptions only through these builders', 
   assert.doesNotMatch(src, /\bseats:\s*[^\n]*\{\s*\}/)
   assert.doesNotMatch(src, /\bseats:\s*\{\s*General/)
   assert.equal((src.match(/buildSeedBooking\(/g) || []).length, 3)
+})
+
+test('run R: a re-seed re-dates future-dated plans from the seed time; past plans keep their date', () => {
+  // The bug: update was { status } only, so qa-general-event-05 (seeded
+  // 60 days ahead on 26 Aug) kept 25 Oct and the clock walked past it.
+  const later = new Date('2026-11-08T02:00:00.000Z')
+  const up = reseedEventUpdate({ status: 'APPROVED', dateOffsetDays: 60 }, later)
+  assert.equal(up.status, 'APPROVED')
+  assert.equal(up.date?.toISOString(), '2027-01-07T02:00:00.000Z')
+  assert.ok(up.date! > later, 'upcoming after the re-seed')
+  assert.deepEqual(reseedEventUpdate({ status: 'COMPLETED', dateOffsetDays: -10 }, later), { status: 'COMPLETED' })
+  assert.deepEqual(reseedEventUpdate({ status: 'APPROVED', dateOffsetDays: 0 }, later), { status: 'APPROVED' })
+  const src = readFileSync(new URL('./qa-seed.ts', import.meta.url), 'utf8')
+  assert.match(src, /update: reseedEventUpdate\(plan\)/, 'the general-event upsert uses it')
 })
 
 console.log(`\n${passed} passed`)
