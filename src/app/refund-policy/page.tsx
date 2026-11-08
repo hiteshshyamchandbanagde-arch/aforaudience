@@ -60,7 +60,7 @@ export default function RefundPolicyPage() {
 
       <H2 id="pay-at-entry">4. Pay at entry and direct payments</H2>
       <P>
-        For <strong>Pay at entry</strong> tickets nothing is collected online, so there is nothing for
+        For <strong>Pay at entry</strong>{" "}tickets nothing is collected online, so there is nothing for
         AforAudience to refund. If you can&apos;t attend, cancel your reservation in <strong>My Tickets</strong> to
         release your seat.
       </P>

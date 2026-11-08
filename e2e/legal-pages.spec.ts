@@ -93,5 +93,8 @@ test("terms cover pay at entry and direct payments between users", async ({ page
 test("refund page covers pay at entry", async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
   await page.goto("/refund-policy/");
-  await expect(page.locator("main")).toContainText("Pay at entry");
+  const main = page.locator("main");
+  await expect(main).toContainText("Pay at entry");
+  // The deployed build once dropped the space after </strong> here.
+  await expect(main).toContainText("Pay at entry tickets nothing is collected online");
 });
