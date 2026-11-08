@@ -2137,6 +2137,20 @@ const ml: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "{payee}-നുള്ള UPI QR കോഡ്",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "പ്രകടന ഫീസ് · നേരിട്ടുള്ള പേയ്‌മെന്റ്",
+    fee: "പ്രകടന ഫീസ്",
+    buyIn: "ബൈ-ഇൻ",
+    cashOnly: "പണം മാത്രം — UPI ID ഇല്ല. നേരിട്ട് നൽകുക.",
+    cancel: "സ്ലോട്ട് റദ്ദാക്കുക",
+    decline: "നിരസിക്കുക",
+    waitingPayee: "പണം ലഭിച്ചെന്ന് അവർ സ്ഥിരീകരിക്കാൻ കാത്തിരിക്കുന്നു.",
+    waitingPayer: "അവരുടെ പേയ്‌മെന്റിനായി കാത്തിരിക്കുന്നു.",
+    upiSettingLabel: "നേരിട്ടുള്ള പേയ്‌മെന്റിനുള്ള UPI ID",
+    upiSettingHelpArtist: "സംഘാടകർ നിങ്ങളുടെ പ്രകടന ഫീസ് ഈ UPI ID-യിലേക്ക് നേരിട്ട് നൽകുന്നു. AforAudience ഈ പണം ഒരിക്കലും സ്വീകരിക്കുന്നില്ല.",
+    upiSettingHelpOrganiser: "കലാകാരന്മാർ ഓപ്പൺ-മൈക്ക് ബൈ-ഇൻ ഈ UPI ID-യിലേക്ക് നേരിട്ട് നിങ്ങൾക്ക് നൽകുന്നു. AforAudience ഈ പണം ഒരിക്കലും സ്വീകരിക്കുന്നില്ല.",
+  },
 }
 
 export default ml

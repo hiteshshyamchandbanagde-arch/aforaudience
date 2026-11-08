@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import Button, { variantStyle } from '@/components/ui/Button'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import DirectPayUpiSetting from '@/components/dashboard/DirectPayUpiSetting'
 import { useLocale } from '@/lib/i18n/translate'
 
 const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }
@@ -141,6 +142,9 @@ export default function OrganiserEditPage() {
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             {o.subtitle}
           </p>
+
+          {/* D3 - where direct payments (fees / buy-ins) reach me */}
+          <DirectPayUpiSetting role="ORGANISER" />
 
           {message && (
             <SuccessBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{message}</SuccessBanner>

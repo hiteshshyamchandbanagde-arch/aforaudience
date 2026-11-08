@@ -11,6 +11,7 @@ import DashboardShell from '@/components/DashboardShell'
 import Button, { variantStyle } from '@/components/ui/Button'
 import GenrePicker from '@/components/GenrePicker'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import DirectPayUpiSetting from '@/components/dashboard/DirectPayUpiSetting'
 import { useLocale } from '@/lib/i18n/translate'
 
 const inputStyle = {
@@ -206,6 +207,9 @@ export default function EditArtistProfilePage() {
           <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             {a.editSubtitle}
           </p>
+
+          {/* D3 - where direct payments (fees / buy-ins) reach me */}
+          <DirectPayUpiSetting role="ARTIST" />
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ marginBottom: 'var(--afa-space-18px)' }}>

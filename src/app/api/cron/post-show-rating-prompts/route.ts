@@ -4,6 +4,7 @@ import { sendPushToUser } from '@/lib/push'
 import { getEventEndDateTime } from '@/lib/eventTime'
 import { shouldAutoNoShow } from '@/lib/pay-at-entry'
 import { expireDirectPayBookings } from '@/lib/venue-direct-pay.server'
+import { expireDirectPayPerformances } from '@/lib/performance-direct-pay.server'
 
 // D1 (Hitesh, 8 Nov) - automatic no-show pass, run from this existing
 // cron: a CONFIRMED booking still RESERVED (not checked in) 24 h after the
@@ -118,7 +119,16 @@ export async function GET(req: Request) {
       console.error('[cron] direct-pay expiry pass failed', err)
     }
 
-    return NextResponse.json({ checked: candidates.length, sent, noShows, directPayExpired })
+    // D3 - direct-payment performance fees / buy-ins waiting > 48 h expire
+    // (lineup slot released the same way an artist cancel releases it).
+    let performanceDirectPayExpired = 0
+    try {
+      performanceDirectPayExpired = await expireDirectPayPerformances({}, now)
+    } catch (err) {
+      console.error('[cron] performance direct-pay expiry pass failed', err)
+    }
+
+    return NextResponse.json({ checked: candidates.length, sent, noShows, directPayExpired, performanceDirectPayExpired })
   } catch (err) {
     console.error('[cron] post-show-rating-prompts failed', err)
     return NextResponse.json({ error: 'Failed' }, { status: 500 })

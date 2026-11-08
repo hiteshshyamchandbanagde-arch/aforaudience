@@ -2137,6 +2137,20 @@ const kn: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "{payee} ಗಾಗಿ UPI QR ಕೋಡ್",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "ಪ್ರದರ್ಶನ ಶುಲ್ಕ · ನೇರ ಪಾವತಿ",
+    fee: "ಪ್ರದರ್ಶನ ಶುಲ್ಕ",
+    buyIn: "ಬೈ-ಇನ್",
+    cashOnly: "ನಗದು ಮಾತ್ರ — UPI ID ಇಲ್ಲ. ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
+    cancel: "ಸ್ಲಾಟ್ ರದ್ದುಮಾಡಿ",
+    decline: "ತಿರಸ್ಕರಿಸಿ",
+    waitingPayee: "ಹಣ ಬಂದಿದೆ ಎಂದು ಅವರು ದೃಢೀಕರಿಸಲು ಕಾಯಲಾಗುತ್ತಿದೆ.",
+    waitingPayer: "ಅವರ ಪಾವತಿಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ.",
+    upiSettingLabel: "ನೇರ ಪಾವತಿಗಾಗಿ UPI ID",
+    upiSettingHelpArtist: "ಸಂಘಟಕರು ನಿಮ್ಮ ಪ್ರದರ್ಶನ ಶುಲ್ಕವನ್ನು ಈ UPI IDಗೆ ನೇರವಾಗಿ ಪಾವತಿಸುತ್ತಾರೆ. AforAudience ಈ ಹಣವನ್ನು ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+    upiSettingHelpOrganiser: "ಕಲಾವಿದರು ಓಪನ್-ಮೈಕ್ ಬೈ-ಇನ್ ಅನ್ನು ಈ UPI IDಗೆ ನೇರವಾಗಿ ನಿಮಗೆ ಪಾವತಿಸುತ್ತಾರೆ. AforAudience ಈ ಹಣವನ್ನು ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+  },
 }
 
 export default kn

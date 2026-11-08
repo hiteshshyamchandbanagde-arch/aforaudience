@@ -2137,6 +2137,20 @@ const gu: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "{payee} માટે UPI QR કોડ",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "પ્રસ્તુતિ ફી · સીધી ચુકવણી",
+    fee: "પ્રસ્તુતિ ફી",
+    buyIn: "બાય-ઇન",
+    cashOnly: "ફક્ત રોકડ — કોઈ UPI ID નથી. રૂબરૂ ચૂકવો.",
+    cancel: "સ્લોટ રદ કરો",
+    decline: "નકારો",
+    waitingPayee: "ચુકવણી મળ્યાની તેમની પુષ્ટિની રાહ છે.",
+    waitingPayer: "તેમની ચુકવણીની રાહ છે.",
+    upiSettingLabel: "સીધી ચુકવણી માટે UPI ID",
+    upiSettingHelpArtist: "આયોજકો તમારી પ્રસ્તુતિ ફી આ UPI ID પર સીધી ચૂકવે છે. AforAudience ક્યારેય આ ચુકવણી લેતું નથી.",
+    upiSettingHelpOrganiser: "કલાકારો ઓપન-માઇક બાય-ઇન આ UPI ID પર સીધું તમને ચૂકવે છે. AforAudience ક્યારેય આ ચુકવણી લેતું નથી.",
+  },
 }
 
 export default gu

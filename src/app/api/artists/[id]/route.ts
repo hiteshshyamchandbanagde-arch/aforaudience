@@ -7,6 +7,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     const artist = await prisma.artist.findUnique({
       where: { id },
+      // D3 - an artist's UPI is only shown to the payer, never on public reads.
+      omit: { upiId: true, upiQrUrl: true },
       include: {
         user: { select: { name: true, displayName: true, avatar: true } },
         performances: {

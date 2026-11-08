@@ -2143,6 +2143,20 @@ const fr: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "Code QR UPI pour {payee}",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "Cachets · paiement direct",
+    fee: "Cachet",
+    buyIn: "Buy-in",
+    cashOnly: "Espèces uniquement — aucun identifiant UPI. Payez en personne.",
+    cancel: "Annuler le passage",
+    decline: "Refuser",
+    waitingPayee: "En attente de la confirmation de réception.",
+    waitingPayer: "En attente de leur paiement.",
+    upiSettingLabel: "Identifiant UPI pour paiements directs",
+    upiSettingHelpArtist: "Les organisateurs vous versent votre cachet directement sur cet identifiant UPI. AforAudience ne perçoit jamais ces paiements.",
+    upiSettingHelpOrganiser: "Les artistes vous versent les buy-ins open mic directement sur cet identifiant UPI. AforAudience ne perçoit jamais ces paiements.",
+  },
 }
 
 export default fr

@@ -2135,6 +2135,20 @@ const mr: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "{payee} साठी UPI QR कोड",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "सादरीकरण शुल्क · थेट पेमेंट",
+    fee: "सादरीकरण शुल्क",
+    buyIn: "बाय-इन",
+    cashOnly: "फक्त रोख — UPI ID नाही. प्रत्यक्ष पैसे द्या.",
+    cancel: "स्लॉट रद्द करा",
+    decline: "नाकारा",
+    waitingPayee: "पैसे मिळाल्याच्या त्यांच्या पुष्टीची वाट पाहत आहोत.",
+    waitingPayer: "त्यांच्या पेमेंटची वाट पाहत आहोत.",
+    upiSettingLabel: "थेट पेमेंटसाठी UPI ID",
+    upiSettingHelpArtist: "आयोजक तुमचे सादरीकरण शुल्क या UPI ID वर थेट पाठवतात. AforAudience हे पैसे कधीही घेत नाही.",
+    upiSettingHelpOrganiser: "कलाकार ओपन-माइक बाय-इन या UPI ID वर थेट तुम्हाला पाठवतात. AforAudience हे पैसे कधीही घेत नाही.",
+  },
 }
 
 export default mr

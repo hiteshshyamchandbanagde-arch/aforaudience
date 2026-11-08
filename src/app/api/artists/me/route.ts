@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { logNewGenreRequests } from '@/lib/genre-requests'
+import { parseUpiId, parseUpiQrUrl } from '@/lib/venue-direct-pay'
 
 // Simple length caps, consistent with other free-text fields in this
 // codebase (displayName 120, review comment 500) - generous enough
@@ -120,9 +121,18 @@ export async function PATCH(req: Request) {
           })
       : undefined
 
+    // D3 - where an organiser pays this artist's fee directly (same
+    // validation as D2's venue owner UPI ID / QR). Only when sent.
+    const upi = body.upiId !== undefined ? parseUpiId(body.upiId) : null
+    if (upi && !upi.ok) return NextResponse.json({ error: upi.error }, { status: 400 })
+    const upiQr = body.upiQrUrl !== undefined ? parseUpiQrUrl(body.upiQrUrl) : null
+    if (upiQr && !upiQr.ok) return NextResponse.json({ error: upiQr.error }, { status: 400 })
+
     const updated = await prisma.artist.update({
       where: { id: artist.id },
       data: {
+        ...(upi?.ok && { upiId: upi.value }),
+        ...(upiQr?.ok && { upiQrUrl: upiQr.value }),
         ...(bio !== undefined && { bio }),
         ...(Array.isArray(genre) && { genre }),
         ...(Array.isArray(styleTag) && { styleTag }),

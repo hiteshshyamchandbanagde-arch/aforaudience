@@ -16,6 +16,7 @@ import { countText } from '@/lib/i18n/plural'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import PerformanceDirectPay from '@/components/dashboard/PerformanceDirectPay'
 import { formatINR } from '@/lib/money-display'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
@@ -559,6 +560,9 @@ export default function ArtistDashboard() {
               </div>
             )}
           </div>
+
+          {/* D3 - fees owed to me / buy-ins I owe, paid directly (renders nothing when none) */}
+          <PerformanceDirectPay side="ARTIST" />
 
           {/* Upcoming performances */}
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
