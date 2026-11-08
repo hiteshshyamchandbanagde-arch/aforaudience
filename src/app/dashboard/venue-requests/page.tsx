@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import DirectPayBookings from '@/components/dashboard/DirectPayBookings'
 import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
@@ -147,6 +148,9 @@ export default function VenueRequestsPage() {
           {loadError && (
             <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
           )}
+
+          {/* D2 - accepted deals waiting on direct payment / confirmation. */}
+          {callerSide && <DirectPayBookings key={requests.map((r) => r.status).join()} side={callerSide} />}
 
           {requests.length === 0 ? (
             <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption={v.empty} />
