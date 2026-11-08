@@ -40,7 +40,10 @@ test("[BUG-2609-087] venue Bookings 'This month' and Sales 'Month' show the same
   const totalRevenue = statValue(page, "total-revenue", "Total Revenue");
   await expect(totalRevenue).toHaveText(bookingsFigure);
   // BUG-2608-090 - the Sales card's sub line now also carries "no platform cut on rentals".
-  await expect(totalRevenue.locator("xpath=following-sibling::p[1]")).toHaveText("by event date · no platform cut on rentals");
+  // It is the card's last line, not "the line after the figure": when the
+  // previous month had revenue, a "▼ n% vs last period" line sits between
+  // them (StatCard; red from 1 Nov, when October became the previous month).
+  await expect(page.getByRole("main").locator('[data-afa-stat="total-revenue"] p').last()).toHaveText("by event date · no platform cut on rentals");
 
   test.info().annotations.push({ type: "month revenue", description: bookingsFigure });
 });
