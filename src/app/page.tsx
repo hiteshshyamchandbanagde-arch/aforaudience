@@ -200,6 +200,9 @@ export default function Home() {
                 { label: "Blog", href: "/blog" },
                 { label: "Careers", href: "/careers" },
                 { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms/" },
+                { label: "Refund & Cancellation", href: "/refund-policy/" },
+                { label: "Contact Us", href: "/contact/" },
               ],
             },
           ].map((col) => (
@@ -214,7 +217,10 @@ export default function Home() {
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "8px" }}>
-          <span>© 2025 AforAudience. All rights reserved.</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <span>© 2026 Shyamkasturi Productions Private Limited. All rights reserved.</span>
+            <span style={{ fontSize: "12px" }}>AforAudience is a product of Shyamkasturi Productions Private Limited.</span>
+          </div>
           <span>Made with ❤️ for the art world</span>
         </div>
       </footer>
