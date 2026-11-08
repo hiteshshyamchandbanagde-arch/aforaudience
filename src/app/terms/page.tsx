@@ -146,11 +146,11 @@ export default function TermsPage() {
 
       <H2>11. Disclaimers &amp; limitation of liability</H2>
       <P>
-        The platform is provided "as is." We facilitate discovery, booking, and payment for live events, but we are
+        The platform is provided "as is." We facilitate discovery and booking of live events (and, when offered, online payment), but we are
         not the organiser, performer, or venue for any given event, and we're not responsible for the quality,
         safety, or conduct of events, venues, or performers listed on the platform. To the maximum extent permitted
-        by law, our liability for any claim relating to the platform is limited to the amount of the platform
-        booking fee(s) you paid in the relevant transaction.
+        by law, our liability for any claim relating to the platform is limited to the platform fees (if any)
+        you paid us in the relevant transaction.
       </P>
 
       <H2>12. Governing law</H2>
