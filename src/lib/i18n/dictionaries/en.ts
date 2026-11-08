@@ -2330,6 +2330,11 @@ const en = {
     upiSaved: "UPI ID saved",
     acceptCashOnly: "Accept as cash only",
     upiRequired: "Add your UPI ID in your profile first, or accept as cash only.",
+    upiQrLabel: "UPI QR code (optional)",
+    upiQrUpload: "Upload QR image",
+    upiQrRemove: "Remove QR",
+    // {payee}: venue name.
+    upiQrAlt: "UPI QR code for {payee}",
   },
 }
 
