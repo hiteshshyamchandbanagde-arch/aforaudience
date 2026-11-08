@@ -5,6 +5,8 @@ import { getSceneStatusBatch } from '@/lib/scene-status'
 export async function GET() {
   try {
     const artists = await prisma.artist.findMany({
+      // D3 - an artist's UPI is only shown to the payer, never on public reads.
+      omit: { upiId: true, upiQrUrl: true },
       include: {
         user: { select: { name: true, displayName: true, avatar: true } },
         _count: { select: { performances: true } },
