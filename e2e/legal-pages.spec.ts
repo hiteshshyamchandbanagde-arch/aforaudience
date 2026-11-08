@@ -16,6 +16,9 @@ import { REFUND_FULL_MIN_DAYS, REFUND_HALF_MIN_DAYS } from "../src/lib/refund-po
 const COMPANY = "Shyamkasturi Productions Private Limited";
 const PLACEHOLDER_TEXT = /to be finalized|once registered|placeholder|to be set on publish|to be defined/i;
 const PAGES = ["/terms/", "/privacy/", "/refund-policy/", "/contact/"];
+// The sticky site header, chat button and Vercel toolbar float over the
+// content box depending on scroll; they are not part of the page under test.
+const HIDE_OVERLAYS = "header, nav, .afa-support-chat-btn, vercel-live-feedback { visibility: hidden !important; }";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -38,6 +41,7 @@ test("contact page shows the support email, address and grievance officer", asyn
   await expect(page.locator("address").first()).toContainText("Ravet, Haveli, Pune 412101");
   await expect(page.locator("main")).toContainText("Shyamchand Bangade");
   await expect(page.locator('main a[href="/refund-policy/"]')).toBeVisible();
+  await page.addStyleTag({ content: HIDE_OVERLAYS });
   const content = page.locator("h1").locator("xpath=..");
   await expect(content).toHaveScreenshot(`contact-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
@@ -55,6 +59,7 @@ test("refund page states the same day tiers as refund-policy.ts", async ({ page,
   await expect(main).toContainText("50%");
   await expect(main).toContainText("including the booking fee");
   await expect(main).toContainText("5–7 working days");
+  await page.addStyleTag({ content: HIDE_OVERLAYS });
   const content = page.locator("h1").locator("xpath=..");
   await expect(content).toHaveScreenshot(`refund-policy-${isMobile ? 390 : 1440}.png`, {
     animations: "disabled",
