@@ -2078,6 +2078,19 @@ const mr: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} रोजी कालबाह्य — सध्या बंद.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · {organiser} यांना प्रवेशावेळी पैसे द्या (रोख/UPI)",
+    noCollect: "AforAudience हे पेमेंट घेत नाही.",
+    reserveCta: "राखून ठेवा",
+    badge: "प्रवेशावेळी पेमेंट · ₹{amount}",
+    attended: "उपस्थित",
+    noShow: "आले नाहीत",
+    reserved: "राखीव",
+    dueAtEntry: "प्रवेशावेळी देय: ₹{amount}",
+    markNoShow: "आले नाहीत म्हणून नोंदवा",
+    checkIn: "चेक इन",
+  },
 }
 
 export default mr
