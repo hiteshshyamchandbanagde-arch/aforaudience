@@ -160,7 +160,11 @@ export default function VenueRequestsPage() {
           )}
 
           {/* D2 - accepted deals waiting on direct payment / confirmation. */}
-          {callerSide && <DirectPayBookings key={requests.map((r) => r.status).join()} side={callerSide} />}
+          {/* D2b - a multi-role user (session role not ORGANISER/VENUE_OWNER) still
+              sees their bookings: render both sides; each hides itself when empty. */}
+          {(callerSide ? [callerSide] : (['ORGANISER', 'VENUE_OWNER'] as const)).map((side) => (
+            <DirectPayBookings key={`${side}-${requests.map((r) => r.status).join()}`} side={side} />
+          ))}
 
           {requests.length === 0 ? (
             <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption={v.empty} />
