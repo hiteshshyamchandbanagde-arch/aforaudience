@@ -1,3 +1,17 @@
+## Part 64 — START HERE (8 Nov 08:05 IST, chat), qa @ this commit
+Supersedes 63 as entry point. GOAL: Pune soft launch (all QA features to prod behind switches, paid bookings OFF); payments = separate track.
+### Decided (Hitesh 8 Nov)
+- Soft launch = deploy QA once, release by switches in waves (W1 discovery+signup, W2 organiser/venue/artist onboarding, W3 free-event tickets, W4 messaging/Wall of Fame/extras). No per-feature cherry-picks to main.
+- Prod DB: START CLEAN. One-time backup/copy of prod approved (lifts the prod-ref block for S5 only). Destructive rule still applies: show sample rows before wipe.
+- Legal pages also go to prod now as a small branch off main (docs-only freeze exception) so Razorpay can verify aforaudience.com.
+- Company facts for site: Shyamkasturi Productions Private Limited; "AforAudience is a product of ..."; reg. office A-504 The Nest CHS, Sr No 76/2, Chandrabhaga Corner, Ravet, Haveli, Pune 412101; +91 92251 39690; info@aforaudience.com (support, tested both ways), info@shyamkasturiproductions.com (company). Grievance Officer: Shyamchand Bangade, Director. Hitesh's name must NOT appear in site content.
+- Payments direction (not built): organisers/venues/artists collect their own money (Route needs >Rs40L turnover); AFA earns platform fee; launch free then prepaid credits (proposal). Razorpay query drafted (ticket via dashboard). CA reply 31 Oct summarised in claude.ai Project doc finance/ca-responses-2026-10-31.md (not in repo: restricted use).
+### In flight
+- Run R (fix/e2e-date-drift-r, autopilot 42436596889 SUCCESS): review + PR. Nightly red 21 Oct-8 Nov (23 runs): offline-tickets:148, unfinished-checkout:54, seat-total:36, venue-revenue:29 (from 1 Nov), bn flake.
+- Run L1 (fix/legal-pages-l1, 42436607199): Terms/Privacy placeholders, /refund-policy (matches refund-policy.ts: 14 d tiers; 15 d still pending), /contact.
+### Next (small runs, in order)
+L2 footer links + "(c) 2026 Shyamkasturi Productions Private Limited" + 12 locale labels -> legal port to main + deploy -> S1 launch switches (paid off + wave flags) -> S2 OTP verify phone/userId -> S3 read-only prod readiness audit -> S4 Feedback catch-up (Hitesh OK) -> S5 clean prod DB (backup, rehearse 75 migrations on scratch DB, reset, apply, recreate Admin) -> S6 Hitesh phone pass, promote qa->main -> S7 waves.
+
 ## Part 63 — START HERE (21 Oct 12:25 IST, chat), qa @ this commit
 Supersedes 62 as entry point (62 = detail of the 16 Oct six-run batch, all merged #756-#761). GOAL unchanged: Pune launch; Phase 1 finish QA, Phase 2 production after QA. No open PRs. No run without Hitesh's "go".
 ### FIRST: red nightly (T3)
