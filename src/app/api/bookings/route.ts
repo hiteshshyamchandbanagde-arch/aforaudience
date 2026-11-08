@@ -7,6 +7,13 @@ import {
   razorpayCredentialsPresent,
 } from '@/lib/razorpay'
 import { getPlatformSettings } from '@/lib/platform-settings'
+import {
+  PAID_BOOKINGS_DISABLED,
+  PAID_BOOKINGS_DISABLED_MESSAGE,
+  PaidBookingsDisabledError,
+  assertPaidAllowed,
+  isPaidBookingsEnabled,
+} from '@/lib/paid-bookings'
 import { deliverTicket } from '@/lib/ticket-delivery'
 import { ensureTicketCode } from '@/lib/assign-ticket-code'
 
@@ -73,6 +80,8 @@ export async function POST(req: Request) {
     // valid range now comes from the admin-configured band, not a
     // hardcoded constant (29 Jul, admin-configurable min/standard/max fee).
     const feeSettings = await getPlatformSettings()
+    // S1a "paid bookings" master switch - free bookings are never affected.
+    const paidBookingsEnabled = isPaidBookingsEnabled(feeSettings)
 
     // Audience-adjustable booking fee (28 Jul, band made admin-configurable
     // 29 Jul). The checkout-adjacent seat picker pre-fills the platform's
@@ -242,6 +251,8 @@ export async function POST(req: Request) {
             ? (bookingFeeOverrideRupees !== null ? bookingFeeOverrideRupees : feeSettings.audienceBookingFee / 100)
             : 0
         const totalAmount = subtotalAmount + bookingFeeRupees
+        // S1a - refuse a paid booking (rolls the tx back) while the switch is off.
+        assertPaidAllowed(Math.round(totalAmount * 100), paidBookingsEnabled)
 
         return tx.booking.create({
           data: {
@@ -325,6 +336,8 @@ export async function POST(req: Request) {
           ? (bookingFeeOverrideRupees !== null ? bookingFeeOverrideRupees : feeSettings.audienceBookingFee / 100)
           : 0
       const totalAmount = subtotalAmount + bookingFeeRupees
+      // S1a - refuse a paid booking (rolls the tx back) while the switch is off.
+      assertPaidAllowed(Math.round(totalAmount * 100), paidBookingsEnabled)
 
       return tx.booking.create({
         data: {
@@ -447,6 +460,12 @@ export async function POST(req: Request) {
       )
     }
   } catch (err) {
+    if (err instanceof PaidBookingsDisabledError) {
+      return NextResponse.json(
+        { error: PAID_BOOKINGS_DISABLED_MESSAGE, code: PAID_BOOKINGS_DISABLED },
+        { status: 403 }
+      )
+    }
     const message =
       err instanceof Error ? err.message : 'Failed to reserve seats'
     console.error('Error creating booking:', message)
