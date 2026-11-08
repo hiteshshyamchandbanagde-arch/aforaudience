@@ -39,18 +39,22 @@ export default function TermsPage() {
       <H2 id="booking">3. Booking tickets (Audience)</H2>
       <UL>
         <LI>
-          Prices shown at checkout include the ticket price plus a small platform booking fee (currently
-          ₹20 per booking, plus GST where applicable), shown separately before you pay.
-          We do not take a cut of the ticket price itself or of venue rental.
+          Each event shows how its tickets are paid for. <strong>Free:</strong> nothing is charged.{" "}
+          <strong>Pay at entry:</strong> you reserve on AforAudience and pay the Organiser directly at the venue
+          (cash or UPI); AforAudience does not collect, hold or refund this payment, and no booking fee is
+          charged. <strong>Online payment</strong> (when offered): payment is processed by Razorpay; a platform
+          booking fee may apply and is shown separately before you pay. We do not take a cut of the ticket price
+          itself or of venue rental.
         </LI>
         <LI>
-          Once payment is confirmed, you'll receive a ticket by email and in-app, as a PDF with a unique QR code.{" "}
+          Your ticket is issued when you reserve (Pay at entry and free events) or when your payment is confirmed
+          (online payment). You&apos;ll receive it by email and in-app, as a PDF with a unique QR code.{" "}
           <strong>Do not share your ticket QR code or booking ID publicly</strong> — anyone holding it can be checked
           in at the venue in your place, and check-in is first-come, first-served.
         </LI>
         <LI>
-          <strong>Refunds and cancellations:</strong> you can cancel a paid booking from My Tickets. What you get
-          back depends on how far ahead of the show you cancel, and if the Organiser cancels the event you get a
+          <strong>Refunds and cancellations:</strong> you can cancel a booking from My Tickets. For online payments, what
+          you get back depends on how far ahead of the show you cancel, and if the Organiser cancels the event you get a
           full refund including the booking fee. The full rules are in our{" "}
           <Link href="/refund-policy/">Refund &amp; Cancellation Policy</Link>.
         </LI>
