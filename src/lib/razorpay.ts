@@ -1,5 +1,6 @@
 import Razorpay from "razorpay"
 import crypto from "crypto"
+import { assertPaidBookingsEnabled } from "@/lib/platform-settings"
 
 // ---------------------------------------------------------------------------
 // Razorpay client — single source of truth for how the SDK is initialized.
@@ -168,6 +169,11 @@ export async function createRazorpayOrder(params: {
   // completely unaffected by this change.
   transfers?: { account: string; amount: number; currency?: string; on_hold?: boolean }[]
 }): Promise<CreateOrderResult> {
+  // S1a choke point: no Razorpay order for a paid amount while the
+  // "paid bookings" switch is off. Throws PaidBookingsDisabledError;
+  // route handlers map it to 403 PAID_BOOKINGS_DISABLED.
+  await assertPaidBookingsEnabled(params.amount)
+
   const client = getRazorpay()
   const keyId = getPublicKeyId()
   if (!client || !keyId) {

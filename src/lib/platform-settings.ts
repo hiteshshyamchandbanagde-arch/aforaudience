@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma"
+import { assertPaidAllowed, isPaidBookingsEnabled } from "@/lib/paid-bookings"
 
 // ---------------------------------------------------------------------------
 // Platform settings — cached read, one row, keyed by the constant id
@@ -41,6 +42,9 @@ export type PlatformSettings = {
   // isDirectPayoutsEnabled() (src/lib/direct-payouts.ts) for the lazy-expiry check.
   directPayoutsEnabled: boolean
   directPayoutsEnabledUntil: Date | null
+  // S1a (8 Nov) - "paid bookings" master switch, default OFF. See
+  // src/lib/paid-bookings.ts for the guard every money path calls.
+  paidBookingsEnabled: boolean
 }
 
 const SINGLETON_ID = "singleton"
@@ -61,6 +65,7 @@ const SETTINGS_SELECT = {
   eventCreationWindowMonths: true,
   directPayoutsEnabled: true,
   directPayoutsEnabledUntil: true,
+  paidBookingsEnabled: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -308,6 +313,32 @@ export async function setDirectPayoutsEnabled(input: {
       directPayoutsEnabled: input.enabled,
       directPayoutsEnabledUntil: input.enabledUntil ?? null,
     },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/** S1a - is the "paid bookings" master switch on? Same uncached read as the fee settings. */
+export async function getPaidBookingsEnabled(): Promise<boolean> {
+  const settings = await getPlatformSettings()
+  return isPaidBookingsEnabled(settings)
+}
+
+/**
+ * S1a - throws PaidBookingsDisabledError for a paid amount (> 0 paise)
+ * while the switch is off. Free amounts never touch the DB.
+ */
+export async function assertPaidBookingsEnabled(amountPaise: number): Promise<void> {
+  if (!(amountPaise > 0)) return
+  assertPaidAllowed(amountPaise, await getPaidBookingsEnabled())
+}
+
+/** S1a - admin-only setter for the "paid bookings" master switch. */
+export async function setPaidBookingsEnabled(enabled: boolean): Promise<PlatformSettings> {
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { paidBookingsEnabled: enabled },
+    create: { id: SINGLETON_ID, audienceBookingFee: 0, paidBookingsEnabled: enabled },
     select: SETTINGS_SELECT,
   })
   return row
