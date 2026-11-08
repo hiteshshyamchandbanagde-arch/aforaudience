@@ -6,6 +6,7 @@ import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { isFlexRequestExpired } from '@/lib/flex-requests'
+import { DIRECT_PAY_PLATFORM_FEE, directPayExpiresAt, shouldUseDirectPay } from '@/lib/venue-direct-pay'
 
 const MAX_OFFERS = 6 // §4.5 suggestion #7 - 3 rounds per side, 6 total
 
@@ -81,7 +82,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'This request expired after 48 hours with no response' }, { status: 400 })
     }
 
-    const { action, amount, comment } = await req.json()
+    const { action, amount, comment, paymentMethod, cashOnly } = await req.json()
 
     if (action === 'decline') {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'DECLINED' } })
@@ -117,6 +118,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
       const platformSettings = await prisma.platformSettings.findFirst()
 
+      // D2 - with online payments off (or the owner choosing direct) the
+      // accepted deal waits for the organiser to pay the owner directly;
+      // it is confirmed only when the owner confirms receipt. The owner
+      // needs a UPI ID on file to accept, or says "cash only". An
+      // organiser accepting the owner's offer is never blocked on it
+      // (the payee block then says cash only).
+      const direct = shouldUseDirectPay(platformSettings?.paidBookingsEnabled === true, paymentMethod)
+      if (direct && callerSide === 'VENUE_OWNER' && !request.venue.owner.upiId && cashOnly !== true) {
+        return NextResponse.json(
+          { error: 'Add your UPI ID in your profile first, or accept as cash only.', code: 'UPI_REQUIRED' },
+          { status: 400 }
+        )
+      }
+
       // Same overlap enforcement as PATCH /api/venue-bookings/[id] - this
       // path creates a CONFIRMED VenueBooking directly (Flexible-venue
       // negotiation acceptance) and was bypassing that guard entirely.
@@ -133,6 +148,42 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           { error: 'This venue already has a confirmed booking on this date.' },
           { status: 409 }
         )
+      }
+
+      if (direct) {
+        const booking = await prisma.$transaction(async (tx) => {
+          await tx.venueBookingRequest.update({ where: { id }, data: { status: 'ACCEPTED' } })
+          return tx.venueBooking.create({
+            data: {
+              venueId: request.venueId,
+              organiserId: request.organiserId,
+              eventId: request.eventId,
+              fromDate: request.requestedDate,
+              toDate: request.requestedDate,
+              status: 'PENDING',
+              amount: lastOffer.amount,
+              agreedRateType: 'FLEXIBLE',
+              durationHours: request.durationHours,
+              platformFeeAmount: DIRECT_PAY_PLATFORM_FEE,
+              paymentMethod: 'DIRECT',
+              directPayStatus: 'AWAITING_PAYMENT',
+              expiresAt: directPayExpiresAt(),
+            },
+          })
+        })
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(otherSideUserId(), {
+              title: 'Venue deal accepted - payment next',
+              body:
+                callerSide === 'VENUE_OWNER'
+                  ? `${request.venue.name}: pay ₹${lastOffer.amount} directly to the owner within 48 hours, then tap "I've paid".`
+                  : `The Organiser accepted ₹${lastOffer.amount} for ${request.venue.name}. Confirm when you receive the payment.`,
+              url: '/dashboard/venue-requests',
+            }),
+          'booking-request-accept-direct'
+        )
+        return NextResponse.json({ message: 'Accepted - awaiting direct payment', bookingId: booking.id })
       }
 
       await prisma.$transaction([

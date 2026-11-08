@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import DirectPayBookings from '@/components/dashboard/DirectPayBookings'
 import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 import { formatDate } from '@/lib/format-date'
@@ -53,6 +54,8 @@ export default function VenueRequestsPage() {
   const [counterInputs, setCounterInputs] = useState<Record<string, string>>({})
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
   const [actingOn, setActingOn] = useState<string | null>(null)
+  // D2b - owner with no UPI ID: offer "Accept as cash only" after UPI_REQUIRED.
+  const [cashOnlyFor, setCashOnlyFor] = useState<string | null>(null)
 
   const role = (session?.user as any)?.role as string | undefined
   const callerSide: 'ORGANISER' | 'VENUE_OWNER' | null =
@@ -100,16 +103,24 @@ export default function VenueRequestsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [(session?.user as any)?.id])
 
-  const act = async (reqId: string, action: 'accept' | 'decline' | 'counter') => {
+  const act = async (reqId: string, action: 'accept' | 'decline' | 'counter', cashOnly = false) => {
     setActingOn(reqId)
     try {
       const res = await fetch(`/api/venue-booking-requests/${reqId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId] }),
+        body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId], ...(cashOnly ? { cashOnly: true } : {}) }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || v.actionFailed)
+      if (!res.ok) {
+        // D2b - accepting with payments off needs a UPI ID, or cash only.
+        if (data.code === 'UPI_REQUIRED') {
+          setCashOnlyFor(reqId)
+          throw new Error(tr.venueDirectPay.upiRequired)
+        }
+        throw new Error(data.error || v.actionFailed)
+      }
+      setCashOnlyFor(null)
       await load()
       setCommentInputs((prev) => ({ ...prev, [reqId]: '' }))
       showToast(
@@ -147,6 +158,13 @@ export default function VenueRequestsPage() {
           {loadError && (
             <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
           )}
+
+          {/* D2 - accepted deals waiting on direct payment / confirmation. */}
+          {/* D2b - a multi-role user (session role not ORGANISER/VENUE_OWNER) still
+              sees their bookings: render both sides; each hides itself when empty. */}
+          {(callerSide ? [callerSide] : (['ORGANISER', 'VENUE_OWNER'] as const)).map((side) => (
+            <DirectPayBookings key={`${side}-${requests.map((r) => r.status).join()}`} side={side} />
+          ))}
 
           {requests.length === 0 ? (
             <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption={v.empty} />
@@ -247,6 +265,11 @@ export default function VenueRequestsPage() {
                         >
                           {v.decline}
                         </SharedButton>
+                        {cashOnlyFor === r.id && (
+                          <Button variant="outline" data-afa-accept-cash-only onClick={() => act(r.id, 'accept', true)} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)' }}>
+                            {tr.venueDirectPay.acceptCashOnly}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}

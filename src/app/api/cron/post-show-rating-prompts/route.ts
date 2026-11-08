@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import { sendPushToUser } from '@/lib/push'
 import { getEventEndDateTime } from '@/lib/eventTime'
 import { shouldAutoNoShow } from '@/lib/pay-at-entry'
+import { expireDirectPayBookings } from '@/lib/venue-direct-pay.server'
 
 // D1 (Hitesh, 8 Nov) - automatic no-show pass, run from this existing
 // cron: a CONFIRMED booking still RESERVED (not checked in) 24 h after the
@@ -109,7 +110,15 @@ export async function GET(req: Request) {
       console.error('[cron] auto no-show pass failed', err)
     }
 
-    return NextResponse.json({ checked: candidates.length, sent, noShows })
+    // D2 - direct-payment venue bookings waiting > 48 h expire (slot released).
+    let directPayExpired = 0
+    try {
+      directPayExpired = await expireDirectPayBookings({}, now)
+    } catch (err) {
+      console.error('[cron] direct-pay expiry pass failed', err)
+    }
+
+    return NextResponse.json({ checked: candidates.length, sent, noShows, directPayExpired })
   } catch (err) {
     console.error('[cron] post-show-rating-prompts failed', err)
     return NextResponse.json({ error: 'Failed' }, { status: 500 })

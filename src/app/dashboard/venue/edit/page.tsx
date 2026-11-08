@@ -27,7 +27,12 @@ export default function VenueOwnerEditPage() {
   const [message, setMessage] = useState('')
 
   const [bio, setBio] = useState('')
+  // D2 - where organisers pay this owner directly for venue hire.
+  const [upiId, setUpiId] = useState('')
   const [avatar, setAvatar] = useState('')
+  // D2b - optional UPI QR image shown to organisers in the payee block.
+  const [upiQrUrl, setUpiQrUrl] = useState('')
+  const [uploadingQr, setUploadingQr] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -43,6 +48,8 @@ export default function VenueOwnerEditPage() {
         if (ownerRes.ok) {
           const d = await ownerRes.json()
           setBio(d.bio || '')
+          setUpiId(d.upiId || '')
+          setUpiQrUrl(d.upiQrUrl || '')
         }
         if (userRes.ok) {
           const d = await userRes.json()
@@ -80,6 +87,30 @@ export default function VenueOwnerEditPage() {
     }
   }
 
+  // D2b - reuses the existing image upload (Vercel Blob); the URL is saved with the profile.
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploadingQr(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || v.uploadFailed)
+        return
+      }
+      setUpiQrUrl(data.url)
+    } catch {
+      setError(v.uploadFailed)
+    } finally {
+      setUploadingQr(false)
+    }
+  }
+
   const save = async () => {
     setSaving(true)
     setError('')
@@ -89,7 +120,7 @@ export default function VenueOwnerEditPage() {
         fetch('/api/venue-owners/me', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bio }),
+          body: JSON.stringify({ bio, upiId: upiId.trim() || null, upiQrUrl: upiQrUrl || null }),
         }),
         fetch('/api/users/me', {
           method: 'PATCH',
@@ -152,6 +183,49 @@ export default function VenueOwnerEditPage() {
             <div>
               <Label>{v.bio}</Label>
               <Field as="textarea" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder={v.bioPlaceholder} />
+            </div>
+
+            <div data-afa-upi-setting>
+              <Label>{tr.venueDirectPay.upiSettingLabel}</Label>
+              <Field
+                aria-label={tr.venueDirectPay.upiSettingLabel}
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                maxLength={256}
+                placeholder="name@bank"
+                autoComplete="off"
+              />
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>
+                {tr.venueDirectPay.upiSettingHelp}
+              </p>
+            </div>
+
+            <div data-afa-upi-qr-setting>
+              <Label>{tr.venueDirectPay.upiQrLabel}</Label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
+                {upiQrUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img data-afa-upi-qr-preview src={upiQrUrl} alt={tr.venueDirectPay.upiQrLabel} style={{ width: '96px', height: '96px', objectFit: 'contain', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-inverse)' }} />
+                )}
+                <label className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingQr ? 'default' : 'pointer', opacity: uploadingQr ? 0.6 : 1 }}>
+                  {uploadingQr ? v.uploading : tr.venueDirectPay.upiQrUpload}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleQrUpload} disabled={uploadingQr} style={{ display: 'none' }} />
+                </label>
+                {upiQrUrl && (
+                  <Button
+                    variant="outline-neutral"
+                    size="lg"
+                    fullWidth={false}
+                    type="button"
+                    data-afa-upi-qr-remove
+                    className="avp-btn-outline"
+                    onClick={() => setUpiQrUrl('')}
+                    style={{ ...outlineLinkStyle, cursor: 'pointer' }}
+                  >
+                    {tr.venueDirectPay.upiQrRemove}
+                  </Button>
+                )}
+              </div>
             </div>
           </Card>
 

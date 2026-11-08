@@ -3,6 +3,16 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { billableHours, wholeBilledHours } from '@/lib/venue-billing'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import {
+  DIRECT_PAY_PLATFORM_FEE,
+  directPayExpiresAt,
+  isDirectPayExpired,
+  isWaitingDirectPay,
+  shouldUseDirectPay,
+} from '@/lib/venue-direct-pay'
+import { expireDirectPayBookings } from '@/lib/venue-direct-pay.server'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -20,7 +30,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const booking = await prisma.venueBooking.findUnique({
       where: { id },
-      include: { venue: true },
+      include: { venue: { include: { owner: true } }, organiser: { select: { userId: true } } },
     })
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
@@ -36,9 +46,53 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
     }
 
-    const { status } = await req.json()
+    const { status, paymentMethod, cashOnly } = await req.json()
     if (!['CONFIRMED', 'CANCELLED', 'PENDING'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
+
+    // D2 - a direct-payment booking moves only through its own steps
+    // (/api/venue-bookings/[id]/direct-pay). Here the owner may still
+    // cancel it while it waits; anything else is refused.
+    if (booking.directPayStatus) {
+      if (isDirectPayExpired(booking)) {
+        await expireDirectPayBookings({ id: booking.id })
+        return NextResponse.json({ error: 'This booking expired after 48 hours.' }, { status: 400 })
+      }
+      if (!isWaitingDirectPay(booking.directPayStatus)) {
+        return NextResponse.json({ error: 'This booking is already settled.' }, { status: 400 })
+      }
+      if (status !== 'CANCELLED') {
+        return NextResponse.json(
+          { error: 'Use the payment steps on this booking (confirm payment received).', code: 'DIRECT_PAY' },
+          { status: 400 }
+        )
+      }
+      const cancelled = await prisma.venueBooking.update({
+        where: { id },
+        data: { status: 'CANCELLED', directPayStatus: 'CANCELLED' },
+      })
+      if (booking.eventId) {
+        await prisma.event.updateMany({
+          where: { id: booking.eventId, status: 'PENDING_APPROVAL' },
+          data: { status: 'DRAFT' },
+        })
+      }
+      return NextResponse.json(cancelled)
+    }
+
+    // D2 - accepting a request while online payments are off (or when the
+    // owner chooses direct) does NOT confirm: it waits for the organiser
+    // to pay the owner directly. The online path below is unchanged.
+    const direct =
+      status === 'CONFIRMED' &&
+      booking.status === 'PENDING' &&
+      shouldUseDirectPay(await getPaidBookingsEnabled(), paymentMethod)
+    if (direct && !booking.venue.owner.upiId && cashOnly !== true) {
+      return NextResponse.json(
+        { error: 'Add your UPI ID in your profile first, or accept as cash only.', code: 'UPI_REQUIRED' },
+        { status: 400 }
+      )
     }
 
     // Feedback 0ed1ec74 - confirmed via code inspection there was no
@@ -129,6 +183,30 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           }
         }
       }
+    }
+
+    if (direct) {
+      const accepted = await prisma.venueBooking.update({
+        where: { id },
+        data: {
+          ...snapshotData,
+          status: 'PENDING',
+          paymentMethod: 'DIRECT',
+          directPayStatus: 'AWAITING_PAYMENT',
+          expiresAt: directPayExpiresAt(),
+          platformFeeAmount: DIRECT_PAY_PLATFORM_FEE,
+        },
+      })
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(booking.organiser.userId, {
+            title: 'Venue request accepted - pay the owner',
+            body: `${booking.venue.name} accepted. Pay ₹${booking.amount} directly within 48 hours, then tap "I've paid".`,
+            url: '/dashboard/venue-requests',
+          }),
+        'venue-direct-accept'
+      )
+      return NextResponse.json(accepted)
     }
 
     const updated = await prisma.venueBooking.update({
