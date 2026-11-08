@@ -2101,6 +2101,14 @@ const de: Dictionary = {
     dueAtEntry: "Am Einlass fällig: ₹{amount}",
     markNoShow: "Als nicht erschienen markieren",
     checkIn: "Einchecken",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "Wie zahlt das Publikum?",
+    modeFree: "Kostenlos",
+    modePayAtEntry: "Zahlung am Einlass",
+    modePayAtEntryHelp: "Das Publikum reserviert auf AforAudience und zahlt direkt bei dir am Veranstaltungsort — bar oder per UPI. AforAudience nimmt diese Zahlung nicht entgegen.",
+    modeOnline: "Online-Zahlung",
+    modeOnlineComingSoon: "Demnächst",
+    modeOnlineKept: "Online-Zahlungen sind vorerst pausiert. Diese Veranstaltung behält ihren Online-Zahlungsmodus; wähle Zahlung am Einlass, um Buchungen anzunehmen.",
   },
 }
 
