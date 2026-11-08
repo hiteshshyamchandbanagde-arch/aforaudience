@@ -29,27 +29,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
           ← Back to AforAudience
         </Link>
 
-        <div
-          style={{
-            marginTop: "24px",
-            marginBottom: "32px",
-            padding: "16px 20px",
-            borderRadius: "12px",
-            background: "#FDF3E8",
-            border: "1px solid #E8C9A0",
-          }}
-        >
-          <p style={{ fontSize: "13px", fontWeight: 700, color: "#8A5A1E", marginBottom: "4px" }}>
-            Draft — pending legal review
-          </p>
-          <p style={{ fontSize: "13px", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
-            This page reflects our current plan, not a finalized legal document. It will be reviewed with our CA and a
-            lawyer once the company is formally registered, and this notice will be removed once that review is
-            complete.
-          </p>
-        </div>
-
-        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "8px" }}>
+        <h1 style={{ marginTop: "32px", fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "8px" }}>
           {title}
         </h1>
         <p style={{ fontSize: "13px", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
