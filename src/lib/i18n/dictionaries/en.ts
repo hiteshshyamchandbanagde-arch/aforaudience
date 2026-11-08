@@ -643,6 +643,7 @@ const en = {
     reserveFailed: "Failed to reserve seats",
     reviewFailed: "Failed to submit review",
     selectTicketsCta: "Select tickets",
+    bookingOpensSoon: "Booking opens soon",
   },
   checkoutPage: {
     loadingCheckout: "Loading your checkout…",

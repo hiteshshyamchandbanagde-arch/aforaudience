@@ -618,6 +618,7 @@ const de: Dictionary = {
     reserveFailed: "Plätze konnten nicht reserviert werden",
     reviewFailed: "Bewertung konnte nicht gesendet werden",
     selectTicketsCta: "Tickets auswählen",
+    bookingOpensSoon: "Buchung öffnet bald",
   },
   checkoutPage: {
     loadingCheckout: "Deine Kasse wird geladen…",

@@ -613,6 +613,7 @@ const es: Dictionary = {
     reserveFailed: "Error al reservar los asientos",
     reviewFailed: "Error al enviar la reseña",
     selectTicketsCta: "Seleccionar entradas",
+    bookingOpensSoon: "Las reservas abren pronto",
   },
   checkoutPage: {
     loadingCheckout: "Cargando tu pago…",

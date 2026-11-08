@@ -614,6 +614,7 @@ const fr: Dictionary = {
     reserveFailed: "Échec de la réservation des places",
     reviewFailed: "Échec de l'envoi de l'avis",
     selectTicketsCta: "Sélectionner les billets",
+    bookingOpensSoon: "Réservations bientôt ouvertes",
   },
   checkoutPage: {
     loadingCheckout: "Chargement de votre paiement…",
