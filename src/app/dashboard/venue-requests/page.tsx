@@ -54,6 +54,8 @@ export default function VenueRequestsPage() {
   const [counterInputs, setCounterInputs] = useState<Record<string, string>>({})
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
   const [actingOn, setActingOn] = useState<string | null>(null)
+  // D2b - owner with no UPI ID: offer "Accept as cash only" after UPI_REQUIRED.
+  const [cashOnlyFor, setCashOnlyFor] = useState<string | null>(null)
 
   const role = (session?.user as any)?.role as string | undefined
   const callerSide: 'ORGANISER' | 'VENUE_OWNER' | null =
@@ -101,16 +103,24 @@ export default function VenueRequestsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [(session?.user as any)?.id])
 
-  const act = async (reqId: string, action: 'accept' | 'decline' | 'counter') => {
+  const act = async (reqId: string, action: 'accept' | 'decline' | 'counter', cashOnly = false) => {
     setActingOn(reqId)
     try {
       const res = await fetch(`/api/venue-booking-requests/${reqId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId] }),
+        body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId], ...(cashOnly ? { cashOnly: true } : {}) }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || v.actionFailed)
+      if (!res.ok) {
+        // D2b - accepting with payments off needs a UPI ID, or cash only.
+        if (data.code === 'UPI_REQUIRED') {
+          setCashOnlyFor(reqId)
+          throw new Error(tr.venueDirectPay.upiRequired)
+        }
+        throw new Error(data.error || v.actionFailed)
+      }
+      setCashOnlyFor(null)
       await load()
       setCommentInputs((prev) => ({ ...prev, [reqId]: '' }))
       showToast(
@@ -251,6 +261,11 @@ export default function VenueRequestsPage() {
                         >
                           {v.decline}
                         </SharedButton>
+                        {cashOnlyFor === r.id && (
+                          <Button variant="outline" data-afa-accept-cash-only onClick={() => act(r.id, 'accept', true)} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)' }}>
+                            {tr.venueDirectPay.acceptCashOnly}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}
