@@ -25,7 +25,8 @@ export default async function SeatSelectionPage({ params }: { params: Promise<{ 
   // S1a - "paid bookings" switch off: no booking panel (no Pay/Book) for a
   // paid event. Back to the event page, which shows "Booking opens soon".
   // POST /api/bookings refuses these anyway; this keeps a deep link honest.
-  if (requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
+  // D1 - PAY_AT_ENTRY is never blocked by the switch.
+  if (event.paymentMode !== 'PAY_AT_ENTRY' && requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
     redirect(`/events/${id}`)
   }
 
