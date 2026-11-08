@@ -49,6 +49,30 @@ enum BookingStatus {
   REFUNDED
 }
 
+// D1 (Hitesh, 8 Nov) - how an event takes money. PAY_AT_ENTRY = the
+// audience reserves on AFA and pays the organiser at the venue; AFA never
+// collects. ONLINE = the existing Razorpay checkout (gated by
+// PlatformSettings.paidBookingsEnabled).
+enum EventPaymentMode {
+  FREE
+  PAY_AT_ENTRY
+  ONLINE
+}
+
+// D1 - per-booking attendance, separate from BookingStatus.
+enum AttendanceStatus {
+  RESERVED
+  ATTENDED
+  NO_SHOW
+}
+
+// D1 - how a booking is (to be) paid.
+enum BookingPaymentMethod {
+  ONLINE
+  AT_ENTRY
+  NONE
+}
+
 enum ApplicationStatus {
   PENDING
   APPROVED
@@ -1299,6 +1323,8 @@ model Event {
   endTime        String
   isFree         Boolean     @default(false)
   ticketPrice    Float?
+  // D1 - backfilled: free -> FREE, priced -> ONLINE.
+  paymentMode    EventPaymentMode @default(FREE)
   totalSeats     Int
   availableSeats Int
   food           Json?
@@ -1665,6 +1691,11 @@ model Booking {
   // something queried from the User side.
   checkedInAt       DateTime?
   checkedInByUserId String?
+
+  // D1 (Hitesh, 8 Nov) - Reserved -> Attended (check-in) / No-show
+  // (organiser action, or automatic 24 h after the event ends).
+  attendance    AttendanceStatus     @default(RESERVED)
+  paymentMethod BookingPaymentMethod @default(NONE)
 
   // Post-show rating prompt (reputation epic §5). Set once the push has
   // fired for this booking so the cron never double-sends - "one push

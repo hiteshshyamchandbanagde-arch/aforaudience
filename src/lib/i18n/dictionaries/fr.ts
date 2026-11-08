@@ -2086,6 +2086,27 @@ const fr: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "Expiré le {date} — actuellement désactivé.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · payez {organiser} à l’entrée (espèces/UPI)",
+    noCollect: "AforAudience n’encaisse pas ce paiement.",
+    reserveCta: "Réserver",
+    badge: "Paiement à l’entrée · ₹{amount}",
+    attended: "Présent",
+    noShow: "Absent",
+    reserved: "Réservé",
+    dueAtEntry: "À payer à l’entrée : ₹{amount}",
+    markNoShow: "Marquer absent",
+    checkIn: "Enregistrer l’entrée",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "Comment le public paiera-t-il ?",
+    modeFree: "Gratuit",
+    modePayAtEntry: "Paiement à l’entrée",
+    modePayAtEntryHelp: "Le public réserve sur AforAudience et vous paie directement sur place — en espèces ou par UPI. AforAudience n’encaisse pas ce paiement.",
+    modeOnline: "Paiement en ligne",
+    modeOnlineComingSoon: "Bientôt disponible",
+    modeOnlineKept: "Les paiements en ligne sont suspendus pour le moment. Cet événement garde son mode de paiement en ligne ; choisissez Paiement à l’entrée pour accepter des réservations.",
+  },
 }
 
 export default fr

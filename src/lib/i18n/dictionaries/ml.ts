@@ -2080,6 +2080,27 @@ const ml: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date}-ന് കാലാവധി കഴിഞ്ഞു — ഇപ്പോൾ ഓഫാണ്.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · പ്രവേശനസമയത്ത് {organiser}-ന് പണം നൽകുക (കാഷ്/UPI)",
+    noCollect: "AforAudience ഈ പേയ്‌മെന്റ് സ്വീകരിക്കുന്നില്ല.",
+    reserveCta: "റിസർവ് ചെയ്യുക",
+    badge: "പ്രവേശനത്തിൽ പേയ്‌മെന്റ് · ₹{amount}",
+    attended: "പങ്കെടുത്തു",
+    noShow: "വന്നില്ല",
+    reserved: "റിസർവ് ചെയ്തു",
+    dueAtEntry: "പ്രവേശനത്തിൽ നൽകേണ്ടത്: ₹{amount}",
+    markNoShow: "വന്നില്ല എന്ന് അടയാളപ്പെടുത്തുക",
+    checkIn: "ചെക്ക് ഇൻ",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "പ്രേക്ഷകർ എങ്ങനെ പണം നൽകും?",
+    modeFree: "സൗജന്യം",
+    modePayAtEntry: "പ്രവേശനസമയത്ത് പണം",
+    modePayAtEntryHelp: "പ്രേക്ഷകർ AforAudience-ൽ സീറ്റ് റിസർവ് ചെയ്യുകയും വേദിയിൽ നേരിട്ട് നിങ്ങൾക്ക് പണം നൽകുകയും ചെയ്യുന്നു — കാഷ് അല്ലെങ്കിൽ UPI. AforAudience ഈ പേയ്‌മെന്റ് സ്വീകരിക്കുന്നില്ല.",
+    modeOnline: "ഓൺലൈൻ പേയ്‌മെന്റ്",
+    modeOnlineComingSoon: "ഉടൻ വരുന്നു",
+    modeOnlineKept: "ഓൺലൈൻ പേയ്‌മെന്റുകൾ ഇപ്പോൾ നിർത്തിവച്ചിരിക്കുന്നു. ഈ ഇവന്റ് ഓൺലൈൻ പേയ്‌മെന്റ് മോഡിൽ തുടരും; ബുക്കിംഗുകൾ സ്വീകരിക്കാൻ പ്രവേശനസമയത്ത് പണം തിരഞ്ഞെടുക്കുക.",
+  },
 }
 
 export default ml

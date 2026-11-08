@@ -78,7 +78,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const updated = await prisma.booking.update({
       where: { id: booking.id },
-      data: { checkedInAt: new Date(), checkedInByUserId: user.id },
+      // D1 - checking in marks the booking Attended.
+      data: { checkedInAt: new Date(), checkedInByUserId: user.id, attendance: 'ATTENDED' },
     })
 
     // s60-auto-follow-organiser-on-attendance: attending a show earns

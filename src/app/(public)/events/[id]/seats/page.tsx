@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import { getPaidBookingsEnabled } from '@/lib/platform-settings'
 import { requestsPaidTickets } from '@/lib/paid-bookings'
 import SeatSelectionClientPage from './SeatSelectionClientPage'
+import { PAY_AT_ENTRY_MAX_SEATS } from '@/lib/pay-at-entry'
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - the seat/ticket-tier picker,
 // relocated out of EventDetailClientPage.tsx into its own real,
@@ -25,7 +26,8 @@ export default async function SeatSelectionPage({ params }: { params: Promise<{ 
   // S1a - "paid bookings" switch off: no booking panel (no Pay/Book) for a
   // paid event. Back to the event page, which shows "Booking opens soon".
   // POST /api/bookings refuses these anyway; this keeps a deep link honest.
-  if (requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
+  // D1 - PAY_AT_ENTRY is never blocked by the switch.
+  if (event.paymentMode !== 'PAY_AT_ENTRY' && requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
     redirect(`/events/${id}`)
   }
 
@@ -59,6 +61,11 @@ export default async function SeatSelectionPage({ params }: { params: Promise<{ 
     ...event,
     totalSeats: displayTotalSeats,
     availableSeats: displayAvailableSeats,
+    // D1 - pay at entry is capped at 4 seats per booking (server-enforced).
+    maxSeatsPerBooking:
+      event.paymentMode === 'PAY_AT_ENTRY'
+        ? Math.min(event.maxSeatsPerBooking, PAY_AT_ENTRY_MAX_SEATS)
+        : event.maxSeatsPerBooking,
   }
 
   return <SeatSelectionClientPage event={JSON.parse(JSON.stringify(eventForClient))} />

@@ -2078,6 +2078,27 @@ const mr: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} रोजी कालबाह्य — सध्या बंद.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · {organiser} यांना प्रवेशावेळी पैसे द्या (रोख/UPI)",
+    noCollect: "AforAudience हे पेमेंट घेत नाही.",
+    reserveCta: "राखून ठेवा",
+    badge: "प्रवेशावेळी पेमेंट · ₹{amount}",
+    attended: "उपस्थित",
+    noShow: "आले नाहीत",
+    reserved: "राखीव",
+    dueAtEntry: "प्रवेशावेळी देय: ₹{amount}",
+    markNoShow: "आले नाहीत म्हणून नोंदवा",
+    checkIn: "चेक इन",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "प्रेक्षक पैसे कसे देतील?",
+    modeFree: "मोफत",
+    modePayAtEntry: "प्रवेशावेळी पेमेंट",
+    modePayAtEntryHelp: "प्रेक्षक AforAudience वर जागा राखून ठेवतात आणि ठिकाणी थेट तुम्हाला पैसे देतात — रोख किंवा UPI. AforAudience हे पेमेंट घेत नाही.",
+    modeOnline: "ऑनलाइन पेमेंट",
+    modeOnlineComingSoon: "लवकरच येत आहे",
+    modeOnlineKept: "ऑनलाइन पेमेंट सध्या थांबवले आहेत. हा इव्हेंट ऑनलाइन पेमेंट मोडमध्येच राहील; बुकिंग घेण्यासाठी प्रवेशावेळी पेमेंट निवडा.",
+  },
 }
 
 export default mr

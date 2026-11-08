@@ -7,6 +7,7 @@ import { parseAmount } from '@/lib/money-validation'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { getPlatformSettings, getPaidBookingsEnabled } from '@/lib/platform-settings'
 import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
+import { resolveEventPaymentMode } from '@/lib/pay-at-entry'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 import { isTourStopBookable, recomputeTourStatus } from '@/lib/tours'
 
@@ -91,7 +92,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
       audienceVoteWeight, panelistVoteWeight, celebrityVoteWeight,
-      termsChecklist, specialNotes, ageLimit,
+      termsChecklist, specialNotes, ageLimit, paymentMode,
       openSlotCount, slotDuration, applicationDeadline,
     } = body
 
@@ -173,13 +174,37 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
     }
 
-    // S1a - "paid bookings" master switch: while it is off, refuse any
-    // ticket price above 0 on the server (UI hiding is not enough).
-    if (requestsPaidTickets({ isFree, ticketPrice, ticketTiers }) && !(await getPaidBookingsEnabled())) {
-      return NextResponse.json(
-        { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED },
-        { status: 403 }
-      )
+    // S1a - "paid bookings" master switch: while it is off, refuse an
+    // ONLINE ticket price above 0 on the server (UI hiding is not enough).
+    // D1 - PAY_AT_ENTRY prices are allowed. Only resolved when the body
+    // touches pricing or the mode, so a publish-only PATCH is unaffected.
+    // A priced edit with no mode keeps the event's current paid mode.
+    let paymentModeUpdate: { paymentMode: 'FREE' | 'PAY_AT_ENTRY' | 'ONLINE' } | Record<string, never> = {}
+    if (
+      paymentMode !== undefined || isFree !== undefined ||
+      ticketPrice !== undefined || ticketTiers !== undefined
+    ) {
+      const pricedRequest = requestsPaidTickets({ isFree, ticketPrice, ticketTiers })
+      const requestedMode =
+        paymentMode !== undefined
+          ? paymentMode
+          : pricedRequest && event.paymentMode !== 'FREE'
+            ? event.paymentMode
+            : undefined
+      const modeResult = resolveEventPaymentMode(requestedMode, pricedRequest, await getPaidBookingsEnabled())
+      if (!modeResult.ok) {
+        return NextResponse.json(
+          modeResult.status === 403
+            ? { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED }
+            : modeResult.body,
+          { status: modeResult.status }
+        )
+      }
+      // Only store FREE when the body really says free/unpriced pricing,
+      // not when it merely omits a price on an already-priced event.
+      if (pricedRequest || paymentMode !== undefined || isFree === true) {
+        paymentModeUpdate = { paymentMode: modeResult.mode }
+      }
     }
 
     // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at
@@ -304,6 +329,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(startTime && { startTime }),
         ...(endTime && { endTime }),
         ...(isFree !== undefined && { isFree: Boolean(isFree) }),
+        ...paymentModeUpdate,
         ...(ticketPrice !== undefined && {
           // Kept for backward compat with anything still reading the flat
           // price directly - null once per-section tiers are in play,

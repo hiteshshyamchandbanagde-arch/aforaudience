@@ -2080,6 +2080,27 @@ const bn: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} তারিখে মেয়াদ শেষ — এখন বন্ধ।",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · প্রবেশের সময় {organiser}-কে পেমেন্ট করুন (নগদ/UPI)",
+    noCollect: "AforAudience এই পেমেন্ট নেয় না।",
+    reserveCta: "রিজার্ভ করুন",
+    badge: "প্রবেশে পেমেন্ট · ₹{amount}",
+    attended: "উপস্থিত",
+    noShow: "আসেননি",
+    reserved: "রিজার্ভড",
+    dueAtEntry: "প্রবেশে দেয়: ₹{amount}",
+    markNoShow: "আসেননি চিহ্নিত করুন",
+    checkIn: "চেক ইন",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "দর্শক কীভাবে পেমেন্ট করবেন?",
+    modeFree: "বিনামূল্যে",
+    modePayAtEntry: "প্রবেশের সময় পেমেন্ট",
+    modePayAtEntryHelp: "দর্শক AforAudience-এ আসন সংরক্ষণ করেন এবং ভেন্যুতে সরাসরি আপনাকে পেমেন্ট করেন — নগদ বা UPI। AforAudience এই পেমেন্ট নেয় না।",
+    modeOnline: "অনলাইন পেমেন্ট",
+    modeOnlineComingSoon: "শীঘ্রই আসছে",
+    modeOnlineKept: "অনলাইন পেমেন্ট এখন বন্ধ আছে। এই ইভেন্টটি অনলাইন পেমেন্ট মোডেই থাকবে; বুকিং নিতে প্রবেশের সময় পেমেন্ট বেছে নিন।",
+  },
 }
 
 export default bn

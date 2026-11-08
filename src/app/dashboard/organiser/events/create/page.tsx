@@ -18,6 +18,8 @@ import { presetLabels, longEventText, seatsText, sectionsText, weekdayName } fro
 import { useLocale } from '@/lib/i18n/translate'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
+import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
+import type { EventPaymentMode } from '@/lib/pay-at-entry'
 
 interface SeatSection {
   id?: string
@@ -184,7 +186,11 @@ export default function CreateEventPage() {
   // auto-overwriting them when Event Type changes - the whole point of
   // "pre-selected but editable" is that a deliberate choice sticks.
   const [dressVibeTouched, setDressVibeTouched] = useState(false)
-  const [isFree, setIsFree] = useState(true)
+  // D1b - Free / Pay at entry / Online payment. isFree is derived so the
+  // existing pricing UI keeps working; paymentMode goes to the server.
+  const [paymentMode, setPaymentMode] = useState<EventPaymentMode>('FREE')
+  const isFree = paymentMode === 'FREE'
+  const paidBookingsEnabled = usePaidBookingsEnabled()
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
   // Competition show (31 Jul feedback) - an optional layer on top of any
@@ -379,7 +385,7 @@ export default function CreateEventPage() {
     if (error) setError('')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    formData, isFree, ticketPrice, surpriseAct, venueId, bookingAmount,
+    formData, paymentMode, ticketPrice, surpriseAct, venueId, bookingAmount,
     maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
     plusOnesRequired, defaultCompensationType, defaultFeeAmount,
     defaultBuyInAmount, tierPrices,
@@ -501,6 +507,7 @@ export default function CreateEventPage() {
           ...formData,
           totalSeats: totalSeatsValue,
           isFree,
+          paymentMode,
           ticketPrice: isFree || usingTierPricing ? null : ticketPrice,
           ticketTiers,
           surpriseAct,
@@ -808,14 +815,7 @@ export default function CreateEventPage() {
                 {f.seatsAndPrice}
               </h2>
 
-              <div style={{ display: 'flex', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-18px)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> {f.freeEntry}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> {f.paidEntry}
-                </label>
-              </div>
+              <PaymentModePicker value={paymentMode} onChange={setPaymentMode} paidEnabled={paidBookingsEnabled === true} />
 
               {usingTierPricing ? (
                 <div>

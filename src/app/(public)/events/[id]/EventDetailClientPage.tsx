@@ -58,6 +58,8 @@ interface EventData {
   endTime: string
   isFree: boolean
   ticketPrice: number | null
+  // D1 - FREE | PAY_AT_ENTRY | ONLINE
+  paymentMode?: string
   totalSeats: number
   availableSeats: number
   maxSeatsPerBooking: number
@@ -244,7 +246,17 @@ export default function EventDetailPage({ event, canReview, bookingPaused = fals
   // two copies of the same ternary. Reuses existing tr.eventDetailPage
   // strings only - no new dictionary keys, per the standing i18n rule
   // (11 locales required for any new user-facing string).
-  const priceLabel = event.isFree
+  // D1 - pay at entry: the audience reserves here and pays the named
+  // organiser at the venue; AFA never collects.
+  const isPayAtEntry = event.paymentMode === 'PAY_AT_ENTRY' && !event.isFree
+  const payAtEntryPrice =
+    event.ticketPrice ||
+    (event.ticketTiers.length > 0 ? Math.min(...event.ticketTiers.map((t) => t.price)) : 0)
+  const priceLabel = isPayAtEntry
+    ? tr.payAtEntry.priceLine
+        .replace("{price}", String(payAtEntryPrice))
+        .replace("{organiser}", event.organiser?.orgName || "")
+    : event.isFree
     ? tr.eventDetailPage.freeEntry
     : event.ticketTiers.length > 0
     ? // BUG-2609-075 - a numbered map is picked seat by seat
@@ -379,12 +391,12 @@ export default function EventDetailPage({ event, canReview, bookingPaused = fals
                     </div>
                   ) : (
                     <>
-                      <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ textDecoration: "none" }}>
-                        {tr.eventDetailPage.selectTicketsCta}
+                      <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ textDecoration: "none" }} data-afa-reserve-cta={isPayAtEntry ? "" : undefined}>
+                        {isPayAtEntry ? tr.payAtEntry.reserveCta : tr.eventDetailPage.selectTicketsCta}
                       </Link>
 
-                      <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
-                        {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
+                      <div data-afa-pay-at-entry-note={isPayAtEntry ? "" : undefined} style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
+                        {isPayAtEntry ? tr.payAtEntry.noCollect : event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
                       </div>
                     </>
                   )}
@@ -708,7 +720,7 @@ export default function EventDetailPage({ event, canReview, bookingPaused = fals
             </span>
           ) : (
             <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ width: "auto", padding: "var(--afa-space-3) var(--afa-space-6)", textDecoration: "none", flexShrink: 0 }}>
-              {tr.eventDetailPage.selectTicketsCta}
+              {isPayAtEntry ? tr.payAtEntry.reserveCta : tr.eventDetailPage.selectTicketsCta}
             </Link>
           )}
         </div>

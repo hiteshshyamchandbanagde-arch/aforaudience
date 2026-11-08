@@ -9,6 +9,7 @@ import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings, getPaidBookingsEnabled } from '@/lib/platform-settings'
 import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
+import { resolveEventPaymentMode } from '@/lib/pay-at-entry'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 import { recomputeTourStatus } from '@/lib/tours'
 import { formatDate } from '@/lib/format-date'
@@ -126,7 +127,7 @@ export async function POST(req: Request) {
       maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
-      termsChecklist, specialNotes, ageLimit,
+      termsChecklist, specialNotes, ageLimit, paymentMode,
       tourId, openSlotCount, slotDuration, applicationDeadline,
     } = body
 
@@ -207,14 +208,22 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: `Max performers must be a whole number between 1 and ${MAX_PERFORMERS}.` }, { status: 400 })
       }
     }
-    // S1a - "paid bookings" master switch: while it is off, refuse any
-    // ticket price above 0 on the server (UI hiding is not enough).
-    if (requestsPaidTickets({ isFree, ticketPrice, ticketTiers }) && !(await getPaidBookingsEnabled())) {
+    // S1a - "paid bookings" master switch: while it is off, refuse an
+    // ONLINE ticket price above 0 on the server (UI hiding is not enough).
+    // D1 - a priced PAY_AT_ENTRY event is allowed (no money through AFA);
+    // a priced event with no mode defaults to PAY_AT_ENTRY while OFF.
+    const pricedRequest = requestsPaidTickets({ isFree, ticketPrice, ticketTiers })
+    const paidOn = await getPaidBookingsEnabled()
+    const modeResult = resolveEventPaymentMode(paymentMode, pricedRequest, paidOn)
+    if (!modeResult.ok) {
       return NextResponse.json(
-        { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED },
-        { status: 403 }
+        modeResult.status === 403
+          ? { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED }
+          : modeResult.body,
+        { status: modeResult.status }
       )
     }
+    const resolvedPaymentMode = modeResult.mode
     if (!isFree && ticketPrice !== undefined && ticketPrice !== null && ticketPrice !== '') {
       const price = Number(ticketPrice)
       if (!Number.isFinite(price) || price < 0 || price > MAX_TICKET_PRICE) {
@@ -348,6 +357,7 @@ export async function POST(req: Request) {
         startTime,
         endTime,
         isFree: Boolean(isFree),
+        paymentMode: resolvedPaymentMode,
         // Kept for backward compat with anything still reading the flat
         // price directly; null when per-section tiers are in play, since
         // there's no single price to show there any more.

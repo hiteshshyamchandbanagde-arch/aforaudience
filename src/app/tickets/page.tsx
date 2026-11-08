@@ -100,6 +100,9 @@ interface BookingItem {
   // full-scalar `include`, not a `select`), just never surfaced in the
   // UI before. Used to split the Past section into attended/missed.
   checkedInAt: string | null
+  // D1 - pay at entry + attendance (scalars from /api/bookings/my).
+  paymentMethod?: string
+  attendance?: string
   // Mobile Redesign Phase 4a (GEN-2609-006) - same story as checkedInAt
   // above: /api/bookings/my's `include` already returns this scalar,
   // it just had no client-side field to land in before this restyle's
@@ -838,8 +841,8 @@ export default function MyTicketsPage() {
                           {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
                         </Badge>
                         {showAttendancePill && (
-                          <Badge variant="status-compact" tone={b.checkedInAt ? STATUS_TONE.sage : STATUS_TONE.muted}>
-                            {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}
+                          <Badge variant="status-compact" tone={b.checkedInAt || b.attendance === 'ATTENDED' ? STATUS_TONE.sage : STATUS_TONE.muted} data-afa-attendance={b.checkedInAt || b.attendance === 'ATTENDED' ? 'ATTENDED' : b.attendance === 'NO_SHOW' ? 'NO_SHOW' : 'MISSED'}>
+                            {b.checkedInAt || b.attendance === 'ATTENDED' ? tr.ticketsPage.attendedPill : b.attendance === 'NO_SHOW' ? tr.payAtEntry.noShow : tr.ticketsPage.missedPill}
                           </Badge>
                         )}
                       </span>
@@ -901,7 +904,16 @@ export default function MyTicketsPage() {
                           </div>
                           )}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            {showPaid && (
+                            {showPaid && b.paymentMethod === 'AT_ENTRY' && (
+                              // D1 - reserved on AFA, paid to the organiser at the venue.
+                              <div style={{ marginBottom: 'var(--afa-space-2)' }}>
+                                <Badge variant="status-compact" tone={STATUS_TONE.muted} data-afa-pay-at-entry-badge>
+                                  {tr.payAtEntry.badge.replace('{amount}', b.totalAmount.toLocaleString('en-IN'))}
+                                </Badge>
+                                <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>{tr.payAtEntry.noCollect}</p>
+                              </div>
+                            )}
+                            {showPaid && b.paymentMethod !== 'AT_ENTRY' && (
                               <div style={{ marginBottom: 'var(--afa-space-2)' }}>
                                 {b.totalAmount > 0 && (
                                   <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>

@@ -2080,6 +2080,27 @@ const ta: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} அன்று காலாவதியானது — தற்போது முடக்கப்பட்டுள்ளது.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · நுழைவில் {organiser}-க்கு செலுத்தவும் (பணம்/UPI)",
+    noCollect: "AforAudience இந்தக் கட்டணத்தை வசூலிப்பதில்லை.",
+    reserveCta: "முன்பதிவு செய்",
+    badge: "நுழைவில் கட்டணம் · ₹{amount}",
+    attended: "வந்தார்",
+    noShow: "வரவில்லை",
+    reserved: "முன்பதிவு",
+    dueAtEntry: "நுழைவில் செலுத்த வேண்டியது: ₹{amount}",
+    markNoShow: "வரவில்லை எனக் குறி",
+    checkIn: "செக் இன்",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "பார்வையாளர்கள் எப்படிச் செலுத்துவார்கள்?",
+    modeFree: "இலவசம்",
+    modePayAtEntry: "நுழைவில் செலுத்துதல்",
+    modePayAtEntryHelp: "பார்வையாளர்கள் AforAudience-இல் இருக்கையை முன்பதிவு செய்து, இடத்தில் நேரடியாக உங்களுக்குச் செலுத்துவார்கள் — பணம் அல்லது UPI. AforAudience இந்தக் கட்டணத்தை வசூலிப்பதில்லை.",
+    modeOnline: "ஆன்லைன் கட்டணம்",
+    modeOnlineComingSoon: "விரைவில்",
+    modeOnlineKept: "ஆன்லைன் கட்டணங்கள் தற்போது நிறுத்தி வைக்கப்பட்டுள்ளன. இந்த நிகழ்வு அதன் ஆன்லைன் கட்டண முறையிலேயே இருக்கும்; முன்பதிவுகளை ஏற்க நுழைவில் செலுத்துதலைத் தேர்ந்தெடுக்கவும்.",
+  },
 }
 
 export default ta

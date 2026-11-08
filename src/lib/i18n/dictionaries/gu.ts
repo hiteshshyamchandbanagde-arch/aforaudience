@@ -2080,6 +2080,27 @@ const gu: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} ના રોજ સમાપ્ત — હાલમાં બંધ.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · પ્રવેશ સમયે {organiser}ને ચૂકવો (રોકડ/UPI)",
+    noCollect: "AforAudience આ ચુકવણી લેતું નથી.",
+    reserveCta: "રિઝર્વ કરો",
+    badge: "પ્રવેશ પર ચુકવણી · ₹{amount}",
+    attended: "હાજર",
+    noShow: "ગેરહાજર",
+    reserved: "રિઝર્વ્ડ",
+    dueAtEntry: "પ્રવેશ પર ચૂકવવાના: ₹{amount}",
+    markNoShow: "ગેરહાજર ચિહ્નિત કરો",
+    checkIn: "ચેક ઇન",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "દર્શકો કેવી રીતે ચૂકવણી કરશે?",
+    modeFree: "મફત",
+    modePayAtEntry: "પ્રવેશ સમયે ચુકવણી",
+    modePayAtEntryHelp: "દર્શકો AforAudience પર સીટ રિઝર્વ કરે છે અને વેન્યૂ પર સીધા તમને ચૂકવે છે — રોકડ અથવા UPI. AforAudience આ ચુકવણી લેતું નથી.",
+    modeOnline: "ઓનલાઇન ચુકવણી",
+    modeOnlineComingSoon: "ટૂંક સમયમાં",
+    modeOnlineKept: "ઓનલાઇન ચુકવણી હાલ થોભાવેલી છે. આ ઇવેન્ટ ઓનલાઇન ચુકવણી મોડમાં જ રહેશે; બુકિંગ લેવા માટે પ્રવેશ સમયે ચુકવણી પસંદ કરો.",
+  },
 }
 
 export default gu

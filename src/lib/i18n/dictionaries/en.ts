@@ -2276,6 +2276,27 @@ const en = {
     // {date}: when the Direct payouts flag auto-disabled.
     directPayoutsExpired: "Expired on {date} — currently off.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · pay {organiser} at entry (cash/UPI)",
+    noCollect: "AforAudience does not collect this payment.",
+    reserveCta: "Reserve",
+    badge: "Pay at entry · ₹{amount}",
+    attended: "Attended",
+    noShow: "No-show",
+    reserved: "Reserved",
+    dueAtEntry: "Due at entry: ₹{amount}",
+    markNoShow: "Mark no-show",
+    checkIn: "Check in",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "How will the audience pay?",
+    modeFree: "Free",
+    modePayAtEntry: "Pay at entry",
+    modePayAtEntryHelp: "Audience reserves on AforAudience and pays you directly at the venue — cash or UPI. AforAudience does not collect this payment.",
+    modeOnline: "Online payment",
+    modeOnlineComingSoon: "Coming soon",
+    modeOnlineKept: "Online payments are paused for now. This event keeps its online payment mode; choose Pay at entry to take bookings.",
+  },
 }
 
 export default en

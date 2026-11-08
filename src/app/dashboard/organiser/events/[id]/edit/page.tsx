@@ -19,6 +19,8 @@ import { useLocale } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
+import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
+import { type EventPaymentMode, initialPickerMode } from '@/lib/pay-at-entry'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface SeatSection {
@@ -61,6 +63,7 @@ interface EventDetail {
   startTime: string
   endTime: string
   isFree: boolean
+  paymentMode?: string | null
   ticketPrice: number | null
   totalSeats: number
   dresscode?: string | null
@@ -172,7 +175,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     title: '', description: '', type: 'OPEN_MIC', date: '', startTime: '', endTime: '',
     totalSeats: '', dresscode: '', vibe: '',
   })
-  const [isFree, setIsFree] = useState(true)
+  // D1b - Free / Pay at entry / Online payment. Loaded from the event's
+  // stored paymentMode (an ONLINE event stays ONLINE while the switch is
+  // off - never silently converted); isFree is derived from it.
+  const [paymentMode, setPaymentMode] = useState<EventPaymentMode>('FREE')
+  const isFree = paymentMode === 'FREE'
+  const paidBookingsEnabled = usePaidBookingsEnabled()
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
   // FEAT-2608-045 - specialNotesOriginal tracks what was loaded from the
@@ -350,7 +358,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           dresscode: data.dresscode || '',
           vibe: data.vibe || '',
         })
-        setIsFree(data.isFree)
+        // The D1 migration backfilled every event's mode, so the switch
+        // fallback (false = Pay at entry, the safe side) is only for odd rows.
+        setPaymentMode(initialPickerMode(data, false))
         setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : '')
         setSurpriseAct(data.surpriseAct)
         setTermsChecklist(data.termsChecklist || [])
@@ -472,6 +482,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           ...formData,
           totalSeats: totalSeatsValue,
           isFree,
+          paymentMode,
           ticketPrice: isFree || usingTierPricing ? null : ticketPrice,
           ticketTiers,
           surpriseAct,
@@ -1125,14 +1136,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-14px)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> {f.freeEntry}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
-                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> {f.paidEntry}
-                </label>
-              </div>
+              <PaymentModePicker value={paymentMode} onChange={setPaymentMode} paidEnabled={paidBookingsEnabled === true} />
 
               {!isFree && !usingTierPricing && (
                 <div>

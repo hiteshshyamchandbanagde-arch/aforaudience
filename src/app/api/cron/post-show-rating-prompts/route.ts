@@ -2,6 +2,40 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { sendPushToUser } from '@/lib/push'
 import { getEventEndDateTime } from '@/lib/eventTime'
+import { shouldAutoNoShow } from '@/lib/pay-at-entry'
+
+// D1 (Hitesh, 8 Nov) - automatic no-show pass, run from this existing
+// cron: a CONFIRMED booking still RESERVED (not checked in) 24 h after the
+// event's end becomes NO_SHOW. Look-back is capped so one run stays small;
+// read paths also compute this lazily (effectiveAttendance) so a missed
+// run never shows a stale "Reserved".
+const NO_SHOW_LOOKBACK_DAYS = 14
+
+async function autoNoShowPass(now: Date): Promise<number> {
+  const floor = new Date(now.getTime() - NO_SHOW_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
+  const candidates = await prisma.booking.findMany({
+    where: {
+      status: 'CONFIRMED',
+      attendance: 'RESERVED',
+      checkedInAt: null,
+      event: { date: { gte: floor, lte: now } },
+    },
+    select: {
+      id: true,
+      status: true,
+      attendance: true,
+      checkedInAt: true,
+      event: { select: { date: true, startTime: true, endTime: true } },
+    },
+  })
+  const ids = candidates.filter((b) => shouldAutoNoShow(b, b.event, now)).map((b) => b.id)
+  if (ids.length === 0) return 0
+  const res = await prisma.booking.updateMany({
+    where: { id: { in: ids }, attendance: 'RESERVED', checkedInAt: null },
+    data: { attendance: 'NO_SHOW' },
+  })
+  return res.count
+}
 
 // Reputation epic §5 - post-show rating prompt. Runs on a schedule (see
 // vercel.json crons) rather than a per-event timer, since Vercel has no
@@ -66,7 +100,16 @@ export async function GET(req: Request) {
       })
     }
 
-    return NextResponse.json({ checked: candidates.length, sent })
+    // D1 - separate failure domain: a no-show pass error never hides the
+    // rating-prompt result above.
+    let noShows = 0
+    try {
+      noShows = await autoNoShowPass(now)
+    } catch (err) {
+      console.error('[cron] auto no-show pass failed', err)
+    }
+
+    return NextResponse.json({ checked: candidates.length, sent, noShows })
   } catch (err) {
     console.error('[cron] post-show-rating-prompts failed', err)
     return NextResponse.json({ error: 'Failed' }, { status: 500 })
