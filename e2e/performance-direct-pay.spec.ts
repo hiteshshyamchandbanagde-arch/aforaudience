@@ -2,7 +2,8 @@ import { test, expect, gotoDashboard } from "./helpers/test";
 import type { Page } from "@playwright/test";
 import { authFile } from "./helpers/personas";
 import { withQaDb } from "./helpers/qa-db";
-import { useRuleViewport } from "./helpers/viewports";
+// Aliased: not a React hook, the lint rule only goes by the "use" prefix.
+import { useRuleViewport as setRuleViewport } from "./helpers/viewports";
 
 /**
  * D3 (Hitesh, 8 Nov) - Organiser <-> Artist performance fees paid DIRECTLY.
@@ -124,7 +125,7 @@ test("[D3] performance direct pay: PAID (Omkar pays Hrithik) and BUY_IN (Hrithik
       expect((await payee.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "markPaid" } })).status()).toBe(403);
       expect((await payer.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "confirmReceived" } })).status()).toBe(403);
 
-      await useRuleViewport(payer, isMobile);
+      await setRuleViewport(payer, isMobile);
       await gotoDashboard(payer, opts.payerUrl);
       const card = payer.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
       await expect(card).toHaveAttribute("data-afa-direct-pay-role", "payer");
@@ -139,7 +140,7 @@ test("[D3] performance direct pay: PAID (Omkar pays Hrithik) and BUY_IN (Hrithik
       await card.getByRole("button", { name: "I've paid" }).click();
       await expect(card.locator('[data-afa-direct-pay-chip="paymentMarked"]')).toBeVisible();
 
-      await useRuleViewport(payee, isMobile);
+      await setRuleViewport(payee, isMobile);
       await gotoDashboard(payee, opts.payeeUrl);
       const pCard = payee.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
       await expect(pCard).toHaveAttribute("data-afa-direct-pay-role", "payee");
