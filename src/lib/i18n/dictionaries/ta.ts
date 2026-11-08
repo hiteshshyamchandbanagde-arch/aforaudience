@@ -609,6 +609,7 @@ const ta: Dictionary = {
     reserveFailed: "இருக்கைகளை முன்பதிவு செய்ய முடியவில்லை",
     reviewFailed: "மதிப்புரையைச் சமர்ப்பிக்க முடியவில்லை",
     selectTicketsCta: "டிக்கெட்டுகளைத் தேர்ந்தெடுக்கவும்",
+    bookingOpensSoon: "முன்பதிவு விரைவில் தொடங்கும்",
   },
   checkoutPage: {
     loadingCheckout: "உங்கள் செக்அவுட் ஏற்றப்படுகிறது…",

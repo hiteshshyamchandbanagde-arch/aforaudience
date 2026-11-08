@@ -609,6 +609,7 @@ const ml: Dictionary = {
     reserveFailed: "സീറ്റുകൾ റിസർവ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     reviewFailed: "അവലോകനം സമർപ്പിക്കാൻ കഴിഞ്ഞില്ല",
     selectTicketsCta: "ടിക്കറ്റുകൾ തിരഞ്ഞെടുക്കുക",
+    bookingOpensSoon: "ബുക്കിംഗ് ഉടൻ ആരംഭിക്കും",
   },
   checkoutPage: {
     loadingCheckout: "നിങ്ങളുടെ ചെക്ക്ഔട്ട് ലോഡ് ചെയ്യുന്നു…",

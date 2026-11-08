@@ -609,6 +609,7 @@ const kn: Dictionary = {
     reserveFailed: "ಸೀಟುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲು ವಿಫಲವಾಗಿದೆ",
     reviewFailed: "ವಿಮರ್ಶೆಯನ್ನು ಸಲ್ಲಿಸಲು ವಿಫಲವಾಗಿದೆ",
     selectTicketsCta: "ಟಿಕೆಟ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    bookingOpensSoon: "ಬುಕಿಂಗ್ ಶೀಘ್ರದಲ್ಲೇ ಆರಂಭವಾಗುತ್ತದೆ",
   },
   checkoutPage: {
     loadingCheckout: "ನಿಮ್ಮ ಚೆಕ್‌ಔಟ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",

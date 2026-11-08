@@ -609,6 +609,7 @@ const te: Dictionary = {
     reserveFailed: "సీట్లను రిజర్వ్ చేయడంలో విఫలమైంది",
     reviewFailed: "రివ్యూను సమర్పించడంలో విఫలమైంది",
     selectTicketsCta: "టికెట్లను ఎంచుకోండి",
+    bookingOpensSoon: "బుకింగ్ త్వరలో ప్రారంభమవుతుంది",
   },
   checkoutPage: {
     loadingCheckout: "మీ చెక్‌అవుట్ లోడ్ అవుతోంది…",

@@ -609,6 +609,7 @@ const mr: Dictionary = {
     reserveFailed: "सीट्स राखून ठेवता आल्या नाहीत",
     reviewFailed: "रिव्ह्यू पाठवता आला नाही",
     selectTicketsCta: "तिकिटे निवडा",
+    bookingOpensSoon: "बुकिंग लवकरच सुरू होईल",
   },
   checkoutPage: {
     loadingCheckout: "तुमचे चेकआउट लोड होत आहे…",
