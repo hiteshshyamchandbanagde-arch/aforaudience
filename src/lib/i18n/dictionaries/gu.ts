@@ -2131,6 +2131,11 @@ const gu: Dictionary = {
     upiSaved: "UPI ID સેવ થયું",
     acceptCashOnly: "ફક્ત રોકડમાં સ્વીકારો",
     upiRequired: "પહેલાં પ્રોફાઇલમાં તમારું UPI ID ઉમેરો, અથવા ફક્ત રોકડમાં સ્વીકારો.",
+    upiQrLabel: "UPI QR કોડ (વૈકલ્પિક)",
+    upiQrUpload: "QR છબી અપલોડ કરો",
+    upiQrRemove: "QR દૂર કરો",
+    // {payee}: venue name.
+    upiQrAlt: "{payee} માટે UPI QR કોડ",
   },
 }
 
