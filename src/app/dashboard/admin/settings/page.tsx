@@ -602,10 +602,14 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
+          {/* Line heights snapped to whole pixels: a fractional card height
+              (1.6 x 13px = 20.8px per line) moved every card below by a
+              sub-pixel and changed how the Direct payouts toggle's text
+              rasterised at 390 (BUG-2609-051 baseline). */}
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
             Paid bookings
           </h2>
-          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
             OFF = free-only launch: paid tickets can&apos;t be created or booked, and paid events show &ldquo;Booking opens soon&rdquo;. Enforced on the server. Free events are never affected.
           </p>
           <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', cursor: 'pointer' }}>
@@ -620,7 +624,7 @@ export default function AdminSettingsPage() {
               Enable paid bookings
             </span>
           </label>
-          <p data-afa-paid-bookings-warning style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-5)' }}>
+          <p data-afa-paid-bookings-warning style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
             Turns on real payments. Needs Razorpay live keys + GST/compliance sign-off.
           </p>
           <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={savePaidBookings} disabled={paidBookingsSaving || paidBookingsEnabled === initialPaidBookingsEnabled}>
