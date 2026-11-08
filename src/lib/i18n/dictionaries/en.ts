@@ -2288,6 +2288,14 @@ const en = {
     dueAtEntry: "Due at entry: ₹{amount}",
     markNoShow: "Mark no-show",
     checkIn: "Check in",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "How will the audience pay?",
+    modeFree: "Free",
+    modePayAtEntry: "Pay at entry",
+    modePayAtEntryHelp: "Audience reserves on AforAudience and pays you directly at the venue — cash or UPI. AforAudience does not collect this payment.",
+    modeOnline: "Online payment",
+    modeOnlineComingSoon: "Coming soon",
+    modeOnlineKept: "Online payments are paused for now. This event keeps its online payment mode; choose Pay at entry to take bookings.",
   },
 }
 
