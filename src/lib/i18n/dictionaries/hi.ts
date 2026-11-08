@@ -2079,6 +2079,19 @@ const hi: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} को समाप्त — अभी बंद है।",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · {organiser} को प्रवेश पर भुगतान करें (नकद/UPI)",
+    noCollect: "AforAudience यह भुगतान नहीं लेता।",
+    reserveCta: "रिज़र्व करें",
+    badge: "प्रवेश पर भुगतान · ₹{amount}",
+    attended: "उपस्थित",
+    noShow: "नहीं आए",
+    reserved: "रिज़र्व्ड",
+    dueAtEntry: "प्रवेश पर देय: ₹{amount}",
+    markNoShow: "नहीं आए चिह्नित करें",
+    checkIn: "चेक इन",
+  },
 }
 
 export default hi
