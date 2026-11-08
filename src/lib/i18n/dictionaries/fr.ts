@@ -2086,6 +2086,19 @@ const fr: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "Expiré le {date} — actuellement désactivé.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · payez {organiser} à l’entrée (espèces/UPI)",
+    noCollect: "AforAudience n’encaisse pas ce paiement.",
+    reserveCta: "Réserver",
+    badge: "Paiement à l’entrée · ₹{amount}",
+    attended: "Présent",
+    noShow: "Absent",
+    reserved: "Réservé",
+    dueAtEntry: "À payer à l’entrée : ₹{amount}",
+    markNoShow: "Marquer absent",
+    checkIn: "Enregistrer l’entrée",
+  },
 }
 
 export default fr
