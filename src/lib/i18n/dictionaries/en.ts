@@ -2276,6 +2276,19 @@ const en = {
     // {date}: when the Direct payouts flag auto-disabled.
     directPayoutsExpired: "Expired on {date} — currently off.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · pay {organiser} at entry (cash/UPI)",
+    noCollect: "AforAudience does not collect this payment.",
+    reserveCta: "Reserve",
+    badge: "Pay at entry · ₹{amount}",
+    attended: "Attended",
+    noShow: "No-show",
+    reserved: "Reserved",
+    dueAtEntry: "Due at entry: ₹{amount}",
+    markNoShow: "Mark no-show",
+    checkIn: "Check in",
+  },
 }
 
 export default en
