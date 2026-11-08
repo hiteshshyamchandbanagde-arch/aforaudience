@@ -2080,6 +2080,19 @@ const kn: Dictionary = {
   adminSettings: {
     directPayoutsExpired: "{date} ರಂದು ಅವಧಿ ಮುಗಿದಿದೆ — ಸದ್ಯ ಆಫ್ ಆಗಿದೆ.",
   },
+  // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
+  payAtEntry: {
+    priceLine: "₹{price} · ಪ್ರವೇಶದಲ್ಲಿ {organiser} ಅವರಿಗೆ ಪಾವತಿಸಿ (ನಗದು/UPI)",
+    noCollect: "AforAudience ಈ ಪಾವತಿಯನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+    reserveCta: "ಕಾಯ್ದಿರಿಸಿ",
+    badge: "ಪ್ರವೇಶದಲ್ಲಿ ಪಾವತಿ · ₹{amount}",
+    attended: "ಹಾಜರಾಗಿದ್ದಾರೆ",
+    noShow: "ಬರಲಿಲ್ಲ",
+    reserved: "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+    dueAtEntry: "ಪ್ರವೇಶದಲ್ಲಿ ಪಾವತಿಸಬೇಕು: ₹{amount}",
+    markNoShow: "ಬರಲಿಲ್ಲ ಎಂದು ಗುರುತಿಸಿ",
+    checkIn: "ಚೆಕ್ ಇನ್",
+  },
 }
 
 export default kn
