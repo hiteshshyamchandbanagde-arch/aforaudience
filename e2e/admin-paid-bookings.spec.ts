@@ -48,6 +48,20 @@ test("[S1a] admin Settings shows the Paid bookings toggle with the real-payments
   await expect(save).toBeDisabled();
 });
 
+// S1a amend - the card first shipped 312.1875px tall at 390 (20.8px and
+// 16.5px line heights), which moved every card below it by a sub-pixel and
+// broke BUG-2609-051's Direct payouts toggle baseline. A whole-pixel height
+// keeps everything under it exactly where it sits without the card.
+test("[S1a] Paid bookings card has a whole-pixel height so the cards below don't shift @needs-db", async ({ page, isMobile }) => {
+  await useRuleViewport(page, isMobile);
+  await gotoDashboard(page, "/dashboard/admin/settings/");
+
+  const card = page.locator("[data-afa-paid-bookings-card]");
+  await expect(card.getByRole("heading", { name: "Paid bookings" })).toBeVisible();
+  const height = await card.evaluate((el) => el.getBoundingClientRect().height);
+  expect(height % 1, `card height ${height}px is a whole number of pixels`).toBe(0);
+});
+
 test("[S1a] settings API rejects a non-boolean paidBookingsEnabled (nothing written)", async ({ page }) => {
   const res = await page.request.patch("/api/admin/platform-settings", {
     data: { paidBookingsEnabled: "yes" },
