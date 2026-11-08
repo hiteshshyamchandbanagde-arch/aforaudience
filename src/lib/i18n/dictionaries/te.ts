@@ -2131,6 +2131,11 @@ const te: Dictionary = {
     upiSaved: "UPI ID సేవ్ అయింది",
     acceptCashOnly: "నగదు మాత్రమేగా ఆమోదించండి",
     upiRequired: "ముందుగా ప్రొఫైల్‌లో మీ UPI ID జోడించండి, లేదా నగదు మాత్రమేగా ఆమోదించండి.",
+    upiQrLabel: "UPI QR కోడ్ (ఐచ్ఛికం)",
+    upiQrUpload: "QR చిత్రాన్ని అప్\u200cలోడ్ చేయండి",
+    upiQrRemove: "QR తీసివేయండి",
+    // {payee}: venue name.
+    upiQrAlt: "{payee} కోసం UPI QR కోడ్",
   },
 }
 
