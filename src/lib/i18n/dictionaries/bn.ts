@@ -2137,6 +2137,20 @@ const bn: Dictionary = {
     // {payee}: venue name.
     upiQrAlt: "{payee}-এর জন্য UPI QR কোড",
   },
+  // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
+  performanceDirectPay: {
+    title: "পারফরম্যান্স ফি · সরাসরি পেমেন্ট",
+    fee: "পারফরম্যান্স ফি",
+    buyIn: "বাই-ইন",
+    cashOnly: "শুধু নগদ — কোনো UPI ID নেই। সামনাসামনি টাকা দিন।",
+    cancel: "স্লট বাতিল করুন",
+    decline: "প্রত্যাখ্যান করুন",
+    waitingPayee: "টাকা পাওয়ার নিশ্চিতকরণের অপেক্ষায়।",
+    waitingPayer: "তাদের পেমেন্টের অপেক্ষায়।",
+    upiSettingLabel: "সরাসরি পেমেন্টের জন্য UPI ID",
+    upiSettingHelpArtist: "আয়োজকরা এই UPI ID-তে সরাসরি আপনার পারফরম্যান্স ফি দেন। AforAudience কখনো এই টাকা নেয় না।",
+    upiSettingHelpOrganiser: "শিল্পীরা এই UPI ID-তে সরাসরি আপনাকে ওপেন-মাইক বাই-ইন দেন। AforAudience কখনো এই টাকা নেয় না।",
+  },
 }
 
 export default bn
