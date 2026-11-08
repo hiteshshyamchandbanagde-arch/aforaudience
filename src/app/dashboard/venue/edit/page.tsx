@@ -27,6 +27,8 @@ export default function VenueOwnerEditPage() {
   const [message, setMessage] = useState('')
 
   const [bio, setBio] = useState('')
+  // D2 - where organisers pay this owner directly for venue hire.
+  const [upiId, setUpiId] = useState('')
   const [avatar, setAvatar] = useState('')
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function VenueOwnerEditPage() {
         if (ownerRes.ok) {
           const d = await ownerRes.json()
           setBio(d.bio || '')
+          setUpiId(d.upiId || '')
         }
         if (userRes.ok) {
           const d = await userRes.json()
@@ -89,7 +92,7 @@ export default function VenueOwnerEditPage() {
         fetch('/api/venue-owners/me', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bio }),
+          body: JSON.stringify({ bio, upiId: upiId.trim() || null }),
         }),
         fetch('/api/users/me', {
           method: 'PATCH',
@@ -152,6 +155,21 @@ export default function VenueOwnerEditPage() {
             <div>
               <Label>{v.bio}</Label>
               <Field as="textarea" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder={v.bioPlaceholder} />
+            </div>
+
+            <div data-afa-upi-setting>
+              <Label>{tr.venueDirectPay.upiSettingLabel}</Label>
+              <Field
+                aria-label={tr.venueDirectPay.upiSettingLabel}
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                maxLength={256}
+                placeholder="name@bank"
+                autoComplete="off"
+              />
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>
+                {tr.venueDirectPay.upiSettingHelp}
+              </p>
             </div>
           </Card>
 
