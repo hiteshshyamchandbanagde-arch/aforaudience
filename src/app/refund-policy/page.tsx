@@ -22,7 +22,10 @@ export default function RefundPolicyPage() {
       </P>
 
       <H2 id="audience-cancels">1. If you cancel your booking</H2>
-      <P>How much you get back depends on how long before the show starts you cancel:</P>
+      <P>
+        Sections 1, 2 and 6 apply to <strong>online payments</strong> made through AforAudience. For an online
+        payment, how much you get back depends on how long before the show starts you cancel:
+      </P>
       <UL>
         <LI>
           <strong>{full} days or more before the show:</strong> a full refund of the amount you paid, minus the
@@ -45,8 +48,8 @@ export default function RefundPolicyPage() {
 
       <H2 id="organiser-cancels">2. If the Organiser cancels the event</H2>
       <P>
-        If an event is cancelled by its Organiser, you get a full refund of everything you paid, including the
-        booking fee.
+        If an event you paid for online is cancelled by its Organiser, you get a full refund of everything you paid,
+        including the booking fee.
       </P>
 
       <H2 id="free-events">3. Free events</H2>
@@ -55,19 +58,31 @@ export default function RefundPolicyPage() {
         your seat.
       </P>
 
-      <H2 id="how-to-cancel">4. How to cancel</H2>
+      <H2 id="pay-at-entry">4. Pay at entry and direct payments</H2>
+      <P>
+        For <strong>Pay at entry</strong> tickets nothing is collected online, so there is nothing for
+        AforAudience to refund. If you can&apos;t attend, cancel your reservation in <strong>My Tickets</strong> to
+        release your seat.
+      </P>
+      <P>
+        Any money paid directly to an Organiser, Venue Owner or Artist (at the venue, or by UPI or cash) is refunded,
+        or not, by them under their own terms. Contact them first; if you need the in-app record of the booking,
+        write to <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>.
+      </P>
+
+      <H2 id="how-to-cancel">5. How to cancel</H2>
       <P>
         Log in, open <strong>My Tickets</strong>, choose the booking and select <strong>Cancel</strong>. Your seat is
         released as soon as the cancellation is confirmed.
       </P>
 
-      <H2 id="refund-timing">5. How refunds are paid</H2>
+      <H2 id="refund-timing">6. How refunds are paid</H2>
       <P>
-        Refunds go back to the original payment method through Razorpay, our payment processor. They typically reach
+        Refunds of online payments go back to the original payment method through Razorpay, our payment processor. They typically reach
         your account within 5–7 working days, depending on your bank.
       </P>
 
-      <H2 id="contact">6. Contact</H2>
+      <H2 id="contact">7. Contact</H2>
       <P>
         Questions about a refund or a cancellation: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>.
         See also our <Link href="/terms/">Terms of Service</Link> and the <Link href="/contact/">Contact</Link> page.
