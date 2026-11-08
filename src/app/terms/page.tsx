@@ -93,11 +93,33 @@ export default function TermsPage() {
 
       <H2>6. Payments</H2>
       <P>
-        All payments are processed through Razorpay. We don't store your card, UPI, or bank details on our servers.
-        Payouts to Organisers and Venue Owners are made as set out in the payout terms agreed when they join.
+        When online payment is offered, it is processed through Razorpay. We don't store your card, UPI, or bank
+        details on our servers. Payouts to Organisers and Venue Owners for online payments are made as set out in
+        the payout terms agreed when they join.
       </P>
 
-      <H2>7. Check-in</H2>
+      <H2 id="direct-payments">7. Direct payments between users</H2>
+      <UL>
+        <LI>
+          Bookings between Organisers and Venue Owners, and between Organisers and Artists (performance fees and
+          buy-in spots), are paid directly between the two parties, for example by UPI or cash.
+        </LI>
+        <LI>
+          AforAudience shows the payee&apos;s payment details and records the &ldquo;paid&rdquo; and
+          &ldquo;received&rdquo; confirmations in the app. AforAudience is <strong>not a party to the payment</strong>{" "}
+          and does not collect, hold or refund it.
+        </LI>
+        <LI>
+          Any dispute about the amount, payment, refund or cancellation of a direct payment is between the two
+          parties. AforAudience may help by sharing the in-app record of the booking and its confirmations.
+        </LI>
+        <LI>
+          Only use the payee details shown in the app, and never pay anyone who claims to be AforAudience or to be
+          collecting money on its behalf.
+        </LI>
+      </UL>
+
+      <H2>8. Check-in</H2>
       <P>
         Tickets are validated at the door via QR scan or manual booking-ID entry by the Organiser or their staff. A
         ticket can only be used once; once checked in, it can't be reused, including by someone else with the same
@@ -105,7 +127,7 @@ export default function TermsPage() {
         used by someone other than the original purchaser.
       </P>
 
-      <H2>8. Acceptable use</H2>
+      <H2>9. Acceptable use</H2>
       <P>You agree not to:</P>
       <UL>
         <LI>Use the platform for any unlawful purpose, or to harass, threaten, or defraud other users.</LI>
@@ -115,14 +137,14 @@ export default function TermsPage() {
       </UL>
       <P>We may suspend or terminate accounts that violate these Terms.</P>
 
-      <H2>9. Content ownership</H2>
+      <H2>10. Content ownership</H2>
       <P>
         You retain ownership of the content you post (event descriptions, artist bios, photos, etc.), but grant us a
         license to display it on the platform as needed to operate the service. You're responsible for having the
         rights to anything you upload.
       </P>
 
-      <H2>10. Disclaimers &amp; limitation of liability</H2>
+      <H2>11. Disclaimers &amp; limitation of liability</H2>
       <P>
         The platform is provided "as is." We facilitate discovery, booking, and payment for live events, but we are
         not the organiser, performer, or venue for any given event, and we're not responsible for the quality,
@@ -131,19 +153,19 @@ export default function TermsPage() {
         booking fee(s) you paid in the relevant transaction.
       </P>
 
-      <H2>11. Governing law</H2>
+      <H2>12. Governing law</H2>
       <P>
         These Terms are governed by the laws of India, and any disputes will be subject to the exclusive
         jurisdiction of the courts at Pune, Maharashtra.
       </P>
 
-      <H2>12. Changes to these Terms</H2>
+      <H2>13. Changes to these Terms</H2>
       <P>
         We may update these Terms from time to time. Continued use of the platform after changes take effect
         constitutes acceptance of the updated Terms.
       </P>
 
-      <H2>13. Contact us</H2>
+      <H2>14. Contact us</H2>
       <P>
         Questions about these Terms: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>. Our
         registered office and Grievance Officer are listed on the <Link href="/contact/">Contact</Link> page.
