@@ -41,14 +41,18 @@ export async function GET() {
     // The database narrows to events dated from two days ago on; the exact
     // start instant (date + startTime, India time) is checked here.
     const recent = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-    const [pendingApplications, pendingFlex] = await Promise.all([
+    const [pendingApplications, pendingFlex, awaitingDirectPay] = await Promise.all([
       prisma.application.findMany({
         where: { event: { organiserId: organiser.id, date: { gte: recent } }, status: 'PENDING' },
         select: { status: true, event: { select: { date: true, startTime: true } } },
       }),
       prisma.venueBookingRequest.count({ where: { organiserId: organiser.id, status: 'PENDING' } }),
+      // D2 - accepted venue bookings the organiser still has to pay directly.
+      prisma.venueBooking.count({
+        where: { organiserId: organiser.id, directPayStatus: 'AWAITING_PAYMENT', expiresAt: { gt: new Date() } },
+      }),
     ])
-    return NextResponse.json({ count: countOpenPendingApplications(pendingApplications) + pendingFlex })
+    return NextResponse.json({ count: countOpenPendingApplications(pendingApplications) + pendingFlex + awaitingDirectPay })
   }
 
   return NextResponse.json({ count: 0 })
