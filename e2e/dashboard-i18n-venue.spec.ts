@@ -93,7 +93,10 @@ const DICTS = { hi, mr, de } as const;
 const DAILY_SEGMENT: Record<Locale, string> = { hi: "प्रति दिन", mr: "दिवसाला", de: "Täglich" };
 // The Maps-link example is a URL, not a word. "VIP" is how every
 // language's section examples write it (venueForm.noSections, venueCreate.gaIntro).
-const PROPER_NOUNS = ["AforAudience", "AFA", "Google", "Google Maps", "Instagram", "YouTube", "https://maps.app.goo.gl/...", "VIP"];
+// "UPI"/"QR" (and "UPI ID") are read in Latin script in hi/mr, as on every UPI
+// app (same allowance as LATIN_ALLOWED in marathi-locale.spec.ts); "name@bank"
+// is the UPI ID format example, like the Maps URL.
+const PROPER_NOUNS = ["AforAudience", "AFA", "Google", "Google Maps", "Instagram", "YouTube", "https://maps.app.goo.gl/...", "VIP", "UPI ID", "UPI", "QR", "name@bank"];
 
 // FacilitiesPicker's preset chips are the stored facility values (saved on
 // the venue and shown as is on its public page), not dictionary strings.
