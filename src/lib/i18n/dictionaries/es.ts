@@ -2096,6 +2096,14 @@ const es: Dictionary = {
     dueAtEntry: "A pagar en la entrada: ₹{amount}",
     markNoShow: "Marcar como no asistió",
     checkIn: "Registrar entrada",
+    // D1b - organiser payment-mode picker (event create/edit).
+    modeLabel: "¿Cómo pagará el público?",
+    modeFree: "Gratis",
+    modePayAtEntry: "Pago en la entrada",
+    modePayAtEntryHelp: "El público reserva en AforAudience y te paga directamente en el lugar — en efectivo o UPI. AforAudience no cobra este pago.",
+    modeOnline: "Pago en línea",
+    modeOnlineComingSoon: "Próximamente",
+    modeOnlineKept: "Los pagos en línea están pausados por ahora. Este evento mantiene su modo de pago en línea; elige Pago en la entrada para aceptar reservas.",
   },
 }
 
