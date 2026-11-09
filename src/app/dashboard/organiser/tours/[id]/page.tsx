@@ -166,7 +166,7 @@ export default function TourDetailPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || o.addStopFailed)
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, o.addStopFailed))
       showToast(o.stopAdded, 'success')
       setShowAddStop(false)
       setStopTitle(''); setStopDescription(''); setStopDate(''); setStopVenueId(''); setStopOpenSlots(''); setStopDeadline('')
