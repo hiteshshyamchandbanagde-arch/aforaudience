@@ -3,25 +3,18 @@ import { connection } from "next/server"
 import { getServerSession } from "next-auth"
 import prisma from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
-import { holdingPageApplies, isAdminRole } from "@/lib/launch-waves"
+import { isAdminRole } from "@/lib/launch-waves"
 
-// S1b-b1 - server-side W1 holding-page check, used by the layouts of the
-// held discovery segments and by the homepage. The pure decision lives in
-// holdingPageApplies() (src/lib/launch-waves.ts, self-tested); this file
-// only does the I/O: the W1 switch (cached 30s, busted by the admin save)
-// and the session role for the ADMIN bypass.
-//
-// Why layouts and not a proxy: this Next version's layouts render on the
-// server on every request to their segment, and each held segment is held
-// as a whole, so a layout that doesn't re-render between sibling pages
-// can't show the wrong state. No proxy file exists in this app and adding
-// one would run on every request (assets, API) just for this.
+// S1b-b1 - server-side W1 reads for pages that change when W1 is closed
+// but aren't held (/register via signupsClosedForViewer()). The holding
+// page itself is decided in src/proxy.ts (S1b-b1-fix) so the public pages
+// stay static/ISR; the pure decision is holdingPageApplies() /
+// w1ProxyAction() in src/lib/launch-waves.ts (self-tested).
 
 export const LAUNCH_WAVES_CACHE_TAG = "launch-waves"
 
 async function fetchW1Open(): Promise<boolean> {
-  // Read-only (getPlatformSettings() upserts) - this runs on every public
-  // page view. A missing row means closed, same as isWaveOpen().
+  // Read-only (getPlatformSettings() upserts). A missing row means closed, same as isWaveOpen().
   const row = await prisma.platformSettings.findUnique({
     where: { id: "singleton" },
     select: { waveDiscoveryOpen: true },
@@ -34,8 +27,9 @@ const getCachedW1Open = unstable_cache(fetchW1Open, ["launch-waves-w1-v1"], {
   revalidate: 30,
 })
 
-/** Called after an admin save so the next page view sees the new W1 state
- * at once ({ expire: 0 } = immediate, same as revalidateDesignTokens()). */
+/** Called after an admin save so /register sees the new W1 state
+ * at once ({ expire: 0 } = immediate, same as revalidateDesignTokens()).
+ * The holding-page proxy keeps its own W1 cache: per instance, <=30s stale. */
 export function revalidateLaunchWaves() {
   revalidateTag(LAUNCH_WAVES_CACHE_TAG, { expire: 0 })
 }
@@ -52,18 +46,6 @@ export async function isW1OpenForDisplay(): Promise<boolean> {
     console.warn("[launch-waves] W1 read failed, not showing the holding page", err)
     return true
   }
-}
-
-/** True when this request should get the holding page instead of `pathname`. */
-export async function shouldShowHoldingPage(pathname: string): Promise<boolean> {
-  // Always per-request: the answer depends on the viewer's session, so a
-  // held page must never be prerendered/ISR-cached either way.
-  await connection()
-  const w1Open = await isW1OpenForDisplay()
-  if (w1Open) return false
-  const session = await getServerSession(authOptions)
-  const role = (session?.user as { role?: string } | undefined)?.role
-  return holdingPageApplies(pathname, w1Open, isAdminRole(role))
 }
 
 /** Same check for a page that isn't held but changes when W1 is closed (/register). */
