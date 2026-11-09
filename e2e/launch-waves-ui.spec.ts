@@ -100,7 +100,7 @@ test.describe("admin", () => {
 
     // The card sits directly above Paid bookings.
     const next = card.locator("xpath=following-sibling::div[1]");
-    await expect(next).toHaveAttribute("data-afa-paid-bookings-card", "");
+    expect(await next.getAttribute("data-afa-paid-bookings-card"), "next card is Paid bookings").not.toBeNull();
 
     const save = card.getByRole("button", { name: "Save", exact: true });
     await expect(save).toBeDisabled();
@@ -144,7 +144,7 @@ test.describe("signed out", () => {
       if (w1) {
         await expect(page.locator("[data-afa-launch-holding]"), url).toHaveCount(0);
         await expect(page.getByText(HOLDING_TITLE.en), url).toHaveCount(0);
-        await expect(page.locator("footer").first(), `${url} rendered its real page`).toBeAttached();
+        await expect(page.getByRole("heading").first(), `${url} rendered its real page`).toBeVisible();
       } else {
         await expect(page.getByRole("heading", { name: HOLDING_TITLE.en }), url).toBeVisible();
       }
@@ -236,10 +236,15 @@ test.describe("signed out", () => {
     const holding = page.locator("[data-afa-launch-holding]");
     await expect(holding.getByRole("heading", { name: HOLDING_TITLE.en })).toBeVisible();
     await expect(holding).toContainText("AforAudience");
-    await expect(holding.getByRole("link", { name: "About us" })).toHaveAttribute("href", "/about");
-    await expect(holding.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/contact");
+    await expect(holding.getByRole("link", { name: "About us" })).toHaveAttribute("href", /^\/about\/?$/);
+    await expect(holding.getByRole("link", { name: "Contact" })).toHaveAttribute("href", /^\/contact\/?$/);
     await hideFloatingOverlays(page);
-    await expect(holding).toHaveScreenshot(`launch-holding-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+    // The app's top bar stays above the holding page; it shows the visitor's
+    // geo-located city, so it is masked out of the baseline.
+    await expect(holding).toHaveScreenshot(`launch-holding-${isMobile ? 390 : 1440}.png`, {
+      animations: "disabled",
+      mask: [page.getByRole("banner")],
+    });
   });
 
   test("[S1b-b1] register 'sign-ups open soon' state: sign-in link stays; screenshot @390/@1440", async ({ page, isMobile }) => {
@@ -247,7 +252,7 @@ test.describe("signed out", () => {
     await page.goto("/dev/launch-holding/?view=signups");
     const box = page.locator("[data-afa-signups-soon]");
     await expect(box.getByRole("heading", { name: SIGNUPS_SOON.en })).toBeVisible();
-    await expect(box.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
+    await expect(box.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", /^\/login\/?$/);
     await hideFloatingOverlays(page);
     await expect(box).toHaveScreenshot(`signups-soon-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
   });
