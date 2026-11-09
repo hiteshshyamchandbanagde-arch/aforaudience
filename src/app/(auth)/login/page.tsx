@@ -1,5 +1,5 @@
 "use client"
-import { useState, useRef, Suspense } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
@@ -36,6 +36,27 @@ function LoginForm() {
   const justReset = searchParams.get("reset")
   const wasSuspended = searchParams.get("suspended")
   const wasIdle = searchParams.get("idle")
+  // S1b-b1 - launch wave W1 (new accounts). null = not known yet / hint
+  // failed: show the normal page. The hint is UX only; register and the
+  // Google createUser step enforce the switch on the server.
+  const [w1Open, setW1Open] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/platform-settings/launch-waves")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && typeof data.W1 === "boolean") setW1Open(data.W1)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const signupsClosed = w1Open === false
+  const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true"
+  // A brand-new Google account refused by the W1 gate (WaveClosedError in
+  // createUser) comes back from NextAuth as ?error=OAuthCreateAccount.
+  const oauthCreateFailed = searchParams.get("error") === "OAuthCreateAccount"
   // Feedback cmrzsmlus - if this login follows a registration that
   // started from a specific "Join As X" link, land the person on
   // Profile (where the "Become an X" application cards live) instead of
@@ -216,6 +237,11 @@ function LoginForm() {
             {tr.loginPage.signedOutIdleBanner}
           </div>
         )}
+        {oauthCreateFailed && !error && (
+          <div data-afa-oauth-create-error style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+            {signupsClosed ? tr.launchWaves.newAccountsSoonNote : tr.authCommon.somethingWentWrong}
+          </div>
+        )}
         {error && (
           <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
             {error}
@@ -354,7 +380,7 @@ function LoginForm() {
             server-side provider is separately gated by whether
             GOOGLE_CLIENT_ID/SECRET are set (see src/lib/auth.ts) - both
             need to be true for this to actually work end to end. */}
-        {mode !== "otp-verify" && process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true" && (
+        {mode !== "otp-verify" && googleEnabled && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
               <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
@@ -375,6 +401,11 @@ function LoginForm() {
               </svg>
               {tr.loginPage.continueWithGoogle}
             </Button>
+            {signupsClosed && (
+              <p data-afa-new-accounts-soon style={{ textAlign: "center", marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", lineHeight: "round(1.5em, 1px)" }}>
+                {tr.launchWaves.newAccountsSoonNote}
+              </p>
+            )}
           </>
         )}
 
@@ -385,12 +416,22 @@ function LoginForm() {
         </div>
       </div>
 
-      <p style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-body)" }}>
-        <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.loginPage.noAccountPrefix}</span>{" "}
-        <Link href="/register" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
-          {tr.loginPage.createOneFreeLink}
-        </Link>
-      </p>
+      {/* S1b-b1 - no "Create account" while W1 is closed; the note sits
+          under the Google button instead (or here when Google is off). */}
+      {signupsClosed ? (
+        !googleEnabled && (
+          <p data-afa-new-accounts-soon style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", lineHeight: "round(1.5em, 1px)" }}>
+            {tr.launchWaves.newAccountsSoonNote}
+          </p>
+        )
+      ) : (
+        <p style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-body)" }}>
+          <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.loginPage.noAccountPrefix}</span>{" "}
+          <Link href="/register" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
+            {tr.loginPage.createOneFreeLink}
+          </Link>
+        </p>
+      )}
     </div>
   )
 }
