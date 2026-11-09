@@ -1276,7 +1276,15 @@ model PlatformSettings {
   // migration never sets it true (prod's clean DB is built from them).
   paidBookingsEnabled        Boolean   @default(false)
 
-  updatedAt                   DateTime @updatedAt
+  // S1b-a (Hitesh, 9 Nov) - launch wave switches W1-W4. Prod default all
+  // OFF; admin turns them on one at a time. Enforced on the server (see
+  // src/lib/launch-waves.ts). ADMIN always bypasses.
+  waveDiscoveryOpen          Boolean   @default(false) // W1 new accounts
+  waveOnboardingOpen         Boolean   @default(false) // W2 organiser/venue/artist apply
+  waveTicketsOpen            Boolean   @default(false) // W3 audience reservations
+  waveDirectBookingsOpen     Boolean   @default(false) // W4 paid B2B bookings
+
+  updatedAt                  DateTime @updatedAt
 }
 
 // Display-only currency preference (Option A, session 47, 30 Jul). One row
