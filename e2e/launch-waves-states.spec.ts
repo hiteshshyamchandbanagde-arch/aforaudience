@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { test, expect, gotoDashboard, hideFloatingOverlays } from "./helpers/test";
 import { authFile } from "./helpers/personas";
-import { openEventFromListing, pickAvailableSeat, JAIPUR_EVENT_TITLE } from "./helpers/events";
+import { pickAvailableSeat } from "./helpers/events";
 import { useRuleViewport } from "./helpers/viewports";
 
 /**
@@ -35,6 +35,7 @@ const CLOSED_W3 = "Tickets open soon — reservations aren't open yet.";
 const RAW_W2 = "Applications to join as an organiser, venue or artist are not open yet.";
 const RAW_W3 = "Ticket reservations are not open yet.";
 
+const JAIPUR_EVENT_ID = "qa-jaipur-event-0001";
 const LOCALE_STORAGE_KEY = "afa-locale";
 const LATIN_ALLOWED = new Set(["AforAudience", "AFA", "OTP", "UPI"]);
 async function latinWords(el: Locator): Promise<string[]> {
@@ -110,9 +111,13 @@ test.describe("W3 tickets", () => {
   test("[S1b-b2] W3 closed after the seats page loaded: reserve shows the friendly line, not the raw 403", async ({ page, isMobile }) => {
     await useRuleViewport(page, isMobile);
     const seen = await stubWaveClosed(page, "**/api/bookings", "W3", RAW_W3);
-    await openEventFromListing(page, JAIPUR_EVENT_TITLE, isMobile);
-    await page.getByRole("link", { name: /select tickets/i }).first().click();
+    // The seeded Jaipur numbered-seat event (e2e/helpers/upcoming-fixtures.ts),
+    // straight to its seat page; the listing -> detail -> seats links are
+    // covered by registration.spec.ts.
+    await page.goto(`/events/${JAIPUR_EVENT_ID}/seats/`);
     await expect(page).toHaveURL(/\/events\/[^/]+\/seats\/?/);
+    // The seat map loads after the page; pick only once its tiles are there.
+    await expect(page.getByTitle(/^Row .+, Seat \d+ — ₹/).first()).toBeVisible({ timeout: 30_000 });
     await pickAvailableSeat(page);
     const continueButton = page.getByRole("button", { name: /continue to checkout/i });
     await expect(continueButton).toBeEnabled({ timeout: 15_000 });
