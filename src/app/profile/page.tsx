@@ -15,6 +15,9 @@ import { FeeSheet } from '@/components/FeeSheet'
 import { PlusIcon } from '@/components/icons/VenueIcons'
 import Button, { variantStyle } from '@/components/ui/Button'
 import { useLocale } from '@/lib/i18n/translate'
+import { useLaunchWaves } from '@/hooks/useLaunchWaves'
+import { waveErrorMessage } from '@/lib/launch-waves-ui'
+import WaveSoonNote from '@/components/WaveSoonNote'
 
 // Mobile Redesign Phase 4c (GEN-2609-008) - small inline line-icons for the
 // mobile nav-hub's two grouped action lists below. No dedicated shared
@@ -239,6 +242,9 @@ function ProfileContent() {
   const [orgName, setOrgName] = useState('')
   const [genre, setGenre] = useState<string[]>([])
   const [applying, setApplying] = useState<'organiser' | 'venue' | 'artist' | null>(null)
+  // S1b-b2 - launch wave W2 (applications) closed: each apply card shows
+  // "Applications open soon" instead of its form/button (admin bypasses).
+  const applicationsClosed = !useLaunchWaves().W2
   const [switching, setSwitching] = useState<'organiser' | 'venue' | 'artist' | null>(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -502,7 +508,7 @@ function ProfileContent() {
         body: JSON.stringify({ orgName }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || tr.profilePage.submitApplicationFailed)
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, tr.profilePage.submitApplicationFailed))
       setMessage(data.message)
       await updateSession()
       await loadStatuses()
@@ -520,7 +526,7 @@ function ProfileContent() {
     try {
       const res = await fetch('/api/venue-owners/apply', { method: 'POST' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || tr.profilePage.submitApplicationFailed)
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, tr.profilePage.submitApplicationFailed))
       setMessage(data.message)
       await updateSession()
       await loadStatuses()
@@ -542,7 +548,7 @@ function ProfileContent() {
         body: JSON.stringify({ genre }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || tr.profilePage.submitApplicationFailed)
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, tr.profilePage.submitApplicationFailed))
       setMessage(data.message)
       await updateSession()
       await loadStatuses()
@@ -994,6 +1000,8 @@ function ProfileContent() {
 
             {artistStatus?.hasProfile ? (
               renderRoleStatus(artistStatus, 'artist', tr.profilePage.roleLabelArtist)
+            ) : applicationsClosed ? (
+              <WaveSoonNote wave="W2">{tr.launchWaves.applicationsSoon}</WaveSoonNote>
             ) : (
               <>
                 <div style={{ marginBottom: 'var(--afa-space-3)' }}>
@@ -1017,6 +1025,8 @@ function ProfileContent() {
 
             {orgStatus?.hasProfile ? (
               renderRoleStatus(orgStatus, 'organiser', tr.profilePage.roleLabelOrganiser)
+            ) : applicationsClosed ? (
+              <WaveSoonNote wave="W2">{tr.launchWaves.applicationsSoon}</WaveSoonNote>
             ) : (
               <>
                 <input
@@ -1044,6 +1054,8 @@ function ProfileContent() {
 
             {venueStatus?.hasProfile ? (
               renderRoleStatus(venueStatus, 'venue', tr.profilePage.roleLabelVenue)
+            ) : applicationsClosed ? (
+              <WaveSoonNote wave="W2">{tr.launchWaves.applicationsSoon}</WaveSoonNote>
             ) : (
               <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
                 {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
