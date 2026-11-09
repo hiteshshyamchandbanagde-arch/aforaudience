@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import EventDetailClientPage from './EventDetailClientPage'
 import { computeHypeScore } from '@/lib/hype-score'
+import { getLaunchWavesForViewer } from '@/lib/launch-waves.server'
+import { bookingSoonState } from '@/lib/launch-waves-ui'
 import { getPaidBookingsEnabled } from '@/lib/platform-settings'
 import { requestsPaidTickets } from '@/lib/paid-bookings'
 
@@ -169,7 +171,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) &&
     !(await getPaidBookingsEnabled())
 
-  return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} bookingPaused={bookingPaused} />
+  // S1b-b2 - launch wave W3 (tickets) closed: "Tickets open soon" for every
+  // event (free and pay-at-entry too), and it wins over the paid switch.
+  // ADMIN sees it open (bypass). POST /api/bookings refuses regardless.
+  const { W3 } = await getLaunchWavesForViewer()
+  const bookingSoon = bookingSoonState({ w3Open: W3, paidPaused: bookingPaused })
+
+  return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} bookingSoon={bookingSoon} />
 }
 
 // Same reasoning as venues/page.tsx - no dynamic API is used here otherwise,
