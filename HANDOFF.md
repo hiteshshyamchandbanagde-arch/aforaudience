@@ -1,3 +1,52 @@
+## Part 68 — START HERE (9 Nov 23:05 IST, chat), qa @ this commit, main @ 636354f
+Supersedes 65–67 as entry point. 67/66/65 stay as history. Dense, for next-session Claude.
+
+### 0. Session start (do in order)
+1. `git fetch && git reset --hard origin/qa`; read this Part, then `docs/design.md`. Repo attach: add_repo push access (gh works, no PAT needed in this harness).
+2. Nightly `E2E (QA)`: last 2 runs GREEN (9 Nov 08:08 + 13:20 UTC). Need 3 in a row for the go-live gate → check the next one first; if red = first item.
+3. BOLD REMINDER to Hitesh: rotate Google Maps key (+ Razorpay test key in .env.local/Vercel Preview); add `BLOB_READ_WRITE_TOKEN` (Preview + Production) for UPI QR upload.
+4. Feedback table query (NEW/UNDER_REVIEW BUG: 10 NEW, 9 UNDER_REVIEW on 8 Nov) cross-checked vs design.md — catch-up (S4) still awaits Hitesh OK.
+5. Confirm priority order with Hitesh (section 5).
+
+### 1. Decisions taken 8–9 Nov (all Hitesh)
+- **Option A soft launch**: free discovery + tickets; NO money through AFA. Target go-live **17–19 Nov**.
+- **Online payments (Razorpay) stay in code, switchable by admin** (`PlatformSettings.paidBookingsEnabled`, Admin → Settings). Prod default OFF; QA row = true. Never remove/refactor Razorpay order/verify/webhook/refund/wallet paths (Hitesh 8 Nov 17:00 "keep switchable if needed tomorrow").
+- **Direct offline payments, AFA never collects**, one flow for all: Request → payee accepts (payee's own UPI ID/QR + amount, payee named, "AforAudience does not collect or hold this payment") → payer "I've paid" (+ optional UPI ref) → payee confirms → CONFIRMED. Decline/cancel/expire. 48 h expiry (venue + artist). No AFA fee on direct.
+- **Audience default = Pay at entry**: instant reservation, capacity-capped, max 4 seats/booking, pay organiser at the door; **attendance tracked** Reserved → Attended / No-show (auto no-show 24 h after event end). "Confirm after payment" audience mode = NOT built (later, if asked).
+- **UPI/QR/UPI ID/name@bank are allowed Latin proper nouns** in hi/mr i18n specs (precedent marathi-locale.spec.ts; applied in venue + organiser specs).
+- **Support AFA (S7)**: agreed in principle — voluntary contribution via AFA's own Razorpay (own income, not aggregation), switch `supportAfaEnabled` default OFF, wording "Support AforAudience — voluntary contribution, not a donation, not tax-deductible, non-refundable", ₹49/99/249 + custom, optional Supporter badge. NOT built. Build after launch prep; CA GST Q pending.
+- **Razorpay brand name** = SHYAMKASTURI PRODUCTIONS (Hitesh's choice, not AforAudience).
+- **Strict T2** (Hitesh 8 Nov): no merge on red, even for pre-existing failures — fix first.
+- Payments later (proposed, NOT decided): **Razorpay Technology Partner** (organisers' own accounts via OAuth, AFA platform fee split at payment). Route rejected (needs >₹40L turnover).
+
+### 2. Shipped 8–9 Nov
+qa: #762 (nightly date-drift R+R2) · #763 legal L1 · #764 footer L2 + delivery clause + draft banner removed · #766 OTP verify binds phone↔user (security) · #767 S1a paid switch · #768 D1 pay at entry + attendance + organiser Free/Pay-at-entry/Online picker · #769 D2 venue direct pay (+cash-only accept, QR upload, multi-role panel fix) · #770 D3 artist direct pay (PAID org→artist, BUY_IN artist→org) · #771 D4 legal wording.
+**main (PROD, live on www.aforaudience.com)**: #765 legal pages + footer company line (docs-only freeze exception, Hitesh OK) · #772 D4 wording port (Hitesh "OK merge #772" 9 Nov 22:55). Verified live.
+**QA DB migrations applied by chat (prod NOT touched)**: `20261108120000_add_paid_bookings_enabled` (+ QA row true) · `20261108180000_add_pay_at_entry_attendance` (backfill: 18 ev ONLINE, 28 bk ONLINE, 10 ATTENDED) · `20261109120000_add_venue_direct_pay` · `20261110120000_add_performance_direct_pay`. All additive. Prod clean DB (S5) will get them from migrations with switch OFF.
+
+### 3. Razorpay (full notes: claude.ai Project doc `finance/razorpay-2026-11-08.md`)
+- MID TxVQjSFVLDVx2J **ACTIVATED 9 Nov**; netbanking live. Website review passed. Live keys NOT generated; when needed → Vercel Production env only.
+- Tickets: 21740823 (activation, resolved), 21742092 (Route answer = same ₹40L rule). **Technology Partner request emailed 9 Nov 22:54** on 21742092 (6 Qs: switch partner type; does ₹40L apply; non-GST organiser KYC; platform fee + GST invoicing; RBI fit; MDR). Await reply; if none in ~2 working days → Partner dashboard → Support.
+- Do NOT apply for Route.
+
+### 4. Open items / known issues
+- Flaky `e2e/language-rollout.spec.ts:108` language switcher (kn; earlier bn/gu) — Rule 4: fix or `test.fixme` + Feedback ticket.
+- `cc-autopilot-status.md` must never be committed (D2 run committed it; chat removed). Dispatches now say "do not commit".
+- Refund tiers in code = 14 / 7 days; Hitesh earlier said 15 — undecided (change code + qa + prod pages together).
+- QA data fix (21 UPDATEs) + Feedback catch-up (incl. OTP ticket) await Hitesh OK. 19 merged branches to delete (Hitesh, GitHub UI).
+- Gotchas: e2e preview queue keeps ONE pending run per group; a docs push to qa can bump a pending PR run → rerun it. Autopilot RESULT text in annotations is truncated → read `##[error]RESULT` / `##[notice]RESULT` from job logs. CC branches without the D-series migrations break lineup/booking pages on QA until chat applies the migration — apply BEFORE expecting green e2e.
+
+### 5. Path to go-live (17–19 Nov), next actions in order
+1. **S1b wave flags W1–W4** (admin-controlled; W1 discovery+signup, W2 organiser/venue/artist onboarding, W3 free + pay-at-entry tickets, W4 direct-payment B2B bookings). Small CC dispatch(es), server + UI gating.
+2. Rule-4 fix for the language-rollout flake.
+3. Nightly green ×3.
+4. **S3 read-only prod readiness audit** (env vars incl. BLOB token, Maps key, Resend domain, cron, NEXTAUTH URL, no QA data, Razorpay keys absent/test, paidBookingsEnabled default false).
+5. Hitesh: Maps key + BLOB token; phone checks on QA (D1 pay at entry: Omkar creates, Atul reserves, check-in/no-show; D2: Omkar requests Vinayak hall, Vinayak UPI+accept, I've paid, confirm; D3: Omkar↔Hrithik paid + buy-in; footer en + 1 Indic). Personas pw `QaPass!2026`.
+6. **S5 clean prod DB**: backup/copy prod (Hitesh approved one-time copy), rehearse all migrations on a scratch DB, show sample rows, reset, recreate Admin (Hitesh's Google account), verify `paidBookingsEnabled=false`.
+7. Promote qa → main (Hitesh OK), switch on W1, then W2/W3/W4 over following days.
+- After launch: S7 Support AFA; Technology Partner build once Razorpay answers in writing + CA check.
+- Hitesh non-code: CA one-liner (GST TCS s.52 / TDS 194-O / registration when AFA collects nothing); Shops & Establishments + PTEC; GST registration (needed only before first PAID online booking).
+
 ## Part 67 — START HERE (8 Nov 16:15 IST, chat), qa @ this commit
 Supersedes 66 as entry point (66 = legal pages live on prod, #762-#765 merged).
 ### DECIDED (Hitesh 8 Nov 16:06): OPTION A — launch free-only
