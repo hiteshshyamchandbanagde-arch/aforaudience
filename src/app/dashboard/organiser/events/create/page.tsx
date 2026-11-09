@@ -805,7 +805,7 @@ export default function CreateEventPage() {
                           : f.noRateNote}
                       </p>
                       <label style={labelStyle}>{f.offerAmount} <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountHint}</span></label>
-                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
+                      <input data-afa-venue-amount type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
                     </>
                   ) : (
                     <>
@@ -819,7 +819,7 @@ export default function CreateEventPage() {
                         </div>
                       </div>
                       <label style={labelStyle}>{f.offerAmount} <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountPrefilledHint}</span></label>
-                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
+                      <input data-afa-venue-amount type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
                     </>
                   )}
                   {venueAmountW4Blocked && (
