@@ -2359,6 +2359,15 @@ const en = {
     holdingContactLink: "Contact",
     signupsSoonTitle: "New sign-ups open soon",
     newAccountsSoonNote: "New accounts open soon — existing members can sign in.",
+    // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
+    applicationsSoon: "Applications open soon",
+    ticketsSoon: "Tickets open soon",
+    paidVenueSoonNote: "Paid venue bookings open soon — zero-amount venue bookings are allowed.",
+    paidSlotsSoon: "Paid artist slots open soon",
+    closedW1: "New accounts open soon — existing members can sign in.",
+    closedW2: "Applications to join as an organiser, venue owner or artist open soon.",
+    closedW3: "Tickets open soon — reservations aren't open yet.",
+    closedW4: "Paid bookings open soon — free artist slots and zero-amount venue bookings are allowed.",
   },
 }
 
