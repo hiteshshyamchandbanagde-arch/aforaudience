@@ -36,7 +36,7 @@ function handlerSource(src: string, method: string): string {
   return next < 0 ? src.slice(start) : src.slice(start, next)
 }
 
-type Gate = { file: string; method: string; wave: 'W1' | 'W2' | 'W3' | 'W4'; call?: RegExp }
+type Gate = { file: string; method: string; wave: 'W1' | 'W2' | 'W3' | 'W4'; call?: RegExp; cond?: RegExp }
 
 export const GATES: Gate[] = [
   { file: 'src/app/api/auth/register/route.ts', method: 'POST', wave: 'W1' },
@@ -44,6 +44,9 @@ export const GATES: Gate[] = [
   { file: 'src/app/api/venue-owners/apply/route.ts', method: 'POST', wave: 'W2' },
   { file: 'src/app/api/artists/apply/route.ts', method: 'POST', wave: 'W2' },
   { file: 'src/app/api/bookings/route.ts', method: 'POST', wave: 'W3' },
+  // W4 - venue booking (request) creation, only when amount > 0.
+  { file: 'src/app/api/venue-bookings/route.ts', method: 'POST', wave: 'W4', cond: /venueBookingNeedsW4\(amount\)/ },
+  { file: 'src/app/api/events/route.ts', method: 'POST', wave: 'W4', cond: /venueId && venueBookingNeedsW4\(bookingAmount\)/ },
 ]
 
 for (const g of GATES) {
@@ -52,6 +55,8 @@ for (const g of GATES) {
     const call = g.call ?? new RegExp(`launchWaveBlock\\(\\s*"?'?${g.wave}`)
     const gateAt = body.search(call)
     assert.ok(gateAt >= 0, `${g.file} does not call the ${g.wave} gate`)
+    // W4 only applies to paid creates: the condition guards the gate call.
+    if (g.cond) assert.match(body.slice(Math.max(0, gateAt - 120), gateAt), g.cond)
     const writeAt = body.search(WRITE_RE)
     if (writeAt >= 0) assert.ok(gateAt < writeAt, `${g.file}: ${g.wave} gate runs after a DB write`)
     // The refusal is sent as-is (status 403, body with code WAVE_CLOSED).

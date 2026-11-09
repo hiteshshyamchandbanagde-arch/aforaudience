@@ -7,7 +7,8 @@ import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
-import { getPlatformSettings, getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { getPlatformSettings, getPaidBookingsEnabled, launchWaveBlock } from '@/lib/platform-settings'
+import { venueBookingNeedsW4 } from '@/lib/launch-waves'
 import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
 import { resolveEventPaymentMode } from '@/lib/pay-at-entry'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
@@ -130,6 +131,13 @@ export async function POST(req: Request) {
       termsChecklist, specialNotes, ageLimit, paymentMode,
       tourId, openSlotCount, slotDuration, applicationDeadline,
     } = body
+
+    // S1b-a - W4 (direct B2B bookings) gate: attaching a venue with a paid
+    // booking amount creates a paid venue booking (request) below, so it is
+    // refused while W4 is closed - before the event or anything else is
+    // written. A zero / missing amount is W2 and goes ahead.
+    const w4 = venueId && venueBookingNeedsW4(bookingAmount) ? await launchWaveBlock('W4', user.role) : null
+    if (w4) return NextResponse.json(w4.body, { status: w4.status })
 
     // Tour by Organiser (12 Aug) - if tourId is present, this is a Tour
     // stop, not a standalone event. Verified up front (ownership + not
