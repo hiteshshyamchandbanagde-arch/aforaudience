@@ -15,6 +15,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { execSync } from 'node:child_process'
 
 let passed = 0
 function test(name: string, fn: () => void) {
@@ -77,7 +78,6 @@ test('W1 gate on Google adapter.createUser runs before prisma.user.create', () =
 })
 
 test('only register + Google adapter create users (any new path must be gated)', () => {
-  const { execSync } = require('node:child_process') as typeof import('node:child_process')
   const out = execSync(`grep -rlE "prisma\\.user\\.(create|upsert)\\(" src || true`, { cwd: ROOT }).toString().trim().split('\n').filter(Boolean).sort()
   assert.deepEqual(out, ['src/app/api/auth/register/route.ts', 'src/lib/auth.ts'])
 })
@@ -90,7 +90,6 @@ test('POST /api/applications only ever auto-creates FREE performances (W2, not W
 })
 
 test('every performance.create in an API route is gated, FREE-only, or in-flight', () => {
-  const { execSync } = require('node:child_process') as typeof import('node:child_process')
   const out = execSync(`grep -rlE "performance\\.create\\(" src || true`, { cwd: ROOT }).toString().trim().split('\n').filter(Boolean).sort()
   assert.deepEqual(out, [
     'src/app/api/applications/[id]/route.ts', // gated W4
