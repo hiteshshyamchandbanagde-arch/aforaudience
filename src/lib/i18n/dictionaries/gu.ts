@@ -738,6 +738,8 @@ const gu: Dictionary = {
     enterSixDigitCode: "6-અંકનો કોડ દાખલ કરો",
   },
   authErrors: {
+    // S1b-b1 - register refused while launch wave W1 is closed.
+    WAVE_CLOSED: "નવા એકાઉન્ટ ટૂંક સમયમાં શરૂ થશે — હાલના સભ્યો સાઇન ઇન કરી શકે છે.",
     ALL_FIELDS_REQUIRED: "બધા ફીલ્ડ્સ જરૂરી છે",
     INVALID_EMAIL_FORMAT: "કૃપા કરીને માન્ય ઇમેઇલ સરનામું દાખલ કરો.",
     PASSWORD_TOO_SHORT: "પાસવર્ડ ઓછામાં ઓછો 8 અક્ષરોનો હોવો જોઈએ",
@@ -2150,6 +2152,14 @@ const gu: Dictionary = {
     upiSettingLabel: "સીધી ચુકવણી માટે UPI ID",
     upiSettingHelpArtist: "આયોજકો તમારી પ્રસ્તુતિ ફી આ UPI ID પર સીધી ચૂકવે છે. AforAudience ક્યારેય આ ચુકવણી લેતું નથી.",
     upiSettingHelpOrganiser: "કલાકારો ઓપન-માઇક બાય-ઇન આ UPI ID પર સીધું તમને ચૂકવે છે. AforAudience ક્યારેય આ ચુકવણી લેતું નથી.",
+  },
+  // S1b-b1 - W1 holding page + sign-ups-closed states.
+  launchWaves: {
+    holdingTitle: "AforAudience ટૂંક સમયમાં શરૂ થઈ રહ્યું છે",
+    holdingAboutLink: "અમારા વિશે",
+    holdingContactLink: "સંપર્ક કરો",
+    signupsSoonTitle: "નવા સાઇન-અપ ટૂંક સમયમાં શરૂ થશે",
+    newAccountsSoonNote: "નવા એકાઉન્ટ ટૂંક સમયમાં શરૂ થશે — હાલના સભ્યો સાઇન ઇન કરી શકે છે.",
   },
 }
 

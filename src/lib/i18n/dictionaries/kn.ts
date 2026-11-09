@@ -738,6 +738,8 @@ const kn: Dictionary = {
     enterSixDigitCode: "6-ಅಂಕಿಯ ಕೋಡ್ ನಮೂದಿಸಿ",
   },
   authErrors: {
+    // S1b-b1 - register refused while launch wave W1 is closed.
+    WAVE_CLOSED: "ಹೊಸ ಖಾತೆಗಳು ಶೀಘ್ರದಲ್ಲೇ ಆರಂಭವಾಗಲಿವೆ — ಈಗಿರುವ ಸದಸ್ಯರು ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು.",
     ALL_FIELDS_REQUIRED: "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯವಿದೆ",
     INVALID_EMAIL_FORMAT: "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ.",
     PASSWORD_TOO_SHORT: "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 8 ಅಕ್ಷರಗಳಿರಬೇಕು",
@@ -2150,6 +2152,14 @@ const kn: Dictionary = {
     upiSettingLabel: "ನೇರ ಪಾವತಿಗಾಗಿ UPI ID",
     upiSettingHelpArtist: "ಸಂಘಟಕರು ನಿಮ್ಮ ಪ್ರದರ್ಶನ ಶುಲ್ಕವನ್ನು ಈ UPI IDಗೆ ನೇರವಾಗಿ ಪಾವತಿಸುತ್ತಾರೆ. AforAudience ಈ ಹಣವನ್ನು ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
     upiSettingHelpOrganiser: "ಕಲಾವಿದರು ಓಪನ್-ಮೈಕ್ ಬೈ-ಇನ್ ಅನ್ನು ಈ UPI IDಗೆ ನೇರವಾಗಿ ನಿಮಗೆ ಪಾವತಿಸುತ್ತಾರೆ. AforAudience ಈ ಹಣವನ್ನು ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+  },
+  // S1b-b1 - W1 holding page + sign-ups-closed states.
+  launchWaves: {
+    holdingTitle: "AforAudience ಶೀಘ್ರದಲ್ಲೇ ಆರಂಭವಾಗಲಿದೆ",
+    holdingAboutLink: "ನಮ್ಮ ಬಗ್ಗೆ",
+    holdingContactLink: "ಸಂಪರ್ಕಿಸಿ",
+    signupsSoonTitle: "ಹೊಸ ನೋಂದಣಿಗಳು ಶೀಘ್ರದಲ್ಲೇ ಆರಂಭವಾಗಲಿವೆ",
+    newAccountsSoonNote: "ಹೊಸ ಖಾತೆಗಳು ಶೀಘ್ರದಲ್ಲೇ ಆರಂಭವಾಗಲಿವೆ — ಈಗಿರುವ ಸದಸ್ಯರು ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು.",
   },
 }
 
