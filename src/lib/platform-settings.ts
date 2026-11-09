@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import { assertPaidAllowed, isPaidBookingsEnabled } from "@/lib/paid-bookings"
+import { isAdminRole, isWaveOpen, launchWaveHint, waveBlock, type Wave } from "@/lib/launch-waves"
 
 // ---------------------------------------------------------------------------
 // Platform settings — cached read, one row, keyed by the constant id
@@ -45,6 +46,12 @@ export type PlatformSettings = {
   // S1a (8 Nov) - "paid bookings" master switch, default OFF. See
   // src/lib/paid-bookings.ts for the guard every money path calls.
   paidBookingsEnabled: boolean
+  // S1b-a (9 Nov) - launch wave switches W1-W4, default OFF. See
+  // src/lib/launch-waves.ts.
+  waveDiscoveryOpen: boolean
+  waveOnboardingOpen: boolean
+  waveTicketsOpen: boolean
+  waveDirectBookingsOpen: boolean
 }
 
 const SINGLETON_ID = "singleton"
@@ -66,6 +73,10 @@ const SETTINGS_SELECT = {
   directPayoutsEnabled: true,
   directPayoutsEnabledUntil: true,
   paidBookingsEnabled: true,
+  waveDiscoveryOpen: true,
+  waveOnboardingOpen: true,
+  waveTicketsOpen: true,
+  waveDirectBookingsOpen: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -339,6 +350,42 @@ export async function setPaidBookingsEnabled(enabled: boolean): Promise<Platform
     where: { id: SINGLETON_ID },
     update: { paidBookingsEnabled: enabled },
     create: { id: SINGLETON_ID, audienceBookingFee: 0, paidBookingsEnabled: enabled },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/** S1b-a - the four launch wave switches as { W1, W2, W3, W4 } booleans. */
+export async function getLaunchWaves(): Promise<Record<Wave, boolean>> {
+  return launchWaveHint(await getPlatformSettings())
+}
+
+/**
+ * S1b-a - the route-side gate. Returns null (go ahead) or the 403
+ * WAVE_CLOSED body. ADMIN bypasses without touching the DB.
+ */
+export async function launchWaveBlock(wave: Wave, role: unknown) {
+  if (isAdminRole(role)) return null
+  return waveBlock(wave, isWaveOpen(await getPlatformSettings(), wave), false)
+}
+
+/** S1b-a - admin-only setter for any subset of the four wave switches. */
+export async function setLaunchWaves(input: {
+  waveDiscoveryOpen?: boolean
+  waveOnboardingOpen?: boolean
+  waveTicketsOpen?: boolean
+  waveDirectBookingsOpen?: boolean
+}): Promise<PlatformSettings> {
+  const data: Record<string, boolean> = {}
+  for (const [k, v] of Object.entries(input)) {
+    if (v === undefined) continue
+    if (typeof v !== "boolean") throw new Error(`${k} must be a boolean`)
+    data[k] = v
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: data,
+    create: { id: SINGLETON_ID, audienceBookingFee: 0, ...data },
     select: SETTINGS_SELECT,
   })
   return row

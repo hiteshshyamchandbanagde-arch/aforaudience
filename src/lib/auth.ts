@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma"
 import { resolveIdentifierToUser } from "@/lib/auth-helpers"
 import { suggestAvailableUsername } from "@/lib/auth-helpers"
 import { verifyOtp } from "@/lib/otp"
+import { getPlatformSettings } from "@/lib/platform-settings"
+import { WaveClosedError, isWaveOpen } from "@/lib/launch-waves"
 
 const LOCKOUT_THRESHOLD = 5
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
@@ -35,6 +37,11 @@ const prismaAdapter = PrismaAdapter(prisma) as any
 const adapter = {
   ...prismaAdapter,
   createUser: async (data: { email: string; name?: string | null; image?: string | null }) => {
+    // S1b-a - W1 gate: no new Google accounts while discovery/signup is
+    // closed. Returning users never reach createUser, so sign-in is
+    // unaffected. A brand-new account can't be ADMIN, so no bypass here.
+    // NextAuth turns the throw into its sign-in error page.
+    if (!isWaveOpen(await getPlatformSettings(), "W1")) throw new WaveClosedError("W1")
     const username = await suggestAvailableUsername(data.name || data.email.split("@")[0])
     return prisma.user.create({
       data: {

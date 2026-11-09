@@ -80,8 +80,30 @@ async function switchLocale(page: Page, isMobile: boolean, locale: { id: string;
   } else {
     // The account-menu trigger: unnamed on the homepage header, "Account
     // menu" in SiteNav; aria-haspopup="menu" on both.
-    await page.locator('button[aria-haspopup="menu"]').click();
-    await page.getByRole("menu").getByRole("button", { name: locale.id.toUpperCase(), exact: true }).click();
+    //
+    // S1b-a flake (te/kn on desktop, 9 Nov run 42624642563): the trace shows
+    // the trigger clicked ~90 ms after `load` and the locale button clicked
+    // ~200 ms after, both "click action done", yet lang stayed "en" for the
+    // full 10 s and the menu still showed EN selected - the pick's handler
+    // never ran (localStorage untouched, so not a later reset). Clicks fired
+    // that soon after load can land while React is still hydrating the
+    // header and get dropped. Same fix as the mobile branch: wait for the
+    // app's own signals instead of firing blind - the menu is open
+    // (aria-expanded, set only by the hydrated handler), then the pick took
+    // (the afa-locale key, written only by setLocale - not html[lang],
+    // which is already "en" before any pick); a dropped tap is tapped
+    // again. The test still asserts html[lang] itself afterwards.
+    const trigger = page.locator('button[aria-haspopup="menu"]');
+    await expect(async () => {
+      if ((await trigger.getAttribute("aria-expanded")) !== "true") await trigger.click();
+      await expect(trigger).toHaveAttribute("aria-expanded", "true", { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
+    const option = page.getByRole("menu").getByRole("button", { name: locale.id.toUpperCase(), exact: true });
+    const saved = () => page.evaluate((key) => window.localStorage.getItem(key), LOCALE_STORAGE_KEY);
+    await expect(async () => {
+      if ((await saved()) !== locale.id) await option.click();
+      await expect.poll(saved, { timeout: 2_000 }).toBe(locale.id);
+    }).toPass({ timeout: 15_000 });
   }
 }
 

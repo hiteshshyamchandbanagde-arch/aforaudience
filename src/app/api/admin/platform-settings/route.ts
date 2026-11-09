@@ -12,6 +12,7 @@ import {
   setEventCreationWindowMonths,
   setDirectPayoutsEnabled,
   setPaidBookingsEnabled,
+  setLaunchWaves,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
@@ -83,12 +84,24 @@ export async function PATCH(req: Request) {
   const hasEventWindow = Object.prototype.hasOwnProperty.call(body, 'eventCreationWindowMonths')
   const hasDirectPayouts = Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabled')
   const hasPaidBookings = Object.prototype.hasOwnProperty.call(body, 'paidBookingsEnabled')
+  // S1b-a - launch wave switches. Validated up front, before ANY setter
+  // runs, so a non-boolean wave flag is a 400 with nothing written.
+  const WAVE_KEYS = ['waveDiscoveryOpen', 'waveOnboardingOpen', 'waveTicketsOpen', 'waveDirectBookingsOpen'] as const
+  const waveInput: Partial<Record<(typeof WAVE_KEYS)[number], boolean>> = {}
+  for (const k of WAVE_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(body, k)) continue
+    if (typeof body[k] !== 'boolean') {
+      return NextResponse.json({ error: `${k} must be a boolean` }, { status: 400 })
+    }
+    waveInput[k] = body[k]
+  }
+  const hasWaves = Object.keys(waveInput).length > 0
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts && !hasPaidBookings) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts && !hasPaidBookings && !hasWaves) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, paidBookingsEnabled, or all three vote weight defaults together is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, paidBookingsEnabled, a wave*Open flag, or all three vote weight defaults together is required',
       },
       { status: 400 }
     )
@@ -185,6 +198,11 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: 'paidBookingsEnabled must be a boolean' }, { status: 400 })
       }
       updated = await setPaidBookingsEnabled(body.paidBookingsEnabled)
+    }
+
+    // S1b-a - launch wave switches W1-W4 (validated above).
+    if (hasWaves) {
+      updated = await setLaunchWaves(waveInput)
     }
 
     return NextResponse.json({ settings: updated })

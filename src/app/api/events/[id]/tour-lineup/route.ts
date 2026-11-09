@@ -4,7 +4,8 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { recomputeTourStatus } from '@/lib/tours'
-import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { getPaidBookingsEnabled, launchWaveBlock } from '@/lib/platform-settings'
+import { performanceNeedsW4 } from '@/lib/launch-waves'
 import { performanceDirectPayCreateData } from '@/lib/performance-direct-pay'
 
 // POST /api/events/[id]/tour-lineup
@@ -49,6 +50,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!event || event.organiserId !== organiser.id) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
+    // S1b-a - W4 gate: adding to a tour stop's lineup creates a performance
+    // on the event's default terms; PAID / BUY_IN is refused while W4 is
+    // closed. FREE slots are W2 and go ahead.
+    const w4 = performanceNeedsW4(event.defaultCompensationType) ? await launchWaveBlock('W4', user.role) : null
+    if (w4) return NextResponse.json(w4.body, { status: w4.status })
     if (event.category !== 'TOUR_STOP' || !event.tourId) {
       return NextResponse.json({ error: 'This action only applies to Tour stops' }, { status: 400 })
     }

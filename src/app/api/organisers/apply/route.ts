@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { launchWaveBlock } from '@/lib/platform-settings'
 import { sendPushToRole, notifyAfterResponse } from '@/lib/push'
 
 // Multi-role support: a person can hold an Organiser profile alongside
@@ -28,6 +29,10 @@ export async function POST(req: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  // S1b-a - W2 (onboarding) gate: no new applications while closed.
+  const w2 = await launchWaveBlock('W2', user.role)
+  if (w2) return NextResponse.json(w2.body, { status: w2.status })
 
   if (user.role === 'ADMIN') {
     return NextResponse.json({ error: "Admin accounts can't apply for a second role." }, { status: 400 })

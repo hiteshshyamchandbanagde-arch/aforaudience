@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { parseAmount } from '@/lib/money-validation'
+import { launchWaveBlock } from '@/lib/platform-settings'
+import { venueBookingNeedsW4 } from '@/lib/launch-waves'
 
 export async function POST(req: Request) {
   try {
@@ -32,6 +34,11 @@ export async function POST(req: Request) {
 
     const body = await req.json()
     const { venueId, eventId, fromDate, toDate, amount } = body
+
+    // S1b-a - W4 (direct B2B bookings) gate: a venue booking with an amount
+    // above 0 is refused while W4 is closed. Zero-amount bookings are W2.
+    const w4 = venueBookingNeedsW4(amount) ? await launchWaveBlock('W4', user.role) : null
+    if (w4) return NextResponse.json(w4.body, { status: w4.status })
 
     if (!venueId || !eventId || !fromDate || !toDate) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })

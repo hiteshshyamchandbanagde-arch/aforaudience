@@ -6,7 +6,7 @@ import {
   createRazorpayOrder,
   razorpayCredentialsPresent,
 } from '@/lib/razorpay'
-import { getPlatformSettings } from '@/lib/platform-settings'
+import { getPlatformSettings, launchWaveBlock } from '@/lib/platform-settings'
 import {
   PAID_BOOKINGS_DISABLED,
   PAID_BOOKINGS_DISABLED_MESSAGE,
@@ -59,6 +59,10 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    // S1b-a - W3 (tickets) gate: no new audience reservations while closed.
+    // Existing bookings, ticket download, check-in, cancel/refund untouched.
+    const w3 = await launchWaveBlock('W3', user.role)
+    if (w3) return NextResponse.json(w3.body, { status: w3.status })
     // §9.2 finding: booking with real money and event-day logistics riding
     // on an unreachable phone was a real gap - gate it here, at the one
     // place a ticket actually gets created, rather than at login (browse-
