@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { formatDate } from '@/lib/format-date'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { waveErrorMessage } from '@/lib/launch-waves-ui'
 import { displayApplicationStatus } from '@/lib/application-status'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
@@ -250,7 +251,8 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || d.updateApplicationFailed)
+        // S1b-b2 - approving a PAID/BUY_IN slot while W4 is closed: friendly line.
+        throw new Error(waveErrorMessage(data, tr.launchWaves, d.updateApplicationFailed))
       }
       await fetchEvent()
       showToast(newStatus === 'APPROVED' ? d.applicationApproved : d.applicationRejected, 'success')

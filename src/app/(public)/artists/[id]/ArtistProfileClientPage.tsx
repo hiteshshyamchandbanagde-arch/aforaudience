@@ -16,6 +16,8 @@ import { BellIcon, BellOffIcon } from "@/components/icons/VenueIcons"
 import type { SceneStatusTier } from "@/lib/scene-status"
 import { formatDate } from "@/lib/format-date"
 import { useLocale } from "@/lib/i18n/translate"
+import { paymentTypeBlocked, waveErrorMessage } from "@/lib/launch-waves-ui"
+import { useLaunchWaves } from "@/hooks/useLaunchWaves"
 
 interface Performance {
   id: string
@@ -77,7 +79,7 @@ export default function ArtistProfilePage({
   sceneStatus?: SceneStatusTier | null
   realTourStops?: { id: string; title: string; date: string; startTime: string; venue: { name: string; city: string } | null; tour: { title: string; slug: string } | null }[]
 }) {
-  const { locale } = useLocale()
+  const { locale, t: tr } = useLocale()
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   // BUG-2608-079 - a dead portrait URL previously left Photo rendering a
   // broken hero image instead of falling back to ArtistNoPhoto.
@@ -103,6 +105,7 @@ export default function ArtistProfilePage({
   const [organiserEvents, setOrganiserEvents] = useState<any[]>([])
   const [selectedInviteEventId, setSelectedInviteEventId] = useState("")
   const [inviting, setInviting] = useState(false)
+  const w4Open = useLaunchWaves().W4
   const [inviteResult, setInviteResult] = useState<{ ok: boolean; message: string } | null>(null)
 
   useEffect(() => {
@@ -141,7 +144,8 @@ export default function ArtistProfilePage({
         body: JSON.stringify({ artistId: artist.id }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || "Failed to send invite")
+      // S1b-b2 - a PAID/BUY_IN event while W4 is closed: friendly line, not the raw 403.
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, "Failed to send invite"))
       setInviteResult({ ok: true, message: `${displayName} added to your lineup!` })
       // Bug caught live (11 Aug): local organiserEvents state was never
       // updated after a successful invite, so the just-invited event
@@ -802,8 +806,10 @@ export default function ArtistProfilePage({
                     >
                       <option value="" style={{ color: "black" }}>Select an event...</option>
                       {invitableEvents.map((e) => (
-                        <option key={e.id} value={e.id} style={{ color: "black" }}>
-                          {e.title} · {formatDate(e.date, 'medium', locale)}
+                        // S1b-b2 - W4 closed: an event whose slots are PAID/BUY_IN can't
+                        // take a new invite yet; FREE ones stay selectable.
+                        <option key={e.id} value={e.id} disabled={paymentTypeBlocked(e.defaultCompensationType, w4Open)} data-afa-comp={e.defaultCompensationType} style={{ color: "black" }}>
+                          {e.title} · {formatDate(e.date, 'medium', locale)}{paymentTypeBlocked(e.defaultCompensationType, w4Open) ? ` · ${tr.launchWaves.paidSlotsSoon}` : ""}
                         </option>
                       ))}
                     </select>
