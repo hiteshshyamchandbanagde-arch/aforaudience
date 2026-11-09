@@ -6,6 +6,9 @@ import { generateAndSendOtp } from "@/lib/otp"
 import { generateResetToken } from "@/lib/tokens" // generic sha256 token - reused for email verification too
 import { sendEmailVerificationEmail } from "@/lib/email"
 import { isValidEmailFormat, isValidUsernameFormat } from "@/lib/validation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { launchWaveBlock } from "@/lib/platform-settings"
 
 // Browse-first model: registration never accepts a role. Every account is
 // created as AUDIENCE. Artist / Organiser / Venue Owner are opt-in upgrades
@@ -19,6 +22,13 @@ import { isValidEmailFormat, isValidUsernameFormat } from "@/lib/validation"
 // Only +91 numbers actually receive an OTP right now (MSG91 is India-only).
 export async function POST(req: NextRequest) {
   try {
+    // S1b-a - W1 (discovery + signup) gate: no new accounts while the wave
+    // is closed. Runs before any validation or DB write. A signed-in ADMIN
+    // bypasses (testing on prod with waves closed).
+    const session = await getServerSession(authOptions)
+    const w1 = await launchWaveBlock("W1", (session?.user as { role?: string } | undefined)?.role)
+    if (w1) return NextResponse.json(w1.body, { status: w1.status })
+
     const { username, email, phone, password, fullName, intendedRole } = await req.json()
     // GEN-2609-042 - purely informational, never the account's real role
     // (see the browse-first note above - that still holds, role is always
