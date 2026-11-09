@@ -738,6 +738,8 @@ const te: Dictionary = {
     enterSixDigitCode: "6-అంకెల కోడ్‌ను నమోదు చేయండి",
   },
   authErrors: {
+    // S1b-b1 - register refused while launch wave W1 is closed.
+    WAVE_CLOSED: "కొత్త ఖాతాలు త్వరలో ప్రారంభమవుతాయి — ఇప్పటికే ఉన్న సభ్యులు సైన్ ఇన్ చేయవచ్చు.",
     ALL_FIELDS_REQUIRED: "అన్ని ఫీల్డ్‌లు అవసరం",
     INVALID_EMAIL_FORMAT: "దయచేసి చెల్లుబాటు అయ్యే ఇమెయిల్ చిరునామాను నమోదు చేయండి.",
     PASSWORD_TOO_SHORT: "పాస్‌వర్డ్ కనీసం 8 అక్షరాలు ఉండాలి",
@@ -2150,6 +2152,14 @@ const te: Dictionary = {
     upiSettingLabel: "నేరుగా చెల్లింపుల కోసం UPI ID",
     upiSettingHelpArtist: "నిర్వాహకులు మీ ప్రదర్శన రుసుమును ఈ UPI IDకి నేరుగా చెల్లిస్తారు. AforAudience ఈ డబ్బును ఎప్పుడూ వసూలు చేయదు.",
     upiSettingHelpOrganiser: "కళాకారులు ఓపెన్-మైక్ బై-ఇన్‌ను ఈ UPI IDకి నేరుగా మీకు చెల్లిస్తారు. AforAudience ఈ డబ్బును ఎప్పుడూ వసూలు చేయదు.",
+  },
+  // S1b-b1 - W1 holding page + sign-ups-closed states.
+  launchWaves: {
+    holdingTitle: "AforAudience త్వరలో ప్రారంభమవుతోంది",
+    holdingAboutLink: "మా గురించి",
+    holdingContactLink: "సంప్రదించండి",
+    signupsSoonTitle: "కొత్త సైన్-అప్‌లు త్వరలో ప్రారంభమవుతాయి",
+    newAccountsSoonNote: "కొత్త ఖాతాలు త్వరలో ప్రారంభమవుతాయి — ఇప్పటికే ఉన్న సభ్యులు సైన్ ఇన్ చేయవచ్చు.",
   },
 }
 
