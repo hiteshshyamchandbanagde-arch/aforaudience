@@ -43,6 +43,7 @@ export const GATES: Gate[] = [
   { file: 'src/app/api/organisers/apply/route.ts', method: 'POST', wave: 'W2' },
   { file: 'src/app/api/venue-owners/apply/route.ts', method: 'POST', wave: 'W2' },
   { file: 'src/app/api/artists/apply/route.ts', method: 'POST', wave: 'W2' },
+  { file: 'src/app/api/bookings/route.ts', method: 'POST', wave: 'W3' },
 ]
 
 for (const g of GATES) {
