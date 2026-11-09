@@ -40,6 +40,9 @@ type Gate = { file: string; method: string; wave: 'W1' | 'W2' | 'W3' | 'W4'; cal
 
 export const GATES: Gate[] = [
   { file: 'src/app/api/auth/register/route.ts', method: 'POST', wave: 'W1' },
+  { file: 'src/app/api/organisers/apply/route.ts', method: 'POST', wave: 'W2' },
+  { file: 'src/app/api/venue-owners/apply/route.ts', method: 'POST', wave: 'W2' },
+  { file: 'src/app/api/artists/apply/route.ts', method: 'POST', wave: 'W2' },
 ]
 
 for (const g of GATES) {
