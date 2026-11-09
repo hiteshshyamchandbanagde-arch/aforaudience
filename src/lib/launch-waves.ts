@@ -150,3 +150,71 @@ export function holdingPageApplies(pathname: string, w1Open: boolean, isAdmin: b
   if (w1Open || isAdmin) return false
   return isW1HeldPath(pathname)
 }
+
+// ---------------------------------------------------------------------------
+// S1b-b1-fix - the holding check runs in src/proxy.ts (not in layouts), so
+// public pages stay static/ISR. The proxy's matcher must be a static
+// literal (Next rule), so it can't import this list; the self-test
+// (scripts/launch-waves-proxy.test.ts) checks the two are equal.
+
+/** Static route the proxy rewrites held requests to (noindex). */
+export const LAUNCHING_SOON_PATH = "/launching-soon"
+
+/** The proxy matcher this list implies: "/" exactly, then each prefix and below. */
+export function w1ProxyMatcher(): string[] {
+  return ["/", ...W1_HELD_PREFIXES.map((p) => `${p}/:path*`)]
+}
+
+export type W1ProxyAction = "next" | "rewrite"
+
+/**
+ * The proxy's decision. readW1Open() is the (cached) switch read; a failed
+ * read counts as open (display courtesy, never blank the site on a DB
+ * blip). readIsAdmin() is only called when W1 is closed and the path is
+ * held, so the open path costs one cached read and nothing else.
+ */
+export async function w1ProxyAction(
+  pathname: string,
+  deps: { readW1Open: () => Promise<boolean>; readIsAdmin: () => Promise<boolean> }
+): Promise<W1ProxyAction> {
+  if (!isW1HeldPath(pathname)) return "next"
+  let w1Open: boolean
+  try {
+    w1Open = await deps.readW1Open()
+  } catch {
+    return "next"
+  }
+  if (w1Open) return "next"
+  let isAdmin = false
+  try {
+    isAdmin = await deps.readIsAdmin()
+  } catch {
+    isAdmin = false
+  }
+  return holdingPageApplies(pathname, w1Open, isAdmin) ? "rewrite" : "next"
+}
+
+/**
+ * A tiny per-instance TTL cache for one async value. Errors are not cached
+ * (the next call retries). `now` is injectable for the self-test.
+ */
+export function ttlCached<T>(fetcher: () => Promise<T>, ttlMs: number, now: () => number = Date.now) {
+  let value: T | undefined
+  let expires = 0
+  let has = false
+  return {
+    async get(): Promise<T> {
+      const t = now()
+      if (has && t < expires) return value as T
+      const v = await fetcher()
+      value = v
+      has = true
+      expires = t + ttlMs
+      return v
+    },
+    clear() {
+      has = false
+      expires = 0
+    },
+  }
+}
