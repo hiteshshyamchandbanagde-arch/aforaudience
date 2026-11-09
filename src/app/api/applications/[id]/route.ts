@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
-import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { getPaidBookingsEnabled, launchWaveBlock } from '@/lib/platform-settings'
+import { performanceNeedsW4 } from '@/lib/launch-waves'
 import { performanceDirectPayCreateData } from '@/lib/performance-direct-pay'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +37,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const { status, compensationType, feeAmount, buyInAmount, paymentMethod } = await req.json()
+    // S1b-a - W4 gate: approving books a lineup slot on these terms (the
+    // explicit override, else the event default - same resolution as
+    // below). A PAID / BUY_IN slot is refused while W4 is closed, before
+    // anything is written. FREE approvals and REJECTED/PENDING go ahead.
+    const w4CompType = ['PAID', 'FREE', 'BUY_IN'].includes(compensationType)
+      ? compensationType
+      : application.event.defaultCompensationType
+    const w4 = status === 'APPROVED' && performanceNeedsW4(w4CompType) ? await launchWaveBlock('W4', user.role) : null
+    if (w4) return NextResponse.json(w4.body, { status: w4.status })
     if (!['APPROVED', 'REJECTED', 'PENDING'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }

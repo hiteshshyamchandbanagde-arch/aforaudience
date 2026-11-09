@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
-import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { getPaidBookingsEnabled, launchWaveBlock } from '@/lib/platform-settings'
+import { performanceNeedsW4 } from '@/lib/launch-waves'
 import { performanceDirectPayCreateData } from '@/lib/performance-direct-pay'
 
 // "Book for your event" card (11 Aug, Hitesh: "keep it invite for
@@ -49,6 +50,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!event || event.organiserId !== organiser.id) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
+    // S1b-a - W4 gate: the invite creates a performance on the event's
+    // default terms; a PAID / BUY_IN one is refused while W4 is closed.
+    // FREE invites are W2 and go ahead.
+    const w4 = performanceNeedsW4(event.defaultCompensationType) ? await launchWaveBlock('W4', user.role) : null
+    if (w4) return NextResponse.json(w4.body, { status: w4.status })
     if (event.status !== 'APPROVED') {
       return NextResponse.json({ error: 'Only published events can invite artists' }, { status: 400 })
     }

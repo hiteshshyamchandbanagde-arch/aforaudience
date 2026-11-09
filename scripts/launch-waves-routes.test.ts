@@ -47,6 +47,10 @@ export const GATES: Gate[] = [
   // W4 - venue booking (request) creation, only when amount > 0.
   { file: 'src/app/api/venue-bookings/route.ts', method: 'POST', wave: 'W4', cond: /venueBookingNeedsW4\(amount\)/ },
   { file: 'src/app/api/events/route.ts', method: 'POST', wave: 'W4', cond: /venueId && venueBookingNeedsW4\(bookingAmount\)/ },
+  // W4 - PAID / BUY_IN performance creation. FREE slots are W2.
+  { file: 'src/app/api/events/[id]/invite-artist/route.ts', method: 'POST', wave: 'W4', cond: /performanceNeedsW4\(event\.defaultCompensationType\)/ },
+  { file: 'src/app/api/events/[id]/tour-lineup/route.ts', method: 'POST', wave: 'W4', cond: /performanceNeedsW4\(event\.defaultCompensationType\)/ },
+  { file: 'src/app/api/applications/[id]/route.ts', method: 'PATCH', wave: 'W4', cond: /status === 'APPROVED' && performanceNeedsW4\(w4CompType\)/ },
 ]
 
 for (const g of GATES) {
@@ -76,6 +80,25 @@ test('only register + Google adapter create users (any new path must be gated)',
   const { execSync } = require('node:child_process') as typeof import('node:child_process')
   const out = execSync(`grep -rlE "prisma\\.user\\.(create|upsert)\\(" src || true`, { cwd: ROOT }).toString().trim().split('\n').filter(Boolean).sort()
   assert.deepEqual(out, ['src/app/api/auth/register/route.ts', 'src/lib/auth.ts'])
+})
+
+test('POST /api/applications only ever auto-creates FREE performances (W2, not W4)', () => {
+  const body = handlerSource(read('src/app/api/applications/route.ts'), 'POST')
+  const creates = body.match(/performance\.create\(\{[\s\S]*?\}\)/g) ?? []
+  assert.ok(creates.length > 0)
+  for (const c of creates) assert.match(c, /compensationType: 'FREE'/)
+})
+
+test('every performance.create in an API route is gated, FREE-only, or in-flight', () => {
+  const { execSync } = require('node:child_process') as typeof import('node:child_process')
+  const out = execSync(`grep -rlE "performance\\.create\\(" src || true`, { cwd: ROOT }).toString().trim().split('\n').filter(Boolean).sort()
+  assert.deepEqual(out, [
+    'src/app/api/applications/[id]/route.ts', // gated W4
+    'src/app/api/applications/route.ts', // FREE only
+    'src/app/api/events/[id]/invite-artist/route.ts', // gated W4
+    'src/app/api/events/[id]/tour-lineup/route.ts', // gated W4
+    'src/lib/performance-direct-pay.server.ts', // waitlist promotion of an in-flight slot
+  ])
 })
 
 console.log(`\n${passed} passed`)
