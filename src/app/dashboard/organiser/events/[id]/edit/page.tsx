@@ -20,6 +20,9 @@ import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
 import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
+import { useLaunchWaves } from '@/hooks/useLaunchWaves'
+import { paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
+import WaveSoonNote from '@/components/WaveSoonNote'
 import { type EventPaymentMode, initialPickerMode } from '@/lib/pay-at-entry'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
@@ -219,6 +222,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [voteWeightSaving, setVoteWeightSaving] = useState(false)
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
   const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
+  // S1b-b2 - launch wave W4 (paid B2B) closed: attaching a venue with an
+  // amount > 0 is blocked, and PAID / BUY_IN can't be newly picked (an
+  // event already saved that way keeps its value). Admin bypasses.
+  const w4Open = useLaunchWaves().W4
   const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
   const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   const [venueId, setVenueId] = useState('')
@@ -241,6 +248,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   // owner's mere starting suggestion.
   const [existingTierPrices, setExistingTierPrices] = useState<Record<string, string>>({})
   const originalVenueId = event?.venue?.id || ''
+  const venueAmountW4Blocked = !!venueId && venueId !== originalVenueId && venueAmountBlocked(bookingAmount, w4Open)
 
   const selectedVenue = venues.find((v) => v.id === venueId)
   // Level-aware (28 Jul): grouped by (level, zoneName) so a same-named
@@ -428,6 +436,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       showToast(f.offerBeforePublish, 'error')
       return
     }
+    if (venueAmountW4Blocked) {
+      showToast(tr.launchWaves.paidVenueSoonNote, 'error')
+      return
+    }
     if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
       showToast(f.offerTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
       return
@@ -503,7 +515,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || ed.updateFailed)
+        throw new Error(waveErrorMessage(data, tr.launchWaves, ed.updateFailed))
       }
 
       // Venue booking is a separate resource, so it's updated as its own request.
@@ -525,7 +537,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             router.push(`/verify-phone?next=${encodeURIComponent(`/dashboard/organiser/events/${id}/edit`)}`)
             return
           }
-          throw new Error(vbData.error || ed.bookVenueFailed)
+          throw new Error(waveErrorMessage(vbData, tr.launchWaves, ed.bookVenueFailed))
         }
       }
 
@@ -1166,12 +1178,19 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     fullWidth={false}
                     selected={defaultCompensationType === opt.value}
                     type="button"
+                    disabled={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value}
+                    data-afa-comp-option={opt.value}
                     onClick={() => setDefaultCompensationType(opt.value)}
                   >
                     {opt.label}
                   </Button>
                 ))}
               </div>
+              {!w4Open && (
+                <div style={{ marginBottom: 'var(--afa-space-10px)' }}>
+                  <WaveSoonNote wave="W4" compact>{tr.launchWaves.paidSlotsSoon}</WaveSoonNote>
+                </div>
+              )}
               {defaultCompensationType === 'PAID' && (
                 <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder={f.feePlaceholder} style={{ ...inputStyle, maxWidth: '200px' }} />
               )}
@@ -1213,6 +1232,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   )}
                   <label style={labelStyle}>{f.offerAmount} {venueId !== originalVenueId && <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountPrefilledHint}</span>}</label>
                   <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" style={inputStyle} />
+                  {venueAmountW4Blocked && (
+                    <div style={{ marginTop: 'var(--afa-space-2)' }}>
+                      <WaveSoonNote wave="W4" compact>{tr.launchWaves.paidVenueSoonNote}</WaveSoonNote>
+                    </div>
+                  )}
                 </div>
               )}
             </section>
