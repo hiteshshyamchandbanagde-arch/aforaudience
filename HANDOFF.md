@@ -25,7 +25,9 @@ Supersedes 66 as entry point (66 = legal pages live on prod, #762-#765 merged).
 - #771 D4 legal (pay at entry + direct payments) MERGED (qa a27b88b; e2e 636 pass). P2 prod port dispatched (fix/legal-prod-port-p2 off main; terms + refund only) -> PR to main, needs Hitesh OK.
 - D3 PR #770 (D3b fixed hi/mr organiser i18n: only UPI terms) e2e running.
 - #770 D3 MERGED (qa d0b2938; e2e 634 pass). Direct-payment wave (D1-D4) complete on qa.
-- PR #772 -> main = prod port of D4 legal text (2 files, text == qa, preview dpl_D98hrQ1nfzkt2ynKShLAzomfgkVW renders). WAITING for Hitesh 'OK merge #772'.
+- #772 MERGED to MAIN (636354f) on Hitesh 'OK merge #772' (9 Nov 22:55 IST); prod deploy dpl_CQ8d7vK6MfRjC9izhhR1KwZBTZWu READY; verified live on www.aforaudience.com/refund-policy/ (section 4 Pay at entry and direct payments).
+- Razorpay: account ACTIVATED 9 Nov; Technology Partner request emailed 9 Nov 22:54 on ticket 21742092 (details in claude.ai Project doc finance/razorpay-2026-11-08.md). Online payments stay OFF.
+- Nightly E2E (QA) green 9 Nov 08:08 + 13:20 UTC (2 in a row).
 - Next: S1b wave flags W1-W4; Rule-4 fix for language-rollout flake; nightly x3; S3 read-only prod audit; S5 clean prod DB; S7 Support AFA; Feedback catch-up (S4, Hitesh OK).
 - Razorpay must stay switchable (Hitesh 17:00): D1 dispatch has explicit rule.
 - S7 Support AFA (Hitesh 17:02, agreed): voluntary contribution page via AFA's own Razorpay (not aggregation), separate switch supportAfaEnabled default OFF, wording 'Support AforAudience — voluntary contribution, not a donation, not tax-deductible, non-refundable', fixed amounts 49/99/249 + custom, optional Supporter badge. CA Q: GST on contributions + before registration. Build after D1-D4.
