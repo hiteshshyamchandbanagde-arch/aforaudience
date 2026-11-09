@@ -742,6 +742,8 @@ const es: Dictionary = {
     enterSixDigitCode: "Introduce el código de 6 dígitos",
   },
   authErrors: {
+    // S1b-b1 - register refused while launch wave W1 is closed.
+    WAVE_CLOSED: "Las nuevas cuentas abren pronto — los miembros actuales pueden iniciar sesión.",
     ALL_FIELDS_REQUIRED: "Todos los campos son obligatorios",
     INVALID_EMAIL_FORMAT: "Introduce una dirección de correo electrónico válida.",
     PASSWORD_TOO_SHORT: "La contraseña debe tener al menos 8 caracteres",
@@ -2154,6 +2156,14 @@ const es: Dictionary = {
     upiSettingLabel: "UPI ID para pagos directos",
     upiSettingHelpArtist: "Los organizadores te pagan el caché directamente a este UPI ID. AforAudience nunca cobra estos pagos.",
     upiSettingHelpOrganiser: "Los artistas te pagan los buy-ins de open mic directamente a este UPI ID. AforAudience nunca cobra estos pagos.",
+  },
+  // S1b-b1 - W1 holding page + sign-ups-closed states.
+  launchWaves: {
+    holdingTitle: "AforAudience abre pronto",
+    holdingAboutLink: "Sobre nosotros",
+    holdingContactLink: "Contacto",
+    signupsSoonTitle: "Los nuevos registros abren pronto",
+    newAccountsSoonNote: "Las nuevas cuentas abren pronto — los miembros actuales pueden iniciar sesión.",
   },
 }
 
