@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
+import { getLaunchWavesForViewer } from '@/lib/launch-waves.server'
 import { getPaidBookingsEnabled } from '@/lib/platform-settings'
 import { requestsPaidTickets } from '@/lib/paid-bookings'
 import SeatSelectionClientPage from './SeatSelectionClientPage'
@@ -28,6 +29,13 @@ export default async function SeatSelectionPage({ params }: { params: Promise<{ 
   // POST /api/bookings refuses these anyway; this keeps a deep link honest.
   // D1 - PAY_AT_ENTRY is never blocked by the switch.
   if (event.paymentMode !== 'PAY_AT_ENTRY' && requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
+    redirect(`/events/${id}`)
+  }
+
+  // S1b-b2 - launch wave W3 (tickets) closed: no booking panel for any
+  // event (admin bypasses). Back to the event page, which shows "Tickets
+  // open soon"; POST /api/bookings refuses anyway.
+  if (!(await getLaunchWavesForViewer()).W3) {
     redirect(`/events/${id}`)
   }
 

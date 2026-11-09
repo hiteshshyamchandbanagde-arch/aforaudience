@@ -12,6 +12,7 @@ import { colorForZone } from "@/components/SeatLayoutPreview"
 import { SeatStateDot } from "@/components/EventCard"
 import { TicketIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
+import { waveErrorMessage } from "@/lib/launch-waves-ui"
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - the interactive booking panel
 // (seat/tier picker, fee slider, Book button), relocated out of
@@ -156,7 +157,8 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
           router.push(`/verify-phone?next=${encodeURIComponent(`/events/${event.id}/seats`)}`)
           return
         }
-        throw new Error(data.error || tr.eventDetailPage.reserveFailed)
+        // S1b-b2 - a stale page while W3 is closed gets the friendly line, not the raw 403.
+        throw new Error(waveErrorMessage(data, tr.launchWaves, tr.eventDetailPage.reserveFailed))
       }
 
       // Two possible responses:
