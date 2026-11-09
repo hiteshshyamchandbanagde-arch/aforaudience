@@ -102,3 +102,51 @@ export function venueBookingNeedsW4(amount: unknown): boolean {
 export function performanceNeedsW4(paymentType: unknown): boolean {
   return paymentType === "PAID" || paymentType === "BUY_IN"
 }
+
+// ---------------------------------------------------------------------------
+// S1b-b1 - W1 holding page. While W1 (discovery + sign-up) is closed, a
+// non-admin visitor to "/" or a public discovery route sees an "opening
+// soon" page instead. Everything else - login/password/verify pages, legal
+// pages, /about, /contact, /dashboard/**, /api/**, static/PWA files and
+// /.well-known/** - stays reachable. Held routes are an explicit list (not
+// "everything except"), so a route nobody thought about is never held by
+// accident.
+
+/** Route prefixes held while W1 is closed. "/" is matched exactly. */
+export const W1_HELD_PREFIXES = [
+  "/events",
+  "/artists",
+  "/organisers",
+  "/tours",
+  "/venue-owners",
+  "/wall-of-fame",
+  "/venues",
+  "/blog",
+  "/livestreams",
+  "/for-artists",
+  "/careers",
+] as const
+
+/** Strips query/hash and trailing slashes ("/events/" -> "/events", "" -> "/"). */
+export function normalisePathname(pathname: string): string {
+  const bare = (pathname || "/").split(/[?#]/)[0]
+  const trimmed = bare.replace(/\/+$/, "")
+  return trimmed === "" ? "/" : trimmed
+}
+
+/** True when the path is the homepage or under a held discovery prefix. */
+export function isW1HeldPath(pathname: string): boolean {
+  const p = normalisePathname(pathname)
+  if (p === "/") return true
+  return W1_HELD_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix + "/"))
+}
+
+/**
+ * Should this request get the "opening soon" holding page instead of the
+ * real page? Only when W1 is closed, the viewer isn't ADMIN, and the path
+ * is a held discovery route.
+ */
+export function holdingPageApplies(pathname: string, w1Open: boolean, isAdmin: boolean): boolean {
+  if (w1Open || isAdmin) return false
+  return isW1HeldPath(pathname)
+}
