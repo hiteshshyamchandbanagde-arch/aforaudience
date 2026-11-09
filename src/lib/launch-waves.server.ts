@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache"
+import { revalidateTag, unstable_cache } from "next/cache"
 import { connection } from "next/server"
 import { getServerSession } from "next-auth"
 import prisma from "@/lib/prisma"
@@ -33,6 +33,12 @@ const getCachedW1Open = unstable_cache(fetchW1Open, ["launch-waves-w1-v1"], {
   tags: [LAUNCH_WAVES_CACHE_TAG],
   revalidate: 30,
 })
+
+/** Called after an admin save so the next page view sees the new W1 state
+ * at once ({ expire: 0 } = immediate, same as revalidateDesignTokens()). */
+export function revalidateLaunchWaves() {
+  revalidateTag(LAUNCH_WAVES_CACHE_TAG, { expire: 0 })
+}
 
 /**
  * W1 state for display only. A failed read counts as open: the holding page

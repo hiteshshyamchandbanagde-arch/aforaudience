@@ -16,6 +16,7 @@ import {
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
+import { revalidateLaunchWaves } from '@/lib/launch-waves.server'
 
 // GET /api/admin/platform-settings
 // PATCH /api/admin/platform-settings
@@ -203,6 +204,8 @@ export async function PATCH(req: Request) {
     // S1b-a - launch wave switches W1-W4 (validated above).
     if (hasWaves) {
       updated = await setLaunchWaves(waveInput)
+      // S1b-b1 - the holding page caches W1 for 30s; drop it now.
+      revalidateLaunchWaves()
     }
 
     return NextResponse.json({ settings: updated })
