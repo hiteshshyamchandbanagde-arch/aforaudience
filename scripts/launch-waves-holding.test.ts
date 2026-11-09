@@ -5,7 +5,7 @@
 //
 //   npx tsx scripts/launch-waves-holding.test.ts
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { W1_HELD_PREFIXES, holdingPageApplies, isW1HeldPath, normalisePathname } from '../src/lib/launch-waves'
 
@@ -107,34 +107,17 @@ test('every held prefix is itself a held path, and the list has no "/" catch-all
   assert.equal((W1_HELD_PREFIXES as readonly string[]).includes('/'), false)
 })
 
-// The wiring: every held prefix's folder (top-level and/or inside the
-// (public) route group) has a layout.tsx that runs WaveHoldingGate with that
-// same path, and every route inside (public) is on the held list. A new
-// discovery route added without a gate fails here.
+// The wiring moved to src/proxy.ts in S1b-b1-fix (the per-segment
+// WaveHoldingGate layouts made every public page dynamic); the matcher /
+// held-list equality is checked in scripts/launch-waves-proxy.test.ts.
+// Every route inside the (public) group must still be on the held list.
 const APP = join(__dirname, '..', 'src', 'app')
-test('every held prefix folder has a WaveHoldingGate layout with its own path', () => {
-  for (const prefix of W1_HELD_PREFIXES) {
-    const name = prefix.slice(1)
-    const dirs = [join(APP, name), join(APP, '(public)', name)].filter((d) => existsSync(d))
-    assert.ok(dirs.length > 0, `no folder for ${prefix}`)
-    for (const d of dirs) {
-      const layout = join(d, 'layout.tsx')
-      assert.ok(existsSync(layout), `missing ${layout}`)
-      assert.ok(readFileSync(layout, 'utf8').includes(`<WaveHoldingGate path="${prefix}">`), `${layout} does not gate ${prefix}`)
-    }
-  }
-})
-
 test('every (public) route is on the held list', () => {
   const pub = join(APP, '(public)')
   for (const name of readdirSync(pub)) {
     if (!statSync(join(pub, name)).isDirectory()) continue
     assert.equal(isW1HeldPath('/' + name), true, `(public)/${name} is not held`)
   }
-})
-
-test('the homepage is gated', () => {
-  assert.ok(readFileSync(join(APP, 'page.tsx'), 'utf8').includes('<WaveHoldingGate path="/">'))
 })
 
 console.log(`\n${passed} passed`)
