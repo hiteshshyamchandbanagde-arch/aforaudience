@@ -2169,8 +2169,8 @@ const fr: Dictionary = {
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Les candidatures ouvrent bientôt",
     ticketsSoon: "Billets bientôt disponibles",
-    paidVenueSoonNote: "Les réservations de lieux payantes ouvrent bientôt — les réservations de lieu à montant nul sont autorisées.",
-    paidSlotsSoon: "Les créneaux d'artistes payants ouvrent bientôt",
+    paidVenueSoonNote: "Les réservations de lieux avec frais ouvrent bientôt — les réservations de lieu à 0 ₹ sont autorisées.",
+    paidSlotsSoon: "Les créneaux d'artistes avec frais ouvrent bientôt",
     closedW1: "Les nouveaux comptes ouvrent bientôt — les membres existants peuvent se connecter.",
     closedW2: "Les candidatures pour rejoindre en tant qu'organisateur, propriétaire de lieu ou artiste ouvrent bientôt.",
     closedW3: "Billets bientôt disponibles — les réservations ne sont pas encore ouvertes.",
