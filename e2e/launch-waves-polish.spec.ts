@@ -144,10 +144,13 @@ test.describe("W4 payment options", () => {
     await expectBlocked(main.locator('[data-afa-comp-option="PAID"]'));
     await expectBlocked(main.locator('[data-afa-comp-option="BUY_IN"]'));
     await expectAvailable(main.locator('[data-afa-comp-option="FREE"]'));
-    const row = main.locator('[data-afa-comp-option="FREE"]').locator("xpath=..");
+    const free = main.locator('[data-afa-comp-option="FREE"]');
+    const row = free.locator("xpath=..");
     await row.scrollIntoViewIfNeeded();
     await hideFloatingOverlays(page);
-    await expect(row).toHaveScreenshot(`wave-w4-comp-options-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
+    // Free is masked: its selected colour follows the theme's accent (not
+    // what this check is about); the baseline is the two blocked options.
+    await expect(row).toHaveScreenshot(`wave-w4-comp-options-${isMobile ? 390 : 1440}.png`, { animations: "disabled", mask: [free] });
   });
 
   test("[S1b-c2] W4 open on create: Paid / Buy-in look normal", async ({ page, isMobile }) => {
