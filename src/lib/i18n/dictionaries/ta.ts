@@ -738,6 +738,8 @@ const ta: Dictionary = {
     enterSixDigitCode: "6-இலக்க குறியீட்டை உள்ளிடவும்",
   },
   authErrors: {
+    // S1b-b1 - register refused while launch wave W1 is closed.
+    WAVE_CLOSED: "புதிய கணக்குகள் விரைவில் தொடங்கும் — ஏற்கனவே உள்ள உறுப்பினர்கள் உள்நுழையலாம்.",
     ALL_FIELDS_REQUIRED: "அனைத்து புலங்களும் தேவை",
     INVALID_EMAIL_FORMAT: "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.",
     PASSWORD_TOO_SHORT: "கடவுச்சொல் குறைந்தது 8 எழுத்துகள் இருக்க வேண்டும்",
@@ -2150,6 +2152,14 @@ const ta: Dictionary = {
     upiSettingLabel: "நேரடி பணத்துக்கான UPI ID",
     upiSettingHelpArtist: "ஏற்பாட்டாளர்கள் உங்கள் நிகழ்ச்சி கட்டணத்தை இந்த UPI ID-க்கு நேரடியாக செலுத்துவார்கள். AforAudience இந்தப் பணத்தை ஒருபோதும் வசூலிப்பதில்லை.",
     upiSettingHelpOrganiser: "கலைஞர்கள் ஓபன்-மைக் பை-இன் தொகையை இந்த UPI ID-க்கு நேரடியாக உங்களுக்குச் செலுத்துவார்கள். AforAudience இந்தப் பணத்தை ஒருபோதும் வசூலிப்பதில்லை.",
+  },
+  // S1b-b1 - W1 holding page + sign-ups-closed states.
+  launchWaves: {
+    holdingTitle: "AforAudience விரைவில் தொடங்குகிறது",
+    holdingAboutLink: "எங்களைப் பற்றி",
+    holdingContactLink: "தொடர்புக்கு",
+    signupsSoonTitle: "புதிய பதிவுகள் விரைவில் தொடங்கும்",
+    newAccountsSoonNote: "புதிய கணக்குகள் விரைவில் தொடங்கும் — ஏற்கனவே உள்ள உறுப்பினர்கள் உள்நுழையலாம்.",
   },
 }
 

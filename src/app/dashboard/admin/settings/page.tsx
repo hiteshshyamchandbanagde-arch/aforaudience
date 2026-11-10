@@ -14,6 +14,16 @@ import { PageTitle } from '@/components/dashboard/PageTitle'
 import { useLocale } from '@/lib/i18n/translate'
 import { formatDate } from '@/lib/format-date'
 import { directPayoutsExpiredAt, isDirectPayoutsEnabled, type DirectPayoutsFlag } from '@/lib/direct-payouts'
+import { WAVES, WAVE_FLAG, launchWaveHint, type Wave } from '@/lib/launch-waves'
+
+// S1b-b1 - the four launch wave switches, shown above Paid bookings.
+const WAVE_TOGGLE_COPY: Record<Wave, { label: string; help: string }> = {
+  W1: { label: 'W1 · Discovery + sign-up', help: 'Public pages and new accounts.' },
+  W2: { label: 'W2 · Onboarding', help: 'Organiser, venue owner and artist applications.' },
+  W3: { label: 'W3 · Tickets', help: 'Free and pay-at-entry reservations.' },
+  W4: { label: 'W4 · Direct bookings', help: 'Paid venue hire and paid/buy-in artist slots.' },
+}
+const ALL_WAVES_CLOSED: Record<Wave, boolean> = { W1: false, W2: false, W3: false, W4: false }
 
 // /dashboard/admin/settings
 //
@@ -97,6 +107,10 @@ export default function AdminSettingsPage() {
   const [paidBookingsEnabled, setPaidBookingsEnabledState] = useState<boolean>(false)
   const [initialPaidBookingsEnabled, setInitialPaidBookingsEnabled] = useState<boolean>(false)
   const [paidBookingsSaving, setPaidBookingsSaving] = useState(false)
+  // S1b-b1 - launch wave switches W1-W4.
+  const [waves, setWaves] = useState<Record<Wave, boolean>>(ALL_WAVES_CLOSED)
+  const [initialWaves, setInitialWaves] = useState<Record<Wave, boolean>>(ALL_WAVES_CLOSED)
+  const [wavesSaving, setWavesSaving] = useState(false)
   const [directPayoutsEnabled, setDirectPayoutsEnabledState] = useState<boolean>(false)
   const [initialDirectPayoutsEnabled, setInitialDirectPayoutsEnabled] = useState<boolean>(false)
   const [directPayoutsUntil, setDirectPayoutsUntil] = useState<string>('') // datetime-local string, '' = no expiry
@@ -185,6 +199,10 @@ export default function AdminSettingsPage() {
         const paidOn = data.settings.paidBookingsEnabled === true
         setInitialPaidBookingsEnabled(paidOn)
         setPaidBookingsEnabledState(paidOn)
+
+        const waveHint = launchWaveHint(data.settings)
+        setInitialWaves(waveHint)
+        setWaves(waveHint)
 
         const dp = directPayoutsFormState(data.settings)
         setInitialDirectPayoutsEnabled(dp.enabled)
@@ -459,6 +477,30 @@ export default function AdminSettingsPage() {
     }
   }
 
+  const isWavesDirty = WAVES.some((w) => waves[w] !== initialWaves[w])
+  const saveWaves = async () => {
+    setWavesSaving(true)
+    try {
+      const body: Record<string, boolean> = {}
+      for (const w of WAVES) body[WAVE_FLAG[w]] = waves[w]
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const next = launchWaveHint(data.settings)
+      setInitialWaves(next)
+      setWaves(next)
+      showToast('Saved.', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
+    } finally {
+      setWavesSaving(false)
+    }
+  }
+
   const saveDirectPayouts = async () => {
     setDirectPayoutsSaving(true)
     try {
@@ -591,6 +633,49 @@ export default function AdminSettingsPage() {
         {loadError && (
           <ErrorBanner style={{ padding: 'var(--afa-space-3) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
         )}
+
+        <div
+          data-afa-launch-waves-card
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Launch waves
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
+            Go-live is staged in four waves. A closed wave is refused on the server. Turn them on one at a time.
+          </p>
+          {WAVES.map((w) => (
+            <label key={w} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-3)', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                data-afa-wave-toggle={w}
+                checked={waves[w]}
+                onChange={(e) => setWaves((prev) => ({ ...prev, [w]: e.target.checked }))}
+                style={{ width: 18, height: 18, marginTop: 'var(--afa-space-2px)', cursor: 'pointer', flexShrink: 0 }}
+              />
+              <span style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', lineHeight: 'round(1.4em, 1px)' }}>
+                  {WAVE_TOGGLE_COPY[w].label}
+                </span>
+                <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.5em, 1px)' }}>
+                  {WAVE_TOGGLE_COPY[w].help}
+                </span>
+              </span>
+            </label>
+          ))}
+          <p data-afa-launch-waves-note style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
+            Admins are never blocked. Bookings already in progress are never affected.
+          </p>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveWaves} disabled={wavesSaving || !isWavesDirty}>
+            {wavesSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
 
         <div
           data-afa-paid-bookings-card

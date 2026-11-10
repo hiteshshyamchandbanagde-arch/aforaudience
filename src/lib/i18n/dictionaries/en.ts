@@ -790,6 +790,8 @@ const en = {
   // values returned by src/app/api/auth/register/route.ts and
   // src/app/api/auth/otp/request/route.ts.
   authErrors: {
+    // S1b-b1 - register refused while launch wave W1 is closed.
+    WAVE_CLOSED: "New accounts open soon — existing members can sign in.",
     ALL_FIELDS_REQUIRED: "All fields are required",
     INVALID_EMAIL_FORMAT: "Please enter a valid email address.",
     PASSWORD_TOO_SHORT: "Password must be at least 8 characters",
@@ -2349,6 +2351,14 @@ const en = {
     upiSettingLabel: "UPI ID for direct payments",
     upiSettingHelpArtist: "Organisers pay your performance fees directly at this UPI ID. AforAudience never collects these payments.",
     upiSettingHelpOrganiser: "Artists pay open-mic buy-ins directly to you at this UPI ID. AforAudience never collects these payments.",
+  },
+  // S1b-b1 - W1 holding page + sign-ups-closed states.
+  launchWaves: {
+    holdingTitle: "AforAudience is opening soon",
+    holdingAboutLink: "About us",
+    holdingContactLink: "Contact",
+    signupsSoonTitle: "New sign-ups open soon",
+    newAccountsSoonNote: "New accounts open soon — existing members can sign in.",
   },
 }
 
