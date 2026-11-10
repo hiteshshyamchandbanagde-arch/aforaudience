@@ -19,6 +19,11 @@ Part 68 below is still the full entry point (session start, decisions, §5 list)
 ### Phone check (Hitesh, 10 Nov 20:10–21:05, QA waves flipped one at a time by chat, restored all-true)
 W1 ✅ (holding page, /register "open soon", /login note, /terms reachable, admin card) · W2 ✅ (3 apply cards) · W3 ✅ (event "Tickets open soon") · W4 ✅ artist slots (venue note skipped). **Bug**: admin sees holding page on `/` (ISR revalidation through proxy, diagnosis in S1b-c1). Follow-ups: S1b-c1 (bug + full-screen holding + wording/disclosure), S1b-c2 (admin Save disabled look, Create-link "opening soon" labels, hide "Goes live immediately" on Artist card while W2 closed, Paid/Buy-in clearly greyed while W4 closed).
 
+### Follow-ups shipped (10–11 Nov)
+- **#776** (S1b-c1) merged, 696/0: proxy passes ISR revalidation (`x-prerender-revalidate`, matched to preview-mode id) → `/` never caches the holding page; full-screen holding page + Sign in link; "with a fee" copy + "AFA doesn't collect this money" on venue/artist pay steps + pay-at-entry.
+- **#777** (S1b-c2) open: disabled `solid` Button opacity 0.7→0.4 (root cause of "Save looks active"); Create-link "Opening soon" badges; artist "Goes live immediately" only while W2 open; Paid/Buy-in muted + aria-disabled. Desktop screenshot `wave-w2-applications-soon-1440` failed twice (48→47px): note has fractional height → dispatch S1b-c2-fix makes it whole-pixel (no threshold loosening).
+- Hitesh's phone check of the fixes: pending his "go" (check e2e queue before flipping waves on QA).
+
 ### Next (§5 renumbered)
 1. **Human check (Hitesh, phone)**: chat flips one wave OFF on QA for a few minutes at a time with his OK → settings card, holding page, W2/W3/W4 states.
 2. Third green nightly (gate).
