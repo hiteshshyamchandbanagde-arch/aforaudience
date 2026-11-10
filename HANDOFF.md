@@ -1,5 +1,26 @@
-## Part 68 — START HERE (9 Nov 23:05 IST, chat), qa @ this commit, main @ 636354f
-Supersedes 65–67 as entry point. 67/66/65 stay as history. Dense, for next-session Claude.
+## Part 69 — START HERE (10 Nov 07:55 IST, chat), qa @ this commit, main @ 636354f
+Part 68 below is still the full entry point (session start, decisions, §5 list). This Part = delta only.
+
+### S1b launch waves: DONE (overnight 9→10 Nov, chat ran autopilot unattended at Hitesh's request)
+- **#773** (S1b-a) data + server gates: `PlatformSettings.wave{Discovery,Onboarding,Tickets,DirectBookings}Open` (migration `20261111120000_add_launch_waves`, default false). `src/lib/launch-waves.ts`; refusal `403 {code:"WAVE_CLOSED", wave}`; ADMIN always bypasses; in-flight steps never gated. W1 = new accounts (register + Google `adapter.createUser`); W2 = organiser/venue-owner/artist apply; W3 = `POST /api/bookings`; W4 = venue bookings amount>0 + PAID/BUY_IN performance creation (FREE slots / ₹0 venue = W2). Hint `GET /api/platform-settings/launch-waves`. Also fixed `language-rollout.spec.ts` flake (waits on real signals).
+- **#774** (S1b-b1) admin "Launch waves" card + W1 holding page via **`src/proxy.ts`** (matcher = held prefixes only, W1 30s per-instance cache, admin from JWT, rewrite → static `/launching-soon`). /register + login note for closed sign-ups.
+- **#775** (S1b-b2) W2/W3/W4 "opening soon" states + one 403→localized-message helper, 12 locales.
+- **QA DB**: migration applied, singleton all four = true (QA behaves as before). **Prod: untouched**; gets the columns (all OFF) at S5.
+- CI: #773 preview green (3rd attempt), #774 674/0, #775 694/0; qa post-merge runs green (649/0, then green).
+
+### Lessons (cost hours tonight)
+- **Never make public pages per-request** (`connection()` / session in a layout). b1 v1 did → every `<Link>` prefetch became a dynamic render → 30 `networkidle` timeouts. Use proxy.ts for per-request gating of static pages.
+- **Apply the QA migration BEFORE the PR's preview run starts**, else the run 500s on new columns (#773 attempt 1).
+- **Shared e2e queue (`e2e-qa-shared-fixtures`) keeps ONE pending run**: a new push (any branch, incl. qa docs/merge) cancels the pending one. Sequence pushes: push next only once the needed run's job is `in_progress`.
+
+### Next (§5 renumbered)
+1. **Human check (Hitesh, phone)**: chat flips one wave OFF on QA for a few minutes at a time with his OK → settings card, holding page, W2/W3/W4 states.
+2. Third green nightly (gate).
+3. S3 prod settings read-only check. 4. Phone checks → S5 (reset prod DB + promote).
+Open from Part 68 still: refund tiers 14/7 vs 15; key rotation + `BLOB_READ_WRITE_TOKEN`; S4 Feedback catch-up OK.
+
+## Part 68 — (9 Nov 23:05 IST, chat), qa @ 22cf814, main @ 636354f
+Superseded as entry point by Part 69 (delta only — read both). Dense, for next-session Claude.
 
 ### 0. Session start (do in order)
 1. `git fetch && git reset --hard origin/qa`; read this Part, then `docs/design.md`. Repo attach: add_repo push access (gh works, no PAT needed in this harness).
