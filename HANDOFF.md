@@ -21,7 +21,8 @@ W1 ✅ (holding page, /register "open soon", /login note, /terms reachable, admi
 
 ### Follow-ups shipped (10–11 Nov)
 - **#776** (S1b-c1) merged, 696/0: proxy passes ISR revalidation (`x-prerender-revalidate`, matched to preview-mode id) → `/` never caches the holding page; full-screen holding page + Sign in link; "with a fee" copy + "AFA doesn't collect this money" on venue/artist pay steps + pay-at-entry.
-- **#777** (S1b-c2) open: disabled `solid` Button opacity 0.7→0.4 (root cause of "Save looks active"); Create-link "Opening soon" badges; artist "Goes live immediately" only while W2 open; Paid/Buy-in muted + aria-disabled. Desktop screenshot `wave-w2-applications-soon-1440` failed twice (48→47px): note has fractional height → dispatch S1b-c2-fix makes it whole-pixel (no threshold loosening).
+- **#777** (S1b-c2) MERGED 11 Nov (716/0) @ 9c6b5d1: disabled `solid` Button opacity 0.7→0.4 (root cause of "Save looks active"); Create-link "Opening soon" badges; artist "Goes live immediately" only while W2 open; Paid/Buy-in muted + aria-disabled. Desktop screenshot `wave-w2-applications-soon-1440` failed twice (48→47px): note has fractional height → dispatch S1b-c2-fix makes it whole-pixel (no threshold loosening). CC corrected: note always 47px; /profile text line-height 1.5 (19.5px) put it on half-pixel y → scoped `round(1.5em,1px)` on /profile + integer height/y guard.
+- **Gotcha:** `Design Token Check` can sit at `action_required` on CC-bot commits → approve via `POST /actions/runs/{id}/approve`, else PR shows `unstable` and the required check is missing.
 - Hitesh's phone check of the fixes: pending his "go" (check e2e queue before flipping waves on QA).
 
 ### Next (§5 renumbered)
