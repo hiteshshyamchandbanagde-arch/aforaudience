@@ -18,6 +18,8 @@ import { useLocale } from '@/lib/i18n/translate'
 import { useLaunchWaves } from '@/hooks/useLaunchWaves'
 import { waveErrorMessage } from '@/lib/launch-waves-ui'
 import WaveSoonNote from '@/components/WaveSoonNote'
+import Badge from '@/components/ui/Badge'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 // Mobile Redesign Phase 4c (GEN-2609-008) - small inline line-icons for the
 // mobile nav-hub's two grouped action lists below. No dedicated shared
@@ -32,6 +34,9 @@ function BuildingIcon({ style }: { style?: React.CSSProperties }) {
     </svg>
   )
 }
+// One row of the phone profile's grouped menu (Create / Money & account).
+type ProfileMenuRow = { icon: React.ReactNode; title: string; hint?: string; danger?: boolean; soon?: boolean; onClick: () => void }
+
 function UserBadgeIcon({ style }: { style?: React.CSSProperties }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
@@ -738,13 +743,14 @@ function ProfileContent() {
                   existing stats rather than compute new ones, the honest
                   choice was to omit rather than invent three numbers. */}
 
-              {[
+              {([
                 {
                   label: 'Create',
                   rows: [
-                    { icon: <PlusIcon style={{ width: 18, height: 18 }} />, title: 'List an event', onClick: () => scrollToCard('apply-organiser', 'organiser') },
-                    { icon: <BuildingIcon style={{ width: 18, height: 18 }} />, title: 'Register a venue', onClick: () => scrollToCard('apply-venue', 'venue') },
-                    { icon: <UserBadgeIcon style={{ width: 18, height: 18 }} />, title: 'Artist profiles', onClick: () => scrollToCard('apply-artist', 'artist') },
+                    // S1b-c2 - `soon` marks the row "Opening soon" while W2 is closed; it still scrolls to the card.
+                    { icon: <PlusIcon style={{ width: 18, height: 18 }} />, title: 'List an event', soon: applicationsClosed, onClick: () => scrollToCard('apply-organiser', 'organiser') },
+                    { icon: <BuildingIcon style={{ width: 18, height: 18 }} />, title: 'Register a venue', soon: applicationsClosed, onClick: () => scrollToCard('apply-venue', 'venue') },
+                    { icon: <UserBadgeIcon style={{ width: 18, height: 18 }} />, title: 'Artist profiles', soon: applicationsClosed, onClick: () => scrollToCard('apply-artist', 'artist') },
                   ],
                 },
                 {
@@ -755,7 +761,7 @@ function ProfileContent() {
                     { icon: <LogoutIcon style={{ width: 18, height: 18 }} />, title: 'Log out', danger: true, onClick: () => signOutAndClearCache({ callbackUrl: '/' }) },
                   ],
                 },
-              ].map((group) => (
+              ] as { label: string; rows: ProfileMenuRow[] }[]).map((group) => (
                 <div key={group.label} style={{ marginTop: 'var(--afa-space-18px)' }}>
                   <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
                     {group.label}
@@ -776,7 +782,14 @@ function ProfileContent() {
                       >
                         <span style={{ display: 'flex', flexShrink: 0, color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-secondary)' }}>{row.icon}</span>
                         <span style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ display: 'block', fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{row.title}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>
+                            {row.title}
+                            {row.soon && (
+                              <Badge variant="status-compact" tone={STATUS_TONE.muted} data-afa-opening-soon-badge>
+                                {tr.launchWaves.openingSoonBadge}
+                              </Badge>
+                            )}
+                          </span>
                           {row.hint && <span style={{ display: 'block', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: '1px' }}>{row.hint}</span>}
                         </span>
                         {!row.danger && <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />}
