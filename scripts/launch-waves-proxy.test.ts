@@ -11,6 +11,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   LAUNCHING_SOON_PATH,
+  PRERENDER_REVALIDATE_HEADER,
   W1_HELD_PREFIXES,
   ttlCached,
   w1ProxyAction,
@@ -89,6 +90,32 @@ async function main() {
       assert.equal(await w1ProxyAction(p, d), 'next', p)
       assert.equal(d.calls.w1 + d.calls.admin, 0, p)
     }
+  })
+
+  // S1b-c1 regression: on origin/qa the third argument is ignored, so an
+  // ISR revalidation of "/" (no session) is rewritten and the holding page
+  // is stored as "/"'s prerender for everyone (admins included).
+  await test('revalidation request + W1 closed + no token -> next', async () => {
+    for (const p of ['/', '/events/', '/blog/x/']) {
+      const d = deps(false, false)
+      assert.equal(await w1ProxyAction(p, d, { prerenderRevalidate: 'build-id-123', previewModeId: 'build-id-123' }), 'next', p)
+      assert.equal(await w1ProxyAction(p, d, { prerenderRevalidate: '1' }), 'next', `${p} (id unknown)`)
+      assert.equal(d.calls.admin, 0, 'session never read for a revalidation')
+    }
+  })
+
+  await test('revalidation header with the wrong id is a normal visitor (rewrite)', async () => {
+    const d = deps(false, false)
+    assert.equal(await w1ProxyAction('/', d, { prerenderRevalidate: 'spoof', previewModeId: 'build-id-123' }), 'rewrite')
+    assert.equal(await w1ProxyAction('/', d, { prerenderRevalidate: null, previewModeId: 'build-id-123' }), 'rewrite')
+    assert.equal(await w1ProxyAction('/', d, {}), 'rewrite')
+  })
+
+  await test('src/proxy.ts passes the revalidation header and preview id to the decision', () => {
+    const src = readFileSync(PROXY, 'utf8')
+    assert.match(src, /request\.headers\.get\(PRERENDER_REVALIDATE_HEADER\)/)
+    assert.match(src, /__NEXT_PREVIEW_MODE_ID/)
+    assert.equal(PRERENDER_REVALIDATE_HEADER, 'x-prerender-revalidate')
   })
 
   await test('ttlCached: one fetch inside the TTL, refetch after, errors not cached', async () => {

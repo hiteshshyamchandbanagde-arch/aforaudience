@@ -175,8 +175,15 @@ export type W1ProxyAction = "next" | "rewrite"
  */
 export async function w1ProxyAction(
   pathname: string,
-  deps: { readW1Open: () => Promise<boolean>; readIsAdmin: () => Promise<boolean> }
+  deps: { readW1Open: () => Promise<boolean>; readIsAdmin: () => Promise<boolean> },
+  request: { prerenderRevalidate?: string | null; previewModeId?: string } = {}
 ): Promise<W1ProxyAction> {
+  // S1b-c1 - an ISR revalidation/prerender request (Next sends
+  // PRERENDER_REVALIDATE_HEADER "x-prerender-revalidate", with the build's
+  // preview-mode id as its value) must regenerate the REAL page: it carries
+  // no session, so rewriting it would store the holding page as "/"'s
+  // prerender and serve it to everyone, admins included.
+  if (isPrerenderRevalidate(request)) return "next"
   if (!isW1HeldPath(pathname)) return "next"
   let w1Open: boolean
   try {
@@ -192,6 +199,24 @@ export async function w1ProxyAction(
     isAdmin = false
   }
   return holdingPageApplies(pathname, w1Open, isAdmin) ? "rewrite" : "next"
+}
+
+/** Name of Next's ISR revalidation header (next/dist/lib/constants). */
+export const PRERENDER_REVALIDATE_HEADER = "x-prerender-revalidate"
+
+/**
+ * True for an ISR revalidation request. When the build's preview-mode id is
+ * known, the header must equal it (a visitor can't spoof it to skip the
+ * holding page); when it isn't exposed to the proxy, presence is enough
+ * (worst case a crafted request sees public pages early).
+ */
+export function isPrerenderRevalidate(request: {
+  prerenderRevalidate?: string | null
+  previewModeId?: string
+}): boolean {
+  const v = request.prerenderRevalidate
+  if (!v) return false
+  return request.previewModeId ? v === request.previewModeId : true
 }
 
 /**

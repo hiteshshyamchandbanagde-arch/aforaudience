@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
 import prisma from "@/lib/prisma"
-import { LAUNCHING_SOON_PATH, isAdminRole, ttlCached, w1ProxyAction } from "@/lib/launch-waves"
+import {
+  LAUNCHING_SOON_PATH,
+  PRERENDER_REVALIDATE_HEADER,
+  isAdminRole,
+  ttlCached,
+  w1ProxyAction,
+} from "@/lib/launch-waves"
 
 // S1b-b1-fix - W1 holding check. Runs only on "/" and the held discovery
 // prefixes (matcher below), so those pages stay static/ISR: the open path is
@@ -36,6 +42,10 @@ export async function proxy(request: NextRequest) {
       const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
       return isAdminRole(token?.role)
     },
+  }, {
+    // ISR revalidation of "/" must store the real page (S1b-c1).
+    prerenderRevalidate: request.headers.get(PRERENDER_REVALIDATE_HEADER),
+    previewModeId: process.env.__NEXT_PREVIEW_MODE_ID,
   })
   if (action === "next") return NextResponse.next()
   return NextResponse.rewrite(new URL(LAUNCHING_SOON_PATH + "/", request.url))
