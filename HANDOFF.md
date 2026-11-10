@@ -13,6 +13,12 @@ Part 68 below is still the full entry point (session start, decisions, §5 list)
 - **Apply the QA migration BEFORE the PR's preview run starts**, else the run 500s on new columns (#773 attempt 1).
 - **Shared e2e queue (`e2e-qa-shared-fixtures`) keeps ONE pending run**: a new push (any branch, incl. qa docs/merge) cancels the pending one. Sequence pushes: push next only once the needed run's job is `in_progress`.
 
+### Decision (Hitesh, 10 Nov 21:10 IST) — payments
+**All payments are direct cash/UPI between the parties; no AFA transaction at launch** (tickets = free or pay-at-entry; venue hire + artist fees = direct-pay D1–D3). AFA shows who/how much/how (UPI QR/ID or cash) + records I've paid/Received. Defaults chat took (Hitesh prefers decisive; overrule any): W4 stays staged after W1–W3; `paidBookingsEnabled` stays OFF on prod ("Online payment" hidden; code kept for a possible Technology Partner later); S7 "Support AFA" contributions PARKED (would be an AFA transaction). Copy: "paid" → "with a fee"; disclosure line "Pay {name} directly by UPI or cash. AFA doesn't collect this money." on every pay step.
+
+### Phone check (Hitesh, 10 Nov 20:10–21:05, QA waves flipped one at a time by chat, restored all-true)
+W1 ✅ (holding page, /register "open soon", /login note, /terms reachable, admin card) · W2 ✅ (3 apply cards) · W3 ✅ (event "Tickets open soon") · W4 ✅ artist slots (venue note skipped). **Bug**: admin sees holding page on `/` (ISR revalidation through proxy, diagnosis in S1b-c1). Follow-ups: S1b-c1 (bug + full-screen holding + wording/disclosure), S1b-c2 (admin Save disabled look, Create-link "opening soon" labels, hide "Goes live immediately" on Artist card while W2 closed, Paid/Buy-in clearly greyed while W4 closed).
+
 ### Next (§5 renumbered)
 1. **Human check (Hitesh, phone)**: chat flips one wave OFF on QA for a few minutes at a time with his OK → settings card, holding page, W2/W3/W4 states.
 2. Third green nightly (gate).
