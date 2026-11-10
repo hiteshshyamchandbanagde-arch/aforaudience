@@ -130,6 +130,8 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
     await expect(payee.locator("[data-afa-payee-upi]")).toHaveText(TEST_UPI);
     await expect(payee.locator("[data-afa-payee-amount]")).toHaveText("₹4,500");
     await expect(payee.locator("[data-afa-payee-note]")).toContainText("directly. AforAudience does not collect or hold this payment.");
+    // S1b-c1 - direct cash/UPI only: the pay step says AFA never collects.
+    await expect(payee.locator("[data-afa-direct-pay-disclosure]")).toHaveText(/^Pay .+ directly by UPI or cash\. AFA doesn't collect this money\.$/);
     await expect(payee.locator("[data-afa-payee-qr]")).toHaveAttribute("src", TEST_QR);
     await payee.scrollIntoViewIfNeeded();
     await payee.screenshot({ path: `test-results/d2-payee-block-${vp}.png` });

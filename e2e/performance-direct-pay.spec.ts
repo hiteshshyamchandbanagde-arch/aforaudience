@@ -134,6 +134,8 @@ test("[D3] performance direct pay: PAID (Omkar pays Hrithik) and BUY_IN (Hrithik
       await expect(block.locator("[data-afa-payee-upi]")).toHaveText(opts.upi);
       await expect(block.locator("[data-afa-payee-amount]")).toHaveText(opts.amount);
       await expect(block.locator("[data-afa-payee-note]")).toContainText("directly. AforAudience does not collect or hold this payment.");
+      // S1b-c1 - direct cash/UPI only: the pay step says AFA never collects.
+      await expect(block.locator("[data-afa-direct-pay-disclosure]")).toHaveText(/^Pay .+ directly by UPI or cash\. AFA doesn't collect this money\.$/);
       await block.scrollIntoViewIfNeeded();
       await block.screenshot({ path: `test-results/d3-${opts.shot}-payee-block-${vp}.png` });
       await card.getByRole("textbox", { name: "UPI reference (optional)" }).fill(`UTR-D3-${opts.shot}`);

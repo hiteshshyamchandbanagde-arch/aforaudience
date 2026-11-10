@@ -97,6 +97,8 @@ test("[D1] pay-at-entry: reserve 2 seats, ticket says pay at entry, check-in = A
       // My Tickets: badge, no Pay button.
       await gotoDashboard(atul, "/tickets");
       await expect(atul.locator("[data-afa-pay-at-entry-badge]").filter({ hasText: "Pay at entry · ₹600" }).first()).toBeVisible();
+      // S1b-c1 - the pay-at-entry ticket notice says AFA never collects.
+      await expect(atul.locator("[data-afa-direct-pay-disclosure]").filter({ hasText: "Pay the organiser at the venue. AFA doesn't collect this money." }).first()).toBeVisible();
       await expect(atul.getByRole("button", { name: /^Pay/ })).toHaveCount(0);
     } finally {
       await atulCtx.close();
