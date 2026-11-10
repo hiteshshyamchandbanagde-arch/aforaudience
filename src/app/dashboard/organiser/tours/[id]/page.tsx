@@ -14,6 +14,7 @@ import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { countText } from '@/lib/i18n/plural'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { PageTitle } from '@/components/dashboard/PageTitle'
+import { waveErrorMessage } from '@/lib/launch-waves-ui'
 
 const inputStyle = {
   width: '100%',
@@ -165,7 +166,7 @@ export default function TourDetailPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || o.addStopFailed)
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, o.addStopFailed))
       showToast(o.stopAdded, 'success')
       setShowAddStop(false)
       setStopTitle(''); setStopDescription(''); setStopDate(''); setStopVenueId(''); setStopOpenSlots(''); setStopDeadline('')
@@ -186,7 +187,8 @@ export default function TourDetailPage() {
         body: JSON.stringify({ artistId }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || o.addArtistFailed)
+      // S1b-b2 - a PAID/BUY_IN stop while W4 is closed: friendly line, not the raw 403.
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, o.addArtistFailed))
       showToast(data.consentStatus === 'ACCEPTED' ? o.artistAdded : o.artistInvited, 'success')
       await loadTour()
     } catch (err: any) {

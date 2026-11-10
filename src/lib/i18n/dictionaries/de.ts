@@ -2169,6 +2169,15 @@ const de: Dictionary = {
     holdingContactLink: "Kontakt",
     signupsSoonTitle: "Neue Registrierungen bald möglich",
     newAccountsSoonNote: "Neue Konten bald möglich – bestehende Mitglieder können sich anmelden.",
+    // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
+    applicationsSoon: "Bewerbungen bald möglich",
+    ticketsSoon: "Tickets bald erhältlich",
+    paidVenueSoonNote: "Bezahlte Veranstaltungsort-Buchungen bald möglich – Buchungen ohne Betrag sind erlaubt.",
+    paidSlotsSoon: "Bezahlte Künstler-Slots bald möglich",
+    closedW1: "Neue Konten bald möglich – bestehende Mitglieder können sich anmelden.",
+    closedW2: "Bewerbungen als Veranstalter, Veranstaltungsort-Inhaber oder Künstler sind bald möglich.",
+    closedW3: "Tickets bald erhältlich – Reservierungen sind noch nicht geöffnet.",
+    closedW4: "Bezahlte Buchungen bald möglich – kostenlose Künstler-Slots und Veranstaltungsort-Buchungen ohne Betrag sind erlaubt.",
   },
 }
 

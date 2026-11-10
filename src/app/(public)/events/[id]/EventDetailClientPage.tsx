@@ -134,7 +134,12 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
   return eventStart.getTime() <= Date.now()
 }
 
-export default function EventDetailPage({ event, canReview, bookingPaused = false }: { event: EventData | null; canReview: boolean; bookingPaused?: boolean }) {
+// S1b-b2 - bookingSoon: which "opening soon" state replaces the Book button
+// ("W3" = launch wave W3 closed -> "Tickets open soon", wins over "PAID" =
+// paid bookings switched off -> "Booking opens soon"); decided server-side
+// by bookingSoonState() in src/lib/launch-waves-ui.ts.
+export default function EventDetailPage({ event, canReview, bookingSoon = null }: { event: EventData | null; canReview: boolean; bookingSoon?: "W3" | "PAID" | null }) {
+  const bookingPaused = bookingSoon !== null
   const { t: tr, locale } = useLocale()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -386,8 +391,8 @@ export default function EventDetailPage({ event, canReview, bookingPaused = fals
 
                   {bookingPaused ? (
                     // S1a - paid bookings switched off: neutral state, no Pay/Book button.
-                    <div data-afa-booking-opens-soon role="status" style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", textAlign: "center", padding: "var(--afa-space-3)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-xs)" }}>
-                      {tr.eventDetailPage.bookingOpensSoon}
+                    <div data-afa-booking-opens-soon data-afa-tickets-soon={bookingSoon === "W3" ? "" : undefined} role="status" style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", textAlign: "center", padding: "var(--afa-space-3)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-xs)" }}>
+                      {bookingSoon === "W3" ? tr.launchWaves.ticketsSoon : tr.eventDetailPage.bookingOpensSoon}
                     </div>
                   ) : (
                     <>
@@ -715,8 +720,8 @@ export default function EventDetailPage({ event, canReview, bookingPaused = fals
             </div>
           </div>
           {bookingPaused ? (
-            <span data-afa-booking-opens-soon style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", flexShrink: 0 }}>
-              {tr.eventDetailPage.bookingOpensSoon}
+            <span data-afa-booking-opens-soon data-afa-tickets-soon={bookingSoon === "W3" ? "" : undefined} style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", flexShrink: 0 }}>
+              {bookingSoon === "W3" ? tr.launchWaves.ticketsSoon : tr.eventDetailPage.bookingOpensSoon}
             </span>
           ) : (
             <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ width: "auto", padding: "var(--afa-space-3) var(--afa-space-6)", textDecoration: "none", flexShrink: 0 }}>

@@ -20,6 +20,9 @@ import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
 import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
 import type { EventPaymentMode } from '@/lib/pay-at-entry'
+import { useLaunchWaves } from '@/hooks/useLaunchWaves'
+import { paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
+import WaveSoonNote from '@/components/WaveSoonNote'
 
 interface SeatSection {
   id?: string
@@ -247,6 +250,10 @@ export default function CreateEventPage() {
   }
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
   const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
+  // S1b-b2 - launch wave W4 (paid B2B) closed: a venue booking amount > 0
+  // and PAID / BUY_IN artist slots are blocked (admin bypasses).
+  const w4Open = useLaunchWaves().W4
+  const venueAmountW4Blocked = !!venueId && venueAmountBlocked(bookingAmount, w4Open)
   const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
   const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   // Same clamp-on-change discipline as maxSeatsPerBooking/maxPerformers
@@ -473,6 +480,16 @@ export default function CreateEventPage() {
       setSaving(false)
       return
     }
+    if (venueAmountW4Blocked) {
+      fail(tr.launchWaves.paidVenueSoonNote)
+      setSaving(false)
+      return
+    }
+    if (paymentTypeBlocked(defaultCompensationType, w4Open)) {
+      fail(tr.launchWaves.paidSlotsSoon)
+      setSaving(false)
+      return
+    }
     if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
       fail(f.offerTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)))
       setSaving(false)
@@ -533,7 +550,7 @@ export default function CreateEventPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || c.createFailed)
+        throw new Error(waveErrorMessage(data, tr.launchWaves, c.createFailed))
       }
 
       const newEvent = await res.json()
@@ -788,7 +805,7 @@ export default function CreateEventPage() {
                           : f.noRateNote}
                       </p>
                       <label style={labelStyle}>{f.offerAmount} <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountHint}</span></label>
-                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
+                      <input data-afa-venue-amount type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
                     </>
                   ) : (
                     <>
@@ -802,8 +819,13 @@ export default function CreateEventPage() {
                         </div>
                       </div>
                       <label style={labelStyle}>{f.offerAmount} <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountPrefilledHint}</span></label>
-                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
+                      <input data-afa-venue-amount type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder={f.offerPlaceholder} style={inputStyle} />
                     </>
+                  )}
+                  {venueAmountW4Blocked && (
+                    <div style={{ marginTop: 'var(--afa-space-2)' }}>
+                      <WaveSoonNote wave="W4" compact>{tr.launchWaves.paidVenueSoonNote}</WaveSoonNote>
+                    </div>
                   )}
                 </div>
               )}
@@ -923,12 +945,19 @@ export default function CreateEventPage() {
                       fullWidth={false}
                       selected={defaultCompensationType === opt.value}
                       type="button"
+                      disabled={paymentTypeBlocked(opt.value, w4Open)}
+                      data-afa-comp-option={opt.value}
                       onClick={() => setDefaultCompensationType(opt.value)}
                     >
                       {opt.label}
                     </Button>
                   ))}
                 </div>
+                {!w4Open && (
+                  <div style={{ marginBottom: 'var(--afa-space-10px)' }}>
+                    <WaveSoonNote wave="W4" compact>{tr.launchWaves.paidSlotsSoon}</WaveSoonNote>
+                  </div>
+                )}
                 {defaultCompensationType === 'PAID' && (
                   <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder={f.feePlaceholder} style={{ ...inputStyle, maxWidth: "200px" }} />
                 )}

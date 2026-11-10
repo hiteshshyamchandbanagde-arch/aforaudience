@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth"
 import prisma from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
 import { isAdminRole } from "@/lib/launch-waves"
+import { wavesForViewer, type WaveHint } from "@/lib/launch-waves-ui"
+import { getLaunchWaves } from "@/lib/platform-settings"
 
 // S1b-b1 - server-side W1 reads for pages that change when W1 is closed
 // but aren't held (/register via signupsClosedForViewer()). The holding
@@ -54,4 +56,21 @@ export async function signupsClosedForViewer(): Promise<boolean> {
   if (await isW1OpenForDisplay()) return false
   const session = await getServerSession(authOptions)
   return !isAdminRole((session?.user as { role?: string } | undefined)?.role)
+}
+
+/**
+ * S1b-b2 - all four waves as this viewer should see them (ADMIN bypass,
+ * same as the server gates). Display only: a failed read counts as open,
+ * the routes still refuse and the client maps their 403 to a friendly line.
+ */
+export async function getLaunchWavesForViewer(): Promise<WaveHint> {
+  await connection()
+  let hint: WaveHint | null = null
+  try {
+    hint = await getLaunchWaves()
+  } catch (err) {
+    console.warn("[launch-waves] wave read failed, showing everything open", err)
+  }
+  const session = await getServerSession(authOptions)
+  return wavesForViewer(hint, isAdminRole((session?.user as { role?: string } | undefined)?.role))
 }

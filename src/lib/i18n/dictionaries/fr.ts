@@ -2166,6 +2166,15 @@ const fr: Dictionary = {
     holdingContactLink: "Nous contacter",
     signupsSoonTitle: "Les inscriptions ouvrent bientôt",
     newAccountsSoonNote: "Les nouveaux comptes ouvrent bientôt — les membres existants peuvent se connecter.",
+    // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
+    applicationsSoon: "Les candidatures ouvrent bientôt",
+    ticketsSoon: "Billets bientôt disponibles",
+    paidVenueSoonNote: "Les réservations de lieux payantes ouvrent bientôt — les réservations de lieu à montant nul sont autorisées.",
+    paidSlotsSoon: "Les créneaux d'artistes payants ouvrent bientôt",
+    closedW1: "Les nouveaux comptes ouvrent bientôt — les membres existants peuvent se connecter.",
+    closedW2: "Les candidatures pour rejoindre en tant qu'organisateur, propriétaire de lieu ou artiste ouvrent bientôt.",
+    closedW3: "Billets bientôt disponibles — les réservations ne sont pas encore ouvertes.",
+    closedW4: "Les réservations payantes ouvrent bientôt — les créneaux d'artistes gratuits et les réservations de lieu à montant nul sont autorisés.",
   },
 }
 
