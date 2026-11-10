@@ -2168,6 +2168,7 @@ const es: Dictionary = {
     newAccountsSoonNote: "Las nuevas cuentas abren pronto — los miembros actuales pueden iniciar sesión.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Las solicitudes abren pronto",
+    openingSoonBadge: "Próximamente",
     ticketsSoon: "Las entradas salen pronto",
     paidVenueSoonNote: "Las reservas de recintos con tarifa abren pronto — se permiten reservas de recinto de ₹0.",
     paidSlotsSoon: "Los espacios para artistas con tarifa abren pronto",

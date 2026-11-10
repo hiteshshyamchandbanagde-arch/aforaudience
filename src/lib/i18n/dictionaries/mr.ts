@@ -2162,6 +2162,7 @@ const mr: Dictionary = {
     newAccountsSoonNote: "नवीन खाती लवकरच सुरू होतील — सध्याचे सदस्य साइन इन करू शकतात.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "अर्ज लवकरच सुरू होतील",
+    openingSoonBadge: "लवकरच सुरू",
     ticketsSoon: "तिकिटे लवकरच सुरू होतील",
     paidVenueSoonNote: "शुल्क असलेली स्थळ बुकिंग लवकरच सुरू होईल — ₹0 स्थळ बुकिंगला परवानगी आहे.",
     paidSlotsSoon: "शुल्क असलेले कलाकार स्लॉट लवकरच सुरू होतील",

@@ -2164,6 +2164,7 @@ const te: Dictionary = {
     newAccountsSoonNote: "కొత్త ఖాతాలు త్వరలో ప్రారంభమవుతాయి — ఇప్పటికే ఉన్న సభ్యులు సైన్ ఇన్ చేయవచ్చు.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "దరఖాస్తులు త్వరలో ప్రారంభమవుతాయి",
+    openingSoonBadge: "త్వరలో ప్రారంభం",
     ticketsSoon: "టికెట్లు త్వరలో అందుబాటులోకి వస్తాయి",
     paidVenueSoonNote: "రుసుము ఉన్న వేదిక బుకింగ్‌లు త్వరలో ప్రారంభమవుతాయి — ₹0 వేదిక బుకింగ్‌లకు అనుమతి ఉంది.",
     paidSlotsSoon: "రుసుము ఉన్న కళాకారుల స్లాట్‌లు త్వరలో ప్రారంభమవుతాయి",

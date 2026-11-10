@@ -2164,6 +2164,7 @@ const gu: Dictionary = {
     newAccountsSoonNote: "નવા એકાઉન્ટ ટૂંક સમયમાં શરૂ થશે — હાલના સભ્યો સાઇન ઇન કરી શકે છે.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "અરજીઓ ટૂંક સમયમાં શરૂ થશે",
+    openingSoonBadge: "ટૂંક સમયમાં શરૂ",
     ticketsSoon: "ટિકિટ ટૂંક સમયમાં શરૂ થશે",
     paidVenueSoonNote: "ફી સાથેની સ્થળ બુકિંગ ટૂંક સમયમાં શરૂ થશે — ₹0 સ્થળ બુકિંગની મંજૂરી છે.",
     paidSlotsSoon: "ફી સાથેના કલાકાર સ્લોટ ટૂંક સમયમાં શરૂ થશે",

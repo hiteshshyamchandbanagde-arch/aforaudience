@@ -2173,6 +2173,7 @@ const de: Dictionary = {
     newAccountsSoonNote: "Neue Konten bald möglich – bestehende Mitglieder können sich anmelden.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Bewerbungen bald möglich",
+    openingSoonBadge: "Bald verfügbar",
     ticketsSoon: "Tickets bald erhältlich",
     paidVenueSoonNote: "Veranstaltungsort-Buchungen mit Gebühr bald möglich – Buchungen über ₹0 sind erlaubt.",
     paidSlotsSoon: "Künstler-Slots mit Gebühr bald möglich",

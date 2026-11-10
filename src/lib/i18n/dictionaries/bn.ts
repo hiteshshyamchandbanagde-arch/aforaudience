@@ -2164,6 +2164,7 @@ const bn: Dictionary = {
     newAccountsSoonNote: "নতুন অ্যাকাউন্ট শীঘ্রই চালু হবে — বর্তমান সদস্যরা সাইন ইন করতে পারেন।",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "আবেদন শীঘ্রই চালু হবে",
+    openingSoonBadge: "শীঘ্রই চালু",
     ticketsSoon: "টিকিট শীঘ্রই চালু হবে",
     paidVenueSoonNote: "ফি-সহ ভেন্যু বুকিং শীঘ্রই চালু হবে — ₹0 ভেন্যু বুকিং করা যাবে।",
     paidSlotsSoon: "ফি-সহ শিল্পী স্লট শীঘ্রই চালু হবে",

@@ -2363,6 +2363,8 @@ const en = {
     newAccountsSoonNote: "New accounts open soon — existing members can sign in.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Applications open soon",
+    // S1b-c2 - badge on the profile "Create" rows while W2 is closed.
+    openingSoonBadge: "Opening soon",
     ticketsSoon: "Tickets open soon",
     paidVenueSoonNote: "Venue bookings with a fee open soon — ₹0 venue bookings are allowed.",
     paidSlotsSoon: "Artist slots with a fee open soon",

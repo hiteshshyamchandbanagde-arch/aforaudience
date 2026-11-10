@@ -2163,6 +2163,7 @@ const hi: Dictionary = {
     newAccountsSoonNote: "नए अकाउंट जल्द ही खुलेंगे — मौजूदा सदस्य साइन इन कर सकते हैं।",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "आवेदन जल्द ही खुलेंगे",
+    openingSoonBadge: "जल्द ही खुलेगा",
     ticketsSoon: "टिकट जल्द ही खुलेंगे",
     paidVenueSoonNote: "शुल्क वाली वेन्यू बुकिंग जल्द ही खुलेगी — ₹0 वाली वेन्यू बुकिंग की अनुमति है।",
     paidSlotsSoon: "शुल्क वाले कलाकार स्लॉट जल्द ही खुलेंगे",
