@@ -5,7 +5,7 @@
 //
 //   npx tsx scripts/launch-waves-holding.test.ts
 import assert from 'node:assert/strict'
-import { readdirSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { W1_HELD_PREFIXES, holdingPageApplies, isW1HeldPath, normalisePathname } from '../src/lib/launch-waves'
 
@@ -118,6 +118,30 @@ test('every (public) route is on the held list', () => {
     if (!statSync(join(pub, name)).isDirectory()) continue
     assert.equal(isW1HeldPath('/' + name), true, `(public)/${name} is not held`)
   }
+})
+
+// S1b-c1 - the holding page is a clean full screen: globals.css hides each
+// piece of chrome while [data-afa-launch-holding] is on the page, and every
+// hidden selector still exists on its component (a renamed hook would
+// silently bring the chrome back).
+test('holding page hides top bar, tab bar, nudges and support chat; keeps Sign in', () => {
+  const ROOT = join(__dirname, '..')
+  const read = (p: string) => readFileSync(join(ROOT, p), 'utf8')
+  const css = read('src/app/globals.css')
+  const hooks: Array<[string, string, string]> = [
+    ['[data-afa-top-bar]', 'src/components/mobile/MobileTopBar.tsx', 'data-afa-top-bar'],
+    ['[data-afa-tab-bar]', 'src/components/mobile/MobileTabBar.tsx', 'data-afa-tab-bar'],
+    ['[data-afa-nudge-stack]', 'src/components/NudgeStack.tsx', 'data-afa-nudge-stack'],
+    ['.afa-support-chat-btn', 'src/components/SupportWidget.tsx', 'className="afa-support-chat-btn"'],
+    ['.afa-support-chat-panel', 'src/components/SupportWidget.tsx', 'className="afa-support-chat-panel"'],
+  ]
+  for (const [sel, file, marker] of hooks) {
+    assert.ok(css.includes(`body:has([data-afa-launch-holding]) ${sel}`), `globals.css hides ${sel}`)
+    assert.ok(read(file).includes(marker), `${file} still carries ${marker}`)
+  }
+  const holding = read('src/components/LaunchHoldingPage.tsx')
+  assert.match(holding, /href="\/login"[\s\S]*data-afa-holding-signin/)
+  assert.match(holding, /tr\.nav\.signIn/)
 })
 
 console.log(`\n${passed} passed`)

@@ -55,6 +55,20 @@ export default function LaunchHoldingPage() {
           {tr.launchWaves.holdingContactLink}
         </Link>
       </nav>
+      {/* S1b-c1 - the site chrome is hidden here (globals.css), so admins
+          need their own small way in. */}
+      <Link
+        href="/login"
+        data-afa-holding-signin
+        style={{
+          marginTop: "var(--afa-space-6)",
+          color: "var(--afa-text-secondary)",
+          fontSize: "var(--afa-text-caption)",
+          textDecoration: "underline",
+        }}
+      >
+        {tr.nav.signIn}
+      </Link>
     </main>
   )
 }

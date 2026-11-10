@@ -129,6 +129,7 @@ export default function MobileTopBar() {
       // items-stretch, justify-around, fixed, bottom-0) in its className
       // and only non-conflicting properties (background, zIndex, padding)
       // in its style object - matched here.
+      data-afa-top-bar=""
       className="lg:hidden flex items-center"
       style={{
         position: 'sticky',
