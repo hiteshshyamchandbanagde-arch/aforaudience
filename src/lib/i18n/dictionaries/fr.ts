@@ -2092,6 +2092,7 @@ const fr: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · payez {organiser} à l’entrée (espèces/UPI)",
     noCollect: "AforAudience n’encaisse pas ce paiement.",
+    payAtVenueLine: "Payez l'organisateur sur place. AFA ne perçoit pas cet argent.",
     reserveCta: "Réserver",
     badge: "Paiement à l’entrée · ₹{amount}",
     attended: "Présent",
@@ -2120,6 +2121,7 @@ const fr: Dictionary = {
     chipExpired: "Expirée",
     chipCancelled: "Annulée",
     payNote: "Payez directement {payee}. AforAudience n’encaisse ni ne détient ce paiement.",
+    payDirectLine: "Payez {name} directement par UPI ou en espèces. AFA ne perçoit pas cet argent.",
     amount: "Montant",
     upiLabel: "Identifiant UPI",
     copy: "Copier",
@@ -2169,8 +2171,8 @@ const fr: Dictionary = {
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Les candidatures ouvrent bientôt",
     ticketsSoon: "Billets bientôt disponibles",
-    paidVenueSoonNote: "Les réservations de lieux payantes ouvrent bientôt — les réservations de lieu à montant nul sont autorisées.",
-    paidSlotsSoon: "Les créneaux d'artistes payants ouvrent bientôt",
+    paidVenueSoonNote: "Les réservations de lieux avec frais ouvrent bientôt — les réservations de lieu à 0 ₹ sont autorisées.",
+    paidSlotsSoon: "Les créneaux d'artistes avec frais ouvrent bientôt",
     closedW1: "Les nouveaux comptes ouvrent bientôt — les membres existants peuvent se connecter.",
     closedW2: "Les candidatures pour rejoindre en tant qu'organisateur, propriétaire de lieu ou artiste ouvrent bientôt.",
     closedW3: "Billets bientôt disponibles — les réservations ne sont pas encore ouvertes.",

@@ -2282,6 +2282,7 @@ const en = {
   payAtEntry: {
     priceLine: "₹{price} · pay {organiser} at entry (cash/UPI)",
     noCollect: "AforAudience does not collect this payment.",
+    payAtVenueLine: "Pay the organiser at the venue. AFA doesn't collect this money.",
     reserveCta: "Reserve",
     badge: "Pay at entry · ₹{amount}",
     attended: "Attended",
@@ -2311,6 +2312,7 @@ const en = {
     chipCancelled: "Cancelled",
     // {payee}: venue owner / venue name.
     payNote: "Pay {payee} directly. AforAudience does not collect or hold this payment.",
+    payDirectLine: "Pay {name} directly by UPI or cash. AFA doesn't collect this money.",
     amount: "Amount",
     upiLabel: "UPI ID",
     copy: "Copy",
@@ -2362,8 +2364,8 @@ const en = {
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Applications open soon",
     ticketsSoon: "Tickets open soon",
-    paidVenueSoonNote: "Paid venue bookings open soon — zero-amount venue bookings are allowed.",
-    paidSlotsSoon: "Paid artist slots open soon",
+    paidVenueSoonNote: "Venue bookings with a fee open soon — ₹0 venue bookings are allowed.",
+    paidSlotsSoon: "Artist slots with a fee open soon",
     closedW1: "New accounts open soon — existing members can sign in.",
     closedW2: "Applications to join as an organiser, venue owner or artist open soon.",
     closedW3: "Tickets open soon — reservations aren't open yet.",

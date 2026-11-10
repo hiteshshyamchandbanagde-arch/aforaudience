@@ -2090,6 +2090,7 @@ const es: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · paga a {organiser} en la entrada (efectivo/UPI)",
     noCollect: "AforAudience no cobra este pago.",
+    payAtVenueLine: "Paga al organizador en el recinto. AFA no cobra este dinero.",
     reserveCta: "Reservar",
     badge: "Pago en la entrada · ₹{amount}",
     attended: "Asistió",
@@ -2118,6 +2119,7 @@ const es: Dictionary = {
     chipExpired: "Caducada",
     chipCancelled: "Cancelada",
     payNote: "Paga directamente a {payee}. AforAudience no cobra ni retiene este pago.",
+    payDirectLine: "Paga a {name} directamente por UPI o en efectivo. AFA no cobra este dinero.",
     amount: "Importe",
     upiLabel: "ID de UPI",
     copy: "Copiar",
@@ -2167,8 +2169,8 @@ const es: Dictionary = {
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Las solicitudes abren pronto",
     ticketsSoon: "Las entradas salen pronto",
-    paidVenueSoonNote: "Las reservas de recintos de pago abren pronto — se permiten reservas de recinto con importe cero.",
-    paidSlotsSoon: "Los espacios de pago para artistas abren pronto",
+    paidVenueSoonNote: "Las reservas de recintos con tarifa abren pronto — se permiten reservas de recinto de ₹0.",
+    paidSlotsSoon: "Los espacios para artistas con tarifa abren pronto",
     closedW1: "Las nuevas cuentas abren pronto — los miembros actuales pueden iniciar sesión.",
     closedW2: "Las solicitudes para unirte como organizador, propietario de recinto o artista abren pronto.",
     closedW3: "Las entradas salen pronto — las reservas aún no están abiertas.",

@@ -2086,6 +2086,7 @@ const gu: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · પ્રવેશ સમયે {organiser}ને ચૂકવો (રોકડ/UPI)",
     noCollect: "AforAudience આ ચુકવણી લેતું નથી.",
+    payAtVenueLine: "આયોજકને સ્થળ પર ચૂકવો. AFA આ પૈસા લેતું નથી.",
     reserveCta: "રિઝર્વ કરો",
     badge: "પ્રવેશ પર ચુકવણી · ₹{amount}",
     attended: "હાજર",
@@ -2114,6 +2115,7 @@ const gu: Dictionary = {
     chipExpired: "સમય પૂરો",
     chipCancelled: "રદ",
     payNote: "{payee}ને સીધી ચુકવણી કરો. AforAudience આ ચુકવણી લેતું નથી કે રાખતું નથી.",
+    payDirectLine: "{name}ને સીધા UPI અથવા રોકડથી ચૂકવો. AFA આ પૈસા લેતું નથી.",
     amount: "રકમ",
     upiLabel: "UPI ID",
     copy: "કૉપિ કરો",
@@ -2163,8 +2165,8 @@ const gu: Dictionary = {
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "અરજીઓ ટૂંક સમયમાં શરૂ થશે",
     ticketsSoon: "ટિકિટ ટૂંક સમયમાં શરૂ થશે",
-    paidVenueSoonNote: "સશુલ્ક સ્થળ બુકિંગ ટૂંક સમયમાં શરૂ થશે — શૂન્ય રકમની સ્થળ બુકિંગની મંજૂરી છે.",
-    paidSlotsSoon: "સશુલ્ક કલાકાર સ્લોટ ટૂંક સમયમાં શરૂ થશે",
+    paidVenueSoonNote: "ફી સાથેની સ્થળ બુકિંગ ટૂંક સમયમાં શરૂ થશે — ₹0 સ્થળ બુકિંગની મંજૂરી છે.",
+    paidSlotsSoon: "ફી સાથેના કલાકાર સ્લોટ ટૂંક સમયમાં શરૂ થશે",
     closedW1: "નવા એકાઉન્ટ ટૂંક સમયમાં શરૂ થશે — હાલના સભ્યો સાઇન ઇન કરી શકે છે.",
     closedW2: "આયોજક, સ્થળ માલિક અથવા કલાકાર તરીકે જોડાવાની અરજીઓ ટૂંક સમયમાં શરૂ થશે.",
     closedW3: "ટિકિટ ટૂંક સમયમાં શરૂ થશે — આરક્ષણ હજી શરૂ થયું નથી.",

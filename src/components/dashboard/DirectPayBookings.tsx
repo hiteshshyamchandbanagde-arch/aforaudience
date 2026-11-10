@@ -162,6 +162,8 @@ export default function DirectPayBookings({ side }: { side: 'ORGANISER' | 'VENUE
                     />
                   )}
                   <div data-afa-payee-note style={muted}>{s.payNote.replace('{payee}', b.payee.venueName)}</div>
+                  {/* S1b-c1 - all payments are direct cash/UPI; AFA never collects. */}
+                  <div data-afa-direct-pay-disclosure style={muted}>{s.payDirectLine.replace('{name}', b.payee.venueName)}</div>
                   {b.payerReference && <div style={muted}>{s.reference.replace('{ref}', b.payerReference)}</div>}
                   {b.expiresAt && <div style={muted}>{s.expires.replace('{date}', formatDate(b.expiresAt, 'medium', locale))}</div>}
                 </div>

@@ -239,12 +239,32 @@ test.describe("signed out", () => {
     await expect(holding.getByRole("link", { name: "About us" })).toHaveAttribute("href", /^\/about\/?$/);
     await expect(holding.getByRole("link", { name: "Contact" })).toHaveAttribute("href", /^\/contact\/?$/);
     await hideFloatingOverlays(page);
-    // The app's top bar stays above the holding page; it shows the visitor's
-    // geo-located city, so it is masked out of the baseline.
+    // S1b-c1: the top bar is now hidden on the holding page; the mask stays
+    // harmless (it matches nothing visible) in case the bar ever returns.
     await expect(holding).toHaveScreenshot(`launch-holding-${isMobile ? 390 : 1440}.png`, {
       animations: "disabled",
       mask: [page.getByRole("banner")],
     });
+  });
+
+  // S1b-c1 - Hitesh's phone check: the holding page is a clean full screen.
+  // No top bar (search + Sign up), tab bar, nudges or support bubble; the
+  // only way in is the holding page's own small Sign in link.
+  test("[S1b-c1] holding page hides the site chrome and keeps a small Sign in link", async ({ page, isMobile }) => {
+    await useRuleViewport(page, isMobile);
+    await page.goto("/dev/launch-holding/");
+    const holding = page.locator("[data-afa-launch-holding]");
+    await expect(holding.getByRole("heading", { name: HOLDING_TITLE.en })).toBeVisible();
+    await expect(page.locator("[data-afa-top-bar]")).toBeHidden();
+    await expect(page.locator("[data-afa-tab-bar]")).toBeHidden();
+    await expect(page.locator("[data-afa-nudge-stack]")).toBeHidden();
+    for (const bubble of await page.locator(".afa-support-chat-btn").all()) await expect(bubble).toBeHidden();
+    await expect(page.getByRole("searchbox")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Sign up", exact: true })).toBeHidden();
+    const signIn = holding.locator("[data-afa-holding-signin]");
+    await expect(signIn).toBeVisible();
+    await expect(signIn).toHaveText("Sign in");
+    await expect(signIn).toHaveAttribute("href", /^\/login\/?$/);
   });
 
   test("[S1b-b1] register 'sign-ups open soon' state: sign-in link stays; screenshot @390/@1440", async ({ page, isMobile }) => {

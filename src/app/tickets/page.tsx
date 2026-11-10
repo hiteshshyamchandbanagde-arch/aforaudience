@@ -911,6 +911,7 @@ export default function MyTicketsPage() {
                                   {tr.payAtEntry.badge.replace('{amount}', b.totalAmount.toLocaleString('en-IN'))}
                                 </Badge>
                                 <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>{tr.payAtEntry.noCollect}</p>
+                                <p data-afa-direct-pay-disclosure style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>{tr.payAtEntry.payAtVenueLine}</p>
                               </div>
                             )}
                             {showPaid && b.paymentMethod !== 'AT_ENTRY' && (

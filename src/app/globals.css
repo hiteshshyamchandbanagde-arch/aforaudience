@@ -795,3 +795,18 @@ select:-webkit-autofill {
   .afa-seat-anim { animation: none; }
   .afa-path-card:hover { transform: none; }
 }
+
+/* S1b-c1 - the W1 holding page is a clean full screen. The proxy rewrite
+   keeps the visitor's URL ("/"), so usePathname() can't tell the chrome to
+   hide; the holding page's own marker does it instead. Hidden: mobile top
+   bar (search + Sign up), bottom tab bar, nudge banners, support bubble and
+   panel. LaunchHoldingPage keeps its own wordmark, About/Contact and a
+   small Sign in link. Checked by scripts/launch-waves-holding.test.ts and
+   e2e/launch-waves-ui.spec.ts. */
+body:has([data-afa-launch-holding]) [data-afa-top-bar],
+body:has([data-afa-launch-holding]) [data-afa-tab-bar],
+body:has([data-afa-launch-holding]) [data-afa-nudge-stack],
+body:has([data-afa-launch-holding]) .afa-support-chat-btn,
+body:has([data-afa-launch-holding]) .afa-support-chat-panel {
+  display: none !important;
+}

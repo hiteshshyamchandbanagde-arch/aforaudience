@@ -23,11 +23,12 @@ import { useRuleViewport } from "./helpers/viewports";
 // Literals on purpose (not imported from the dictionaries): a copy change
 // has to change this spec too.
 const APPLICATIONS_SOON = { en: "Applications open soon", hi: "आवेदन जल्द ही खुलेंगे", mr: "अर्ज लवकरच सुरू होतील" };
-const PAID_SLOTS_SOON = { en: "Paid artist slots open soon", hi: "सशुल्क कलाकार स्लॉट जल्द ही खुलेंगे", mr: "सशुल्क कलाकार स्लॉट लवकरच सुरू होतील" };
+// S1b-c1 (10 Nov) - "paid" never suggests paying through AFA: "with a fee".
+const PAID_SLOTS_SOON = { en: "Artist slots with a fee open soon", hi: "शुल्क वाले कलाकार स्लॉट जल्द ही खुलेंगे", mr: "शुल्क असलेले कलाकार स्लॉट लवकरच सुरू होतील" };
 const PAID_VENUE_SOON = {
-  en: "Paid venue bookings open soon — zero-amount venue bookings are allowed.",
-  hi: "सशुल्क वेन्यू बुकिंग जल्द ही खुलेगी — शून्य राशि वाली वेन्यू बुकिंग की अनुमति है।",
-  mr: "सशुल्क स्थळ बुकिंग लवकरच सुरू होईल — शून्य रकमेच्या स्थळ बुकिंगला परवानगी आहे.",
+  en: "Venue bookings with a fee open soon — ₹0 venue bookings are allowed.",
+  hi: "शुल्क वाली वेन्यू बुकिंग जल्द ही खुलेगी — ₹0 वाली वेन्यू बुकिंग की अनुमति है।",
+  mr: "शुल्क असलेली स्थळ बुकिंग लवकरच सुरू होईल — ₹0 स्थळ बुकिंगला परवानगी आहे.",
 };
 const CLOSED_W2 = "Applications to join as an organiser, venue owner or artist open soon.";
 const CLOSED_W3 = "Tickets open soon — reservations aren't open yet.";

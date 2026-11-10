@@ -165,6 +165,8 @@ export default function PerformanceDirectPay({ side, eventId }: { side: Performa
                     />
                   )}
                   <div data-afa-payee-note style={muted}>{v.payNote.replace('{payee}', p.payeeBlock.name)}</div>
+                  {/* S1b-c1 - all payments are direct cash/UPI; AFA never collects. */}
+                  <div data-afa-direct-pay-disclosure style={muted}>{v.payDirectLine.replace('{name}', p.payeeBlock.name)}</div>
                   {p.payerReference && <div style={muted}>{v.reference.replace('{ref}', p.payerReference)}</div>}
                   {p.expiresAt && <div style={muted}>{v.expires.replace('{date}', formatDate(p.expiresAt, 'medium', locale))}</div>}
                 </div>

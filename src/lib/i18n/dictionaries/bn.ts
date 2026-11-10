@@ -2086,6 +2086,7 @@ const bn: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · প্রবেশের সময় {organiser}-কে পেমেন্ট করুন (নগদ/UPI)",
     noCollect: "AforAudience এই পেমেন্ট নেয় না।",
+    payAtVenueLine: "ভেন্যুতে আয়োজককে টাকা দিন। AFA এই টাকা নেয় না।",
     reserveCta: "রিজার্ভ করুন",
     badge: "প্রবেশে পেমেন্ট · ₹{amount}",
     attended: "উপস্থিত",
@@ -2114,6 +2115,7 @@ const bn: Dictionary = {
     chipExpired: "মেয়াদ শেষ",
     chipCancelled: "বাতিল",
     payNote: "{payee}-কে সরাসরি পেমেন্ট করুন। AforAudience এই পেমেন্ট নেয় না বা রাখে না।",
+    payDirectLine: "{name}-কে সরাসরি UPI বা নগদে টাকা দিন। AFA এই টাকা নেয় না।",
     amount: "পরিমাণ",
     upiLabel: "UPI ID",
     copy: "কপি করুন",
@@ -2163,8 +2165,8 @@ const bn: Dictionary = {
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "আবেদন শীঘ্রই চালু হবে",
     ticketsSoon: "টিকিট শীঘ্রই চালু হবে",
-    paidVenueSoonNote: "সশুল্ক ভেন্যু বুকিং শীঘ্রই চালু হবে — শূন্য টাকার ভেন্যু বুকিং করা যাবে।",
-    paidSlotsSoon: "সশুল্ক শিল্পী স্লট শীঘ্রই চালু হবে",
+    paidVenueSoonNote: "ফি-সহ ভেন্যু বুকিং শীঘ্রই চালু হবে — ₹0 ভেন্যু বুকিং করা যাবে।",
+    paidSlotsSoon: "ফি-সহ শিল্পী স্লট শীঘ্রই চালু হবে",
     closedW1: "নতুন অ্যাকাউন্ট শীঘ্রই চালু হবে — বর্তমান সদস্যরা সাইন ইন করতে পারেন।",
     closedW2: "আয়োজক, ভেন্যু মালিক বা শিল্পী হিসেবে যোগ দেওয়ার আবেদন শীঘ্রই চালু হবে।",
     closedW3: "টিকিট শীঘ্রই চালু হবে — সংরক্ষণ এখনও শুরু হয়নি।",
