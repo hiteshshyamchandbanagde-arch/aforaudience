@@ -1009,6 +1009,8 @@ function ProfileContent() {
             </h2>
             <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.artistUpgradeDesc}
+              {/* S1b-c2 - "goes live immediately" is only true while W2 is open. */}
+              {!applicationsClosed && <> {tr.profilePage.artistUpgradeInstant}</>}
             </p>
 
             {artistStatus?.hasProfile ? (
