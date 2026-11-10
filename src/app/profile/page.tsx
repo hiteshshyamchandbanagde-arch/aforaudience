@@ -648,6 +648,12 @@ function ProfileContent() {
             @media (max-width: 900px) {
               .afa-profile-grid { grid-template-columns: 1fr; gap: var(--afa-space-5); }
             }
+            /* S1b-c2-fix - whole-pixel line heights (design.md §9.0). The
+               inherited 1.5 gave 19.5px (13px) and 16.5px (11px) lines, so
+               every box below sat on a half pixel and its rasterised height
+               flipped 47/48px with the copy above it. Inline lineHeight
+               still wins where a call site sets one. */
+            .afa-profile-page-container :where(p, label, h1, h2, h3) { line-height: round(1.5em, 1px); }
             .afa-profile-page-container input:focus,
             .afa-profile-page-container textarea:focus,
             .afa-profile-page-container select:focus {

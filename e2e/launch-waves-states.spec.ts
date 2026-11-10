@@ -83,6 +83,17 @@ test.describe("W2 applications", () => {
     await expect(venueCard.getByRole("button")).toHaveCount(0);
     await expect(page.locator('#apply-organiser [data-afa-wave-soon="W2"]')).toHaveText(APPLICATIONS_SOON.en);
     await expect(page.locator('#apply-artist [data-afa-wave-soon="W2"]')).toHaveText(APPLICATIONS_SOON.en);
+    // S1b-c2-fix - whole-pixel box (design.md §9.0). The note is 47px, but the
+    // profile copy above it had 19.5px lines, so it sat on a half pixel and
+    // rasterised to 48px or 47px depending on the copy above it.
+    for (const card of ["#apply-artist", "#apply-venue", "#apply-organiser"]) {
+      const box = await page.locator(`${card} [data-afa-wave-soon="W2"]`).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { y: r.top + window.scrollY, h: r.height };
+      });
+      expect(Number.isInteger(box.h), `${card} note height ${box.h}px is not a whole pixel`).toBe(true);
+      expect(Number.isInteger(box.y), `${card} note top ${box.y}px is not a whole pixel`).toBe(true);
+    }
     await note.scrollIntoViewIfNeeded();
     await hideFloatingOverlays(page);
     await expect(note).toHaveScreenshot(`wave-w2-applications-soon-${isMobile ? 390 : 1440}.png`, { animations: "disabled" });
