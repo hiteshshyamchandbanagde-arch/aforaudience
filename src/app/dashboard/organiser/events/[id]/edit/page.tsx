@@ -21,7 +21,7 @@ import { PageTitle } from '@/components/dashboard/PageTitle'
 import { formatINR } from '@/lib/money-display'
 import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
 import { useLaunchWaves } from '@/hooks/useLaunchWaves'
-import { paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
+import { WAVE_BLOCKED_CONTROL_STYLE, paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
 import WaveSoonNote from '@/components/WaveSoonNote'
 import { type EventPaymentMode, initialPickerMode } from '@/lib/pay-at-entry'
 import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
@@ -1179,6 +1179,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     selected={defaultCompensationType === opt.value}
                     type="button"
                     disabled={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value}
+                    aria-disabled={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value || undefined}
+                    style={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value ? WAVE_BLOCKED_CONTROL_STYLE : undefined}
                     data-afa-comp-option={opt.value}
                     onClick={() => setDefaultCompensationType(opt.value)}
                   >
