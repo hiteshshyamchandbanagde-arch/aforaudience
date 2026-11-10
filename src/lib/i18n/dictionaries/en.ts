@@ -459,7 +459,9 @@ const en = {
     displayCurrencyHeading: "Display currency",
     displayCurrencyDesc: "Shows prices converted to this currency alongside the real ₹ amount. All payments are always charged and settled in Indian Rupees regardless of this setting.",
     saveCurrencyBtn: "Save currency",
-    artistUpgradeDesc: "Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.",
+    artistUpgradeDesc: "Get discovered, apply to perform at events, and track your growth.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "Goes live immediately, no approval wait.",
     settingUpEllipsis: "Setting up...",
     becomeArtistBtn: "Become an Artist",
     becomeOrganiserHeading: "Become an Organiser",

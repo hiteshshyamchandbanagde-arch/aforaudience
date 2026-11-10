@@ -435,7 +435,9 @@ const de: Dictionary = {
     displayCurrencyHeading: "Anzeigewährung",
     displayCurrencyDesc: "Zeigt Preise umgerechnet in diese Währung, neben dem tatsächlichen ₹-Betrag. Alle Zahlungen werden unabhängig von dieser Einstellung immer in indischen Rupien abgerechnet und beglichen.",
     saveCurrencyBtn: "Währung speichern",
-    artistUpgradeDesc: "Entdeckt werden, dich für Auftritte bei Events bewerben und dein Wachstum verfolgen. Sofort live, keine Wartezeit auf Genehmigung.",
+    artistUpgradeDesc: "Entdeckt werden, dich für Auftritte bei Events bewerben und dein Wachstum verfolgen.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "Sofort live, keine Wartezeit auf Genehmigung.",
     settingUpEllipsis: "Wird eingerichtet...",
     becomeArtistBtn: "Künstler werden",
     becomeOrganiserHeading: "Veranstalter werden",

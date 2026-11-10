@@ -425,7 +425,9 @@ const hi: Dictionary = {
     displayCurrencyHeading: "प्रदर्शन मुद्रा",
     displayCurrencyDesc: "वास्तविक ₹ राशि के साथ-साथ कीमतें इस मुद्रा में बदलकर दिखाता है। सभी भुगतान हमेशा भारतीय रुपये में ही लिए और सेटल किए जाते हैं, इस सेटिंग की परवाह किए बिना।",
     saveCurrencyBtn: "मुद्रा सेव करें",
-    artistUpgradeDesc: "पहचान बनाएं, इवेंट्स में प्रस्तुति के लिए आवेदन करें, और अपनी प्रगति ट्रैक करें। तुरंत लाइव हो जाता है, अनुमोदन की प्रतीक्षा नहीं करनी पड़ती।",
+    artistUpgradeDesc: "पहचान बनाएं, इवेंट्स में प्रस्तुति के लिए आवेदन करें, और अपनी प्रगति ट्रैक करें।",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "तुरंत लाइव हो जाता है, अनुमोदन की प्रतीक्षा नहीं करनी पड़ती।",
     settingUpEllipsis: "सेट अप हो रहा है...",
     becomeArtistBtn: "कलाकार बनें",
     becomeOrganiserHeading: "आयोजक बनें",

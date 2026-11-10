@@ -431,7 +431,9 @@ const fr: Dictionary = {
     displayCurrencyHeading: "Devise d'affichage",
     displayCurrencyDesc: "Affiche les prix convertis dans cette devise, aux côtés du montant réel en ₹. Tous les paiements sont toujours facturés et réglés en roupies indiennes, quel que soit ce paramètre.",
     saveCurrencyBtn: "Enregistrer la devise",
-    artistUpgradeDesc: "Soyez découvert, postulez pour vous produire à des événements, et suivez votre progression. Actif immédiatement, sans attente d'approbation.",
+    artistUpgradeDesc: "Soyez découvert, postulez pour vous produire à des événements, et suivez votre progression.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "Actif immédiatement, sans attente d'approbation.",
     settingUpEllipsis: "Configuration en cours...",
     becomeArtistBtn: "Devenir artiste",
     becomeOrganiserHeading: "Devenir organisateur",

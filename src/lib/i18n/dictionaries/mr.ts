@@ -426,7 +426,9 @@ const mr: Dictionary = {
     displayCurrencyHeading: "दाखवायचे चलन",
     displayCurrencyDesc: "खऱ्या ₹ रकमेसोबत किंमत या चलनात बदलून दाखवते. ही सेटिंग काहीही असली तरी सगळे पेमेंट नेहमी भारतीय रुपयांतच घेतले आणि दिले जाते.",
     saveCurrencyBtn: "चलन सेव्ह करा",
-    artistUpgradeDesc: "लोकांच्या नजरेत या, इव्हेंट्समध्ये सादरीकरणासाठी अर्ज करा, आणि तुमची प्रगती बघा. लगेच सुरू होते, मंजुरीची वाट नाही.",
+    artistUpgradeDesc: "लोकांच्या नजरेत या, इव्हेंट्समध्ये सादरीकरणासाठी अर्ज करा, आणि तुमची प्रगती बघा.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "लगेच सुरू होते, मंजुरीची वाट नाही.",
     settingUpEllipsis: "सेट करत आहोत...",
     becomeArtistBtn: "कलाकार व्हा",
     becomeOrganiserHeading: "आयोजक व्हा",

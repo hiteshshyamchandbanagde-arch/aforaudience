@@ -426,7 +426,9 @@ const gu: Dictionary = {
     displayCurrencyHeading: "ડિસ્પ્લે કરન્સી",
     displayCurrencyDesc: "વાસ્તવિક ₹ રકમ સાથે આ કરન્સીમાં રૂપાંતરિત કિંમતો બતાવે છે. આ સેટિંગને ધ્યાનમાં લીધા વિના તમામ ચૂકવણીઓ હંમેશા ભારતીય રૂપિયામાં વસૂલવામાં અને પતાવવામાં આવે છે.",
     saveCurrencyBtn: "કરન્સી સાચવો",
-    artistUpgradeDesc: "શોધાઓ, ઇવેન્ટ્સમાં પ્રદર્શન કરવા અરજી કરો, અને તમારી વૃદ્ધિને ટ્રેક કરો. તરત જ લાઇવ થાય છે, મંજૂરીની રાહ જોવાની જરૂર નથી.",
+    artistUpgradeDesc: "શોધાઓ, ઇવેન્ટ્સમાં પ્રદર્શન કરવા અરજી કરો, અને તમારી વૃદ્ધિને ટ્રેક કરો.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "તરત જ લાઇવ થાય છે, મંજૂરીની રાહ જોવાની જરૂર નથી.",
     settingUpEllipsis: "સેટઅપ થઈ રહ્યું છે...",
     becomeArtistBtn: "કલાકાર બનો",
     becomeOrganiserHeading: "આયોજક બનો",
