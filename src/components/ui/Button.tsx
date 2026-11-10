@@ -802,6 +802,18 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
   }
 }
 
+// S1b-c2 (Hitesh's phone check, 10 Nov) - a disabled `solid` Save at
+// 0.7 opacity still read as full orange on a phone (--afa-fill-solid is
+// the brightest fill), so a clean admin Settings card looked savable.
+// The solid fill gets the same clearly-off look the other disabled
+// controls use (PaymentModePicker: low opacity + not-allowed cursor).
+// Other variants keep 0.7: they are outlines/tints that already read
+// as off, and their screenshot baselines stay unchanged.
+function disabledStyle(variant: ButtonVariant): React.CSSProperties {
+  if (variant === 'solid') return { opacity: 0.4, cursor: 'not-allowed' }
+  return { opacity: 0.7, cursor: 'default' }
+}
+
 export default function Button(props: ButtonProps) {
   const { variant, children, fullWidth = true, size = 36, selected = false, icon, style, className: callerClassName } = props
   // GEN-2609-110 - `afa-btn` carries the shared focus-visible ring and
@@ -810,7 +822,7 @@ export default function Button(props: ButtonProps) {
   const className = ['afa-btn', `afa-btn-${variant}`, callerClassName].filter(Boolean).join(' ')
   const merged: React.CSSProperties = {
     ...variantStyle(variant, fullWidth, size, selected),
-    ...('disabled' in props && props.disabled ? { opacity: 0.7, cursor: 'default' } : null),
+    ...('disabled' in props && props.disabled ? disabledStyle(variant) : null),
     ...style,
   }
   const content = (

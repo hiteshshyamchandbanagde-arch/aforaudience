@@ -73,6 +73,19 @@ export function paymentTypeBlocked(paymentType: unknown, w4Open: boolean): boole
   return paymentType === "PAID" || paymentType === "BUY_IN"
 }
 
+/**
+ * S1b-c2 (Hitesh's phone check, 10 Nov) - the look of a payment option a
+ * closed wave blocks: `disabled` alone left Paid / Buy-in looking like
+ * Free. Same clearly-off look as PaymentModePicker's blocked option (low
+ * opacity, not-allowed cursor) plus a muted dashed border, tokens only.
+ */
+export const WAVE_BLOCKED_CONTROL_STYLE = {
+  opacity: 0.4,
+  cursor: "not-allowed",
+  border: "1px dashed var(--afa-border-resting)",
+  color: "var(--afa-text-muted)",
+} as const
+
 /** W4: is this venue booking amount blocked? Zero / blank never is. */
 export function venueAmountBlocked(amount: unknown, w4Open: boolean): boolean {
   if (w4Open) return false

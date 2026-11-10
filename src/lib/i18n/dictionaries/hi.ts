@@ -425,7 +425,9 @@ const hi: Dictionary = {
     displayCurrencyHeading: "प्रदर्शन मुद्रा",
     displayCurrencyDesc: "वास्तविक ₹ राशि के साथ-साथ कीमतें इस मुद्रा में बदलकर दिखाता है। सभी भुगतान हमेशा भारतीय रुपये में ही लिए और सेटल किए जाते हैं, इस सेटिंग की परवाह किए बिना।",
     saveCurrencyBtn: "मुद्रा सेव करें",
-    artistUpgradeDesc: "पहचान बनाएं, इवेंट्स में प्रस्तुति के लिए आवेदन करें, और अपनी प्रगति ट्रैक करें। तुरंत लाइव हो जाता है, अनुमोदन की प्रतीक्षा नहीं करनी पड़ती।",
+    artistUpgradeDesc: "पहचान बनाएं, इवेंट्स में प्रस्तुति के लिए आवेदन करें, और अपनी प्रगति ट्रैक करें।",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "तुरंत लाइव हो जाता है, अनुमोदन की प्रतीक्षा नहीं करनी पड़ती।",
     settingUpEllipsis: "सेट अप हो रहा है...",
     becomeArtistBtn: "कलाकार बनें",
     becomeOrganiserHeading: "आयोजक बनें",
@@ -2163,6 +2165,7 @@ const hi: Dictionary = {
     newAccountsSoonNote: "नए अकाउंट जल्द ही खुलेंगे — मौजूदा सदस्य साइन इन कर सकते हैं।",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "आवेदन जल्द ही खुलेंगे",
+    openingSoonBadge: "जल्द ही खुलेगा",
     ticketsSoon: "टिकट जल्द ही खुलेंगे",
     paidVenueSoonNote: "शुल्क वाली वेन्यू बुकिंग जल्द ही खुलेगी — ₹0 वाली वेन्यू बुकिंग की अनुमति है।",
     paidSlotsSoon: "शुल्क वाले कलाकार स्लॉट जल्द ही खुलेंगे",

@@ -459,7 +459,9 @@ const en = {
     displayCurrencyHeading: "Display currency",
     displayCurrencyDesc: "Shows prices converted to this currency alongside the real ₹ amount. All payments are always charged and settled in Indian Rupees regardless of this setting.",
     saveCurrencyBtn: "Save currency",
-    artistUpgradeDesc: "Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.",
+    artistUpgradeDesc: "Get discovered, apply to perform at events, and track your growth.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "Goes live immediately, no approval wait.",
     settingUpEllipsis: "Setting up...",
     becomeArtistBtn: "Become an Artist",
     becomeOrganiserHeading: "Become an Organiser",
@@ -2363,6 +2365,8 @@ const en = {
     newAccountsSoonNote: "New accounts open soon — existing members can sign in.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Applications open soon",
+    // S1b-c2 - badge on the profile "Create" rows while W2 is closed.
+    openingSoonBadge: "Opening soon",
     ticketsSoon: "Tickets open soon",
     paidVenueSoonNote: "Venue bookings with a fee open soon — ₹0 venue bookings are allowed.",
     paidSlotsSoon: "Artist slots with a fee open soon",

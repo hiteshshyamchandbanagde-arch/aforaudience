@@ -21,7 +21,7 @@ import { formatINR } from '@/lib/money-display'
 import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
 import type { EventPaymentMode } from '@/lib/pay-at-entry'
 import { useLaunchWaves } from '@/hooks/useLaunchWaves'
-import { paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
+import { WAVE_BLOCKED_CONTROL_STYLE, paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
 import WaveSoonNote from '@/components/WaveSoonNote'
 
 interface SeatSection {
@@ -946,6 +946,8 @@ export default function CreateEventPage() {
                       selected={defaultCompensationType === opt.value}
                       type="button"
                       disabled={paymentTypeBlocked(opt.value, w4Open)}
+                      aria-disabled={paymentTypeBlocked(opt.value, w4Open) || undefined}
+                      style={paymentTypeBlocked(opt.value, w4Open) ? WAVE_BLOCKED_CONTROL_STYLE : undefined}
                       data-afa-comp-option={opt.value}
                       onClick={() => setDefaultCompensationType(opt.value)}
                     >

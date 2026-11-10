@@ -116,6 +116,45 @@ test.describe("admin", () => {
     }
   });
 
+  // S1b-c2 (Hitesh's phone check, 10 Nov): the clean Save was `disabled`
+  // but still looked full orange at 390 (the shared Button only dimmed it
+  // to 0.7). It must look off, not just be off. Never clicks Save.
+  test("[S1b-c2] Launch waves Save looks disabled when clean, enabled when changed @needs-db", async ({ page, isMobile }) => {
+    await useRuleViewport(page, isMobile);
+    await gotoDashboard(page, "/dashboard/admin/settings/");
+    const card = page.locator("[data-afa-launch-waves-card]");
+    await expect(card.getByRole("heading", { name: "Launch waves" })).toBeVisible();
+    const save = card.getByRole("button", { name: "Save", exact: true });
+    const look = () =>
+      save.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { opacity: Number(cs.opacity), cursor: cs.cursor };
+      });
+
+    await expect(save).toBeDisabled();
+    const off = await look();
+    expect(off.opacity, "clean Save is visibly dimmed").toBeLessThanOrEqual(0.5);
+    expect(off.cursor).toBe("not-allowed");
+
+    const toggle = card.locator('[data-afa-wave-toggle="W2"]');
+    await toggle.click();
+    await expect(save).toBeEnabled();
+    const on = await look();
+    expect(on.opacity, "changed Save is full strength").toBe(1);
+    expect(on.cursor).toBe("pointer");
+
+    await toggle.click();
+    await expect(save).toBeDisabled();
+    expect((await look()).opacity).toBeLessThanOrEqual(0.5);
+
+    // Same shared style, so every other clean solid Save on the page looks off too.
+    const opacities = await page
+      .locator("button.afa-btn-solid:disabled")
+      .evaluateAll((els) => els.map((el) => Number(getComputedStyle(el).opacity)));
+    expect(opacities.length, "the page has disabled solid Saves").toBeGreaterThan(1);
+    for (const o of opacities) expect(o).toBeLessThanOrEqual(0.5);
+  });
+
   // Same reason as the Paid bookings card (S1a amend): a fractional height
   // would move every card below it by a sub-pixel and break their baselines.
   test("[S1b-b1] Launch waves card has a whole-pixel height @needs-db", async ({ page, isMobile }) => {

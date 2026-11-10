@@ -431,7 +431,9 @@ const fr: Dictionary = {
     displayCurrencyHeading: "Devise d'affichage",
     displayCurrencyDesc: "Affiche les prix convertis dans cette devise, aux côtés du montant réel en ₹. Tous les paiements sont toujours facturés et réglés en roupies indiennes, quel que soit ce paramètre.",
     saveCurrencyBtn: "Enregistrer la devise",
-    artistUpgradeDesc: "Soyez découvert, postulez pour vous produire à des événements, et suivez votre progression. Actif immédiatement, sans attente d'approbation.",
+    artistUpgradeDesc: "Soyez découvert, postulez pour vous produire à des événements, et suivez votre progression.",
+    // S1b-c2 - shown only while W2 (onboarding) is open.
+    artistUpgradeInstant: "Actif immédiatement, sans attente d'approbation.",
     settingUpEllipsis: "Configuration en cours...",
     becomeArtistBtn: "Devenir artiste",
     becomeOrganiserHeading: "Devenir organisateur",
@@ -2170,6 +2172,7 @@ const fr: Dictionary = {
     newAccountsSoonNote: "Les nouveaux comptes ouvrent bientôt — les membres existants peuvent se connecter.",
     // S1b-b2 - W2/W3/W4 "opening soon" states + 403 WAVE_CLOSED lines.
     applicationsSoon: "Les candidatures ouvrent bientôt",
+    openingSoonBadge: "Bientôt disponible",
     ticketsSoon: "Billets bientôt disponibles",
     paidVenueSoonNote: "Les réservations de lieux avec frais ouvrent bientôt — les réservations de lieu à 0 ₹ sont autorisées.",
     paidSlotsSoon: "Les créneaux d'artistes avec frais ouvrent bientôt",
