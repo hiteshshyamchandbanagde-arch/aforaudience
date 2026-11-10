@@ -2084,6 +2084,7 @@ const mr: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · {organiser} यांना प्रवेशावेळी पैसे द्या (रोख/UPI)",
     noCollect: "AforAudience हे पेमेंट घेत नाही.",
+    payAtVenueLine: "आयोजकांना स्थळावर पैसे द्या. AFA हे पैसे घेत नाही.",
     reserveCta: "राखून ठेवा",
     badge: "प्रवेशावेळी पेमेंट · ₹{amount}",
     attended: "उपस्थित",
@@ -2112,6 +2113,7 @@ const mr: Dictionary = {
     chipExpired: "मुदत संपली",
     chipCancelled: "रद्द",
     payNote: "{payee} यांना थेट पेमेंट करा. AforAudience हे पेमेंट घेत नाही आणि ठेवत नाही.",
+    payDirectLine: "{name} यांना थेट UPI किंवा रोख पैसे द्या. AFA हे पैसे घेत नाही.",
     amount: "रक्कम",
     upiLabel: "UPI ID",
     copy: "कॉपी करा",

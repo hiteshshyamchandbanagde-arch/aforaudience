@@ -2090,6 +2090,7 @@ const es: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · paga a {organiser} en la entrada (efectivo/UPI)",
     noCollect: "AforAudience no cobra este pago.",
+    payAtVenueLine: "Paga al organizador en el recinto. AFA no cobra este dinero.",
     reserveCta: "Reservar",
     badge: "Pago en la entrada · ₹{amount}",
     attended: "Asistió",
@@ -2118,6 +2119,7 @@ const es: Dictionary = {
     chipExpired: "Caducada",
     chipCancelled: "Cancelada",
     payNote: "Paga directamente a {payee}. AforAudience no cobra ni retiene este pago.",
+    payDirectLine: "Paga a {name} directamente por UPI o en efectivo. AFA no cobra este dinero.",
     amount: "Importe",
     upiLabel: "ID de UPI",
     copy: "Copiar",

@@ -2282,6 +2282,7 @@ const en = {
   payAtEntry: {
     priceLine: "₹{price} · pay {organiser} at entry (cash/UPI)",
     noCollect: "AforAudience does not collect this payment.",
+    payAtVenueLine: "Pay the organiser at the venue. AFA doesn't collect this money.",
     reserveCta: "Reserve",
     badge: "Pay at entry · ₹{amount}",
     attended: "Attended",
@@ -2311,6 +2312,7 @@ const en = {
     chipCancelled: "Cancelled",
     // {payee}: venue owner / venue name.
     payNote: "Pay {payee} directly. AforAudience does not collect or hold this payment.",
+    payDirectLine: "Pay {name} directly by UPI or cash. AFA doesn't collect this money.",
     amount: "Amount",
     upiLabel: "UPI ID",
     copy: "Copy",

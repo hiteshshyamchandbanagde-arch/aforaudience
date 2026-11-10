@@ -2086,6 +2086,7 @@ const te: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · ప్రవేశం వద్ద {organiser}కి చెల్లించండి (నగదు/UPI)",
     noCollect: "AforAudience ఈ చెల్లింపును వసూలు చేయదు.",
+    payAtVenueLine: "నిర్వాహకుడికి వేదిక వద్దే చెల్లించండి. AFA ఈ డబ్బును వసూలు చేయదు.",
     reserveCta: "రిజర్వ్ చేయండి",
     badge: "ప్రవేశం వద్ద చెల్లింపు · ₹{amount}",
     attended: "హాజరయ్యారు",
@@ -2114,6 +2115,7 @@ const te: Dictionary = {
     chipExpired: "గడువు ముగిసింది",
     chipCancelled: "రద్దు",
     payNote: "{payee}కి నేరుగా చెల్లించండి. AforAudience ఈ చెల్లింపును వసూలు చేయదు, ఉంచుకోదు.",
+    payDirectLine: "{name}కు నేరుగా UPI లేదా నగదుతో చెల్లించండి. AFA ఈ డబ్బును వసూలు చేయదు.",
     amount: "మొత్తం",
     upiLabel: "UPI ID",
     copy: "కాపీ చేయండి",

@@ -2086,6 +2086,7 @@ const kn: Dictionary = {
   payAtEntry: {
     priceLine: "₹{price} · ಪ್ರವೇಶದಲ್ಲಿ {organiser} ಅವರಿಗೆ ಪಾವತಿಸಿ (ನಗದು/UPI)",
     noCollect: "AforAudience ಈ ಪಾವತಿಯನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+    payAtVenueLine: "ಆಯೋಜಕರಿಗೆ ಸ್ಥಳದಲ್ಲೇ ಪಾವತಿಸಿ. AFA ಈ ಹಣವನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
     reserveCta: "ಕಾಯ್ದಿರಿಸಿ",
     badge: "ಪ್ರವೇಶದಲ್ಲಿ ಪಾವತಿ · ₹{amount}",
     attended: "ಹಾಜರಾಗಿದ್ದಾರೆ",
@@ -2114,6 +2115,7 @@ const kn: Dictionary = {
     chipExpired: "ಅವಧಿ ಮುಗಿದಿದೆ",
     chipCancelled: "ರದ್ದು",
     payNote: "{payee} ಅವರಿಗೆ ನೇರವಾಗಿ ಪಾವತಿಸಿ. AforAudience ಈ ಪಾವತಿಯನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ ಅಥವಾ ಇಟ್ಟುಕೊಳ್ಳುವುದಿಲ್ಲ.",
+    payDirectLine: "{name} ಅವರಿಗೆ ನೇರವಾಗಿ UPI ಅಥವಾ ನಗದು ಮೂಲಕ ಪಾವತಿಸಿ. AFA ಈ ಹಣವನ್ನು ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
     amount: "ಮೊತ್ತ",
     upiLabel: "UPI ID",
     copy: "ನಕಲಿಸಿ",
