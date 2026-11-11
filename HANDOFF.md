@@ -23,6 +23,8 @@ W1 ✅ (holding page, /register "open soon", /login note, /terms reachable, admi
 - **#776** (S1b-c1) merged, 696/0: proxy passes ISR revalidation (`x-prerender-revalidate`, matched to preview-mode id) → `/` never caches the holding page; full-screen holding page + Sign in link; "with a fee" copy + "AFA doesn't collect this money" on venue/artist pay steps + pay-at-entry.
 - **#777** (S1b-c2) MERGED 11 Nov (716/0) @ 9c6b5d1: disabled `solid` Button opacity 0.7→0.4 (root cause of "Save looks active"); Create-link "Opening soon" badges; artist "Goes live immediately" only while W2 open; Paid/Buy-in muted + aria-disabled. Desktop screenshot `wave-w2-applications-soon-1440` failed twice (48→47px): note has fractional height → dispatch S1b-c2-fix makes it whole-pixel (no threshold loosening). CC corrected: note always 47px; /profile text line-height 1.5 (19.5px) put it on half-pixel y → scoped `round(1.5em,1px)` on /profile + integer height/y guard.
 - **Gotcha:** `Design Token Check` can sit at `action_required` on CC-bot commits → approve via `POST /actions/runs/{id}/approve`, else PR shows `unstable` and the required check is missing.
+- **Gotcha:** never push docs to qa within ~5 min of a merge — Vercel builds only the newest commit, so the merge's post-merge `E2E (QA)` push run fails 'No deployment … became ready' with no tests run (happened 11 Nov: 9c6b5d1 skipped, f287a7b deployed). Re-verify with `workflow_dispatch` on e2e.yml: manual run 42947203316 on f287a7b = 716/0 ✅.
+- Nightly 11 Nov 06:53 IST did not fire (GitHub schedule drop); backup 10:11 IST. Gate: scheduled greens so far 10 Nov 08:29Z + 12:57Z.
 - Hitesh's phone check of the fixes: pending his "go" (check e2e queue before flipping waves on QA).
 
 ### Next (§5 renumbered)
