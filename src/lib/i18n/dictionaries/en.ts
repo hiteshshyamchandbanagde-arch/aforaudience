@@ -2343,6 +2343,22 @@ const en = {
     upiQrRemove: "Remove QR",
     // {payee}: venue name.
     upiQrAlt: "UPI QR code for {payee}",
+    // 12 Nov - cancel after CONFIRMED + refund tracking. {days} = DIRECT_PAY_FULL_REFUND_MIN_DAYS, {amount} = the advance (₹).
+    cancelConfirmedTitle: "Cancel this confirmed booking?",
+    cancelOutcomeDue: "You are cancelling {days}+ days before the date, so the {amount} advance is due back in full under the {days}-day term.",
+    cancelOutcomeAsAgreed: "You are cancelling inside {days} days of the date, so any refund of the {amount} advance is as you both agree.",
+    cancelOutcomeNone: "No advance was paid, so there is nothing to refund.",
+    cancelOutcomeNote: "AforAudience does not hold this money. The venue owner refunds the organiser directly.",
+    keepBooking: "Keep booking",
+    chipRefundDue: "Refund due",
+    chipRefundAsAgreed: "Refund as agreed",
+    // {date}: when the organiser confirmed it.
+    chipRefundReceived: "Refund received ✓ {date}",
+    // {who}: partyOrganiser / partyVenueOwner; {date}: when.
+    cancelledByLine: "Cancelled by {who} on {date}",
+    partyOrganiser: "the organiser",
+    partyVenueOwner: "the venue owner",
+    iReceivedRefund: "I've received the refund",
   },
   // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
   performanceDirectPay: {
