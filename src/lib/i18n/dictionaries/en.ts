@@ -2373,6 +2373,12 @@ const en = {
     upiSettingLabel: "UPI ID for direct payments",
     upiSettingHelpArtist: "Organisers pay your performance fees directly at this UPI ID. AforAudience never collects these payments.",
     upiSettingHelpOrganiser: "Artists pay open-mic buy-ins directly to you at this UPI ID. AforAudience never collects these payments.",
+    // 12 Nov - cancel a CONFIRMED slot + refund tracking. Outcome lines, chips and "I've received the refund" reuse venueDirectPay.
+    cancelConfirmedTitle: "Cancel this confirmed slot?",
+    keepSlot: "Keep slot",
+    // {payee}: who was paid (refunds); {payer}: who paid (gets the refund).
+    cancelOutcomeNote: "AforAudience does not hold this money. {payee} refunds {payer} directly.",
+    partyArtist: "the artist",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {
