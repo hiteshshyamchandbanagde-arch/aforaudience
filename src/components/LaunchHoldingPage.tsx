@@ -56,12 +56,20 @@ export default function LaunchHoldingPage() {
         </Link>
       </nav>
       {/* S1b-c1 - the site chrome is hidden here (globals.css), so admins
-          need their own small way in. */}
+          need their own small way in. Part 70 Next #2: the text stays
+          caption-size, but the tap box is 44x44px (the same 40+4 space-scale
+          build as the tickets actions). marginTop drops from 24px to 10px so
+          the text's centre stays where it was (24 + 15/2 vs 10 + 44/2). */}
       <Link
         href="/login"
         data-afa-holding-signin
         style={{
-          marginTop: "var(--afa-space-6)",
+          marginTop: "var(--afa-space-10px)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "calc(var(--afa-space-40px) + var(--afa-space-1))",
+          minWidth: "calc(var(--afa-space-40px) + var(--afa-space-1))",
           color: "var(--afa-text-secondary)",
           fontSize: "var(--afa-text-caption)",
           textDecoration: "underline",
