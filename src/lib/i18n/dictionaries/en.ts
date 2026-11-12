@@ -2315,6 +2315,8 @@ const en = {
     // {payee}: venue owner / venue name.
     payNote: "Pay {payee} directly. AforAudience does not collect or hold this payment.",
     payDirectLine: "Pay {name} directly by UPI or cash. AFA doesn't collect this money.",
+    // 12 Nov - the direct-pay standard term; {days} = DIRECT_PAY_FULL_REFUND_MIN_DAYS.
+    refundTermLine: "Cancel {days}+ days before the date: full refund of any advance. Inside {days} days: as you both agree.",
     amount: "Amount",
     upiLabel: "UPI ID",
     copy: "Copy",
