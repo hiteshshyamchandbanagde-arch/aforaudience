@@ -377,7 +377,10 @@ test("[D3-refund] BUY_IN: artist self-cancels a CONFIRMED direct buy-in via /can
       .filter({ has: hri.getByText(title, { exact: true }) })
       .filter({ has: hri.getByRole("button", { name: "Cancel", exact: true }) })
       .last();
-    const cancelled = hri.waitForResponse((r) => r.url().endsWith(`/api/performances/${perfId}/cancel`) && r.request().method() === "POST");
+    // trailingSlash is on: skip the 308 hop to /cancel/ and wait for the real answer.
+    const cancelled = hri.waitForResponse(
+      (r) => r.url().includes(`/api/performances/${perfId}/cancel`) && r.request().method() === "POST" && r.status() !== 308
+    );
     await upcomingRow.getByRole("button", { name: "Cancel", exact: true }).click();
 
     // The dialog states the direct refund outcome, not "recorded as refunded".
