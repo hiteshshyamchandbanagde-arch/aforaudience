@@ -2143,6 +2143,19 @@ const gu: Dictionary = {
     upiQrRemove: "QR દૂર કરો",
     // {payee}: venue name.
     upiQrAlt: "{payee} માટે UPI QR કોડ",
+    cancelConfirmedTitle: "આ કન્ફર્મ બુકિંગ રદ કરવી છે?",
+    cancelOutcomeDue: "તમે તારીખના {days}+ દિવસ પહેલાં રદ કરી રહ્યા છો, તેથી {days}-દિવસની શરત મુજબ {amount} એડવાન્સ પૂરો પાછો મળવો જોઈએ.",
+    cancelOutcomeAsAgreed: "તમે તારીખના {days} દિવસની અંદર રદ કરી રહ્યા છો, તેથી {amount} એડવાન્સનું રિફંડ તમે બંને નક્કી કરો તેમ.",
+    cancelOutcomeNone: "કોઈ એડવાન્સ ચૂકવાયો નથી, તેથી રિફંડ કરવા જેવું કંઈ નથી.",
+    cancelOutcomeNote: "AforAudience આ પૈસા રાખતું નથી. વેન્યુ માલિક સીધા ઓર્ગેનાઇઝરને રિફંડ કરે છે.",
+    keepBooking: "બુકિંગ રાખો",
+    chipRefundDue: "રિફંડ બાકી",
+    chipRefundAsAgreed: "સંમતિ મુજબ રિફંડ",
+    chipRefundReceived: "રિફંડ મળ્યું ✓ {date}",
+    cancelledByLine: "{who} દ્વારા {date} ના રોજ રદ",
+    partyOrganiser: "ઓર્ગેનાઇઝર",
+    partyVenueOwner: "વેન્યુ માલિક",
+    iReceivedRefund: "મને રિફંડ મળ્યું",
   },
   // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
   performanceDirectPay: {
