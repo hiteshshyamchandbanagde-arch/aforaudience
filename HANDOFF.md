@@ -1,4 +1,35 @@
-## Part 70 — START HERE (12 Nov 07:30 IST, chat), qa @ this commit, main @ 636354f
+## Part 71 — START HERE (12 Nov 10:10 IST, chat), qa @ this commit, main @ 636354f
+Read order: **71 → 70 → 69 → 68**. Delta only.
+
+### Shipped
+- **#778** (`5eae472`) holding-page Sign in tap box 34×15 → 44×44 @390/@1440, same look. Test `[holding-signin-tap]` (launch-waves-ui.spec.ts) red on 7f00553 (test-first) / green on head.
+- **#779** (`b3bb4e7`) refund terms for the direct-pay model: `/refund-policy` rewritten, `/terms` bullet, `src/lib/direct-pay-terms.ts` `DIRECT_PAY_FULL_REFUND_MIN_DAYS = 15`, new `refundTermLine` (12 locales) under the direct-pay disclosure (venue `DirectPayBookings` + artist `PerformanceDirectPay`). `refund-policy.ts` 14/7 tiers untouched + dormant (restore note in page). Deploy READY, no new runtime errors.
+- Dispatches: `cc-prompt-holding-signin-tap-target.md`, `cc-prompt-refund-terms-direct-pay.md`.
+
+### Decision (Hitesh, 12 Nov 07:57 IST) — refunds
+AFA holds no money → can't issue/force refunds. One **standard term** both parties agree to before paying: cancelled 15+ days before the date → any advance refunded in full by the receiver; inside 15 → as agreed. Tickets are free/pay-at-entry → nothing to refund. AFA keeps the record, can mediate, may restrict repeat late-cancellers / non-refunders. Replaces the 14/7 vs 15 question (closed). Per-party presets = later.
+
+### Nightly analysis (for the gate)
+- 21 Oct–8 Nov red ×23 on one commit (89df313): date drift (no upcoming free fixture event, dated screenshots, venue-revenue delta line from 1 Nov, hi eyebrow 1px). Fixed by #762 spec/fixture-only. **Seed re-dating never run on QA DB** → will drift again.
+- 11 Nov red ×2: W1 left off on QA (operator error).
+- 12 Nov 01:23Z slot never fired; 04:41Z backup pending at handoff. Streak = 0.
+- Seen once on #778's test-first run: `dashboard-i18n-artist.spec.ts:166` (English left on Artist dashboard in mr). Not on the rerun; watch.
+
+### Next (chat), in order
+1. Watch nightlies → 3 consecutive scheduled greens. Post-merge e2e: b3bb4e7 push run 43150580631; 5eae472's push run may be superseded by the nightly (same HEAD → acceptable).
+2. **Dispatch: post-confirm cancel + refund tracking** (needed before S5; /refund-policy §6 already says venue/artist bookings cancel from the dashboard but today `cancel` is only allowed before CONFIRMED in `venue-direct-pay.ts`/`performance-direct-pay`): either side cancels a CONFIRMED direct-pay booking → status "refund due" if ≥15 d and an advance was marked paid → payer confirms "refund received"; late-cancel count on profiles (display only). Small chunks; D-series specs.
+3. **Dispatch: e2e hardening** — pre-flight (all 4 waves true + an upcoming free fixture event, fail fast with one message), freeze clock in dated-screenshot specs, fixture events self-renewing (QA DB write → show Hitesh sample rows first).
+4. S3 prod read-only check → phone checks → S5 with Hitesh's OK.
+5. Feedback: mark BUG-2609-051 (Direct payouts toggle) and GEN-2610-008 (collect/hold/settle) REJECTED — moot after 10 Nov; log #778/#779 rows.
+
+### Open for Hitesh
+1. Phone check 2 (W1 off ≤15 min; chat sets a send_later to restore) + tap holding Sign in.
+2. 🔴 Rotate Google Maps key (Places 403 PERMISSION_DENIED still in runtime errors) + Razorpay test key; add `BLOB_READ_WRITE_TOKEN`; billing check.
+3. Razorpay Technology Partner: reply #21740833 says enrol via Partner Dashboard (Home → Explore Now → Manage Platforms; review ~2–3 weeks). Hitesh emailed back 12 Nov asking: direct settlement to sub-merchants?, onboarding/KYC, platform fee per txn?, turnover limits, non-GST artists?; told them the refund policy will say AFA processes no payments. **Enrolment form still to submit.** Earlier ticket #21742092.
+4. Delete merged branches in GitHub UI (+ `fix/refund-terms-direct-pay`, `fix/holding-signin-tap-target`; API 403).
+5. Read /refund-policy + /terms on phone; check hi/mr `refundTermLine`; CA/lawyer look at the policy wording later.
+
+## Part 70 — (12 Nov 07:30 IST, chat), superseded as entry point by Part 71, qa @ this commit, main @ 636354f
 Read order: **70 → 69 → 68** (68 = session-start protocol, decisions, §5). Delta only.
 
 ### State at handoff
