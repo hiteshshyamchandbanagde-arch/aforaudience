@@ -127,7 +127,21 @@ test.describe("Hrithik", () => {
     expect(order.upcoming.length, "Hrithik has upcoming applications").toBeGreaterThan(0);
     expect(order.past, "One-Act Play Festival is past").toContain(PAST_APP.id);
 
+    // The direct-pay panel loads after the page and sits above My
+    // Applications: one leftover e2e slot (186.5 px) moved the card by a
+    // half pixel and the screenshot 1 px (12 Nov, run 43198504175). Wait for
+    // it and require it empty, so the screenshot never races it.
+    const directPay = page.waitForResponse(
+      (r) => r.url().includes("/api/performances/direct-pay") && r.request().method() === "GET" && r.status() !== 308,
+      { timeout: 30_000 } // fetched once the page has loaded: gotoDashboard's own 30 s budget
+    );
     await gotoDashboard(page, "/dashboard/artist/");
+    const dp = await (await directPay).json();
+    expect(
+      dp.asArtist.map((p: { id: string; event: { title: string } }) => `${p.id} (${p.event.title})`),
+      "Hrithik has no direct-pay slots (a leftover from performance-direct-pay.spec shifts this layout; its beforeAll sweeps them)"
+    ).toEqual([]);
+    await expect(page.locator("[data-afa-performance-direct-pay]")).toHaveCount(0);
     const apps = page.locator("[data-afa-application]");
     await expect(apps.first()).toBeVisible({ timeout: 20_000 });
     const shown = await apps.evaluateAll((els) => els.map((el) => el.getAttribute("data-afa-application")));

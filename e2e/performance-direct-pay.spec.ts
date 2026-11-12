@@ -33,6 +33,27 @@ test.use({ storageState: authFile("omkar") });
 const ARTIST_UPI = "hrithik.e2e@okaxis";
 const ORG_UPI = "omkar.e2e@okicici";
 
+/**
+ * Sweeps this spec's own fixtures left by a run that was killed before its
+ * `finally` (12 Nov: a CONFIRMED "E2E D3-refund buyin-1440" slot from an
+ * 08:35Z run stayed on Hrithik's dashboard, the direct-pay panel above My
+ * Applications moved the list by 210.5 px and application-closed's artist
+ * 1440 screenshot came out 1 px off). Only Omkar's "E2E D3 ..." events more
+ * than 15 minutes old: a live run's events are minutes old at most.
+ */
+test.beforeAll(async () => {
+  const stale = await withQaDb(async (db) => {
+    const { rows } = await db.query<{ id: string }>(
+      `SELECT e.id FROM "Event" e JOIN "Organiser" o ON o.id = e."organiserId" JOIN "User" u ON u.id = o."userId"
+        WHERE u.email = 'omkar.organiser@aforaudience.qa' AND e.title LIKE 'E2E D3%'
+          AND e."createdAt" < now() - interval '15 minutes'`
+    );
+    return rows.map((r) => r.id);
+  });
+  if (stale.length) console.log(`[D3] removing ${stale.length} stale E2E D3 event(s) from an earlier run: ${stale.join(", ")}`);
+  await dropEvents(stale);
+});
+
 function ymd(d: Date) {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;

@@ -5,6 +5,7 @@ import { hasQaDatabase, warn, withQaDb } from "./helpers/qa-db";
 import { keepFixturesUpcoming } from "./helpers/upcoming-fixtures";
 import { keepPersonaCities, keepPersonaLocales } from "./helpers/persona-cities";
 import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/temp-admin";
+import { launchWavesPreflightMessage } from "./helpers/launch-waves-preflight";
 
 /**
  * Runs once before the suite.
@@ -30,6 +31,10 @@ import { ADMIN_AUTH_FILE, createTempAdmin, deleteTempAdmin } from "./helpers/tem
  *    by hand on QA is put back (helpers/persona-cities.ts), with a
  *    warning; seed-health.spec.ts checks it too. Their account language
  *    (GEN-2610-006) is put back to none the same way.
+ *
+ * Between 1 and 2, the launch-wave pre-flight (HANDOFF Part 71): all four
+ * waves must be open on QA, or the run stops with one message naming the
+ * closed wave (helpers/launch-waves-preflight.ts). Read-only.
  */
 const WARM_UP_BUDGET_MS = 60_000;
 
@@ -53,6 +58,8 @@ export default async function globalSetup(config: FullConfig) {
   } finally {
     await warmUp.dispose();
   }
+
+  await checkLaunchWaves(baseURL);
 
   if (!hasQaDatabase()) {
     warn(
@@ -89,6 +96,30 @@ export default async function globalSetup(config: FullConfig) {
       throw err;
     }
   }
+}
+
+/**
+ * Reads the launch-wave hint the app itself serves (backed by the QA
+ * PlatformSettings singleton) and throws one clear message if any wave is
+ * off. 11 Nov: W1 left OFF turned into ~50 unrelated failures per shard.
+ */
+async function checkLaunchWaves(baseURL: string) {
+  const ctx = await request.newContext({ baseURL });
+  let body: unknown;
+  try {
+    const res = await ctx.get("/api/platform-settings/launch-waves/");
+    if (!res.ok()) throw new Error(`HTTP ${res.status()} ${res.statusText()}`);
+    body = await res.json();
+  } catch (err) {
+    throw new Error(
+      `QA pre-flight: could not read the launch waves from ${baseURL}/api/platform-settings/launch-waves/ (${(err as Error).message}). No tests were run.`
+    );
+  } finally {
+    await ctx.dispose();
+  }
+  const message = launchWavesPreflightMessage(body);
+  if (message) throw new Error(message);
+  console.log("[e2e setup] launch waves W1-W4 all open");
 }
 
 async function signIn(

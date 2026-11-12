@@ -28,9 +28,9 @@ export const CLOCK_FORWARD_DAYS = 30;
 export type UpcomingFixture = { id: string; title: string; usedBy: string };
 
 export const UPCOMING_FIXTURES: UpcomingFixture[] = [
-  { id: "qa-jaipur-event-0001", title: "Jaipur Mic Gala 100", usedBy: "smoke, seat-availability, seat-legend, seat-total, ticket-tier, registration, fonts, chat-bubble" },
-  { id: "qa-demo-event-full-5", title: "Mixed Bag Comedy Lineup", usedBy: "colour-rules (Hrithik's upcoming show: he has an APPROVED performance on it)" },
-  { id: "qa-demo-event-full-9", title: "Improv Theatre Jam", usedBy: "contrast, organiser-tab-bar, chat-bubble (Omkar's event), events-search (an upcoming event outside Atul's city)" },
+  { id: "qa-jaipur-event-0001", title: "Jaipur Mic Gala 100", usedBy: "smoke, seat-availability, seat-legend, seat-total, ticket-tier, ticket-actions (Atul's ticket), registration, fonts, chat-bubble" },
+  { id: "qa-demo-event-full-5", title: "Mixed Bag Comedy Lineup", usedBy: "colour-rules (Hrithik's upcoming show: he has an APPROVED performance on it), ticket-actions (Atul's ticket)" },
+  { id: "qa-demo-event-full-9", title: "Improv Theatre Jam", usedBy: "contrast, organiser-tab-bar, chat-bubble (Omkar's event), events-search (an upcoming event outside Atul's city), event-card-price (the flat-priced card)" },
   { id: "e2efixtureevt00001", title: "E2E Fixture: Waitlist/Wallet Flow", usedBy: "waitlist-wallet-credit" },
 ];
 
