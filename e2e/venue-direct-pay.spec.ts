@@ -186,3 +186,182 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
     });
   }
 });
+
+/**
+ * 12 Nov (Hitesh) - cancel after CONFIRMED + refund tracking. AFA moves no
+ * money: it records who cancelled, when, and whether the advance is due
+ * back under the 15-day term (DUE) or left to the parties (AS_AGREED); the
+ * organiser (the payer) then confirms receipt.
+ *
+ * Fixture: a CONFIRMED direct-pay booking (confirmedAt set = the owner
+ * confirmed receipt of the advance) on Vinayak's venue for Omkar, inserted
+ * straight into QA and deleted in finally (T6). Getting to CONFIRMED
+ * through the UI is already covered by the [D2] test above.
+ *
+ * Regression shape: on origin/qa there is no "Cancel booking" on a
+ * confirmed booking, the API refuses cancelConfirmed / refundReceived with
+ * 400 "Invalid action", and the refund columns don't exist, so this fails;
+ * on the branch it passes.
+ *
+ * Needs migration 20261112120000_add_direct_pay_refund_tracking on QA.
+ */
+async function seedConfirmed(daysOut: number, tag: string): Promise<string> {
+  return withQaDb(async (db) => {
+    const { rows } = await db.query<{ venueId: string; organiserId: string }>(
+      `SELECT v.id AS "venueId", o.id AS "organiserId"
+         FROM "Venue" v JOIN "VenueOwner" vo ON vo.id = v."ownerId" JOIN "User" vu ON vu.id = vo."userId",
+              "Organiser" o JOIN "User" ou ON ou.id = o."userId"
+        WHERE vu.email = 'vinayak.venue@aforaudience.qa' AND v."isApproved" = true AND vo."isApproved" = true
+          AND ou.email = 'omkar.organiser@aforaudience.qa'
+        ORDER BY v."createdAt" ASC LIMIT 1`
+    );
+    expect(rows.length, "Vinayak's approved venue + Omkar's organiser on QA").toBe(1);
+    const id = `e2e-refund-${tag}-${Date.now()}`;
+    const from = new Date(Date.now() + daysOut * 24 * 60 * 60 * 1000);
+    await db.query(
+      `INSERT INTO "VenueBooking" (id, "venueId", "organiserId", "fromDate", "toDate", status, amount,
+              "paymentMethod", "directPayStatus", "paidMarkedAt", "confirmedAt", "platformFeeAmount")
+       VALUES ($1, $2, $3, $4, $4, 'CONFIRMED', 4500, 'DIRECT', 'CONFIRMED', now(), now(), 0)`,
+      [id, rows[0].venueId, rows[0].organiserId, from]
+    );
+    return id;
+  });
+}
+
+async function readRefund(id: string) {
+  return withQaDb(async (db) => {
+    const { rows } = await db.query<{
+      status: string; directPayStatus: string; directRefundStatus: string | null;
+      cancelledBy: string | null; cancelledAt: Date | null; refundReceivedAt: Date | null;
+    }>(
+      `SELECT status, "directPayStatus", "directRefundStatus", "cancelledBy", "cancelledAt", "refundReceivedAt"
+         FROM "VenueBooking" WHERE id = $1`,
+      [id]
+    );
+    return rows[0];
+  });
+}
+
+async function dropBookings(ids: string[]) {
+  if (!ids.length) return;
+  await withQaDb((db) => db.query(`DELETE FROM "VenueBooking" WHERE id = ANY($1)`, [ids]));
+}
+
+test("[D2-refund] organiser cancels a CONFIRMED booking 15+ days out -> Refund due -> I've received the refund @needs-db", async ({ page, browser, isMobile }) => {
+  test.setTimeout(120_000);
+  const vp = isMobile ? 390 : 1440;
+  const ids: string[] = [];
+  const vinCtx = await browser.newContext({ storageState: authFile("vinayak") });
+  const vin = await vinCtx.newPage();
+  try {
+    // Far enough out that IST calendar days are >= 15 at any time of day.
+    const id = await seedConfirmed(DIRECT_PAY_FULL_REFUND_MIN_DAYS + 10, `due-${vp}`);
+    ids.push(id);
+
+    await useRuleViewport(page, isMobile);
+    await gotoDashboard(page, "/dashboard/venue-requests");
+    const card = page.locator(`[data-afa-direct-pay-booking="${id}"]`);
+    await expect(card.locator('[data-afa-direct-pay-chip="confirmed"]')).toBeVisible();
+    await card.getByRole("button", { name: "Cancel booking" }).click();
+
+    // The dialog states the outcome before anything changes.
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Cancel this confirmed booking?");
+    await expect(dialog.locator('[data-afa-cancel-outcome="DUE"]')).toHaveText(
+      `You are cancelling ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}+ days before the date, so the ₹4,500 advance is due back in full under the ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}-day term.` +
+        "AforAudience does not hold this money. The venue owner refunds the organiser directly."
+    );
+    await dialog.screenshot({ path: `test-results/d2-refund-dialog-due-${vp}.png` });
+    await dialog.getByRole("button", { name: "Cancel booking" }).click();
+
+    await expect(card.locator('[data-afa-direct-pay-chip="cancelled"]')).toBeVisible();
+    await expect(card.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(card.locator('[data-afa-cancelled-by="ORGANISER"]')).toContainText("Cancelled by the organiser on ");
+    await card.screenshot({ path: `test-results/d2-refund-chip-due-${vp}.png` });
+
+    let row = await readRefund(id);
+    expect(row.status).toBe("CANCELLED");
+    expect(row.directPayStatus).toBe("CANCELLED");
+    expect(row.directRefundStatus).toBe("DUE");
+    expect(row.cancelledBy).toBe("ORGANISER");
+    expect(row.cancelledAt).toBeTruthy();
+
+    // The venue owner sees the same chip, and cannot mark the refund received.
+    await useRuleViewport(vin, isMobile);
+    await gotoDashboard(vin, "/dashboard/venue/bookings");
+    const vCard = vin.locator(`[data-afa-direct-pay-booking="${id}"]`);
+    await expect(vCard.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(vCard.getByRole("button", { name: "I've received the refund" })).toHaveCount(0);
+    const ownerMarks = await vin.request.post(`/api/venue-bookings/${id}/direct-pay`, { data: { action: "refundReceived" } });
+    expect(ownerMarks.status()).toBe(403);
+
+    // A cancelled booking can't be cancelled again.
+    const again = await page.request.post(`/api/venue-bookings/${id}/direct-pay`, { data: { action: "cancelConfirmed" } });
+    expect(again.status()).toBe(400);
+
+    // The organiser confirms the refund arrived.
+    await card.getByRole("button", { name: "I've received the refund" }).click();
+    await expect(card.locator('[data-afa-refund-chip="RECEIVED"]')).toContainText("Refund received ✓");
+    await expect(card.getByRole("button", { name: "I've received the refund" })).toHaveCount(0);
+    await card.screenshot({ path: `test-results/d2-refund-chip-received-${vp}.png` });
+    const second = await page.request.post(`/api/venue-bookings/${id}/direct-pay`, { data: { action: "refundReceived" } });
+    expect(second.status()).toBe(400);
+
+    row = await readRefund(id);
+    expect(row.directRefundStatus).toBe("RECEIVED");
+    expect(row.refundReceivedAt).toBeTruthy();
+  } finally {
+    await vinCtx.close();
+    await dropBookings(ids);
+  }
+});
+
+test("[D2-refund] venue owner cancels a CONFIRMED booking inside 15 days -> Refund as agreed; started booking refused @needs-db", async ({ page, browser, isMobile }) => {
+  test.setTimeout(120_000);
+  const vp = isMobile ? 390 : 1440;
+  const ids: string[] = [];
+  const vinCtx = await browser.newContext({ storageState: authFile("vinayak") });
+  const vin = await vinCtx.newPage();
+  try {
+    const id = await seedConfirmed(5, `asagreed-${vp}`);
+    const started = await seedConfirmed(-1, `started-${vp}`);
+    ids.push(id, started);
+
+    await useRuleViewport(vin, isMobile);
+    await gotoDashboard(vin, "/dashboard/venue/bookings");
+    const vCard = vin.locator(`[data-afa-direct-pay-booking="${id}"]`);
+    await expect(vCard.locator('[data-afa-direct-pay-chip="confirmed"]')).toBeVisible();
+    await vCard.getByRole("button", { name: "Cancel booking" }).click();
+    const dialog = vin.getByRole("dialog");
+    await expect(dialog.locator('[data-afa-cancel-outcome="AS_AGREED"]')).toContainText(
+      `You are cancelling inside ${DIRECT_PAY_FULL_REFUND_MIN_DAYS} days of the date, so any refund of the ₹4,500 advance is as you both agree.`
+    );
+    await dialog.screenshot({ path: `test-results/d2-refund-dialog-asagreed-${vp}.png` });
+    await dialog.getByRole("button", { name: "Cancel booking" }).click();
+    await expect(vCard.locator('[data-afa-refund-chip="AS_AGREED"]')).toHaveText("Refund as agreed");
+    await expect(vCard.locator('[data-afa-cancelled-by="VENUE_OWNER"]')).toContainText("Cancelled by the venue owner on ");
+
+    const row = await readRefund(id);
+    expect(row.directRefundStatus).toBe("AS_AGREED");
+    expect(row.cancelledBy).toBe("VENUE_OWNER");
+
+    // The organiser sees it too, with the received button.
+    await useRuleViewport(page, isMobile);
+    await gotoDashboard(page, "/dashboard/venue-requests");
+    const card = page.locator(`[data-afa-direct-pay-booking="${id}"]`);
+    await expect(card.locator('[data-afa-refund-chip="AS_AGREED"]')).toHaveText("Refund as agreed");
+    await expect(card.getByRole("button", { name: "I've received the refund" })).toBeVisible();
+    await card.screenshot({ path: `test-results/d2-refund-chip-asagreed-${vp}.png` });
+
+    // A booking that has already started can't be cancelled (no button, API 400).
+    const sCard = page.locator(`[data-afa-direct-pay-booking="${started}"]`);
+    await expect(sCard.locator('[data-afa-direct-pay-chip="confirmed"]')).toBeVisible();
+    await expect(sCard.getByRole("button", { name: "Cancel booking" })).toHaveCount(0);
+    const late = await page.request.post(`/api/venue-bookings/${started}/direct-pay`, { data: { action: "cancelConfirmed" } });
+    expect(late.status()).toBe(400);
+    expect((await readRefund(started)).directPayStatus).toBe("CONFIRMED");
+  } finally {
+    await vinCtx.close();
+    await dropBookings(ids);
+  }
+});
