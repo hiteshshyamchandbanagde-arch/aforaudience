@@ -14,8 +14,10 @@
 import {
   type DirectPayAction,
   type DirectPayStatus,
+  cancelConfirmedOutcome,
   directPayExpiresAt,
   directPayTransition,
+  directRefundTransition,
   isDirectPayExpired,
   shouldUseDirectPay,
   venueBookingChip,
@@ -68,12 +70,20 @@ export function performanceDirectPayCreateData(
 export function performanceDirectPayTransition(
   p: PerformanceTerms & { directPayStatus: string | null | undefined },
   action: DirectPayAction,
-  actor: PerformanceParty
+  actor: PerformanceParty,
+  ctx?: { eventStart?: Date | string | number | null; now?: number }
 ): { ok: true; next: DirectPayStatus } | { ok: false; status: 400 | 403; error: string } {
   const dir = performanceDirection(p)
   if (!dir) return { ok: false, status: 400, error: 'Nothing to pay for this performance.' }
   // Map onto D2's roles: payer = ORGANISER, payee = VENUE_OWNER.
-  const t = directPayTransition(p.directPayStatus, action, actor === dir.payer ? 'ORGANISER' : 'VENUE_OWNER')
+  const t = directPayTransition(p.directPayStatus, action, actor === dir.payer ? 'ORGANISER' : 'VENUE_OWNER', {
+    fromDate: ctx?.eventStart,
+    now: ctx?.now,
+  })
+  // 12 Nov - cancelConfirmed: either party, CONFIRMED and before the event starts.
+  if (action === 'cancelConfirmed') {
+    return t.ok ? t : { ...t, error: t.error.replace('booking', 'performance') }
+  }
   if (t.ok || t.status !== 403) {
     if (!t.ok && t.error.startsWith('This booking')) return { ...t, error: 'This performance is no longer waiting on payment.' }
     return t
@@ -110,4 +120,66 @@ export function performanceChip(
     { status: p.cancelledAt ? 'CANCELLED' : 'CONFIRMED', directPayStatus: p.directPayStatus, expiresAt: p.expiresAt },
     now
   )
+}
+
+/**
+ * refundReceived (12 Nov): only the PAYER confirms the refund arrived.
+ * PAID -> the organiser; BUY_IN -> the artist. DUE | AS_AGREED -> RECEIVED.
+ * Reuses D2's directRefundTransition with the payer mapped onto its
+ * ORGANISER side.
+ */
+export function performanceRefundTransition(
+  p: PerformanceTerms & { directRefundStatus: string | null | undefined },
+  actor: PerformanceParty
+): { ok: true; next: 'RECEIVED' } | { ok: false; status: 400 | 403; error: string } {
+  const dir = performanceDirection(p)
+  if (!dir) return { ok: false, status: 400, error: 'There is no refund to confirm on this performance.' }
+  const t = directRefundTransition(p.directRefundStatus, actor === dir.payer ? 'ORGANISER' : 'VENUE_OWNER')
+  if (t.ok) return t
+  if (t.status === 403) {
+    return { ok: false, status: 403, error: `Only the ${dir.payer === 'ARTIST' ? 'artist' : 'organiser'} can confirm the refund was received.` }
+  }
+  return { ...t, error: t.error.replace('booking', 'performance') }
+}
+
+/**
+ * The update for a CONFIRMED direct-pay performance cancelled by `actor`
+ * (the direct-pay cancelConfirmed action and the artist's own /cancel
+ * share it). Refund outcome from D2's 15-day helper, counted against the
+ * event date; "advance paid" = the payee confirmed receipt (confirmedAt).
+ * Never sets buyInRefundStatus: AFA holds no direct money to refund.
+ */
+export function performanceCancelConfirmedData(
+  p: { confirmedAt: Date | string | null | undefined },
+  eventDate: Date | string | number,
+  actor: PerformanceParty,
+  now: Date
+): {
+  cancelledAt: Date
+  cancelledBy: PerformanceParty
+  directPayStatus: 'CANCELLED'
+  directRefundStatus: 'DUE' | 'AS_AGREED' | null
+} {
+  return {
+    cancelledAt: now,
+    cancelledBy: actor,
+    directPayStatus: 'CANCELLED',
+    directRefundStatus: cancelConfirmedOutcome(eventDate, now, p.confirmedAt != null),
+  }
+}
+
+/** Push body to the other party after a confirmed slot is cancelled (same copy pattern as D2). */
+export function performanceCancelledPushBody(
+  eventTitle: string,
+  amount: number,
+  outcome: 'DUE' | 'AS_AGREED' | null,
+  days: number
+): string {
+  if (outcome === 'DUE') {
+    return `The confirmed slot at "${eventTitle}" was cancelled. Refund of the ₹${amount} paid is due under the ${days}-day term.`
+  }
+  if (outcome === 'AS_AGREED') {
+    return `The confirmed slot at "${eventTitle}" was cancelled. Cancelled inside ${days} days: any refund is as you both agree.`
+  }
+  return `The confirmed slot at "${eventTitle}" was cancelled.`
 }
