@@ -2170,6 +2170,10 @@ const te: Dictionary = {
     upiSettingLabel: "నేరుగా చెల్లింపుల కోసం UPI ID",
     upiSettingHelpArtist: "నిర్వాహకులు మీ ప్రదర్శన రుసుమును ఈ UPI IDకి నేరుగా చెల్లిస్తారు. AforAudience ఈ డబ్బును ఎప్పుడూ వసూలు చేయదు.",
     upiSettingHelpOrganiser: "కళాకారులు ఓపెన్-మైక్ బై-ఇన్‌ను ఈ UPI IDకి నేరుగా మీకు చెల్లిస్తారు. AforAudience ఈ డబ్బును ఎప్పుడూ వసూలు చేయదు.",
+    cancelConfirmedTitle: "ఈ ధృవీకరించిన స్లాట్‌ను రద్దు చేయాలా?",
+    keepSlot: "స్లాట్ ఉంచండి",
+    cancelOutcomeNote: "AforAudience ఈ డబ్బును ఉంచుకోదు. {payee} నేరుగా {payer}కి రీఫండ్ చేస్తారు.",
+    partyArtist: "కళాకారుడు",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

@@ -2168,6 +2168,10 @@ const mr: Dictionary = {
     upiSettingLabel: "थेट पेमेंटसाठी UPI ID",
     upiSettingHelpArtist: "आयोजक तुमचे सादरीकरण शुल्क या UPI ID वर थेट पाठवतात. AforAudience हे पैसे कधीही घेत नाही.",
     upiSettingHelpOrganiser: "कलाकार ओपन-माइक बाय-इन या UPI ID वर थेट तुम्हाला पाठवतात. AforAudience हे पैसे कधीही घेत नाही.",
+    cancelConfirmedTitle: "हा कन्फर्म स्लॉट रद्द करायचा?",
+    keepSlot: "स्लॉट ठेवा",
+    cancelOutcomeNote: "AforAudience हे पैसे ठेवत नाही. {payee} थेट {payer} यांना रिफंड करतात.",
+    partyArtist: "कलाकार",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

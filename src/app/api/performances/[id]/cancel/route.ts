@@ -3,8 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
-import { promoteNextWaitlisted } from '@/lib/performance-direct-pay.server'
+import { cancelConfirmedPerformanceSlot, promoteNextWaitlisted } from '@/lib/performance-direct-pay.server'
 import { isWaitingDirectPay } from '@/lib/venue-direct-pay'
+import { performanceCancelConfirmedData, performanceCancelledPushBody, performanceDirection } from '@/lib/performance-direct-pay'
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from '@/lib/direct-pay-terms'
 
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
 
@@ -28,11 +30,12 @@ function eventStartInstant(date: Date, startTime: string): Date {
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getServerSession(authOptions)
-  if (!session?.user) {
+  const sessionUserId = (session?.user as { id?: string } | undefined)?.id
+  if (!sessionUserId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const user = await prisma.user.findUnique({ where: { id: (session.user as any).id } })
+  const user = await prisma.user.findUnique({ where: { id: sessionUserId } })
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -57,6 +60,32 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       { error: 'Cancellations must be made at least 24 hours before the event.' },
       { status: 400 }
     )
+  }
+
+  // 12 Nov - a CONFIRMED direct-pay slot: AFA holds none of that money, so
+  // never claim buyInRefundStatus REFUNDED. Same outcome as the direct-pay
+  // cancelConfirmed action (cancelledBy ARTIST, refund status from the
+  // 15-day term vs the event date, directPayStatus CANCELLED).
+  if (performance.directPayStatus === 'CONFIRMED') {
+    const data = performanceCancelConfirmedData(performance, performance.event.date, 'ARTIST', new Date())
+    const { released, promoted } = await cancelConfirmedPerformanceSlot(performance.id, data)
+    if (!released) {
+      return NextResponse.json({ error: 'This slot just changed - refresh and try again.' }, { status: 409 })
+    }
+    const amount = performanceDirection(performance)?.amount ?? 0
+    notifyAfterResponse(async () => {
+      await sendPushToUser(performance.event.organiser.userId, {
+        title: 'Artist cancelled',
+        body: `${promoted ? 'A spot was filled from the waitlist. ' : ''}${performanceCancelledPushBody(
+          performance.event.title,
+          amount,
+          data.directRefundStatus,
+          DIRECT_PAY_FULL_REFUND_MIN_DAYS
+        )}`,
+        url: `/dashboard/organiser/events/${performance.eventId}`,
+      })
+    }, 'performance-cancelled-organiser')
+    return NextResponse.json(await prisma.performance.findUnique({ where: { id } }))
   }
 
   // D3 - a direct-pay slot still waiting on payment: nothing was collected,

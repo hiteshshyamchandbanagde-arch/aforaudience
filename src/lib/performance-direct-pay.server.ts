@@ -107,6 +107,34 @@ export async function releaseDirectPaySlot(
     data: { cancelledAt: now, directPayStatus: to },
   })
   if (res.count === 0) return false
+  await promoteAfterRelease(id)
+  return true
+}
+
+/**
+ * 12 Nov - cancels a CONFIRMED direct-pay performance with the outcome from
+ * performanceCancelConfirmedData (cancelledAt/cancelledBy/CANCELLED/refund
+ * status) and releases the lineup slot the same way. Guarded on CONFIRMED
+ * and not yet cancelled, so a race moves it once. Shared by the direct-pay
+ * cancelConfirmed action and the artist's own /cancel.
+ * released: false when the row had already moved on.
+ */
+export async function cancelConfirmedPerformanceSlot(
+  id: string,
+  data: Pick<
+    Prisma.PerformanceUpdateManyMutationInput,
+    'cancelledAt' | 'cancelledBy' | 'directPayStatus' | 'directRefundStatus'
+  >
+): Promise<{ released: boolean; promoted: Awaited<ReturnType<typeof promoteNextWaitlisted>> }> {
+  const res = await prisma.performance.updateMany({
+    where: { id, cancelledAt: null, directPayStatus: 'CONFIRMED' },
+    data,
+  })
+  if (res.count === 0) return { released: false, promoted: null }
+  return { released: true, promoted: await promoteAfterRelease(id) }
+}
+
+async function promoteAfterRelease(id: string) {
   const p = await prisma.performance.findUnique({
     where: { id },
     select: {
@@ -115,6 +143,5 @@ export async function releaseDirectPaySlot(
       },
     },
   })
-  if (p) await promoteNextWaitlisted(p.event)
-  return true
+  return p ? promoteNextWaitlisted(p.event) : null
 }

@@ -2174,6 +2174,10 @@ const es: Dictionary = {
     upiSettingLabel: "UPI ID para pagos directos",
     upiSettingHelpArtist: "Los organizadores te pagan el caché directamente a este UPI ID. AforAudience nunca cobra estos pagos.",
     upiSettingHelpOrganiser: "Los artistas te pagan los buy-ins de open mic directamente a este UPI ID. AforAudience nunca cobra estos pagos.",
+    cancelConfirmedTitle: "¿Cancelar este espacio confirmado?",
+    keepSlot: "Mantener espacio",
+    cancelOutcomeNote: "AforAudience no retiene este dinero. {payee} reembolsa directamente a {payer}.",
+    partyArtist: "el artista",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

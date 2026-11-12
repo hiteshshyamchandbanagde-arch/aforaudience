@@ -1693,6 +1693,13 @@ model Performance {
   confirmedAt     DateTime?
   expiresAt       DateTime?
 
+  // Cancel after CONFIRMED + refund tracking (12 Nov, mirrors VenueBooking).
+  // Reuses cancelledAt above. Refund status null = nothing was paid (or
+  // not cancelled after CONFIRMED). The payer confirms RECEIVED.
+  directRefundStatus DirectRefundStatus?
+  cancelledBy        DirectPayParty?
+  refundReceivedAt   DateTime?
+
   @@index([directPayStatus, expiresAt])
 }
 

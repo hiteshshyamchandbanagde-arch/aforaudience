@@ -15,6 +15,8 @@ import { formatDate } from '@/lib/format-date'
 import { countText } from '@/lib/i18n/plural'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { performanceCancelOutcomeBody } from '@/components/dashboard/performance-cancel-outcome'
+import { performanceDirection } from '@/lib/performance-direct-pay'
 import { PageTitle } from '@/components/dashboard/PageTitle'
 import PerformanceDirectPay from '@/components/dashboard/PerformanceDirectPay'
 import { formatINR } from '@/lib/money-display'
@@ -64,12 +66,15 @@ interface Performance {
   feeAmount: number | null
   buyInAmount: number | null
   cancelledAt: string | null
+  directPayStatus?: string | null
+  confirmedAt?: string | null
   event: {
     id: string
     title: string
     date: string
     startTime: string
     venue: { name: string; city: string } | null
+    organiser?: { orgName: string } | null
   }
   reviews: Review[]
 }
@@ -233,8 +238,26 @@ export default function ArtistDashboard() {
     }
   }
 
-  const cancelPerformance = async (performanceId: string) => {
-    if (!(await confirm({ title: a.cancelConfirmTitle, body: a.cancelConfirmBody, confirmLabel: a.cancelConfirmLabel, cancelLabel: a.keepIt, destructive: true }))) return
+  const cancelPerformance = async (p: Performance) => {
+    const performanceId = p.id
+    // 12 Nov - a CONFIRMED direct-pay slot: AFA records no buy-in refund, so
+    // the dialog states the direct refund outcome instead (same as the panel).
+    const dir = p.directPayStatus === 'CONFIRMED' ? performanceDirection(p) : null
+    const me = profile?.displayName || profile?.name || ''
+    const org = p.event.organiser?.orgName || ''
+    const body = dir
+      ? performanceCancelOutcomeBody({
+          eventDate: p.event.date,
+          confirmedAt: p.confirmedAt,
+          amount: dir.amount,
+          payeeName: dir.payee === 'ARTIST' ? me : org,
+          payerName: dir.payer === 'ARTIST' ? me : org,
+          v: tr.venueDirectPay,
+          s: tr.performanceDirectPay,
+        })
+      : a.cancelConfirmBody
+    const title = dir ? tr.performanceDirectPay.cancelConfirmedTitle : a.cancelConfirmTitle
+    if (!(await confirm({ title, body, confirmLabel: a.cancelConfirmLabel, cancelLabel: a.keepIt, destructive: true }))) return
     setCancelling(performanceId)
     try {
       const res = await fetch(`/api/performances/${performanceId}/cancel`, { method: 'POST' })
@@ -588,7 +611,7 @@ export default function ArtistDashboard() {
                           variant="outline-error"
                           size="sm"
                           fullWidth={false}
-                          onClick={() => cancelPerformance(p.id)}
+                          onClick={() => cancelPerformance(p)}
                           disabled={cancelling === p.id}
                         >
                           {cancelling === p.id ? a.cancelling : chrome.cancel}

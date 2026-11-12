@@ -2170,6 +2170,10 @@ const kn: Dictionary = {
     upiSettingLabel: "ನೇರ ಪಾವತಿಗಾಗಿ UPI ID",
     upiSettingHelpArtist: "ಸಂಘಟಕರು ನಿಮ್ಮ ಪ್ರದರ್ಶನ ಶುಲ್ಕವನ್ನು ಈ UPI IDಗೆ ನೇರವಾಗಿ ಪಾವತಿಸುತ್ತಾರೆ. AforAudience ಈ ಹಣವನ್ನು ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
     upiSettingHelpOrganiser: "ಕಲಾವಿದರು ಓಪನ್-ಮೈಕ್ ಬೈ-ಇನ್ ಅನ್ನು ಈ UPI IDಗೆ ನೇರವಾಗಿ ನಿಮಗೆ ಪಾವತಿಸುತ್ತಾರೆ. AforAudience ಈ ಹಣವನ್ನು ಎಂದಿಗೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
+    cancelConfirmedTitle: "ಈ ದೃಢೀಕರಿಸಿದ ಸ್ಲಾಟ್ ರದ್ದುಗೊಳಿಸುವುದೇ?",
+    keepSlot: "ಸ್ಲಾಟ್ ಇರಿಸಿ",
+    cancelOutcomeNote: "AforAudience ಈ ಹಣವನ್ನು ಇಟ್ಟುಕೊಳ್ಳುವುದಿಲ್ಲ. {payee} ನೇರವಾಗಿ {payer}ಗೆ ಮರುಪಾವತಿ ಮಾಡುತ್ತಾರೆ.",
+    partyArtist: "ಕಲಾವಿದರು",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

@@ -2170,6 +2170,10 @@ const bn: Dictionary = {
     upiSettingLabel: "সরাসরি পেমেন্টের জন্য UPI ID",
     upiSettingHelpArtist: "আয়োজকরা এই UPI ID-তে সরাসরি আপনার পারফরম্যান্স ফি দেন। AforAudience কখনো এই টাকা নেয় না।",
     upiSettingHelpOrganiser: "শিল্পীরা এই UPI ID-তে সরাসরি আপনাকে ওপেন-মাইক বাই-ইন দেন। AforAudience কখনো এই টাকা নেয় না।",
+    cancelConfirmedTitle: "এই কনফার্ম স্লট বাতিল করবেন?",
+    keepSlot: "স্লট রাখুন",
+    cancelOutcomeNote: "AforAudience এই টাকা রাখে না। {payee} সরাসরি {payer}-কে রিফান্ড করেন।",
+    partyArtist: "শিল্পী",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

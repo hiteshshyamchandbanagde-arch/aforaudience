@@ -198,3 +198,227 @@ test("[D3] performance direct pay: PAID (Omkar pays Hrithik) and BUY_IN (Hrithik
     });
   }
 });
+
+/**
+ * 12 Nov (Hitesh) - cancel a CONFIRMED direct-pay performance + refund
+ * tracking (artist half of #780). AFA moves no money: it records who
+ * cancelled, when, and whether the amount paid is due back under the
+ * 15-day term (DUE, counted against the event date) or left to the
+ * parties (AS_AGREED). The PAYER confirms receipt: PAID -> the organiser,
+ * BUY_IN -> the artist.
+ *
+ * Fixture: an event Omkar creates (30 days out) with a CONFIRMED direct-pay
+ * Performance for Hrithik inserted straight into QA (confirmedAt set = the
+ * payee confirmed receipt). Reaching CONFIRMED through the UI is covered by
+ * the [D3] test above. Everything is deleted in finally (T6).
+ *
+ * Regression shape: on origin/qa a confirmed slot has no "Cancel slot" in
+ * the direct-pay panel, the API refuses cancelConfirmed / refundReceived
+ * with 400 "Invalid action", and the artist's own /cancel of a confirmed
+ * direct BUY_IN sets buyInRefundStatus REFUNDED (a refund AFA can't make)
+ * and leaves directPayStatus CONFIRMED. So both tests fail there and pass
+ * on the branch.
+ *
+ * Needs migration 20261112130000_add_performance_direct_refund_tracking on QA.
+ */
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+async function seedConfirmedPerformance(
+  page: Page,
+  label: string,
+  terms: { compensationType: "PAID" | "BUY_IN"; feeAmount: number | null; buyInAmount: number | null }
+): Promise<{ eventId: string; perfId: string; title: string }> {
+  const title = `E2E D3-refund ${label} ${Date.now()}`;
+  const ev = await page.request.post("/api/events", {
+    data: {
+      title,
+      description: "D3 refund e2e - confirmed slot cancelled.",
+      type: "OPEN_MIC",
+      // Far enough out that IST calendar days are >= 15 at any time of day.
+      date: ymd(new Date(Date.now() + (DIRECT_PAY_FULL_REFUND_MIN_DAYS + 15) * DAY_MS)),
+      startTime: "19:00",
+      endTime: "21:00",
+      isFree: true,
+      totalSeats: 20,
+    },
+  });
+  expect(ev.status(), await ev.text()).toBeLessThan(300);
+  const evBody = await ev.json();
+  const eventId = (evBody.event?.id ?? evBody.id) as string;
+  const perfId = `e2e-perf-refund-${label}-${Date.now()}`;
+  await withQaDb(async (db) => {
+    await db.query(`UPDATE "Event" SET status = 'APPROVED' WHERE id = $1`, [eventId]);
+    const a = await db.query<{ id: string }>(
+      `SELECT a.id FROM "Artist" a JOIN "User" u ON u.id = a."userId" WHERE u.email = 'hrithik.artist@aforaudience.qa'`
+    );
+    expect(a.rows.length, "Hrithik needs an artist profile on QA").toBe(1);
+    await db.query(
+      `INSERT INTO "Performance" (id, "eventId", "artistId", slot, duration, "compensationType", "feeAmount", "buyInAmount",
+              "paymentMethod", "directPayStatus", "paidMarkedAt", "confirmedAt")
+       VALUES ($1, $2, $3, 1, 10, $4::"CompensationType", $5, $6, 'DIRECT', 'CONFIRMED', now(), now())`,
+      [perfId, eventId, a.rows[0].id, terms.compensationType, terms.feeAmount, terms.buyInAmount]
+    );
+  });
+  return { eventId, perfId, title };
+}
+
+async function readPerfRefund(id: string) {
+  return withQaDb(async (db) => {
+    const { rows } = await db.query<{
+      directPayStatus: string; directRefundStatus: string | null; cancelledBy: string | null;
+      cancelledAt: Date | null; refundReceivedAt: Date | null; buyInRefundStatus: string | null;
+    }>(
+      `SELECT "directPayStatus", "directRefundStatus", "cancelledBy", "cancelledAt", "refundReceivedAt", "buyInRefundStatus"
+         FROM "Performance" WHERE id = $1`,
+      [id]
+    );
+    return rows[0];
+  });
+}
+
+async function dropEvents(eventIds: string[]) {
+  if (!eventIds.length) return;
+  await withQaDb(async (db) => {
+    await db.query(`DELETE FROM "Performance" WHERE "eventId" = ANY($1)`, [eventIds]);
+    await db.query(`DELETE FROM "Application" WHERE "eventId" = ANY($1)`, [eventIds]);
+    await db.query(`DELETE FROM "TicketTier" WHERE "eventId" = ANY($1)`, [eventIds]);
+    await db.query(`DELETE FROM "Event" WHERE id = ANY($1)`, [eventIds]);
+  });
+}
+
+test("[D3-refund] PAID: organiser cancels a CONFIRMED slot 15+ days out -> Refund due -> organiser marks it received @needs-db", async ({ page, browser, isMobile }) => {
+  test.setTimeout(150_000);
+  const vp = isMobile ? 390 : 1440;
+  const eventIds: string[] = [];
+  const hriCtx = await browser.newContext({ storageState: authFile("hrithik") });
+  const hri = await hriCtx.newPage();
+  try {
+    const { eventId, perfId } = await seedConfirmedPerformance(page, `paid-${vp}`, {
+      compensationType: "PAID", feeAmount: 1500, buyInAmount: null,
+    });
+    eventIds.push(eventId);
+
+    // Nothing to confirm before a cancel.
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(400);
+
+    await setRuleViewport(page, isMobile);
+    await gotoDashboard(page, `/dashboard/organiser/events/${eventId}/lineup`);
+    const card = page.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
+    await expect(card.locator('[data-afa-direct-pay-chip="confirmed"]')).toBeVisible();
+    await card.locator("[data-afa-cancel-confirmed-btn]").click();
+
+    // The dialog states the outcome before anything changes.
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Cancel this confirmed slot?");
+    const outcome = dialog.locator('[data-afa-cancel-outcome="DUE"]');
+    await expect(outcome).toContainText(
+      `You are cancelling ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}+ days before the date, so the ₹1,500 advance is due back in full under the ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}-day term.`
+    );
+    await expect(outcome).toContainText(/AforAudience does not hold this money\. .+ refunds .+ directly\./);
+    await dialog.screenshot({ path: `test-results/d3-refund-dialog-due-${vp}.png` });
+    await dialog.getByRole("button", { name: "Cancel slot" }).click();
+
+    await expect(card.locator('[data-afa-direct-pay-chip="cancelled"]')).toBeVisible();
+    await expect(card.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(card.locator('[data-afa-cancelled-by="ORGANISER"]')).toContainText("Cancelled by the organiser on ");
+    await card.screenshot({ path: `test-results/d3-refund-chip-due-${vp}.png` });
+
+    let row = await readPerfRefund(perfId);
+    expect(row.directPayStatus).toBe("CANCELLED");
+    expect(row.directRefundStatus).toBe("DUE");
+    expect(row.cancelledBy).toBe("ORGANISER");
+    expect(row.cancelledAt).toBeTruthy();
+    expect(row.buyInRefundStatus).toBeNull();
+
+    // The artist (payee) sees the chip but cannot mark the refund received.
+    await setRuleViewport(hri, isMobile);
+    await gotoDashboard(hri, "/dashboard/artist");
+    const aCard = hri.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
+    await expect(aCard.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(aCard.locator("[data-afa-refund-received-btn]")).toHaveCount(0);
+    expect((await hri.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(403);
+
+    // A cancelled slot can't be cancelled again.
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "cancelConfirmed" } })).status()).toBe(400);
+
+    // The organiser (payer) confirms the refund arrived.
+    await card.locator("[data-afa-refund-received-btn]").click();
+    await expect(card.locator('[data-afa-refund-chip="RECEIVED"]')).toContainText("Refund received ✓");
+    await expect(card.locator("[data-afa-refund-received-btn]")).toHaveCount(0);
+    await card.screenshot({ path: `test-results/d3-refund-chip-received-${vp}.png` });
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(400);
+
+    row = await readPerfRefund(perfId);
+    expect(row.directRefundStatus).toBe("RECEIVED");
+    expect(row.refundReceivedAt).toBeTruthy();
+  } finally {
+    await hriCtx.close();
+    await dropEvents(eventIds);
+  }
+});
+
+test("[D3-refund] BUY_IN: artist self-cancels a CONFIRMED direct buy-in via /cancel -> direct refund outcome, buyInRefundStatus stays null @needs-db", async ({ page, browser, isMobile }) => {
+  test.setTimeout(150_000);
+  const vp = isMobile ? 390 : 1440;
+  const eventIds: string[] = [];
+  const hriCtx = await browser.newContext({ storageState: authFile("hrithik") });
+  const hri = await hriCtx.newPage();
+  try {
+    const { eventId, perfId, title } = await seedConfirmedPerformance(page, `buyin-${vp}`, {
+      compensationType: "BUY_IN", feeAmount: null, buyInAmount: 200,
+    });
+    eventIds.push(eventId);
+
+    // Hrithik cancels from his own upcoming list (POST /api/performances/[id]/cancel).
+    await setRuleViewport(hri, isMobile);
+    await gotoDashboard(hri, "/dashboard/artist");
+    const upcomingRow = hri
+      .locator("div")
+      .filter({ has: hri.getByText(title, { exact: true }) })
+      .filter({ has: hri.getByRole("button", { name: "Cancel", exact: true }) })
+      .last();
+    // trailingSlash is on: skip the 308 hop to /cancel/ and wait for the real answer.
+    const cancelled = hri.waitForResponse(
+      (r) => r.url().includes(`/api/performances/${perfId}/cancel`) && r.request().method() === "POST" && r.status() !== 308
+    );
+    await upcomingRow.getByRole("button", { name: "Cancel", exact: true }).click();
+
+    // The dialog states the direct refund outcome, not "recorded as refunded".
+    const dialog = hri.getByRole("dialog");
+    await expect(dialog).toContainText("Cancel this confirmed slot?");
+    const outcome = dialog.locator("[data-afa-cancel-outcome]");
+    await expect(outcome).toHaveAttribute("data-afa-cancel-outcome", /^(DUE|AS_AGREED)$/);
+    await expect(outcome).toContainText("₹200 advance");
+    await expect(dialog).not.toContainText("recorded as refunded");
+    await dialog.screenshot({ path: `test-results/d3-refund-artist-cancel-dialog-${vp}.png` });
+    await dialog.getByRole("button", { name: "Cancel performance" }).click();
+    expect((await cancelled).status()).toBe(200);
+
+    const row = await readPerfRefund(perfId);
+    expect(row.buyInRefundStatus, "AFA holds no direct buy-in, so it must not claim REFUNDED").toBeNull();
+    expect(row.directPayStatus).toBe("CANCELLED");
+    expect(["DUE", "AS_AGREED"]).toContain(row.directRefundStatus);
+    expect(row.directRefundStatus).toBe("DUE"); // event is 30 days out
+    expect(row.cancelledBy).toBe("ARTIST");
+    expect(row.cancelledAt).toBeTruthy();
+
+    // The artist is the payer of a buy-in: the panel shows the chip, who
+    // cancelled, and their "I've received the refund" button.
+    await gotoDashboard(hri, "/dashboard/artist");
+    const card = hri.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
+    await expect(card.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(card.locator('[data-afa-cancelled-by="ARTIST"]')).toContainText("Cancelled by the artist on ");
+    await expect(card.locator("[data-afa-refund-received-btn]")).toBeVisible();
+    await card.scrollIntoViewIfNeeded();
+    await card.screenshot({ path: `test-results/d3-refund-artist-chip-due-${vp}.png` });
+
+    // The organiser (payee) cannot mark it received; the artist can, once.
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(403);
+    await card.locator("[data-afa-refund-received-btn]").click();
+    await expect(card.locator('[data-afa-refund-chip="RECEIVED"]')).toContainText("Refund received ✓");
+    expect((await readPerfRefund(perfId)).directRefundStatus).toBe("RECEIVED");
+  } finally {
+    await hriCtx.close();
+    await dropEvents(eventIds);
+  }
+});
