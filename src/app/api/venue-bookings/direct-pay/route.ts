@@ -43,6 +43,10 @@ export async function GET() {
       payerReference: true,
       confirmedAt: true,
       expiresAt: true,
+      directRefundStatus: true,
+      cancelledBy: true,
+      cancelledAt: true,
+      refundReceivedAt: true,
       platformFeeAmount: true,
       createdAt: true,
       venue: {
