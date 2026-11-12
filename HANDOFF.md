@@ -1,4 +1,25 @@
-## Part 73 — START HERE (12 Nov 15:45 IST, chat), qa @ this commit, main @ 636354f
+## Part 74 — START HERE (12 Nov 21:00 IST, chat, end of session), qa @ this commit, main @ 636354f
+Read order: **74 → 73 → 72 → 71**. Delta only. Session-start protocol unchanged (Part 68).
+
+### Shipped today (12 Nov): #778 tap target · #779 refund terms · #780 venue cancel+refund · #781 artist cancel+refund (+ /cancel false-REFUNDED fix) · **#782** (`363d93e`) e2e hardening
+- #782: `e2e/global-setup.ts` pre-flight reads `/api/platform-settings/launch-waves/` and stops the run with ONE message if any wave is OFF (or unreadable). `ticket-actions`/`ticket-tier`/`event-card-price` off "any upcoming" seed data. `performance-direct-pay.spec` beforeAll sweeps its own stale "E2E D3%" events (>15 min old); `application-closed` waits for Hrithik's direct-pay panel and requires it empty.
+- **Root cause of the 16:20 IST red** (`application-closed` artist 1440, 488 px, 1 px shift): a CONFIRMED "E2E D3-refund buyin-1440" slot left on QA by a preview run cancelled mid-flight at 08:35Z → 186.5 px direct-pay panel above My Applications. Not a product bug. Leftover gone (swept).
+- **Seen once, watch:** `artist-browse-events.spec.ts:97` [BUG-2610-023] share-poster QR origin ≠ deployment origin, on intermediate head 9c3a638 only; green on 22084a5. If it recurs twice → Rule 4.
+
+### Gate
+- Count rule (chat, overrulable): one full green suite run on qa per calendar day, any trigger. **Day 1 = 12 Nov** (5eae472 720/0; a64e12c green).
+- 12 Nov scheduled nightly fired 08:26Z but was **cancelled by chat's own branch pushes** (shared queue keeps one pending run). **Rule for chat: no dispatches/branch pushes 01:00–05:30Z and 08:00–09:00Z** (scheduled slots + GitHub's late firing).
+
+### Next (chat)
+1. Next session: check the 13 Nov nightly (first run with pre-flight). Green → day 2.
+2. S3 prod read-only check (env vars, keys, cron, paid OFF, wave + refund columns absent until S5). S5 must apply **4 new migrations** on prod: launch waves `20261111120000`, `20261112120000`, `20261112130000` (+ check list since main @ 636354f).
+3. Feedback rows for #778–#782 (CodeCounter displayIds). BUG-2609-051 + GEN-2610-008 REJECTED 12 Nov (done).
+4. Later: late-cancel count on profiles; per-party refund presets.
+
+### Open for Hitesh (unchanged)
+Phone check 2 (+ tap holding Sign in; read cancel/refund copy as Omkar & Hrithik, hi/mr) · rotate Maps (Places 403 still live) + Razorpay test key, add `BLOB_READ_WRITE_TOKEN` · Razorpay TP enrolment form (#21740833; email sent 12 Nov) · delete merged branches incl. today's 5 (`fix/holding-signin-tap-target`, `fix/refund-terms-direct-pay`, `feat/venue-direct-pay-cancel-refund`, `feat/performance-direct-pay-cancel-refund`, `test/e2e-hardening`).
+
+## Part 73 — (12 Nov 15:45 IST, chat), superseded as entry point by Part 74, qa @ this commit, main @ 636354f
 Read order: **73 → 72 → 71**. Delta only.
 
 - **#781 merged** (`a64e12c`): artist direct-pay `cancelConfirmed` + `refundReceived` (payer only: organiser for PAID, artist for BUY_IN). **Bug fixed:** `/api/performances/[id]/cancel` on a CONFIRMED direct buy-in set `buyInRefundStatus: REFUNDED` and left CONFIRMED; it now gets the 15-day outcome. Migration `20261112130000_add_performance_direct_refund_tracking` already on QA; prod at S5 (with `20261112120000`). Preview green; deploy READY; no new runtime errors.
