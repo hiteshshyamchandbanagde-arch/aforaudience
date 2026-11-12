@@ -1,4 +1,13 @@
-## Part 71 — START HERE (12 Nov 10:10 IST, chat), qa @ this commit, main @ 636354f
+## Part 72 — START HERE (12 Nov 13:50 IST, chat), qa @ this commit, main @ 636354f
+Read order: **72 → 71 → 70**. Delta only.
+
+- **#780 merged** (`68b60c2`): venue direct-pay `cancelConfirmed` (either side, CONFIRMED, before fromDate → DUE if ≥15 IST calendar days else AS_AGREED; "advance paid" = `confirmedAt`) + `refundReceived` (organiser only). Migration `20261112120000_add_direct_pay_refund_tracking` (enums `DirectRefundStatus`, `DirectPayParty`; 4 VenueBooking cols) **applied on QA by chat before the run; prod gets it at S5**. Preview e2e green; deploy READY; no new runtime errors.
+- **#779 post-merge e2e red once** (`design-system-goal.spec.ts:115`, `admin.close()` "Target closed" after a confirmed revert); token verified restored on QA; next qa run (5eae472) 720/0/0 → one-off, not quarantined.
+- **Nightly:** neither scheduled slot (01:23Z, 04:41Z) fired 12 Nov. Chat counts **one full green suite run on qa per calendar day** toward the 3-in-a-row gate (any trigger) unless Hitesh says scheduled-only. 12 Nov = day 1 (5eae472, 720/0).
+- **Running:** autopilot `43181443401` = artist half (`cc-prompt-performance-direct-pay-cancel-refund.md`). Migration `20261112130000_add_performance_direct_refund_tracking` (3 Performance cols) **already applied on QA**. Includes a bug fix: `/api/performances/[id]/cancel` sets `buyInRefundStatus: REFUNDED` and leaves `directPayStatus: CONFIRMED` for direct-pay buy-ins (false refund claim).
+- Next after artist half: e2e hardening dispatch (Part 71 Next #3); Feedback rows for #778–#781 + REJECT BUG-2609-051 / GEN-2610-008.
+
+## Part 71 — (12 Nov 10:10 IST, chat), superseded as entry point by Part 72, qa @ this commit, main @ 636354f
 Read order: **71 → 70 → 69 → 68**. Delta only.
 
 ### Shipped
