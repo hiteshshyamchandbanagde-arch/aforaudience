@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
     const include = {
       artist: { select: { upiId: true, upiQrUrl: true, user: { select: { name: true } } } },
-      event: { select: { id: true, title: true, date: true, organiser: { select: { orgName: true, upiId: true, upiQrUrl: true } } } },
+      event: { select: { id: true, title: true, date: true, startTime: true, organiser: { select: { orgName: true, upiId: true, upiQrUrl: true } } } },
     } as const
     const base = { paymentMethod: 'DIRECT' as const, directPayStatus: { not: null } }
     const [mine, theirs] = await Promise.all([
@@ -54,7 +54,11 @@ export async function GET(req: Request) {
         payerReference: p.payerReference,
         expiresAt: p.expiresAt,
         cancelledAt: p.cancelledAt,
-        event: { id: p.event.id, title: p.event.title, date: p.event.date },
+        confirmedAt: p.confirmedAt,
+        directRefundStatus: p.directRefundStatus,
+        cancelledBy: p.cancelledBy,
+        refundReceivedAt: p.refundReceivedAt,
+        event: { id: p.event.id, title: p.event.title, date: p.event.date, startTime: p.event.startTime },
         artistName,
         orgName: p.event.organiser.orgName,
         payeeBlock: {
