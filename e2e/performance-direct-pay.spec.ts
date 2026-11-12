@@ -1,6 +1,7 @@
 import { test, expect, gotoDashboard } from "./helpers/test";
 import type { Page } from "@playwright/test";
 import { authFile } from "./helpers/personas";
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from "../src/lib/direct-pay-terms";
 import { withQaDb } from "./helpers/qa-db";
 // Aliased: not a React hook, the lint rule only goes by the "use" prefix.
 import { useRuleViewport as setRuleViewport } from "./helpers/viewports";
@@ -136,6 +137,10 @@ test("[D3] performance direct pay: PAID (Omkar pays Hrithik) and BUY_IN (Hrithik
       await expect(block.locator("[data-afa-payee-note]")).toContainText("directly. AforAudience does not collect or hold this payment.");
       // S1b-c1 - direct cash/UPI only: the pay step says AFA never collects.
       await expect(block.locator("[data-afa-direct-pay-disclosure]")).toHaveText(/^Pay .+ directly by UPI or cash\. AFA doesn't collect this money\.$/);
+      // 12 Nov - the direct-pay 15-day standard term sits under the disclosure line.
+      await expect(block.locator("[data-afa-direct-pay-refund-term]")).toHaveText(
+        `Cancel ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}+ days before the date: full refund of any advance. Inside ${DIRECT_PAY_FULL_REFUND_MIN_DAYS} days: as you both agree.`,
+      );
       await block.scrollIntoViewIfNeeded();
       await block.screenshot({ path: `test-results/d3-${opts.shot}-payee-block-${vp}.png` });
       await card.getByRole("textbox", { name: "UPI reference (optional)" }).fill(`UTR-D3-${opts.shot}`);

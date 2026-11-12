@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react'
 import { Card, StatusPill, Button, Field, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import { useToast } from '@/components/Toast'
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from '@/lib/direct-pay-terms'
 import { formatDate } from '@/lib/format-date'
 import { formatINR } from '@/lib/money-display'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
@@ -167,6 +168,8 @@ export default function PerformanceDirectPay({ side, eventId }: { side: Performa
                   <div data-afa-payee-note style={muted}>{v.payNote.replace('{payee}', p.payeeBlock.name)}</div>
                   {/* S1b-c1 - all payments are direct cash/UPI; AFA never collects. */}
                   <div data-afa-direct-pay-disclosure style={muted}>{v.payDirectLine.replace('{name}', p.payeeBlock.name)}</div>
+                  {/* 12 Nov - the 15-day direct-pay standard term, from direct-pay-terms.ts. */}
+                  <div data-afa-direct-pay-refund-term style={muted}>{v.refundTermLine.replaceAll('{days}', String(DIRECT_PAY_FULL_REFUND_MIN_DAYS))}</div>
                   {p.payerReference && <div style={muted}>{v.reference.replace('{ref}', p.payerReference)}</div>}
                   {p.expiresAt && <div style={muted}>{v.expires.replace('{date}', formatDate(p.expiresAt, 'medium', locale))}</div>}
                 </div>

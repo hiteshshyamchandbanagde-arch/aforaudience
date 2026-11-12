@@ -2118,6 +2118,7 @@ const te: Dictionary = {
     chipCancelled: "రద్దు",
     payNote: "{payee}కి నేరుగా చెల్లించండి. AforAudience ఈ చెల్లింపును వసూలు చేయదు, ఉంచుకోదు.",
     payDirectLine: "{name}కు నేరుగా UPI లేదా నగదుతో చెల్లించండి. AFA ఈ డబ్బును వసూలు చేయదు.",
+    refundTermLine: "తేదీకి {days}+ రోజుల ముందు రద్దు చేస్తే: చెల్లించిన అడ్వాన్స్ మొత్తం తిరిగి ఇస్తారు. {days} రోజుల లోపు: మీరిద్దరూ అంగీకరించినట్లు.",
     amount: "మొత్తం",
     upiLabel: "UPI ID",
     copy: "కాపీ చేయండి",

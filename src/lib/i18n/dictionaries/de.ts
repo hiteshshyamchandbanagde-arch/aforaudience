@@ -2127,6 +2127,7 @@ const de: Dictionary = {
     chipCancelled: "Storniert",
     payNote: "Zahle direkt an {payee}. AforAudience nimmt diese Zahlung weder entgegen noch verwahrt sie.",
     payDirectLine: "Bezahle {name} direkt per UPI oder bar. AFA nimmt dieses Geld nicht ein.",
+    refundTermLine: "Storno {days}+ Tage vor dem Termin: volle Rückzahlung jeder Anzahlung. Innerhalb von {days} Tagen: wie ihr beide es vereinbart.",
     amount: "Betrag",
     upiLabel: "UPI-ID",
     copy: "Kopieren",

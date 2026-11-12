@@ -2118,6 +2118,7 @@ const bn: Dictionary = {
     chipCancelled: "বাতিল",
     payNote: "{payee}-কে সরাসরি পেমেন্ট করুন। AforAudience এই পেমেন্ট নেয় না বা রাখে না।",
     payDirectLine: "{name}-কে সরাসরি UPI বা নগদে টাকা দিন। AFA এই টাকা নেয় না।",
+    refundTermLine: "তারিখের {days}+ দিন আগে বাতিল করলে: দেওয়া পুরো অগ্রিম ফেরত। {days} দিনের মধ্যে: আপনারা দুজনে যেমন ঠিক করবেন।",
     amount: "পরিমাণ",
     upiLabel: "UPI ID",
     copy: "কপি করুন",

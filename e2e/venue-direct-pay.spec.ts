@@ -1,5 +1,6 @@
 import { test, expect, gotoDashboard } from "./helpers/test";
 import { authFile } from "./helpers/personas";
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from "../src/lib/direct-pay-terms";
 import { withQaDb } from "./helpers/qa-db";
 import { useRuleViewport } from "./helpers/viewports";
 
@@ -132,6 +133,10 @@ test("[D2] venue direct pay: request -> accept (UPI shown) -> I've paid -> owner
     await expect(payee.locator("[data-afa-payee-note]")).toContainText("directly. AforAudience does not collect or hold this payment.");
     // S1b-c1 - direct cash/UPI only: the pay step says AFA never collects.
     await expect(payee.locator("[data-afa-direct-pay-disclosure]")).toHaveText(/^Pay .+ directly by UPI or cash\. AFA doesn't collect this money\.$/);
+    // 12 Nov - the direct-pay 15-day standard term sits under the disclosure line.
+    await expect(payee.locator("[data-afa-direct-pay-refund-term]")).toHaveText(
+      `Cancel ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}+ days before the date: full refund of any advance. Inside ${DIRECT_PAY_FULL_REFUND_MIN_DAYS} days: as you both agree.`,
+    );
     await expect(payee.locator("[data-afa-payee-qr]")).toHaveAttribute("src", TEST_QR);
     await payee.scrollIntoViewIfNeeded();
     await payee.screenshot({ path: `test-results/d2-payee-block-${vp}.png` });

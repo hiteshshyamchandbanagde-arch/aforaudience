@@ -1,91 +1,85 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import LegalDocLayout, { H2, P, UL, LI } from "@/components/LegalDocLayout"
-import { REFUND_FULL_MIN_DAYS, REFUND_HALF_MIN_DAYS } from "@/lib/refund-policy"
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from "@/lib/direct-pay-terms"
 
 export const metadata: Metadata = {
   title: "Refund & Cancellation Policy — AforAudience",
-  description: "When and how ticket bookings on AforAudience are refunded.",
+  description: "How cancellations and refunds work on AforAudience, where payments are made directly between the parties.",
 }
 
-// L1 (8 Nov) - the tiers below are read from src/lib/refund-policy.ts, the
-// same module the refund API uses, so this page can't drift from what a
-// cancellation actually pays back.
+// 12 Nov 2026 (Hitesh) - direct-pay model. AforAudience processes no payments
+// and holds no money, so it can't issue refunds; it publishes one standard
+// term, read from src/lib/direct-pay-terms.ts so this page and the in-app
+// disclosure line can't drift.
 export default function RefundPolicyPage() {
-  const full = REFUND_FULL_MIN_DAYS
-  const half = REFUND_HALF_MIN_DAYS
+  const days = DIRECT_PAY_FULL_REFUND_MIN_DAYS
   return (
-    <LegalDocLayout title="Refund & Cancellation Policy" lastUpdated="8 November 2026">
+    <LegalDocLayout title="Refund & Cancellation Policy" lastUpdated="12 November 2026">
       <P>
-        AforAudience is a product of Shyamkasturi Productions Private Limited. This policy explains when a ticket
-        booking made on AforAudience is refunded, how much is refunded, and how long it takes.
+        AforAudience is a product of Shyamkasturi Productions Private Limited. This policy explains how bookings made
+        on AforAudience are cancelled, and who refunds what.
       </P>
 
-      <H2 id="audience-cancels">1. If you cancel your booking</H2>
+      <H2 id="no-payments">1. AforAudience processes no payments</H2>
       <P>
-        Sections 1, 2 and 6 apply to <strong>online payments</strong> made through AforAudience. For an online
-        payment, how much you get back depends on how long before the show starts you cancel:
+        AforAudience charges no fee and processes no payments. Every payment (tickets paid at entry, venue hire,
+        artist fees) is made directly between the people involved, by cash, UPI or bank transfer. Because
+        AforAudience never receives or holds the money, it cannot issue or force a refund. What it does is publish
+        the standard term below, which both parties agree to before paying, and keep the record of the booking.
+      </P>
+
+      <H2 id="audience-cancels">2. Tickets</H2>
+      <P>
+        Tickets on AforAudience are <strong>free</strong> or <strong>pay at entry</strong>, so nothing is paid in
+        advance and there is nothing to refund. If you can&apos;t attend, cancel your reservation in{" "}
+        <strong>My Tickets</strong> to release your seat.
+      </P>
+
+      {/* The online-payment tiers (src/lib/refund-policy.ts) and the Razorpay
+          refund-timing section used to be here. Restore from git (pre-12 Nov)
+          if paidBookingsEnabled is ever turned on. */}
+
+      <H2 id="standard-term">3. Venue hire and artist fees: the standard term</H2>
+      <P>
+        Venue hire and artist fees are paid directly between the Organiser and the Venue Owner or Artist. When a
+        booking is cancelled, this standard term applies:
       </P>
       <UL>
         <LI>
-          <strong>{full} days or more before the show:</strong> a full refund of the amount you paid, minus the
-          booking fee and taxes.
+          <strong>Cancelled {days} days or more before the booked date:</strong> any advance is refunded in full by the
+          party who received it.
         </LI>
         <LI>
-          <strong>
-            {half} to {full} days before the show (less than {full} days, at least {half} days):
-          </strong>{" "}
-          a refund of 50% of the amount you paid.
+          <strong>Cancelled less than {days} days before the booked date:</strong> as agreed between the parties.
         </LI>
-        <LI>
-          <strong>Less than {half} days before the show:</strong> no refund.
-        </LI>
-        <LI>Once the show has started, a booking can no longer be refunded.</LI>
       </UL>
+      <P>The refund is paid directly by the party who received the advance, not by AforAudience.</P>
+
+      <H2 id="organiser-cancels">4. If an event is cancelled</H2>
       <P>
-        Before you confirm a cancellation, the app shows you the exact amount you will get back.
+        The Organiser cancels the event in the app. Every ticket holder, and every Venue Owner and Artist on the
+        event, is notified. Any advance for venue hire or artist fees is then settled under the standard term above.
       </P>
 
-      <H2 id="organiser-cancels">2. If the Organiser cancels the event</H2>
-      <P>
-        If an event you paid for online is cancelled by its Organiser, you get a full refund of everything you paid,
-        including the booking fee.
-      </P>
+      <H2 id="what-afa-does">5. What AforAudience does</H2>
+      <UL>
+        <LI>Keeps the in-app record of each booking, its dates and its cancellation.</LI>
+        <LI>Can mediate between the parties if there is a disagreement.</LI>
+        <LI>May restrict accounts that repeatedly cancel late or don&apos;t refund an advance that is due.</LI>
+      </UL>
 
-      <H2 id="free-events">3. Free events</H2>
+      <H2 id="how-to-cancel">6. How to cancel</H2>
       <P>
-        Free events are never charged, so there is nothing to refund. You can still cancel a free booking to release
-        your seat.
-      </P>
-
-      <H2 id="pay-at-entry">4. Pay at entry and direct payments</H2>
-      <P>
-        For <strong>Pay at entry</strong>{" "}tickets nothing is collected online, so there is nothing for
-        AforAudience to refund. If you can&apos;t attend, cancel your reservation in <strong>My Tickets</strong> to
-        release your seat.
-      </P>
-      <P>
-        Any money paid directly to an Organiser, Venue Owner or Artist (at the venue, or by UPI or cash) is refunded,
-        or not, by them under their own terms. Contact them first; if you need the in-app record of the booking,
-        write to <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>.
-      </P>
-
-      <H2 id="how-to-cancel">5. How to cancel</H2>
-      <P>
-        Log in, open <strong>My Tickets</strong>, choose the booking and select <strong>Cancel</strong>. Your seat is
-        released as soon as the cancellation is confirmed.
-      </P>
-
-      <H2 id="refund-timing">6. How refunds are paid</H2>
-      <P>
-        Refunds of online payments go back to the original payment method through Razorpay, our payment processor. They typically reach
-        your account within 5–7 working days, depending on your bank.
+        Log in, open <strong>My Tickets</strong> (for tickets) or the booking in your dashboard (for venue and artist
+        bookings) and select <strong>Cancel</strong>. The cancellation is recorded with its date.
       </P>
 
       <H2 id="contact">7. Contact</H2>
       <P>
-        Questions about a refund or a cancellation: <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>.
-        See also our <Link href="/terms/">Terms of Service</Link> and the <Link href="/contact/">Contact</Link> page.
+        Questions about a refund or a cancellation, or if you need the in-app record of a booking:{" "}
+        <a href="mailto:info@aforaudience.com">info@aforaudience.com</a>. See also our{" "}
+        <Link href="/terms/">Terms of Service</Link> and the <Link href="/contact/">Contact</Link> page.
       </P>
     </LegalDocLayout>
   )
