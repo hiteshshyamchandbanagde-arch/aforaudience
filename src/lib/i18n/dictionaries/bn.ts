@@ -2143,6 +2143,19 @@ const bn: Dictionary = {
     upiQrRemove: "QR সরান",
     // {payee}: venue name.
     upiQrAlt: "{payee}-এর জন্য UPI QR কোড",
+    cancelConfirmedTitle: "এই কনফার্ম বুকিং বাতিল করবেন?",
+    cancelOutcomeDue: "আপনি তারিখের {days}+ দিন আগে বাতিল করছেন, তাই {days}-দিনের শর্ত অনুযায়ী {amount} অগ্রিম পুরোটা ফেরত পাওনা।",
+    cancelOutcomeAsAgreed: "আপনি তারিখের {days} দিনের মধ্যে বাতিল করছেন, তাই {amount} অগ্রিমের রিফান্ড আপনারা দুজনে যেমন ঠিক করবেন।",
+    cancelOutcomeNone: "কোনো অগ্রিম দেওয়া হয়নি, তাই রিফান্ডের কিছু নেই।",
+    cancelOutcomeNote: "AforAudience এই টাকা রাখে না। ভেন্যু মালিক সরাসরি আয়োজককে রিফান্ড দেন।",
+    keepBooking: "বুকিং রাখুন",
+    chipRefundDue: "রিফান্ড বাকি",
+    chipRefundAsAgreed: "সম্মতি অনুযায়ী রিফান্ড",
+    chipRefundReceived: "রিফান্ড পাওয়া গেছে ✓ {date}",
+    cancelledByLine: "{date} তারিখে {who} বাতিল করেছেন",
+    partyOrganiser: "আয়োজক",
+    partyVenueOwner: "ভেন্যু মালিক",
+    iReceivedRefund: "আমি রিফান্ড পেয়েছি",
   },
   // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
   performanceDirectPay: {

@@ -5,6 +5,8 @@ import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import {
   type DirectPayAction,
+  cancelConfirmedOutcome,
+  directRefundTransition,
   type DirectPaySide,
   directPayExpiresAt,
   directPayTransition,
@@ -12,14 +14,18 @@ import {
   normalisePayerReference,
 } from '@/lib/venue-direct-pay'
 import { expireDirectPayBookings } from '@/lib/venue-direct-pay.server'
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from '@/lib/direct-pay-terms'
 
-const ACTIONS: readonly DirectPayAction[] = ['markPaid', 'confirmReceived', 'cancel']
+const ACTIONS: readonly DirectPayAction[] = ['markPaid', 'confirmReceived', 'cancel', 'cancelConfirmed', 'refundReceived']
 
 /**
  * D2 - the direct-payment steps of a venue booking (AFA never collects):
  *   { action: 'markPaid', reference? }  organiser: "I've paid"     -> PAID_MARKED
  *   { action: 'confirmReceived' }       venue owner: got the money -> CONFIRMED
  *   { action: 'cancel' }                either side, before confirm -> CANCELLED
+ *   { action: 'cancelConfirmed' }       either side, CONFIRMED and before fromDate
+ *                                       -> CANCELLED + refund outcome (DUE / AS_AGREED)
+ *   { action: 'refundReceived' }        organiser (payer): DUE | AS_AGREED -> RECEIVED
  * Expired bookings (48 h at any waiting step) are expired lazily here.
  */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -64,10 +70,36 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'This booking expired after 48 hours.', code: 'EXPIRED' }, { status: 400 })
     }
 
-    const t = directPayTransition(booking.directPayStatus, action, side)
-    if (!t.ok) return NextResponse.json({ error: t.error }, { status: t.status })
+    if (action === 'refundReceived') {
+      const rt = directRefundTransition(booking.directRefundStatus, side)
+      if (!rt.ok) return NextResponse.json({ error: rt.error }, { status: rt.status })
+      const rr = await prisma.venueBooking.updateMany({
+        where: { id: booking.id, directRefundStatus: booking.directRefundStatus },
+        data: { directRefundStatus: 'RECEIVED', refundReceivedAt: new Date() },
+      })
+      if (rr.count === 0) {
+        return NextResponse.json({ error: 'This booking just changed - refresh and try again.' }, { status: 409 })
+      }
+      if (booking.venue.owner.userId !== userId) {
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(booking.venue.owner.userId, {
+              title: 'Refund received',
+              body: `The organiser confirmed they received the refund for ${booking.venue.name}.`,
+              url: '/dashboard/venue/bookings',
+            }),
+          'venue-direct-refundReceived'
+        )
+      }
+      const done = await prisma.venueBooking.findUnique({ where: { id: booking.id } })
+      return NextResponse.json(done)
+    }
 
     const now = new Date()
+    const t = directPayTransition(booking.directPayStatus, action, side, { fromDate: booking.fromDate, now: now.getTime() })
+    if (!t.ok) return NextResponse.json({ error: t.error }, { status: t.status })
+
+    let refundOutcome: 'DUE' | 'AS_AGREED' | null = null
     let data: Parameters<typeof prisma.venueBooking.updateMany>[0]['data']
     if (t.next === 'PAID_MARKED') {
       // A new waiting step: the owner gets a fresh 48 h to confirm.
@@ -95,8 +127,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         )
       }
       data = { status: 'CONFIRMED', directPayStatus: 'CONFIRMED', confirmedAt: now }
+    } else if (action === 'cancelConfirmed') {
+      // CONFIRMED means the owner confirmed receipt: that is the advance.
+      refundOutcome = cancelConfirmedOutcome(booking.fromDate, now, booking.confirmedAt != null)
+      data = {
+        status: 'CANCELLED',
+        directPayStatus: 'CANCELLED',
+        cancelledBy: side,
+        cancelledAt: now,
+        directRefundStatus: refundOutcome,
+      }
     } else {
-      data = { status: 'CANCELLED', directPayStatus: 'CANCELLED' }
+      // Pre-confirm cancel: nothing was paid, so no refund status.
+      data = { status: 'CANCELLED', directPayStatus: 'CANCELLED', cancelledBy: side, cancelledAt: now }
     }
 
     // Guarded on the step we read, so a double tap / race moves it once.
@@ -129,7 +172,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         ? { title: 'Organiser says they have paid', body: `Check you received ₹${booking.amount} for ${venueName}, then confirm.`, url: '/dashboard/venue/bookings' }
         : t.next === 'CONFIRMED'
           ? { title: 'Venue booking confirmed!', body: `${venueName} confirmed your payment of ₹${booking.amount}.`, url: '/dashboard/venue-requests' }
-          : { title: 'Venue booking cancelled', body: `The booking at ${venueName} was cancelled.`, url: side === 'ORGANISER' ? '/dashboard/venue/bookings' : '/dashboard/venue-requests' }
+          : {
+              title: 'Venue booking cancelled',
+              body:
+                refundOutcome === 'DUE'
+                  ? `The booking at ${venueName} was cancelled. Refund of the ₹${booking.amount} advance is due under the ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}-day term.`
+                  : refundOutcome === 'AS_AGREED'
+                    ? `The booking at ${venueName} was cancelled. Cancelled inside ${DIRECT_PAY_FULL_REFUND_MIN_DAYS} days: any refund is as you both agree.`
+                    : `The booking at ${venueName} was cancelled.`,
+              url: side === 'ORGANISER' ? '/dashboard/venue/bookings' : '/dashboard/venue-requests',
+            }
     if (otherUserId !== userId) {
       notifyAfterResponse(() => sendPushToUser(otherUserId, push), `venue-direct-${action}`)
     }

@@ -85,6 +85,21 @@ enum DirectPayStatus {
   CANCELLED
 }
 
+// Direct-pay refund tracking (Hitesh, 12 Nov). AFA moves no money: it only
+// records whether a refund of the advance is due under the 15-day standard
+// term (DUE), left to the parties (AS_AGREED), or confirmed by the payer.
+enum DirectRefundStatus {
+  DUE
+  AS_AGREED
+  RECEIVED
+}
+
+enum DirectPayParty {
+  ORGANISER
+  VENUE_OWNER
+  ARTIST
+}
+
 enum ApplicationStatus {
   PENDING
   APPROVED
@@ -1348,6 +1363,13 @@ model VenueBooking {
   payerReference  String?
   confirmedAt     DateTime?
   expiresAt       DateTime?
+
+  // Cancel after CONFIRMED + refund tracking (12 Nov). Refund status null
+  // = nothing was paid (or not cancelled).
+  directRefundStatus DirectRefundStatus?
+  cancelledBy        DirectPayParty?
+  cancelledAt        DateTime?
+  refundReceivedAt   DateTime?
 
   @@index([directPayStatus, expiresAt])
 }

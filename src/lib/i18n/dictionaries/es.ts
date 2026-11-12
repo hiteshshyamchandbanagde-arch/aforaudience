@@ -2147,6 +2147,19 @@ const es: Dictionary = {
     upiQrRemove: "Quitar QR",
     // {payee}: venue name.
     upiQrAlt: "Código QR de UPI para {payee}",
+    cancelConfirmedTitle: "¿Cancelar esta reserva confirmada?",
+    cancelOutcomeDue: "Cancelas {days}+ días antes de la fecha, así que el anticipo de {amount} debe devolverse completo según la regla de {days} días.",
+    cancelOutcomeAsAgreed: "Cancelas dentro de los {days} días previos a la fecha, así que cualquier reembolso del anticipo de {amount} será según lo que acordéis.",
+    cancelOutcomeNone: "No se pagó ningún anticipo, así que no hay nada que reembolsar.",
+    cancelOutcomeNote: "AforAudience no guarda este dinero. El propietario del local reembolsa directamente al organizador.",
+    keepBooking: "Mantener reserva",
+    chipRefundDue: "Reembolso pendiente",
+    chipRefundAsAgreed: "Reembolso según acuerdo",
+    chipRefundReceived: "Reembolso recibido ✓ {date}",
+    cancelledByLine: "Cancelada por {who} el {date}",
+    partyOrganiser: "el organizador",
+    partyVenueOwner: "el propietario del local",
+    iReceivedRefund: "He recibido el reembolso",
   },
   // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
   performanceDirectPay: {

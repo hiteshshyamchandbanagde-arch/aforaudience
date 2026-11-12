@@ -2143,6 +2143,19 @@ const ta: Dictionary = {
     upiQrRemove: "QR-ஐ நீக்கு",
     // {payee}: venue name.
     upiQrAlt: "{payee}-க்கான UPI QR குறியீடு",
+    cancelConfirmedTitle: "உறுதிசெய்யப்பட்ட இந்த முன்பதிவை ரத்து செய்யவா?",
+    cancelOutcomeDue: "தேதிக்கு {days}+ நாட்கள் முன்பு ரத்து செய்கிறீர்கள், எனவே {days}-நாள் விதிப்படி {amount} முன்பணம் முழுமையாகத் திருப்பித் தரப்பட வேண்டும்.",
+    cancelOutcomeAsAgreed: "தேதிக்கு {days} நாட்களுக்குள் ரத்து செய்கிறீர்கள், எனவே {amount} முன்பணத்தின் ரீஃபண்ட் நீங்கள் இருவரும் ஒப்புக்கொண்டபடி.",
+    cancelOutcomeNone: "முன்பணம் செலுத்தப்படவில்லை, எனவே ரீஃபண்ட் செய்ய எதுவும் இல்லை.",
+    cancelOutcomeNote: "AforAudience இந்தப் பணத்தை வைத்திருப்பதில்லை. அரங்க உரிமையாளர் நேரடியாக ஏற்பாட்டாளருக்கு ரீஃபண்ட் செய்வார்.",
+    keepBooking: "முன்பதிவை வைத்திருங்கள்",
+    chipRefundDue: "ரீஃபண்ட் நிலுவையில்",
+    chipRefundAsAgreed: "ஒப்புக்கொண்டபடி ரீஃபண்ட்",
+    chipRefundReceived: "ரீஃபண்ட் பெறப்பட்டது ✓ {date}",
+    cancelledByLine: "{date} அன்று {who} ரத்து செய்தார்",
+    partyOrganiser: "ஏற்பாட்டாளர்",
+    partyVenueOwner: "அரங்க உரிமையாளர்",
+    iReceivedRefund: "எனக்கு ரீஃபண்ட் கிடைத்தது",
   },
   // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
   performanceDirectPay: {

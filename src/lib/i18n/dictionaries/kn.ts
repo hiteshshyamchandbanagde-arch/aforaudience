@@ -2143,6 +2143,19 @@ const kn: Dictionary = {
     upiQrRemove: "QR ತೆಗೆದುಹಾಕಿ",
     // {payee}: venue name.
     upiQrAlt: "{payee} ಗಾಗಿ UPI QR ಕೋಡ್",
+    cancelConfirmedTitle: "ಈ ದೃಢೀಕೃತ ಬುಕಿಂಗ್ ರದ್ದು ಮಾಡಬೇಕೆ?",
+    cancelOutcomeDue: "ನೀವು ದಿನಾಂಕಕ್ಕೆ {days}+ ದಿನ ಮೊದಲು ರದ್ದು ಮಾಡುತ್ತಿದ್ದೀರಿ, ಆದ್ದರಿಂದ {days}-ದಿನದ ನಿಯಮದಂತೆ {amount} ಮುಂಗಡ ಪೂರ್ಣವಾಗಿ ಹಿಂತಿರುಗಿಸಬೇಕು.",
+    cancelOutcomeAsAgreed: "ನೀವು ದಿನಾಂಕಕ್ಕೆ {days} ದಿನಗಳೊಳಗೆ ರದ್ದು ಮಾಡುತ್ತಿದ್ದೀರಿ, ಆದ್ದರಿಂದ {amount} ಮುಂಗಡದ ರಿಫಂಡ್ ನೀವಿಬ್ಬರೂ ಒಪ್ಪಿದಂತೆ.",
+    cancelOutcomeNone: "ಯಾವುದೇ ಮುಂಗಡ ಪಾವತಿಸಿಲ್ಲ, ಆದ್ದರಿಂದ ರಿಫಂಡ್ ಮಾಡಲು ಏನೂ ಇಲ್ಲ.",
+    cancelOutcomeNote: "AforAudience ಈ ಹಣವನ್ನು ಇಟ್ಟುಕೊಳ್ಳುವುದಿಲ್ಲ. ವೆನ್ಯೂ ಮಾಲೀಕರು ನೇರವಾಗಿ ಆಯೋಜಕರಿಗೆ ರಿಫಂಡ್ ಮಾಡುತ್ತಾರೆ.",
+    keepBooking: "ಬುಕಿಂಗ್ ಇರಿಸಿ",
+    chipRefundDue: "ರಿಫಂಡ್ ಬಾಕಿ",
+    chipRefundAsAgreed: "ಒಪ್ಪಿದಂತೆ ರಿಫಂಡ್",
+    chipRefundReceived: "ರಿಫಂಡ್ ಸಿಕ್ಕಿದೆ ✓ {date}",
+    cancelledByLine: "{date} ರಂದು {who} ರದ್ದು ಮಾಡಿದರು",
+    partyOrganiser: "ಆಯೋಜಕರು",
+    partyVenueOwner: "ವೆನ್ಯೂ ಮಾಲೀಕರು",
+    iReceivedRefund: "ನನಗೆ ರಿಫಂಡ್ ಸಿಕ್ಕಿದೆ",
   },
   // D3 - organiser <-> artist fees / buy-ins paid directly (AFA never collects).
   performanceDirectPay: {

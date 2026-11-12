@@ -70,7 +70,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
       const cancelled = await prisma.venueBooking.update({
         where: { id },
-        data: { status: 'CANCELLED', directPayStatus: 'CANCELLED' },
+        // 12 Nov - record who cancelled (admins are not a party; nothing was paid, so no refund status).
+        data: {
+          status: 'CANCELLED',
+          directPayStatus: 'CANCELLED',
+          cancelledAt: new Date(),
+          ...(user.role === 'ADMIN' ? {} : { cancelledBy: 'VENUE_OWNER' as const }),
+        },
       })
       if (booking.eventId) {
         await prisma.event.updateMany({
