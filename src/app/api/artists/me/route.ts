@@ -45,7 +45,8 @@ export async function GET() {
         },
         performances: {
           include: {
-            event: { include: { venue: true } },
+            // organiser name: the direct-pay cancel dialog names who refunds whom (12 Nov).
+            event: { include: { venue: true, organiser: { select: { orgName: true } } } },
             reviews: {
               include: {
                 user: { select: { name: true, displayName: true } },
