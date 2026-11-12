@@ -306,6 +306,23 @@ test.describe("signed out", () => {
     await expect(signIn).toHaveAttribute("href", /^\/login\/?$/);
   });
 
+  // Part 70 Next #2 - the Sign in link is caption-size text, so its tap box
+  // must still be at least 44x44px (admins use it on a phone while W1 is
+  // closed). Runs in both projects: 390 (mobile-chrome) and 1440 (desktop).
+  test("[holding-signin-tap] holding page Sign in link has a 44x44px tap box @390/@1440", async ({ page, isMobile }) => {
+    await useRuleViewport(page, isMobile);
+    await page.goto("/dev/launch-holding/");
+    const signIn = page.locator("[data-afa-launch-holding] [data-afa-holding-signin]");
+    await expect(signIn).toBeVisible();
+    const box = await signIn.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { width: r.width, height: r.height };
+    });
+    console.log(`[holding-signin-tap] ${isMobile ? 390 : 1440}: ${box.width}x${box.height}`);
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  });
+
   test("[S1b-b1] register 'sign-ups open soon' state: sign-in link stays; screenshot @390/@1440", async ({ page, isMobile }) => {
     await useRuleViewport(page, isMobile);
     await page.goto("/dev/launch-holding/?view=signups");
