@@ -41,9 +41,11 @@ test.describe("signed in as Atul", () => {
     const numbered = bookings.filter(
       (b) => b.status === "CONFIRMED" && b.ticketCode && (b.seatLabels?.length ?? 0) > 0 && new Date(b.event.date) > new Date(),
     );
-    const booking = numbered.find((b) => b.event.id === JAIPUR) ?? numbered[0];
-    expect(booking, "Atul has an upcoming confirmed numbered-seat booking on QA").toBeTruthy();
-    const detail = await page.request.get(`/api/bookings/${booking.id}`);
+    // Jaipur only (kept 45+ days ahead by global-setup): no "any upcoming"
+    // fallback, which would pick whatever row the clock left (e2e hardening).
+    const booking = numbered.find((b) => b.event.id === JAIPUR);
+    expect(booking, "Atul has an upcoming confirmed numbered-seat booking on Jaipur Mic Gala 100").toBeTruthy();
+    const detail = await page.request.get(`/api/bookings/${booking!.id}`);
     const { booking: full } = (await detail.json()) as { booking: { numberedSeats: { tierLabel: string }[] } };
     const tiers = [...new Set(full.numberedSeats.map((s) => s.tierLabel))];
     expect(tiers.length, "the booking's seats have tiers").toBeGreaterThan(0);
@@ -51,7 +53,7 @@ test.describe("signed in as Atul", () => {
     await page.goto("/tickets/");
     // The ticket stub row (Tier / Qty / Ref) holding this booking's code.
     const stub = page
-      .locator(`div:has(> div > p:text-is("Tier")):has(> div > p:text-is("${booking.ticketCode}"))`)
+      .locator(`div:has(> div > p:text-is("Tier")):has(> div > p:text-is("${booking!.ticketCode}"))`)
       .filter({ visible: true })
       .first();
     await expect(stub).toBeVisible({ timeout: 20_000 });
