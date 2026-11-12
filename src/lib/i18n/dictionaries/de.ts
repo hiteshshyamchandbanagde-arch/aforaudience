@@ -2179,6 +2179,10 @@ const de: Dictionary = {
     upiSettingLabel: "UPI-ID für Direktzahlungen",
     upiSettingHelpArtist: "Veranstalter zahlen deine Gage direkt an diese UPI-ID. AforAudience nimmt diese Zahlungen nie entgegen.",
     upiSettingHelpOrganiser: "Künstler zahlen Open-Mic-Buy-ins direkt an diese UPI-ID. AforAudience nimmt diese Zahlungen nie entgegen.",
+    cancelConfirmedTitle: "Diesen bestätigten Slot stornieren?",
+    keepSlot: "Slot behalten",
+    cancelOutcomeNote: "AforAudience hält dieses Geld nicht. {payee} erstattet {payer} direkt.",
+    partyArtist: "dem Künstler",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

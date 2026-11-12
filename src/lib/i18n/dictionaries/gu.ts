@@ -2170,6 +2170,10 @@ const gu: Dictionary = {
     upiSettingLabel: "સીધી ચુકવણી માટે UPI ID",
     upiSettingHelpArtist: "આયોજકો તમારી પ્રસ્તુતિ ફી આ UPI ID પર સીધી ચૂકવે છે. AforAudience ક્યારેય આ ચુકવણી લેતું નથી.",
     upiSettingHelpOrganiser: "કલાકારો ઓપન-માઇક બાય-ઇન આ UPI ID પર સીધું તમને ચૂકવે છે. AforAudience ક્યારેય આ ચુકવણી લેતું નથી.",
+    cancelConfirmedTitle: "આ કન્ફર્મ સ્લોટ રદ કરવો છે?",
+    keepSlot: "સ્લોટ રાખો",
+    cancelOutcomeNote: "AforAudience આ પૈસા રાખતું નથી. {payee} સીધા {payer}ને રિફંડ કરે છે.",
+    partyArtist: "કલાકાર",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {

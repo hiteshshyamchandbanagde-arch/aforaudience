@@ -2176,6 +2176,10 @@ const fr: Dictionary = {
     upiSettingLabel: "Identifiant UPI pour paiements directs",
     upiSettingHelpArtist: "Les organisateurs vous versent votre cachet directement sur cet identifiant UPI. AforAudience ne perçoit jamais ces paiements.",
     upiSettingHelpOrganiser: "Les artistes vous versent les buy-ins open mic directement sur cet identifiant UPI. AforAudience ne perçoit jamais ces paiements.",
+    cancelConfirmedTitle: "Annuler ce créneau confirmé ?",
+    keepSlot: "Garder le créneau",
+    cancelOutcomeNote: "AforAudience ne détient pas cet argent. {payee} rembourse {payer} directement.",
+    partyArtist: "l'artiste",
   },
   // S1b-b1 - W1 holding page + sign-ups-closed states.
   launchWaves: {
