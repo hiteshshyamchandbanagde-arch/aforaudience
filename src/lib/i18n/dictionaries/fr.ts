@@ -2124,6 +2124,7 @@ const fr: Dictionary = {
     chipCancelled: "Annulée",
     payNote: "Payez directement {payee}. AforAudience n’encaisse ni ne détient ce paiement.",
     payDirectLine: "Payez {name} directement par UPI ou en espèces. AFA ne perçoit pas cet argent.",
+    refundTermLine: "Annulation {days} jours ou plus avant la date : remboursement intégral de tout acompte. À moins de {days} jours : selon ce que vous convenez tous les deux.",
     amount: "Montant",
     upiLabel: "Identifiant UPI",
     copy: "Copier",

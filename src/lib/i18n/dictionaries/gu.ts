@@ -2118,6 +2118,7 @@ const gu: Dictionary = {
     chipCancelled: "રદ",
     payNote: "{payee}ને સીધી ચુકવણી કરો. AforAudience આ ચુકવણી લેતું નથી કે રાખતું નથી.",
     payDirectLine: "{name}ને સીધા UPI અથવા રોકડથી ચૂકવો. AFA આ પૈસા લેતું નથી.",
+    refundTermLine: "તારીખના {days}+ દિવસ પહેલાં રદ કરો તો: આપેલી સંપૂર્ણ એડવાન્સ રકમ પરત. {days} દિવસની અંદર: તમે બંને નક્કી કરો તેમ.",
     amount: "રકમ",
     upiLabel: "UPI ID",
     copy: "કૉપિ કરો",
