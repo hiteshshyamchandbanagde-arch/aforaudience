@@ -8,12 +8,19 @@
 import { useEffect, useState } from 'react'
 import { Card, StatusPill, Button, Field, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from '@/lib/direct-pay-terms'
 import { formatDate } from '@/lib/format-date'
 import { formatINR } from '@/lib/money-display'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { refreshBadgeCounts } from '@/lib/badge-refresh'
-import { venueBookingChip, type VenueBookingChip, type DirectPayAction } from '@/lib/venue-direct-pay'
+import {
+  venueBookingChip,
+  cancelConfirmedOutcome,
+  hasBookingStarted,
+  type VenueBookingChip,
+  type DirectPayAction,
+} from '@/lib/venue-direct-pay'
 
 type Item = {
   id: string
@@ -23,12 +30,23 @@ type Item = {
   directPayStatus: string | null
   payerReference: string | null
   expiresAt: string | null
+  confirmedAt?: string | null
+  directRefundStatus?: 'DUE' | 'AS_AGREED' | 'RECEIVED' | null
+  cancelledBy?: 'ORGANISER' | 'VENUE_OWNER' | 'ARTIST' | null
+  cancelledAt?: string | null
+  refundReceivedAt?: string | null
   venue: { name: string; city: string }
   organiser: { orgName: string }
   payee: { name: string; venueName: string; upiId: string | null; upiQrUrl?: string | null }
 }
 
 type Strings = Dictionary['venueDirectPay']
+
+const REFUND_CHIP: Record<'DUE' | 'AS_AGREED' | 'RECEIVED', { tone: StatusPillTone; label: keyof Strings }> = {
+  DUE: { tone: 'gold', label: 'chipRefundDue' },
+  AS_AGREED: { tone: 'muted', label: 'chipRefundAsAgreed' },
+  RECEIVED: { tone: 'sage', label: 'chipRefundReceived' },
+}
 
 const CHIP: Record<VenueBookingChip, { tone: StatusPillTone; label: keyof Strings }> = {
   requested: { tone: 'gold', label: 'chipRequested' },
@@ -56,6 +74,7 @@ export default function DirectPayBookings({ side }: { side: 'ORGANISER' | 'VENUE
   const { locale, t } = useLocale()
   const s = t.venueDirectPay
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [items, setItems] = useState<Item[]>([])
   const [refs, setRefs] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<string | null>(null)
@@ -90,6 +109,33 @@ export default function DirectPayBookings({ side }: { side: 'ORGANISER' | 'VENUE
     }
   }
 
+  // 12 Nov - cancel after CONFIRMED: the dialog states the refund outcome
+  // (same helper the API uses) before anything changes.
+  const cancelConfirmed = async (b: Item) => {
+    const outcome = cancelConfirmedOutcome(b.fromDate, Date.now(), b.confirmedAt != null)
+    const days = String(DIRECT_PAY_FULL_REFUND_MIN_DAYS)
+    const line =
+      outcome === 'DUE' ? s.cancelOutcomeDue : outcome === 'AS_AGREED' ? s.cancelOutcomeAsAgreed : s.cancelOutcomeNone
+    const ok = await confirm({
+      title: s.cancelConfirmedTitle,
+      body: (
+        <span data-afa-cancel-outcome={outcome ?? 'NONE'}>
+          {line.replaceAll('{days}', days).replaceAll('{amount}', formatINR(b.amount))}
+          {outcome && (
+            <>
+              <br />
+              {s.cancelOutcomeNote}
+            </>
+          )}
+        </span>
+      ),
+      confirmLabel: s.cancel,
+      cancelLabel: s.keepBooking,
+      destructive: true,
+    })
+    if (ok) await act(b.id, 'cancelConfirmed')
+  }
+
   const copy = async (id: string, upi: string) => {
     try {
       await navigator.clipboard.writeText(upi)
@@ -112,16 +158,51 @@ export default function DirectPayBookings({ side }: { side: 'ORGANISER' | 'VENUE
         {items.map((b) => {
           const chip = venueBookingChip(b)
           const waiting = chip === 'awaitingPayment' || chip === 'paymentMarked'
+          const canCancelConfirmed = b.directPayStatus === 'CONFIRMED' && !hasBookingStarted(b.fromDate)
+          const refund = b.directRefundStatus ? REFUND_CHIP[b.directRefundStatus] : null
           return (
             <Card key={b.id} data-afa-direct-pay-booking={b.id} style={{ padding: 'var(--afa-space-4)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
                 <div style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>
                   {side === 'ORGANISER' ? b.venue.name : b.organiser.orgName} · {formatDate(b.fromDate, 'medium', locale)}
                 </div>
-                <span data-afa-direct-pay-chip={chip}>
-                  <StatusPill tone={CHIP[chip].tone}>{s[CHIP[chip].label]}</StatusPill>
+                <span style={{ display: 'inline-flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
+                  <span data-afa-direct-pay-chip={chip}>
+                    <StatusPill tone={CHIP[chip].tone}>{s[CHIP[chip].label]}</StatusPill>
+                  </span>
+                  {refund && b.directRefundStatus && (
+                    <span data-afa-refund-chip={b.directRefundStatus}>
+                      <StatusPill tone={refund.tone}>
+                        {s[refund.label].replace('{date}', b.refundReceivedAt ? formatDate(b.refundReceivedAt, 'medium', locale) : '').trim()}
+                      </StatusPill>
+                    </span>
+                  )}
                 </span>
               </div>
+
+              {chip === 'cancelled' && b.cancelledBy && b.cancelledAt && (
+                <div data-afa-cancelled-by={b.cancelledBy} style={{ ...muted, marginTop: 'var(--afa-space-2)' }}>
+                  {s.cancelledByLine
+                    .replace('{who}', b.cancelledBy === 'ORGANISER' ? s.partyOrganiser : s.partyVenueOwner)
+                    .replace('{date}', formatDate(b.cancelledAt, 'medium', locale))}
+                </div>
+              )}
+
+              {(canCancelConfirmed ||
+                (side === 'ORGANISER' && (b.directRefundStatus === 'DUE' || b.directRefundStatus === 'AS_AGREED'))) && (
+                <div style={{ marginTop: 'var(--afa-space-3)', display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {side === 'ORGANISER' && (b.directRefundStatus === 'DUE' || b.directRefundStatus === 'AS_AGREED') && (
+                    <Button type="button" data-afa-refund-received-btn disabled={busy === b.id} onClick={() => act(b.id, 'refundReceived')}>
+                      {s.iReceivedRefund}
+                    </Button>
+                  )}
+                  {canCancelConfirmed && (
+                    <Button variant="outline" type="button" data-afa-cancel-confirmed-btn disabled={busy === b.id} onClick={() => cancelConfirmed(b)}>
+                      {s.cancel}
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {waiting && (
                 <div
