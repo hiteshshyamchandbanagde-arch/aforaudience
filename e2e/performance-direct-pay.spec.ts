@@ -198,3 +198,90 @@ test("[D3] performance direct pay: PAID (Omkar pays Hrithik) and BUY_IN (Hrithik
     });
   }
 });
+
+/**
+ * 12 Nov (Hitesh) - cancel a CONFIRMED direct-pay performance + refund
+ * tracking (artist half of #780). AFA moves no money: it records who
+ * cancelled, when, and whether the amount paid is due back under the
+ * 15-day term (DUE, counted against the event date) or left to the
+ * parties (AS_AGREED). The PAYER confirms receipt: PAID -> the organiser,
+ * BUY_IN -> the artist.
+ *
+ * Fixture: an event Omkar creates (30 days out) with a CONFIRMED direct-pay
+ * Performance for Hrithik inserted straight into QA (confirmedAt set = the
+ * payee confirmed receipt). Reaching CONFIRMED through the UI is covered by
+ * the [D3] test above. Everything is deleted in finally (T6).
+ *
+ * Regression shape: on origin/qa a confirmed slot has no "Cancel slot" in
+ * the direct-pay panel, the API refuses cancelConfirmed / refundReceived
+ * with 400 "Invalid action", and the artist's own /cancel of a confirmed
+ * direct BUY_IN sets buyInRefundStatus REFUNDED (a refund AFA can't make)
+ * and leaves directPayStatus CONFIRMED. So both tests fail there and pass
+ * on the branch.
+ *
+ * Needs migration 20261112130000_add_performance_direct_refund_tracking on QA.
+ */
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+async function seedConfirmedPerformance(
+  page: Page,
+  label: string,
+  terms: { compensationType: "PAID" | "BUY_IN"; feeAmount: number | null; buyInAmount: number | null }
+): Promise<{ eventId: string; perfId: string; title: string }> {
+  const title = `E2E D3-refund ${label} ${Date.now()}`;
+  const ev = await page.request.post("/api/events", {
+    data: {
+      title,
+      description: "D3 refund e2e - confirmed slot cancelled.",
+      type: "OPEN_MIC",
+      // Far enough out that IST calendar days are >= 15 at any time of day.
+      date: ymd(new Date(Date.now() + (DIRECT_PAY_FULL_REFUND_MIN_DAYS + 15) * DAY_MS)),
+      startTime: "19:00",
+      endTime: "21:00",
+      isFree: true,
+      totalSeats: 20,
+    },
+  });
+  expect(ev.status(), await ev.text()).toBeLessThan(300);
+  const evBody = await ev.json();
+  const eventId = (evBody.event?.id ?? evBody.id) as string;
+  const perfId = `e2e-perf-refund-${label}-${Date.now()}`;
+  await withQaDb(async (db) => {
+    await db.query(`UPDATE "Event" SET status = 'APPROVED' WHERE id = $1`, [eventId]);
+    const a = await db.query<{ id: string }>(
+      `SELECT a.id FROM "Artist" a JOIN "User" u ON u.id = a."userId" WHERE u.email = 'hrithik.artist@aforaudience.qa'`
+    );
+    expect(a.rows.length, "Hrithik needs an artist profile on QA").toBe(1);
+    await db.query(
+      `INSERT INTO "Performance" (id, "eventId", "artistId", slot, duration, "compensationType", "feeAmount", "buyInAmount",
+              "paymentMethod", "directPayStatus", "paidMarkedAt", "confirmedAt")
+       VALUES ($1, $2, $3, 1, 10, $4::"CompensationType", $5, $6, 'DIRECT', 'CONFIRMED', now(), now())`,
+      [perfId, eventId, a.rows[0].id, terms.compensationType, terms.feeAmount, terms.buyInAmount]
+    );
+  });
+  return { eventId, perfId, title };
+}
+
+async function readPerfRefund(id: string) {
+  return withQaDb(async (db) => {
+    const { rows } = await db.query<{
+      directPayStatus: string; directRefundStatus: string | null; cancelledBy: string | null;
+      cancelledAt: Date | null; refundReceivedAt: Date | null; buyInRefundStatus: string | null;
+    }>(
+      `SELECT "directPayStatus", "directRefundStatus", "cancelledBy", "cancelledAt", "refundReceivedAt", "buyInRefundStatus"
+         FROM "Performance" WHERE id = $1`,
+      [id]
+    );
+    return rows[0];
+  });
+}
+
+async function dropEvents(eventIds: string[]) {
+  if (!eventIds.length) return;
+  await withQaDb(async (db) => {
+    await db.query(`DELETE FROM "Performance" WHERE "eventId" = ANY($1)`, [eventIds]);
+    await db.query(`DELETE FROM "Application" WHERE "eventId" = ANY($1)`, [eventIds]);
+    await db.query(`DELETE FROM "TicketTier" WHERE "eventId" = ANY($1)`, [eventIds]);
+    await db.query(`DELETE FROM "Event" WHERE id = ANY($1)`, [eventIds]);
+  });
+}
