@@ -285,3 +285,74 @@ async function dropEvents(eventIds: string[]) {
     await db.query(`DELETE FROM "Event" WHERE id = ANY($1)`, [eventIds]);
   });
 }
+
+test("[D3-refund] PAID: organiser cancels a CONFIRMED slot 15+ days out -> Refund due -> organiser marks it received @needs-db", async ({ page, browser, isMobile }) => {
+  test.setTimeout(150_000);
+  const vp = isMobile ? 390 : 1440;
+  const eventIds: string[] = [];
+  const hriCtx = await browser.newContext({ storageState: authFile("hrithik") });
+  const hri = await hriCtx.newPage();
+  try {
+    const { eventId, perfId } = await seedConfirmedPerformance(page, `paid-${vp}`, {
+      compensationType: "PAID", feeAmount: 1500, buyInAmount: null,
+    });
+    eventIds.push(eventId);
+
+    // Nothing to confirm before a cancel.
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(400);
+
+    await setRuleViewport(page, isMobile);
+    await gotoDashboard(page, `/dashboard/organiser/events/${eventId}/lineup`);
+    const card = page.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
+    await expect(card.locator('[data-afa-direct-pay-chip="confirmed"]')).toBeVisible();
+    await card.locator("[data-afa-cancel-confirmed-btn]").click();
+
+    // The dialog states the outcome before anything changes.
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Cancel this confirmed slot?");
+    const outcome = dialog.locator('[data-afa-cancel-outcome="DUE"]');
+    await expect(outcome).toContainText(
+      `You are cancelling ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}+ days before the date, so the ₹1,500 advance is due back in full under the ${DIRECT_PAY_FULL_REFUND_MIN_DAYS}-day term.`
+    );
+    await expect(outcome).toContainText(/AforAudience does not hold this money\. .+ refunds .+ directly\./);
+    await dialog.screenshot({ path: `test-results/d3-refund-dialog-due-${vp}.png` });
+    await dialog.getByRole("button", { name: "Cancel slot" }).click();
+
+    await expect(card.locator('[data-afa-direct-pay-chip="cancelled"]')).toBeVisible();
+    await expect(card.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(card.locator('[data-afa-cancelled-by="ORGANISER"]')).toContainText("Cancelled by the organiser on ");
+    await card.screenshot({ path: `test-results/d3-refund-chip-due-${vp}.png` });
+
+    let row = await readPerfRefund(perfId);
+    expect(row.directPayStatus).toBe("CANCELLED");
+    expect(row.directRefundStatus).toBe("DUE");
+    expect(row.cancelledBy).toBe("ORGANISER");
+    expect(row.cancelledAt).toBeTruthy();
+    expect(row.buyInRefundStatus).toBeNull();
+
+    // The artist (payee) sees the chip but cannot mark the refund received.
+    await setRuleViewport(hri, isMobile);
+    await gotoDashboard(hri, "/dashboard/artist");
+    const aCard = hri.locator(`[data-afa-direct-pay-performance="${perfId}"]`);
+    await expect(aCard.locator('[data-afa-refund-chip="DUE"]')).toHaveText("Refund due");
+    await expect(aCard.locator("[data-afa-refund-received-btn]")).toHaveCount(0);
+    expect((await hri.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(403);
+
+    // A cancelled slot can't be cancelled again.
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "cancelConfirmed" } })).status()).toBe(400);
+
+    // The organiser (payer) confirms the refund arrived.
+    await card.locator("[data-afa-refund-received-btn]").click();
+    await expect(card.locator('[data-afa-refund-chip="RECEIVED"]')).toContainText("Refund received ✓");
+    await expect(card.locator("[data-afa-refund-received-btn]")).toHaveCount(0);
+    await card.screenshot({ path: `test-results/d3-refund-chip-received-${vp}.png` });
+    expect((await page.request.post(`/api/performances/${perfId}/direct-pay`, { data: { action: "refundReceived" } })).status()).toBe(400);
+
+    row = await readPerfRefund(perfId);
+    expect(row.directRefundStatus).toBe("RECEIVED");
+    expect(row.refundReceivedAt).toBeTruthy();
+  } finally {
+    await hriCtx.close();
+    await dropEvents(eventIds);
+  }
+});
