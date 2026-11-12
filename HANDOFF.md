@@ -1,5 +1,32 @@
-## Part 69 — START HERE (10 Nov 07:55 IST, chat), qa @ this commit, main @ 636354f
-Part 68 below is still the full entry point (session start, decisions, §5 list). This Part = delta only.
+## Part 70 — START HERE (12 Nov 07:30 IST, chat), qa @ this commit, main @ 636354f
+Read order: **70 → 69 → 68** (68 = session-start protocol, decisions, §5). Delta only.
+
+### State at handoff
+- qa clean: S1b launch waves fully merged (#773 data+gates, #774 W1 proxy holding page, #775 W2–W4 states, #776 ISR-revalidation fix + full-screen holding + direct-pay copy, #777 polish). **0 open PRs.** main/prod untouched (frozen).
+- QA `PlatformSettings`: all four waves **true**, `paidBookingsEnabled` true (QA only). Prod gets wave columns (all OFF) at S5.
+- Last QA e2e: manual 43030020018 = 715/0/1 flaky ✅. **Go-live gate streak = 0**: 11 Nov's two scheduled runs failed because chat left W1 off on QA (see 69 incident). Need fresh consecutive green *scheduled* runs; GitHub fires them hours late (01:23Z cron seen at 07:51Z/12:08Z). 12 Nov's had not fired at 07:30 IST.
+
+### Decisions in force (all in 69)
+- **Payments: all direct cash/UPI, no AFA transaction** (Hitesh 10 Nov). Copy says "with a fee" + "AFA doesn't collect this money". `paidBookingsEnabled` OFF on prod; S7 contributions parked; Razorpay Technology Partner reply still awaited (ticket 21742092).
+- Waves: W4 opens a few days after W1–W3 (default, overrulable).
+
+### Open for Hitesh
+1. **Phone check 2** (only item left): admin sees real home with W1 off; Launch waves Save greyed when clean. Flip W1 off only while he's actively checking; **restore ≤15 min or before any scheduled run**.
+2. Refund tiers 14/7 vs 15 — before S5.
+3. 🔴 Rotate Google Maps key + Razorpay test key (.env.local, Vercel Preview); add `BLOB_READ_WRITE_TOKEN` (Preview + Production). Check Razorpay/Maps billing.
+4. S4 Feedback catch-up OK (still 10 NEW / 9 UNDER_REVIEW bugs, all ≤3 Oct).
+
+### Next (chat)
+1. Watch scheduled nightlies → 3 consecutive greens.
+2. Tiny follow-up: holding-page **Sign in** link too small to tap on mobile (390) → ≥44px tap target. Small dispatch; don't push docs to qa within 5 min of a merge.
+3. S3 prod settings read-only check (env vars, keys, cron, paid OFF default, wave columns absent until S5).
+4. Phone checks → S5 (reset prod DB + promote qa→main) with Hitesh's explicit OK.
+
+### Gotchas learned 9–11 Nov (details in 69)
+Apply QA migration before the PR's preview run · never make public pages per-request (use proxy.ts) · proxy must pass `x-prerender-revalidate` · shared e2e queue keeps ONE pending run: push next only when needed run's job is `in_progress` · `Design Token Check` may sit `action_required` on bot commits → `POST /actions/runs/{id}/approve` · no docs push to qa within 5 min of a merge (Vercel skips the merge build) · re-verify via `workflow_dispatch` on e2e.yml.
+
+## Part 69 — (10 Nov 07:55 IST, chat), superseded as entry point by Part 70
+Delta only.
 
 ### S1b launch waves: DONE (overnight 9→10 Nov, chat ran autopilot unattended at Hitesh's request)
 - **#773** (S1b-a) data + server gates: `PlatformSettings.wave{Discovery,Onboarding,Tickets,DirectBookings}Open` (migration `20261111120000_add_launch_waves`, default false). `src/lib/launch-waves.ts`; refusal `403 {code:"WAVE_CLOSED", wave}`; ADMIN always bypasses; in-flight steps never gated. W1 = new accounts (register + Google `adapter.createUser`); W2 = organiser/venue-owner/artist apply; W3 = `POST /api/bookings`; W4 = venue bookings amount>0 + PAID/BUY_IN performance creation (FREE slots / ₹0 venue = W2). Hint `GET /api/platform-settings/launch-waves`. Also fixed `language-rollout.spec.ts` flake (waits on real signals).
