@@ -1,6 +1,8 @@
 import { test, expect } from "./helpers/test";
 import { authFile } from "./helpers/personas";
 import { useRuleViewport } from "./helpers/viewports";
+import { CLOCK_FORWARD_DAYS, HRITHIK_UPCOMING_EVENT_ID } from "./helpers/upcoming-fixtures";
+import type { Page } from "@playwright/test";
 
 /**
  * My Tickets, the actions under PAID on a confirmed ticket (Download PDF,
@@ -19,12 +21,46 @@ import { useRuleViewport } from "./helpers/viewports";
  *
  * Atul, at 390 and 1440. Read-only: nothing is pressed, nothing cancelled
  * or sent.
+ *
+ * Date drift (e2e hardening, 12 Nov): the page shows whatever Atul holds, so
+ * the first card (the baseline) changed with the clock and with rows other
+ * specs left behind (e.g. 8 "E2E D1 Pay at entry" tickets dated 8 Nov). The
+ * browser's /api/bookings/my is cut to Atul's two seeded bookings on events
+ * global-setup keeps 45+ days ahead (helpers/upcoming-fixtures.ts), so the
+ * cards are the same every night. A second run moves the browser clock
+ * CLOCK_FORWARD_DAYS on and must match the same baseline.
  */
+
+/** Atul's seeded confirmed tickets on the kept-upcoming fixtures (qa-seed.ts). */
+const FIXTURE_EVENTS = ["qa-jaipur-event-0001", HRITHIK_UPCOMING_EVENT_ID];
+
+async function onlyFixtureTickets(page: Page) {
+  await page.route(/\/api\/bookings\/my\/?$/, async (route) => {
+    const res = await route.fetch();
+    const all = (await res.json()) as { status: string; event: { id: string } }[];
+    const kept = all.filter((b) => b.status === "CONFIRMED" && FIXTURE_EVENTS.includes(b.event.id));
+    expect(kept.length, "Atul holds a confirmed ticket on Jaipur Mic Gala 100 and Mixed Bag Comedy Lineup").toBeGreaterThanOrEqual(2);
+    await route.fulfill({ response: res, json: kept });
+  });
+}
 
 test.use({ storageState: authFile("atul") });
 
-test("[BUG-2610-012] My Tickets: every ticket action label fits inside its button on one line, tap targets 44px", async ({ page, isMobile }) => {
+test.beforeEach(async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
+});
+
+test("[BUG-2610-012] My Tickets: every ticket action label fits inside its button on one line, tap targets 44px", async ({ page, isMobile }) => {
+  await checkTicketActions(page, isMobile);
+});
+
+test(`[BUG-2610-012] ${CLOCK_FORWARD_DAYS} days on: My Tickets actions and baseline unchanged`, async ({ page, isMobile }) => {
+  await page.clock.setFixedTime(new Date(Date.now() + CLOCK_FORWARD_DAYS * 24 * 60 * 60 * 1000));
+  await checkTicketActions(page, isMobile);
+});
+
+async function checkTicketActions(page: Page, isMobile: boolean) {
+  await onlyFixtureTickets(page);
   await page.goto("/tickets/");
   const downloads = page.locator('a[href^="/api/bookings/"][href*="/ticket"]').filter({ visible: true });
   await expect(downloads.first(), "Atul has an upcoming confirmed ticket").toBeVisible({ timeout: 20_000 });
@@ -92,4 +128,4 @@ test("[BUG-2610-012] My Tickets: every ticket action label fits inside its butto
     mask: [area.locator("img")],
     maxDiffPixelRatio: 0.02,
   });
-});
+}
