@@ -84,6 +84,16 @@ test("terms links its refund section to /refund-policy/", async ({ page, isMobil
   await expect(page.locator('main a[href="/refund-policy/"]')).toBeVisible();
 });
 
+test("terms refund bullet states the direct-pay standard term, not the online tiers", async ({ page, isMobile }) => {
+  await useRuleViewport(page, isMobile);
+  await page.goto("/terms/");
+  const bullet = page.locator("main li").filter({ hasText: "Refunds and cancellations:" });
+  await expect(bullet).toContainText(
+    `cancelled ${DIRECT_PAY_FULL_REFUND_MIN_DAYS} days or more before the booked date, any advance is refunded in full`,
+  );
+  await expect(bullet).not.toContainText("how far ahead of the show");
+});
+
 /**
  * D4 (8 Nov 2026) - launch moves no money through AFA. Priced shows are Pay
  * at entry and Organiser<->Venue Owner / Organiser<->Artist deals are paid
