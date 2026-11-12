@@ -21,6 +21,7 @@ import te from '../src/lib/i18n/dictionaries/te'
 import de from '../src/lib/i18n/dictionaries/de'
 import es from '../src/lib/i18n/dictionaries/es'
 import fr from '../src/lib/i18n/dictionaries/fr'
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from '../src/lib/direct-pay-terms'
 
 let passed = 0
 function test(name: string, fn: () => void) {
@@ -69,6 +70,41 @@ test('the three pay screens render the disclosure line', () => {
   assert.match(read('src/components/dashboard/DirectPayBookings.tsx'), /data-afa-direct-pay-disclosure[^\n]*s\.payDirectLine\.replace\('\{name\}'/)
   assert.match(read('src/components/dashboard/PerformanceDirectPay.tsx'), /data-afa-direct-pay-disclosure[^\n]*v\.payDirectLine\.replace\('\{name\}'/)
   assert.match(read('src/app/tickets/page.tsx'), /data-afa-direct-pay-disclosure[^\n]*tr\.payAtEntry\.payAtVenueLine/)
+})
+
+// 12 Nov (Hitesh) - the direct-pay 15-day standard term, shown under the
+// disclosure line on both direct-pay screens.
+test('standard term is 15 days', () => {
+  assert.equal(DIRECT_PAY_FULL_REFUND_MIN_DAYS, 15)
+})
+
+test('en refundTermLine is the agreed wording', () => {
+  assert.equal(
+    en.venueDirectPay.refundTermLine,
+    'Cancel {days}+ days before the date: full refund of any advance. Inside {days} days: as you both agree.',
+  )
+})
+
+test('every dictionary has refundTermLine with {days} twice, no hard-coded 15', () => {
+  for (const [id, d] of Object.entries(ALL)) {
+    const line = d.venueDirectPay.refundTermLine
+    assert.equal(line.split('{days}').length - 1, 2, `${id} refundTermLine keeps {days} twice`)
+    assert.ok(!/15|१५|౧౫/.test(line), `${id} refundTermLine has no hard-coded 15`)
+    if (id !== 'en') assert.notEqual(line, en.venueDirectPay.refundTermLine, `${id} translated`)
+  }
+})
+
+test('hi + mr: no English in refundTermLine', () => {
+  for (const d of [hi, mr]) {
+    const s = d.venueDirectPay.refundTermLine.replaceAll('{days}', '')
+    assert.deepEqual(latinWords(s), [], s)
+  }
+})
+
+test('both direct-pay screens render the refund term from the constant', () => {
+  const read = (p: string) => readFileSync(join(ROOT, p), 'utf8')
+  assert.match(read('src/components/dashboard/DirectPayBookings.tsx'), /data-afa-direct-pay-refund-term[^\n]*s\.refundTermLine\.replaceAll\('\{days\}', String\(DIRECT_PAY_FULL_REFUND_MIN_DAYS\)\)/)
+  assert.match(read('src/components/dashboard/PerformanceDirectPay.tsx'), /data-afa-direct-pay-refund-term[^\n]*v\.refundTermLine\.replaceAll\('\{days\}', String\(DIRECT_PAY_FULL_REFUND_MIN_DAYS\)\)/)
 })
 
 console.log(`\n${passed} passed`)
