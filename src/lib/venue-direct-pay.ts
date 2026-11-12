@@ -4,6 +4,10 @@
 //   directly and taps "I've paid" (+ optional reference) -> owner confirms
 //   receipt -> CONFIRMED. Either side may cancel before confirm; every
 //   waiting step expires after 48 h and releases the slot.
+//   After CONFIRMED (12 Nov), either side may still cancel before the
+//   booked date (cancelConfirmed); AFA records whether the advance is due
+//   back under the 15-day standard term, and the organiser (the payer)
+//   confirms receipt of any refund (refundReceived).
 //
 // Pure helpers only (no Prisma import) so unit self-tests and client
 // components can use them. The online (Razorpay) venue path is untouched:
@@ -12,7 +16,11 @@
 
 export type DirectPayStatus = 'AWAITING_PAYMENT' | 'PAID_MARKED' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED'
 export type DirectPaySide = 'ORGANISER' | 'VENUE_OWNER'
-export type DirectPayAction = 'markPaid' | 'confirmReceived' | 'cancel'
+export type DirectPayAction = 'markPaid' | 'confirmReceived' | 'cancel' | 'cancelConfirmed' | 'refundReceived'
+export type DirectRefundStatus = 'DUE' | 'AS_AGREED' | 'RECEIVED'
+type Fail = { ok: false; status: 400 | 403; error: string }
+
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from './direct-pay-terms'
 
 export const DIRECT_PAY_EXPIRY_HOURS = 48
 export const DIRECT_PAY_EXPIRY_MS = DIRECT_PAY_EXPIRY_HOURS * 60 * 60 * 1000
@@ -53,18 +61,68 @@ export function isDirectPayExpired(
   return now > new Date(b.expiresAt).getTime()
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000
+const IST_OFFSET_MS = 330 * 60 * 1000
+
+/** Whole IST calendar days from `now` to `date` (same IST day = 0; past = negative). */
+export function istCalendarDaysUntil(date: Date | string | number, now: Date | string | number = Date.now()): number {
+  const day = (v: Date | string | number) => Math.floor((new Date(v).getTime() + IST_OFFSET_MS) / DAY_MS)
+  return day(date) - day(now)
+}
+
+/**
+ * Refund outcome when a CONFIRMED direct-pay booking is cancelled
+ * (/refund-policy §3, src/lib/direct-pay-terms.ts):
+ *   DUE        an advance was paid and the booked date is
+ *              DIRECT_PAY_FULL_REFUND_MIN_DAYS+ IST calendar days away
+ *   AS_AGREED  an advance was paid, cancelled inside that window
+ *   null       nothing was paid, so there is nothing to refund
+ * "Advance paid" = the venue owner confirmed receipt (confirmedAt set,
+ * which is what makes a direct booking CONFIRMED). The organiser's
+ * "I've paid" tap (paidMarkedAt) alone is only a claim.
+ */
+export function cancelConfirmedOutcome(
+  fromDate: Date | string | number,
+  now: Date | string | number,
+  advancePaid: boolean
+): 'DUE' | 'AS_AGREED' | null {
+  if (!advancePaid) return null
+  return istCalendarDaysUntil(fromDate, now) >= DIRECT_PAY_FULL_REFUND_MIN_DAYS ? 'DUE' : 'AS_AGREED'
+}
+
+/** Has the booked date started (or passed)? Measured in real time against fromDate. */
+export function hasBookingStarted(fromDate: Date | string | number, now: Date | string | number = Date.now()): boolean {
+  return new Date(now).getTime() >= new Date(fromDate).getTime()
+}
+
 /**
  * The state machine. Who may do what, from which step:
  *   markPaid        ORGANISER    AWAITING_PAYMENT -> PAID_MARKED (window restarts)
  *   confirmReceived VENUE_OWNER  AWAITING_PAYMENT | PAID_MARKED -> CONFIRMED
  *                                (cash handed over before the organiser taps counts)
  *   cancel          either       AWAITING_PAYMENT | PAID_MARKED -> CANCELLED
+ *   cancelConfirmed either       CONFIRMED -> CANCELLED, only before fromDate
+ *                                (needs ctx.fromDate; refused once started)
+ * refundReceived is not a step change: see directRefundTransition.
  */
 export function directPayTransition(
   current: string | null | undefined,
   action: DirectPayAction,
-  side: DirectPaySide
-): { ok: true; next: DirectPayStatus } | { ok: false; status: 400 | 403; error: string } {
+  side: DirectPaySide,
+  ctx?: { fromDate?: Date | string | number | null; now?: number }
+): { ok: true; next: DirectPayStatus } | Fail {
+  if (action === 'cancelConfirmed') {
+    if (current !== 'CONFIRMED') {
+      return { ok: false, status: 400, error: 'Only a confirmed booking can be cancelled this way.' }
+    }
+    if (!ctx?.fromDate || hasBookingStarted(ctx.fromDate, ctx.now ?? Date.now())) {
+      return { ok: false, status: 400, error: 'This booking has already started and can no longer be cancelled.' }
+    }
+    return { ok: true, next: 'CANCELLED' }
+  }
+  if (action === 'refundReceived') {
+    return { ok: false, status: 400, error: 'Invalid action' }
+  }
   if (!isWaitingDirectPay(current)) {
     return { ok: false, status: 400, error: 'This booking is no longer waiting on payment.' }
   }
@@ -79,6 +137,20 @@ export function directPayTransition(
   }
   if (action === 'cancel') return { ok: true, next: 'CANCELLED' }
   return { ok: false, status: 400, error: 'Invalid action' }
+}
+
+/**
+ * refundReceived: the ORGANISER (the payer) confirms the refund arrived.
+ * DUE | AS_AGREED -> RECEIVED. Anyone else 403; a second tap 400.
+ */
+export function directRefundTransition(
+  current: string | null | undefined,
+  side: DirectPaySide
+): { ok: true; next: 'RECEIVED' } | Fail {
+  if (side !== 'ORGANISER') return { ok: false, status: 403, error: 'Only the organiser can confirm the refund was received.' }
+  if (current === 'RECEIVED') return { ok: false, status: 400, error: 'The refund is already marked as received.' }
+  if (current !== 'DUE' && current !== 'AS_AGREED') return { ok: false, status: 400, error: 'There is no refund to confirm on this booking.' }
+  return { ok: true, next: 'RECEIVED' }
 }
 
 /** Optional UPI / cash reference typed by the organiser: trimmed, capped, null when empty. */
