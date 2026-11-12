@@ -1,6 +1,6 @@
 import { test, expect } from "./helpers/test";
 import { useRuleViewport } from "./helpers/viewports";
-import { REFUND_FULL_MIN_DAYS, REFUND_HALF_MIN_DAYS } from "../src/lib/refund-policy";
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from "../src/lib/direct-pay-terms";
 
 /**
  * L1 (8 Nov 2026) - legal pages for Razorpay website verification.
@@ -9,6 +9,9 @@ import { REFUND_FULL_MIN_DAYS, REFUND_HALF_MIN_DAYS } from "../src/lib/refund-po
  * Refund or Contact page. Each page must now load, name Shyamkasturi
  * Productions Private Limited and carry no placeholder text; the refund
  * page states the same day tiers the refund API uses (refund-policy.ts).
+ * 12 Nov 2026: AFA processes no payments, so the refund page now states
+ * the direct-pay 15-day standard term (direct-pay-terms.ts) and no online
+ * tiers; the online tiers stay dormant in refund-policy.ts.
  *
  * Guest; nothing is written. At 390 and 1440 (one project each).
  */
@@ -52,16 +55,21 @@ test("contact page shows the support email, address and grievance officer", asyn
   });
 });
 
-test("refund page states the same day tiers as refund-policy.ts", async ({ page, isMobile }) => {
+test("refund page states the direct-pay standard term from direct-pay-terms.ts", async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
   await page.goto("/refund-policy/");
   const main = page.locator("main");
-  await expect(main).toContainText(`${REFUND_FULL_MIN_DAYS} days or more before the show`);
-  await expect(main).toContainText(`${REFUND_HALF_MIN_DAYS} to ${REFUND_FULL_MIN_DAYS} days before the show`);
-  await expect(main).toContainText(`Less than ${REFUND_HALF_MIN_DAYS} days before the show`);
-  await expect(main).toContainText("50%");
-  await expect(main).toContainText("including the booking fee");
-  await expect(main).toContainText("5–7 working days");
+  const days = DIRECT_PAY_FULL_REFUND_MIN_DAYS;
+  await expect(main).toContainText("AforAudience charges no fee and processes no payments");
+  await expect(main).toContainText(
+    `Cancelled ${days} days or more before the booked date: any advance is refunded in full by the party who received it.`,
+  );
+  await expect(main).toContainText(`Cancelled less than ${days} days before the booked date: as agreed between the parties.`);
+  // The dormant online tiers and Razorpay refund timing are no longer shown.
+  const text = await main.innerText();
+  expect(text).not.toContain("50%");
+  expect(text).not.toMatch(/Razorpay/i);
+  expect(text).not.toContain("5–7 working days");
   await page.addStyleTag({ content: HIDE_OVERLAYS });
   const content = page.locator("h1").locator("xpath=..");
   await expect(content).toHaveScreenshot(`refund-policy-${isMobile ? 390 : 1440}.png`, {
@@ -94,7 +102,7 @@ test("refund page covers pay at entry", async ({ page, isMobile }) => {
   await useRuleViewport(page, isMobile);
   await page.goto("/refund-policy/");
   const main = page.locator("main");
-  await expect(main).toContainText("Pay at entry");
+  await expect(main).toContainText("pay at entry");
   // The deployed build once dropped the space after </strong> here.
-  await expect(main).toContainText("Pay at entry tickets nothing is collected online");
+  await expect(main).toContainText("free or pay at entry, so nothing is paid in advance");
 });
