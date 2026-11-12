@@ -1,4 +1,13 @@
-## Part 72 — START HERE (12 Nov 13:50 IST, chat), qa @ this commit, main @ 636354f
+## Part 73 — START HERE (12 Nov 15:45 IST, chat), qa @ this commit, main @ 636354f
+Read order: **73 → 72 → 71**. Delta only.
+
+- **#781 merged** (`a64e12c`): artist direct-pay `cancelConfirmed` + `refundReceived` (payer only: organiser for PAID, artist for BUY_IN). **Bug fixed:** `/api/performances/[id]/cancel` on a CONFIRMED direct buy-in set `buyInRefundStatus: REFUNDED` and left CONFIRMED; it now gets the 15-day outcome. Migration `20261112130000_add_performance_direct_refund_tracking` already on QA; prod at S5 (with `20261112120000`). Preview green; deploy READY; no new runtime errors.
+- The 15-day refund term is now complete end to end: policy page, terms, disclosure lines, venue + artist cancel and refund tracking.
+- **Running:** autopilot = `cc-prompt-e2e-hardening.md` (pre-flight in global-setup: fail fast if any launch wave is OFF on QA; date-drift audit → spec-owned rows relative to now / `page.clock`; max ~6 specs; no QA seed re-run, no masking).
+- Still to do (chat): Feedback rows for #778–#781 + REJECT BUG-2609-051 / GEN-2610-008; S3 prod read-only check; gate count (day 1 = 12 Nov, 5eae472 720/0; the a64e12c post-merge run will also be on 12 Nov).
+- Open for Hitesh: unchanged from Part 71 (phone check 2; keys; Razorpay TP enrolment form; branch cleanup incl. `feat/venue-direct-pay-cancel-refund`, `feat/performance-direct-pay-cancel-refund`; read the cancel/refund copy as Omkar/Hrithik on a phone).
+
+## Part 72 — (12 Nov 13:50 IST, chat), superseded as entry point by Part 73, qa @ this commit, main @ 636354f
 Read order: **72 → 71 → 70**. Delta only.
 
 - **#780 merged** (`68b60c2`): venue direct-pay `cancelConfirmed` (either side, CONFIRMED, before fromDate → DUE if ≥15 IST calendar days else AS_AGREED; "advance paid" = `confirmedAt`) + `refundReceived` (organiser only). Migration `20261112120000_add_direct_pay_refund_tracking` (enums `DirectRefundStatus`, `DirectPayParty`; 4 VenueBooking cols) **applied on QA by chat before the run; prod gets it at S5**. Preview e2e green; deploy READY; no new runtime errors.
