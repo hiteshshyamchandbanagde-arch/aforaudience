@@ -1,4 +1,23 @@
-## Part 74 — START HERE (12 Nov 21:00 IST, chat, end of session), qa @ this commit, main @ 636354f
+## Part 75 — START HERE (15 Nov 16:25 IST, chat), qa @ this commit, main @ 636354f
+Read order: **75 → 74 → 73**. Delta only.
+
+- **Nightlies on 2d1c238:** 12 Nov ✅, 13 Nov ✅✅, 14 Nov ✅ + ❌ (43591452734), 15 Nov ✅ (43692184961). 12 Nov post-#782 push run "red" = no tests ran (Vercel built no deployment for test-only 363d93e; e2e.yml waited 12 min) → workflow gap, see Next 3.
+- **#783 merged** (`1c67473`): 14 Nov red root cause = **product race** (GEN-2610-005): Use my location tapped while the chip read "…" judged GPS against a stale null city → switched a saved city to the GPS city without asking. `LocationChip.tsx`: `locationRef` + await pending `/api/user/location` before `locateOutcome`; open-reset moved from effect to click (also fixes a pre-existing set-state-in-effect lint error). Regression spec holds the saved-city GET 4 s. The S1b-b1 (hi) flake = test race (old English form hidden in DOM during locale swap); test waits for one form + new `register-locale-swap.spec.ts`. Deploy READY, 0 runtime errors.
+- Dispatch: `cc-prompt-flaky-location-register.md`.
+
+### Gate
+Treat as **met when the next scheduled nightly on ≥1c67473 is green** (12/13/15 green on the old head; 14 Nov red explained + fixed). Then S3.
+
+### Next (chat)
+1. Check next nightly → gate → **S3 prod read-only check** (env vars incl. `BLOB_READ_WRITE_TOKEN`, keys, cron, `paidBookingsEnabled` OFF, the prod schema missing waves `20261111120000` + refund `20261112120000`/`20261112130000` — list every migration since main @ 636354f).
+2. Feedback rows for #778–#783 (CodeCounter displayIds).
+3. e2e.yml: when the qa push commit has no Vercel deployment (test/docs-only), fall back to the latest READY qa deployment instead of failing "No tests were run". Small dispatch, outside 01:00–05:30Z.
+4. Push windows for chat: none in 01:00–05:30Z and 08:00–09:00Z.
+
+### Open for Hitesh
+Phone check 2 (+ holding Sign in, cancel/refund copy as Omkar/Hrithik en/hi/mr, Use-my-location-right-after-load asks) · rotate Maps (Places 403) + Razorpay test key, add `BLOB_READ_WRITE_TOKEN`, billing · Razorpay TP enrolment form · delete merged branches (+ `fix/flaky-location-register`) · later: CA/lawyer on Refund Policy wording · final prod go-ahead.
+
+## Part 74 — (12 Nov 21:00 IST, chat), superseded as entry point by Part 75, qa @ this commit, main @ 636354f
 Read order: **74 → 73 → 72 → 71**. Delta only. Session-start protocol unchanged (Part 68).
 
 ### Shipped today (12 Nov): #778 tap target · #779 refund terms · #780 venue cancel+refund · #781 artist cancel+refund (+ /cancel false-REFUNDED fix) · **#782** (`363d93e`) e2e hardening
