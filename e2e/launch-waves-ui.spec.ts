@@ -36,6 +36,10 @@ const HOLDING_TITLE = {
   hi: "AforAudience जल्द ही खुल रहा है",
   mr: "AforAudience लवकरच सुरू होत आहे",
 };
+const FULL_NAME_PLACEHOLDER = {
+  en: "Your full name",
+  hi: "आपका पूरा नाम",
+};
 const SIGNUPS_SOON = {
   en: "New sign-ups open soon",
   hi: "नए साइन-अप जल्द ही खुलेंगे",
@@ -233,8 +237,17 @@ test.describe("signed out", () => {
       });
 
       await page.goto("/register/");
+      // Nightly 14 Nov (run 43591452734): with a saved language the server's
+      // English form is re-rendered in that language on the client, and for
+      // ~20 ms (measured on QA's build) the old English form is still in the
+      // DOM, hidden, next to the new one (two input[name="fullName"]). A
+      // person only ever sees one; e2e/register-locale-swap.spec.ts checks
+      // that. Wait for exactly one form, in this locale, before typing.
+      const fullName = page.locator('input[name="fullName"]');
+      await expect(page.getByPlaceholder(FULL_NAME_PLACEHOLDER[locale], { exact: true })).toBeVisible();
+      await expect(fullName).toHaveCount(1);
       const suffix = `${Date.now()}`.slice(-8);
-      await page.locator('input[name="fullName"]').fill("Wave Test");
+      await fullName.fill("Wave Test");
       await page.locator('input[name="username"]').fill(`e2ewave${suffix}`);
       await page.locator('input[name="email"]').fill(`e2e-wave-${suffix}@example.com`);
       await page.locator('input[name="phoneNumber"]').fill(`9${suffix}0`.slice(0, 10));
