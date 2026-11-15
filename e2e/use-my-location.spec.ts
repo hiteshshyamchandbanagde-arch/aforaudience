@@ -205,3 +205,37 @@ test("[GEN-2610-005] saved Jaipur, GPS in Pune: Switch on the travel prompt pick
   await status.getByRole("button", { name: "Switch", exact: true }).click();
   await expect(chip(page, isMobile)).toHaveText(chipReads("Pune"));
 });
+
+// Nightly 14 Nov (run 43591452734): after a reload the chip still read "…"
+// when "Use my location" was tapped, and the saved Jaipur was silently
+// replaced by Pune. The tap's answer was judged against the city as it was
+// at tap time (not loaded yet = "no saved city" = switch straight away).
+// Here the city read is held back on purpose so the tap always lands
+// first: the answer has to wait for the saved city and still ask.
+test("[GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: still asks, never switches on its own", async ({
+  page,
+  context,
+  isMobile,
+}) => {
+  await at(context, PUNE);
+  await page.goto("/");
+  await settledChipText(page, isMobile);
+  await openPicker(page, isMobile);
+  await chipScope(page, isMobile).getByRole("button", { name: "Jaipur", exact: true }).click();
+  await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
+
+  // Hold every later read of the saved city for 4 s.
+  await page.route("**/api/user/location**", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    await new Promise((r) => setTimeout(r, 4_000));
+    await route.continue().catch(() => {});
+  });
+  await page.reload();
+  const useRow = await openPicker(page, isMobile);
+  await expect(chip(page, isMobile)).toHaveText(/^(📍)?\s*…/);
+  await useRow.click();
+
+  const status = chipScope(page, isMobile).getByRole("status");
+  await expect(status).toContainText("You seem to be in Pune. Switch?");
+  await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
+});

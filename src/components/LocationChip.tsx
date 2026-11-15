@@ -101,7 +101,19 @@ async function fetchCities(): Promise<CityOption[]> {
 // at 1440).
 export default function LocationChip({ variant = 'desktop', inPanel = false }: { variant?: 'desktop' | 'mobile' | 'topbar'; inPanel?: boolean }) {
   const { t } = useLocale()
-  const [location, setLocation] = useState<LocationState | null>(null)
+  const [location, setLocationState] = useState<LocationState | null>(null)
+  // Nightly 14 Nov - "Use my location" answers later (GPS, then the city
+  // list). Its decision reads the city from here, as it is when the answer
+  // lands, not as it was when the row was tapped: a tap made while the
+  // chip still read "…" judged against "no saved city" and replaced a
+  // saved city without asking. `locationRead` is the pending read, so that
+  // answer can wait for the saved city first.
+  const locationRef = useRef<LocationState | null>(null)
+  const locationRead = useRef<Promise<unknown> | null>(null)
+  const setLocation = (next: LocationState | null) => {
+    locationRef.current = next
+    setLocationState(next)
+  }
   const [open, setOpen] = useState(false)
   const [cities, setCities] = useState<CityOption[]>([])
   // BUG-2610-032 - false until /api/venues/cities has answered. Before that
@@ -130,9 +142,14 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
 
   useEffect(() => {
     let cancelled = false
-    fetch('/api/user/location')
+    locationRead.current = fetch('/api/user/location')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (!cancelled && data) setLocation({ city: data.city, lat: data.lat, lng: data.lng, country: data.country ?? null, saved: data.saved === true }) })
+      .then((data) => {
+        if (cancelled || !data) return
+        const next: LocationState = { city: data.city, lat: data.lat, lng: data.lng, country: data.country ?? null, saved: data.saved === true }
+        locationRef.current = next
+        setLocationState(next)
+      })
       .catch(() => {})
     return () => { cancelled = true }
   }, [readCount])
@@ -142,7 +159,10 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   useEffect(() => {
     const onChanged = (e: Event) => {
       const detail = (e as CustomEvent<LocationChangedDetail>).detail
-      if (detail?.city) setLocation({ city: detail.city, lat: null, lng: null, country: detail.country, saved: true })
+      if (!detail?.city) return
+      const next: LocationState = { city: detail.city, lat: null, lng: null, country: detail.country, saved: true }
+      locationRef.current = next
+      setLocationState(next)
     }
     window.addEventListener(LOCATION_CHANGED_EVENT, onChanged)
     return () => window.removeEventListener(LOCATION_CHANGED_EVENT, onChanged)
@@ -163,11 +183,6 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
     }
   }, [open, citiesLoaded])
 
-  // A closed picker starts clean next time it opens.
-  useEffect(() => {
-    if (!open) setGeo({ kind: 'idle' })
-  }, [open])
-
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -182,7 +197,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
     setOpen(false)
     setQuery('')
     setSaving(true)
-    const previous = location
+    const previous = locationRef.current
     setLocation({ city: option.city, lat: null, lng: null, country: option.country, saved: true })
     try {
       const res = await fetch('/api/user/location', {
@@ -224,7 +239,10 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
           }
           const nearest = nearestCity(pos.coords.latitude, pos.coords.longitude, [...byPoint.keys()])
           const option = nearest ? list.find((c) => c.city === nearest.city && c.country === nearest.country) ?? null : null
-          const outcome = locateOutcome({ nearest, currentCity: location?.city ?? null, saved: location?.saved === true, dismissedCities: readDismissed() })
+          // The saved city not read yet (chip "…"): wait for it before deciding.
+          if (locationRef.current === null && locationRead.current) await locationRead.current
+          const current = locationRef.current
+          const outcome = locateOutcome({ nearest, currentCity: current?.city ?? null, saved: current?.saved === true, dismissedCities: readDismissed() })
           if (outcome === 'none' || !nearest || !option) setGeo({ kind: 'unavailable' })
           else if (outcome === 'far') setGeo({ kind: 'far', option, km: roundKm(nearest.km) })
           else if (outcome === 'prompt') setGeo({ kind: 'prompt', option })
@@ -265,7 +283,11 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
         // bare-reason: renders one of three context looks (mobile menu row, top-bar label, pill chip) to match the header hosting it; no one variant covers all three
         variant="bare"
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          // A picker starts clean each time it opens (the chip is the only way in).
+          if (!open) setGeo({ kind: 'idle' })
+          setOpen(!open)
+        }}
         style={chipStyle}
       >
         {variant !== 'topbar' && <Icon name="pin" size={14} style={INLINE_ICON_STYLE} />}
