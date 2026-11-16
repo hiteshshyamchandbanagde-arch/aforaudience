@@ -1,4 +1,29 @@
-## Part 75 — START HERE (15 Nov 16:25 IST, chat), qa @ this commit, main @ 636354f
+## Part 76 — START HERE (16 Nov 12:40 IST, chat), qa @ this commit, main @ 636354f
+Read order: **76 → 75**. Delta only.
+
+### Gate: MET
+Scheduled nightly on 164b068 (incl. #783) green 15 Nov 12:15Z; 12/13/15 Nov green; 14 Nov red = GEN-2610-005 product race, fixed in #783.
+
+### S3 prod read-only check (Vercel env names + repo; prod DB NOT touched)
+**Prod (Production target) has:** DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, NEXT_PUBLIC_SUPABASE_URL/ANON_KEY, NEXT_PUBLIC_ENV_LABEL, Supabase integration vars (POSTGRES_*, SUPABASE_*), BLOB_STORE_ID, BLOB_WEBHOOK_PUBLIC_KEY.
+**Code reads but prod LACKS:**
+- 🔴 `MSG91_AUTH_KEY`, `MSG91_TEMPLATE_ID` — sign-up (RegisterForm stage 2) and OTP login need SMS; prod defaults `OTP_PROVIDER` → msg91 (correct: never set `mock` on prod). Not set on Preview either (QA uses mock). MSG91 needs DLT registration (TRAI) → **launch blocker, Hitesh decision.**
+- 🔴 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED` — Admin is Hitesh's Google account → without these **no admin on prod**. OAuth client needs aforaudience.com redirect URI.
+- `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_FROM_TICKETS` (ticket/notification email; verify sending domain), `NEXT_PUBLIC_APP_URL` (links, QR, share posters).
+- `BLOB_READ_WRITE_TOKEN` (uploads; also missing on Preview? — Preview HAS it), `GOOGLE_PLACES_API_KEY` (new key; QA's is 403), `VAPID_SUBJECT`/`VAPID_PRIVATE_KEY`/`NEXT_PUBLIC_VAPID_PUBLIC_KEY` (new prod pair), `ANTHROPIC_API_KEY` (SupportWidget), `CRON_SECRET` (**set it**: unset = `/api/cron/post-show-rating-prompts` is callable by anyone).
+- Not needed while `paidBookingsEnabled` OFF: `RAZORPAY_KEY_ID/SECRET/WEBHOOK_SECRET`.
+**DB:** prod migrations = 8 (to `20260709…`), qa = 83 → **75 to apply**. Per Hitesh (8 Nov) prod starts clean: backup → fresh schema → `prisma migrate deploy` (all 83) → minimal seed (PlatformSettings singleton with waves as Hitesh decides + paid OFF, CodeCounter, DesignToken rows if not migration-seeded, genres/cities if seeded). Seed list still to be derived (next). Use the transaction pooler (6543) for DATABASE_URL (QA lesson).
+**Cron:** `vercel.json` absent on main → `*/15` rating-prompt cron starts at promotion.
+
+### Next (chat)
+1. Derive the prod minimal-seed list from `scripts/qa-seed.ts` + migrations (read-only) → show Hitesh.
+2. Write the S5 runbook (backup, reset, migrate deploy, seed, env vars, promote `qa→main`, smoke) → Hitesh's explicit OK per step that touches prod.
+3. Feedback rows #778–#783; e2e.yml no-deployment fallback.
+
+### Open for Hitesh
+Decide sign-up/login on prod without SMS (MSG91+DLT vs email-only/Google-only for launch) · Google OAuth for prod domain · prod env values (list above) · phone check 2 · Razorpay TP form · branch cleanup.
+
+## Part 75 — (15 Nov 16:25 IST, chat), superseded as entry point by Part 76, qa @ this commit, main @ 636354f
 Read order: **75 → 74 → 73**. Delta only.
 
 - **Nightlies on 2d1c238:** 12 Nov ✅, 13 Nov ✅✅, 14 Nov ✅ + ❌ (43591452734), 15 Nov ✅ (43692184961). 12 Nov post-#782 push run "red" = no tests ran (Vercel built no deployment for test-only 363d93e; e2e.yml waited 12 min) → workflow gap, see Next 3.
