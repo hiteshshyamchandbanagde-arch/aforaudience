@@ -116,7 +116,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       const verifyError = requireVerifiedPhone(user, 'confirming this booking')
       if (verifyError) return verifyError
 
-      const platformSettings = await prisma.platformSettings.findFirst()
+      const platformSettings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } })
 
       // D2 - with online payments off (or the owner choosing direct) the
       // accepted deal waits for the organiser to pay the owner directly;

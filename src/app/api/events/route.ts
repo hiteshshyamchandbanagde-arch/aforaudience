@@ -503,7 +503,7 @@ export async function POST(req: Request) {
           'venue-booking-request'
         )
       } else {
-        const platformSettings = await prisma.platformSettings.findFirst()
+        const platformSettings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } })
         await prisma.venueBooking.create({
           data: {
             venueId,
