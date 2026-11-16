@@ -1,4 +1,26 @@
-## Part 76 — START HERE (16 Nov 12:40 IST, chat), qa @ this commit, main @ 636354f
+## Part 77 — START HERE (16 Nov 22:05 IST, chat, end of session), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **77 → 76 → 75**. Delta only. 0 open PRs.
+
+- Nightlies 16 Nov: ✅ 164b068 (08:04Z), ✅ 193f3c1 (13:07Z). Gate MET (Part 76). Green streak since #783: 3 scheduled runs.
+- No code changes since #783 (`1c67473`). S3 findings + S5 outline in **Part 76** (read it).
+
+### Session start (next)
+1. ⚠️ Billing reminder: Razorpay + Google Maps/Places (QA Places key = 403).
+2. Check overnight nightly. Push windows for chat: none 01:00–05:30Z / 08:00–09:00Z.
+3. Ask Hitesh for the **blocking decision**: prod sign-up/login without SMS → (a) MSG91 + DLT first, or (b) launch on email/Google sign-up, SMS later (small code change: OTP stage optional behind a setting).
+4. PAT: `/home/claude/afa/token.txt` may not survive; ask Hitesh if missing.
+
+### Next (chat), in order
+1. On Hitesh's sign-up decision → dispatch (if b).
+2. Prod minimal-seed list (read-only, from `scripts/qa-seed.ts` + migrations): PlatformSettings singleton (waves + `paidBookingsEnabled` OFF), CodeCounter, DesignToken rows if not migration-seeded, genres/cities → show Hitesh.
+3. **S5 runbook** (Hitesh OK per prod step): backup prod → fresh schema → `prisma migrate deploy` (83; 75 new) → seed → prod env vars → `qa→main` → smoke on aforaudience.com → turn waves on one by one.
+4. Feedback rows #778–#783 (CodeCounter displayIds).
+5. e2e.yml: no Vercel deployment for test/docs-only push → fall back to latest READY qa deployment.
+
+### Open for Hitesh
+🔴 sign-up decision (above) · 🔴 Google OAuth client for aforaudience.com (admin login) · prod env values: Resend + EMAIL_FROM(+_TICKETS), NEXT_PUBLIC_APP_URL, BLOB_READ_WRITE_TOKEN, new Places key, ANTHROPIC_API_KEY, CRON_SECRET (chat can generate VAPID pair + CRON_SECRET) · phone check 2 · Razorpay TP enrolment form (#21740833) · delete merged branches · later: CA/lawyer on Refund Policy.
+
+## Part 76 — (16 Nov 12:40 IST, chat), superseded as entry point by Part 77, qa @ this commit, main @ 636354f
 Read order: **76 → 75**. Delta only.
 
 ### Gate: MET
