@@ -1,4 +1,25 @@
-## Part 77 — START HERE (16 Nov 22:05 IST, chat, end of session), qa @ this commit, main @ 636354f (prod frozen)
+## Part 78 — START HERE (16 Nov 22:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **78 → 77 → 76**. Delta only.
+
+- **Sign-up decision (Hitesh, 16 Nov): (a) MSG91 + DLT first.** No code change; launch waits for DLT + `MSG91_AUTH_KEY`/`MSG91_TEMPLATE_ID` on prod. The email/Google-only option is dropped.
+- Nightly: no new scheduled run since 193f3c1 (13:07Z ✅); preview on 178fa42 ✅. GitHub access is now attached to the session (no PAT needed this session).
+- **Prod minimal seed (derived, read-only).** Only these rows. `qa-seed.ts` is all personas/fixtures, so none of it goes to prod:
+  1. PlatformSettings `'singleton'`: comes from the migration; all waves + `paidBookingsEnabled` OFF by default. **`'default'` row must go** (see the parity bug below).
+  2. DisplayCurrencyRate: 5 rows (migration-seeded, = QA).
+  3. DesignToken: must equal QA/globals.css (115 rows). **Migration replay ≠ QA** (see below).
+  4. Admin: 1 `User` row (`email` = Hitesh's Google admin email, as on QA, `role ADMIN`). Google `allowDangerousEmailAccountLinking` links his first Google sign-in to it. Needed because W1 is closed and he isn't admin until the row exists. Needs the prod Google OAuth client.
+  5. Not needed: CodeCounter (upserted on demand), genres/cities (code constants + live events), DesignTokenVersion (history).
+- **Prod-parity bug found** (latent, prod-only): migration replay leaves PlatformSettings `'default'` (fee 199) next to `'singleton'`; 3 `findFirst()` callers (events POST, venue-booking-requests/[id], /api/platform-settings) could read it. DesignToken replay = 82 rows vs QA 115: 2 stale overriding values (`--afa-amber-tint` #FFF8E1, `--afa-text-muted` 0.4), 10 dead keys, 42 missing. **Dispatch `cc-prompt-prod-parity-seed.md`** → branch `fix/prod-parity-seed`: idempotent migration `20261117120000_prod_parity_settings_tokens` (no-op on QA), `findFirst` → singleton, replay-parity unit test.
+
+### Next (chat)
+1. Autopilot result → PR → merge → `apply_migration` on QA → verify 0 changes (DesignToken 115, PlatformSettings 1).
+2. S5 runbook (seed = the list above; the parity migration makes steps 1–3 automatic, so only the admin row is manual SQL).
+3. Feedback rows #778–#783 + this bug; e2e.yml no-deployment fallback.
+
+### Open for Hitesh
+🔴 MSG91 account + DLT registration (entity, sender ID, OTP template) → keys · 🔴 Google OAuth client for aforaudience.com · the rest as in Part 77.
+
+## Part 77 — (16 Nov 22:05 IST, chat, end of session), superseded as entry point by Part 78, qa @ this commit, main @ 636354f (prod frozen)
 Read order: **77 → 76 → 75**. Delta only. 0 open PRs.
 
 - Nightlies 16 Nov: ✅ 164b068 (08:04Z), ✅ 193f3c1 (13:07Z). Gate MET (Part 76). Green streak since #783: 3 scheduled runs.
