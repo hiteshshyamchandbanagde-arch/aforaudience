@@ -49,7 +49,7 @@ export default function WelcomeSequence() {
   const [finishing, setFinishing] = useState(false);
 
   const user = session?.user as
-    | { phone?: string | null; isVerified?: boolean; onboardedAt?: string | null; intendedRole?: string | null }
+    | { phone?: string | null; isVerified?: boolean; needsPhoneVerification?: boolean; onboardedAt?: string | null; intendedRole?: string | null }
     | undefined;
 
   useEffect(() => {
@@ -69,11 +69,11 @@ export default function WelcomeSequence() {
   // so a fresh send here is always issued - never assumed still good.
   useEffect(() => {
     if (step !== 2 || !user) return;
-    if (!user.isVerified && user.phone) {
+    if (user.needsPhoneVerification === true && user.phone) {
       otp.sendCode(user.phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>, tr.loginPage.offlineCodeError);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, user?.isVerified, user?.phone]);
+  }, [step, user?.needsPhoneVerification, user?.phone]);
 
   // Screen 3 entry: skip if push isn't supported on this browser, or
   // permission is already decided one way or the other - same gating
@@ -170,8 +170,10 @@ export default function WelcomeSequence() {
               {tr.welcomeSequence.step1Subtitle}
             </p>
             {/* Run C item 3 - an already-verified phone (sign-up verifies
-                it) skips the Verify phone step entirely. */}
-            <Button variant="primary" onClick={() => setStep(user.isVerified ? 3 : 2)}>
+                it) skips the Verify phone step entirely. SMS OTP toggle:
+                so does everyone while SMS OTP is off (needsPhoneVerification
+                is false then). */}
+            <Button variant="primary" onClick={() => setStep(user.needsPhoneVerification === true ? 2 : 3)}>
               {tr.welcomeSequence.getStartedButton}
             </Button>
           </>

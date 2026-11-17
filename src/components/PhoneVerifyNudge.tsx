@@ -16,7 +16,8 @@ import { Icon } from '@/components/Icon';
  * checkout instead of an upfront explanation now.
  *
  * Rules of engagement:
- *   - Only visible when logged in AND isVerified is false
+ *   - Only visible when logged in AND session.needsPhoneVerification is
+ *     true (phone unverified while SMS OTP is on)
  *   - Hidden on auth pages, checkout, verify-phone itself, admin, and API
  *     routes (checkout hides so mid-flow attention isn't stolen there -
  *     the flow already redirects to /verify-phone directly if needed)
@@ -34,17 +35,19 @@ const EXCLUDED_PATH_PREFIXES = [
 export default function PhoneVerifyNudge() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [needsVerification, setNeedsVerification] = useState<boolean | null>(null);
   const { t } = useLocale();
 
+  // SMS OTP toggle - session.needsPhoneVerification is false for everyone
+  // while SMS OTP is off, so the nudge never shows then.
   useEffect(() => {
     if (status !== 'authenticated') return;
-    const sessionVerified = (session?.user as any)?.isVerified;
-    if (typeof sessionVerified === 'boolean') setIsVerified(sessionVerified);
+    const needs = (session?.user as { needsPhoneVerification?: boolean } | undefined)?.needsPhoneVerification;
+    if (typeof needs === 'boolean') setNeedsVerification(needs);
   }, [status, session]);
 
   if (status !== 'authenticated' || !session?.user) return null;
-  if (isVerified !== false) return null;
+  if (needsVerification !== true) return null;
 
   if (pathname) {
     for (const prefix of EXCLUDED_PATH_PREFIXES) {
