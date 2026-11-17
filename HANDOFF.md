@@ -1,5 +1,17 @@
-## Part 78 — START HERE (16 Nov 22:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
-Read order: **78 → 77 → 76**. Delta only.
+## Part 79 — START HERE (17 Nov 01:05 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **79 → 78 → 77**. Delta only. 0 open PRs.
+
+- **#784 merged** (`cbc6cbe`, pinned head 97720457): migration `20261117120000_prod_parity_settings_tokens` + 3 `findFirst` → `findUnique({id:'singleton'})` + `scripts/migration-seed-parity.test.ts` (on the qa tree 0/4 → branch 4/4). CC deviation, correct: `--afa-amber-tint` is deleted by `20260921120000`, so it's re-inserted (43 inserts, not 42; 1 value fix on replay). CI on head: design-tokens ✅, e2e-preview ✅ (run 43919026760). Vercel qa `dpl_4BU2CVLEXLrcJJap9oa9YF6Nijqn` READY, 0 runtime errors in the last 1 h. Human check: none.
+- **QA `apply_migration` NOT run:** the Supabase confirmation was auto-cancelled (Hitesh away). It's a no-op on QA anyway. Pre-snapshot: DesignToken 115, md5 `1c2f165cf0df37344230a6ee59bf4520` (key|value|group|type|locked|updatedAt), PlatformSettings = `singleton` only. Next session: apply it (needs Hitesh to approve the prompt), then re-run the snapshot query and expect the same md5 and 1 row.
+- Branch `fix/prod-parity-seed`: delete returned 403 for chat's token → add to Hitesh's branch cleanup.
+- Vercel IDs: project `prj_h2Z6oALLnZ3fVmAHzCSBztcra1kC`, team `team_Jt2repUHwYG8LFkYHUa57YvL`.
+
+### Next (chat)
+1. QA apply_migration (above) → verify.
+2. S5 prod runbook. Seed is now automatic from `migrate deploy`; the only manual step is the admin `User` row (Hitesh's Google email, role ADMIN).
+3. Feedback rows #778–#784; e2e.yml no-deployment fallback.
+
+## Part 78 — (16 Nov 22:55 IST, chat), superseded as entry point by Part 79, qa @ this commit, main @ 636354f (prod frozen)
 
 - **Sign-up decision (Hitesh, 16 Nov): (a) MSG91 + DLT first.** No code change; launch waits for DLT + `MSG91_AUTH_KEY`/`MSG91_TEMPLATE_ID` on prod. The email/Google-only option is dropped.
 - Nightly: no new scheduled run since 193f3c1 (13:07Z ✅); preview on 178fa42 ✅. GitHub access is now attached to the session (no PAT needed this session).
