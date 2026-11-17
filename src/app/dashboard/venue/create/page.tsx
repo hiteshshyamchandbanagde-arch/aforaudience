@@ -264,8 +264,10 @@ export default function CreateVenuePage() {
 
       const newVenue = await res.json()
       clearDraft()
-      const isVerified = (session?.user as any)?.isVerified
-      if (!publish && !isVerified) {
+      // SMS OTP toggle - the "verify your phone" draft note only while the
+      // phone gate applies (session.needsPhoneVerification, false when off).
+      const needsPhoneVerification = (session?.user as { needsPhoneVerification?: boolean } | undefined)?.needsPhoneVerification === true
+      if (!publish && needsPhoneVerification) {
         showToast(vc.draftUnverified, 'info')
       }
       router.push(`/dashboard/venue/${newVenue.id}`)
