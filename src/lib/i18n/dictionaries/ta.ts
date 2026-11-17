@@ -2083,6 +2083,10 @@ const ta: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "{date} அன்று காலாவதியானது — தற்போது முடக்கப்பட்டுள்ளது.",
+    smsOtpHeading: "SMS OTP (தொலைபேசி சரிபார்ப்பு)",
+    smsOtpHelp: "முடக்கம் = மின்னஞ்சல் அல்லது Google மூலம் மட்டும் பதிவு, எங்கும் தொலைபேசி சரிபார்ப்பு இல்லை. SMS எதுவும் அனுப்பப்படாது.",
+    smsOtpToggle: "SMS OTP-ஐ இயக்கு",
+    smsOtpWarning: "MSG91 விசைகள் + DLT பதிவு நேரலையான பிறகே இயக்கவும்.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

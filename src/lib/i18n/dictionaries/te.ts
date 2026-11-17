@@ -2083,6 +2083,10 @@ const te: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "{date}న గడువు ముగిసింది — ప్రస్తుతం ఆఫ్‌లో ఉంది.",
+    smsOtpHeading: "SMS OTP (ఫోన్ ధృవీకరణ)",
+    smsOtpHelp: "ఆఫ్ = ఈమెయిల్ లేదా Google ద్వారా మాత్రమే సైన్-అప్, ఎక్కడా ఫోన్ తనిఖీ లేదు. ఏ SMS పంపబడదు.",
+    smsOtpToggle: "SMS OTP ఆన్ చేయండి",
+    smsOtpWarning: "MSG91 కీలు + DLT నమోదు లైవ్ అయిన తర్వాతే ఆన్ చేయండి.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

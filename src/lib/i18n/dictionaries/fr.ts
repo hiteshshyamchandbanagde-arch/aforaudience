@@ -2089,6 +2089,10 @@ const fr: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "Expiré le {date} — actuellement désactivé.",
+    smsOtpHeading: "OTP par SMS (vérification du téléphone)",
+    smsOtpHelp: "DÉSACTIVÉ = inscription par e-mail ou Google uniquement, aucune vérification du téléphone. Aucun SMS n'est envoyé.",
+    smsOtpToggle: "Activer l'OTP par SMS",
+    smsOtpWarning: "À activer seulement quand les clés MSG91 + l'enregistrement DLT sont actifs.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {
