@@ -5,10 +5,10 @@ import { isUsernameAvailable } from "@/lib/auth-helpers"
 import { generateAndSendOtp } from "@/lib/otp"
 import { generateResetToken } from "@/lib/tokens" // generic sha256 token - reused for email verification too
 import { sendEmailVerificationEmail } from "@/lib/email"
-import { isValidEmailFormat, isValidUsernameFormat } from "@/lib/validation"
+import { registerUser } from "@/lib/register-core"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { launchWaveBlock } from "@/lib/platform-settings"
+import { getPlatformSettings, launchWaveBlock } from "@/lib/platform-settings"
 
 // Browse-first model: registration never accepts a role. Every account is
 // created as AUDIENCE. Artist / Organiser / Venue Owner are opt-in upgrades
@@ -17,8 +17,9 @@ import { launchWaveBlock } from "@/lib/platform-settings"
 // `username` (stored as User.name) is the login username - see
 // lib/auth-helpers.ts suggestAvailableUsername/isUsernameAvailable, used by
 // the register form for live-suggest + availability check before submit.
-// Phone is now required (was optional) since it's the mandatory OTP
-// verification gate before the account can sign in via password or OTP.
+// Phone is required while SMS OTP is on (it's the OTP verification gate);
+// optional while PlatformSettings.smsOtpEnabled is off (17 Nov) - see
+// lib/register-core.ts for the whole decision in both modes.
 // Only +91 numbers actually receive an OTP right now (MSG91 is India-only).
 export async function POST(req: NextRequest) {
   try {
@@ -29,138 +30,31 @@ export async function POST(req: NextRequest) {
     const w1 = await launchWaveBlock("W1", (session?.user as { role?: string } | undefined)?.role)
     if (w1) return NextResponse.json(w1.body, { status: w1.status })
 
-    const { username, email, phone, password, fullName, intendedRole } = await req.json()
-    // GEN-2609-042 - purely informational, never the account's real role
-    // (see the browse-first note above - that still holds, role is always
-    // AUDIENCE). Whitelisted against the same 3 values the "Join As X"
-    // landing links and RegisterForm's own copy already use; anything else
-    // (missing, garbage, tampered) is silently dropped to null rather than
-    // rejecting the whole signup over a cosmetic field.
-    const normalizedIntendedRole =
-      intendedRole === "artist" || intendedRole === "organiser" || intendedRole === "venue"
-        ? intendedRole
-        : null
-    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : email
-    const normalizedUsername = typeof username === "string" ? username.trim() : username
-    const normalizedPhone = typeof phone === "string" ? phone.trim() : phone
-    // Human-readable display name. Optional in the request for backward
-    // compatibility with any older client, but the new register form
-    // always sends it. Trimmed and length-capped to a reasonable ceiling
-    // (120 chars — long enough for any real name, short enough to fit
-    // on a ticket PDF and in an email subject line without weirdness).
-    const rawFullName = typeof fullName === "string" ? fullName.trim() : ""
-    const normalizedDisplayName = rawFullName.length > 0 ? rawFullName.slice(0, 120) : null
-
-    // `code` is a stable, language-independent identifier the client uses to
-    // look up a translated message (see tr.authErrors in the i18n
-    // dictionaries). `error` stays a plain English string for logs/back-compat.
-    // `field` names which form field the error belongs to, so the client can
-    // route it without sniffing English keywords out of `error` (that
-    // sniffing broke once errors could be shown in Hindi - BUG-2608-038).
-    if (!normalizedUsername || !normalizedEmail || !normalizedPhone || !password) {
-      return NextResponse.json(
-        { error: "All fields are required", code: "ALL_FIELDS_REQUIRED" },
-        { status: 400 }
-      )
-    }
-
-    // Browser <input type="email"> validation is client-side only and can
-    // be bypassed (autofill, disabled JS, direct API calls). Two QA users
-    // slipped malformed emails (missing "@") through this exact gap.
-    if (!isValidEmailFormat(normalizedEmail)) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address.", code: "INVALID_EMAIL_FORMAT", field: "email" },
-        { status: 400 }
-      )
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters", code: "PASSWORD_TOO_SHORT", field: "password" },
-        { status: 400 }
-      )
-    }
-
-    if (!isValidUsernameFormat(normalizedUsername)) {
-      return NextResponse.json(
-        {
-          error: "Username must be 3-20 characters, letters/numbers/underscore only",
-          code: "USERNAME_INVALID",
-          field: "username",
-        },
-        { status: 400 }
-      )
-    }
-
-    const usernameOk = await isUsernameAvailable(normalizedUsername)
-    if (!usernameOk) {
-      return NextResponse.json(
-        { error: "That username is already taken.", code: "USERNAME_TAKEN", field: "username" },
-        { status: 400 }
-      )
-    }
-
-    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "That email address is already registered.", code: "EMAIL_TAKEN", field: "email" },
-        { status: 400 }
-      )
-    }
-
-    if (!normalizedPhone.startsWith("+91")) {
-      return NextResponse.json(
-        {
-          error: "Only Indian (+91) phone numbers are supported for OTP verification right now.",
-          code: "PHONE_NOT_INDIA",
-          field: "phone",
-        },
-        { status: 400 }
-      )
-    }
-
-    const existingPhoneUser = await prisma.user.findFirst({ where: { phone: normalizedPhone } })
-    if (existingPhoneUser) {
-      return NextResponse.json(
-        { error: "That phone number is already registered.", code: "PHONE_TAKEN", field: "phone" },
-        { status: 400 }
-      )
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    const user = await prisma.user.create({
-      data: {
-        name: normalizedUsername,
-        displayName: normalizedDisplayName,
-        email: normalizedEmail,
-        phone: normalizedPhone,
-        password: hashedPassword,
-        role: "AUDIENCE",
-        isVerified: false,
-        isApproved: true,
-        intendedRole: normalizedIntendedRole,
-      }
+    const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
+    const result = await registerUser(body ?? {}, {
+      smsOtpEnabled: (await getPlatformSettings()).smsOtpEnabled,
+      isUsernameAvailable,
+      emailTaken: async (email) => !!(await prisma.user.findUnique({ where: { email } })),
+      phoneTaken: async (phone) => !!(await prisma.user.findFirst({ where: { phone } })),
+      hashPassword: (password) => bcrypt.hash(password, 12),
+      createUser: (data) =>
+        prisma.user.create({
+          data: { ...data, role: "AUDIENCE", isVerified: false, isApproved: true },
+          select: { id: true, email: true, phone: true, code: true },
+        }),
+      sendSignupOtp: (phone) => generateAndSendOtp(phone, "SIGNUP_VERIFY"),
     })
 
-    const otpResult = await generateAndSendOtp(normalizedPhone, "SIGNUP_VERIFY")
+    if (result.user) {
+      // Fire-and-forget - does not block signup completion. See email.ts for
+      // why this stays separate from the phone-OTP verification gate.
+      const { id, email } = result.user
+      sendVerificationEmailAsync(id, email).catch((err) =>
+        console.error("Email verification send failed:", err)
+      )
+    }
 
-    // Fire-and-forget - does not block signup completion. See email.ts for
-    // why this stays separate from the phone-OTP verification gate.
-    sendVerificationEmailAsync(user.id, user.email).catch((err) =>
-      console.error("Email verification send failed:", err)
-    )
-
-    return NextResponse.json(
-      {
-        message: "Account created! Verify your phone to continue.",
-        userId: user.id,
-        phone: user.phone,
-        code: user.code,
-        devOtp: otpResult.devCode, // only present in QA (mock provider), undefined in prod
-      },
-      { status: 201 }
-    )
+    return NextResponse.json(result.body, { status: result.status })
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
