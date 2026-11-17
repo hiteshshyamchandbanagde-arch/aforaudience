@@ -53,6 +53,23 @@ function LoginForm() {
     }
   }, [])
   const signupsClosed = w1Open === false
+  // SMS OTP toggle (17 Nov) - while PlatformSettings.smsOtpEnabled is off
+  // "Login with OTP" is hidden (password + Google only). Shown until the
+  // flag says off; the OTP endpoints refuse on the server either way.
+  const [smsOtpEnabled, setSmsOtpEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/auth/sms-otp")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && typeof data.enabled === "boolean") setSmsOtpEnabled(data.enabled)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const otpLoginHidden = smsOtpEnabled === false
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true"
   // A brand-new Google account refused by the W1 gate (WaveClosedError in
   // createUser) comes back from NextAuth as ?error=OAuthCreateAccount.
@@ -309,13 +326,15 @@ function LoginForm() {
             >
               {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
             </Button>
-            <Button
-              variant="link"
-              onClick={() => { setMode("otp-request"); setError("") }}
-              style={{ marginTop: "var(--afa-space-2)" }}
-            >
-              {tr.loginPage.useOtpInstead}
-            </Button>
+            {!otpLoginHidden && (
+              <Button
+                variant="link"
+                onClick={() => { setMode("otp-request"); setError("") }}
+                style={{ marginTop: "var(--afa-space-2)" }}
+              >
+                {tr.loginPage.useOtpInstead}
+              </Button>
+            )}
           </>
         )}
 
