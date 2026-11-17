@@ -1298,6 +1298,10 @@ model PlatformSettings {
   waveOnboardingOpen         Boolean   @default(false) // W2 organiser/venue/artist apply
   waveTicketsOpen            Boolean   @default(false) // W3 audience reservations
   waveDirectBookingsOpen     Boolean   @default(false) // W4 paid B2B bookings
+  // SMS OTP toggle (17 Nov) - default OFF (prod has no MSG91/DLT yet).
+  // OFF: no SMS sent, sign-up skips OTP, phone gate waived. See
+  // src/lib/phone-gate.ts.
+  smsOtpEnabled              Boolean   @default(false)
 
   updatedAt                  DateTime @updatedAt
 }
