@@ -242,6 +242,23 @@ export default function RegisterForm() {
 
   // ---- Stage 2: phone OTP verification, shown after successful register ----
   const [stage, setStage] = useState<"form" | "otp">("form")
+  // SMS OTP toggle (17 Nov) - while PlatformSettings.smsOtpEnabled is off
+  // there's no OTP stage: phone is optional and the new account signs in
+  // with its password straight away. Defaults to ON (today's behaviour)
+  // until the flag loads; the server's `signInDirectly` is the final word.
+  const [smsOtpEnabled, setSmsOtpEnabled] = useState(true)
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/auth/sms-otp")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d && typeof d.enabled === "boolean") setSmsOtpEnabled(d.enabled)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
   const [userId, setUserId] = useState<string | null>(null)
   const [fullPhone, setFullPhone] = useState<string | null>(null)
   const [otpCode, setOtpCode] = useState("")
@@ -276,7 +293,8 @@ export default function RegisterForm() {
     if (usernameStatus === "invalid") {
       setFieldErrors({ username: tr.authErrors.USERNAME_INVALID }); return
     }
-    if (!/^\d{10}$/.test(live.phoneNumber)) {
+    const phoneGiven = live.phoneNumber.trim() !== ""
+    if ((smsOtpEnabled || phoneGiven) && !/^\d{10}$/.test(live.phoneNumber)) {
       setFieldErrors({ phone: tr.registerPage.invalidPhoneNumber }); return
     }
 
@@ -284,7 +302,7 @@ export default function RegisterForm() {
     setError("")
     setFieldErrors({})
 
-    const phone = `+91${live.phoneNumber}`
+    const phone = phoneGiven ? `+91${live.phoneNumber}` : undefined
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -326,8 +344,21 @@ export default function RegisterForm() {
         return
       }
 
+      if (data.signInDirectly) {
+        // SMS OTP off - no OTP stage; sign in with the password just set
+        // and continue to onboarding, same as after a successful OTP.
+        const result = await signIn("credentials", { identifier: live.email, password: live.password, redirect: false })
+        if (!result || result.error) {
+          setError(result?.error === "SUSPENDED" ? tr.authCommon.accountSuspendedMessage : tr.authCommon.somethingWentWrong)
+          setLoading(false)
+          return
+        }
+        router.push("/")
+        return
+      }
+
       setUserId(data.userId)
-      setFullPhone(data.phone ?? phone)
+      setFullPhone(data.phone ?? phone ?? null)
       setDevOtp(data.devOtp ?? null)
       setStage("otp")
       setLoading(false)
@@ -617,9 +648,11 @@ export default function RegisterForm() {
                   style={{ flex: 1, minWidth: 0, padding: "var(--afa-space-3) var(--afa-space-14px)", border: "none", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
-              <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
-                {tr.registerPage.otpHint}
-              </p>
+              {smsOtpEnabled && (
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
+                  {tr.registerPage.otpHint}
+                </p>
+              )}
               {fieldErrors.phone && (
                 <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>{fieldErrors.phone}</p>
               )}

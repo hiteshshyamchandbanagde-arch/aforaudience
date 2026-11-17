@@ -52,6 +52,8 @@ export type PlatformSettings = {
   waveOnboardingOpen: boolean
   waveTicketsOpen: boolean
   waveDirectBookingsOpen: boolean
+  // SMS OTP toggle (17 Nov), default OFF. See src/lib/phone-gate.ts.
+  smsOtpEnabled: boolean
 }
 
 const SINGLETON_ID = "singleton"
@@ -77,6 +79,7 @@ const SETTINGS_SELECT = {
   waveOnboardingOpen: true,
   waveTicketsOpen: true,
   waveDirectBookingsOpen: true,
+  smsOtpEnabled: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -386,6 +389,22 @@ export async function setLaunchWaves(input: {
     where: { id: SINGLETON_ID },
     update: data,
     create: { id: SINGLETON_ID, audienceBookingFee: 0, ...data },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/** SMS OTP toggle (17 Nov) - is SMS OTP on? Same uncached read as the other settings. */
+export async function getSmsOtpEnabled(): Promise<boolean> {
+  return (await getPlatformSettings()).smsOtpEnabled
+}
+
+/** SMS OTP toggle (17 Nov) - admin-only setter, same shape as setPaidBookingsEnabled. */
+export async function setSmsOtpEnabled(enabled: boolean): Promise<PlatformSettings> {
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { smsOtpEnabled: enabled },
+    create: { id: SINGLETON_ID, audienceBookingFee: 0, smsOtpEnabled: enabled },
     select: SETTINGS_SELECT,
   })
   return row

@@ -2083,6 +2083,10 @@ const gu: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "{date} ના રોજ સમાપ્ત — હાલમાં બંધ.",
+    smsOtpHeading: "SMS OTP (ફોન ચકાસણી)",
+    smsOtpHelp: "બંધ = ફક્ત ઇમેઇલ અથવા Google થી સાઇન-અપ, ક્યાંય ફોન ચકાસણી નહીં. કોઈ SMS મોકલાતો નથી.",
+    smsOtpToggle: "SMS OTP ચાલુ કરો",
+    smsOtpWarning: "MSG91 કી + DLT નોંધણી લાઇવ થયા પછી જ ચાલુ કરો.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

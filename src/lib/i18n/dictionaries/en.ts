@@ -2279,6 +2279,11 @@ const en = {
   adminSettings: {
     // {date}: when the Direct payouts flag auto-disabled.
     directPayoutsExpired: "Expired on {date} — currently off.",
+    // SMS OTP toggle (17 Nov) - the phone verification on/off card.
+    smsOtpHeading: "SMS OTP (phone verification)",
+    smsOtpHelp: "OFF = sign-up with email or Google only, no phone checks anywhere. No SMS is sent.",
+    smsOtpToggle: "Enable SMS OTP",
+    smsOtpWarning: "Turn on only after the MSG91 keys + DLT registration are live.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

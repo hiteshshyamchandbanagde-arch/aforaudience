@@ -554,8 +554,10 @@ export default function CreateEventPage() {
       }
 
       const newEvent = await res.json()
-      const isVerified = (session?.user as any)?.isVerified
-      if (!publish && !isVerified) {
+      // SMS OTP toggle - the "verify your phone" draft note only while the
+      // phone gate applies (session.needsPhoneVerification, false when off).
+      const needsPhoneVerification = (session?.user as { needsPhoneVerification?: boolean } | undefined)?.needsPhoneVerification === true
+      if (!publish && needsPhoneVerification) {
         showToast(c.savedDraftVerify, 'info')
       } else if (publish && venueId) {
         showToast(c.submittedPending, 'info')

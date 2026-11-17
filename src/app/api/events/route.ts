@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { withListingPrice } from '@/lib/booking-tiers'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
-import { requireVerifiedPhone } from '@/lib/verification'
+import { requirePhoneVerification } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings, getPaidBookingsEnabled, launchWaveBlock } from '@/lib/platform-settings'
@@ -187,7 +187,7 @@ export async function POST(req: Request) {
     // Body is parsed first so Draft saves for unverified organisers always
     // reach here instead of being rejected before their data is even read.
     if (publish === true) {
-      const verifyError = requireVerifiedPhone(user, 'publishing this event')
+      const verifyError = await requirePhoneVerification(user, 'publishing this event')
       if (verifyError) return verifyError
       if (!venueId) {
         return NextResponse.json({ error: 'A venue must be attached before publishing. Save as a draft to continue without one.' }, { status: 400 })
@@ -278,7 +278,7 @@ export async function POST(req: Request) {
     // could be submitted blank at Publish - inverting the negotiation flow
     // (venue owner names a price first) and defeating the payment-
     // transparency feature. Required only at Publish, same pattern as
-    // requireVerifiedPhone above - a Draft is still a work in progress.
+    // requirePhoneVerification above - a Draft is still a work in progress.
     const bookingAmountCheck = parseAmount(bookingAmount, {
       label: 'Offer Amount',
       required: publish === true && !!venueId,

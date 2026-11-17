@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
+import { needsPhoneVerification } from '@/lib/phone-gate'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { parseAmount } from '@/lib/money-validation'
-import { launchWaveBlock } from '@/lib/platform-settings'
+import { getPlatformSettings, launchWaveBlock } from '@/lib/platform-settings'
 import { venueBookingNeedsW4 } from '@/lib/launch-waves'
 
 export async function POST(req: Request) {
@@ -17,7 +18,8 @@ export async function POST(req: Request) {
     if (!user || user.role !== 'ORGANISER') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    if (!user.isVerified) {
+    // SMS OTP toggle (17 Nov) - waived while smsOtpEnabled is off.
+    if (needsPhoneVerification(user, await getPlatformSettings())) {
       return NextResponse.json(
         { error: 'Verify your phone number before booking a venue.', reason: 'PHONE_NOT_VERIFIED' },
         { status: 403 }

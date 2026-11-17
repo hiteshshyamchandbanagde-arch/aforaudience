@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getPlatformSettings } from "@/lib/platform-settings"
+import { smsOtpBlock } from "@/lib/phone-gate"
 import { verifyOtp } from "@/lib/otp"
 import { verifySignupOtp } from "@/lib/otp-signup-verify"
 import { prisma } from "@/lib/prisma"
@@ -11,6 +13,10 @@ import { prisma } from "@/lib/prisma"
 // Run S2 (8 Nov): the code only verifies the account whose stored phone is
 // `phone` - see lib/otp-signup-verify.ts for the order of checks.
 export async function POST(req: NextRequest) {
+  // SMS OTP toggle (17 Nov) - every purpose is off while smsOtpEnabled is off.
+  const smsOff = smsOtpBlock(await getPlatformSettings())
+  if (smsOff) return NextResponse.json(smsOff.body, { status: smsOff.status })
+
   const body = (await req.json().catch(() => ({}))) as {
     phone?: unknown
     userId?: unknown

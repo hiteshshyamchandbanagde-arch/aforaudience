@@ -12,6 +12,7 @@ import {
   setEventCreationWindowMonths,
   setDirectPayoutsEnabled,
   setPaidBookingsEnabled,
+  setSmsOtpEnabled,
   setLaunchWaves,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
@@ -85,6 +86,7 @@ export async function PATCH(req: Request) {
   const hasEventWindow = Object.prototype.hasOwnProperty.call(body, 'eventCreationWindowMonths')
   const hasDirectPayouts = Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabled')
   const hasPaidBookings = Object.prototype.hasOwnProperty.call(body, 'paidBookingsEnabled')
+  const hasSmsOtp = Object.prototype.hasOwnProperty.call(body, 'smsOtpEnabled')
   // S1b-a - launch wave switches. Validated up front, before ANY setter
   // runs, so a non-boolean wave flag is a 400 with nothing written.
   const WAVE_KEYS = ['waveDiscoveryOpen', 'waveOnboardingOpen', 'waveTicketsOpen', 'waveDirectBookingsOpen'] as const
@@ -98,11 +100,11 @@ export async function PATCH(req: Request) {
   }
   const hasWaves = Object.keys(waveInput).length > 0
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts && !hasPaidBookings && !hasWaves) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts && !hasPaidBookings && !hasSmsOtp && !hasWaves) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, paidBookingsEnabled, a wave*Open flag, or all three vote weight defaults together is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, paidBookingsEnabled, smsOtpEnabled, a wave*Open flag, or all three vote weight defaults together is required',
       },
       { status: 400 }
     )
@@ -199,6 +201,15 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: 'paidBookingsEnabled must be a boolean' }, { status: 400 })
       }
       updated = await setPaidBookingsEnabled(body.paidBookingsEnabled)
+    }
+
+    // SMS OTP toggle (17 Nov) - phone verification on/off (off = no SMS,
+    // no phone gate). Turn on only once MSG91 keys + DLT are live.
+    if (hasSmsOtp) {
+      if (typeof body.smsOtpEnabled !== 'boolean') {
+        return NextResponse.json({ error: 'smsOtpEnabled must be a boolean' }, { status: 400 })
+      }
+      updated = await setSmsOtpEnabled(body.smsOtpEnabled)
     }
 
     // S1b-a - launch wave switches W1-W4 (validated above).

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
-import { requireVerifiedPhone } from '@/lib/verification'
+import { requirePhoneVerification } from '@/lib/verification'
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     if (!artist) {
       return NextResponse.json({ error: 'Artist profile not found' }, { status: 404 })
     }
-    const verifyError = requireVerifiedPhone(user, 'applying - the organiser is building their lineup on it')
+    const verifyError = await requirePhoneVerification(user, 'applying - the organiser is building their lineup on it')
     if (verifyError) return verifyError
 
     const body = await req.json()

@@ -2083,6 +2083,10 @@ const bn: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "{date} তারিখে মেয়াদ শেষ — এখন বন্ধ।",
+    smsOtpHeading: "SMS OTP (ফোন যাচাই)",
+    smsOtpHelp: "বন্ধ = শুধু ইমেল বা Google দিয়ে সাইন-আপ, কোথাও ফোন যাচাই নেই। কোনো SMS পাঠানো হয় না।",
+    smsOtpToggle: "SMS OTP চালু করুন",
+    smsOtpWarning: "MSG91 কী + DLT নিবন্ধন লাইভ হওয়ার পরেই চালু করুন।",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

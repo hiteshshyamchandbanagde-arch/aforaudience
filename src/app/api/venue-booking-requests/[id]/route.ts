@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
-import { requireVerifiedPhone } from '@/lib/verification'
+import { requirePhoneVerification } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { isFlexRequestExpired } from '@/lib/flex-requests'
 import { DIRECT_PAY_PLATFORM_FEE, directPayExpiresAt, shouldUseDirectPay } from '@/lib/venue-direct-pay'
@@ -113,7 +113,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!lastOffer) {
         return NextResponse.json({ error: 'No offer to accept yet' }, { status: 400 })
       }
-      const verifyError = requireVerifiedPhone(user, 'confirming this booking')
+      const verifyError = await requirePhoneVerification(user, 'confirming this booking')
       if (verifyError) return verifyError
 
       const platformSettings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } })

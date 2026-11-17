@@ -69,3 +69,58 @@ test("[S1a] settings API rejects a non-boolean paidBookingsEnabled (nothing writ
   expect(res.status()).toBe(400);
   expect((await res.json()).error).toBe("paidBookingsEnabled must be a boolean");
 });
+
+// SMS OTP toggle (Hitesh, 17 Nov) - the "SMS OTP (phone verification)"
+// switch sits next to Paid bookings on the same page, same pattern. Same
+// read-only rule: the row is global and shards run in parallel, so the
+// switch is checked against the stored value and only flipped client-side,
+// never saved. QA's row is ON (chat sets it after the migration). OFF-mode
+// behaviour is covered by scripts/phone-gate*.test.ts + a Human check.
+test("[SMS OTP] admin Settings shows the SMS OTP switch in its stored state with the helper text; nothing saved @needs-db", async ({ page, isMobile }) => {
+  const stored = await withQaDb(async (db) => {
+    const { rows } = await db.query<{ smsOtpEnabled: boolean }>(
+      `SELECT "smsOtpEnabled" FROM "PlatformSettings" WHERE id = 'singleton'`
+    );
+    expect(rows.length, "the platform settings row exists on QA").toBe(1);
+    return rows[0].smsOtpEnabled;
+  });
+
+  await useRuleViewport(page, isMobile);
+  await gotoDashboard(page, "/dashboard/admin/settings/");
+
+  const card = page.locator("[data-afa-sms-otp-card]");
+  await expect(card.getByRole("heading", { name: "SMS OTP (phone verification)" })).toBeVisible();
+  await expect(card.locator("[data-afa-sms-otp-help]")).toHaveText(
+    "OFF = sign-up with email or Google only, no phone checks anywhere. No SMS is sent."
+  );
+  await expect(card.locator("[data-afa-sms-otp-warning]")).toHaveText(
+    "Turn on only after the MSG91 keys + DLT registration are live."
+  );
+
+  const toggle = card.locator("[data-afa-sms-otp-toggle]");
+  const save = card.getByRole("button", { name: "Save", exact: true });
+  if (stored) await expect(toggle).toBeChecked();
+  else await expect(toggle).not.toBeChecked();
+  await expect(save).toBeDisabled();
+
+  // Fits the viewport (no sideways overflow at 390) and has a whole-pixel
+  // height, so the cards below it don't shift by a sub-pixel.
+  const box = await card.boundingBox();
+  expect(box, "card is laid out").not.toBeNull();
+  expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  const height = await card.evaluate((el) => el.getBoundingClientRect().height);
+  expect(height % 1, `card height ${height}px is a whole number of pixels`).toBe(0);
+
+  await toggle.click();
+  await expect(save).toBeEnabled();
+  await toggle.click();
+  await expect(save).toBeDisabled();
+});
+
+test("[SMS OTP] settings API rejects a non-boolean smsOtpEnabled (nothing written)", async ({ page }) => {
+  const res = await page.request.patch("/api/admin/platform-settings", {
+    data: { smsOtpEnabled: "yes" },
+  });
+  expect(res.status()).toBe(400);
+  expect((await res.json()).error).toBe("smsOtpEnabled must be a boolean");
+});

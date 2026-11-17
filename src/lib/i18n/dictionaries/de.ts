@@ -2092,6 +2092,10 @@ const de: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "Abgelaufen am {date} — derzeit aus.",
+    smsOtpHeading: "SMS-OTP (Telefonbestätigung)",
+    smsOtpHelp: "AUS = Registrierung nur per E-Mail oder Google, nirgends Telefonprüfungen. Es werden keine SMS gesendet.",
+    smsOtpToggle: "SMS-OTP aktivieren",
+    smsOtpWarning: "Erst einschalten, wenn die MSG91-Schlüssel + DLT-Registrierung live sind.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

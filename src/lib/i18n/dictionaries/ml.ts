@@ -2083,6 +2083,10 @@ const ml: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "{date}-ന് കാലാവധി കഴിഞ്ഞു — ഇപ്പോൾ ഓഫാണ്.",
+    smsOtpHeading: "SMS OTP (ഫോൺ സ്ഥിരീകരണം)",
+    smsOtpHelp: "ഓഫ് = ഇമെയിൽ അല്ലെങ്കിൽ Google വഴി മാത്രം സൈൻ-അപ്പ്, എവിടെയും ഫോൺ പരിശോധനയില്ല. SMS ഒന്നും അയയ്ക്കില്ല.",
+    smsOtpToggle: "SMS OTP ഓണാക്കുക",
+    smsOtpWarning: "MSG91 കീകൾ + DLT രജിസ്ട്രേഷൻ ലൈവ് ആയ ശേഷം മാത്രം ഓണാക്കുക.",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {

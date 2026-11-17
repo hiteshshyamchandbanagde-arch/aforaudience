@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getPlatformSettings } from "@/lib/platform-settings"
+import { smsOtpBlock } from "@/lib/phone-gate"
 import { generateAndSendOtp } from "@/lib/otp"
 import { resolveIdentifierToUser } from "@/lib/auth-helpers"
 
@@ -10,6 +12,10 @@ import { resolveIdentifierToUser } from "@/lib/auth-helpers"
 //                     via signIn("otp-login", {identifier, code}) on the
 //                     client - see lib/auth.ts - not a route here.
 export async function POST(req: NextRequest) {
+  // SMS OTP toggle (17 Nov) - every purpose is off while smsOtpEnabled is off.
+  const smsOff = smsOtpBlock(await getPlatformSettings())
+  if (smsOff) return NextResponse.json(smsOff.body, { status: smsOff.status })
+
   const body = await req.json()
   const { purpose, phone, identifier } = body as {
     purpose: "LOGIN" | "SIGNUP_VERIFY"
