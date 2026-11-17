@@ -26,3 +26,15 @@ export function needsPhoneVerification(
 ): boolean {
   return phoneVerificationRequired(settings) && !user.isVerified
 }
+
+/**
+ * The refusal every SMS OTP endpoint returns while smsOtpEnabled is off
+ * (404: the feature isn't there). null = go ahead.
+ */
+export function smsOtpBlock(settings: PhoneGateSettings) {
+  if (phoneVerificationRequired(settings)) return null
+  return {
+    status: 404,
+    body: { error: "SMS OTP is not available.", code: "SMS_OTP_DISABLED" },
+  } as const
+}

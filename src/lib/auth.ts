@@ -9,6 +9,7 @@ import { resolveIdentifierToUser } from "@/lib/auth-helpers"
 import { suggestAvailableUsername } from "@/lib/auth-helpers"
 import { verifyOtp } from "@/lib/otp"
 import { getPlatformSettings } from "@/lib/platform-settings"
+import { needsPhoneVerification, smsOtpBlock } from "@/lib/phone-gate"
 import { WaveClosedError, isWaveOpen } from "@/lib/launch-waves"
 
 const LOCKOUT_THRESHOLD = 5
@@ -148,6 +149,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.identifier || !credentials?.code) return null
+        // SMS OTP toggle (17 Nov) - no OTP sign-in while SMS OTP is off.
+        if (smsOtpBlock(await getPlatformSettings())) return null
 
         const user = await resolveIdentifierToUser(credentials.identifier)
         if (!user || !user.phone) return null
@@ -199,6 +202,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.userId || !credentials?.code) return null
+        // SMS OTP toggle (17 Nov) - no OTP sign-in while SMS OTP is off.
+        if (smsOtpBlock(await getPlatformSettings())) return null
 
         const user = await prisma.user.findUnique({ where: { id: credentials.userId } })
         if (!user || !user.phone || user.isVerified) return null
@@ -292,6 +297,13 @@ export const authOptions: NextAuthOptions = {
         if (currentUser) {
           (session.user as any).displayName = currentUser.displayName
           ;(session.user as any).isVerified = currentUser.isVerified
+          // SMS OTP toggle (17 Nov) - what the client should gate on.
+          // isVerified keeps meaning "phone verified"; this is false for
+          // everyone while smsOtpEnabled is off (see lib/phone-gate.ts).
+          ;(session.user as any).needsPhoneVerification = needsPhoneVerification(
+            currentUser,
+            await getPlatformSettings()
+          )
           ;(session.user as any).role = currentUser.role
           ;(session.user as any).phone = currentUser.phone
           ;(session.user as any).onboardedAt = currentUser.onboardedAt

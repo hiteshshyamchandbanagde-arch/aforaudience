@@ -79,6 +79,44 @@ async function main() {
     })
   }
 
+  if (existsSync(join(ROOT, 'src/lib/phone-gate.ts'))) {
+    const { smsOtpBlock } = await import('../src/lib/phone-gate')
+    await test('smsOtpBlock: 404 SMS_OTP_DISABLED when off, null when on', () => {
+      assert.equal(smsOtpBlock({ smsOtpEnabled: true }), null)
+      const off = smsOtpBlock({ smsOtpEnabled: false })
+      assert.ok(off)
+      assert.equal(off.status, 404)
+      assert.equal(off.body.code, 'SMS_OTP_DISABLED')
+    })
+  }
+
+  for (const f of ['src/app/api/auth/otp/request/route.ts', 'src/app/api/auth/otp/verify/route.ts']) {
+    await test(`${f} refuses (smsOtpBlock) before any OTP send/verify`, () => {
+      const src = read(f)
+      const gate = src.search(/smsOtpBlock\(await getPlatformSettings\(\)\)/)
+      assert.ok(gate >= 0, 'no smsOtpBlock gate')
+      const work = src.search(/generateAndSendOtp\(|verifySignupOtp\(|resolveIdentifierToUser\(/)
+      assert.ok(work > gate, 'gate must run before the OTP work')
+      assert.match(src, /if \(smsOff\) return NextResponse\.json\(smsOff\.body, \{ status: smsOff\.status \}\)/)
+    })
+  }
+
+  await test('otp-login and signup-otp sign-ins refuse while SMS OTP is off', () => {
+    const src = read('src/lib/auth.ts')
+    for (const id of ['otp-login', 'signup-otp']) {
+      const start = src.indexOf(`id: "${id}"`)
+      assert.ok(start >= 0, `${id} provider missing`)
+      const body = src.slice(start, src.indexOf('CredentialsProvider(', start) > 0 ? src.indexOf('CredentialsProvider(', start) : start + 3000)
+      const gate = body.search(/if \(smsOtpBlock\(await getPlatformSettings\(\)\)\) return null/)
+      assert.ok(gate >= 0, `${id}: no smsOtpBlock gate`)
+      assert.ok(body.indexOf('verifyOtp(') > gate, `${id}: gate must run before verifyOtp`)
+    }
+  })
+
+  await test('session exposes needsPhoneVerification via the helper', () => {
+    assert.match(read('src/lib/auth.ts'), /\.needsPhoneVerification = needsPhoneVerification\(\s*currentUser,\s*await getPlatformSettings\(\)\s*\)/)
+  })
+
   await test('no route under src/app/api reads .isVerified or calls requireVerifiedPhone', () => {
     const offenders: string[] = []
     for (const f of walk(join(ROOT, 'src/app/api'))) {
