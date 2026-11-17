@@ -107,6 +107,10 @@ export default function AdminSettingsPage() {
   const [paidBookingsEnabled, setPaidBookingsEnabledState] = useState<boolean>(false)
   const [initialPaidBookingsEnabled, setInitialPaidBookingsEnabled] = useState<boolean>(false)
   const [paidBookingsSaving, setPaidBookingsSaving] = useState(false)
+  // SMS OTP toggle (17 Nov) - phone verification on/off (default OFF).
+  const [smsOtpEnabled, setSmsOtpEnabledState] = useState<boolean>(false)
+  const [initialSmsOtpEnabled, setInitialSmsOtpEnabled] = useState<boolean>(false)
+  const [smsOtpSaving, setSmsOtpSaving] = useState(false)
   // S1b-b1 - launch wave switches W1-W4.
   const [waves, setWaves] = useState<Record<Wave, boolean>>(ALL_WAVES_CLOSED)
   const [initialWaves, setInitialWaves] = useState<Record<Wave, boolean>>(ALL_WAVES_CLOSED)
@@ -199,6 +203,10 @@ export default function AdminSettingsPage() {
         const paidOn = data.settings.paidBookingsEnabled === true
         setInitialPaidBookingsEnabled(paidOn)
         setPaidBookingsEnabledState(paidOn)
+
+        const smsOn = data.settings.smsOtpEnabled === true
+        setInitialSmsOtpEnabled(smsOn)
+        setSmsOtpEnabledState(smsOn)
 
         const waveHint = launchWaveHint(data.settings)
         setInitialWaves(waveHint)
@@ -477,6 +485,27 @@ export default function AdminSettingsPage() {
     }
   }
 
+  const saveSmsOtp = async () => {
+    setSmsOtpSaving(true)
+    try {
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ smsOtpEnabled }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const on = data.settings.smsOtpEnabled === true
+      setInitialSmsOtpEnabled(on)
+      setSmsOtpEnabledState(on)
+      showToast('Saved.', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
+    } finally {
+      setSmsOtpSaving(false)
+    }
+  }
+
   const isWavesDirty = WAVES.some((w) => waves[w] !== initialWaves[w])
   const saveWaves = async () => {
     setWavesSaving(true)
@@ -714,6 +743,45 @@ export default function AdminSettingsPage() {
           </p>
           <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={savePaidBookings} disabled={paidBookingsSaving || paidBookingsEnabled === initialPaidBookingsEnabled}>
             {paidBookingsSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        {/* SMS OTP toggle (17 Nov) - same shape as Paid bookings; line
+            heights snapped to whole pixels so the cards below don't move
+            by a sub-pixel (BUG-2609-051 baseline). */}
+        <div
+          data-afa-sms-otp-card
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, lineHeight: 'round(1.3em, 1px)', marginBottom: 'var(--afa-space-6px)' }}>
+            {tr.adminSettings.smsOtpHeading}
+          </h2>
+          <p data-afa-sms-otp-help style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
+            {tr.adminSettings.smsOtpHelp}
+          </p>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              data-afa-sms-otp-toggle
+              checked={smsOtpEnabled}
+              onChange={(e) => setSmsOtpEnabledState(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', lineHeight: 'round(1.5em, 1px)' }}>
+              {tr.adminSettings.smsOtpToggle}
+            </span>
+          </label>
+          <p data-afa-sms-otp-warning style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
+            {tr.adminSettings.smsOtpWarning}
+          </p>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveSmsOtp} disabled={smsOtpSaving || smsOtpEnabled === initialSmsOtpEnabled}>
+            {smsOtpSaving ? 'Saving…' : 'Save'}
           </Button>
         </div>
 
