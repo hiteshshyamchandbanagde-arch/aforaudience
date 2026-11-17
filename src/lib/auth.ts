@@ -300,7 +300,7 @@ export const authOptions: NextAuthOptions = {
           // SMS OTP toggle (17 Nov) - what the client should gate on.
           // isVerified keeps meaning "phone verified"; this is false for
           // everyone while smsOtpEnabled is off (see lib/phone-gate.ts).
-          ;(session.user as any).needsPhoneVerification = needsPhoneVerification(
+          ;(session.user as { needsPhoneVerification?: boolean }).needsPhoneVerification = needsPhoneVerification(
             currentUser,
             await getPlatformSettings()
           )
