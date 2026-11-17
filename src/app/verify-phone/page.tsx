@@ -45,9 +45,30 @@ function VerifyPhoneInner() {
 
   const { submitting, devOtp, error, codeSent, sendCode: hookSendCode, verifyCode: hookVerifyCode, setError } = useOtpVerification()
 
+  // SMS OTP toggle (17 Nov) - while PlatformSettings.smsOtpEnabled is off
+  // there's no phone check at all, so this page just sends the user on to
+  // `next` (or home). Same public flag the sign-up/login forms read; a
+  // failed read keeps today's (ON) page. Only a same-site path is followed.
+  const [smsOtpOff, setSmsOtpOff] = useState(false)
   useEffect(() => {
+    let cancelled = false
+    fetch('/api/auth/sms-otp')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d || d.enabled !== false) return
+        setSmsOtpOff(true)
+        const raw = searchParams.get('next')
+        const dest = raw && /^\/(?![/\\])/.test(raw) ? raw : '/'
+        router.replace(dest)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [router, searchParams])
+
+  useEffect(() => {
+    if (smsOtpOff) return
     if (status === 'unauthenticated') router.push(`/login?next=${encodeURIComponent(`/verify-phone?next=${next}`)}`)
-  }, [status, router, next])
+  }, [status, router, next, smsOtpOff])
 
   useEffect(() => {
     const load = async () => {
@@ -91,7 +112,7 @@ function VerifyPhoneInner() {
     if (ok) router.push(next)
   }
 
-  if (status === 'loading' || loading) {
+  if (status === 'loading' || loading || smsOtpOff) {
     return (<><SiteNav /><BrandLoader /></>)
   }
 
