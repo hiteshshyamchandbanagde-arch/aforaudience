@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getPlatformSettings } from '@/lib/platform-settings'
+import { needsPhoneVerification } from '@/lib/phone-gate'
 
 // Gate for actions where an unverified identity becomes something someone
 // else relies on or is bound by - a published venue listing an Organiser
@@ -10,8 +12,11 @@ import { NextResponse } from 'next/server'
 // `action` names what's actually being gated so the message can say why,
 // not just assert a rule - e.g. "publishing this venue" instead of a
 // generic "doing this" reused across four unrelated actions.
-export function requireVerifiedPhone(user: { isVerified: boolean }, action: string) {
-  if (!user.isVerified) {
+//
+// SMS OTP toggle (17 Nov): waived entirely while PlatformSettings
+// .smsOtpEnabled is off - see src/lib/phone-gate.ts.
+export async function requirePhoneVerification(user: { isVerified: boolean }, action: string) {
+  if (needsPhoneVerification(user, await getPlatformSettings())) {
     return NextResponse.json(
       { error: `Please verify your mobile number before ${action}.` },
       { status: 403 }

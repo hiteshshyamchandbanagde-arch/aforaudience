@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { isValidMapsUrl } from '@/lib/maps-url'
-import { requireVerifiedPhone } from '@/lib/verification'
+import { requirePhoneVerification } from '@/lib/verification'
 import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -70,7 +70,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // exact gap Feedback flagged ("Venue publish without verify mobile
     // number"). Same guard, same condition, as create.
     if (publish === true) {
-      const verifyError = requireVerifiedPhone(user, 'publishing this venue - organisers plan real bookings around it')
+      const verifyError = await requirePhoneVerification(user, 'publishing this venue - organisers plan real bookings around it')
       if (verifyError) return verifyError
     }
 

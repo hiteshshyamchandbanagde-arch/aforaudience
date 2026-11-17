@@ -1,4 +1,5 @@
 import { NextResponse, after } from 'next/server'
+import { needsPhoneVerification } from '@/lib/phone-gate'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -68,7 +69,8 @@ export async function POST(req: Request) {
     // place a ticket actually gets created, rather than at login (browse-
     // first stays intact; verification is only required to *book*, not to
     // look around).
-    if (!user.isVerified) {
+    // SMS OTP toggle (17 Nov) - waived while smsOtpEnabled is off.
+    if (needsPhoneVerification(user, await getPlatformSettings())) {
       return NextResponse.json(
         { error: 'Verify your phone number before booking a ticket.', reason: 'PHONE_NOT_VERIFIED' },
         { status: 403 }

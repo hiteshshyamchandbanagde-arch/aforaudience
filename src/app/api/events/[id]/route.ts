@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { parseAmount } from '@/lib/money-validation'
-import { requireVerifiedPhone } from '@/lib/verification'
+import { requirePhoneVerification } from '@/lib/verification'
 import { getPlatformSettings, getPaidBookingsEnabled } from '@/lib/platform-settings'
 import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
 import { resolveEventPaymentMode } from '@/lib/pay-at-entry'
@@ -240,7 +240,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     let resolvedStatus: string | undefined
     if (publish !== undefined) {
       if (publish) {
-        const verifyError = requireVerifiedPhone(user, 'publishing this event')
+        const verifyError = await requirePhoneVerification(user, 'publishing this event')
         if (verifyError) return verifyError
 
         // GEN-2608-040 (15 Aug) - same requirement as POST /api/events:

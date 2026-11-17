@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { requireVerifiedPhone } from '@/lib/verification'
+import { requirePhoneVerification } from '@/lib/verification'
 import { fetchLinkedAccount } from '@/lib/razorpay'
 import { getPlatformSettings, isDirectPayoutsEnabled } from '@/lib/platform-settings'
 
@@ -15,7 +15,7 @@ import { getPlatformSettings, isDirectPayoutsEnabled } from '@/lib/platform-sett
 // isn't wired here yet. This route only links an existing account_id and
 // keeps its activation status current.
 //
-// Gated behind requireVerifiedPhone the same as venue/event publish and
+// Gated behind requirePhoneVerification the same as venue/event publish and
 // application acceptance — an unverified identity shouldn't be able to
 // redirect real audience money to a bank account it controls.
 
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const phoneCheck = requireVerifiedPhone(user, 'linking a payout account')
+  const phoneCheck = await requirePhoneVerification(user, 'linking a payout account')
   if (phoneCheck) return phoneCheck
 
   const { organiser, error } = await getOrganiserOrError(user.id)
