@@ -2082,6 +2082,10 @@ const hi: Dictionary = {
   },
   adminSettings: {
     directPayoutsExpired: "{date} को समाप्त — अभी बंद है।",
+    smsOtpHeading: "SMS OTP (फ़ोन सत्यापन)",
+    smsOtpHelp: "बंद = साइन-अप केवल ईमेल या Google से, कहीं भी फ़ोन की जाँच नहीं। कोई SMS नहीं भेजा जाता।",
+    smsOtpToggle: "SMS OTP चालू करें",
+    smsOtpWarning: "MSG91 कुंजियाँ + DLT पंजीकरण लाइव होने के बाद ही चालू करें।",
   },
   // D1 (Hitesh, 8 Nov) - Pay at entry + attendance.
   payAtEntry: {
