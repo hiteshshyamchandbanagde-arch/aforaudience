@@ -1,4 +1,12 @@
-## Part 79 — START HERE (17 Nov 01:05 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+## Part 80 — START HERE (17 Nov 07:45 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **80 → 79 → 78**. Delta only.
+
+- **Sign-up decision REVERSED (Hitesh, 17 Nov 07:28 IST): launch without MSG91, make SMS OTP configurable.** New admin setting `PlatformSettings.smsOtpEnabled` (default false = prod). OFF = no SMS, sign-up without an OTP stage (phone optional), no OTP login, **phone gate waived everywhere** (10 server gates incl. audience `bookings` + `venue-bookings`, 4 client redirects, nudges, welcome step). ON = today's flow. No replacement email gate (no email on prod yet). QA row will be set ON by chat so the OTP e2e keep running.
+- Dispatches: `cc-prompt-sms-otp-toggle-a.md` (server/auth, migration `20261117130000_sms_otp_toggle`) → then `…-b.md` (client gates, nudges, admin switch), same branch `feat/sms-otp-toggle`, one PR. **Before the PR's e2e-preview:** chat applies the migration on QA + sets `smsOtpEnabled = true` on QA `singleton`.
+- **Prod admin (Hitesh, 17 Nov):** Google account `hiteshshyamchandbanagde@gmail.com` (store lowercase, same as QA). Seed the `User` row with role ADMIN **plus a password hash** (credentials login has no admin restriction), so admin login doesn't wait for the Google OAuth client. Hitesh generates the bcrypt hash locally (cost 12) and pastes only the hash; the plain password never goes in chat. Later Google sign-in links by email.
+- QA parity `apply_migration` (from Part 79) retried 02:0xZ: the Supabase confirmation went unanswered (timeout). Still pending, still a no-op on QA.
+
+## Part 79 — (17 Nov 01:05 IST, chat), superseded as entry point by Part 80, qa @ this commit, main @ 636354f (prod frozen)
 Read order: **79 → 78 → 77**. Delta only. 0 open PRs.
 
 - **#784 merged** (`cbc6cbe`, pinned head 97720457): migration `20261117120000_prod_parity_settings_tokens` + 3 `findFirst` → `findUnique({id:'singleton'})` + `scripts/migration-seed-parity.test.ts` (on the qa tree 0/4 → branch 4/4). CC deviation, correct: `--afa-amber-tint` is deleted by `20260921120000`, so it's re-inserted (43 inserts, not 42; 1 value fix on replay). CI on head: design-tokens ✅, e2e-preview ✅ (run 43919026760). Vercel qa `dpl_4BU2CVLEXLrcJJap9oa9YF6Nijqn` READY, 0 runtime errors in the last 1 h. Human check: none.
