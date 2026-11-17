@@ -1,5 +1,21 @@
-## Part 80 — START HERE (17 Nov 07:45 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
-Read order: **80 → 79 → 78**. Delta only.
+## Part 81 — START HERE (17 Nov 19:35 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **81 → 80 → 79**. Delta only. 0 open PRs.
+
+- **#785 merged** (`4bacebd`, pinned head 048f5960): SMS OTP admin setting. 17 commits (A: server/auth, B: client gates, nudges, admin switch in 12 locales). Tests: phone-gate 19/19 (0/13 on qa), register-core 9/9, sms-otp-ui, phone-gate-client 10/10 (1/10 on qa), e2e admin switch read-only 390/1440. CI: design-tokens ✅, e2e-preview ✅ (attempt 2). Vercel qa `dpl_BrX5CACwLt1h3DREZJ835G6oHYVr` READY; runtime errors = known only (Places 403, pg deprecation, expected pay-at-entry 4-seat validation).
+- QA: migration `sms_otp_toggle` applied 07:12Z, `smsOtpEnabled = true` on `singleton` (Hitesh approved). **Prod: column default false = OFF**, comes in with `migrate deploy`.
+- **Lesson:** e2e-preview fires on the **branch push** (deployment_status), not on PR open. Attempt 1 ran at 06:31Z before the QA column existed → `/api/platform-settings/launch-waves` 500 → pre-flight "no tests ran". **For any dispatch with a migration: apply it on QA before CC pushes** (put the SQL in the dispatch and apply it right after triggering), or re-run e2e-preview after applying.
+- QA parity `apply_migration` still not run (prompt timed out 07:1xZ). It's a no-op on QA. The DesignToken md5 moved only because `--afa-selected` `updatedAt` was touched 16 Nov 19:42Z with the same value (admin-editor e2e).
+- Human check: QA admin → Settings "SMS OTP" switch shows ON, reads well in en/hi/mr. Prod smoke (OFF): email + Google sign-up, no phone step, reserve a free ticket.
+
+### Next (chat)
+1. S5 prod runbook (seed = migrations + admin `User` row with Hitesh's email + password hash; env vars; qa→main; smoke; waves).
+2. QA parity apply_migration (Hitesh present).
+3. Feedback rows #778–#785; e2e.yml no-deployment fallback.
+
+### Open for Hitesh
+Resend (domain DNS + key + From addresses) · new prod Places key · ANTHROPIC_API_KEY · billing check · phone check 2 · Google OAuth client (non-blocking) · branch cleanup (incl. `fix/prod-parity-seed`, `feat/sms-otp-toggle`).
+
+## Part 80 — (17 Nov 07:45 IST, chat), superseded as entry point by Part 81, qa @ this commit, main @ 636354f (prod frozen)
 
 - **Sign-up decision REVERSED (Hitesh, 17 Nov 07:28 IST): launch without MSG91, make SMS OTP configurable.** New admin setting `PlatformSettings.smsOtpEnabled` (default false = prod). OFF = no SMS, sign-up without an OTP stage (phone optional), no OTP login, **phone gate waived everywhere** (10 server gates incl. audience `bookings` + `venue-bookings`, 4 client redirects, nudges, welcome step). ON = today's flow. No replacement email gate (no email on prod yet). QA row will be set ON by chat so the OTP e2e keep running.
 - Dispatches: `cc-prompt-sms-otp-toggle-a.md` (server/auth, migration `20261117130000_sms_otp_toggle`) → then `…-b.md` (client gates, nudges, admin switch), same branch `feat/sms-otp-toggle`, one PR. **Before the PR's e2e-preview:** chat applies the migration on QA + sets `smsOtpEnabled = true` on QA `singleton`.
