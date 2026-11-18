@@ -225,7 +225,10 @@ test("[GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: stil
   // before the save answers, and the reload below could cut the save off.
   // The reloaded page then had no saved city, and Pune was (rightly) picked
   // straight away. Wait for the save itself.
-  const saved = page.waitForResponse((r) => r.url().includes("/api/user/location") && r.request().method() === "POST");
+  // trailingSlash: true answers the POST with a 308 first; wait for the real answer.
+  const saved = page.waitForResponse(
+    (r) => r.url().includes("/api/user/location") && r.request().method() === "POST" && (r.status() < 300 || r.status() >= 400),
+  );
   await chipScope(page, isMobile).getByRole("button", { name: "Jaipur", exact: true }).click();
   expect((await saved).ok()).toBe(true);
   await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
