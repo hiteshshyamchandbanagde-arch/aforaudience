@@ -224,28 +224,46 @@ test("[GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: stil
   await chipScope(page, isMobile).getByRole("button", { name: "Jaipur", exact: true }).click();
   await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
 
-  // Hold every later read of the saved city for 4 s.
-  await page.route("**/api/user/location**", async (route) => {
-    if (route.request().method() !== "GET") return route.continue();
-    await new Promise((r) => setTimeout(r, 4_000));
-    await route.continue().catch(() => {});
-  });
+  // Gate every later read of the saved city until the tap has been made.
+  // (Was a fixed 4 s hold: that 4 s sat inside the answer's 10 s budget
+  // and made the qa push runs red on slow functions, 18 Nov. The gate
+  // keeps the same guarantee - the tap lands before the city is read -
+  // and releases it the moment the tap is in.)
+  const gate = gateRequests(page, "**/api/user/location**");
   const timings = recordTimings(page);
   try {
+    await gate.install();
     await page.reload();
     const useRow = await openPicker(page, isMobile);
     await expect(chip(page, isMobile)).toHaveText(/^(📍)?\s*…/);
     timings.mark("tap");
     await useRow.click();
+    gate.release();
 
     const status = chipScope(page, isMobile).getByRole("status");
     await expect(status).toContainText("You seem to be in Pune. Switch?");
     timings.mark("answer");
     await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
   } finally {
+    gate.release();
     await timings.attach();
   }
 });
+
+/** Holds every GET matching `pattern` until release() (later GETs pass straight through). */
+function gateRequests(page: Page, pattern: string) {
+  let release: () => void = () => {};
+  const open = new Promise<void>((r) => (release = r));
+  return {
+    install: () =>
+      page.route(pattern, async (route) => {
+        if (route.request().method() !== "GET") return route.continue();
+        await open;
+        await route.continue().catch(() => {});
+      }),
+    release: () => release(),
+  };
+}
 
 /**
  * Diagnostics for the push-run red (18 Nov): when each saved-city read and
