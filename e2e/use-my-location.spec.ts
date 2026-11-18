@@ -253,3 +253,48 @@ test("[GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: stil
   await expect(status).toContainText("You seem to be in Pune. Switch?");
   await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
 });
+
+/** Holds every GET matching `pattern` until release() (later GETs pass straight through). */
+function gateRequests(page: Page, pattern: string) {
+  let release: () => void = () => {};
+  const open = new Promise<void>((r) => (release = r));
+  return {
+    install: () =>
+      page.route(pattern, async (route) => {
+        if (route.request().method() !== "GET") return route.continue();
+        await open;
+        await route.continue().catch(() => {});
+      }),
+    release: () => release(),
+  };
+}
+
+// 18 Nov qa push runs: a tap made while the picker's own city list was
+// still loading started a second /api/venues/cities request and waited
+// for it before answering. The list is gated here until the tap is in, so
+// the tap always lands mid-request: one list request per page, not two.
+test("[GEN-2610-005] tapped while the city list is loading: one city-list request, not two", async ({ page, context, isMobile }) => {
+  await at(context, LONAVALA);
+  await page.goto("/");
+  await settledChipText(page, isMobile);
+
+  const gate = gateRequests(page, "**/api/venues/cities**");
+  const listRequests: string[] = [];
+  // A request a redirect started (the trailing-slash 308) is the same request.
+  page.on("request", (r) => {
+    if (/\/api\/venues\/cities/.test(r.url()) && !r.redirectedFrom()) listRequests.push(r.url());
+  });
+  try {
+    await gate.install();
+    const useRow = await openPicker(page, isMobile);
+    await useRow.click();
+    // The tap is in (the picker is finding you) before the list is let through.
+    await expect(chipScope(page, isMobile).getByRole("status")).toContainText("Finding you");
+    gate.release();
+    await expect(chipScope(page, isMobile).getByRole("status")).toContainText("No shows near you yet. Nearest: Pune, 54 km");
+  } finally {
+    gate.release();
+  }
+  expect(listRequests).toHaveLength(1);
+});
+
