@@ -230,12 +230,38 @@ test("[GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: stil
     await new Promise((r) => setTimeout(r, 4_000));
     await route.continue().catch(() => {});
   });
-  await page.reload();
-  const useRow = await openPicker(page, isMobile);
-  await expect(chip(page, isMobile)).toHaveText(/^(📍)?\s*…/);
-  await useRow.click();
+  const timings = recordTimings(page);
+  try {
+    await page.reload();
+    const useRow = await openPicker(page, isMobile);
+    await expect(chip(page, isMobile)).toHaveText(/^(📍)?\s*…/);
+    timings.mark("tap");
+    await useRow.click();
 
-  const status = chipScope(page, isMobile).getByRole("status");
-  await expect(status).toContainText("You seem to be in Pune. Switch?");
-  await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
+    const status = chipScope(page, isMobile).getByRole("status");
+    await expect(status).toContainText("You seem to be in Pune. Switch?");
+    timings.mark("answer");
+    await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
+  } finally {
+    await timings.attach();
+  }
 });
+
+/**
+ * Diagnostics for the push-run red (18 Nov): when each saved-city read and
+ * city-list request started and finished, relative to the reload, plus the
+ * tap and the answer. Attached to the test as timings.json on every run.
+ */
+function recordTimings(page: Page) {
+  const t0 = Date.now();
+  const events: { at: number; what: string }[] = [];
+  const watched = (url: string) => /\/api\/(user\/location|venues\/cities)/.test(url);
+  const label = (r: { method(): string; url(): string }) => `${r.method()} ${new URL(r.url()).pathname}`;
+  page.on("request", (r) => { if (watched(r.url())) events.push({ at: Date.now() - t0, what: `start ${label(r)}` }); });
+  page.on("requestfinished", (r) => { if (watched(r.url())) events.push({ at: Date.now() - t0, what: `finish ${label(r)}` }); });
+  page.on("requestfailed", (r) => { if (watched(r.url())) events.push({ at: Date.now() - t0, what: `failed ${label(r)}` }); });
+  return {
+    mark: (what: string) => events.push({ at: Date.now() - t0, what }),
+    attach: () => test.info().attach("timings.json", { body: JSON.stringify(events, null, 2), contentType: "application/json" }),
+  };
+}
