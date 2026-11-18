@@ -1,4 +1,9 @@
-## Part 81 — START HERE (17 Nov 19:35 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+## Part 82 — START HERE (18 Nov 11:10 IST, chat, end of session), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **82 → 81 → 80**. 0 open PRs.
+
+- 🔴 **First item:** push-triggered E2E (QA) on `4bacebd` (#785 merge), run 44097402048 → **739 ✅ / 1 ❌ (failed incl. retry)**: `[mobile-chrome] e2e/use-my-location.spec.ts:215 [GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: still asks, never switches on its own`, `getByRole('banner').getByRole('status')` toContainText. The scheduled nightlies on af00556 (09:19Z, 13:49Z 17 Nov) were green. Rule 4: decide whether it's a real race (does #785's extra `getPlatformSettings()` in the session callback delay the saved-city load?) or flaky (quarantine with `test.fixme` + a Feedback ticket in the same PR). Check the next scheduled nightly first.
+
+## Part 81 — (17 Nov 19:35 IST, chat), superseded as entry point by Part 82, qa @ this commit, main @ 636354f (prod frozen)
 Read order: **81 → 80 → 79**. Delta only. 0 open PRs.
 
 - **#785 merged** (`4bacebd`, pinned head 048f5960): SMS OTP admin setting. 17 commits (A: server/auth, B: client gates, nudges, admin switch in 12 locales). Tests: phone-gate 19/19 (0/13 on qa), register-core 9/9, sms-otp-ui, phone-gate-client 10/10 (1/10 on qa), e2e admin switch read-only 390/1440. CI: design-tokens ✅, e2e-preview ✅ (attempt 2). Vercel qa `dpl_BrX5CACwLt1h3DREZJ835G6oHYVr` READY; runtime errors = known only (Places 403, pg deprecation, expected pay-at-entry 4-seat validation).
