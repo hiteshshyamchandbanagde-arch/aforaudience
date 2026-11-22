@@ -1,4 +1,19 @@
-## Part 82 — START HERE (18 Nov 11:10 IST, chat, end of session), qa @ this commit, main @ 636354f (prod frozen)
+## Part 83 — START HERE (22 Nov 14:15 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **83 → 82 → 81**. 1 open PR (#786).
+
+- **GEN-2610-005:** #786 (test-only: wait for Jaipur POST before reload + gate the saved-city GET until after the tap; from Hitesh's laptop CC) is green (e2e-preview + design-tokens) — **merge blocked on Hitesh's explicit "merge"** (auto-mode denied an unasked merge). Autopilot branch `fix/gen-2610-005-tap-gate`: keep ONLY `9701288` (LocationChip shares the pending cities request + Promise.all; new e2e "one city-list request, not two", fails on qa) → re-dispatch onto qa after #786; drop 68a9680/081423f (overlap). Nightlies 18 Nov green.
+- **Prod env (Hitesh, 19–22 Nov) — all Production-only unless noted:** RESEND_API_KEY, EMAIL_FROM (`AforAudience <no-reply@aforaudience.com>`), EMAIL_FROM_TICKETS (`AforAudience Tickets <tickets@aforaudience.com>` — code default is mail.aforaudience.com, unverified), GOOGLE_PLACES_API_KEY (new key `afa-prod-places`, Places API (New) only, app restriction None, tested OK), ANTHROPIC_API_KEY (`afa-prod`; expiry not confirmed — ask), NEXT_PUBLIC_APP_URL=https://aforaudience.com (Config), NEXT_PUBLIC_VAPID_PUBLIC_KEY (Config, from .env.local, 87 chars), VAPID_PRIVATE_KEY + VAPID_SUBJECT (now Production and Preview), NEXTAUTH_URL **split**: Production=https://aforaudience.com (Config) / Preview=old value (aforaudience.vercel.app), BLOB_READ_WRITE_TOKEN (same store `aforaudience-upload` as QA).
+- ⚠️ Verify: Preview VAPID_PRIVATE_KEY/VAPID_SUBJECT/NEXTAUTH_URL were edited with a blank value box (Secret) — if Vercel blanked them, QA login/push breaks → check next nightly + a QA login first. VAPID pair match unproven → prod smoke must test push.
+- **Google Cloud:** free trial had ended (= root cause of QA Places 403). Hitesh upgraded to Paid (22 Nov); "account verification under review". Budget `AFA` ₹1,000/mo, alerts 50/90/100%. QA key works again.
+- Resend: DNS records added at GoDaddy (nameservers domaincontrol.com) 19 Nov; Verified status not yet confirmed.
+- Admin bcrypt hash received in chat 19 Nov (valid $2b$12$, 60 chars) — NOT committed (public repo); ask Hitesh to re-paste at the prod admin-row step if this chat is gone.
+- Not on prod by design: RAZORPAY_* (paid off), GOOGLE_CLIENT_* / NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED (OAuth later; QA client "AforAudience QA" exists), OTP_PROVIDER (SMS off). NEXTAUTH_SECRET shared prod+preview (OK for launch; split later). Prod DATABASE_URL (Jul) — verify it's the prod pooler 6543 in the runbook.
+
+### Next (chat)
+1. Hitesh: Resend Verified? · "merge" #786 · approve QA parity apply_migration.
+2. Re-dispatch 9701288 onto qa. 3. S5 prod runbook (each step Hitesh OK).
+
+## Part 82 —  (18 Nov 11:10 IST, chat, end of session), qa @ this commit, main @ 636354f (prod frozen)
 Read order: **82 → 81 → 80**. 0 open PRs.
 
 - 🔴 **First item:** push-triggered E2E (QA) on `4bacebd` (#785 merge), run 44097402048 → **739 ✅ / 1 ❌ (failed incl. retry)**: `[mobile-chrome] e2e/use-my-location.spec.ts:215 [GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: still asks, never switches on its own`, `getByRole('banner').getByRole('status')` toContainText. The scheduled nightlies on af00556 (09:19Z, 13:49Z 17 Nov) were green. Rule 4: decide whether it's a real race (does #785's extra `getPlatformSettings()` in the session callback delay the saved-city load?) or flaky (quarantine with `test.fixme` + a Feedback ticket in the same PR). Check the next scheduled nightly first.
