@@ -55,12 +55,12 @@ CREATE TABLE IF NOT EXISTS "CodeCounter" (
   CONSTRAINT "CodeCounter_pkey" PRIMARY KEY ("prefix", "yearMonth")
 );
 
--- 5. generate_role_code(): QA fills the codes above with a DB function
---    (AFA/ART/ORG/VEN + YYMM + 6-digit per-month sequence from
---    CodeCounter, e.g. ORG2608000058 - see src/lib/auth-helpers.ts
---    CODE_PATTERN). Its QA definition is not in the repo. Reconstructed
---    here and wired as column defaults ONLY when no generate_role_code
---    exists at all, so QA's own version is never touched.
+-- 5. Role codes are filled exactly as on QA (read-only introspection,
+--    22 Nov): generate_role_code(p_prefix) (AFA/ART/ORG/VEN + YYMM +
+--    6-digit per-month sequence from CodeCounter, e.g. ORG2608000058 - see
+--    src/lib/auth-helpers.ts CODE_PATTERN) called by a BEFORE INSERT
+--    trigger per table. The code columns have NO default. Each function
+--    and trigger is created only if missing, so QA's own are never touched.
 DO $outer$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'generate_role_code') THEN
     EXECUTE $fn$
@@ -79,9 +79,35 @@ DO $outer$ BEGIN
       END
       $body$
     $fn$;
-    ALTER TABLE "User" ALTER COLUMN "code" SET DEFAULT generate_role_code('AFA');
-    ALTER TABLE "Artist" ALTER COLUMN "code" SET DEFAULT generate_role_code('ART');
-    ALTER TABLE "Organiser" ALTER COLUMN "code" SET DEFAULT generate_role_code('ORG');
-    ALTER TABLE "VenueOwner" ALTER COLUMN "code" SET DEFAULT generate_role_code('VEN');
   END IF;
 END $outer$;
+
+DO $outer$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN SELECT * FROM (VALUES
+    ('User', 'set_user_code', 'trg_user_code', 'AFA'),
+    ('Artist', 'set_artist_code', 'trg_artist_code', 'ART'),
+    ('Organiser', 'set_organiser_code', 'trg_organiser_code', 'ORG'),
+    ('VenueOwner', 'set_venueowner_code', 'trg_venueowner_code', 'VEN')
+  ) AS v(tbl, fn, trg, prefix) LOOP
+    IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = r.fn) THEN
+      EXECUTE format(
+        'CREATE FUNCTION %I() RETURNS trigger LANGUAGE plpgsql AS $body$ '
+        'begin if new."code" is null then new."code" := generate_role_code(%L); end if; return new; end $body$',
+        r.fn, r.prefix);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = r.trg AND tgrelid = format('public.%I', r.tbl)::regclass) THEN
+      EXECUTE format('CREATE TRIGGER %I BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION %I()', r.trg, r.tbl, r.fn);
+    END IF;
+  END LOOP;
+END $outer$;
+
+-- Supabase advisor function_search_path_mutable flags all 5 on QA.
+-- Safe to run on QA too.
+ALTER FUNCTION generate_role_code(TEXT) SET search_path = public;
+ALTER FUNCTION set_user_code() SET search_path = public;
+ALTER FUNCTION set_artist_code() SET search_path = public;
+ALTER FUNCTION set_organiser_code() SET search_path = public;
+ALTER FUNCTION set_venueowner_code() SET search_path = public;
