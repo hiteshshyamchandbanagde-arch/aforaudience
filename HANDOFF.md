@@ -16,9 +16,12 @@ Read order: **83 → 82 → 81**. 0 open PRs.
 - Admin bcrypt hash received in chat 19 Nov (valid $2b$12$, 60 chars) — NOT committed (public repo); ask Hitesh to re-paste at the prod admin-row step if this chat is gone.
 - Not on prod by design: RAZORPAY_* (paid off), GOOGLE_CLIENT_* / NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED (OAuth later; QA client "AforAudience QA" exists), OTP_PROVIDER (SMS off). NEXTAUTH_SECRET shared prod+preview (OK for launch; split later). Prod DATABASE_URL (Jul) — verify it's the prod pooler 6543 in the runbook.
 
-### Next (chat)
-1. Hitesh: Resend Verified? · "merge" #786 · approve QA parity apply_migration.
-2. Re-dispatch 9701288 onto qa. 3. S5 prod runbook (each step Hitesh OK).
+### Next (chat) — START OF NEXT SESSION, in order
+1. Read autopilot run 45010210291 (fresh-replay part 2 on `fix/prod-fresh-replay`): review diff (QA's exact code triggers, RLS migration, search_path), open PR, CI green → Hitesh "merge" → apply its ALTER FUNCTION … SET search_path lines on QA (needs Hitesh OK) → re-run get_advisors (expect 0 WARN/ERROR).
+2. City-list follow-up `fix/gen-2610-005-one-cities-request` (1139655): check the 'travel prompt shows once' repeat failures (pre-existing?) → PR → merge on Hitesh OK.
+3. Push E2E on 1d3ffad (#786) — confirm green; check QA login/push still OK (Preview NEXTAUTH_URL/VAPID were re-saved blank-valued 22 Nov).
+4. Prod launch (each step Hitesh OK; chat may touch prod only if Hitesh lifts the block for launch): ~~backup~~ skipped → wipe prod public schema → `prisma migrate deploy` by hand (Vercel build does NOT run it; Hitesh locally with prod DATABASE_URL, or chat) → admin User row (hash in 19 Nov chat; re-ask if gone) → verify prod DATABASE_URL = pooler 6543 → qa→main → smoke (email sign-up, admin login, free ticket, push, photo upload, Places) → waves.
+5. Hitesh (non-blocking): delete merged branches (fix/prod-parity-seed, feat/sms-otp-toggle, fix/flaky-location-register, fix/gen-2610-005-e2e-save-race, fix/gen-2610-005-tap-gate); optional re-login on QA with Google (fresh OAuth tokens after RLS exposure); Anthropic prod key expires 31 Dec.
 
 ## Part 82 —  (18 Nov 11:10 IST, chat, end of session), qa @ this commit, main @ 636354f (prod frozen)
 Read order: **82 → 81 → 80**. 0 open PRs.
