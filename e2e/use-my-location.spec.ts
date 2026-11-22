@@ -221,19 +221,33 @@ test("[GEN-2610-005] saved Jaipur, tapped before the saved city has loaded: stil
   await page.goto("/");
   await settledChipText(page, isMobile);
   await openPicker(page, isMobile);
+  // Push runs 16/17 Nov: the chip reads Jaipur as soon as it is tapped,
+  // before the save answers, and the reload below could cut the save off.
+  // The reloaded page then had no saved city, and Pune was (rightly) picked
+  // straight away. Wait for the save itself.
+  // trailingSlash: true answers the POST with a 308 first; wait for the real answer.
+  const saved = page.waitForResponse(
+    (r) => r.url().includes("/api/user/location") && r.request().method() === "POST" && (r.status() < 300 || r.status() >= 400),
+  );
   await chipScope(page, isMobile).getByRole("button", { name: "Jaipur", exact: true }).click();
+  expect((await saved).ok()).toBe(true);
   await expect(chip(page, isMobile)).toHaveText(chipReads("Jaipur"));
 
-  // Hold every later read of the saved city for 4 s.
+  // Hold every later read of the saved city until "Use my location" has
+  // been tapped (not a fixed 4 s, which also ate into the answer's 10 s
+  // when QA was slow). Released after 20 s anyway so nothing hangs.
+  let tapped!: () => void;
+  const tap = new Promise<void>((r) => (tapped = r));
   await page.route("**/api/user/location**", async (route) => {
     if (route.request().method() !== "GET") return route.continue();
-    await new Promise((r) => setTimeout(r, 4_000));
+    await Promise.race([tap, new Promise((r) => setTimeout(r, 20_000))]);
     await route.continue().catch(() => {});
   });
   await page.reload();
   const useRow = await openPicker(page, isMobile);
   await expect(chip(page, isMobile)).toHaveText(/^(📍)?\s*…/);
   await useRow.click();
+  tapped();
 
   const status = chipScope(page, isMobile).getByRole("status");
   await expect(status).toContainText("You seem to be in Pune. Switch?");
