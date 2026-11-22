@@ -12,7 +12,9 @@ CREATE TYPE "FeedbackStatus_new" AS ENUM (
 
 ALTER TABLE "Feedback" ADD COLUMN "status_new" "FeedbackStatus_new";
 
-UPDATE "Feedback" SET "status_new" = CASE status
+-- 22 Nov: replay-safe for a fresh DB (prod); no-op on QA. Compare as text:
+-- a fresh DB's FeedbackStatus has no 'TESTED' (QA got it out-of-band).
+UPDATE "Feedback" SET "status_new" = CASE status::text
   WHEN 'NEW' THEN 'NEW'
   WHEN 'REVIEWED' THEN 'UNDER_REVIEW'
   WHEN 'TESTED' THEN 'IN_TEST'
@@ -60,6 +62,14 @@ ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_displayId_key" UNIQUE ("displayI
 
 -- 4. Seed CodeCounter so future Feedback inserts continue the sequence
 --    correctly instead of restarting at 001 per prefix/month
+-- 22 Nov: replay-safe for a fresh DB (prod); no-op on QA. No migration
+-- ever created CodeCounter (QA got it out-of-band); shape = schema.prisma.
+CREATE TABLE IF NOT EXISTS "CodeCounter" (
+  "prefix" TEXT NOT NULL,
+  "yearMonth" TEXT NOT NULL,
+  "currentSeq" INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT "CodeCounter_pkey" PRIMARY KEY ("prefix", "yearMonth")
+);
 INSERT INTO "CodeCounter" (prefix, "yearMonth", "currentSeq")
 SELECT
   CASE category

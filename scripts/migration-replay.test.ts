@@ -67,7 +67,8 @@ function parseSchema(): Expected {
       const m = l.match(/^(\w+)\s+(\w+)(\[\])?(\?)?/)
       assert.ok(m, `schema.prisma ${name}: cannot parse field "${l}"`)
       if (modelNames.has(m[2])) continue // relation field, no column
-      cols.set(m[1], { nullable: !!m[4] })
+      // Prisma creates scalar lists (TEXT[]) without NOT NULL - see init.
+      cols.set(m[1], { nullable: !!m[4] || !!m[3] })
     }
     tables.set(name, cols)
   }
