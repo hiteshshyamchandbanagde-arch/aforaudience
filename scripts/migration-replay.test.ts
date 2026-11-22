@@ -174,36 +174,69 @@ async function main() {
       assert.deepEqual(rows.map((r) => r.code), ['AED', 'EUR', 'GBP', 'INR', 'USD'])
     })
 
-    await test('role codes: User/Artist/Organiser/VenueOwner.code default to generate_role_code()', async () => {
+    // QA (read-only introspection, 22 Nov) fills codes with BEFORE INSERT
+    // triggers, not column defaults: a fresh DB must be the same.
+    const ROLE_TRIGGERS = [
+      ['Artist', 'trg_artist_code', 'set_artist_code'],
+      ['Organiser', 'trg_organiser_code', 'set_organiser_code'],
+      ['User', 'trg_user_code', 'set_user_code'],
+      ['VenueOwner', 'trg_venueowner_code', 'set_venueowner_code'],
+    ]
+    const triggerRows = async () =>
+      (await db.query<{ t: string; g: string; f: string }>(
+        `SELECT c.relname AS t, tg.tgname AS g, p.proname AS f FROM pg_trigger tg
+         JOIN pg_class c ON c.oid = tg.tgrelid JOIN pg_proc p ON p.oid = tg.tgfoid
+         WHERE NOT tg.tgisinternal AND tg.tgname IN ('trg_user_code','trg_artist_code','trg_organiser_code','trg_venueowner_code')
+         ORDER BY 1, 2`,
+      )).rows.map((r) => [r.t, r.g, r.f])
+
+    await test('role codes: QA-style BEFORE INSERT triggers exist and code columns have no default', async () => {
+      assert.deepEqual(await triggerRows(), ROLE_TRIGGERS)
       const { rows } = await db.query<{ t: string; d: string | null }>(
         `SELECT table_name AS t, column_default AS d FROM information_schema.columns
          WHERE table_schema = 'public' AND column_name = 'code' AND table_name IN ('User','Artist','Organiser','VenueOwner') ORDER BY 1`,
       )
-      assert.deepEqual(
-        rows.map((r) => `${r.t}: ${r.d}`),
-        ['Artist: generate_role_code(\'ART\'::text)', 'Organiser: generate_role_code(\'ORG\'::text)', 'User: generate_role_code(\'AFA\'::text)', 'VenueOwner: generate_role_code(\'VEN\'::text)'],
-      )
+      assert.deepEqual(rows.map((r) => `${r.t}: ${r.d}`), ['Artist: null', 'Organiser: null', 'User: null', 'VenueOwner: null'])
+    })
+
+    await test('role codes: a "User" inserted with no code gets AFA<YYMM>000001, the next AFA<YYMM>000002', async () => {
+      const ym = (await db.query<{ ym: string }>(`SELECT to_char(now(), 'YYMM') AS ym`)).rows[0].ym
       const ins = `INSERT INTO "User" (id, name, email, password, "updatedAt") VALUES ($1, $1, $1 || '@replay.test', 'x', now()) RETURNING code`
       const a = (await db.query<{ code: string }>(ins, ['replay_u1'])).rows[0].code
       const b = (await db.query<{ code: string }>(ins, ['replay_u2'])).rows[0].code
-      // Same shape as CODE_PATTERN in src/lib/auth-helpers.ts
-      assert.match(a, /^AFA\d{10}$/)
-      assert.equal(Number(b.slice(-6)), Number(a.slice(-6)) + 1, `${a} then ${b}`)
       await db.query(`DELETE FROM "User" WHERE id IN ('replay_u1','replay_u2')`)
+      assert.deepEqual([a, b], [`AFA${ym}000001`, `AFA${ym}000002`])
+    })
+
+    await test('role-code functions all have search_path=public', async () => {
+      const { rows } = await db.query<{ f: string; c: string[] | null }>(
+        `SELECT p.proname AS f, p.proconfig AS c FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+         WHERE n.nspname = 'public' AND p.proname IN ('generate_role_code','set_user_code','set_artist_code','set_organiser_code','set_venueowner_code')
+         ORDER BY 1`,
+      )
+      assert.deepEqual(
+        rows.map((r) => `${r.f}: ${(r.c ?? []).join(',')}`),
+        ['generate_role_code', 'set_artist_code', 'set_organiser_code', 'set_user_code', 'set_venueowner_code'].map((f) => `${f}: search_path=public`),
+      )
+    })
+
+    await test('RLS is enabled on every public table (no anon REST access)', async () => {
+      const { rows } = await db.query<{ t: string }>(
+        `SELECT c.relname AS t FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+         WHERE n.nspname = 'public' AND c.relkind IN ('r','p') AND NOT c.relrowsecurity ORDER BY 1`,
+      )
+      assert.deepEqual(rows.map((r) => r.t), [], 'public tables with RLS disabled')
     })
 
     await test('catch-up migration is a no-op when re-run on a DB that already has everything (QA)', async () => {
       const catchup = dirs.find((d) => d.endsWith('_fresh_db_catchup'))
       assert.ok(catchup, 'no *_fresh_db_catchup migration')
-      // QA's own generate_role_code must never be replaced: simulate a
-      // QA-style definition and check the re-run leaves it and the
-      // column defaults alone.
-      await db.exec(`ALTER TABLE "User" ALTER COLUMN "code" DROP DEFAULT`)
       await db.exec(readFileSync(join(MIGRATIONS, catchup, 'migration.sql'), 'utf8'))
+      assert.deepEqual(await triggerRows(), ROLE_TRIGGERS, 'triggers changed or duplicated by the re-run')
       const { rows } = await db.query<{ d: string | null }>(
         `SELECT column_default AS d FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'User' AND column_name = 'code'`,
       )
-      assert.equal(rows[0].d, null, 'catch-up re-wired User.code although generate_role_code already existed')
+      assert.equal(rows[0].d, null, 'catch-up added a column default on User.code')
     })
   }
 
