@@ -42,7 +42,7 @@ const norm = (v: string) => v.replace(/\s+/g, ' ').trim()
 
 // ---- schema.prisma -> expected tables/columns/enums -----------------
 type Expected = {
-  tables: Map<string, Map<string, { nullable: boolean }>>
+  tables: Map<string, Map<string, { nullable: boolean | null }>>
   enums: Map<string, string[]>
 }
 
@@ -62,13 +62,15 @@ function parseSchema(): Expected {
       enums.set(name, lines.map((l) => l.split(/\s+/)[0]))
       continue
     }
-    const cols = new Map<string, { nullable: boolean }>()
+    const cols = new Map<string, { nullable: boolean | null }>()
     for (const l of lines) {
       const m = l.match(/^(\w+)\s+(\w+)(\[\])?(\?)?/)
       assert.ok(m, `schema.prisma ${name}: cannot parse field "${l}"`)
       if (modelNames.has(m[2])) continue // relation field, no column
-      // Prisma creates scalar lists (TEXT[]) without NOT NULL - see init.
-      cols.set(m[1], { nullable: !!m[4] || !!m[3] })
+      // Scalar lists (TEXT[]) can't be null in Prisma; Prisma's own SQL
+      // leaves them nullable (init), hand-written SQL may add NOT NULL.
+      // Either is fine, so nullability is not checked for lists (null).
+      cols.set(m[1], { nullable: m[3] ? null : !!m[4] })
     }
     tables.set(name, cols)
   }
@@ -113,7 +115,7 @@ async function main() {
   if (replayed) {
     const want = parseSchema()
 
-    await test('every schema.prisma model has its table and columns (nullability matches)', async () => {
+    await test('every schema.prisma model has its table and columns (nullability matches, lists excepted)', async () => {
       const { rows } = await db.query<{ t: string; c: string; n: string }>(
         `SELECT table_name AS t, column_name AS c, is_nullable AS n FROM information_schema.columns WHERE table_schema = 'public'`,
       )
@@ -128,7 +130,7 @@ async function main() {
         if (!h) { problems.push(`missing table ${t}`); continue }
         for (const [c, { nullable }] of cols) {
           if (!h.has(c)) problems.push(`missing column ${t}.${c}`)
-          else if (h.get(c) !== nullable) problems.push(`${t}.${c}: db ${h.get(c) ? 'NULL' : 'NOT NULL'}, schema ${nullable ? 'NULL' : 'NOT NULL'}`)
+          else if (nullable !== null && h.get(c) !== nullable) problems.push(`${t}.${c}: db ${h.get(c) ? 'NULL' : 'NOT NULL'}, schema ${nullable ? 'NULL' : 'NOT NULL'}`)
         }
       }
       assert.deepEqual(problems, [])
@@ -170,6 +172,38 @@ async function main() {
     await test('DisplayCurrencyRate has INR, USD, EUR, GBP, AED', async () => {
       const { rows } = await db.query<{ code: string }>(`SELECT code FROM "DisplayCurrencyRate" ORDER BY code`)
       assert.deepEqual(rows.map((r) => r.code), ['AED', 'EUR', 'GBP', 'INR', 'USD'])
+    })
+
+    await test('role codes: User/Artist/Organiser/VenueOwner.code default to generate_role_code()', async () => {
+      const { rows } = await db.query<{ t: string; d: string | null }>(
+        `SELECT table_name AS t, column_default AS d FROM information_schema.columns
+         WHERE table_schema = 'public' AND column_name = 'code' AND table_name IN ('User','Artist','Organiser','VenueOwner') ORDER BY 1`,
+      )
+      assert.deepEqual(
+        rows.map((r) => `${r.t}: ${r.d}`),
+        ['Artist: generate_role_code(\'ART\'::text)', 'Organiser: generate_role_code(\'ORG\'::text)', 'User: generate_role_code(\'AFA\'::text)', 'VenueOwner: generate_role_code(\'VEN\'::text)'],
+      )
+      const ins = `INSERT INTO "User" (id, name, email, password, "updatedAt") VALUES ($1, $1, $1 || '@replay.test', 'x', now()) RETURNING code`
+      const a = (await db.query<{ code: string }>(ins, ['replay_u1'])).rows[0].code
+      const b = (await db.query<{ code: string }>(ins, ['replay_u2'])).rows[0].code
+      // Same shape as CODE_PATTERN in src/lib/auth-helpers.ts
+      assert.match(a, /^AFA\d{10}$/)
+      assert.equal(Number(b.slice(-6)), Number(a.slice(-6)) + 1, `${a} then ${b}`)
+      await db.query(`DELETE FROM "User" WHERE id IN ('replay_u1','replay_u2')`)
+    })
+
+    await test('catch-up migration is a no-op when re-run on a DB that already has everything (QA)', async () => {
+      const catchup = dirs.find((d) => d.endsWith('_fresh_db_catchup'))
+      assert.ok(catchup, 'no *_fresh_db_catchup migration')
+      // QA's own generate_role_code must never be replaced: simulate a
+      // QA-style definition and check the re-run leaves it and the
+      // column defaults alone.
+      await db.exec(`ALTER TABLE "User" ALTER COLUMN "code" DROP DEFAULT`)
+      await db.exec(readFileSync(join(MIGRATIONS, catchup, 'migration.sql'), 'utf8'))
+      const { rows } = await db.query<{ d: string | null }>(
+        `SELECT column_default AS d FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'User' AND column_name = 'code'`,
+      )
+      assert.equal(rows[0].d, null, 'catch-up re-wired User.code although generate_role_code already existed')
     })
   }
 
