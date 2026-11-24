@@ -119,6 +119,22 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   // BUG-2610-032 - false until /api/venues/cities has answered. Before that
   // an empty list means "still loading", not "no city matches".
   const [citiesLoaded, setCitiesLoaded] = useState(false)
+  // The pending (or answered) city-list request, shared by the picker and
+  // "Use my location". A tap made while the picker's own request was still
+  // in flight used to start a second one (its closure still read
+  // citiesLoaded === false) and wait for it before answering (18 Nov qa
+  // push runs). Cleared on a failure so the next open asks again.
+  const citiesFetch = useRef<Promise<CityOption[]> | null>(null)
+  const loadCities = (): Promise<CityOption[]> => {
+    if (!citiesFetch.current) {
+      const pending = fetchCities()
+      citiesFetch.current = pending
+      pending.catch(() => {
+        if (citiesFetch.current === pending) citiesFetch.current = null
+      })
+    }
+    return citiesFetch.current
+  }
   const [query, setQuery] = useState('')
   const [saving, setSaving] = useState(false)
   const [geo, setGeo] = useState<GeoState>({ kind: 'idle' })
@@ -171,7 +187,7 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
   useEffect(() => {
     if (!open || citiesLoaded) return
     let cancelled = false
-    fetchCities()
+    loadCities()
       .then((list) => {
         if (cancelled) return
         setCities(list)
@@ -228,11 +244,11 @@ export default function LocationChip({ variant = 'desktop', inPanel = false }: {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const list = citiesLoaded ? cities : await fetchCities()
-          if (!citiesLoaded) {
-            setCities(list)
-            setCitiesLoaded(true)
-          }
+          // The city list and (if the chip still reads "…") the saved city,
+          // waited for together, not one after the other.
+          const [list] = await Promise.all([loadCities(), locationRef.current === null ? locationRead.current : null])
+          setCities(list)
+          setCitiesLoaded(true)
           const byPoint = new Map<CityPoint, CityOption>()
           for (const c of list) {
             if (typeof c.lat === 'number' && typeof c.lng === 'number') byPoint.set({ city: c.city, country: c.country, lat: c.lat, lng: c.lng }, c)
