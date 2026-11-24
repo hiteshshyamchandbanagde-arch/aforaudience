@@ -1,4 +1,20 @@
-## Part 83 — START HERE (22 Nov 14:15 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+## Part 84 — START HERE (24 Nov 10:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+Read order: **84 → 83 → 82**. 0 open PRs.
+
+- **#787 MERGED** (`a97bc78`, pinned head bf71187; Hitesh "merge both", 24 Nov). Fresh-replay part 2: catch-up migration `20261122120000` (role-code columns/indexes, EmailVerificationToken, Otp, CodeCounter, generate_role_code + 4 BEFORE INSERT triggers — chat verified against QA pg_get_functiondef/pg_get_triggerdef 22 Nov, identical logic; code columns no default on QA too), `20261122130000` RLS on all public tables, `20260802080000` made replay-safe (checksum changes; deploy ignores applied ones), PGlite `scripts/migration-replay.test.ts` 7/11 → 11/11, 86/86 replay. AGENTS.md RLS rule. CI: e2e-preview 740 ✅ / 0 ❌ / 0 flaky, design-tokens ✅.
+- **#788 MERGED** (`f127447`, pinned head 1139655): GEN-2610-005 one city-list request per picker. CI e2e-preview 742 ✅ / 0 ❌ / 0 flaky → CC's local 'travel prompt shows once' x5 failures were local-only (no Rule 4).
+- **QA ALTER FUNCTION … SET search_path = public** on the 5 role-code functions applied (Hitesh OK, apply_migration `role_code_functions_search_path`). Advisor security: **0 ERROR, 0 WARN**; 52 INFO rls_enabled_no_policy (intended deny-all).
+- Lesson: e2e-preview runs share concurrency group `e2e-qa-shared-fixtures` (cancel-in-progress false) → a newer *pending* run replaces an older pending one. Rerunning one PR's e2e while another is queued cancels the queued one. Queue reruns one at a time.
+- Chat token cannot delete branches or cancel runs (auto-mode denied) → add to Hitesh cleanup: `fix/prod-fresh-replay`, `fix/gen-2610-005-one-cities-request`.
+
+### Next (chat)
+1. Prod launch, each step Hitesh OK; chat touches prod only if Hitesh lifts the block: wipe prod public schema → `prisma migrate deploy` by hand (Hitesh locally with prod DATABASE_URL, or chat) → admin User row (re-paste hash) → verify prod DATABASE_URL = pooler 6543 → qa→main → smoke (email sign-up, admin login, free ticket, push, photo upload, Places) → waves.
+2. Feedback table: GEN-2610-005 → BUILD_COMPLETE (await nightly for RESOLVED).
+
+### Open for Hitesh
+Lift prod block for launch day (or run prod commands yourself) · delete 7 merged branches (fix/prod-parity-seed, feat/sms-otp-toggle, fix/flaky-location-register, fix/gen-2610-005-e2e-save-race, fix/gen-2610-005-tap-gate, fix/prod-fresh-replay, fix/gen-2610-005-one-cities-request) · optional Google re-login on QA · Anthropic prod key expires 31 Dec.
+
+## Part 83 — superseded by 84, (22 Nov 14:15 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
 Read order: **83 → 82 → 81**. 0 open PRs.
 
 - **#786 MERGED** 22 Nov (`1d3ffad`, pinned head 0b63021, CI green; Hitesh said merge). Follow-up dispatched: `cc-prompt-gen-2610-005-one-cities-request.md` (cherry-pick 9701288). Branches to delete (chat token denied): `fix/gen-2610-005-e2e-save-race`, `fix/gen-2610-005-tap-gate` (after follow-up), plus earlier list.
