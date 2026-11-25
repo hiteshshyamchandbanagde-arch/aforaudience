@@ -1,0 +1,198 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
+import Button, { variantStyle } from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import DirectPayUpiSetting from '@/components/dashboard/DirectPayUpiSetting'
+import { useLocale } from '@/lib/i18n/translate'
+
+const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }
+const inputStyle = { width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
+
+// Session 62, design.md §9.5. First edit surface for Organiser.orgName/bio -
+// previously these could only be set once, at apply-time. Powers the new
+// public /organisers/[id] bio profile page. Avatar lives on User (shared
+// account-level field, same as Artist), so this page also PATCHes
+// /api/users/me for the photo, same two-request pattern as the Artist edit
+// page.
+export default function OrganiserEditPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const { t: tr } = useLocale()
+  const o = tr.organiserDashboard.editProfile
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
+  const [orgName, setOrgName] = useState('')
+  const [bio, setBio] = useState('')
+  const [avatar, setAvatar] = useState('')
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const [orgRes, userRes] = await Promise.all([
+          fetch('/api/organisers/me'),
+          fetch('/api/users/me'),
+        ])
+        if (orgRes.ok) {
+          const d = await orgRes.json()
+          setOrgName(d.orgName || '')
+          setBio(d.bio || '')
+        }
+        if (userRes.ok) {
+          const d = await userRes.json()
+          setAvatar(d.user?.avatar || '')
+        }
+      } catch {
+        setError(o.loadFailed)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (session?.user) fetchProfile()
+    // Not on `o`: switching language must not reload and drop unsaved edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploadingAvatar(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || o.uploadFailed)
+        return
+      }
+      setAvatar(data.url)
+    } catch {
+      setError(o.uploadFailed)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  const save = async () => {
+    if (!orgName.trim()) {
+      setError(o.nameEmpty)
+      return
+    }
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const [orgRes, userRes] = await Promise.all([
+        fetch('/api/organisers/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orgName, bio }),
+        }),
+        fetch('/api/users/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ avatar: avatar.trim() || null }),
+        }),
+      ])
+      if (!orgRes.ok) {
+        const data = await orgRes.json().catch(() => ({}))
+        throw new Error(data.error || o.saveFailed)
+      }
+      if (!userRes.ok) {
+        const data = await userRes.json().catch(() => ({}))
+        throw new Error(data.error || o.savePhotoFailed)
+      }
+      setMessage(o.saved)
+    } catch (err: any) {
+      setError(err.message || o.saveFailed)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
+
+  return (
+    <>
+      <SiteNav />
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
+            {o.title}
+          </PageTitle>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
+            {o.subtitle}
+          </p>
+
+          {/* D3 - where direct payments (fees / buy-ins) reach me */}
+          <DirectPayUpiSetting role="ORGANISER" />
+
+          {message && (
+            <SuccessBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{message}</SuccessBanner>
+          )}
+          {error && (
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
+          )}
+
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+              <label style={labelStyle}>{o.profilePicture}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
+                {avatar && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt={o.photoAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
+                )}
+                <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                  {uploadingAvatar ? o.uploading : avatar ? o.changePhoto : o.uploadPhoto}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
+                </label>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+              <label style={labelStyle}>{o.orgName}</label>
+              <input type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} maxLength={120} style={inputStyle} />
+            </div>
+
+            <div>
+              <label style={labelStyle}>{o.bio}</label>
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder={o.bioPlaceholder} style={{ ...inputStyle, resize: 'vertical' as const }} />
+            </div>
+          </div>
+
+          <Button
+            data-afa-action-row
+            variant="primary"
+            size="lg"
+            fullWidth={false}
+            onClick={save}
+            disabled={saving}
+            style={{ opacity: saving ? 0.6 : 1 }}
+          >
+            {saving ? o.saving : o.saveProfile}
+          </Button>
+        </div>
+      </main>
+      </DashboardShell>
+    </>
+  )
+}

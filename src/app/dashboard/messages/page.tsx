@@ -1,0 +1,179 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import { useLocale } from '@/lib/i18n/translate'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+
+function initials(name: string) {
+  return name.charAt(0).toUpperCase() || '?'
+}
+
+interface Thread {
+  conversationId: string
+  contextType: 'PERFORMANCE' | 'VENUE_BOOKING' | 'BOOKING'
+  label: string | null
+  isActive: boolean
+  otherParticipant: { id: string; name: string; displayName: string | null } | null
+  lastMessage: { body: string; createdAt: string; senderId: string } | null
+  unread: boolean
+  updatedAt: string
+}
+
+// v1 scope (design.md §9.4): text-only, ~15-20s polling to match the
+// rest of the app's real-time-ish surfaces - no websockets built yet.
+const POLL_MS = 15000
+
+export default function MessagesInboxPage() {
+  const { t: tr } = useLocale()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [threads, setThreads] = useState<Thread[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const CONTEXT_LABEL: Record<Thread['contextType'], string> = {
+    PERFORMANCE: tr.messagesInboxPage.contextLineup,
+    VENUE_BOOKING: tr.messagesInboxPage.contextVenue,
+    BOOKING: tr.messagesInboxPage.contextTicket,
+  }
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
+
+  const fetchThreads = useCallback(async () => {
+    try {
+      const res = await fetch('/api/conversations')
+      if (res.ok) setThreads(await res.json())
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    fetchThreads()
+    const interval = setInterval(fetchThreads, POLL_MS)
+    return () => clearInterval(interval)
+  }, [status, fetchThreads])
+
+  if (status === 'loading' || loading) {
+    return (
+      <>
+        <SiteNav />
+        <BrandLoader />
+      </>
+    )
+  }
+
+  return (
+    <>
+      <SiteNav />
+      <DashboardShell>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+          <div style={{ maxWidth: '760px', padding: 'var(--afa-space-32px) var(--afa-space-6)' }}>
+            <PageTitle style={{ marginBottom: 'var(--afa-space-6)' }}>
+              {tr.messagesInboxPage.heading}
+            </PageTitle>
+
+            {threads.length === 0 && (
+              <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-sans)' }}>
+                {tr.messagesInboxPage.emptyState}
+              </p>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+              {threads.map((t) => {
+                const name = t.otherParticipant?.displayName ?? t.otherParticipant?.name ?? tr.messagesInboxPage.unknownParticipant
+                return (
+                  <Link
+                    key={t.conversationId}
+                    href={`/dashboard/messages/${t.conversationId}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 'var(--afa-space-3)',
+                      padding: 'var(--afa-space-4)',
+                      borderRadius: 'var(--afa-radius-lg)',
+                      border: t.unread ? '1px solid var(--afa-amber-tint)' : '1px solid var(--afa-tint-06)',
+                      background: t.unread ? 'var(--afa-amber-wash)' : 'var(--afa-surface-raised)',
+                      textDecoration: 'none',
+                      color: 'var(--afa-text-primary)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 'var(--afa-text-ui)',
+                        fontWeight: 700,
+                        background: 'var(--afa-tint-08)',
+                        color: 'var(--afa-text-primary)',
+                      }}
+                    >
+                      {initials(name)}
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-2px)' }}>
+                        {/* Type tag: single amber treatment for all 3 context types
+                            (BUG-2609-003 / Figma Make review) - differentiated by
+                            label text only, not by color. */}
+                        <span
+                          style={{
+                            fontSize: 'var(--afa-text-caption)',
+                            fontWeight: 500,
+                            letterSpacing: '0.04em',
+                            padding: 'var(--afa-space-2px) var(--afa-space-6px)',
+                            borderRadius: 'var(--afa-radius-xs)',
+                            background: 'var(--afa-amber-tint)',
+                            color: 'var(--afa-amber)',
+                          }}
+                        >
+                          {CONTEXT_LABEL[t.contextType]}
+                        </span>
+                        {!t.isActive && (
+                          <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.45 }}>{tr.messagesInboxPage.closedLabel}</span>
+                        )}
+                        {t.unread && (
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--afa-amber)' }} />
+                        )}
+                      </div>
+                      <div style={{ fontWeight: t.unread ? 600 : 500, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-ui)' }}>
+                        {name}
+                        {t.label && <span style={{ fontWeight: 400, opacity: 0.6 }}> — {t.label}</span>}
+                      </div>
+                      {t.lastMessage && (
+                        <div
+                          style={{
+                            fontSize: 'var(--afa-text-ui)',
+                            opacity: 0.6,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            marginTop: 'var(--afa-space-2px)',
+                          }}
+                        >
+                          {t.lastMessage.body}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </main>
+      </DashboardShell>
+    </>
+  )
+}

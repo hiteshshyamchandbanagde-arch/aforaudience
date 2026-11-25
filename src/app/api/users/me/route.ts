@@ -1,0 +1,195 @@
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { VALID_LOCALE_IDS } from '@/lib/i18n/locales'
+
+// GET /api/users/me
+//
+// Returns the calling user's editable profile fields. Deliberately a
+// narrow projection — never returns password, tokenVersion, or any
+// role-application internals. Extend as more editable fields land.
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const user = await prisma.user.findUnique({
+    where: { id: (session.user as any).id },
+    select: {
+      id: true,
+      name: true,
+      displayName: true,
+      email: true,
+      phone: true,
+      code: true,
+      isVerified: true,
+      avatar: true,
+      bio: true,
+      displayCurrency: true,
+      preferredLocale: true,
+    },
+  })
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  return NextResponse.json({ user })
+}
+
+// PATCH /api/users/me
+//
+// Generic "me" endpoint for account-level editable fields: displayName,
+// avatar, displayCurrency, bio (session 62 - Audience-facing "About You",
+// design.md §9.5). Future editable profile fields land here rather than
+// proliferating per-field routes.
+//
+// Auth-required. Only affects the calling user's own row.
+export async function PATCH(req: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: (session.user as any).id },
+    })
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    let body: any
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+
+    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null; bio?: string | null; preferredLocale?: string | null; onboardedAt?: Date } = {}
+
+    // Only touch displayName if it appears in the body. Undefined means
+    // "not touched"; null/empty string means "clear". A trimmed non-empty
+    // string sets the value, capped at 120 chars for consistency with
+    // register.
+    if (Object.prototype.hasOwnProperty.call(body, 'displayName')) {
+      const raw = body.displayName
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.displayName = null
+      } else if (typeof raw === 'string') {
+        updates.displayName = raw.trim().slice(0, 120)
+      } else {
+        return NextResponse.json(
+          { error: 'displayName must be a string or null' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Profile picture - URL paste, not a real file upload (no storage
+    // provider is wired up in this app yet). Same "trust a pasted link"
+    // pattern already used for social links and venue Maps URLs
+    // elsewhere - validated as a real URL, not just any string.
+    if (Object.prototype.hasOwnProperty.call(body, 'avatar')) {
+      const raw = body.avatar
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.avatar = null
+      } else if (typeof raw === 'string') {
+        try {
+          new URL(raw.trim())
+          updates.avatar = raw.trim().slice(0, 500)
+        } catch {
+          return NextResponse.json({ error: 'Avatar must be a valid URL' }, { status: 400 })
+        }
+      } else {
+        return NextResponse.json({ error: 'avatar must be a string or null' }, { status: 400 })
+      }
+    }
+
+    // Display-only currency preference (Option A). null/empty = clear back
+    // to the India/₹ default. Validated against DisplayCurrencyRate's known
+    // codes, not a free string - a typo'd code would silently fall back to
+    // INR in the formatter, which is safe, but rejecting it here surfaces
+    // the mistake to the user instead of hiding it.
+    if (Object.prototype.hasOwnProperty.call(body, 'displayCurrency')) {
+      const raw = body.displayCurrency
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.displayCurrency = null
+      } else if (typeof raw === 'string') {
+        const code = raw.trim().toUpperCase()
+        const known = await prisma.displayCurrencyRate.findUnique({ where: { code } })
+        if (!known) {
+          return NextResponse.json({ error: `Unknown currency code: ${code}` }, { status: 400 })
+        }
+        updates.displayCurrency = code === 'INR' ? null : code
+      } else {
+        return NextResponse.json({ error: 'displayCurrency must be a string or null' }, { status: 400 })
+      }
+    }
+
+    // Optional "About You" bio (session 62, design.md §9.5) - same
+    // trim/cap/null-clears pattern as displayName above. Never required;
+    // this is the Audience-facing counterpart to Artist.bio/Organiser.bio.
+    // Capped at 500 chars - this is a short "about you" blurb shown next
+    // to ratings/reviews, not a full biography page like Artist gets.
+    if (Object.prototype.hasOwnProperty.call(body, 'bio')) {
+      const raw = body.bio
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.bio = null
+      } else if (typeof raw === 'string') {
+        updates.bio = raw.trim().slice(0, 500)
+      } else {
+        return NextResponse.json({ error: 'bio must be a string or null' }, { status: 400 })
+      }
+    }
+
+    // GEN-2610-006 - the account's language. Must be one of the offered
+    // locales; null clears it back to "use the device's choice". Never
+    // set from the city or anything else, only from the person's pick.
+    if (Object.prototype.hasOwnProperty.call(body, 'preferredLocale')) {
+      const raw = body.preferredLocale
+      if (raw === null) {
+        updates.preferredLocale = null
+      } else if (typeof raw === 'string' && VALID_LOCALE_IDS.indexOf(raw) !== -1) {
+        updates.preferredLocale = raw
+      } else {
+        return NextResponse.json({ error: 'preferredLocale must be one of the offered languages or null' }, { status: 400 })
+      }
+    }
+
+    // GEN-2609-042 - onboarding welcome sequence's completion marker.
+    // Deliberately a boolean flag, not a client-supplied date: the
+    // server always stamps its own `now()` rather than trusting whatever
+    // timestamp a client might send. Only ever moves null -> a real date,
+    // never cleared or moved backward from here.
+    if (Object.prototype.hasOwnProperty.call(body, 'onboardingComplete')) {
+      if (body.onboardingComplete === true) {
+        updates.onboardedAt = new Date()
+      } else {
+        return NextResponse.json({ error: 'onboardingComplete must be true' }, { status: 400 })
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No editable fields provided' }, { status: 400 })
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: updates,
+      select: {
+        id: true,
+        name: true,
+        displayName: true,
+        email: true,
+        avatar: true,
+        bio: true,
+        displayCurrency: true,
+        preferredLocale: true,
+      },
+    })
+
+    return NextResponse.json({ ok: true, user: updated })
+  } catch (err) {
+    console.error('[users/me.PATCH] error:', err)
+    return NextResponse.json({ error: 'Update failed' }, { status: 500 })
+  }
+}

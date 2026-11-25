@@ -2,9 +2,20 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
+import PosterShareCard from '@/components/PosterShareCard'
+import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { eventPriceLabel } from '@/components/EventCard'
+import { isPastEvent } from '@/lib/application-status'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
 interface EventItem {
   id: string
@@ -15,19 +26,72 @@ interface EventItem {
   startTime: string
   isFree: boolean
   ticketPrice: number | null
+  priceFromTiers?: boolean
+  defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
+  defaultFeeAmount: number | null
+  defaultBuyInAmount: number | null
+  maxPerformers: number | null
+  lineup: { id: string }[]
   venue: { name: string; city: string } | null
 }
 
+function compensationBadge(event: EventItem, a: Dictionary['artistDashboard']): { label: string; bg: string; color: string } {
+  if (event.defaultCompensationType === 'PAID') {
+    return { label: a.compPaid.replace('{amount}', `₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`), ...STATUS_TONE.sage }
+  }
+  if (event.defaultCompensationType === 'BUY_IN') {
+    return { label: a.compBuyIn.replace('{amount}', `₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`), ...STATUS_TONE.error }
+  }
+  return { label: a.compFree, bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }
+}
+
+// Full lineups no longer hard-block applying - they queue as WAITLISTED
+// instead (Hitesh's own admin note, 22 Jul). FCFS, promoted manually by
+// the Organiser for now - no auto-cancellation-triggered promotion exists
+// yet, that's a separate gap (see design.md 9.4).
+function isEventFull(event: EventItem): boolean {
+  return event.maxPerformers !== null && event.lineup.length >= event.maxPerformers
+}
+
+// GEN-2610-007 - labels from t.artistDashboard; the stored status stays English.
+const STATUS_LABEL: Record<string, { labelKey: 'statusPending' | 'statusApproved' | 'statusWaitlisted' | 'statusRejected'; color: string }> = {
+  PENDING: { labelKey: 'statusPending', color: 'var(--afa-sage-bright)' },
+  APPROVED: { labelKey: 'statusApproved', color: 'var(--afa-sage-bright)' },
+  WAITLISTED: { labelKey: 'statusWaitlisted', color: 'var(--afa-amber)' },
+  REJECTED: { labelKey: 'statusRejected', color: 'var(--afa-text-primary)' },
+}
+
 export default function BrowseEventsToApplyPage() {
+  const { locale, t: tr } = useLocale()
+  const a = tr.artistDashboard
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
-  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set())
+  // BUG-2608-053 (follow-up from FEAT-2608-048) - this page had no city/
+  // country filter at all, unlike the public Events browse and Venues
+  // listing (FEAT-2608-036). Same pattern as (public)/events/page.tsx:
+  // /api/events already accepts ?city= and filters server-side (indexed
+  // via Venue_city_idx), and /api/venues/cities gives the full option
+  // list regardless of the current filter, so the dropdown doesn't
+  // narrow itself out of its own options.
+  const [cities, setCities] = useState<{ city: string; country: string | null; label: string }[]>([])
+  const [selectedCity, setSelectedCity] = useState('All Cities')
+  const cityAutoAppliedRef = useRef(false)
+  const [applicationStatus, setApplicationStatus] = useState<Record<string, string>>({})
+  // Session 39 (Feedback ec6e4adf) - maps eventId -> this artist's own
+  // Performance id, so the poster share card can be shown for their
+  // active confirmed slot independent of the rest of the lineup filling.
+  const [performanceIdByEvent, setPerformanceIdByEvent] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  // BUG-2610-002 - true only while the latest load failed, kept apart from
+  // `events` so a failed load never reads as "no published events".
+  // Bumping reloadKey re-runs the load (Retry). Same as /events (#717).
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
+  const { showToast } = useToast()
   const [message, setMessage] = useState<Record<string, string>>({})
   const [applying, setApplying] = useState<string | null>(null)
-  const [justApplied, setJustApplied] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -35,120 +99,268 @@ export default function BrowseEventsToApplyPage() {
     }
   }, [status, router])
 
+  // Cities list is independent of the current filter - always the full
+  // set we have approved venues in, same source the public Events page
+  // uses, so the dropdown never narrows itself out of its own options.
   useEffect(() => {
-    const fetchData = async () => {
+    fetch('/api/venues/cities')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.cities) setCities(data.cities) })
+      .catch(() => {})
+  }, [])
+
+  // Apply the artist's resolved default location as a starting filter,
+  // once, the moment we know it's a real option (validated against the
+  // cities list first - same guard the public page uses so an unknown
+  // or stale guess doesn't silently zero out the results).
+  useEffect(() => {
+    if (cityAutoAppliedRef.current) return
+    if (cities.length === 0) return
+    cityAutoAppliedRef.current = true
+    const cityNames = cities.map((c) => c.city)
+    fetch('/api/user/location')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.city && cityNames.includes(data.city)) {
+          setSelectedCity(data.city)
+        }
+      })
+      .catch(() => {})
+  }, [cities])
+
+  // BUG-2610-002 - the "All Cities" load and the load for the
+  // auto-applied city overlap on most visits. Each run owns an
+  // AbortController that its cleanup aborts, so only the load for the
+  // current selectedCity may touch state; the ref closes the gap between
+  // a city change committing and that (passive) cleanup running. Same
+  // pattern as (public)/events/page.tsx (BUG-2609-077, #717).
+  const latestCityRef = useRef(selectedCity)
+  useLayoutEffect(() => {
+    latestCityRef.current = selectedCity
+  }, [selectedCity])
+  const hasUser = !!session?.user
+  useEffect(() => {
+    if (!hasUser) return
+    const controller = new AbortController()
+    const city = selectedCity
+    const isStale = () => controller.signal.aborted || latestCityRef.current !== city
+    const fetchEvents = async () => {
+      setLoading(true)
+      setLoadFailed(false)
       try {
-        const [eventsRes, profileRes] = await Promise.all([
-          fetch('/api/events'),
-          fetch('/api/artists/me'),
-        ])
+        const url = city === 'All Cities' ? '/api/events' : `/api/events?city=${encodeURIComponent(city)}`
+        const eventsRes = await fetch(url, { signal: controller.signal })
         if (!eventsRes.ok) throw new Error('Failed to fetch events')
         const eventsData = await eventsRes.json()
-        setEvents(eventsData)
+        if (isStale()) return
+        // BUG-2610-023 - Browse is for applying: upcoming events only. Past
+        // lineups belong to the dashboard's history.
+        setEvents(eventsData.filter((e: EventItem) => !isPastEvent(e)))
+        setLoading(false)
+      } catch (err: any) {
+        if (isStale() || err?.name === 'AbortError') return
+        setLoadFailed(true)
+        setLoading(false)
+      }
+    }
+    fetchEvents()
+    return () => controller.abort()
+  }, [hasUser, selectedCity, reloadKey])
 
+  // Applications/performances status is per-artist, not per-city - fetched
+  // once per session, independent of the events filter above.
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profileRes = await fetch('/api/artists/me')
         if (profileRes.ok) {
           const profile = await profileRes.json()
-          setAppliedIds(new Set((profile.applications || []).map((a: any) => a.event.id)))
+          const statusMap: Record<string, string> = {}
+          for (const a of profile.applications || []) {
+            statusMap[a.event.id] = a.status
+          }
+          setApplicationStatus(statusMap)
+
+          const perfMap: Record<string, string> = {}
+          for (const p of profile.performances || []) {
+            if (!p.cancelledAt) perfMap[p.event.id] = p.id
+          }
+          setPerformanceIdByEvent(perfMap)
         }
-      } catch (err: any) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
+      } catch {
+        // Non-fatal - the events list above still renders without this.
       }
     }
 
     if (session?.user) {
-      fetchData()
+      fetchProfile()
     }
   }, [session])
 
   const apply = async (eventId: string) => {
     setApplying(eventId)
-    setError('')
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, message: message[eventId] || '' }),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Failed to apply')
+        throw new Error(data.error || a.applyFailed)
       }
-      setJustApplied((prev) => new Set(prev).add(eventId))
+      setApplicationStatus((prev) => ({ ...prev, [eventId]: data.status }))
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || a.applyFailed, 'error')
     } finally {
       setApplying(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/artist" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Dashboard
-          </Link>
-
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
-            Browse Events
-          </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Apply to perform at published events.
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <PageTitle size="lg" style={{ marginBottom: 'var(--afa-space-2)' }}>
+            {a.browseTitle}
+          </PageTitle>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+            {a.browseSubtitle}
           </p>
 
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            style={{
+              fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)',
+              background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)',
+              borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2) var(--afa-space-14px)', marginBottom: 'var(--afa-space-32px)', cursor: 'pointer',
+            }}
+          >
+            {/* The value stays the "All Cities" sentinel; only the label is translated. */}
+            <option value="All Cities">{a.allCities}</option>
+            {cities.map((c) => (
+              <option key={`${c.city}-${c.country ?? ''}`} value={c.city}>{c.label}</option>
+            ))}
+          </select>
 
-          {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: '#fff', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6 }}>No published events yet. Check back soon!</p>
+          {loadFailed ? (
+            // BUG-2610-002 - a failed load gets the error + Retry, never
+            // the "no published events" copy below.
+            <div role="alert" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-3)', textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>{tr.eventsPage.loadErrorTitle}</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-muted)', margin: 0 }}>{tr.eventsPage.loadErrorSub}</p>
+              <Button variant="outline-accent" size="pill-md" fullWidth={false} type="button" onClick={() => setReloadKey((k) => k + 1)}>
+                {tr.eventsPage.retry}
+              </Button>
+            </div>
+          ) : events.length === 0 ? (
+            <div data-testid="artist-browse-empty" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-3)', textAlign: 'center', padding: 'var(--afa-space-64px) var(--afa-space-6)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+              {/* BUG-2610-020 - with a city picked, name it and offer every city. */}
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>
+                {selectedCity === 'All Cities' ? tr.eventsPage.artistBrowseEmpty : tr.eventsPage.artistBrowseEmptyInCity.replace('{city}', selectedCity)}
+              </p>
+              {selectedCity !== 'All Cities' && (
+                <Button variant="outline-accent" size="pill-md" fullWidth={false} type="button" onClick={() => setSelectedCity('All Cities')}>
+                  {tr.eventsPage.emptyShowAllCities}
+                </Button>
+              )}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-4)' }}>
               {events.map((event) => {
-                const alreadyApplied = appliedIds.has(event.id) || justApplied.has(event.id)
+                const existingStatus = applicationStatus[event.id]
+                const comp = compensationBadge(event, a)
+                const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: '#fff', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
+                  <div key={event.id} data-afa-browse-event={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)', gap: 'var(--afa-space-10px)', flexWrap: 'wrap' }}>
                       <div>
-                        <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A' }}>{event.title}</h3>
-                        <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginTop: '2px' }}>
-                          {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-2px)' }}>
+                          {formatDate(event.date, 'medium', locale)} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : chrome.venueTbd}
                         </p>
                       </div>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#C8441A' }}>
-                        {event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : ''}
+                      <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+                        {a.audiencePays.replace('{price}', event.isFree ? a.free : eventPriceLabel(event, tr))}
                       </span>
                     </div>
-                    <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
-                    {alreadyApplied ? (
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#4A6741' }}>✓ Applied</span>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-3)' }}>
+                      <Badge variant="pill" tone={comp} data-afa-compensation={event.defaultCompensationType ?? 'FREE'}>{comp.label}</Badge>
+                      {full && !existingStatus && (
+                        <Badge variant="pill" tone={{ bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }}>
+                          {a.lineupFull}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* §9.4 low-risk fix identified 29 Jul, session 47 - the
+                        Buy-in badge above previously only carried this
+                        disclaimer on the artist's own dashboard (§4.5); a
+                        real user-facing expectation gap since this is the
+                        first place an artist actually sees the amount,
+                        before ever applying. Same wording used on the
+                        dashboard's "Recorded Earnings" section, for
+                        consistency. */}
+                    {event.defaultCompensationType === 'BUY_IN' && (
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: 'calc(-1 * var(--afa-space-6px))', marginBottom: 'var(--afa-space-3)' }}>
+                        {a.buyInNote}
+                      </p>
+                    )}
+
+                    <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-14px)' }}>{event.description}</p>
+
+                    {existingStatus ? (
+                      <>
+                        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-text-primary)' }}>
+                          {STATUS_LABEL[existingStatus] ? a[STATUS_LABEL[existingStatus].labelKey] : existingStatus}
+                        </span>
+                        {performanceIdByEvent[event.id] && (
+                          <div style={{ marginTop: 'var(--afa-space-14px)' }}>
+                            <PosterShareCard
+                              src={`/api/posters/artist/${performanceIdByEvent[event.id]}`}
+                              filename={`${event.title}-my-poster.png`}
+                              title={a.posterTitle.replace('{title}', event.title)}
+                            />
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div>
                         <textarea
                           value={message[event.id] || ''}
                           onChange={(e) => setMessage((prev) => ({ ...prev, [event.id]: e.target.value }))}
-                          placeholder="Optional note to the organiser"
+                          placeholder={a.notePlaceholder}
                           rows={2}
-                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const }}
+                          style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-10px)', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
-                        <button
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          fullWidth={false}
                           onClick={() => apply(event.id)}
+                          data-afa-apply={full ? 'waitlist' : 'apply'}
                           disabled={applying === event.id}
-                          style={{ fontSize: '13px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '6px', padding: '8px 20px', cursor: 'pointer', opacity: applying === event.id ? 0.6 : 1 }}
+                          // BUG-2610-023 - colour, fill and border are set only for
+                          // the outlined Join Waitlist. An explicit `background:
+                          // undefined` key used to override the primary variant's
+                          // fill (Button spreads `style` last), leaving Apply to
+                          // Perform as dark text on no fill.
+                          style={{
+                            fontSize: 'var(--afa-text-ui)',
+                            ...(full ? { color: 'var(--afa-text-primary)', background: 'transparent', border: '1.5px solid var(--afa-tint-20)' } : {}),
+                            padding: 'var(--afa-space-2) var(--afa-space-5)',
+                            opacity: applying === event.id ? 0.6 : 1,
+                          }}
                         >
-                          {applying === event.id ? 'Applying...' : 'Apply to Perform'}
-                        </button>
+                          {applying === event.id ? a.submitting : full ? a.joinWaitlist : a.applyToPerform}
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -158,6 +370,7 @@ export default function BrowseEventsToApplyPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

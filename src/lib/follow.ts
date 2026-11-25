@@ -1,0 +1,150 @@
+import prisma from '@/lib/prisma'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+
+// Mobile Redesign Phase 4b (GEN-2609-007) - added 'EVENT' (Saved/wishlist).
+// This type was a plain hand-written union, not imported from the Prisma-
+// generated FollowTargetType enum, so adding the enum value in schema.prisma
+// alone did NOT widen it here or make any switch over it exhaustive - had
+// to update both by hand. Converted resolveTargetOwner below from an if/
+// else-falls-through-to-Venue chain into a real switch with a `never`
+// exhaustiveness check specifically so this doesn't happen silently again
+// the next time a target type is added.
+export type FollowTargetType = 'ARTIST' | 'VENUE' | 'ORGANISER' | 'EVENT'
+
+// Resolves the target's underlying User id (for the "new follower" push)
+// given the target's own id (not the User id). Artist/Organiser have a
+// direct userId; Venue routes through its VenueOwner; Event routes through
+// its Organiser - same "new follower" notification semantics as following
+// that event's organiser directly.
+async function resolveTargetOwner(targetType: FollowTargetType, targetId: string) {
+  switch (targetType) {
+    case 'ARTIST': {
+      const artist = await prisma.artist.findUnique({ where: { id: targetId }, select: { userId: true } })
+      return artist ? { userId: artist.userId, dashboardUrl: '/dashboard/artist' } : null
+    }
+    case 'ORGANISER': {
+      const organiser = await prisma.organiser.findUnique({ where: { id: targetId }, select: { userId: true } })
+      return organiser ? { userId: organiser.userId, dashboardUrl: '/dashboard/organiser' } : null
+    }
+    case 'VENUE': {
+      const venue = await prisma.venue.findUnique({
+        where: { id: targetId },
+        select: { owner: { select: { userId: true } } },
+      })
+      return venue ? { userId: venue.owner.userId, dashboardUrl: '/dashboard/venue' } : null
+    }
+    case 'EVENT': {
+      const event = await prisma.event.findUnique({
+        where: { id: targetId },
+        select: { organiser: { select: { userId: true } } },
+      })
+      return event ? { userId: event.organiser.userId, dashboardUrl: '/dashboard/organiser' } : null
+    }
+    default: {
+      const _exhaustive: never = targetType
+      throw new Error(`Unhandled FollowTargetType: ${_exhaustive}`)
+    }
+  }
+}
+
+export async function getFollowStatus(userId: string | null, targetType: FollowTargetType, targetId: string) {
+  if (!userId) return { following: false, notifyEnabled: false }
+  const existing = await prisma.follow.findUnique({
+    where: { userId_targetType_targetId: { userId, targetType, targetId } },
+  })
+  return { following: !!existing, notifyEnabled: existing?.notifyEnabled ?? true }
+}
+
+// Toggle - follows if not already following, unfollows if already following.
+// Returns null if the target itself doesn't exist.
+export async function toggleFollow(userId: string, targetType: FollowTargetType, targetId: string) {
+  const owner = await resolveTargetOwner(targetType, targetId)
+  if (!owner) return null
+
+  const existing = await prisma.follow.findUnique({
+    where: { userId_targetType_targetId: { userId, targetType, targetId } },
+  })
+
+  if (existing) {
+    await prisma.follow.delete({ where: { id: existing.id } })
+    return { following: false, notifyEnabled: false }
+  }
+
+  await prisma.follow.create({ data: { userId, targetType, targetId } })
+
+  // Only on a new follow, not unfollow - nobody needs a push for someone
+  // quietly un-following them.
+  const follower = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, displayName: true } })
+  notifyAfterResponse(
+    () =>
+      sendPushToUser(owner.userId, {
+        title: 'New follower',
+        body: `${follower?.displayName || follower?.name || 'Someone'} started following you.`,
+        url: owner.dashboardUrl,
+      }),
+    'new-follower'
+  )
+
+  return { following: true, notifyEnabled: true }
+}
+
+// Post-show rating nudge (reputation epic §5): rating a performer earns
+// automatic early-notification access to their next event, via the
+// existing Follow + notifyFollowersOfNewEvent plumbing - no new
+// infrastructure needed for "early access." Unlike toggleFollow, this
+// never un-follows and is a silent no-op if already following (doesn't
+// reset an existing notifyEnabled=false mute).
+export async function ensureFollowing(userId: string, targetType: FollowTargetType, targetId: string) {
+  const existing = await prisma.follow.findUnique({
+    where: { userId_targetType_targetId: { userId, targetType, targetId } },
+  })
+  if (existing) return
+
+  const owner = await resolveTargetOwner(targetType, targetId)
+  if (!owner) return
+
+  await prisma.follow.create({ data: { userId, targetType, targetId } })
+}
+// Returns null if not currently following (nothing to mute).
+export async function setNotifyEnabled(
+  userId: string,
+  targetType: FollowTargetType,
+  targetId: string,
+  notifyEnabled: boolean
+) {
+  const existing = await prisma.follow.findUnique({
+    where: { userId_targetType_targetId: { userId, targetType, targetId } },
+  })
+  if (!existing) return null
+  await prisma.follow.update({ where: { id: existing.id }, data: { notifyEnabled } })
+  return { following: true, notifyEnabled }
+}
+
+// Notifies every follower with notifyEnabled=true that a target has a new
+// published event. Fire-and-forget per follower via the existing
+// sendPushToUser/notifyAfterResponse plumbing - callers should invoke this
+// only on a genuine DRAFT/PENDING_APPROVAL -> APPROVED transition, not on
+// every save of an already-live event.
+export async function notifyFollowersOfNewEvent(
+  targetType: FollowTargetType,
+  targetId: string,
+  event: { id: string; title: string }
+) {
+  const followers = await prisma.follow.findMany({
+    where: { targetType, targetId, notifyEnabled: true },
+    select: { userId: true },
+  })
+  if (followers.length === 0) return
+
+  notifyAfterResponse(async () => {
+    await Promise.all(
+      followers.map((f) =>
+        sendPushToUser(f.userId, {
+          title: 'New event',
+          body: `${event.title} was just announced.`,
+          url: `/events/${event.id}`,
+        })
+      )
+    )
+  }, 'new-event-followers')
+}

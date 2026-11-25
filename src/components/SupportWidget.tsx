@@ -1,0 +1,882 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import Button, { variantStyle } from '@/components/ui/Button';
+import { CheckIcon } from '@/components/icons/EventIcons';
+import { ABOVE_CHAT_BUTTON_MOBILE, CHAT_BUTTON_MOBILE_BOTTOM, CHAT_BUTTON_SIZE, CHAT_PANEL_GAP, MOBILE_BREAKPOINT_MAX } from '@/components/mobile/chromeOffsets';
+import { MIN_TOP, setChatButtonLifted, useActionRowClearance } from '@/components/mobile/useActionRowClearance';
+
+/**
+ * Floating support widget: chat first, feedback-form fallback.
+ *
+ * Chat is free and open to everyone — guests and paying audience alike,
+ * no login gate, no payment gate. This was a deliberate call: the
+ * platform's browse-first principle (design doc §2) never gates basic
+ * platform functions behind money or identity, and the people who most
+ * need quick answers are prospective bookers who haven't paid yet —
+ * gating support behind payment would remove help exactly when it does
+ * the most good. See the design doc for the fuller reasoning.
+ *
+ * Instead, cost/abuse is bounded by an admin-configurable per-session
+ * message cap (`PlatformSettings.chatMaxMessagesPerSession`, editable at
+ * /dashboard/admin/settings, default 15). Enforced via sessionStorage —
+ * a soft cost guard, not a hard security boundary. A determined user can
+ * reset it by clearing storage; that's an accepted trade-off since the
+ * goal is bounding ordinary usage, not adversarial abuse prevention.
+ *
+ * Feedback tab supports an optional screenshot attachment. Client-side
+ * resize/recompress via canvas keeps the upload well under ~1MB before
+ * base64-encoding it into the request — see MAX_ATTACHMENT_DIMENSION
+ * and JPEG_QUALITY below. Stored directly on the Feedback row for MVP
+ * simplicity (no Vercel Blob wired up yet); fine at low volume.
+ */
+
+type Panel = 'closed' | 'chat' | 'feedback';
+
+/** On-brand chat icon — a warm spotlight glow (kept from the previous
+ * mic design, matches the "live performance" theme) behind a simple
+ * speech-bubble glyph. Replaces the earlier stage-mic icon: user testing
+ * (Hitesh, session 44) showed it reads as a literal microphone/voice-input
+ * control on mobile, not as "open chat" — a plain speech bubble is
+ * unambiguous while still sitting on the same terracotta glow so the
+ * button doesn't lose its identity. Uses currentColor so it inherits the
+ * button/text color it's placed in.
+ *
+ * `pulse` adds a subtle breathing animation to the spotlight glow - used
+ * only on the closed floating button (an idle "waiting for someone to
+ * step up" cue), not once the panel is open, where it'd just be
+ * distracting. Pure SVG SMIL animation, no separate stylesheet needed. */
+function ChatIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="9" r="9" style={{ fill: "var(--afa-amber)" }} opacity="0.18">
+        {pulse && (
+          <>
+            <animate attributeName="opacity" values="0.18;0.32;0.18" dur="2.6s" repeatCount="indefinite" />
+            <animate attributeName="r" values="9;10;9" dur="2.6s" repeatCount="indefinite" />
+          </>
+        )}
+      </circle>
+      <path
+        d="M4.5 9.5a6.5 6 0 0 1 6.5-6h2a6.5 6 0 0 1 6.5 6c0 3.31-3.13 6-7 6-.86 0-1.68-.13-2.43-.38L6 17l.9-3.3A6.02 6.02 0 0 1 4.5 9.5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <circle cx="8.7" cy="9.3" r="1" fill="currentColor" />
+      <circle cx="12" cy="9.3" r="1" fill="currentColor" />
+      <circle cx="15.3" cy="9.3" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function CloseIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  suggestsFallback?: boolean;
+}
+
+const FEEDBACK_CATEGORIES: { value: string; label: string }[] = [
+  { value: 'QUESTION', label: 'Question' },
+  { value: 'BUG', label: 'Bug' },
+  { value: 'FEATURE_IDEA', label: 'Feature idea' },
+  { value: 'GENERAL', label: 'General feedback' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+const SESSION_COUNT_KEY = 'afora_chat_message_count';
+const EXCLUDED_PREFIXES = ['/auth', '/checkout', '/api', '/admin', '/dashboard/messages'];
+const MAX_ATTACHMENT_DIMENSION = 1280; // px, longest side, before compression
+const JPEG_QUALITY = 0.7;
+const MAX_ATTACHMENT_BYTES = 1_000_000; // matches server's ~1.4MB data-URL cap with base64 overhead
+
+// Re-homed off the tab bar (previously overlapped it at a flat
+// bottom:20, which is why the now-removed clearance padding existed
+// elsewhere). Mirrors `body.afa-mobile-tab-bar-active` in globals.css
+// (`calc(64px + env(safe-area-inset-bottom))`) rather than a hardcoded
+// guess, so this stays in sync if that height ever changes. Only
+// applies below the same 1023px breakpoint the tab bar itself renders
+// at (`lg:hidden` elsewhere in this codebase) - desktop keeps its
+// original flat offsets, since there's no tab bar there to clear.
+// BUG-2609-072 - the offsets now live in mobile/chromeOffsets.ts, shared
+// with Toast.tsx, which stacks above this button on mobile.
+const CHAT_PANEL_MOBILE_BOTTOM = ABOVE_CHAT_BUTTON_MOBILE; // clears the 56px button + the same 12px gap it always opened with
+const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} - 52px)`; // same 52px top clearance the old bottom:88/maxHeight pairing reserved
+// BUG-2609-081 - the least panel height worth lifting for. An open button
+// lifts above an action row only while this much panel still fits between
+// it and the top bar; past that it stops and the row sits under the panel.
+const CHAT_PANEL_MIN_HEIGHT = 320;
+// BUG-2609-081 - set on <body> while the button renders on a page that
+// scrolls, to reserve room after the page's last content (see the style
+// block below).
+const BUBBLE_ACTIVE_CLASS = 'afa-support-bubble-active';
+
+// Shared shape for every text input/textarea/select in this widget (same
+// spirit as dashboard/venue/[id]/edit/page.tsx's own local `inputStyle`).
+// background stays --afa-surface-page rather than that file's
+// --afa-surface-raised: this panel itself is --afa-surface-raised, so
+// inputs need the darker "well" token to read as recessed against it,
+// not the page's own lighter-hierarchy pairing.
+const inputStyle = {
+  width: '100%',
+  padding: 'var(--afa-space-10px) var(--afa-space-3)',
+  borderRadius: 'var(--afa-radius-sm)',
+  border: '1px solid var(--afa-border-resting)',
+  background: 'var(--afa-surface-page)',
+  fontSize: 'var(--afa-text-body)',
+  color: 'var(--afa-text-primary)',
+} as const;
+
+export default function SupportWidget() {
+  const pathname = usePathname();
+  const [panel, setPanel] = useState<Panel>('closed');
+  // BUG-2609-068 - the closed bubble lifts above (or hides behind) a
+  // bottom action row on mobile instead of covering it.
+  // BUG-2609-081 - it keeps lifting while the panel is open (the X sat on
+  // "Save & Unpublish" because the lift used to stop then). Open, it never
+  // hides - the user needs the X - and lifts only as far as leaves the
+  // panel CHAT_PANEL_MIN_HEIGHT. Closed, on a page that cannot scroll, it
+  // also lifts above any other control under its resting spot; open, the
+  // panel covers those controls anyway, so only marked rows move it.
+  const restingProbeRef = useRef<HTMLDivElement>(null);
+  const excluded = !!pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p));
+  const open = panel !== 'closed';
+  const clearance = useActionRowClearance(restingProbeRef, !excluded, {
+    avoidControls: !open,
+    keepVisible: open,
+    headroom: open ? CHAT_PANEL_MIN_HEIGHT + CHAT_PANEL_GAP : 0,
+  });
+  const lifted = !excluded && (clearance.bottom !== null || clearance.hidden);
+  useEffect(() => {
+    setChatButtonLifted(lifted);
+    return () => setChatButtonLifted(false);
+  }, [lifted]);
+  // BUG-2609-081 - every page that scrolls reserves room after its last
+  // content, so the last controls can always scroll clear of the button.
+  // A page that fits the viewport gets none (it would only make it
+  // scroll); there the button lifts instead.
+  const reserve = !excluded && clearance.scrollable;
+  useEffect(() => {
+    document.body.classList.toggle(BUBBLE_ACTIVE_CLASS, reserve);
+    return () => document.body.classList.remove(BUBBLE_ACTIVE_CLASS);
+  }, [reserve]);
+
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Cap + config state — fetched once on mount.
+  const [maxMessages, setMaxMessages] = useState<number | null>(null);
+  const [chatEnabled, setChatEnabled] = useState(true);
+  const [sessionCount, setSessionCount] = useState(0);
+
+  // Feedback state
+  const [fbCategory, setFbCategory] = useState('QUESTION');
+  const [fbMessage, setFbMessage] = useState('');
+  // Feedback cmsa7h3x2 - Hitesh asked for a structured template so bug
+  // reports come in usable (what happened vs what was expected) instead
+  // of one-line "it's broken" messages. Only shown for category=BUG;
+  // other categories (feature ideas, questions) don't fit a
+  // repro/expected/actual shape and keep the free-text textarea. Page
+  // isn't a field here - window.location.pathname is already captured
+  // automatically below, no need to make the user type it.
+  const [bugAction, setBugAction] = useState('');
+  const [bugExpected, setBugExpected] = useState('');
+  const [bugActual, setBugActual] = useState('');
+  // Lighter structure for FEATURE_IDEA - just enough to get the "why"
+  // without the repro/expected/actual shape a bug needs. Problem is
+  // optional (some ideas are pure "wouldn't it be nice", not a pain
+  // point) - the idea itself is the only required part.
+  const [featureProblem, setFeatureProblem] = useState('');
+  const [featureIdea, setFeatureIdea] = useState('');
+  const [fbSubmitting, setFbSubmitting] = useState(false);
+  const [fbSubmitted, setFbSubmitted] = useState(false);
+  const [fbFromChatbot, setFbFromChatbot] = useState(false);
+  const [fbAttachmentPreview, setFbAttachmentPreview] = useState<string | null>(null);
+  const [fbAttachmentDataUrl, setFbAttachmentDataUrl] = useState<string | null>(null);
+  const [fbAttachmentError, setFbAttachmentError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  // Load the cap + chat-enabled flag once, and the session's running
+  // count from sessionStorage (resets per tab/session, not per page nav).
+  useEffect(() => {
+    fetch('/api/chat/config')
+      .then((res) => res.json())
+      .then((data) => {
+        setMaxMessages(data.maxMessagesPerSession);
+        setChatEnabled(data.chatEnabled);
+      })
+      .catch(() => {
+        // If config fails to load, fail open on the UI (show chat) but
+        // the backend will still enforce via its own settings read —
+        // worst case the user sees an error on send, not a broken cap.
+        setChatEnabled(true);
+      });
+
+    try {
+      const stored = sessionStorage.getItem(SESSION_COUNT_KEY);
+      setSessionCount(stored ? parseInt(stored, 10) || 0 : 0);
+    } catch {
+      // sessionStorage disabled — cap just won't persist across
+      // messages within the tab; each send still checks the current
+      // in-memory count, so it degrades gracefully rather than breaking.
+    }
+  }, []);
+
+  const capReached = maxMessages !== null && sessionCount >= maxMessages;
+
+  if (excluded) {
+    return null;
+  }
+
+  const incrementSessionCount = () => {
+    const next = sessionCount + 1;
+    setSessionCount(next);
+    try {
+      sessionStorage.setItem(SESSION_COUNT_KEY, String(next));
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const sendChatMessage = async () => {
+    const text = chatInput.trim();
+    if (!text || chatLoading || capReached || !chatEnabled) return;
+
+    const nextMessages: ChatMessage[] = [...chatMessages, { role: 'user', content: text }];
+    setChatMessages(nextMessages);
+    setChatInput('');
+    setChatLoading(true);
+    incrementSessionCount();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content:
+              data.error || 'Something went wrong. Try the feedback form below instead.',
+          },
+        ]);
+        return;
+      }
+
+      setChatMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: data.answer, suggestsFallback: data.suggestsFallback },
+      ]);
+    } catch {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: "Couldn't reach the assistant. Try the feedback form below instead.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Suggested improvement (2 Aug, Hitesh asked for feedback-form ideas):
+  // the chatbot's "send this to the team" fallback always landed as
+  // category=QUESTION, even when someone was clearly describing
+  // something broken in plain language ("nothing happens when I
+  // click..."). Simple keyword check - not trying to be clever, just
+  // catching the obvious cases - so those land pre-selected as BUG and
+  // get the structured template instead of dumping a vague sentence
+  // into Question. Genuine questions are unaffected.
+  const BUG_SIGNAL_WORDS = [
+    'not working', "doesn't work", 'does not work', 'broken', 'error',
+    'bug', 'crash', 'stuck', 'fails', 'failed', 'blank', 'nothing happens',
+    "won't", 'wont ', "can't", 'cant ', 'unable to', 'glitch',
+  ];
+  const looksLikeBugReport = (text: string) => {
+    const lower = text.toLowerCase();
+    return BUG_SIGNAL_WORDS.some((w) => lower.includes(w));
+  };
+
+  const openFeedbackFromChat = (unansweredQuestion: string) => {
+    if (looksLikeBugReport(unansweredQuestion)) {
+      setFbCategory('BUG');
+      setBugAction(unansweredQuestion);
+      setFbMessage('');
+    } else {
+      setFbCategory('QUESTION');
+      setFbMessage(unansweredQuestion);
+      setBugAction('');
+    }
+    setFbFromChatbot(true);
+    setFbSubmitted(false);
+    setPanel('feedback');
+  };
+
+  // Bug fix (2 Aug) - fromChatbot was ONLY ever set true via the specific
+  // "Send this to the team" CTA above, which only appears when the bot's
+  // answer happens to match a narrow keyword regex (suggestsFallback).
+  // Three other ways into the feedback panel - the plain "Feedback" tab
+  // click, the "chat unavailable" fallback button, and the session-limit
+  // link - all skipped it entirely, even when the person clearly arrived
+  // mid-conversation. Result: fromChatbot was true on zero rows in the
+  // whole database despite people genuinely reporting bugs through chat
+  // first. Fixed by deriving it from actual engagement (does this
+  // session have any chat messages at all?) rather than only the one
+  // narrow CTA, and routing every panel-switch-to-feedback through this
+  // one helper instead of four separate ad-hoc setPanel('feedback')
+  // calls.
+  const switchToFeedbackPanel = () => {
+    if (chatMessages.length > 0) setFbFromChatbot(true);
+    setFbSubmitted(false);
+    setPanel('feedback');
+  };
+
+  const handleAttachmentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setFbAttachmentError('');
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setFbAttachmentError('Please attach an image file.');
+      return;
+    }
+
+    // Resize/recompress via canvas so we never ship a multi-megabyte
+    // phone photo straight into the request body. Longest side capped
+    // at MAX_ATTACHMENT_DIMENSION, re-encoded as JPEG at JPEG_QUALITY.
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      let { width, height } = img;
+      if (width > height && width > MAX_ATTACHMENT_DIMENSION) {
+        height = Math.round((height * MAX_ATTACHMENT_DIMENSION) / width);
+        width = MAX_ATTACHMENT_DIMENSION;
+      } else if (height > MAX_ATTACHMENT_DIMENSION) {
+        width = Math.round((width * MAX_ATTACHMENT_DIMENSION) / height);
+        height = MAX_ATTACHMENT_DIMENSION;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setFbAttachmentError("Couldn't process that image. Try a different file.");
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+
+      // Rough byte size of a base64 data URL: length * 0.75 (minus the
+      // small header). Good enough for a client-side sanity check;
+      // server re-validates the real length regardless.
+      const approxBytes = Math.round((dataUrl.length - 22) * 0.75);
+      if (approxBytes > MAX_ATTACHMENT_BYTES) {
+        setFbAttachmentError('That image is still too large after compression. Try a smaller screenshot.');
+        return;
+      }
+
+      setFbAttachmentDataUrl(dataUrl);
+      setFbAttachmentPreview(dataUrl);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      setFbAttachmentError("Couldn't read that image. Try a different file.");
+    };
+    img.src = objectUrl;
+  };
+
+  const clearAttachment = () => {
+    setFbAttachmentDataUrl(null);
+    setFbAttachmentPreview(null);
+    setFbAttachmentError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const isBugCategory = fbCategory === 'BUG';
+  const isFeatureCategory = fbCategory === 'FEATURE_IDEA';
+  const composedBugMessage = `What I did: ${bugAction.trim()}\nWhat I expected: ${bugExpected.trim()}\nWhat happened instead: ${bugActual.trim()}`;
+  const composedFeatureMessage = featureProblem.trim()
+    ? `Problem: ${featureProblem.trim()}\nIdea: ${featureIdea.trim()}`
+    : `Idea: ${featureIdea.trim()}`;
+  const fbCanSubmit = isBugCategory
+    ? Boolean(bugAction.trim() && bugActual.trim())
+    : isFeatureCategory
+      ? Boolean(featureIdea.trim())
+      : Boolean(fbMessage.trim());
+
+  const submitFeedback = async () => {
+    if (!fbCanSubmit || fbSubmitting) return;
+    setFbSubmitting(true);
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: fbCategory,
+          message: isBugCategory ? composedBugMessage : isFeatureCategory ? composedFeatureMessage : fbMessage.trim(),
+          pageUrl: typeof window !== 'undefined' ? window.location.pathname : undefined,
+          fromChatbot: fbFromChatbot,
+          attachmentData: fbAttachmentDataUrl ?? undefined,
+        }),
+      });
+      if (res.ok) {
+        setFbSubmitted(true);
+        // BUG-2608-020: the profile card and /my-feedback list both fetch
+        // /api/feedback/mine once on mount with no revalidation trigger, so
+        // a submission made from here (an in-page overlay, not a real
+        // navigation/focus change) never showed up without a hard reload.
+        // Broadcasting a plain window event keeps this widget decoupled
+        // from whichever pages care about the result.
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('afa:feedback-submitted'));
+        }
+        setFbMessage('');
+        setBugAction('');
+        setBugExpected('');
+        setBugActual('');
+        setFeatureProblem('');
+        setFeatureIdea('');
+        setFbFromChatbot(false);
+        clearAttachment();
+      } else {
+        const data = await res.json();
+        setFbAttachmentError(data.error || 'Something went wrong. Try again.');
+      }
+    } catch {
+      // Silent — the submitted state just won't flip; user can retry.
+    } finally {
+      setFbSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <style>{`
+        .afa-support-chat-btn { bottom: 20px; }
+        .afa-support-chat-panel { bottom: 88px; max-height: calc(100vh - 140px); }
+        @media (max-width: ${MOBILE_BREAKPOINT_MAX}px) {
+          .afa-support-chat-btn { bottom: ${CHAT_BUTTON_MOBILE_BOTTOM}; }
+          .afa-support-chat-panel { bottom: ${CHAT_PANEL_MOBILE_BOTTOM}; max-height: ${CHAT_PANEL_MOBILE_MAX_HEIGHT}; }
+          /* BUG-2609-081 - room after the page's last content: the tab
+             bar's height (globals.css reserves only that), the button
+             and the gap above it. This replaces the tab-bar rule and
+             DashboardShell's own bar padding, it does not add to them. */
+          body.${BUBBLE_ACTIVE_CLASS} { padding-bottom: ${ABOVE_CHAT_BUTTON_MOBILE}; }
+          body.${BUBBLE_ACTIVE_CLASS} .afa-shell-bar-clearance { padding-bottom: 0; }
+        }
+      `}</style>
+      <div
+        ref={restingProbeRef}
+        aria-hidden="true"
+        className="afa-support-chat-btn"
+        style={{ position: 'fixed', right: 20, width: CHAT_BUTTON_SIZE, height: CHAT_BUTTON_SIZE, visibility: 'hidden', pointerEvents: 'none' }}
+      />
+      <Button
+        variant="icon"
+        className="afa-support-chat-btn"
+        data-afa-floating=""
+        onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
+        aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
+        title={panel === 'closed' ? 'Chat with us' : 'Close'}
+        style={{
+          position: 'fixed',
+          right: 20,
+          zIndex: 45,
+          width: CHAT_BUTTON_SIZE,
+          height: CHAT_BUTTON_SIZE,
+          ...(clearance.bottom !== null ? { bottom: clearance.bottom } : null),
+          ...(clearance.hidden ? { visibility: 'hidden' as const, pointerEvents: 'none' as const } : null),
+          borderRadius: '50%',
+          background: 'var(--afa-amber)',
+          color: 'var(--afa-on-fill-solid)',
+          boxShadow: '0 6px 20px var(--afa-shadow)',
+          fontSize: 'var(--afa-text-heading)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 26px var(--afa-shadow)' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px var(--afa-shadow)' }}
+      >
+        {panel === 'closed' ? <ChatIcon size={26} pulse /> : <CloseIcon size={22} />}
+      </Button>
+
+      {panel !== 'closed' && (
+        <div
+          className="afa-support-chat-panel"
+          role="dialog"
+          aria-label="Support"
+          data-afa-floating=""
+          style={{
+            position: 'fixed',
+            right: 20,
+            zIndex: 45,
+            // BUG-2609-081 - above the lifted button, not the resting spot.
+            ...(clearance.bottom !== null
+              ? {
+                  bottom: clearance.bottom + CHAT_BUTTON_SIZE + CHAT_PANEL_GAP,
+                  maxHeight: `calc(100vh - ${clearance.bottom + CHAT_BUTTON_SIZE + CHAT_PANEL_GAP + MIN_TOP}px)`,
+                }
+              : null),
+            width: 340,
+            maxWidth: 'calc(100vw - 40px)',
+            height: 460,
+            background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
+            borderRadius: 'var(--afa-radius-xl)',
+            boxShadow: '0 10px 40px var(--afa-shadow)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            fontFamily: 'inherit',
+          }}
+        >
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--afa-border-resting)' }}>
+            <Button
+              variant="tab"
+              size="md"
+              fullWidth={false}
+              selected={panel === 'chat'}
+              onClick={() => setPanel('chat')}
+              style={{ flex: 1, marginBottom: '-1px' }}
+            >
+              Ask a question
+            </Button>
+            <Button
+              variant="tab"
+              size="md"
+              fullWidth={false}
+              selected={panel === 'feedback'}
+              onClick={switchToFeedbackPanel}
+              style={{ flex: 1, marginBottom: '-1px' }}
+            >
+              Feedback
+            </Button>
+          </div>
+
+          {panel === 'chat' && (
+            <>
+              {!chatEnabled ? (
+                <div style={{ flex: 1, padding: 'var(--afa-space-5)', textAlign: 'center' }}>
+                  <div style={{ marginBottom: 'var(--afa-space-3)', display: 'flex', justifyContent: 'center', color: 'var(--afa-text-primary)' }}>
+                    <ChatIcon size={36} />
+                  </div>
+                  <div style={{ fontWeight: 600, marginBottom: 'var(--afa-space-2)' }}>
+                    Chat is temporarily unavailable.
+                  </div>
+                  <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-4)' }}>
+                    Please use the feedback form instead — the team reads these personally.
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="pill-md"
+                    fullWidth={false}
+                    onClick={switchToFeedbackPanel}
+                  >
+                    Go to feedback form
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--afa-space-3)' }}>
+                    {chatMessages.length === 0 && (
+                      <div style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-2)' }}>
+                        Ask anything about booking, becoming an Artist/Organiser, fees, or
+                        how AforAudience works.
+                      </div>
+                    )}
+                    {chatMessages.map((m, i) => (
+                      <div key={i} style={{ marginBottom: 'var(--afa-space-10px)' }}>
+                        <div
+                          style={{
+                            display: 'inline-block',
+                            maxWidth: '85%',
+                            padding: 'var(--afa-space-2) var(--afa-space-3)',
+                            borderRadius: 'var(--afa-radius-lg)',
+                            fontSize: 'var(--afa-text-body)',
+                            lineHeight: 1.4,
+                            background: m.role === 'user' ? 'var(--afa-amber)' : 'var(--afa-surface-page)',
+                            color: m.role === 'user' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                            float: m.role === 'user' ? 'right' : 'left',
+                            clear: 'both',
+                          }}
+                        >
+                          {m.content}
+                        </div>
+                        {m.role === 'assistant' && m.suggestsFallback && (
+                          <div style={{ clear: 'both', marginTop: 'var(--afa-space-1)' }}>
+                            <Button
+                              variant="outline-accent"
+                              size="pill-sm"
+                              fullWidth={false}
+                              onClick={() =>
+                                openFeedbackFromChat(chatMessages[i - 1]?.content ?? m.content)
+                              }
+                            >
+                              Send this to the team →
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {chatLoading && (
+                      <div style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-2)' }}>
+                        Thinking…
+                      </div>
+                    )}
+                    {capReached && (
+                      <div
+                        style={{
+                          background: 'var(--afa-amber-tint)',
+                          border: '1px solid var(--afa-amber-border)',
+                          borderRadius: 'var(--afa-radius-md)',
+                          padding: 'var(--afa-space-10px)',
+                          fontSize: 'var(--afa-text-ui)',
+                          marginTop: 'var(--afa-space-2)',
+                        }}
+                      >
+                        You&apos;ve reached the question limit for this session. Need more
+                        help?{' '}
+                        <Button
+                          variant="text-link"
+                          onClick={switchToFeedbackPanel}
+                        >
+                          Use the feedback form
+                        </Button>
+                        .
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+                  <div style={{ display: 'flex', borderTop: '1px solid var(--afa-border-resting)', padding: 'var(--afa-space-2)' }}>
+                    <input
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') sendChatMessage();
+                      }}
+                      disabled={capReached}
+                      placeholder={capReached ? 'Question limit reached' : 'Type your question…'}
+                      style={{
+                        ...inputStyle,
+                        flex: 1,
+                        borderRadius: 'var(--afa-radius-pill)',
+                        padding: 'var(--afa-space-2) var(--afa-space-14px)',
+                        outline: 'none',
+                        opacity: capReached ? 0.5 : 1,
+                      }}
+                    />
+                    <Button
+                      variant="primary"
+                      fullWidth={false}
+                      onClick={sendChatMessage}
+                      disabled={chatLoading || !chatInput.trim() || capReached}
+                      style={{ marginLeft: 'var(--afa-space-2)' }}
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {panel === 'feedback' && (
+            <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--afa-space-4)' }}>
+              {fbSubmitted ? (
+                <div style={{ textAlign: 'center', padding: 'var(--afa-space-40px) var(--afa-space-3)' }}>
+                  <CheckIcon style={{ width: 32, height: 32, marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }} />
+                  <div style={{ fontWeight: 600, marginBottom: 'var(--afa-space-1)' }}>Thanks — got it.</div>
+                  <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
+                    The team reviews these personally.
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                    What&apos;s this about?
+                  </label>
+                  <select
+                    value={fbCategory}
+                    onChange={(e) => setFbCategory(e.target.value)}
+                    style={{
+                      ...inputStyle,
+                      marginBottom: 'var(--afa-space-3)',
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      // Chevron stroke inlined as a literal colour - the
+                      // same value as --afa-text-secondary - since a data-URI
+                      // can't reference a CSS custom property. Same technique
+                      // as profile/page.tsx's display-currency select.
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,245,240,0.65)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", // token-ok(rgb-rgba-literal): chevron stroke inlined into a data-URI, matches --afa-text-secondary, var() can't be embedded in a URL-encoded SVG string
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                      paddingRight: 'var(--afa-space-32px)',
+                    }}
+                  >
+                    {FEEDBACK_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  {isBugCategory ? (
+                    <>
+                      <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                        What did you do?
+                      </label>
+                      <textarea
+                        value={bugAction}
+                        onChange={(e) => setBugAction(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. Entered my full name on the Sign Up page"
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 'var(--afa-space-3)' }}
+                      />
+                      <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                        What did you expect? <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+                      </label>
+                      <textarea
+                        value={bugExpected}
+                        onChange={(e) => setBugExpected(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. A username to be suggested automatically"
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 'var(--afa-space-3)' }}
+                      />
+                      <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                        What happened instead?
+                      </label>
+                      <textarea
+                        value={bugActual}
+                        onChange={(e) => setBugActual(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. The field stayed blank, had to type it myself"
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 'var(--afa-space-3)' }}
+                      />
+                    </>
+                  ) : isFeatureCategory ? (
+                    <>
+                      <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                        What problem does this solve? <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+                      </label>
+                      <textarea
+                        value={featureProblem}
+                        onChange={(e) => setFeatureProblem(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. I can never remember which events I already reported feedback on"
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 'var(--afa-space-3)' }}
+                      />
+                      <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                        What would you like to see?
+                      </label>
+                      <textarea
+                        value={featureIdea}
+                        onChange={(e) => setFeatureIdea(e.target.value)}
+                        rows={3}
+                        placeholder="e.g. A page showing my own past feedback and its status"
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 'var(--afa-space-3)' }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                        Message
+                      </label>
+                      <textarea
+                        value={fbMessage}
+                        onChange={(e) => setFbMessage(e.target.value)}
+                        rows={5}
+                        placeholder="Tell us what's up…"
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 'var(--afa-space-3)' }}
+                      />
+                    </>
+                  )}
+
+                  <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)' }}>
+                    Screenshot (optional)
+                  </label>
+                  {fbAttachmentPreview ? (
+                    <div style={{ marginBottom: 'var(--afa-space-3)' }}>
+                      <img
+                        src={fbAttachmentPreview}
+                        alt="Attachment preview"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: 120,
+                          borderRadius: 'var(--afa-radius-md)',
+                          border: '1px solid var(--afa-border-resting)',
+                          display: 'block',
+                          marginBottom: 'var(--afa-space-6px)',
+                        }}
+                      />
+                      <Button
+                        variant="text-link"
+                        onClick={clearAttachment}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ) : (
+                    <div style={{ marginBottom: 'var(--afa-space-3)' }}>
+                      {/* GEN-2609-118 - outline: Send is the form's primary action. */}
+                      <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: 'pointer' }}>
+                        Attach screenshot
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAttachmentSelect}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {fbAttachmentError && (
+                    <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-3)' }}>
+                      {fbAttachmentError}
+                    </div>
+                  )}
+
+                  <Button variant="primary" onClick={submitFeedback} disabled={fbSubmitting || !fbCanSubmit}>
+                    {fbSubmitting ? 'Sending…' : 'Send'}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}

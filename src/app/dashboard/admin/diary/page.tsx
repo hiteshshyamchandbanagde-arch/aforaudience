@@ -1,0 +1,260 @@
+'use client'
+
+import { useEffect, useState, type CSSProperties } from 'react'
+import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
+import BrandLoader from '@/components/BrandLoader'
+import { useToast } from '@/components/Toast'
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+
+// /dashboard/admin/diary — Admin Diary
+//
+// Structured, status-tracked version of docs/admin-diary.md's free-form
+// milestone log (company registration, PAN, GST, current account, CA
+// sign-offs, etc.). The markdown file stays as the dated narrative
+// record; this page is the actionable view an admin can update without
+// a code session — add an entry, flip its status as things progress.
+
+type DiaryStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
+
+interface DiaryEntry {
+  id: string
+  title: string
+  notes: string | null
+  status: DiaryStatus
+  createdBy: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+const STATUS_META: Record<DiaryStatus, { label: string; color: string; bg: string }> = {
+  PENDING: { label: 'Pending', color: 'var(--afa-amber)', bg: 'var(--afa-amber-tint)' },
+  IN_PROGRESS: { label: 'In Progress', color: 'var(--afa-blue)', bg: 'var(--afa-blue-tint)' },
+  COMPLETED: { label: 'Completed', color: 'var(--afa-green-deep)', bg: 'var(--afa-success-tint)' },
+}
+
+const STATUS_ORDER: DiaryStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED']
+
+export default function AdminDiaryPage() {
+  const { showToast } = useToast()
+  const [entries, setEntries] = useState<DiaryEntry[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [newTitle, setNewTitle] = useState('')
+  const [newNotes, setNewNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  async function load() {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/diary')
+      if (!res.ok) throw new Error('Failed to load')
+      const data = await res.json()
+      setEntries(data.entries)
+    } catch {
+      showToast('Could not load the diary. Try refreshing.', 'error')
+      setEntries([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function handleCreate() {
+    if (!newTitle.trim()) {
+      showToast('Give the entry a title first.', 'error')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/diary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle.trim(), notes: newNotes.trim() || undefined }),
+      })
+      if (!res.ok) throw new Error('Failed to create')
+      const data = await res.json()
+      setEntries((prev) => [data.entry, ...(prev || [])])
+      setNewTitle('')
+      setNewNotes('')
+      showToast('Entry added.', 'success')
+    } catch {
+      showToast('Could not add the entry. Try again.', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleStatusChange(id: string, status: DiaryStatus) {
+    setUpdatingId(id)
+    const prevEntries = entries
+    // optimistic update
+    setEntries((prev) => (prev || []).map((e) => (e.id === id ? { ...e, status } : e)))
+    try {
+      const res = await fetch('/api/admin/diary', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      })
+      if (!res.ok) throw new Error('Failed to update')
+    } catch {
+      setEntries(prevEntries)
+      showToast('Could not update status. Try again.', 'error')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const inputStyle: CSSProperties = {
+    width: '100%',
+    padding: 'var(--afa-space-3) var(--afa-space-14px)',
+    borderRadius: 'var(--afa-radius-lg)',
+    border: '1px solid var(--afa-tint-10)',
+    fontSize: 'var(--afa-text-body)',
+    boxSizing: 'border-box',
+    background: 'var(--afa-surface-inverse)',
+    color: 'var(--afa-text-primary)',
+  }
+
+  const newEntryForm = (
+    <div
+      style={{
+        background: 'var(--afa-surface-page)',
+        border: '1px solid var(--afa-tint-08)',
+        borderRadius: 'var(--afa-radius-xl)',
+        padding: 'var(--afa-space-5)',
+      }}
+    >
+      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-14px)' }}>
+        New entry
+      </p>
+      <input
+        value={newTitle}
+        onChange={(e) => setNewTitle(e.target.value)}
+        placeholder="Title (e.g. GST registration)"
+        style={{ ...inputStyle, marginBottom: 'var(--afa-space-10px)' }}
+      />
+      <textarea
+        value={newNotes}
+        onChange={(e) => setNewNotes(e.target.value)}
+        placeholder="Notes (optional)"
+        rows={3}
+        style={{ ...inputStyle, marginBottom: 'var(--afa-space-14px)', fontFamily: 'inherit', resize: 'vertical' }}
+      />
+      <Button variant="solid" size="lg" fullWidth onClick={handleCreate} disabled={saving || !newTitle.trim()}>
+        {saving ? 'Saving...' : 'Add entry'}
+      </Button>
+    </div>
+  )
+
+  const entriesList = (
+    <div
+      style={{
+        background: 'var(--afa-surface-page)',
+        border: '1px solid var(--afa-tint-08)',
+        borderRadius: 'var(--afa-radius-xl)',
+        overflow: 'hidden',
+      }}
+    >
+      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-18px) var(--afa-space-5) var(--afa-space-1)' }}>
+        Past entries
+      </p>
+      {loading ? (
+        <div style={{ padding: 'var(--afa-space-6) var(--afa-space-5) var(--afa-space-32px)' }}>
+          <BrandLoader label="Loading diary..." />
+        </div>
+      ) : entries && entries.length > 0 ? (
+        <div>
+          {entries.map((entry, i) => {
+            const meta = STATUS_META[entry.status]
+            return (
+              <div
+                key={entry.id}
+                style={{
+                  padding: 'var(--afa-space-4) var(--afa-space-5)',
+                  borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : 'none',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)', marginBottom: entry.notes ? 'var(--afa-space-6px)' : '0' }}>
+                  <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
+                  <Badge variant="status-compact" tone={meta} style={{ fontWeight: 600, flexShrink: 0 }}>
+                    {meta.label}
+                  </Badge>
+                </div>
+                {entry.notes && (
+                  <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 'var(--afa-space-10px)' }}>{entry.notes}</div>
+                )}
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {STATUS_ORDER.map((s) => (
+                    <Button
+                      key={s}
+                      // bare-reason: each chip's selected colour is that status's own STATUS_META colour (data-driven); toggle-pill's selection is always the one fill-solid tint
+                      variant="bare"
+                      onClick={() => handleStatusChange(entry.id, s)}
+                      disabled={updatingId === entry.id || s === entry.status}
+                      style={{
+                        fontSize: 'var(--afa-text-micro)',
+                        fontWeight: 600,
+                        padding: '5px var(--afa-space-3)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
+                        borderRadius: 'var(--afa-radius-pill)',
+                        border: s === entry.status ? `1px solid ${STATUS_META[s].color}` : '1px solid var(--afa-tint-12)',
+                        background: s === entry.status ? STATUS_META[s].bg : 'var(--afa-surface-raised)',
+                        color: s === entry.status ? STATUS_META[s].color : 'var(--afa-text-secondary)',
+                        opacity: s === entry.status ? 1 : 0.7,
+                        cursor: s === entry.status ? 'default' : 'pointer',
+                      }}
+                    >
+                      {STATUS_META[s].label}
+                    </Button>
+                  ))}
+                  <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, marginLeft: 'auto' }}>
+                    Updated {formatDate(entry.updatedAt, 'medium')}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center', padding: 'var(--afa-space-48px) var(--afa-space-5) var(--afa-space-40px)', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
+          No diary entries yet. Add the first one on the left.
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <>
+      <SiteNav />
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-80px)' }}>
+        <PageTitle style={{ margin: '0 0 var(--afa-space-6px)' }}>
+          Admin Diary
+        </PageTitle>
+        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 'var(--afa-space-6)' }}>
+          Company, legal, and administrative milestones — registration, PAN, GST, current account, CA sign-offs, and anything else worth tracking outside the product Feedback board.
+        </p>
+
+        {/* Mobile: form stacked above the list. Desktop: form pinned beside the list. */}
+        <div className="flex flex-col gap-4 lg:hidden">
+          {newEntryForm}
+          {entriesList}
+        </div>
+        <div className="hidden lg:grid lg:grid-cols-[340px_1fr] lg:gap-6 lg:items-start">
+          <div style={{ position: 'sticky', top: '24px' }}>{newEntryForm}</div>
+          {entriesList}
+        </div>
+      </div>
+      </main>
+      </DashboardShell>
+    </>
+  )
+}

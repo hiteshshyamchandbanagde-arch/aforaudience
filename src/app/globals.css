@@ -2,6 +2,19 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* GEN-2609-111 - keep Tailwind's automatic source detection out of the
+   non-source trees (root markdown, docs/, ddoc/, e2e/, scripts/). Their
+   prose quotes arbitrary-value class names with placeholder values, which
+   Tailwind turned into invalid CSS that broke next dev. The untracked
+   Figma/ export is excluded too: its .tsx leaked a stray rounded-[12px]
+   into the built CSS. src/ stays scanned. Paths are relative to this file. */
+@source not "../../*.md";
+@source not "../../docs";
+@source not "../../ddoc";
+@source not "../../e2e";
+@source not "../../scripts";
+@source not "../../Figma";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -49,8 +62,324 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* --- AforAudience brand colors (Theme Phase 0) ---
+     Extracted 1:1 from prior hardcoded hex values - no color changed,
+     only referenced by variable now. See docs/design.md for the phase plan. */
+  --afa-amber: #C9973A;
+  --afa-blue: #4A6FA5;
+  --afa-blue-dark: #2E5C8A;
+  --afa-brown-black: #1A1000;
+  --afa-brown-dark: #4A2E1A;
+  --afa-brown-gold: #8A5A1E;
+  --afa-cream: #F7F3EE;
+  --afa-error: #B3261E;
+  --afa-forest: #2F4A28;
+  --afa-gold: #8A6A1F;
+  --afa-gray-taupe: #8A877E;
+  --afa-green-black: #001A10;
+  --afa-green-bright: #2F7D4A;
+  --afa-green-dark: #276749;
+  --afa-green-deep: #166534;
+  --afa-green-mid: #2D6A4F;
+  --afa-indigo-black: #0A001A;
+  --afa-ink: #0E0C0A;
+  --afa-maroon-black: #1A0500;
+  --afa-mint-tint: #EAF3E7;
+  --afa-orange-dark: #C2410C;
+  --afa-peach: #F5A26E;
+  --afa-plum: #7A4A8A;
+  --afa-plum-black: #1A0A1A;
+  --afa-sage: #4A6741;
+  --afa-social-blue: #1D9BF0;
+  --afa-taupe: #8A827A;
+  --afa-white: #FFF;
+
+  /* Fixed brand-mark color for the "A" in the AforAudience wordmark -
+     deliberately NOT --afa-fill-solid and NEVER overridden by any theme
+     block below. The logo should read as the same brand color everywhere
+     (nav, hero, auth pages, app icon, splash screen, email) regardless
+     of which accent theme a user has picked - otherwise the one mark
+     meant to be instantly recognizable would shift color depending on a
+     UI preference, which undermines the point of a fixed brand mark.
+     Same hex as the retired terracotta accent; kept as its own variable
+     so it can never accidentally get swept into a future theme block. */
+  --afa-brand-mark: #C8441A;
+
+  /* --- Theme Phase 2a - semantic surface/text tokens (FEAT-2608-051) ---
+     A role-based layer on top of the Phase 0 --afa-* palette above.
+     Every value below is currently IDENTICAL to its --afa-* source -
+     zero visual change in this commit. The point is naming: today
+     --afa-ink is used for two different jobs that happen to share one
+     hex value - "body text color on the cream page" and "the fill
+     color of a solid button/badge with light text on top" (~135
+     spots, audited 15 Aug). Phase 1's dark-theme attempt showed that
+     inverting --afa-ink directly breaks the second group (illegible
+     light-on-light). These semantic names let Phase 2b retarget each
+     of the ~1,042 existing usages onto the role it actually plays,
+     so Phase 2c can give surface/inverse/fill-solid independent dark
+     values instead of one shared ink value forced to serve three
+     different jobs at once. Do not rename or remove --afa-ink/-cream
+     themselves - Phase 2b migrates usages onto these new names
+     file-by-file, it doesn't delete the source palette. */
+  /* --- Theme Phase 2c - dark-stage values (FEAT-2608-051) ---
+     "Direction B" agreed with Hitesh: dark stage-lit surfaces, one
+     saturated accent standing in for spotlight energy, rather than
+     the Phase 0/1 warm cream/gold heritage palette. Going straight to
+     default (Hitesh's call) rather than opt-in - this IS the new
+     default look as of this commit. Because Phase 2b already gave
+     every one of the ~1,147 ink/cream usages a semantic role, these
+     three tokens can now genuinely diverge instead of sharing one
+     hex value: surface-page/surface-inverse are both dark but at
+     different depths (inverse reads as a deliberately deeper band -
+     footer, ticker, splash), while fill-solid is the bright accent
+     so buttons actually pop against the dark page instead of
+     vanishing into it. */
+  --afa-surface-page: #141414;
+  --afa-surface-raised: #1F1F1F;
+  --afa-surface-inverse: #0A0A0A;
+
+  --afa-text-primary: #F5F5F0;
+  --afa-text-secondary: rgba(245, 245, 240, 0.65);
+  /* GEN-2609-113 - 0.40 -> 0.50: at 0.40 muted text measured 3.6:1 on
+     --afa-surface-page (fails AA for body text); 0.50 is 4.95:1. */
+  --afa-text-muted: rgba(245, 245, 240, 0.5);
+  /* GEN-2609-113 - top of the text ladder (absorbs 0.75-0.85). */
+  --afa-text-soft: rgba(245, 245, 240, 0.8);
+
+  /* GEN-2609-074 - a real, separate role from --afa-text-secondary,
+     not a duplicate to merge away: hero-subtitle text sitting directly
+     on top of a photograph (Wall of Fame/Organisers/Venue-owners' hero
+     bands), not a flat surface color. Hitesh's call: a cool, pure
+     white reads legibly across a photo's unpredictable luminance in a
+     way --afa-text-secondary's warm cream tint (tuned for flat
+     surfaces) doesn't guarantee, and the lower alpha (0.5 vs
+     --text-secondary's 0.65) was likely already tuned for that same
+     reason. Named for the role, not the value, since more photo-hero
+     pages are expected as this app leans further into imagery. */
+  --afa-text-on-image: rgba(255, 255, 255, 0.5);
+
+  --afa-fill-solid: #FF5A36;
+
+  /* GEN-2609-068 - this exact border value (rgba(245,245,240,0.15))
+     was already the de facto resting-border color across the app -
+     .afa-search-box (this file) and several inline styles all
+     independently retyped it - but had no named token. Centralizing
+     it here so Button.tsx's new outline-neutral variant (and any
+     future consumer) can reference var() instead of adding another
+     copy of the literal. */
+  --afa-border-resting: rgba(245, 245, 240, 0.15);
+
+  /* GEN-2609-099 - general-purpose translucent tints of --afa-text-
+     primary's base RGB (245,245,240), the same family --afa-text-
+     secondary/-muted/--afa-border-resting already draw from at other
+     alphas. These 2 specifically (0.08, 0.1) are the two values that
+     clear GEN-2609-081's approved 50-occurrence bar for a new token
+     (--afa-tint-08 at 171 live literals, --afa-tint-10 at 100 - see
+     docs/token-migration-status.md's GEN-2609-093 audit and
+     docs/design.md's GEN-2609-099 entry for the full count and method).
+     Named `--afa-tint-*`, not `--afa-border-*`/`--afa-text-*`,
+     deliberately: checked real property context before naming, not
+     assumed - 0.08 is 148 border-property sites vs. 10 background
+     (61 vs. 9 files), 0.1 is 88 border-property vs. 8 background (38
+     vs. 4 files) - both border-dominant but genuinely mixed, not a
+     single role, so a role-specific name would misdescribe a real
+     minority of usage either way. */
+  --afa-tint-08: rgba(245, 245, 240, 0.08);
+  --afa-tint-10: rgba(245, 245, 240, 0.1);
+
+  /* GEN-2609-113 - colour closeout (docs/decisions/2026-09-26-radius-
+     colour-scale.md section 2). The rest of the cream surface/border
+     ladder, then tone tints and dark overlays. Every value is a literal
+     rgba(), not color-mix(), so an admin editing a tint edits exactly
+     the colour they see. The near-identical cream rgba(247,243,238,a)
+     and white rgba(255,255,255,a) overlays fold into this ladder. */
+  --afa-tint-04: rgba(245, 245, 240, 0.04);
+  --afa-tint-06: rgba(245, 245, 240, 0.06);
+  --afa-tint-12: rgba(245, 245, 240, 0.12);
+  --afa-tint-20: rgba(245, 245, 240, 0.2);
+  --afa-tint-30: rgba(245, 245, 240, 0.3);
+
+  --afa-amber-wash: rgba(201, 151, 58, 0.08);
+  --afa-amber-tint: rgba(201, 151, 58, 0.15);
+  --afa-amber-border: rgba(201, 151, 58, 0.4);
+  --afa-amber-strong: rgba(201, 151, 58, 0.6);
+
+  /* GEN-2609-118 - selected / active state (chips, toggle boxes, tabs,
+     seats, period pickers, status filters): amber text on a faint amber
+     tint with an amber border, never a solid fill. Its own family so an
+     admin can change selection without touching the CTA fill or the
+     amber accent. Defaults equal the amber values these sites use. */
+  --afa-selected: var(--afa-amber);
+  --afa-selected-bg: rgba(201, 151, 58, 0.08);
+  --afa-selected-border: rgba(201, 151, 58, 0.4);
+  --afa-error-tint: rgba(179, 38, 30, 0.1);
+  --afa-error-edge: rgba(179, 38, 30, 0.3);
+  --afa-sage-tint: rgba(74, 103, 65, 0.12);
+  --afa-success-tint: rgba(39, 103, 73, 0.15);
+  --afa-fill-tint: rgba(255, 90, 54, 0.2);
+  --afa-blue-tint: rgba(74, 111, 165, 0.15);
+
+  --afa-shadow: rgba(0, 0, 0, 0.3);
+  --afa-scrim: rgba(10, 10, 10, 0.7);
+  --afa-scrim-strong: rgba(10, 10, 10, 0.9);
+
+  --afa-on-fill-solid: var(--afa-brown-black);
+
+  /* GEN-2609-068 - lightened, AA-legible variants of --afa-sage/--afa-error
+     for TEXT sitting on top of those colors' own translucent tinted
+     backgrounds (STATUS_TONE.sage/.error's `bg`) - the base --afa-sage/
+     --afa-error values themselves are legible on a solid light or
+     mid-tone surface, but fail contrast at the actual ~0.10-0.12 alpha
+     those tones use over --afa-surface-raised (#1F1F1F). Same "-bright"
+     naming precedent as the (currently unused) legacy --afa-gold-bright.
+     Verified, not eyeballed - full contrast-math trail in HANDOFF.md's
+     GEN-2609-068 entry:
+     - sage tint (rgba(74,103,65,0.12) over #1F1F1F) composites to
+       ~rgb(36,40,35), luminance ~0.0201 -> --afa-sage-bright needs
+       luminance >= ~0.2655 for 4.5:1. #7AA86E measures ~0.333, giving
+       ~5.46:1 at the real 0.12 alpha and ~5.11:1 even at a hypothetical
+       0.20 alpha (this dispatch's own upper estimate) - comfortable
+       margin either way, not a razor-thin pass.
+     - error tint (rgba(179,38,30,0.10) over #1F1F1F) composites to
+       ~rgb(46,32,31), luminance ~0.0172 -> --afa-error-bright needs
+       luminance >= ~0.2522 for 4.5:1. #E67870 measures ~0.314, giving
+       ~5.43:1 at the real 0.10 alpha and ~5.10:1 at a hypothetical 0.20
+       alpha. (For reference: the old --afa-red-alt, #EF4444, measured
+       only ~4.16:1 against this same background. GEN-2609-115 folded
+       its remaining text uses into --afa-error-bright and removed it.) */
+  --afa-sage-bright: #7AA86E;
+  --afa-error-bright: #E67870;
+
+  /* Type scale & spacing grid (Step 1 completion, 15 Sep 2026) - derived
+     from grepping every shipped font-size/spacing value in src/, not
+     picked first and fitted after. See docs/afa-design-tokens-reference.md
+     Section 8 for the full derivation. Tokens only, zero adoption yet -
+     weight/line-height/font-family stay explicit at each call site, same
+     as the existing --afa-space and type-scale pattern. */
+  --afa-text-micro: 11px;
+  --afa-text-small: 12px;
+  --afa-text-ui: 13px;
+  --afa-text-body: 14px;
+  --afa-text-title: 16px;
+  /* GEN-2609-106 - added per Hitesh's font-size-closeout decision
+     (delegated: "go ahead with your planning"): a real gap between
+     title (16px) and heading (24px) that off-scale literals had been
+     filling ad hoc at 22px, 23 sites repo-wide. */
+  --afa-text-subheading: 22px;
+  --afa-text-heading: 24px;
+
+  --afa-space-1: 4px;
+  --afa-space-2: 8px;
+  --afa-space-3: 12px;
+  --afa-space-4: 16px;
+  --afa-space-5: 20px;
+  --afa-space-6: 24px;
+
+  /* Page-title tiers (Section 8.4/8.5) - decided and already applied
+     consistently as literals at ~36 call sites (GEN-2609-032/033/035);
+     this just names that existing decision, doesn't retrofit it. */
+  --afa-text-page-title: 28px;
+  --afa-text-page-title-lg: 32px;
+  /* GEN-2609-116 - large display-size figures between heading (24px)
+     and page-title (28px): stat numbers, date numerals and venue card
+     titles. 4 sites had kept a 26px literal after the GEN-2609-106
+     closeout; 3+ sites of one value is the bar for a new token. */
+  --afa-text-display: 26px;
+
+  /* GEN-2609-075 - radius + button-padding scale, promoted out of
+     Button.tsx's SIZE_CHROME (where these were plain hardcoded numbers,
+     never a CSS custom property) so the admin design-token panel has a
+     real, live-effect "radius"/"button" group to control. These are the
+     static fallback the app renders when the DesignToken DB table is
+     empty or unreachable - see src/lib/design-tokens.ts's
+     DEFAULT_TOKEN_VALUES, which mirrors these exact values as the "reset
+     to defaults" target. */
+  --afa-radius-sharp: 0px;
+  --afa-radius-sm: 6px;
+  --afa-radius-md: 8px;
+  --afa-radius-pill: 999px;
+
+  /* GEN-2609-112 - radius closeout: full 8-step scale per
+     docs/decisions/2026-09-26-radius-colour-scale.md section 1. xs/xl/2xl
+     are new; lg replaces the pixel-named --afa-radius-12px (same 12px
+     value), and --afa-radius-10px is retired into lg (10 -> 12px,
+     accepted). Off-scale literals round onto these steps: 2/3/4 -> xs,
+     5/7 -> sm, 10/14 -> lg, 24 -> 2xl, 99 -> pill. */
+  --afa-radius-xs: 3px;
+  --afa-radius-lg: 12px;
+  --afa-radius-xl: 16px;
+  --afa-radius-2xl: 20px;
+
+  --afa-btn-padding-sm: 4px 10px;
+  --afa-btn-padding-md: 9px 17px;
+  --afa-btn-padding-lg: 12px 24px;
+
+  /* GEN-2609-096 - Button.tsx's pill-sm/pill-md size tokens kept their
+     own literal padding (see Button.tsx's own GEN-2609-075 comment -
+     deliberately never audited against the sm/md/lg scale, since
+     13px/14px are coincidences of the type scale, not the pill
+     shape's own design). Promoted to real tokens now so the pill
+     shape is admin-controlled too, same as sm/md/lg already are. */
+  --afa-btn-padding-pill-sm: 6px 14px;
+  --afa-btn-padding-pill-md: 10px 18px;
+
+  /* GEN-2609-081 - scale extension: the 8/4/2 highest-frequency
+     off-scale spacing/font-size/radius values from GEN-2609-079's own
+     batch-1 migration (repo-wide precise count >= 50 non-tokenized
+     occurrences each - see docs/design.md's GEN-2609-081 entry for the
+     full reconciled count per value and the naming-scheme reasoning).
+     Same "tokens only, zero adoption yet" posture as the original
+     scale (GEN-2609-077's own comment above) - this ticket adds no
+     migration, so every value here is admin-editable but not yet
+     consumed anywhere in src/ (confirmed via design-token-coverage.ts).
+     Naming: the original space-1..6 / text-micro..heading / radius-sharp..
+     pill names are either a step INDEX (space-N) or a semantic role -
+     neither scheme has a natural, non-colliding slot for an
+     in-between raw value, and the dispatch's own instruction was not
+     to rename or re-value any existing token. Explicit px-suffixed
+     names read unambiguously as "this many pixels" (the unit is part
+     of the name), which is the deliberate signal that distinguishes
+     e.g. --afa-space-2px (2px, this ticket) from the pre-existing
+     --afa-space-2 (8px, GEN-2609-077's step-2) at a glance - same
+     scheme applied to all 3 scales for consistency. */
+  --afa-space-2px: 2px;
+  --afa-space-6px: 6px;
+  --afa-space-10px: 10px;
+  --afa-space-14px: 14px;
+  --afa-space-18px: 18px;
+  --afa-space-28px: 28px;
+  --afa-space-32px: 32px;
+  --afa-space-48px: 48px;
+  /* GEN-2609-107 phase 2 - the large values left after phase 1 that
+     recur 10+ times (counts on qa at 4 Oct: 36px x11, 40px x36, 56px x16,
+     64px x20, 80px x32). Exact values, so adopting them changes nothing
+     on screen. Spacing tokens are hygiene, not admin knobs: the spacing
+     group is hidden in /dashboard/admin/design-system. */
+  --afa-space-36px: 36px;
+  --afa-space-40px: 40px;
+  --afa-space-56px: 56px;
+  --afa-space-64px: 64px;
+  --afa-space-80px: 80px;
+
+  /* GEN-2609-106 - renamed from pixel-named to semantic (formerly
+     --afa-text-10px/15px/18px/20px), per Hitesh's font-size-closeout
+     decision - the pixel-named scheme was always meant as a stopgap
+     (see GEN-2609-081's own comment above), and these 4 are now
+     genuinely adopted (not "zero adoption yet" like when that scheme
+     was chosen), so the semantic names are no longer premature. */
+  --afa-text-caption: 10px;
+  --afa-text-body-lg: 15px;
+  --afa-text-lead: 18px;
+  --afa-text-subtitle: 20px;
+
+  /* Repointed to the app's real dark-theme tokens (BUG-2609-043) - .dark
+     (below) is never applied to <html>/<body> anywhere in this app, so
+     these shadcn-scaffold defaults were the actual fallback every
+     unstyled element inherited: near-black text on white, the opposite
+     of this app's real identity. Single source of truth now instead of
+     a second, wrong set of hardcoded values. */
+  --background: var(--afa-surface-page);
+  --foreground: var(--afa-text-primary);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -82,6 +411,13 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
+/* Theme Phase 1/2 (opt-in accent picker: Indigo/Peacock/Vermilion/Royal
+   Purple/Midnight Sapphire/Noir) removed (GEN-2608-048, 15 Aug) - Hitesh's
+   call to lock the palette to a single identity rather than a
+   user-selectable picker, consistent with the Theme Phase 2c dark-reskin
+   decision below being "the" default look, not one option among seven.
+   See docs/design.md Theme Phase 1/2 entries for the removed history. */
 
 .dark {
   --background: oklch(0.145 0 0);
@@ -127,4 +463,350 @@
   html {
     @apply font-sans;
   }
+}
+/* Phase 2c multi-script fix (FEAT-2608-051), unlayered so it wins over
+   the @apply font-sans above regardless of source order. Manrope only
+   covers Latin, so this chains in each Noto Sans script family (loaded
+   in layout.tsx) as fallbacks - the browser resolves font-family
+   per-character via unicode-range, so a Devanagari/Tamil/etc. glyph
+   gets a real designed font instead of silently falling back to the
+   OS default. This fixes the INHERITED base case immediately. Known
+   remaining gap: components that set an explicit inline
+   fontFamily: "var(--font-sans)" (a common pattern in this codebase)
+   still resolve to Manrope-only at that element, since an inline
+   style overrides inheritance - closing that needs the same kind of
+   mechanical multi-file pass Phase 2b did for color tokens, not yet
+   done, tracked in FEAT-2608-051. */
+html {
+  font-family: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif;
+}
+
+/* BUG-2610-030 - tracked labels in Indic scripts. Letter-spacing splits
+   a word at every conjunct and vowel sign ("जीवंत" read "जी वं त"), and
+   uppercase means nothing in these scripts. The one switch for every
+   tracked label: in an Indic locale (TranslationProvider sets <html lang>
+   from the active locale) any element that sets letter-spacing or
+   text-transform - inline style (how every label here sets it) or a
+   Tailwind tracking-/uppercase class - gets normal spacing and no
+   transform. !important because the labels set both inline.
+   e2e/homepage-hindi.spec.ts checks it at 390 and 1440. */
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="letter-spacing"], [class*="tracking-"]) {
+  letter-spacing: normal !important;
+}
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="text-transform"], .uppercase) {
+  text-transform: none !important;
+}
+
+/* Run D (Hitesh phone pass, 13 Oct) - mono labels in Indic scripts. The
+   mono font has no Indic glyphs, so the fallback was set on the mono grid
+   and labels read with double-width gaps. In an Indic locale the mono
+   variable itself becomes the sans stack, so every inline
+   fontFamily: "var(--font-mono)" and the Tailwind font-mono class (which
+   compiles to var(--font-geist-mono)) follow without touching call sites.
+   It sits on html and body with !important to outrank next/font's class
+   on <html> and the design-token runtime style's
+   body{--font-mono: ... !important} (design-tokens.ts).
+   Former mono labels keep tabular digits so counts and prices don't jump.
+   e2e/indic-mono-font.spec.ts checks it; English keeps the mono font. */
+:is(html, body):is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) {
+  --font-mono: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif !important;
+  --font-geist-mono: var(--font-mono) !important;
+}
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) :is([style*="--font-mono"], .font-mono):not(nav *) {
+  font-variant-numeric: tabular-nums;
+}
+/* Run D amend - nav chrome keeps the mono metrics. The phone tab bars and
+   the desktop header nav were sized for the mono fallback: in sans,
+   Malayalam's "Saved" wraps in its fifth of 390 px and the Marathi and
+   Hindi nav baselines shift (e2e tab-bar-labels, marathi-locale,
+   dashboard-i18n-artist). Inside nav the variables go back to what English
+   has; body text and labels elsewhere keep the sans swap above. */
+:is(:lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(ta), :lang(te)) nav {
+  --font-mono: var(--font-phys-jetbrains-mono) !important;
+  --font-geist-mono: initial !important;
+}
+.hero-rotator {
+  height: 100%;
+  min-height: 360px;
+}
+
+@media (max-width: 900px) {
+  .hero-rotator {
+    height: 320px;
+    min-height: 0;
+  }
+}
+
+/* Real CSS :hover, not JS onMouseEnter/onMouseLeave (28 Jul). Elements
+   with JS mouse-hover handlers attached directly to a clickable link
+   need a "phantom" first tap on touchscreens just to trigger the hover
+   state - the actual navigation only fires on a second tap. Live-caught
+   on /events and /artists card links ("need to click View Event
+   multiple times"). CSS :hover has no such quirk - a single tap
+   activates :active/click directly. */
+.hover-lift-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.hover-lift-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Shared directory-page search input chrome (Venues/Artists/Events hero) -
+   was three independently hand-rolled boxes (two under this same class
+   name with different padding/icon-side choices, one border-bottom-only
+   on Events). One definition here so the box and its focus state can't
+   drift apart per-page again. See src/components/SearchInputBox.tsx for
+   the markup this class is applied to. */
+.afa-search-box { display: flex; align-items: center; gap: 12px; background: var(--afa-surface-page); border: 1px solid rgba(245,245,240,0.15); padding: 12px 16px; box-sizing: border-box; }
+.afa-search-box:focus-within { border-color: var(--afa-amber); }
+
+/* BUG-2609-063 - Chrome paints autofilled fields with its own light-blue
+   background and dark text, unreadable on the dark shell. Text and caret
+   go to --afa-text-primary. For the background, the usual inset
+   box-shadow fill would have to pick one surface, but fields here sit on
+   several: transparent over the auth card (--afa-surface-raised),
+   --afa-surface-page, --afa-surface-raised, and only a few on
+   --afa-surface-inverse. So the browser's background change is deferred
+   with a transition delay instead, and each field keeps the background
+   it already declares. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--afa-text-primary);
+  caret-color: var(--afa-text-primary);
+  transition: background-color 0s 600000s, color 0s 600000s;
+}
+
+/* FEAT-2608-044 - the Venues/Artists card grids use role="link" divs for
+   the click-guard pattern (PR #261/#312), which get no visible focus ring
+   by default the way a real <a> would. Scoped to .afa-focusable rather
+   than every role="link" site-wide, to stay within this ticket's scope. */
+.afa-focusable:focus-visible {
+  outline: 2px solid var(--afa-amber);
+  outline-offset: 2px;
+}
+
+/* GEN-2609-110 - states the shared Button (src/components/ui/Button.tsx)
+   can't set inline. Every Button carries .afa-btn plus .afa-btn-<variant>.
+   The focus ring is the .afa-focusable ring above, on every variant. The
+   hover rules only touch properties the variant leaves unset inline for
+   the resting state, so a selected option keeps its selected colour. */
+.afa-btn:focus-visible {
+  outline: 2px solid var(--afa-amber);
+  outline-offset: 2px;
+}
+.afa-btn-scrim:focus-visible { outline-offset: -2px; }
+.afa-btn-menu-row { background: transparent; }
+.afa-btn-menu-row:not(:disabled):hover { background: var(--afa-tint-06); }
+.afa-btn-tab { color: var(--afa-text-secondary); transition: color 0.2s ease; }
+.afa-btn-tab:hover { color: var(--afa-text-primary); }
+.afa-btn-tab-display { color: var(--afa-text-muted); transition: color 0.2s ease; }
+.afa-btn-tab-display:hover { color: var(--afa-text-secondary); }
+.afa-btn-text-toggle { color: var(--afa-text-muted); transition: color 0.2s ease; }
+.afa-btn-text-toggle:hover { color: var(--afa-text-secondary); }
+
+/* Venue Owner Portal shared UI (src/components/dashboard/VenuePortalUI.tsx) -
+   ported from the approved Figma Make export. Scoped under .avp- so these
+   hover/focus rules (impossible to express as inline styles) can't drift
+   into unrelated dashboard surfaces. */
+.avp-crosshatch {
+  background-image:
+    linear-gradient(rgba(245, 245, 240, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 245, 240, 0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.avp-btn-primary:hover { filter: brightness(1.1); }
+.avp-btn-primary:active { filter: brightness(0.95); }
+.avp-btn-outline:hover { border-color: rgba(245, 245, 240, 0.4); background: rgba(245, 245, 240, 0.03); }
+.avp-hover-border:hover { border-color: rgba(245, 245, 240, 0.2); color: var(--afa-text-primary); }
+.avp-field:focus { border-color: rgba(201, 151, 58, 0.5); outline: none; box-shadow: 0 0 0 1px rgba(201, 151, 58, 0.35); }
+
+/* GEN-2608-082 - Venue Creation + Seat Arrangement redesign (Figma Make
+   export round 2, docs/venue-seating-redesign + seating-visual-polish).
+   Warm radial depth reused behind key moments (the Seating & Pricing fork,
+   the seat-map Preview) so those surfaces aren't flat - ported from the
+   export's .afa-glow-orange/.afa-glow-amber/.afa-card-lift, retargeted onto
+   this app's --afa-surface-page/--afa-surface-raised instead of Figma's own
+   hardcoded --color-ink/--color-raised. */
+.afa-glow-orange {
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(255, 90, 54, 0.08), transparent 62%),
+    var(--afa-surface-page);
+}
+.afa-glow-amber {
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(201, 151, 58, 0.07), transparent 62%),
+    var(--afa-surface-page);
+}
+.afa-card-lift {
+  background:
+    radial-gradient(140% 120% at 50% 0%, rgba(255, 90, 54, 0.06), transparent 55%),
+    var(--afa-surface-raised);
+  box-shadow: 0 1px 0 rgba(245, 245, 240, 0.04) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+}
+/* Structural seat-count/layout changes fade+scale a seat in so the change
+   reads as legible; position-only changes (aisle width, alignment) apply
+   with no animation - see the Terminology panel's "Live-preview behaviour"
+   copy for the full rule this timing implements. */
+@keyframes seatIn {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+.afa-seat-anim { animation: seatIn 0.18s ease-out both; }
+
+/* SeatSectionEditor.tsx (GA section-row builder) + the Seating & Pricing
+   fork's PathCards - real :hover, not JS mouse handlers (see the
+   hover-lift-card note above re: the phantom-tap issue on touchscreens). */
+.ga-remove-btn:hover { color: var(--afa-fill-solid) !important; }
+.ga-add-row:hover { border-color: rgba(255, 90, 54, 0.5) !important; color: var(--afa-text-primary) !important; }
+.afa-path-card:hover { transform: translateY(-2px); }
+
+/* GEN-2609-003 - Mobile Redesign Phase 1: nav shell + push transitions.
+   MobileTabBar.tsx toggles this class on <body> (not a per-page wrapper -
+   see that file's own comment for why) so its fixed bottom bar never
+   covers page content. `lg` matches DashboardShell.tsx's own mobile
+   breakpoint, the only other place this codebase draws that line, and
+   the min-width companion keeps desktop completely untouched even if the
+   class is present (defensive - MobileTabBar already checks viewport via
+   its own `lg:hidden`, this is belt-and-suspenders on the CSS side). */
+@media (max-width: 1023px) {
+  body.afa-mobile-tab-bar-active {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    /* BUG-2609-084 - for anything pinned to the viewport bottom (a sticky
+       action row): add this to its offset so the bar never covers it.
+       Unset (0px fallback) on desktop and on routes with no bar. */
+    --afa-tab-bar-clearance: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* GEN-2609-002 - Register on a ~1440x864 laptop window: AuthLayout's
+   `compact` flag adds .afa-auth-compact, and on desktop these tighten the
+   gaps RegisterForm reads (each falls back to its usual spacing anywhere
+   else, so phones and the other auth pages are unchanged). Nothing is
+   removed or reordered; a form that still can't fit scrolls with the page. */
+@media (min-width: 1024px) {
+  .afa-auth-compact {
+    --afa-register-header-gap: var(--afa-space-4);
+    --afa-register-card-pad: var(--afa-space-6) var(--afa-space-32px);
+    --afa-register-divider-gap: var(--afa-space-3);
+    --afa-register-field-gap: var(--afa-space-3);
+    --afa-register-submit-gap: var(--afa-space-4);
+    --afa-register-terms-gap: var(--afa-space-10px);
+    --afa-register-footer-gap: var(--afa-space-14px);
+    --afa-register-note-gap: var(--afa-space-6px);
+  }
+}
+
+/* Push-transition mount animation for full-screen routes entered from
+   the mobile tab shell (EventDetail, Checkout - see their own
+   layout.tsx files). Ported from the Figma Make export's
+   afa-push-in/.afa-push (src/index.css) - same timing/easing/offset,
+   applied here via a plain CSS animation on mount rather than the View
+   Transitions API, since a route's client page component always mounts
+   fresh on real App Router navigation into it - no JS/useEffect needed
+   to trigger it. Mobile-only (this is a tab-shell concept; desktop
+   navigates to these routes via normal SiteNav links, not a "push") and
+   skipped under reduced-motion. */
+@keyframes afa-push-in {
+  from { transform: translateX(28px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@media (max-width: 1023px) {
+  .afa-push-mount {
+    animation: afa-push-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+.afa-path-card:not(.afa-path-card-active):hover { border-color: rgba(245, 245, 240, 0.3); }
+
+/* GEN-2609-004 (Mobile Redesign Phase 2) - bottom-sheet mount animation,
+   used by the mobile filter sheet on /events (MobileEventFilterSheet.tsx).
+   Same naming spirit as .afa-push-mount above (Phase 1) - a plain CSS
+   animation on mount, no JS timing needed since the sheet is a fresh
+   mount each time it opens (conditionally rendered, not toggled via
+   visibility). Not gated to mobile-only via @media the way push-mount is,
+   since this class is only ever applied by a component that itself only
+   mounts below the same `lg` breakpoint - nothing stops it being reused
+   by a future sheet at any width, so the gate belongs on the trigger, not
+   the animation. */
+@keyframes afa-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes afa-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.afa-sheet-mount {
+  animation: afa-sheet-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.afa-backdrop-mount {
+  animation: afa-backdrop-in 0.2s ease-out;
+}
+
+/* Contribution-moment seal stamp-in (GEN-2609-037) - the audit's original
+   Step 5 "Booking-confirmation ticket stamp" moment, finally built. Same
+   fresh-mount-only reasoning as .afa-sheet-in above: ContributionMoment.tsx's
+   confirmation screen mounts fresh every time, no JS timing needed. */
+@keyframes afa-seal-stamp-in {
+  0% { transform: scale(1.35) rotate(-10deg); opacity: 0; }
+  55% { transform: scale(0.94) rotate(2deg); opacity: 1; }
+  75% { transform: scale(1.04) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes afa-seal-ring-pulse {
+  0% { transform: scale(1); opacity: 0; }
+  40% { opacity: 0; }
+  60% { transform: scale(1.35); opacity: 0.5; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+.afa-seal-stamp-mount {
+  animation: afa-seal-stamp-in 480ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.afa-seal-ring-mount {
+  animation: afa-seal-ring-pulse 480ms ease-out;
+}
+
+/* GEN-2609-062 - was independently defined inline via its own <style>
+   tag in 10 files (13 real injections - wall-of-fame alone had 3, one
+   per loading-spinner instance), the same @keyframes text copy-pasted
+   every time a new spinner needed it. Consolidated to this single
+   definition; every duplicate removed from its call site. Pure cleanup
+   - the animation itself (0.7s linear infinite, applied via inline
+   `animation: "afa-spin ..."` at each spinner div) is unchanged. */
+@keyframes afa-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Consolidated reduced-motion block (docs/motion-guidelines.md) - was 3
+   separate @media (prefers-reduced-motion: reduce) blocks scattered across
+   this file (one per animation batch as each shipped). Merged into one on
+   audit Step 6 so future animations have a single place to register their
+   reduced-motion behaviour instead of adding a 4th/5th block. Mechanical
+   merge only - same selectors, same declarations, nothing added or dropped. */
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift-card { transition: none; }
+  .hover-lift-card:hover { transform: none; }
+  .afa-push-mount { animation: none; }
+  .afa-sheet-mount, .afa-backdrop-mount, .afa-seal-stamp-mount, .afa-seal-ring-mount { animation: none; }
+  .afa-seat-anim { animation: none; }
+  .afa-path-card:hover { transform: none; }
+}
+
+/* S1b-c1 - the W1 holding page is a clean full screen. The proxy rewrite
+   keeps the visitor's URL ("/"), so usePathname() can't tell the chrome to
+   hide; the holding page's own marker does it instead. Hidden: mobile top
+   bar (search + Sign up), bottom tab bar, nudge banners, support bubble and
+   panel. LaunchHoldingPage keeps its own wordmark, About/Contact and a
+   small Sign in link. Checked by scripts/launch-waves-holding.test.ts and
+   e2e/launch-waves-ui.spec.ts. */
+body:has([data-afa-launch-holding]) [data-afa-top-bar],
+body:has([data-afa-launch-holding]) [data-afa-tab-bar],
+body:has([data-afa-launch-holding]) [data-afa-nudge-stack],
+body:has([data-afa-launch-holding]) .afa-support-chat-btn,
+body:has([data-afa-launch-holding]) .afa-support-chat-panel {
+  display: none !important;
 }

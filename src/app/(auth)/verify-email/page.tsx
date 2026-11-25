@@ -1,0 +1,85 @@
+"use client"
+
+import { useState, useEffect, Suspense } from "react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import EnvBadge from "@/components/EnvBadge"
+import BrandLoader from '@/components/BrandLoader'
+import AuthLayout from '@/components/AuthLayout'
+import { useLocale } from "@/lib/i18n/translate"
+
+function VerifyEmailContent() {
+  const searchParams = useSearchParams()
+  const token = searchParams.get("token") || ""
+  const { t: tr } = useLocale()
+  const [status, setStatus] = useState<"checking" | "ok" | "error">("checking")
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    if (!token) {
+      setStatus("error")
+      setError(tr.verifyEmailPage.linkInvalidOrExpired)
+      return
+    }
+
+    fetch("/api/auth/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    })
+      .then(async (res) => {
+        const data = await res.json()
+        if (!res.ok) {
+          setStatus("error")
+          setError(data.error || tr.authCommon.somethingWentWrong)
+          return
+        }
+        setStatus("ok")
+      })
+      .catch(() => {
+        setStatus("error")
+        setError(tr.forgotPasswordPage.somethingWentWrongRetry)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  return (
+    <div className="w-full max-w-[440px]">
+      <div className="text-center mb-8">
+        <Link href="/" className="text-[length:var(--afa-text-page-title)] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="text-[color:var(--afa-brand-mark)]">A</span>forAudience
+          <EnvBadge />
+        </Link>
+      </div>
+
+      <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_var(--afa-shadow)] text-center">
+        {status === "checking" && (
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
+        )}
+        {status === "ok" && (
+          <>
+            <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+              {tr.verifyEmailPage.emailVerifiedBanner}
+            </div>
+            <Link href="/" style={{ color: "var(--afa-amber)", fontWeight: 500, fontSize: "var(--afa-text-body)" }}>
+              {tr.verifyEmailPage.continueToAfa}
+            </Link>
+          </>
+        )}
+        {status === "error" && (
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>{error}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <AuthLayout>
+      <Suspense fallback={<BrandLoader />}>
+        <VerifyEmailContent />
+      </Suspense>
+    </AuthLayout>
+  )
+}

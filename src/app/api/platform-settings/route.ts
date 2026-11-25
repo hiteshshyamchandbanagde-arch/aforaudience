@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma'
 // Falls back to sane defaults if the seeded row is ever missing, so callers
 // never have to handle "no settings exist" as a special case.
 export async function GET() {
-  const settings = await prisma.platformSettings.findFirst()
+  const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } })
   return NextResponse.json({
     flatVenueBookingFee: settings?.flatVenueBookingFee ?? 199,
     ticketCommissionRate: settings?.ticketCommissionRate ?? 0.08,

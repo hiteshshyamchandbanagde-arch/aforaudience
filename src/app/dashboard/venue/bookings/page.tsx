@@ -3,8 +3,19 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
+import MessageButton from '@/components/MessageButton'
+import DashboardShell from '@/components/DashboardShell'
+import DirectPayBookings from '@/components/dashboard/DirectPayBookings'
+import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
+import SharedButton from '@/components/ui/Button'
+import { calendarDate, formatDate, istMonthKey } from '@/lib/format-date'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
 
 interface BookingRequest {
   id: string
@@ -16,22 +27,45 @@ interface BookingRequest {
   venue: { id: string; name: string; city: string }
   organiser: { orgName: string }
   event: { id: string; title: string; date: string } | null
+  // D2 - set on direct-payment bookings (shown in the DirectPayBookings panel).
+  directPayStatus?: string | null
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f' },
-  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E' },
-  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A' },
+const STATUS_TONE: Record<string, StatusPillTone> = {
+  PENDING: 'gold',
+  CONFIRMED: 'sage',
+  CANCELLED: 'error',
+  REFUNDED: 'muted',
+}
+
+// The status words, by the stored status (which stays English).
+function statusLabel(status: string, v: Dictionary['venueDashboard']['bookings']) {
+  if (status === 'PENDING') return v.statusPending
+  if (status === 'CONFIRMED') return v.statusConfirmed
+  if (status === 'CANCELLED') return v.statusCancelled
+  if (status === 'REFUNDED') return v.statusRefunded
+  return status.toLowerCase()
+}
+
+/** Sunday-first one-letter weekday names in the UI language (4 Jan 2026 is a Sunday). */
+function weekdayInitials(locale: string) {
+  const f = new Intl.DateTimeFormat(locale, { weekday: 'narrow', timeZone: 'UTC' })
+  return Array.from({ length: 7 }, (_, i) => f.format(new Date(Date.UTC(2026, 0, 4 + i))))
 }
 
 export default function VenueBookingsPage() {
+  const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.bookings
+  const chrome = tr.dashboardChrome
   const { data: session, status } = useSession()
   const router = useRouter()
   const [bookings, setBookings] = useState<BookingRequest[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const { showToast } = useToast()
   const [actingOn, setActingOn] = useState<string | null>(null)
+  const [cashOnlyFor, setCashOnlyFor] = useState<string | null>(null)
+  const [directPayTick, setDirectPayTick] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date()
     return new Date(d.getFullYear(), d.getMonth(), 1)
@@ -47,11 +81,11 @@ export default function VenueBookingsPage() {
   const fetchBookings = async () => {
     try {
       const res = await fetch('/api/venues/my-bookings')
-      if (!res.ok) throw new Error('Failed to fetch booking requests')
+      if (!res.ok) throw new Error(v.loadFailed)
       const data = await res.json()
       setBookings(data)
     } catch (err: any) {
-      setError(err.message)
+      setLoadError(err.message)
     } finally {
       setLoading(false)
     }
@@ -64,39 +98,51 @@ export default function VenueBookingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
-  const respond = async (bookingId: string, newStatus: 'CONFIRMED' | 'CANCELLED') => {
+  const respond = async (bookingId: string, newStatus: 'CONFIRMED' | 'CANCELLED', cashOnly = false) => {
     setActingOn(bookingId)
     try {
       const res = await fetch(`/api/venue-bookings/${bookingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, ...(cashOnly ? { cashOnly: true } : {}) }),
       })
-      if (!res.ok) throw new Error('Failed to update booking')
+      if (!res.ok) {
+        // D2 - accepting with payments off needs a UPI ID, or cash only.
+        const body = await res.json().catch(() => ({}))
+        if (body.code === 'UPI_REQUIRED') {
+          setCashOnlyFor(bookingId)
+          throw new Error(tr.venueDirectPay.upiRequired)
+        }
+        throw new Error(v.updateFailed)
+      }
+      setCashOnlyFor(null)
       await fetchBookings()
+      setDirectPayTick((n) => n + 1)
+      showToast(newStatus === 'CONFIRMED' ? v.confirmedToast : v.rejectedToast, 'success')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || v.updateFailed, 'error')
     } finally {
       setActingOn(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={chrome.loading} /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
-  const pending = bookings.filter((b) => b.status === 'PENDING')
+  // D2 - an accepted direct-payment booking is still PENDING until the
+  // owner confirms receipt; it lives in the DirectPayBookings panel.
+  const pending = bookings.filter((b) => b.status === 'PENDING' && !b.directPayStatus)
   const resolved = bookings.filter((b) => b.status !== 'PENDING')
 
   // F3 - revenue summary. Gross amounts only (the rental fee the Organiser
   // pays), not netted against the platform's flat booking fee - that's a
   // separate, smaller number this view isn't trying to reconcile against.
   const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
-  const now = new Date()
+  // BUG-2609-087 - by event date, and the month is India's: the device
+  // zone would flip it at 5:30 am on the 1st for a UTC browser.
+  const thisMonth = istMonthKey(new Date())
   const thisMonthRevenue = confirmed
-    .filter((b) => {
-      const d = new Date(b.fromDate)
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    })
+    .filter((b) => istMonthKey(b.fromDate) === thisMonth)
     .reduce((sum, b) => sum + b.amount, 0)
   const totalRevenue = confirmed.reduce((sum, b) => sum + b.amount, 0)
   const pendingValue = pending.reduce((sum, b) => sum + b.amount, 0)
@@ -120,155 +166,158 @@ export default function VenueBookingsPage() {
   ]
 
   const CAL_STATUS_DOT: Record<string, string> = {
-    PENDING: '#C9973A',
-    CONFIRMED: '#4A6741',
-    CANCELLED: '#B3261E',
-    REFUNDED: '#8a877e',
+    PENDING: 'var(--afa-amber)',
+    CONFIRMED: 'var(--afa-sage)',
+    CANCELLED: 'var(--afa-error)',
+    REFUNDED: 'var(--afa-gray-taupe)',
   }
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Venues
-          </Link>
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
+          <div>
+            <PageHead
+              eyebrow={v.eyebrow}
+              title={v.title}
+              description={v.description}
+            />
+          </div>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '6px' }}>
-            Bookings, Revenue &amp; Calendar
-          </h1>
-          <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Revenue is gross rental income (not netted against the platform's flat booking fee). Multi-day bookings are marked on their start date only.
-          </p>
-
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
+          {loadError && (
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{loadError}</ErrorBanner>
           )}
 
+          <DirectPayBookings key={directPayTick} side="VENUE_OWNER" />
+
           {/* F3 - Revenue summary */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
             {[
-              { label: 'This month', value: thisMonthRevenue },
-              { label: 'Total confirmed', value: totalRevenue },
-              { label: 'Pending value', value: pendingValue },
+              { key: 'this-month', label: v.thisMonth, value: thisMonthRevenue, sub: tr.common.byEventDate },
+              { key: 'total-confirmed', label: v.totalConfirmed, value: totalRevenue, sub: null },
+              { key: 'pending-value', label: v.pendingValue, value: pendingValue, sub: null },
             ].map((s) => (
-              <div key={s.label} style={{ background: '#fff', borderRadius: '12px', padding: '18px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 6px' }}>{s.label}</p>
-                <p style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
-              </div>
+              <Card key={s.key} data-afa-stat={s.key} style={{ padding: 'var(--afa-space-18px) var(--afa-space-5)' }}>
+                <StatLabel style={{ margin: '0 0 var(--afa-space-2)' }}>{s.label}</StatLabel>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{formatINR(s.value)}</p>
+                {s.sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>{s.sub}</p>}
+              </Card>
             ))}
           </div>
 
           {/* F3 - Calendar */}
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <button
+          <Card style={{ padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-5)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--afa-space-4)' }}>
+              <SharedButton
+                variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)); setSelectedDay(null) }}
-                style={{ background: 'none', border: 'none', fontSize: '16px', cursor: 'pointer', color: '#0E0C0A', opacity: 0.6, padding: '4px 8px' }}
+                aria-label={v.prevMonth}
+                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-1) var(--afa-space-2)' }}
               >
                 ←
-              </button>
-              <p style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>
-                {calendarMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+              </SharedButton>
+              <p style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
+                {formatDate(calendarDate(calendarMonth.getFullYear(), calendarMonth.getMonth()), 'monthYear', locale)}
               </p>
-              <button
+              <SharedButton
+                variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)); setSelectedDay(null) }}
-                style={{ background: 'none', border: 'none', fontSize: '16px', cursor: 'pointer', color: '#0E0C0A', opacity: 0.6, padding: '4px 8px' }}
+                aria-label={v.nextMonth}
+                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: 'var(--afa-space-1) var(--afa-space-2)' }}
               >
                 →
-              </button>
+              </SharedButton>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                <div key={i} style={{ textAlign: 'center', fontSize: '11px', fontWeight: 600, color: '#0E0C0A', opacity: 0.4, padding: '4px 0' }}>{d}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--afa-space-1)', marginBottom: 'var(--afa-space-1)' }}>
+              {weekdayInitials(locale).map((d, i) => (
+                <div key={i} style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-muted)', padding: 'var(--afa-space-1) 0' }}>{d}</div>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--afa-space-1)' }}>
               {calendarCells.map((day, i) => {
                 if (!day) return <div key={i} />
                 const key = day.toDateString()
                 const dayBookings = bookingsByDate[key] || []
                 const isSelected = selectedDay === key
                 return (
-                  <button
+                  <SharedButton
+                    // bare-reason: calendar day cell: a square grid cell sized by the 7-column grid, holding the date and status dots; not a button shape any variant describes
+                    variant="bare"
                     key={i}
                     onClick={() => dayBookings.length > 0 && setSelectedDay(isSelected ? null : key)}
                     style={{
-                      aspectRatio: '1', borderRadius: '8px', border: isSelected ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.06)',
-                      background: isSelected ? 'rgba(200,68,26,0.06)' : '#fff', cursor: dayBookings.length > 0 ? 'pointer' : 'default',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', padding: 0,
+                      aspectRatio: '1', borderRadius: 'var(--afa-radius-md)', border: isSelected ? '1px solid var(--afa-selected-border)' : '1px solid var(--afa-tint-08)',
+                      background: isSelected ? 'var(--afa-selected-bg)' : dayBookings.length > 0 ? 'var(--afa-tint-04)' : 'transparent',
+                      cursor: dayBookings.length > 0 ? 'pointer' : 'default',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'var(--afa-space-2px)', padding: 0,
                     }}
                   >
-                    <span style={{ fontSize: '13px', color: '#0E0C0A' }}>{day.getDate()}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: dayBookings.length > 0 ? 'var(--afa-text-primary)' : 'var(--afa-text-muted)' }}>{day.getDate()}</span>
                     {dayBookings.length > 0 && (
-                      <div style={{ display: 'flex', gap: '2px' }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2px)' }}>
                         {dayBookings.slice(0, 3).map((b) => (
                           <span key={b.id} style={{ width: '5px', height: '5px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status] }} />
                         ))}
                       </div>
                     )}
-                  </button>
+                  </SharedButton>
                 )
               })}
             </div>
 
             {selectedDay && bookingsByDate[selectedDay] && (
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+              <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-08)' }}>
                 {bookingsByDate[selectedDay].map((b) => (
-                  <div key={b.id} style={{ fontSize: '13px', color: '#0E0C0A', padding: '4px 0' }}>
-                    <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: '6px' }} />
-                    {b.event?.title || 'Untitled event'} — {b.venue.name} · ₹{b.amount.toLocaleString('en-IN')} · <span style={{ opacity: 0.6 }}>{b.status.toLowerCase()}</span>
+                  <div key={b.id} style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-1) 0' }}>
+                    <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: 'var(--afa-space-6px)' }} />
+                    {b.event?.title || v.untitledEvent} — {b.venue.name} · {formatINR(b.amount)} · <span style={{ color: 'var(--afa-text-secondary)' }}>{statusLabel(b.status, v)}</span>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Pending */}
-          <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
-              Pending {pending.length > 0 && `(${pending.length})`}
+          <div style={{ marginBottom: 'var(--afa-space-32px)' }}>
+            <h2 data-afa-section="pending" style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+              {v.pending} {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>No pending booking requests.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>{v.noPending}</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-3)' }}>
                 {pending.map((b) => (
-                  <div key={b.id} style={{ background: '#fff', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                  <Card key={b.id} style={{ padding: 'var(--afa-space-5)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-10px)' }}>
                       <div>
-                        <p style={{ fontWeight: 700, fontSize: '16px', color: '#0E0C0A' }}>{b.event?.title || 'Untitled event'}</p>
-                        <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
-                          for {b.venue.name}, {b.venue.city} · requested by {b.organiser.orgName}
+                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || v.untitledEvent}</p>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>
+                          {v.requestLine.replace('{venue}', b.venue.name).replace('{city}', b.venue.city).replace('{organiser}', b.organiser.orgName)}
                         </p>
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#C8441A' }}>₹{b.amount}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>{formatINR(b.amount)}</span>
                     </div>
-                    <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
-                      📅 {new Date(b.fromDate).toLocaleDateString()}
-                      {b.fromDate !== b.toDate && ` – ${new Date(b.toDate).toLocaleDateString()}`}
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-4)' }}>
+                      <Icon name="calendar" size={14} style={INLINE_ICON_STYLE} /> {formatDate(b.fromDate, 'medium', locale)}
+                      {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
                     </p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => respond(b.id, 'CONFIRMED')}
-                        disabled={actingOn === b.id}
-                        style={{ fontSize: '13px', fontWeight: 600, color: '#F7F3EE', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 18px', cursor: 'pointer', opacity: actingOn === b.id ? 0.6 : 1 }}
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => respond(b.id, 'CANCELLED')}
-                        disabled={actingOn === b.id}
-                        style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '8px 18px', cursor: 'pointer', opacity: actingOn === b.id ? 0.6 : 1 }}
-                      >
-                        Reject
-                      </button>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
+                      <Button onClick={() => respond(b.id, 'CONFIRMED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
+                        <IconCheck /> {v.confirm}
+                      </Button>
+                      <Button variant="outline" onClick={() => respond(b.id, 'CANCELLED')} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === b.id ? 0.6 : 1 }}>
+                        <IconX /> {v.reject}
+                      </Button>
+                      {cashOnlyFor === b.id && (
+                        <Button variant="outline" data-afa-accept-cash-only onClick={() => respond(b.id, 'CONFIRMED', true)} disabled={actingOn === b.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)' }}>
+                          {tr.venueDirectPay.acceptCashOnly}
+                        </Button>
+                      )}
                     </div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             )}
@@ -277,22 +326,28 @@ export default function VenueBookingsPage() {
           {/* Resolved */}
           {resolved.length > 0 && (
             <div>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
-                Past Requests
+              <h2 data-afa-section="past" style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+                {v.pastRequests}
               </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {resolved.map((b) => {
-                  const st = STATUS_STYLE[b.status] || STATUS_STYLE.PENDING
+                  const tone = STATUS_TONE[b.status] || 'gold'
                   return (
-                    <div key={b.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                    <Card key={b.id} style={{ padding: 'var(--afa-space-4) var(--afa-space-5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-10px)' }}>
                       <div>
-                        <p style={{ fontWeight: 600, fontSize: '14px', color: '#0E0C0A' }}>{b.event?.title || 'Untitled event'}</p>
-                        <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>{b.venue.name} · {b.organiser.orgName} · ₹{b.amount}</p>
+                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>{b.event?.title || v.untitledEvent}</p>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)' }}>{b.venue.name} · {b.organiser.orgName} · {formatINR(b.amount)}</p>
+                        {/* BUG-2608-091 - the booking's date (and end date if multi-day), same format as the Pending cards, so two past bookings of the same venue, organiser and amount can be told apart. */}
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2px)', marginBottom: 0 }}>
+                          <Icon name="calendar" size={14} style={INLINE_ICON_STYLE} /> {formatDate(b.fromDate, 'medium', locale)}
+                          {b.fromDate !== b.toDate && ` – ${formatDate(b.toDate, 'medium', locale)}`}
+                        </p>
                       </div>
-                      <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: st.bg, color: st.color }}>
-                        {b.status.toLowerCase()}
-                      </span>
-                    </div>
+                      <StatusPill tone={tone}>{statusLabel(b.status, v)}</StatusPill>
+                      {b.status === 'CONFIRMED' && (
+                        <MessageButton contextType="VENUE_BOOKING" contextId={b.id} label={v.messageOrganiser} />
+                      )}
+                    </Card>
                   )
                 })}
               </div>
@@ -300,6 +355,7 @@ export default function VenueBookingsPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

@@ -1,0 +1,691 @@
+// GEN-2609-075 - Admin-controlled design tokens, runtime layer (MVP).
+//
+// Deliberately no `prisma`/`next/cache` imports in this file - it's
+// imported by the admin page, a Client Component, and `next build`
+// (Turbopack) bundles whatever a Client Component imports for the
+// browser too. Pulling in `@/lib/prisma` here drags the `pg` driver
+// (Node-only: `net`/`tls`/`fs`/`dns`) into the client bundle and fails
+// the build outright - caught by an actual `next build` run, not
+// assumed. The DB-touching half (reads, unstable_cache, revalidateTag)
+// lives in design-tokens.server.ts instead, imported only from Server
+// Components and Route Handlers.
+//
+// One CSS custom property per DesignToken row. The root layout reads
+// every row (cached, tag "design-tokens") and injects them as a single
+// <style> block in <head> that overrides globals.css's :root defaults -
+// so a change made in /dashboard/admin/design-system takes effect on
+// the next page load everywhere, no deploy. If the DB is empty or the
+// read throws, the layout renders no override at all and the page
+// falls back to globals.css's own hardcoded defaults untouched.
+//
+// Font tokens (--font-display/--font-ui/--font-sans/--font-mono) are a
+// special case: those names are ALSO set directly on <body> by
+// next/font's generated classes (see layout.tsx), so overriding them
+// only at :root wouldn't win - a property declared directly on body
+// (even without !important) beats one inherited from an ancestor like
+// html. The runtime <style> below targets `body` (not just `:root`)
+// and uses !important so it wins regardless. Their curated allowlist
+// values are `var(--font-phys-*)` references to 4 always-loaded,
+// role-independent physical font aliases (also added in layout.tsx) -
+// NOT the role names themselves - specifically so reassigning one
+// role's font can't silently drift if another role gets reassigned in
+// the same save (see layout.tsx's own comment on --font-phys-*).
+//
+// Token values are user-controlled (admin-authored, DB-stored) and get
+// concatenated directly into a server-rendered <style> tag on every
+// public page load - a real CSS/markup-injection surface, not just a
+// data-integrity one. isValidTokenValue() is the one gate everything
+// must pass through before it's ever written, and it's deliberately an
+// allowlist (exact shape per `type`), not a denylist.
+
+export const DESIGN_TOKEN_CACHE_TAG = "design-tokens"
+
+export type TokenGroup = "color" | "font" | "size" | "spacing" | "radius" | "button"
+export type TokenType = "color" | "dimension" | "dimension-shorthand" | "font-family"
+
+export type DesignTokenDTO = {
+  key: string
+  value: string
+  group: TokenGroup
+  type: TokenType
+  locked: boolean
+  updatedBy: string | null
+  updatedAt: string
+}
+
+// The 5 core brand tokens - surfaces + accent + the CTA fill/text pair.
+// Editable here, but only behind a confirm dialog (client) and this
+// same check (server) - see docs/design.md's GEN-2609-075 entry for why
+// these 5 specifically. Unrelated to check-design-tokens.js's own
+// locked-palette rule, which keeps blocking raw literals in application
+// code regardless of what this table holds.
+export const LOCKED_TOKEN_KEYS = new Set<string>([
+  "--afa-surface-page",
+  "--afa-surface-raised",
+  "--afa-amber",
+  "--afa-fill-solid",
+  "--afa-on-fill-solid",
+])
+
+// The only allowed values for the 4 font-role tokens - each a reference
+// to one of layout.tsx's 4 stable --font-phys-* aliases. Kept as a
+// closed enum (not free text) since a bad font-family value here is one
+// of the lowest-visible-harm ways an admin typo could degrade the whole
+// site (silent fallback to a generic font, not a broken page) - but
+// still worth just not allowing outside this curated set at all.
+export const FONT_ALLOWLIST = [
+  { label: "Young Serif", value: "var(--font-phys-young-serif)" },
+  { label: "Schibsted Grotesk", value: "var(--font-phys-schibsted-grotesk)" },
+  { label: "Instrument Sans", value: "var(--font-phys-instrument-sans)" },
+  { label: "JetBrains Mono", value: "var(--font-phys-jetbrains-mono)" },
+] as const
+
+const HEX_COLOR = /^#[0-9a-fA-F]{3,4}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/
+// GEN-2609-108 - channels 0-255 with no leading zeros (the old `\d{1,3}`
+// took 999), alpha 0-1. The regex fixes the shape; parseRgb checks the
+// numeric bounds.
+const RGB_COLOR = /^rgba?\(\s*(0|[1-9]\d{0,2})\s*,\s*(0|[1-9]\d{0,2})\s*,\s*(0|[1-9]\d{0,2})\s*(?:,\s*(0|1|1\.0+|0?\.\d+)\s*)?\)$/
+const COLOR_VAR_REF = /^var\(--afa-[a-z0-9-]+\)$/
+// No leading zeros (`0100000px` was saved once on QA), no bare `.5px`,
+// no sign. A token that genuinely needs a negative value goes in
+// NEGATIVE_ALLOWED_KEYS below.
+const DIMENSION = /^0$|^(0|[1-9]\d*)(\.\d+)?(px|rem|em|%)$/
+const DIMENSION_SHORTHAND = /^(0|[1-9]\d*)(\.\d+)?px(\s+(0|[1-9]\d*)(\.\d+)?px){0,3}$/
+
+// GEN-2609-108 - no token takes a negative value today. An explicit set
+// so allowing one later is a deliberate, reviewed edit.
+export const NEGATIVE_ALLOWED_KEYS = new Set<string>()
+
+// GEN-2609-108 - value ranges, px only. Every QA DB value sat inside
+// these on 26 Sep, so none of them rejects a value that is live today.
+// Lookup: exact key first (KEY_RANGES), then the key's group.
+export type TokenRange = { min: number; max: number }
+
+export const GROUP_RANGES = {
+  radius: { min: 0, max: 40 },
+  size: { min: 10, max: 72 },
+  spacing: { min: 0, max: 64 },
+  button: { min: 0, max: 64 },
+} satisfies Record<string, TokenRange>
+
+export const KEY_RANGES: Record<string, TokenRange> = {
+  // Below ~100px a tall pill starts showing flat sides.
+  "--afa-radius-pill": { min: 100, max: 9999 },
+  // GEN-2609-115 - caption (10px badge micro-labels) is a small-text
+  // role, not a heading: its own range, below micro's floor.
+  "--afa-text-caption": { min: 9, max: 16 },
+  // Running-text roles (micro is the label size).
+  "--afa-text-micro": { min: 11, max: 24 },
+  "--afa-text-small": { min: 11, max: 24 },
+  "--afa-text-ui": { min: 11, max: 24 },
+  "--afa-text-body": { min: 11, max: 24 },
+  "--afa-text-body-lg": { min: 11, max: 24 },
+  // GEN-2609-107 phase 2 - the one spacing token whose default sits
+  // above the group's 64px cap (page-level section padding).
+  "--afa-space-80px": { min: 0, max: 120 },
+}
+
+// The radius scale must stay ordered. The pill is not part of it.
+export const RADIUS_ORDER = [
+  "--afa-radius-sharp",
+  "--afa-radius-xs",
+  "--afa-radius-sm",
+  "--afa-radius-md",
+  "--afa-radius-lg",
+  "--afa-radius-xl",
+  "--afa-radius-2xl",
+] as const
+
+// Group from the key's prefix, so validation needs only the key.
+// `--afa-text-*` colour tokens never reach the range check (type gate).
+export function rangeGroupForKey(key: string): keyof typeof GROUP_RANGES | null {
+  if (key.startsWith("--afa-radius-")) return "radius"
+  if (key.startsWith("--afa-space-")) return "spacing"
+  if (key.startsWith("--afa-btn-padding-")) return "button"
+  if (key.startsWith("--afa-text-")) return "size"
+  return null
+}
+
+export function rangeFor(key: string): TokenRange | null {
+  if (KEY_RANGES[key]) return KEY_RANGES[key]
+  const g = rangeGroupForKey(key)
+  return g ? GROUP_RANGES[g] : null
+}
+
+export function parsePx(part: string): number | null {
+  if (part === "0") return 0
+  const m = part.match(/^(-?\d+(?:\.\d+)?)px$/)
+  return m ? Number(m[1]) : null
+}
+
+// Shape only - what every stored value must satisfy before it goes near
+// the <style> tag. No key-specific rules.
+function isValidShape(type: TokenType, value: string): boolean {
+  if (typeof value !== "string" || value.length === 0 || value.length > 120) return false
+  // Belt-and-braces: none of these characters are ever legitimate inside
+  // a single CSS custom property value in this app, and every one of
+  // them is exactly what a style/markup-injection payload would need.
+  if (/[<>{};]|\/\*|\*\//.test(value)) return false
+
+  switch (type) {
+    case "color":
+      return HEX_COLOR.test(value) || parseRgb(value) !== null || COLOR_VAR_REF.test(value)
+    case "dimension":
+      return DIMENSION.test(value)
+    case "dimension-shorthand":
+      return DIMENSION_SHORTHAND.test(value)
+    case "font-family":
+      return FONT_ALLOWLIST.some((f) => f.value === value)
+    default:
+      return false
+  }
+}
+
+// Why a value can't be saved for this key, or null if it can. Shared by
+// the API (authoritative) and the editor (inline errors) so the two
+// can't disagree.
+export function tokenValueError(key: string, type: TokenType, value: string): string | null {
+  const isDim = type === "dimension" || type === "dimension-shorthand"
+  const negativeAllowed = isDim && NEGATIVE_ALLOWED_KEYS.has(key)
+  const shapeValue = negativeAllowed ? value.replace(/(^|\s)-/g, "$1") : value
+  if (!isValidShape(type, shapeValue)) {
+    if (isDim && /(^|\s)-/.test(value)) return "Negative values are not allowed."
+    if (isDim && /(^|\s)0\d/.test(value)) return "Remove the leading zero."
+    if (isDim) return "Use a px value, e.g. 12px."
+    if (type === "color") return "Use #hex, or rgba(r, g, b, a) with channels 0–255 and alpha 0–1."
+    return "Not an allowed value."
+  }
+  if (!isDim) return null
+  const range = rangeFor(key)
+  if (!range) return null
+  for (const part of value.trim().split(/\s+/)) {
+    const px = parsePx(part)
+    if (px === null) return "Use px for this token."
+    if (px < range.min || px > range.max) return `Must be between ${range.min}px and ${range.max}px.`
+  }
+  return null
+}
+
+// Pass `key` wherever it's known (every write path does). Without it
+// only the shape is checked: that's buildDesignTokenCss's defence-in-
+// depth pass, which must not drop a stored value just because a range
+// was tightened after it was saved.
+export function isValidTokenValue(type: TokenType, value: string, key?: string): boolean {
+  if (key === undefined) return isValidShape(type, value)
+  return tokenValueError(key, type, value) === null
+}
+
+// GEN-2609-108 - checks the full resulting value set (saved values with
+// edits applied) and names the neighbour each out-of-order radius
+// crosses. Only pairs touching `changed` are reported, so a scale that's
+// already out of order in the DB doesn't block an unrelated save.
+// GEN-2609-108 / BUG-2609-061 - what restoring a version would really
+// do, computed the same way by the confirm dialog and the API:
+// - changes: snapshot values that differ from live and still pass
+//   today's rules (the note's count is changes.length);
+// - skipped: snapshot values today's rules reject (older versions on QA
+//   hold `0px` pills and `200px` md radii), left as they are;
+// - newerKeys: live tokens the snapshot predates, left as they are.
+// Snapshot keys that no longer exist as tokens are ignored.
+export type RestorePlan = {
+  changes: { key: string; from: string; to: string }[]
+  skipped: { key: string; value: string; reason: string }[]
+  newerKeys: string[]
+  after: Record<string, string>
+}
+
+export function planRestore(snapshot: Record<string, unknown>, live: { key: string; value: string; type: TokenType }[]): RestorePlan {
+  const changes: RestorePlan["changes"] = []
+  const skipped: RestorePlan["skipped"] = []
+  const newerKeys: string[] = []
+  const after: Record<string, string> = Object.fromEntries(live.map((t) => [t.key, t.value]))
+  for (const t of live) {
+    if (!(t.key in snapshot)) {
+      newerKeys.push(t.key)
+      continue
+    }
+    const to = snapshot[t.key]
+    if (typeof to !== "string") {
+      skipped.push({ key: t.key, value: String(to), reason: "Not a string." })
+      continue
+    }
+    if (to === t.value) continue
+    const reason = tokenValueError(t.key, t.type, to)
+    if (reason) {
+      skipped.push({ key: t.key, value: to, reason })
+      continue
+    }
+    changes.push({ key: t.key, from: t.value, to })
+    after[t.key] = to
+  }
+  return { changes, skipped, newerKeys, after }
+}
+
+export function restoreNote(versionId: string, changed: number): string {
+  return `Restored version ${versionId} (${changed} token(s) changed)`
+}
+
+// GEN-2609-115 - a version row with no token changes: a restore point
+// recorded after the DB was changed outside the editor (SQL applied
+// after a merge). The reason is required, one line, at most 200 chars.
+export const SNAPSHOT_REASON_MAX = 200
+
+export function snapshotNote(reason: unknown): string | null {
+  if (typeof reason !== "string") return null
+  const r = reason.replace(/\s+/g, " ").trim()
+  if (r.length === 0 || r.length > SNAPSHOT_REASON_MAX) return null
+  return `Snapshot: ${r}`
+}
+
+export function radiusOrderErrors(values: Record<string, string>, changed?: Iterable<string>): { key: string; message: string }[] {
+  const changedSet = changed ? new Set(changed) : null
+  const errors: { key: string; message: string }[] = []
+  for (let i = 0; i < RADIUS_ORDER.length - 1; i++) {
+    const lo = RADIUS_ORDER[i]
+    const hi = RADIUS_ORDER[i + 1]
+    const a = values[lo] !== undefined ? parsePx(values[lo]) : null
+    const b = values[hi] !== undefined ? parsePx(values[hi]) : null
+    if (a === null || b === null || a <= b) continue
+    if (changedSet && !changedSet.has(lo) && !changedSet.has(hi)) continue
+    // Blame whichever side moved; if both did, the lower one.
+    if (!changedSet || changedSet.has(lo)) {
+      errors.push({ key: lo, message: `Can't be larger than ${hi} (${values[hi]}).` })
+    } else {
+      errors.push({ key: hi, message: `Can't be smaller than ${lo} (${values[lo]}).` })
+    }
+  }
+  return errors
+}
+
+export function isTokenGroup(v: string): v is TokenGroup {
+  return v === "color" || v === "font" || v === "size" || v === "spacing" || v === "radius" || v === "button"
+}
+export function isTokenType(v: string): v is TokenType {
+  return v === "color" || v === "dimension" || v === "dimension-shorthand" || v === "font-family"
+}
+
+export function toDTO(row: { key: string; value: string; group: string; type: string; locked: boolean; updatedBy: string | null; updatedAt: Date }): DesignTokenDTO | null {
+  if (!isTokenGroup(row.group) || !isTokenType(row.type)) return null
+  return {
+    key: row.key,
+    value: row.value,
+    group: row.group,
+    type: row.type,
+    locked: row.locked,
+    updatedBy: row.updatedBy,
+    updatedAt: row.updatedAt.toISOString(),
+  }
+}
+
+// Builds the <style> body injected in <head>. Font-role tokens target
+// `body` (see the file header comment above for why); everything else
+// targets `:root`. Both use !important for one consistent reason to
+// reason about: next/font's own generated stylesheet order relative to
+// this inline tag isn't a documented contract, so relying on plain
+// source-order cascade for the non-font tokens would be fragile too.
+export function buildDesignTokenCss(tokens: DesignTokenDTO[]): string {
+  if (tokens.length === 0) return ""
+  const rootDecls: string[] = []
+  const bodyDecls: string[] = []
+  for (const t of tokens) {
+    if (!isValidTokenValue(t.type, t.value)) continue // defense in depth - should never trip if writes are validated
+    const decl = `${t.key}: ${t.value} !important;`
+    if (t.group === "font") bodyDecls.push(decl)
+    else rootDecls.push(decl)
+  }
+  const parts: string[] = []
+  if (rootDecls.length) parts.push(`:root{${rootDecls.join("")}}`)
+  if (bodyDecls.length) parts.push(`body{${bodyDecls.join("")}}`)
+  return parts.join("")
+}
+
+// Defaults, mirrored 1:1 from src/app/globals.css (the 82 pre-existing
+// --afa-* tokens) plus the 11 new ones this ticket adds (4 --afa-radius-*,
+// 3 --afa-btn-padding-*, 4 --font-* role tokens). This is the single
+// source of truth "reset to defaults" restores to - kept as a plain
+// object (not re-read from globals.css at runtime) so a reset works
+// even if globals.css itself has since drifted, and so there's one
+// place, not two, to keep in sync with the seed migration.
+export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
+  "--afa-amber": "#C9973A",
+  "--afa-blue": "#4A6FA5",
+  "--afa-blue-dark": "#2E5C8A",
+  "--afa-brown-black": "#1A1000",
+  "--afa-brown-dark": "#4A2E1A",
+  "--afa-brown-gold": "#8A5A1E",
+  "--afa-cream": "#F7F3EE",
+  "--afa-error": "#B3261E",
+  "--afa-forest": "#2F4A28",
+  "--afa-gold": "#8A6A1F",
+  "--afa-gray-taupe": "#8A877E",
+  "--afa-green-black": "#001A10",
+  "--afa-green-bright": "#2F7D4A",
+  "--afa-green-dark": "#276749",
+  "--afa-green-deep": "#166534",
+  "--afa-green-mid": "#2D6A4F",
+  "--afa-indigo-black": "#0A001A",
+  "--afa-ink": "#0E0C0A",
+  "--afa-maroon-black": "#1A0500",
+  "--afa-mint-tint": "#EAF3E7",
+  "--afa-orange-dark": "#C2410C",
+  "--afa-peach": "#F5A26E",
+  "--afa-plum": "#7A4A8A",
+  "--afa-plum-black": "#1A0A1A",
+  "--afa-sage": "#4A6741",
+  "--afa-social-blue": "#1D9BF0",
+  "--afa-taupe": "#8A827A",
+  "--afa-white": "#FFF",
+  "--afa-brand-mark": "#C8441A",
+  "--afa-surface-page": "#141414",
+  "--afa-surface-raised": "#1F1F1F",
+  "--afa-surface-inverse": "#0A0A0A",
+  "--afa-text-primary": "#F5F5F0",
+  "--afa-text-secondary": "rgba(245, 245, 240, 0.65)",
+  "--afa-text-muted": "rgba(245, 245, 240, 0.5)",
+  "--afa-text-soft": "rgba(245, 245, 240, 0.8)",
+  "--afa-text-on-image": "rgba(255, 255, 255, 0.5)",
+  "--afa-fill-solid": "#FF5A36",
+  "--afa-border-resting": "rgba(245, 245, 240, 0.15)",
+  "--afa-tint-08": "rgba(245, 245, 240, 0.08)",
+  "--afa-tint-10": "rgba(245, 245, 240, 0.1)",
+  "--afa-tint-04": "rgba(245, 245, 240, 0.04)",
+  "--afa-tint-06": "rgba(245, 245, 240, 0.06)",
+  "--afa-tint-12": "rgba(245, 245, 240, 0.12)",
+  "--afa-tint-20": "rgba(245, 245, 240, 0.2)",
+  "--afa-tint-30": "rgba(245, 245, 240, 0.3)",
+  "--afa-amber-wash": "rgba(201, 151, 58, 0.08)",
+  "--afa-amber-tint": "rgba(201, 151, 58, 0.15)",
+  "--afa-amber-border": "rgba(201, 151, 58, 0.4)",
+  "--afa-amber-strong": "rgba(201, 151, 58, 0.6)",
+  "--afa-selected": "var(--afa-amber)",
+  "--afa-selected-bg": "rgba(201, 151, 58, 0.08)",
+  "--afa-selected-border": "rgba(201, 151, 58, 0.4)",
+  "--afa-error-tint": "rgba(179, 38, 30, 0.1)",
+  "--afa-error-edge": "rgba(179, 38, 30, 0.3)",
+  "--afa-sage-tint": "rgba(74, 103, 65, 0.12)",
+  "--afa-success-tint": "rgba(39, 103, 73, 0.15)",
+  "--afa-fill-tint": "rgba(255, 90, 54, 0.2)",
+  "--afa-blue-tint": "rgba(74, 111, 165, 0.15)",
+  "--afa-shadow": "rgba(0, 0, 0, 0.3)",
+  "--afa-scrim": "rgba(10, 10, 10, 0.7)",
+  "--afa-scrim-strong": "rgba(10, 10, 10, 0.9)",
+  "--afa-on-fill-solid": "var(--afa-brown-black)",
+  "--afa-sage-bright": "#7AA86E",
+  "--afa-error-bright": "#E67870",
+  "--afa-text-micro": "11px",
+  "--afa-text-small": "12px",
+  "--afa-text-ui": "13px",
+  "--afa-text-body": "14px",
+  "--afa-text-title": "16px",
+  "--afa-text-subheading": "22px",
+  "--afa-text-heading": "24px",
+  "--afa-text-display": "26px",
+  "--afa-text-page-title": "28px",
+  "--afa-text-page-title-lg": "32px",
+  "--afa-space-1": "4px",
+  "--afa-space-2": "8px",
+  "--afa-space-3": "12px",
+  "--afa-space-4": "16px",
+  "--afa-space-5": "20px",
+  "--afa-space-6": "24px",
+  "--afa-radius-sharp": "0px",
+  "--afa-radius-sm": "6px",
+  "--afa-radius-md": "8px",
+  "--afa-radius-pill": "999px",
+  "--afa-radius-xs": "3px",
+  "--afa-radius-lg": "12px",
+  "--afa-radius-xl": "16px",
+  "--afa-radius-2xl": "20px",
+  "--afa-btn-padding-sm": "4px 10px",
+  "--afa-btn-padding-md": "9px 17px",
+  "--afa-btn-padding-lg": "12px 24px",
+  "--afa-btn-padding-pill-sm": "6px 14px",
+  "--afa-btn-padding-pill-md": "10px 18px",
+  "--afa-space-2px": "2px",
+  "--afa-space-6px": "6px",
+  "--afa-space-10px": "10px",
+  "--afa-space-14px": "14px",
+  "--afa-space-18px": "18px",
+  "--afa-space-28px": "28px",
+  "--afa-space-32px": "32px",
+  "--afa-space-48px": "48px",
+  "--afa-space-36px": "36px",
+  "--afa-space-40px": "40px",
+  "--afa-space-56px": "56px",
+  "--afa-space-64px": "64px",
+  "--afa-space-80px": "80px",
+  "--afa-text-caption": "10px",
+  "--afa-text-body-lg": "15px",
+  "--afa-text-lead": "18px",
+  "--afa-text-subtitle": "20px",
+  "--font-display": "var(--font-phys-young-serif)",
+  "--font-ui": "var(--font-phys-schibsted-grotesk)",
+  "--font-sans": "var(--font-phys-instrument-sans)",
+  "--font-mono": "var(--font-phys-jetbrains-mono)",
+}
+
+// WCAG 2.x relative luminance / contrast ratio - no shared helper
+// existed anywhere in the repo (every prior contrast check documented
+// in HANDOFF.md was done by hand, ad hoc, per session). Only handles
+// #hex and rgb()/rgba() - the two shapes every color token in this
+// table actually uses (see isValidTokenValue above) - a `var()`
+// reference (only --afa-on-fill-solid) is resolved by the caller before
+// this runs.
+function srgbToLinear(c: number): number {
+  const cs = c / 255
+  return cs <= 0.03928 ? cs / 12.92 : Math.pow((cs + 0.055) / 1.055, 2.4)
+}
+
+export function parseCssColor(value: string): [number, number, number, number] | null {
+  const hex = value.match(/^#([0-9a-fA-F]{3,8})$/)
+  if (hex) {
+    let h = hex[1]
+    if (h.length === 3 || h.length === 4) h = h.split("").map((c) => c + c).join("")
+    if (h.length !== 6 && h.length !== 8) return null
+    const r = parseInt(h.slice(0, 2), 16)
+    const g = parseInt(h.slice(2, 4), 16)
+    const b = parseInt(h.slice(4, 6), 16)
+    const a = h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1
+    return [r, g, b, a]
+  }
+  return parseRgb(value)
+}
+
+// GEN-2609-108 - the editor's alpha slider writes values back in the
+// same spaced form the DB and globals.css use: rgba(245, 245, 240, 0.5).
+// Alpha is rounded to 2 places (the slider's step) with trailing zeros
+// dropped, so 0.50 -> 0.5 and 1.00 -> 1.
+export function formatAlpha(a: number): string {
+  return String(Math.round(Math.min(Math.max(a, 0), 1) * 100) / 100)
+}
+
+export function composeRgba(r: number, g: number, b: number, a: number): string {
+  return `rgba(${r}, ${g}, ${b}, ${formatAlpha(a)})`
+}
+
+export function rgbToHex([r, g, b]: [number, number, number, number]): string {
+  return "#" + [r, g, b].map((c) => Math.round(c).toString(16).padStart(2, "0")).join("").toUpperCase()
+}
+
+function parseRgb(value: string): [number, number, number, number] | null {
+  const m = value.match(RGB_COLOR)
+  if (!m) return null
+  const [r, g, b] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  if (r > 255 || g > 255 || b > 255) return null
+  const a = m[4] !== undefined ? Number(m[4]) : 1
+  if (a > 1) return null
+  return [r, g, b, a]
+}
+
+function relativeLuminance([r, g, b]: [number, number, number, number]): number {
+  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b)
+}
+
+// Alpha-aware: a translucent text color is flattened onto its
+// background before computing luminance, since that's what's actually
+// visible - several real tokens here are rgba() with alpha < 1
+// (--afa-text-secondary, --afa-text-muted, --afa-text-on-image).
+function flattenOnBackground(fg: [number, number, number, number], bg: [number, number, number, number]): [number, number, number, number] {
+  const a = fg[3]
+  return [fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a), 1]
+}
+
+// `baseValue`: what a translucent background sits on (a tint over the
+// page, say). The background is flattened onto it first, then the text
+// onto that, so the ratio is for the colours actually on screen.
+export function contrastRatio(fgValue: string, bgValue: string, baseValue?: string): number | null {
+  const fgRaw = parseCssColor(fgValue)
+  let bgRaw = parseCssColor(bgValue)
+  if (!fgRaw || !bgRaw) return null
+  if (baseValue !== undefined && bgRaw[3] < 1) {
+    const base = parseCssColor(baseValue)
+    if (!base) return null
+    bgRaw = flattenOnBackground(bgRaw, base)
+  }
+  const fg = flattenOnBackground(fgRaw, bgRaw)
+  const l1 = relativeLuminance(fg)
+  const l2 = relativeLuminance(bgRaw)
+  const lighter = Math.max(l1, l2)
+  const darker = Math.min(l1, l2)
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+// GEN-2610-001 - the light documents (ticket email, ticket PDF) keep the
+// primary fill for fills, bars and large type, but small text needs
+// 4.5:1 and the fill on cream is 2.81:1. This returns `fgValue` as-is
+// when it already passes on `bgValue`, otherwise the same hue mixed
+// towards black (light ground) or white (dark ground) just far enough to
+// pass, as #hex. Derived from the resolved token, so an admin colour edit
+// still carries through to the tint.
+export const TEXT_CONTRAST_MIN = 4.5
+export function textSafeColor(fgValue: string, bgValue: string, min = TEXT_CONTRAST_MIN): string {
+  const fgRaw = parseCssColor(fgValue)
+  const bg = parseCssColor(bgValue)
+  if (!fgRaw || !bg) return fgValue
+  if ((contrastRatio(fgValue, bgValue) ?? 0) >= min) return fgValue
+  const fg = flattenOnBackground(fgRaw, bg)
+  const towards = relativeLuminance(bg) > 0.18 ? 0 : 255
+  const mix = (t: number) => rgbToHex([0, 1, 2].map((i) => fg[i] + (towards - fg[i]) * t) as [number, number, number, number])
+  const passes = (t: number) => (contrastRatio(mix(t), bgValue) ?? 0) >= min
+  if (!passes(1)) return mix(1)
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2
+    if (passes(mid)) hi = mid
+    else lo = mid
+  }
+  return mix(hi)
+}
+
+// Resolves one level of var(--afa-x) indirection (--afa-on-fill-solid
+// and --afa-selected use it today).
+export function resolveTokenValue(values: Record<string, string>, key: string): string {
+  const raw = values[key] ?? ""
+  const ref = raw.match(/^var\((--afa-[a-z0-9-]+)\)$/)
+  return ref ? values[ref[1]] ?? raw : raw
+}
+
+// GEN-2609-119 - concrete colours for surfaces where var() can't render
+// (poster images, email HTML, the ticket PDF, the manifest, the
+// theme-color meta). `values` holds saved values by key; a key it lacks
+// falls back to DEFAULT_TOKEN_VALUES. var(--x) chains are followed to a
+// #hex / rgb() / rgba(). A chain that loops, runs past the depth limit,
+// dangles or ends in something that isn't a colour is retried on the
+// defaults alone, so one bad saved row can't blank a poster. A key no
+// table knows resolves to UNRESOLVED_COLOR.
+export const COLOR_RESOLVE_MAX_DEPTH = 8
+export const UNRESOLVED_COLOR = "#000000"
+const ANY_VAR_REF = /^var\((--[a-z0-9-]+)\)$/
+
+function followColorChain(lookup: (key: string) => string | undefined, key: string): string | null {
+  const seen = new Set<string>()
+  let current = key
+  for (let depth = 0; depth <= COLOR_RESOLVE_MAX_DEPTH; depth++) {
+    if (seen.has(current)) return null
+    seen.add(current)
+    const raw = lookup(current)?.trim()
+    if (!raw) return null
+    const ref = raw.match(ANY_VAR_REF)
+    if (!ref) return parseCssColor(raw) ? raw : null
+    current = ref[1]
+  }
+  return null
+}
+
+export function resolveColorValue(values: Record<string, string>, key: string): string {
+  return (
+    followColorChain((k) => values[k] ?? DEFAULT_TOKEN_VALUES[k], key) ??
+    followColorChain((k) => DEFAULT_TOKEN_VALUES[k], key) ??
+    UNRESOLVED_COLOR
+  )
+}
+
+// pdf-lib takes rgb(r, g, b) with each channel in 0..1 and opacity as a
+// separate draw option; this returns both from a resolved CSS colour.
+export type PdfRgb = { r: number; g: number; b: number; opacity: number }
+export function toPdfRgb(value: string): PdfRgb {
+  const [r, g, b, a] = parseCssColor(value) ?? parseCssColor(UNRESOLVED_COLOR)!
+  return { r: r / 255, g: g / 255, b: b / 255, opacity: a }
+}
+
+// GEN-2609-108 - every text/surface pair the site uses at rest. `over`
+// is the surface a translucent `bg` sits on. `large`: text that only
+// ever renders large (>= 24px, or >= 18.66px bold) - 3:1 instead of 4.5:1.
+// No pair is large-only today (headings use the same primary-text pair
+// as body copy), so the flag exists for the next one.
+export type ContrastPair = { fg: string; bg: string; over?: string; label: string; large?: boolean }
+
+export const CONTRAST_PAIRS: ContrastPair[] = [
+  { fg: "--afa-text-primary", bg: "--afa-surface-page", label: "Primary text on page" },
+  { fg: "--afa-text-secondary", bg: "--afa-surface-page", label: "Secondary text on page" },
+  { fg: "--afa-text-muted", bg: "--afa-surface-page", label: "Muted text on page" },
+  { fg: "--afa-text-primary", bg: "--afa-surface-raised", label: "Primary text on raised surface" },
+  { fg: "--afa-text-secondary", bg: "--afa-surface-raised", label: "Secondary text on raised surface" },
+  { fg: "--afa-text-muted", bg: "--afa-surface-raised", label: "Muted text on raised surface" },
+  { fg: "--afa-cream", bg: "--afa-surface-raised", label: "Cream text on raised surface" },
+  { fg: "--afa-amber", bg: "--afa-surface-page", label: "Amber accent on page" },
+  { fg: "--afa-sage-bright", bg: "--afa-sage-tint", over: "--afa-surface-page", label: "Success badge text on its tint" },
+  { fg: "--afa-error-bright", bg: "--afa-error-tint", over: "--afa-surface-page", label: "Error badge text on its tint" },
+  { fg: "--afa-amber", bg: "--afa-amber-tint", over: "--afa-surface-page", label: "Amber badge text on its tint" },
+  { fg: "--afa-selected", bg: "--afa-selected-bg", over: "--afa-surface-page", label: "Selected text on its tint (page)" },
+  { fg: "--afa-selected", bg: "--afa-selected-bg", over: "--afa-surface-raised", label: "Selected text on its tint (raised surface)" },
+  { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Primary button text on fill" },
+  { fg: "--afa-on-fill-solid", bg: "--afa-fill-solid", label: "Form-submit button text on fill" },
+  { fg: "--afa-cream", bg: "--afa-sage", label: "Success button text on sage" },
+]
+
+export function contrastMinimum(pair: ContrastPair): number {
+  return pair.large ? 3 : 4.5
+}
+
+export function pairRatio(pair: ContrastPair, values: Record<string, string>): number | null {
+  const base = pair.over ? resolveTokenValue(values, pair.over) : undefined
+  return contrastRatio(resolveTokenValue(values, pair.fg), resolveTokenValue(values, pair.bg), base)
+}
+
+export type ContrastFailure = { label: string; fg: string; bg: string; min: number; before: number | null; after: number }
+
+// A save "fails" a pair when it ends below the minimum and either
+// crossed it or made an already-failing pair worse. A pair that was
+// already under the bar and isn't touched doesn't block the save.
+export function contrastFailures(before: Record<string, string>, after: Record<string, string>): ContrastFailure[] {
+  const out: ContrastFailure[] = []
+  for (const pair of CONTRAST_PAIRS) {
+    const a = pairRatio(pair, after)
+    if (a === null) continue
+    const min = contrastMinimum(pair)
+    if (a >= min) continue
+    const b = pairRatio(pair, before)
+    if (b !== null && b < min && a >= b - 0.005) continue
+    out.push({ label: pair.label, fg: pair.fg, bg: pair.bg, min, before: b, after: a })
+  }
+  return out
+}
+
+// GEN-2609-115 - a restore gets the same contrast check as a save:
+// live values before, the restore plan's result after. Shared by the
+// restore dialog and the revert API so the two can't disagree.
+export function restoreContrastFailures(plan: RestorePlan, live: { key: string; value: string }[]): ContrastFailure[] {
+  return contrastFailures(Object.fromEntries(live.map((t) => [t.key, t.value])), plan.after)
+}

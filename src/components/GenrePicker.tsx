@@ -1,0 +1,92 @@
+'use client'
+
+import { PRESET_GENRES } from '@/lib/genres'
+import { useLocale } from '@/lib/i18n/translate'
+import Button from '@/components/ui/Button'
+
+// Same fix pattern as FacilitiesPicker (Feedback 3213952d, session 36) and
+// Dress Code/Vibe (session 36) - replaces free-text "comma separated"
+// Genre input, which directly produced garbage public-facing filter chips
+// (Feedback 3b8cb30d, confirmed live: "Standup comedy"/"Stand-up"/"standup
+// comic" as three separate chips instead of one, "Aman" - an artist's own
+// name - used as a genre, role-words like "Singer"/"Dancer"/"Poet" instead
+// of an actual genre). Bounded preset list + an "Other" free-text fallback
+// (capped length) - still outputs a plain string[] so no backend/schema
+// change is needed; Artist.genre's existing write path is untouched.
+//
+// Session 39 addition (PR #224): an "Other" value entered here shows on
+// the submitting artist's own profile immediately (this component doesn't
+// block or gate anything client-side) - but the API layer (see
+// /api/artists/me and /api/artists/apply) separately logs it as a
+// GenreRequest, so it won't appear as a public filter-chip option on
+// /artists until an admin approves it there.
+
+const MAX_OTHER_LENGTH = 200
+
+interface Props {
+  value: string[]
+  onChange: (genres: string[]) => void
+  // Profile page redesign (5 Sep 2026, Figma Make port) wants more generously
+  // padded pills there; defaults to the original size so every other caller
+  // (e.g. dashboard/artist/edit) renders unchanged.
+  size?: 'default' | 'lg'
+}
+
+export default function GenrePicker({ value, onChange, size = 'default' }: Props) {
+  const { t: tr } = useLocale()
+  const pillSize = size === 'lg' ? 'pill-md' : 'pill-sm'
+  const presetSelected = value.filter((v) => PRESET_GENRES.includes(v))
+  // Anything in `value` that isn't one of the presets is "Other" content -
+  // this correctly round-trips existing artists who already have free-text
+  // genre saved from before this component existed (e.g. "Aman", "Singer").
+  const otherValue = value.filter((v) => !PRESET_GENRES.includes(v)).join(', ')
+
+  const splitOther = (raw: string) =>
+    raw.split(',').map((g) => g.trim()).filter(Boolean).slice(0, 10)
+
+  const togglePreset = (genre: string) => {
+    const next = presetSelected.includes(genre)
+      ? presetSelected.filter((g) => g !== genre)
+      : [...presetSelected, genre]
+    onChange([...next, ...splitOther(otherValue)])
+  }
+
+  const handleOtherChange = (raw: string) => {
+    const clamped = raw.slice(0, MAX_OTHER_LENGTH)
+    onChange([...presetSelected, ...splitOther(clamped)])
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
+        {PRESET_GENRES.map((genre) => {
+          const selected = presetSelected.includes(genre)
+          return (
+            <Button
+              key={genre}
+              variant="toggle-pill"
+              size={pillSize}
+              fullWidth={false}
+              type="button"
+              selected={selected}
+              onClick={() => togglePreset(genre)}
+            >
+              {genre}
+            </Button>
+          )
+        })}
+      </div>
+      <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: 'var(--afa-space-6px)' }}>
+        {tr.genrePicker.otherLabel} <span style={{ fontWeight: 400, opacity: 0.7 }}>{tr.genrePicker.otherHint}</span>
+      </label>
+      <input
+        type="text"
+        value={otherValue}
+        onChange={(e) => handleOtherChange(e.target.value)}
+        maxLength={MAX_OTHER_LENGTH}
+        placeholder={tr.genrePicker.otherPlaceholder}
+        style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+      />
+    </div>
+  )
+}

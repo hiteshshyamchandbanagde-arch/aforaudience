@@ -12,24 +12,24 @@ export default function EnvBadge() {
   if (!label) return null
 
   const isQA = label.toLowerCase().includes("qa")
-  const bg = isQA ? "#C8441A" : "#E8E2D9"
-  const fg = isQA ? "#F7F3EE" : "#0E0C0A"
+  const bg = isQA ? "var(--afa-fill-solid)" : "var(--afa-tint-08)"
+  const fg = isQA ? "var(--afa-cream)" : "var(--afa-text-secondary)"
 
   return (
     <span
       aria-label={`Environment: ${label}`}
       style={{
         display: "inline-block",
-        marginLeft: "8px",
-        padding: "2px 8px",
-        fontSize: "11px",
+        marginLeft: "var(--afa-space-2)",
+        padding: "var(--afa-space-2px) var(--afa-space-2)",
+        fontSize: "var(--afa-text-micro)",
         fontWeight: 600,
         letterSpacing: "0.02em",
         color: fg,
         background: bg,
-        borderRadius: "999px",
+        borderRadius: "var(--afa-radius-pill)",
         verticalAlign: "middle",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-sans)",
       }}
     >
       {label}

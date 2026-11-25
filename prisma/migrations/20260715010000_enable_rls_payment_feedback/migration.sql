@@ -1,0 +1,34 @@
+-- Enable Row Level Security on Payment and Feedback.
+--
+-- Why: Supabase's security advisor flagged both tables as RLS-disabled,
+-- which means anyone holding the anon key can construct a Supabase
+-- client and read/modify every row (payment records including Razorpay
+-- IDs and amounts; feedback submissions including guest bug reports
+-- and attached screenshots).
+--
+-- Why "no policies" is the right shape here:
+-- The application does NOT use @supabase/supabase-js anywhere. All
+-- reads and writes go through Prisma against DATABASE_URL, which is
+-- the Supabase Session Pooler connecting as the `postgres` role.
+-- That role has BYPASSRLS, so enabling RLS has ZERO effect on the app.
+-- What it DOES do: kills any anon/authenticated JWT read path against
+-- these tables. Since nothing today needs that path, the least-privilege
+-- default is "no rows to anyone but the bypass role".
+--
+-- FORCE ROW LEVEL SECURITY is intentionally NOT added: FORCE would
+-- also subject the table owner (postgres) to RLS, breaking Prisma.
+-- Regular ENABLE respects BYPASSRLS on postgres, which is what we want.
+--
+-- If any future feature needs client-side reads (e.g. an audience-side
+-- "your payment history" page hitting Supabase directly), a targeted
+-- CREATE POLICY should be added in that PR - scoped to the specific
+-- authenticated user and specific columns - not by loosening this
+-- default.
+--
+-- The advisor's warning ("enabling RLS without policies will block all
+-- access") is addressed by the analysis above: it blocks anon/auth
+-- access, which is exactly the goal, and Prisma keeps working because
+-- postgres bypasses RLS.
+
+ALTER TABLE "Payment"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Feedback" ENABLE ROW LEVEL SECURITY;

@@ -1,7 +1,10 @@
 "use client"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import Button from "@/components/ui/Button"
+import Input from "@/components/ui/Input"
+import { useModalSheet } from "@/lib/use-modal-sheet"
 
 type AuthPromptSheetProps = {
   open: boolean
@@ -31,9 +34,11 @@ export default function AuthPromptSheet({
   subtitle,
   onSuccess,
 }: AuthPromptSheetProps) {
-  const [form, setForm] = useState({ email: "", password: "" })
+  const [form, setForm] = useState({ identifier: "", password: "" })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const sheetRef = useRef<HTMLDivElement>(null)
+  useModalSheet(open, sheetRef, onClose)
 
   if (!open) return null
 
@@ -46,15 +51,17 @@ export default function AuthPromptSheet({
     setError("")
     try {
       const result = await signIn("credentials", {
-        email: form.email.trim().toLowerCase(),
+        identifier: form.identifier.trim(),
         password: form.password,
         redirect: false,
       })
       if (result?.error) {
         if (result.error === "LOCKED") {
           setError("Too many attempts. Try again in 15 minutes.")
+        } else if (result.error === "SUSPENDED") {
+          setError("Your account has been suspended. Contact support if you believe this is a mistake.")
         } else if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password")
+          setError("Invalid credentials")
         } else {
           setError("Failed to sign in. Please check your credentials.")
         }
@@ -71,8 +78,6 @@ export default function AuthPromptSheet({
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
       style={{
         position: "fixed",
         inset: 0,
@@ -85,18 +90,19 @@ export default function AuthPromptSheet({
       {/* Overlay — click to dismiss, resuming guest browsing (no forced login) */}
       <div
         onClick={onClose}
-        style={{ position: "absolute", inset: 0, background: "rgba(14,12,10,0.45)", animation: "authSheetFadeIn 0.15s ease-out" }}
+        style={{ position: "absolute", inset: 0, background: "var(--afa-scrim)", animation: "authSheetFadeIn 0.15s ease-out" }}
       />
 
       <div
+        ref={sheetRef}
         style={{
           position: "relative",
           width: "100%",
           maxWidth: "480px",
-          background: "#F7F3EE",
-          borderRadius: "20px 20px 0 0",
-          padding: "8px 24px 28px",
-          boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
+          background: "var(--afa-surface-raised)",
+          borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)",
+          padding: "var(--afa-space-2) var(--afa-space-6) var(--afa-space-28px)",
+          boxShadow: "0 -8px 40px var(--afa-shadow)",
           animation: "authSheetSlideUp 0.22s ease-out",
           maxHeight: "88vh",
           overflowY: "auto",
@@ -109,66 +115,58 @@ export default function AuthPromptSheet({
         `}</style>
 
         {/* Grab handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(14,12,10,0.15)" }} />
+        <div style={{ display: "flex", justifyContent: "center", padding: "var(--afa-space-10px) 0" }}>
+          <div style={{ width: "36px", height: "4px", borderRadius: "var(--afa-radius-xs)", background: "var(--afa-border-resting)" }} />
         </div>
 
-        <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "#0E0C0A", marginBottom: subtitle ? "4px" : 0 }}>
+        <div style={{ textAlign: "center", marginBottom: "var(--afa-space-5)" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "var(--afa-space-1)" : 0 }}>
             {title}
           </h2>
-          {subtitle && <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.55 }}>{subtitle}</div>}
+          {subtitle && <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.55 }}>{subtitle}</div>}
         </div>
 
         {error && (
-          <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", color: "#C8441A" }}>
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-10px) var(--afa-space-14px)", marginBottom: "var(--afa-space-4)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
             {error}
           </div>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-4)" }}>
           {[
-            { label: "Email", name: "email", type: "email", placeholder: "you@example.com" },
+            { label: "Email / Phone / Username / Code", name: "identifier", type: "text", placeholder: "you@example.com" },
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
           ].map((field) => (
             <div key={field.name}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+              <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                 {field.label}
               </label>
-              <input
+              <Input
                 name={field.name}
                 type={field.type}
                 placeholder={field.placeholder}
                 value={form[field.name as keyof typeof form]}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
           ))}
         </div>
 
-        <button
-          onClick={handleSignIn}
-          disabled={loading}
-          style={{ width: "100%", background: "#C8441A", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "12px" }}
-        >
+        <Button variant="primary" onClick={handleSignIn} disabled={loading} style={{ marginBottom: "var(--afa-space-3)" }}>
           {loading ? "Signing in..." : "Sign In & Continue"}
-        </button>
+        </Button>
 
-        <div style={{ textAlign: "center", fontSize: "13px", color: "#0E0C0A", opacity: 0.6, marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "var(--afa-space-1)" }}>
           New here?{" "}
-          <Link href="/register" style={{ color: "#C8441A", fontWeight: 600, textDecoration: "none" }}>
+          <Link href="/register" style={{ color: "var(--afa-amber)", fontWeight: 600, textDecoration: "none" }}>
             Create an account
           </Link>
         </div>
 
-        <button
-          onClick={onClose}
-          style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "#0E0C0A", opacity: 0.4, fontSize: "13px", padding: "10px 0 0", cursor: "pointer" }}
-        >
+        <Button variant="secondary" onClick={onClose}>
           Keep browsing
-        </button>
+        </Button>
       </div>
     </div>
   )

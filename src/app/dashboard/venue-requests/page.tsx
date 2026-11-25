@@ -2,14 +2,24 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import DirectPayBookings from '@/components/dashboard/DirectPayBookings'
+import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
+import SharedButton from '@/components/ui/Button'
+import { formatDate } from '@/lib/format-date'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { refreshBadgeCounts } from '@/lib/badge-refresh'
+import { formatINR } from '@/lib/money-display'
 
 interface Offer {
   id: string
   proposedBy: 'ORGANISER' | 'VENUE_OWNER'
   amount: number
+  comment: string | null
   createdAt: string
 }
 
@@ -24,21 +34,28 @@ interface RequestItem {
   offers: Offer[]
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f', label: 'Pending' },
-  ACCEPTED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741', label: 'Accepted' },
-  DECLINED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E', label: 'Declined' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Expired' },
+// GEN-2610-007 - the pill's label in the UI language; the stored status stays English.
+const STATUS_STYLE: Record<string, { tone: StatusPillTone; label: keyof Dictionary['organiserDashboard']['venueRequests'] }> = {
+  PENDING: { tone: 'gold', label: 'statusPending' },
+  ACCEPTED: { tone: 'sage', label: 'statusAccepted' },
+  DECLINED: { tone: 'error', label: 'statusDeclined' },
+  EXPIRED: { tone: 'muted', label: 'statusExpired' },
 }
 
 export default function VenueRequestsPage() {
+  const { locale, t: tr } = useLocale()
+  const v = tr.organiserDashboard.venueRequests
   const { data: session, status } = useSession()
   const router = useRouter()
   const [requests, setRequests] = useState<RequestItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const { showToast } = useToast()
   const [counterInputs, setCounterInputs] = useState<Record<string, string>>({})
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
   const [actingOn, setActingOn] = useState<string | null>(null)
+  // D2b - owner with no UPI ID: offer "Accept as cash only" after UPI_REQUIRED.
+  const [cashOnlyFor, setCashOnlyFor] = useState<string | null>(null)
 
   const role = (session?.user as any)?.role as string | undefined
   const callerSide: 'ORGANISER' | 'VENUE_OWNER' | null =
@@ -51,67 +68,106 @@ export default function VenueRequestsPage() {
   const load = async () => {
     try {
       const res = await fetch('/api/venue-booking-requests')
-      if (!res.ok) throw new Error('Failed to load requests')
+      if (!res.ok) throw new Error(v.loadFailed)
       setRequests(await res.json())
+      // BUG-2609-073 - the sidebar/tab-bar badge follows this list: after
+      // this user's own accept/counter/decline, and when the 20 s poll
+      // picks up the other side's.
+      refreshBadgeCounts()
     } catch (err: any) {
-      setError(err.message)
+      setLoadError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    if (session?.user) load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session])
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const act = async (reqId: string, action: 'accept' | 'decline' | 'counter') => {
+  useEffect(() => {
+    // Previously keyed off the whole `session` object, which next-auth
+    // only replaces on its own unrelated schedule (window-focus revalidation,
+    // internal polling) - not a reliable "something changed" signal. That
+    // made this list mostly sit stale until one of those unrelated events
+    // happened to fire (P0 grep, third instance). Fixed the same way as the
+    // seat-map page: key off session?.user?.id (only changes on real
+    // login/logout) plus an explicit poll, since this page is a read-only
+    // list (no local edits to clobber) and genuinely benefits from refreshing
+    // on a real timer, same pattern as the Revenue page.
+    if (!session?.user) return
+    load()
+    if (pollRef.current) clearInterval(pollRef.current)
+    pollRef.current = setInterval(load, 20000)
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [(session?.user as any)?.id])
+
+  const act = async (reqId: string, action: 'accept' | 'decline' | 'counter', cashOnly = false) => {
     setActingOn(reqId)
-    setError('')
     try {
       const res = await fetch(`/api/venue-booking-requests/${reqId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, amount: counterInputs[reqId] }),
+        body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId], ...(cashOnly ? { cashOnly: true } : {}) }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Action failed')
+      if (!res.ok) {
+        // D2b - accepting with payments off needs a UPI ID, or cash only.
+        if (data.code === 'UPI_REQUIRED') {
+          setCashOnlyFor(reqId)
+          throw new Error(tr.venueDirectPay.upiRequired)
+        }
+        throw new Error(data.error || v.actionFailed)
+      }
+      setCashOnlyFor(null)
       await load()
+      setCommentInputs((prev) => ({ ...prev, [reqId]: '' }))
+      showToast(
+        action === 'accept' ? v.accepted : action === 'decline' ? v.declined : v.countered,
+        'success'
+      )
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || v.actionFailed, 'error')
     } finally {
       setActingOn(null)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : '/dashboard/organiser'} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Dashboard
-          </Link>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
-            Venue Booking Requests
-          </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Flexible-rate venue negotiations — {callerSide === 'VENUE_OWNER' ? 'requests against your venues' : 'your outstanding requests'}.
-          </p>
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
+          <div>
+            <PageHead
+              eyebrow={v.eyebrow}
+              title={v.title}
+              description={
+                callerSide === 'VENUE_OWNER' ? v.venueOwnerSubtitle
+                  : callerSide === 'ORGANISER' ? v.organiserSubtitle
+                  : undefined
+              }
+            />
+          </div>
 
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+          {loadError && (
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
           )}
 
+          {/* D2 - accepted deals waiting on direct payment / confirmation. */}
+          {/* D2b - a multi-role user (session role not ORGANISER/VENUE_OWNER) still
+              sees their bookings: render both sides; each hides itself when empty. */}
+          {(callerSide ? [callerSide] : (['ORGANISER', 'VENUE_OWNER'] as const)).map((side) => (
+            <DirectPayBookings key={`${side}-${requests.map((r) => r.status).join()}`} side={side} />
+          ))}
+
           {requests.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: '#0E0C0A', opacity: 0.6 }}>
-              No booking requests yet.
-            </div>
+            <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption={v.empty} />
           ) : (
             requests.map((r) => {
               const lastOffer = r.offers[r.offers.length - 1]
@@ -120,91 +176,116 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <div key={r.id} style={{ background: '#fff', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                <Card key={r.id} style={{ padding: '22px var(--afa-space-6)', marginBottom: 'var(--afa-space-4)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-1)', gap: 'var(--afa-space-10px)' }}>
                     <div>
-                      <p style={{ fontSize: '16px', fontWeight: 600, color: '#0E0C0A', margin: 0 }}>
-                        {r.event?.title || 'Untitled event'}
+                      <p style={{ fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>
+                        {r.event?.title || v.untitledEvent}
                       </p>
-                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, margin: '2px 0 0' }}>
-                        {r.venue.name}, {r.venue.city} · {new Date(r.requestedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {r.durationHours}hr
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', margin: 'var(--afa-space-2px) 0 0' }}>
+                        {r.venue.name}, {r.venue.city} · {formatDate(r.requestedDate, 'medium', locale)} · {v.hours.replace('{n}', String(r.durationHours))}
                         {callerSide === 'VENUE_OWNER' && <> · {r.organiser.orgName} ({r.organiser.user.email})</>}
                       </p>
                     </div>
-                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: statusStyle.bg, color: statusStyle.color, whiteSpace: 'nowrap' }}>
-                      {statusStyle.label}
-                    </span>
+                    <StatusPill tone={statusStyle.tone}>{v[statusStyle.label]}</StatusPill>
                   </div>
 
                   {r.offers.length > 0 && (
-                    <div style={{ background: '#F7F3EE', borderRadius: '8px', padding: '10px 12px', margin: '14px 0' }}>
+                    <div style={{ background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', margin: 'var(--afa-space-4) 0' }}>
                       {r.offers.map((o) => (
-                        <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px' }}>
-                          <span style={{ color: '#0E0C0A', opacity: 0.6 }}>
-                            {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
-                          </span>
-                          <span style={{ fontWeight: 600, color: '#0E0C0A' }}>₹{o.amount.toLocaleString('en-IN')}</span>
+                        <div key={o.id} style={{ padding: 'var(--afa-space-1) 0' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)' }}>
+                            <span style={{ color: 'var(--afa-text-secondary)' }}>
+                              {o.proposedBy === callerSide ? v.youProposed : o.proposedBy === 'ORGANISER' ? v.organiserProposed : v.venueProposed}
+                            </span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--afa-amber)' }}>{formatINR(o.amount)}</span>
+                          </div>
+                          {o.comment && (
+                            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: 'var(--afa-space-2px) 0 0' }}>
+                              "{o.comment}"
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
 
                   {r.status === 'PENDING' && (
-                    <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, margin: '0 0 12px' }}>
-                      Round {roundsUsed} of 6 · expires 48hr after the last offer with no response
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 var(--afa-space-14px)' }}>
+                      {v.round.replace('{n}', String(roundsUsed)).replace('{max}', '6')}
                     </p>
                   )}
 
                   {r.status === 'PENDING' && canRespond && (
                     <div>
-                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
                         <input
                           type="number"
-                          placeholder={lastOffer ? `Counter ₹${lastOffer.amount}` : 'Propose an amount (₹)'}
+                          placeholder={lastOffer ? v.counterPlaceholder.replace('{amount}', formatINR(lastOffer.amount)) : v.proposePlaceholder}
                           value={counterInputs[r.id] || ''}
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                          style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                          min="1"
+                          max="10000000"
+                          className="avp-field"
+                          style={{ flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
                         />
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ marginBottom: 'var(--afa-space-3)' }}>
+                        <input
+                          type="text"
+                          placeholder={v.notePlaceholder}
+                          value={commentInputs[r.id] || ''}
+                          onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
+                          maxLength={300}
+                          className="avp-field"
+                          style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                         {lastOffer && (
-                          <button
-                            onClick={() => act(r.id, 'accept')}
-                            disabled={actingOn === r.id}
-                            style={{ fontSize: '13px', fontWeight: 600, color: '#fff', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
-                          >
-                            Accept ₹{lastOffer.amount.toLocaleString('en-IN')}
-                          </button>
+                          <Button onClick={() => act(r.id, 'accept')} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id ? 0.6 : 1 }}>
+                            <IconCheck /> {v.accept.replace('{amount}', formatINR(lastOffer.amount))}
+                          </Button>
                         )}
-                        <button
+                        <Button
+                          variant="outline"
                           onClick={() => act(r.id, 'counter')}
                           disabled={actingOn === r.id || roundsUsed >= 6}
-                          style={{ fontSize: '13px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
+                          style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
                         >
-                          {lastOffer ? 'Counter' : 'Send quote'}
-                        </button>
-                        <button
+                          {lastOffer ? v.counter : v.sendQuote}
+                        </Button>
+                        <SharedButton
+                          variant="outline-error"
+                          size="lg"
+                          fullWidth={false}
                           onClick={() => act(r.id, 'decline')}
                           disabled={actingOn === r.id}
-                          style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
+                          style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)' }}
                         >
-                          Decline
-                        </button>
+                          {v.decline}
+                        </SharedButton>
+                        {cashOnlyFor === r.id && (
+                          <Button variant="outline" data-afa-accept-cash-only onClick={() => act(r.id, 'accept', true)} disabled={actingOn === r.id} style={{ padding: 'var(--afa-space-2) var(--afa-space-4)', fontSize: 'var(--afa-text-ui)' }}>
+                            {tr.venueDirectPay.acceptCashOnly}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}
 
                   {r.status === 'PENDING' && !canRespond && (
-                    <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.5, fontStyle: 'italic' }}>
-                      Waiting on the other side to respond.
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: 0 }}>
+                      {v.waiting}
                     </p>
                   )}
-                </div>
+                </Card>
               )
             })
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

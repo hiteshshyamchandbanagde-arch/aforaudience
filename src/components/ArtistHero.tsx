@@ -1,0 +1,55 @@
+"use client"
+
+import Link from "next/link"
+import PhotoCrossfadeBackdrop from "@/components/PhotoCrossfadeBackdrop"
+import PhotoRotationDots from "@/components/PhotoRotationDots"
+import { usePhotoRotation } from "@/hooks/usePhotoRotation"
+import { useLocale } from "@/lib/i18n/translate"
+
+/**
+ * Hero for the Artist landing page ("The Stage", GEN-2608-072) - same
+ * full-bleed crossfading-photo treatment as the homepage Hero, reusing
+ * usePhotoRotation/PhotoCrossfadeBackdrop/PhotoRotationDots rather than
+ * re-implementing the rotation/fade mechanics. Copy reuses the Four
+ * Rooms name/promise/CTA already shipped in en.ts rather than inventing
+ * new voice for this page.
+ */
+export default function ArtistHero() {
+  const { t: tr } = useLocale()
+  const { photos, active, setActive, paused, setPaused, reduced } = usePhotoRotation()
+
+  return (
+    <section
+      style={{ position: "relative", minHeight: "100svh", width: "100%", overflow: "hidden", background: "var(--afa-surface-inverse)" }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      <PhotoCrossfadeBackdrop photos={photos} active={active} />
+
+      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "100svh", padding: "128px var(--afa-space-6) 72px" }}>{/* token-ok(spacing-literal): 72px/128px used under 10 times, no exact token (GEN-2609-107) */}
+        <div style={{ maxWidth: "760px" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-6)" }}>
+            {tr.homePage.fourRoomsStageName}
+          </div>
+
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4.4vw, 54px)", fontWeight: 500, lineHeight: 1.18, letterSpacing: "-0.01em", color: "var(--afa-text-primary)", margin: 0 }}>
+            {tr.homePage.fourRoomsStagePromise}
+          </h1>
+
+          <div style={{ marginTop: "34px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>{/* token-ok(spacing-literal): 34px used under 10 times, no exact token (GEN-2609-107) */}
+            <Link href="/register?role=artist" style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-14px) var(--afa-space-28px)", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}>
+              {tr.homePage.fourRoomsStageCta}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+
+        <PhotoRotationDots photos={photos} active={active} setActive={setActive} paused={paused} reduced={reduced} />
+      </div>
+    </section>
+  )
+}

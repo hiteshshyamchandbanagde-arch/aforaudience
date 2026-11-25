@@ -2,49 +2,399 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
+import QRCode from 'qrcode'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import MessageButton from '@/components/MessageButton'
+import { ErrorBanner } from '@/components/ErrorBanner'
+import { EventPoster } from '@/components/EventCard'
+import { CalendarIcon, PinIcon, ClockIcon, CheckIcon, BanIcon, RefundIcon, DownloadIcon, MessageIcon, TicketIcon } from '@/components/icons/EventIcons'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { STATUS_TONE, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
+import StubRow from '@/components/ui/StubRow'
+import { formatDate } from '@/lib/format-date'
+import { useConfirm } from '@/components/ConfirmDialog'
+import { computeRefund, eventStartInstant as refundStartInstant, type RefundPreview } from '@/lib/refund-policy'
+import { splitUnfinishedCheckouts } from '@/lib/unfinished-checkout'
+import { readOfflineTickets, saveOfflineTickets, type OfflineTicket, type OfflineTicketsSnapshot } from '@/lib/offline-tickets'
+import { lastSignedInUserId, requestOfflineShell } from '@/lib/sw-cache'
+
+// BUG-2610-012 - a confirmed ticket's actions (Download PDF / Message
+// Organiser / Cancel ticket): full-width buttons stacked under the QR,
+// each label on one line. minHeight is the 44px tap target, built from
+// the space scale.
+const ACTION_STYLE: React.CSSProperties = {
+  whiteSpace: 'nowrap',
+  minHeight: 'calc(var(--afa-space-40px) + var(--afa-space-1))',
+}
+
+// Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
+// than the Figma mock's decorative QrIcon glyph. Encodes the raw
+// booking ID, same convention as the PDF ticket's QR (src/lib/ticket-
+// pdf.ts) - "not signed, not tokenized... a check-in scanner can trust
+// it as-is" per that file's own comment, so this is the exact value a
+// future scanner will expect, not a lookalike placeholder that would
+// fail if someone actually tried to scan a phone screen at a door.
+function TicketQr({ value, size = 64 }: { value: string; size?: number }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    QRCode.toDataURL(value, { margin: 0, width: size * 2 }).then((url) => {
+      if (!cancelled) setDataUrl(url)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [value, size])
+  if (!dataUrl) return <div style={{ width: size, height: size, background: 'var(--afa-tint-08)', borderRadius: 'var(--afa-radius-sm)' }} />
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 'var(--afa-radius-xs)' }} />
+}
+
+// Companion Tagging Phase 1 (reputation epic §7) - tags where the
+// logged-in user is the one being tagged, awaiting their response.
+interface PendingCompanionTag {
+  id: string
+  taggedBy: { id: string; name: string; displayName: string | null }
+  booking: { id: string; event: { id: string; title: string; date: string; startTime: string } }
+}
+
+// BUG-2608-033 - same shape as PendingCompanionTag plus venue, for the
+// "you're going as a guest" ticket-like cards below. A confirmed
+// companion never has a Booking of their own, so this is intentionally
+// not a BookingItem - no seats/price/PDF, just enough to show they're
+// going.
+interface AcceptedCompanionTag {
+  id: string
+  taggedBy: { id: string; name: string; displayName: string | null }
+  booking: {
+    id: string
+    event: {
+      id: string
+      title: string
+      date: string
+      startTime: string
+      venue: { name: string; city: string } | null
+    }
+  }
+}
 
 interface BookingItem {
   id: string
   seats: Record<string, number>
+  seatLabels?: string[]
+  tierNames?: string[]
   totalAmount: number
+  bookingFeeAmount: number
   status: string
+  expiresAt: string | null
   createdAt: string
+  cancelledAt: string | null
+  refundAmount: number | null
+  // FEAT-2608-006 - already returned by /api/bookings/my (Booking is a
+  // full-scalar `include`, not a `select`), just never surfaced in the
+  // UI before. Used to split the Past section into attended/missed.
+  checkedInAt: string | null
+  // D1 - pay at entry + attendance (scalars from /api/bookings/my).
+  paymentMethod?: string
+  attendance?: string
+  // Mobile Redesign Phase 4a (GEN-2609-006) - same story as checkedInAt
+  // above: /api/bookings/my's `include` already returns this scalar,
+  // it just had no client-side field to land in before this restyle's
+  // ticket-code caption needed it. No API or schema change.
+  ticketCode: string | null
+  // Session 65 (Hitesh feedback) - who's tagged on this booking + their
+  // response status, same PENDING/ACCEPTED/DECLINED shape as checkout.
+  companionTags: {
+    id: string
+    status: 'PENDING' | 'ACCEPTED' | 'DECLINED'
+    taggedUser: { id: string; name: string; displayName: string | null }
+  }[]
   event: {
     id: string
     title: string
     date: string
     startTime: string
+    // Mobile Redesign Phase 4a (GEN-2609-006) - both already present in
+    // /api/bookings/my's response (event is a full-scalar `include`),
+    // just newly typed/surfaced here for the restyled poster header.
+    type: string
+    posterImage: string | null
     venue: { name: string; city: string } | null
   }
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f', label: 'Reserved — payment pending' },
-  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741', label: 'Confirmed' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E', label: 'Cancelled' },
-  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Refunded' },
+// BUG-2609-086 - the Cancel button's tooltip. Same helper as the refund
+// API (src/lib/refund-policy.ts); the cancel sheet itself shows the
+// server's own numbers (GET /api/bookings/[id] refundPreview).
+//
+// Feedback (31 Jul, Hitesh device test) - a past event says so, rather
+// than "No refund - less than 7 days out" (and see isPastEvent below,
+// which hides the button entirely for this case).
+function previewRefund(b: BookingItem, tr: Dictionary): { amount: number; label: string } {
+  const p = computeRefund(b, refundStartInstant(b.event.date, b.event.startTime), new Date())
+  const amount = p.refund.toLocaleString('en-IN')
+  switch (p.tier) {
+    case 'past': return { amount: 0, label: tr.ticketsPage.refundEventHappened }
+    case 'free': return { amount: 0, label: tr.ticketsPage.refundFreeTicket }
+    case '14plus': return { amount: p.refund, label: tr.ticketsPage.refund14PlusTemplate.replace('{amount}', amount) }
+    case '50pct': return { amount: p.refund, label: tr.ticketsPage.refund50PercentTemplate.replace('{amount}', amount) }
+    default: return { amount: 0, label: tr.ticketsPage.refundLessThan7Days }
+  }
+}
+
+const RULE_KEY = { '14plus': 'cancelSheetRule14Plus', '50pct': 'cancelSheetRule50', under7: 'cancelSheetRuleUnder7' } as const
+
+// The cancel sheet's body: paid, refund (with its rule) and, when the tier
+// keeps it, the booking fee - three separate lines.
+function RefundLines({ p, tr }: { p: RefundPreview; tr: Dictionary }) {
+  const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`
+  const rule = p.tier in RULE_KEY ? tr.ticketsPage[RULE_KEY[p.tier as keyof typeof RULE_KEY]] : null
+  const row: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid var(--afa-border-resting)' }
+  return (
+    <div data-afa-refund-lines>
+      <div style={row} data-afa-refund-line="paid">
+        <span>{tr.ticketsPage.cancelSheetPaidLabel}</span>
+        <span style={{ color: 'var(--afa-text-primary)', fontWeight: 600 }}>{p.paid > 0 ? rupees(p.paid) : tr.eventDetailPage.freeAmount}</span>
+      </div>
+      <div style={row} data-afa-refund-line="refund">
+        <span>
+          {tr.ticketsPage.cancelSheetRefundLabel}
+          {rule && <span style={{ display: 'block', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>{rule}</span>}
+        </span>
+        <span style={{ color: 'var(--afa-text-primary)', fontWeight: 600 }}>{rupees(p.refund)}</span>
+      </div>
+      {p.feeWithheld && (
+        <div style={row} data-afa-refund-line="fee">
+          <span>{tr.ticketsPage.cancelSheetFeeLineTemplate.replace('{amount}', p.bookingFee.toLocaleString('en-IN'))}</span>
+        </div>
+      )}
+      <p style={{ margin: 'var(--afa-space-3) 0 0', fontSize: 'var(--afa-text-small)' }}>{tr.ticketsPage.cancelSheetNoUndo}</p>
+    </div>
+  )
+}
+
+function eventStartInstant(b: BookingItem): Date {
+  return refundStartInstant(b.event.date, b.event.startTime)
+}
+
+// Same past-event check as the server's block in PATCH /api/bookings/[id]
+// - used to hide the Cancel button outright rather than show it and
+// reject on click.
+function isPastEvent(b: BookingItem): boolean {
+  return eventStartInstant(b).getTime() <= Date.now()
+}
+
+// FEAT-2608-006 - date-based sections (Today / This weekend / Upcoming /
+// Past) instead of one flat list. "This weekend" means the next Sat or
+// Sun within the coming 7 days - matches how people actually think about
+// "this weekend" rather than a fixed Mon-Sun calendar week.
+type TicketSection = 'today' | 'weekend' | 'upcoming' | 'past'
+
+function getSection(b: BookingItem): TicketSection {
+  const start = eventStartInstant(b)
+  const now = new Date()
+  if (start.getTime() <= now.getTime()) return 'past'
+  if (start.toDateString() === now.toDateString()) return 'today'
+  const diffDays = (start.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+  const day = start.getDay() // 0 = Sun, 6 = Sat
+  if (diffDays <= 7 && (day === 0 || day === 6)) return 'weekend'
+  return 'upcoming'
+}
+
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  PENDING: STATUS_TONE.gold,
+  EXPIRED: STATUS_TONE.muted,
+  CONFIRMED: STATUS_TONE.sage,
+  CANCELLED: STATUS_TONE.error,
+  REFUNDED: STATUS_TONE.muted,
+}
+
+// GEN-2609-068 - v6 redesign's status chip is icon + label, not
+// color-only (task item 1). One icon per effective status, reusing
+// EventIcons.tsx's new Check/Clock/Ban/Refund icons rather than the
+// Figma export's own inlined glyphs.
+const STATUS_ICON: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  PENDING: ClockIcon,
+  EXPIRED: ClockIcon,
+  CONFIRMED: CheckIcon,
+  CANCELLED: BanIcon,
+  REFUNDED: RefundIcon,
+}
+
+// A booking's display status can differ from its DB status: an expired
+// PENDING is functionally dead even though the row still says PENDING.
+function effectiveStatus(b: BookingItem): string {
+  if (b.status === 'PENDING' && b.expiresAt && new Date(b.expiresAt) < new Date()) {
+    return 'EXPIRED'
+  }
+  return b.status
+}
+
+// GEN-2609-068 - the redesigned "ticket stub" row's real-data mapping.
+// Booking has no single "tier" field - `seats` is a tier/section name ->
+// qty record (multi-tier bookings are real, e.g. 2 VIP + 1 General), and
+// `seatLabels` is only populated for numbered-seat venues. Tier shows
+// the section name(s); Qty prefers the actual seat count (seatLabels)
+// when the venue is numbered, falling back to summed `seats` quantities
+// otherwise; Ref is the same ticketCode already shown elsewhere on this
+// page. StubRow's own `whiteSpace: nowrap` + ellipsis handles a long
+// multi-tier name list without needing truncation logic here.
+function stubCells(b: BookingItem, tr: Dictionary) {
+  // BUG-2610-003 - from the API: section names, or a numbered booking's seat tiers.
+  const tierNames = b.tierNames ?? Object.keys(b.seats)
+  const qty = b.seatLabels && b.seatLabels.length > 0 ? b.seatLabels.length : Object.values(b.seats).reduce((sum, n) => sum + n, 0)
+  return [
+    { label: tr.ticketsPage.stubTierLabel, value: tierNames.length > 0 ? tierNames.join(', ') : '—' },
+    { label: tr.ticketsPage.stubQtyLabel, value: qty || '—', align: 'center' as const },
+    { label: tr.ticketsPage.stubRefLabel, value: b.ticketCode || '—', align: 'right' as const },
+  ]
+}
+
+// GEN-2609-068 - shared 10px mono/uppercase/amber section-header
+// treatment (page kicker + "Today"/"This weekend"/etc.), collapsing
+// what the v6 mockup drew as 3 near-duplicate micro-label sizes down to
+// exactly 2 roles across this page - this is the section-level role: a
+// rule line after the label, reused across all 4 real date-based
+// sections (this page's actual grouping, kept as the more useful real
+// logic rather than the mock's simpler confirmed/pending/past split -
+// see docs/design.md's GEN-2609-068 entry).
+function SectionLabel({ label }: { label: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-3)' }}>
+      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
+      <div style={{ height: 1, flex: 1, background: 'var(--afa-tint-08)' }} />
+    </div>
+  )
+}
+
+// GEN-2609-068 - the CONFIRMED-only perforated divider, matching the
+// v6 mockup's "torn ticket stub" visual. The punch-circles use
+// --afa-surface-page (the real PAGE background) against a card that
+// sits on --afa-surface-raised, the same page/card relationship the
+// mockup's own #141414-on-#1F1F1F pairing relied on to read as an
+// actual cutout rather than a plain dashed line.
+function PerfDivider() {
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <div style={{ position: 'absolute', left: -12, width: 20, height: 20, borderRadius: '50%', background: 'var(--afa-surface-page)' }} />
+      <div style={{ flex: 1, borderTop: '1px dashed var(--afa-tint-12)' }} />
+      <div style={{ position: 'absolute', right: -12, width: 20, height: 20, borderRadius: '50%', background: 'var(--afa-surface-page)' }} />
+    </div>
+  )
+}
+
+// BUG-2610-001 - a saved offline ticket back in the card's shape: always
+// CONFIRMED (only those are saved), no amounts, no poster (a remote image).
+function offlineToBooking(t: OfflineTicket): BookingItem {
+  return {
+    id: t.id,
+    seats: { [t.tierNames.join(', ') || '-']: t.qty },
+    tierNames: t.tierNames,
+    totalAmount: 0,
+    bookingFeeAmount: 0,
+    status: 'CONFIRMED',
+    expiresAt: null,
+    createdAt: '',
+    cancelledAt: null,
+    refundAmount: null,
+    checkedInAt: t.checkedInAt,
+    ticketCode: t.ticketCode,
+    companionTags: [],
+    event: { ...t.event, posterImage: null },
+  }
+}
+
+// BUG-2610-001 - "no network" as opposed to "signed out". Offline, the
+// next-auth session fetch fails and useSession reports unauthenticated,
+// exactly like a real sign-out; a failed request (TypeError, no response
+// at all) is what tells them apart. /api is never served from the SW cache.
+async function isNetworkDown(): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
+  try {
+    await fetch('/api/auth/session', { cache: 'no-store' })
+    return false
+  } catch {
+    return true
+  }
 }
 
 export default function MyTicketsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr, locale } = useLocale()
   const [bookings, setBookings] = useState<BookingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<string | null>(null)
+  const [checkingRefund, setCheckingRefund] = useState<string | null>(null)
+  const confirm = useConfirm()
+  const [pendingTags, setPendingTags] = useState<PendingCompanionTag[]>([])
+  const [acceptedTags, setAcceptedTags] = useState<AcceptedCompanionTag[]>([])
+  const [respondingTag, setRespondingTag] = useState<string | null>(null)
+  // BUG-2610-001 - set when the network is down: the saved snapshot for
+  // the last signed-in user on this device, or null if there is none.
+  const [offline, setOffline] = useState<{ snapshot: OfflineTicketsSnapshot | null } | null>(null)
+  const userId = (session?.user as { id?: string } | undefined)?.id ?? null
+  const showOffline = (forUserId: string | null) => {
+    setOffline({ snapshot: readOfflineTickets(forUserId) })
+    setLoading(false)
+  }
+  // Mobile Redesign Phase 4a (GEN-2609-006) - click-guarded card
+  // navigation, same pattern as EventCard/events/page.tsx's
+  // navigatingId + useTransition (see that file's comment: without the
+  // guard, a slow first render reads as "nothing happened" and repeat
+  // clicks fire duplicate navigations).
+  const [, startTransition] = useTransition()
+  const [navigatingId, setNavigatingId] = useState<string | null>(null)
+  const goToEvent = (id: string) => {
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/events/${id}`)
+    })
+  }
 
+  // BUG-2610-001 - signed out while online still goes to /login; with no
+  // network it shows the saved tickets instead.
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/login')
+    if (status !== 'unauthenticated') return
+    let cancelled = false
+    isNetworkDown().then((down) => {
+      if (cancelled) return
+      if (down) showOffline(lastSignedInUserId())
+      else router.push('/login')
+    })
+    return () => {
+      cancelled = true
+    }
   }, [status, router])
 
   const load = async () => {
     try {
-      const res = await fetch('/api/bookings/my')
-      if (!res.ok) throw new Error('Failed to load your tickets')
-      setBookings(await res.json())
+      let res: Response
+      try {
+        res = await fetch('/api/bookings/my')
+      } catch {
+        // BUG-2610-001 - no network (not a 401): the saved tickets.
+        showOffline(userId)
+        return
+      }
+      if (!res.ok) throw new Error(tr.ticketsPage.failedToLoadFallback)
+      const data = await res.json()
+      setBookings(data)
+      setOffline(null)
+      if (userId) {
+        saveOfflineTickets(userId, data)
+        // Reopened 13 Oct - the page itself kept offline too, however
+        // the user got here (a tab tap never caches its HTML).
+        requestOfflineShell('/tickets/')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -52,18 +402,117 @@ export default function MyTicketsPage() {
     }
   }
 
+  const loadPendingTags = async () => {
+    try {
+      const res = await fetch('/api/companions/mine')
+      if (!res.ok) return
+      const data = await res.json()
+      setPendingTags(data.tags || [])
+    } catch {
+      // Non-critical - the rest of the page still works.
+    }
+  }
+
+  // BUG-2608-033 - separate fetch (rather than folding into
+  // loadPendingTags) since it's a genuinely different list with its own
+  // card treatment below, not more pending-inbox items.
+  const loadAcceptedTags = async () => {
+    try {
+      const res = await fetch('/api/companions/mine?status=ACCEPTED')
+      if (!res.ok) return
+      const data = await res.json()
+      setAcceptedTags(data.tags || [])
+    } catch {
+      // Non-critical - the rest of the page still works.
+    }
+  }
+
   useEffect(() => {
-    if (session?.user) load()
+    if (session?.user) {
+      load()
+      loadPendingTags()
+      loadAcceptedTags()
+    }
   }, [session])
 
-  const cancelBooking = async (id: string) => {
-    setCancelling(id)
+  // BUG-2610-001 (reopened 13 Oct) - losing signal with the page open
+  // switches to the saved view (no actions that need the network);
+  // getting it back refetches and returns to the live page.
+  useEffect(() => {
+    const goOffline = () => showOffline(userId ?? lastSignedInUserId())
+    const goOnline = () => {
+      if (!userId) {
+        // Opened offline, so there is no session yet: start over online.
+        window.location.reload()
+        return
+      }
+      load()
+      loadPendingTags()
+      loadAcceptedTags()
+    }
+    window.addEventListener('offline', goOffline)
+    window.addEventListener('online', goOnline)
+    return () => {
+      window.removeEventListener('offline', goOffline)
+      window.removeEventListener('online', goOnline)
+    }
+  }, [userId])
+
+  const respondToTag = async (tagId: string, accept: boolean) => {
+    setRespondingTag(tagId)
+    try {
+      const res = await fetch(`/api/companions/${tagId}/respond`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accept }),
+      })
+      if (res.ok) {
+        setPendingTags((prev) => prev.filter((t) => t.id !== tagId))
+        // Accepting moves it straight into the "going as a guest" list
+        // below - refetch rather than guess-shape the item locally,
+        // this list is small and infrequent so the extra round trip is
+        // cheap.
+        if (accept) loadAcceptedTags()
+      }
+    } finally {
+      setRespondingTag(null)
+    }
+  }
+
+  const cancelBooking = async (b: BookingItem) => {
+    if (b.status === 'CONFIRMED') {
+      if (isPastEvent(b)) {
+        setError(tr.ticketsPage.eventAlreadyHappenedCancelError)
+        return
+      }
+      // BUG-2609-086 - the server's own refund numbers, not a recomputed copy.
+      setCheckingRefund(b.id)
+      let preview: RefundPreview | null = null
+      try {
+        const res = await fetch(`/api/bookings/${b.id}`)
+        if (res.ok) preview = (await res.json()).booking?.refundPreview ?? null
+      } catch {}
+      setCheckingRefund(null)
+      if (!preview) {
+        setError(tr.ticketsPage.cancelSheetLoadFailed)
+        return
+      }
+      const ok = await confirm({
+        title: tr.ticketsPage.cancelSheetTitle,
+        body: <RefundLines p={preview} tr={tr} />,
+        confirmLabel: tr.ticketsPage.cancelTicketButton,
+        cancelLabel: tr.ticketsPage.cancelSheetKeep,
+        destructive: true,
+      })
+      if (!ok) return
+    }
+    setCancelling(b.id)
     setError('')
     try {
-      const res = await fetch(`/api/bookings/${id}`, { method: 'PATCH' })
+      const res = await fetch(`/api/bookings/${b.id}`, { method: 'PATCH' })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to cancel')
+        throw new Error(data.error || tr.ticketsPage.failedToCancelFallback)
       }
       await load()
     } catch (err: any) {
@@ -73,67 +522,499 @@ export default function MyTicketsPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (offline) return renderOffline(offline.snapshot)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
+
+  // BUG-2610-018 - an expired unpaid hold is not a ticket: no card, at
+  // most one compact "Unfinished checkout" row (src/lib/unfinished-checkout.ts).
+  const { tickets, unfinished } = splitUnfinishedCheckouts(bookings)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '8px' }}>
-            My Tickets
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <style>{`
+          .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-4); }
+          @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }
+        `}</style>
+        <div style={{ maxWidth: '800px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <p style={{ margin: '0 0 var(--afa-space-6px)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--afa-amber)' }}>
+            {tr.ticketsPage.pageKicker}
+          </p>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+            {tr.ticketsPage.pageTitle}
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Online payment isn't live yet, so tickets here are reservations, not confirmed purchases — we'll email you when checkout opens.
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
+            {tr.ticketsPage.pageSubtitle}
           </p>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
+          )}
+
+          {/* Companion Tagging Phase 1 (reputation epic §7) - "you've been
+              tagged" inbox. Sits above the ticket list since it needs a
+              response, unlike the tickets below which are just informational. */}
+          {pendingTags.length > 0 && (
+            <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
+                {tr.ticketsPage.youveBeenTagged}
+              </h2>
+              {pendingTags.map((t) => (
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-body)', margin: '0 0 var(--afa-space-10px)' }}>
+                    <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
+                    {tr.ticketsPage.taggedYouAsCompanionForTemplate
+                      .replace('{event}', t.booking.event.title)
+                      .replace('{date}', formatDate(t.booking.event.date, 'short', locale))}
+                  </p>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
+                    <Button
+                      variant="outline-accent"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={() => respondToTag(t.id, true)}
+                      disabled={respondingTag === t.id}
+                    >
+                      {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
+                    </Button>
+                    <Button
+                      variant="outline-neutral"
+                      size="sm"
+                      fullWidth={false}
+                      onClick={() => respondToTag(t.id, false)}
+                      disabled={respondingTag === t.id}
+                    >
+                      {tr.ticketsPage.declineButton}
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {bookings.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: '#0E0C0A', opacity: 0.6 }}>
-              No tickets yet. <Link href="/events" style={{ color: '#C8441A', fontWeight: 600 }}>Browse events</Link>
+          {/* BUG-2608-033 - confirmed companion tags rendered as their
+              own ticket-like cards. Deliberately lighter than the real
+              booking cards below (no price, no seat labels, no PDF
+              download) - a companion never has a Booking of their own,
+              so this shows only what's actually true: they're confirmed
+              to attend as someone else's guest. */}
+          {acceptedTags.length > 0 && (
+            <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
+                {tr.ticketsPage.youreGoingAsGuest}
+              </h2>
+              {acceptedTags.map((t) => (
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)' }}>
+                    <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
+                      {t.booking.event.title}
+                    </Link>
+                    <Badge variant="status-compact" tone={STATUS_TONE.sage}>
+                      {tr.ticketsPage.companionConfirmedPill}
+                    </Badge>
+                  </div>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 var(--afa-space-10px)' }}>
+                    {formatDate(t.booking.event.date, 'medium', locale)} · {t.booking.event.startTime}
+                    {t.booking.event.venue && <> · {t.booking.event.venue.name}, {t.booking.event.venue.city}</>}
+                  </p>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0 }}>
+                    {tr.ticketsPage.guestOfTemplate.replace('{name}', t.taggedBy.displayName || t.taggedBy.name)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {unfinished.length > 0 && (
+            <div data-afa-unfinished-checkouts style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-6)' }}>
+              {unfinished.map((b) => (
+                <div
+                  key={b.id}
+                  data-afa-unfinished-checkout={b.id}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)' }}
+                >
+                  <ClockIcon style={{ width: 14, height: 14, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>
+                      {tr.ticketsPage.unfinishedCheckoutLabel}
+                    </p>
+                    <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {b.event.title} · <span data-afa-unfinished-date>{formatDate(b.event.date, 'short', locale)}</span>
+                    </p>
+                  </div>
+                  <Link href={`/events/${b.event.id}`} style={{ flexShrink: 0, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    {tr.ticketsPage.bookAgainLink}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tickets.length === 0 && acceptedTags.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-64px) var(--afa-space-32px)', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-raised)' }}>
+                <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{tr.ticketsPage.emptyTitle}</p>
+                <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{tr.ticketsPage.emptyDescription}</p>
+                <Link href="/events" style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600 }}>
+                  {tr.ticketsPage.browseEventsLink}
+                </Link>
+              </div>
             </div>
           ) : (
-            bookings.map((b) => {
-              const s = STATUS_STYLE[b.status] || STATUS_STYLE.PENDING
+            (['today', 'weekend', 'upcoming', 'past'] as TicketSection[]).map((section) => {
+              const items = tickets.filter((b) => getSection(b) === section)
+              if (items.length === 0) return null
+              const heading = {
+                today: tr.ticketsPage.sectionToday,
+                weekend: tr.ticketsPage.sectionThisWeekend,
+                upcoming: tr.ticketsPage.sectionUpcoming,
+                past: tr.ticketsPage.sectionPast,
+              }[section]
               return (
-                <div key={b.id} style={{ background: '#fff', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: '#0E0C0A', textDecoration: 'none' }}>
-                      {b.event.title}
-                    </Link>
-                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
-                      {s.label}
-                    </span>
+                <div key={section} style={{ marginBottom: 'var(--afa-space-28px)' }}>
+                  <SectionLabel label={heading} />
+                  <div className="afa-tickets-grid">
+                    {items.map((b) => renderCard(b))}
                   </div>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, margin: '0 0 10px' }}>
-                    {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {b.event.startTime}
-                    {b.event.venue && <> · {b.event.venue.name}, {b.event.venue.city}</>}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#0E0C0A' }}>
-                    <span>{Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}</span>
-                    <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
-                  </div>
-                  {b.status === 'PENDING' && (
-                    <button
-                      onClick={() => cancelBooking(b.id)}
-                      disabled={cancelling === b.id}
-                      style={{ marginTop: '12px', fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
-                    >
-                      {cancelling === b.id ? 'Cancelling...' : 'Cancel reservation'}
-                    </button>
-                  )}
                 </div>
               )
             })
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
+
+  // BUG-2610-001 - My Tickets with no network: a banner, then the saved
+  // tickets (QR drawn on the device by TicketQr, no request) or, with no
+  // snapshot, how to get one. Never a redirect to /login.
+  function renderOffline(snapshot: OfflineTicketsSnapshot | null) {
+    const savedAt = snapshot ? formatDate(snapshot.savedAt, 'dateTime', locale) : ''
+    return (
+      <>
+        <SiteNav />
+        <DashboardShell>
+        <main data-afa-offline-tickets style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+          <style>{`
+            .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-4); }
+            @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }
+          `}</style>
+          <div style={{ maxWidth: '800px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
+              {tr.ticketsPage.pageTitle}
+            </h1>
+            {snapshot ? (
+              <>
+                <p
+                  role="status"
+                  data-afa-offline-banner
+                  style={{ margin: '0 0 var(--afa-space-6)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)' }}
+                >
+                  {tr.ticketsPage.offlineBannerTemplate.replace('{savedAt}', savedAt)}
+                </p>
+                {snapshot.tickets.length === 0 ? (
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{tr.ticketsPage.emptyTitle}</p>
+                ) : (
+                  <div className="afa-tickets-grid">
+                    {snapshot.tickets.map((t) => renderCard(offlineToBooking(t), true))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div role="status" data-afa-offline-empty style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-48px) var(--afa-space-6)', textAlign: 'center' }}>
+                <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
+                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)' }}>{tr.ticketsPage.offlineNoSavedTitle}</p>
+                <p style={{ margin: 0, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{tr.ticketsPage.offlineNoSavedBody}</p>
+              </div>
+            )}
+          </div>
+        </main>
+        </DashboardShell>
+      </>
+    )
+  }
+
+  // Extracted so the four date-sections above can share one card
+  // renderer instead of duplicating this JSX per bucket.
+  // BUG-2610-001 - `offlineView`: a saved ticket, QR only, no actions
+  // (they all need the network) and no tap-through to the event page.
+  function renderCard(b: BookingItem, offlineView = false) {
+              const eff = effectiveStatus(b)
+              const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
+              const StatusIcon = STATUS_ICON[eff] || ClockIcon
+              const isLivePending = eff === 'PENDING'
+              const showAttendancePill = eff === 'CONFIRMED' && isPastEvent(b)
+              // GEN-2609-068 - v6 redesign: cancelled/refunded cards are
+              // ghosted (55% opacity) and non-interactive, matching the
+              // v6 mockup exactly - a deliberate decision, not a silent
+              // copy. Flagged in docs/design.md/HANDOFF.md as worth
+              // Hitesh's explicit confirmation: the event itself already
+              // happened or the booking is dead either way, so there's
+              // an argument a still-tappable card (to see the past event
+              // page / who else went) is more useful than a fully inert
+              // one. Kept matching the mockup for this pass since it's
+              // the simpler, lower-risk default - easy to reverse if
+              // that confirmation comes back the other way.
+              const isGhosted = eff === 'CANCELLED' || eff === 'REFUNDED'
+              const inert = isGhosted || offlineView
+              const typeKey = (b.event.type in tr.eventTypes ? b.event.type : 'OPEN_MIC') as keyof typeof tr.eventTypes
+              const typeLabel = tr.eventTypes[typeKey]
+              const isNavigating = navigatingId === b.event.id
+              // The QR only makes sense once a booking is actually
+              // CONFIRMED (matches the existing "Download ticket PDF"
+              // button's own gating below) - a PENDING/CANCELLED/
+              // REFUNDED booking has nothing to scan at a door.
+              // Tickets B (Hitesh, 14 Oct) - nor once the event is past
+              // (the page's own isPastEvent rule, offline view included):
+              // no QR, no "Scan at door"; Download PDF stays.
+              const showQr = eff === 'CONFIRMED' && !isPastEvent(b)
+              const used = eff === 'CONFIRMED' && !!b.checkedInAt
+              // A free booking reads "Free" rather than hiding the amount.
+              // Offline tickets carry no amounts (src/lib/offline-tickets.ts),
+              // so their 0 is unknown, not free.
+              const showPaid = !offlineView
+              return (
+                <div
+                  key={b.id}
+                  role={inert ? undefined : 'link'}
+                  tabIndex={inert ? undefined : 0}
+                  aria-busy={isNavigating}
+                  onClick={inert ? undefined : () => goToEvent(b.event.id)}
+                  onKeyDown={
+                    inert
+                      ? undefined
+                      : (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            goToEvent(b.event.id)
+                          }
+                        }
+                  }
+                  className={inert ? undefined : 'afa-focusable'}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: 'var(--afa-surface-raised)',
+                    borderRadius: 'var(--afa-radius-xl)',
+                    border: isGhosted ? '1px solid var(--afa-tint-06)' : '1px solid var(--afa-tint-10)',
+                    cursor: inert ? 'default' : navigatingId && !isNavigating ? 'default' : 'pointer',
+                    opacity: (isGhosted ? 0.55 : 1) * (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.85 : 1),
+                    transition: 'opacity 0.15s ease',
+                  }}
+                >
+                  {isNavigating && (
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'var(--afa-scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', border: '3px solid var(--afa-border-resting)', borderTopColor: 'var(--afa-amber)', animation: 'afa-spin 0.7s linear infinite' }} />
+                    </div>
+                  )}
+
+                  {/* Hero: 112px (down from 132px), bottom-up gradient,
+                      category + title over the image, status chip
+                      top-right. EventPoster already builds on Photo.tsx
+                      (grayscale+amber-duotone real photos) with an
+                      illustrated fallback for a missing/broken
+                      posterImage - kept as-is rather than calling
+                      Photo.tsx directly and losing that fallback. */}
+                  <div style={{ position: 'relative', height: '112px', overflow: 'hidden' }}>
+                    <EventPoster posterImage={b.event.posterImage} title={b.event.title} type={b.event.type} typeLabel={typeLabel} hideCaption />
+                    <div
+                      style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, var(--afa-scrim-strong) 100%)', // token-ok(rgb-rgba-literal): transparent end of an image fade, structural
+                      }}
+                    />
+                    <div style={{ position: 'absolute', right: 10, top: 10 }}>
+                      <span style={{ display: 'flex', gap: 'var(--afa-space-6px)', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <Badge
+                          variant="status-compact"
+                          tone={s}
+                          icon={<StatusIcon style={{ width: 11, height: 11 }} />}
+                          style={{ whiteSpace: 'normal', textAlign: 'right', maxWidth: '150px' }}
+                        >
+                          {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
+                        </Badge>
+                        {showAttendancePill && (
+                          <Badge variant="status-compact" tone={b.checkedInAt || b.attendance === 'ATTENDED' ? STATUS_TONE.sage : STATUS_TONE.muted} data-afa-attendance={b.checkedInAt || b.attendance === 'ATTENDED' ? 'ATTENDED' : b.attendance === 'NO_SHOW' ? 'NO_SHOW' : 'MISSED'}>
+                            {b.checkedInAt || b.attendance === 'ATTENDED' ? tr.ticketsPage.attendedPill : b.attendance === 'NO_SHOW' ? tr.payAtEntry.noShow : tr.ticketsPage.missedPill}
+                          </Badge>
+                        )}
+                      </span>
+                    </div>
+                    <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10 }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                        {typeLabel}
+                      </div>
+                      <h3
+                        style={{
+                          marginTop: 'var(--afa-space-2px)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, lineHeight: 1.25, color: 'var(--afa-text-primary)',
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        }}
+                      >
+                        {b.event.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Meta row: date/time + venue, font-sans 12px. */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 'var(--afa-space-4)', rowGap: 'var(--afa-space-1)', padding: 'var(--afa-space-10px) var(--afa-space-14px) 0' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)' }}>
+                      <CalendarIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                      {formatDate(b.event.date, 'short', locale)} · {b.event.startTime}
+                    </span>
+                    {b.event.venue && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <PinIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                        {b.event.venue.name}, {b.event.venue.city}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Ticket stub row (Tier / Qty / Ref) - new shared
+                      StubRow component (src/components/ui/StubRow.tsx),
+                      inset on --afa-surface-inverse. */}
+                  <div style={{ margin: 'var(--afa-space-10px) var(--afa-space-14px) 0' }}>
+                    <StubRow cells={stubCells(b, tr)} />
+                  </div>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    {/* CONFIRMED: perforated divider, QR inline with
+                        price, 3-button equal-weight outline row. */}
+                    {eff === 'CONFIRMED' && (
+                      <>
+                        <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-14px) 0' }}>
+                          <PerfDivider />
+                        </div>
+                        {(showQr || showPaid) && (
+                        <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)', alignItems: 'flex-start' }}>
+                          {showQr && (
+                          <div data-afa-ticket-qr style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-cream)' }}>
+                              <TicketQr value={b.id} size={60} />
+                            </div>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
+                              {used ? tr.ticketsPage.scannedLabel : tr.ticketsPage.scanAtDoor}
+                            </span>
+                          </div>
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {showPaid && b.paymentMethod === 'AT_ENTRY' && (
+                              // D1 - reserved on AFA, paid to the organiser at the venue.
+                              <div style={{ marginBottom: 'var(--afa-space-2)' }}>
+                                <Badge variant="status-compact" tone={STATUS_TONE.muted} data-afa-pay-at-entry-badge>
+                                  {tr.payAtEntry.badge.replace('{amount}', b.totalAmount.toLocaleString('en-IN'))}
+                                </Badge>
+                                <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>{tr.payAtEntry.noCollect}</p>
+                                <p data-afa-direct-pay-disclosure style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>{tr.payAtEntry.payAtVenueLine}</p>
+                              </div>
+                            )}
+                            {showPaid && b.paymentMethod !== 'AT_ENTRY' && (
+                              <div style={{ marginBottom: 'var(--afa-space-2)' }}>
+                                {b.totalAmount > 0 && (
+                                  <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
+                                )}
+                                <p data-afa-ticket-paid style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+                                  {b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        )}
+                        {!offlineView && (
+                        <div data-afa-ticket-actions style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)', padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                          {/* BUG-2610-012 - the actions used to share the narrow
+                              column beside the QR (about 70px each at 390, and the
+                              2-up desktop grid is narrower still), so every label
+                              wrapped to two lines and spilled past its border. They
+                              now stack at the card's full width under the QR, one
+                              line each, 44px tall (ACTION_STYLE). */}
+                          <Button
+                            variant="outline-neutral"
+                            size="sm"
+                            href={`/api/bookings/${b.id}/ticket`}
+                            style={ACTION_STYLE}
+                          >
+                            <DownloadIcon style={{ width: 13, height: 13 }} />
+                            {tr.ticketsPage.downloadPdfShort}
+                          </Button>
+                          <MessageButton
+                            contextType="BOOKING"
+                            contextId={b.id}
+                            label={tr.ticketsPage.messageOrganiser}
+                            icon={<MessageIcon style={{ width: 13, height: 13 }} />}
+                            variant="outline-neutral"
+                            style={ACTION_STYLE}
+                          />
+                          {!isPastEvent(b) && (
+                            <Button
+                              variant="outline-neutral"
+                              size="sm"
+                              onClick={() => cancelBooking(b)}
+                              disabled={cancelling === b.id || checkingRefund === b.id}
+                              title={previewRefund(b, tr).label}
+                              style={{ ...ACTION_STYLE, opacity: cancelling === b.id ? 0.6 : 1 }}
+                            >
+                              {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
+                            </Button>
+                          )}
+                        </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* PENDING: single fill-solid Pay Now + outline
+                        Cancel - matches current behavior, restyled. */}
+                    {isLivePending && (
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)' }}>
+                        {b.totalAmount > 0 && (
+                          <Button variant="primary" size="sm" href={`/checkout/${b.id}`} style={{ flex: 1 }}>
+                            {tr.ticketsPage.payNowArrow}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline-neutral"
+                          size="sm"
+                          onClick={() => cancelBooking(b)}
+                          disabled={cancelling === b.id}
+                          style={{ flex: b.totalAmount > 0 ? 1 : undefined, opacity: cancelling === b.id ? 0.6 : 1 }}
+                        >
+                          {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelButton}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* CANCELLED / REFUNDED: status note only, no
+                        actions - card itself is ghosted/non-interactive
+                        above. */}
+                    {isGhosted && b.cancelledAt && (
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                        {eff === 'REFUNDED'
+                          ? tr.ticketsPage.refundedNoteTemplate.replace('{amount}', (b.refundAmount ?? 0).toLocaleString('en-IN'))
+                          : tr.ticketsPage.cancelledNoRefund}
+                      </p>
+                    )}
+
+                    {b.companionTags && b.companionTags.length > 0 && (
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0, padding: isGhosted ? '0 var(--afa-space-14px) var(--afa-space-14px)' : '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
+                        {tr.ticketsPage.goingWith}{' '}
+                        {b.companionTags.map((t, i) => (
+                          <span key={t.id}>
+                            {i > 0 && ', '}
+                            {t.taggedUser.displayName || t.taggedUser.name}{' '}
+                            {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+  }
 }

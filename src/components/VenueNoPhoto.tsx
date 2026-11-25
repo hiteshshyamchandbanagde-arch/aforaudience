@@ -1,0 +1,102 @@
+import type { CSSProperties, ComponentType } from "react"
+import { IntimateRoomMark, MidHallMark, LargeArenaMark, seedFromVenueId } from "@/components/icons/VenueIcons"
+
+// No-photo fallback for venue cards/hero (GEN-2608-074). Replaces the old
+// circular-monogram-letter treatment (monogramTone, src/lib/placeholder-image.ts)
+// for venues specifically - artist cards keep ArtistNoPhoto, untouched,
+// out of scope here.
+//
+// Per the approved design.md spec: Venue has no genre-equivalent category
+// field (only capacity, always present), so the fallback is keyed by
+// capacity tier instead - Intimate (<200) / Mid-size (200-800) / Large
+// (800+) - each with its own distinct illustrated line-art panel, rather
+// than a single repeated mark. Explicitly no stock photos, no emoji,
+// nothing implying a real photo of a venue we haven't verified.
+
+export type CapacityTier = "intimate" | "mid" | "large"
+
+export function capacityTier(capacity: number): CapacityTier {
+  if (capacity < 200) return "intimate"
+  if (capacity < 800) return "mid"
+  return "large"
+}
+
+const TIER_MARK: Record<CapacityTier, ComponentType<{ v: number; style?: CSSProperties }>> = {
+  intimate: IntimateRoomMark,
+  mid: MidHallMark,
+  large: LargeArenaMark,
+}
+
+interface VenueNoPhotoProps {
+  capacity: number
+  // Venue id, hashed into the `v` seed that drives the export's
+  // per-instance variation (lamp vs. spotlight, chair/row/tier counts -
+  // see seedFromVenueId in VenueIcons.tsx). Optional only so existing
+  // callers don't break at the type level while being migrated; falls
+  // back to a fixed seed (matches export behavior for an empty seed
+  // string, since seedFromVenueId("") === 0).
+  seed?: string
+  caption?: string
+  size?: "card" | "hero"
+}
+
+// BUG-2608-072 gap 4 originally baked the tier-label badge into this
+// component. Export (VenueCard.tsx) only ever shows that badge as a
+// card-level overlay sibling to the media (real photo OR fallback) - the
+// detail-page hero's fallback (VenueDetail.tsx) has no badge at all, only
+// the caption text below it. Badge now lives at the call site (card grid)
+// instead, so it (a) also shows over real photos, which this component
+// can't do since it only renders for the no-photo case, and (b) stops
+// incorrectly appearing on the detail hero.
+export default function VenueNoPhoto({ capacity, seed, caption, size = "card" }: VenueNoPhotoProps) {
+  const tier = capacityTier(capacity)
+  const Mark = TIER_MARK[tier]
+  const v = seedFromVenueId(seed ?? "")
+  // Full-bleed for both card AND hero - confirmed against the export
+  // (VenueDetail.tsx line 79-83, the detail page's own no-photo branch):
+  // `<VenueFallback capacity={venue.capacity} seed={venue.id} />`, no
+  // className override, the exact same call as VenueCard.tsx's card
+  // usage. VenueFallback's SVG is unconditionally `absolute inset-0
+  // h-full w-full` regardless of context - there's no smaller/centered
+  // hero variant anywhere in the export. The previous 70%/420px,
+  // flex-centered hero treatment here was never actually checked against
+  // that line and didn't match it. Whatever breathing room the artwork
+  // has comes from empty space drawn inside each Mark's own viewBox
+  // coordinates, not a shrink at this layer.
+
+  return (
+    // BUG-2608-074 - this reused --afa-surface-page (the page background
+    // itself), giving the illustration panel zero visual distinction from
+    // the page behind it. With no visible card, the tierLabel badge below
+    // (meant to overlay the panel's top-left corner) read as a stray
+    // floating label between the header actions and the illustration
+    // instead of a badge sitting on a card. --afa-surface-raised is the
+    // locked palette's dedicated "elevated panel" token (docs/design.md).
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "var(--afa-surface-raised)" }}>
+      {/* Grid/graph-paper texture (export: VenueMedia.tsx line 115-123,
+          quoted via Claude Code). Two 1px cream linear-gradients (one
+          vertical, one horizontal) on a 22x22px cell, 4% opacity - a
+          crosshatch, not a single pattern image or Tailwind bg-grid
+          utility. Sits behind the Mark SVG, same relative parent. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          opacity: 0.04,
+          backgroundImage:
+            "linear-gradient(var(--afa-cream) 1px, transparent 1px), linear-gradient(90deg, var(--afa-cream) 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
+        }}
+      />
+      <Mark v={v} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
+
+      {caption && (
+        <span style={{ position: "absolute", bottom: size === "hero" ? "16px" : "8px", left: size === "hero" ? "16px" : "10px", right: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", letterSpacing: "0.04em", color: "var(--afa-cream)", opacity: 0.4, textTransform: "uppercase" }}>
+          {caption}
+        </span>
+      )}
+    </div>
+  )
+}

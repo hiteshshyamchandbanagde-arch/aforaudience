@@ -14,7 +14,7 @@ const ADDRESS_LINES = [
   "Maharashtra, India",
 ]
 
-const addressStyle = { fontStyle: "normal", marginBottom: "16px", opacity: 0.88 } as const
+const addressStyle = { fontStyle: "normal", marginBottom: "var(--afa-space-4)", opacity: 0.88 } as const
 
 function AddressLines() {
   return (

@@ -1,0 +1,281 @@
+"use client"
+
+import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { signOutAndClearCache } from "@/lib/sw-cache"
+import EnvBadge from "@/components/EnvBadge"
+import SearchBox from "@/components/SearchBox"
+import LocationChip from "@/components/LocationChip"
+import Button from "@/components/ui/Button"
+import { useLocale } from "@/lib/i18n/translate"
+import { LOCALES } from "@/lib/i18n/locales"
+
+type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
+
+const NAV_LINKS: { key: NavLinkKey; href: string }[] = [
+  { key: "events", href: "/events" },
+  { key: "artists", href: "/artists" },
+  { key: "venues", href: "/venues" },
+  { key: "wall-of-fame", href: "/wall-of-fame" },
+]
+
+function getDashboardLink(role?: string) {
+  switch (role) {
+    case "VENUE_OWNER":
+      return "/dashboard/venue"
+    case "ARTIST":
+      return "/dashboard/artist"
+    case "ORGANISER":
+      return "/dashboard/organiser"
+    case "ADMIN":
+      return "/dashboard/admin"
+    case "AUDIENCE":
+      return "/dashboard/audience"
+    default:
+      return null
+  }
+}
+
+function initials(name: string) {
+  return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "?"
+}
+
+/**
+ * Homepage-only lighter header, per design.md "Four rooms, one house"
+ * (17 Aug) - distinct from the global SiteNav (untouched, still tracked
+ * under GEN-2608-015). Collapses the account icon row + language +
+ * location into a single profile-menu trigger, matching the approved
+ * Figma Make reference's 5-icons -> 1-dropdown pattern. Signed-in users
+ * still see this lighter header on "/"; SiteNav takes over once they
+ * navigate deeper into the app.
+ *
+ * GEN-2609-019 (Mobile Nav v3, Phase A) - same treatment as SiteNav.tsx:
+ * this whole header is now hidden below `lg` (not just its hamburger),
+ * replaced by the global MobileTopBar (mounted once in layout.tsx, so it
+ * already covers "/" too). Caught by an actual mobile screenshot of the
+ * homepage during Phase A verification - this component is a separate
+ * one from SiteNav (homepage-only), so hiding SiteNav's own hamburger
+ * didn't touch it, and it was still rendering its full desktop-style
+ * logo/wordmark/QA-badge row underneath the new global bar.
+ *
+ * GEN-2609-019 follow-up (post-review) - cutover corrected from 900px to
+ * 1024px (Tailwind's `lg`, matching MobileTopBar's own `lg:hidden` exactly)
+ * - same fix, same reasoning, and the same stale-900px root cause as
+ * SiteNav.tsx's own follow-up comment. This file wasn't flagged in that
+ * review (it only named SiteNav.tsx), but it's the identical bug: any
+ * width in the old 901-1023px gap rendered this header on top of
+ * MobileTopBar too, not just on the non-homepage routes SiteNav covers.
+ */
+export default function HomeHeader() {
+  const { data: session, status } = useSession()
+  const { locale, setLocale, t } = useLocale()
+  const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
+  const dashboardLink = user ? getDashboardLink(user.role) : null
+
+  const [pendingCount, setPendingCount] = useState(0)
+  useEffect(() => {
+    if (user?.role !== "VENUE_OWNER" && user?.role !== "ORGANISER") return
+    let cancelled = false
+    fetch("/api/notifications/pending-count")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+
+  const [unreadCount, setUnreadCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch("/api/conversations/unread-count")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setUnreadCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
+
+  const [pendingCompanionCount, setPendingCompanionCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch("/api/companions/pending-count")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCompanionCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
+
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [menuOpen])
+
+  const navLabelFor: Record<NavLinkKey, string> = {
+    events: t.nav.events,
+    artists: t.nav.artists,
+    venues: t.nav.venues,
+    "wall-of-fame": t.nav.wallOfFame,
+  }
+
+  const accountLinks = user
+    ? [
+        ...(dashboardLink ? [{ key: "dashboard", href: dashboardLink, label: t.nav.dashboard, badge: pendingCount }] : []),
+        { key: "messages", href: "/dashboard/messages", label: t.nav.messages, badge: unreadCount },
+        { key: "myTickets", href: "/tickets", label: t.nav.myTickets, badge: pendingCompanionCount },
+        { key: "profile", href: "/profile", label: t.nav.profile, badge: 0 },
+      ]
+    : []
+
+  const initialsLabel = user ? initials(user.displayName || user.name || user.email || "?") : null
+
+  return (
+    // BUG-2610-017 - top 0 of the home page's <main> (position: relative in
+    // page.tsx), which starts below the nudge banners: no height variable.
+    <header className="home-header-root" style={{ position: "absolute", insetInline: 0, top: 0, zIndex: 100 }}>
+      <style>{`
+        .home-header-desktop { display: flex; }
+        .home-header-root { display: block; }
+        @media (max-width: 1023px) {
+          .home-header-root { display: none; }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", alignItems: "center", gap: "var(--afa-space-6)", padding: "var(--afa-space-5) var(--afa-space-6)" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-2)", textDecoration: "none", flexShrink: 0 }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>
+            <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
+          </span>
+          <EnvBadge />
+          <span className="home-header-desktop" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+            Where Art Finds Its Crowd
+          </span>
+        </Link>
+
+        <nav className="home-header-desktop" style={{ gap: "var(--afa-space-28px)", alignItems: "center" }}>
+          {NAV_LINKS.map((l) => (
+            <Link key={l.key} href={l.href} style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.7, textDecoration: "none" }}>
+              {navLabelFor[l.key]}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="home-header-desktop" style={{ marginLeft: "auto", alignItems: "center", gap: "var(--afa-space-10px)" }}>
+          <div style={{ overflow: "hidden", transition: "width 0.25s ease, opacity 0.25s ease", width: searchOpen ? "220px" : 0, opacity: searchOpen ? 1 : 0 }}>
+            {searchOpen && <SearchBox />}
+          </div>
+          <Button
+            variant="icon"
+            aria-label={t.search.placeholder}
+            onClick={() => setSearchOpen((v) => !v)}
+            style={{ width: "36px", height: "36px", borderRadius: "50%", color: "var(--afa-text-primary)", opacity: 0.7 }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.2-3.2" strokeLinecap="round" />
+            </svg>
+          </Button>
+
+          <div ref={menuRef} style={{ position: "relative" }}>
+            <Button
+              // bare-reason: account trigger pill whose padding hugs the 28px avatar unevenly (4px left, 10px right); a padding token would push the avatar off-centre
+              variant="bare"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "var(--afa-space-1) var(--afa-space-10px) var(--afa-space-1) var(--afa-space-1)" : "var(--afa-space-2) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
+            >
+              {user ? (
+                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
+                  {initialsLabel}
+                </span>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "var(--afa-text-primary)" }}>
+                  <circle cx="12" cy="8.5" r="3.2" />
+                  <path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2" />
+                </svg>
+              )}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Button>
+
+            {menuOpen && (
+              <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-lg)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px var(--afa-shadow)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
+                {user ? (
+                  <>
+                    <div style={{ padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-10px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                      {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
+                    </div>
+                    {accountLinks.map((l) => (
+                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                        {l.label}
+                        {l.badge > 0 && (
+                          <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
+                            {l.badge}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                    <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                      {t.nav.signIn}
+                    </Link>
+                    <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                  </>
+                )}
+                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
+                  {LOCALES.map((l) => (
+                    <Button
+                      variant="text-toggle"
+                      fullWidth={false}
+                      key={l.id}
+                      selected={locale === l.id}
+                      onClick={() => setLocale(l.id)}
+                      // text-toggle has no padding; a 24px minimum keeps the tap target at WCAG 2.5.8 size
+                      style={{ minWidth: "var(--afa-space-6)", minHeight: "var(--afa-space-6)", padding: "var(--afa-space-2px) var(--afa-space-1)", justifyContent: "center" }}
+                    >
+                      {l.id.toUpperCase()}
+                    </Button>
+                  ))}
+                </div>
+                <div style={{ padding: "0 var(--afa-space-3) var(--afa-space-1)" }}>
+                  <LocationChip inPanel />
+                </div>
+                {user && (
+                  <>
+                    <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                    <Button
+                      variant="menu-row"
+                      onClick={() => { setMenuOpen(false); signOutAndClearCache({ callbackUrl: "/" }) }}
+                    >
+                      {t.nav.signOut}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {!user && status !== "loading" && (
+            <Link href="/register" style={{ marginLeft: "var(--afa-space-1)", fontSize: "var(--afa-text-body)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "9px var(--afa-space-5)", borderRadius: "var(--afa-radius-pill)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+              {t.nav.signUp}
+            </Link>
+          )}
+        </div>
+
+      </div>
+    </header>
+  )
+}

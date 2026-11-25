@@ -3,8 +3,21 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import type { ComponentType, CSSProperties } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import { IN, AU, JP, SG, CA, US, GB, AE } from 'country-flag-icons/react/3x2'
+import {
+  PageHead, Card, StatusPill, EmptyState, ErrorBanner,
+  IconVenue, IconTag, IconPlus, IconUsers, IconMap,
+  primaryLinkStyle, outlineLinkStyle,
+} from '@/components/dashboard/VenuePortalUI'
+import { formatINR } from '@/lib/money-display'
+import { Icon } from '@/components/Icon'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 
 interface SeatSection {
   id: string
@@ -18,25 +31,86 @@ interface Venue {
   name: string
   address: string
   city: string
+  country?: string | null
   capacity: number
   isApproved: boolean
   createdAt: string
+  seatingMode?: string
   seatMap?: { sections?: SeatSection[] } | null
+  zonePrices?: { suggestedPrice: number | null }[]
+  rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
+  hourlyRate?: number | null
+  dailyRate?: number | null
 }
 
+// Same field-mismatch bug family as PR #151/#156: a NUMBERED venue's real
+// pricing lives in VenueZonePrice (via the seat-map builder), not the GA
+// path's seatMap.sections - reading only the latter showed "—" for every
+// NUMBERED venue regardless of whether it was actually priced.
 function priceRange(venue: Venue) {
-  const prices = (venue.seatMap?.sections || []).map((s) => Number(s.price) || 0).filter((p) => p > 0)
+  const prices =
+    venue.seatingMode === 'NUMBERED'
+      ? (venue.zonePrices || []).map((z) => Number(z.suggestedPrice) || 0).filter((p) => p > 0)
+      : (venue.seatMap?.sections || []).map((s) => Number(s.price) || 0).filter((p) => p > 0)
   if (prices.length === 0) return '—'
   const min = Math.min(...prices)
   const max = Math.max(...prices)
-  return min === max ? `₹${min}` : `₹${min}–₹${max}`
+  return min === max ? formatINR(min) : `${formatINR(min)}–${formatINR(max)}`
+}
+
+type MyVenuesText = Dictionary['venueDashboard']['myVenues']
+
+function rateLabel(venue: Venue, v: MyVenuesText) {
+  if (venue.rateType === 'HOURLY' && venue.hourlyRate) return v.hourlyRate.replace('{amount}', formatINR(venue.hourlyRate))
+  if (venue.rateType === 'DAILY' && venue.dailyRate) return v.dailyRate.replace('{amount}', formatINR(venue.dailyRate))
+  return v.flexibleRate
+}
+
+// BUG-2608-083: priceRange() is only meaningful for NUMBERED venues (real
+// per-seat pricing lives in VenueZonePrice/seatMap.sections) - GA/Hourly/
+// Daily/Flexible venues have no per-seat price at all, so this tile
+// always showed a bare "—" for them. The actual rate for those venues is
+// already surfaced below via rateLabel(); this tile just needs to show
+// something venue-type-appropriate instead of a dash with no context.
+function rateTypeLabel(venue: Venue, v: MyVenuesText) {
+  if (venue.rateType === 'HOURLY') return v.rateHourly
+  if (venue.rateType === 'DAILY') return v.rateDaily
+  return v.rateFlexible
+}
+
+// Hitesh's call (23 Aug): every venue card gets a flag next to city,
+// including India - not just non-India ones. venue.country is already
+// present on every real venue via the Places-autocomplete-populated
+// field (confirmed 100% coverage across current QA data: India 933,
+// Australia/Japan/Singapore/Canada/US/UK ~30 each, UAE 29 - see
+// GEN-2608-081's correction). Real SVG components (country-flag-icons),
+// not Unicode emoji flags - emoji flags render as plain two-letter text
+// (e.g. "JP") on Windows since merging the regional-indicator character
+// pair into a flag glyph depends on OS font support, which Windows
+// historically lacks/inconsistently provides (confirmed via Hitesh's
+// live screenshot, BUG-2608-089). SVG guarantees identical rendering
+// everywhere. Explicit map, not a lookup over the full 250+-country
+// export, since the known country set is small and fixed for now;
+// falls back to no flag (not a placeholder guess) for any value outside
+// this set so a typo'd or future-added country doesn't render wrong.
+const COUNTRY_FLAGS: Record<string, ComponentType<{ title?: string; className?: string; style?: CSSProperties }>> = {
+  'India': IN,
+  'Australia': AU,
+  'Japan': JP,
+  'Singapore': SG,
+  'Canada': CA,
+  'United States': US,
+  'United Kingdom': GB,
+  'United Arab Emirates': AE,
 }
 
 export default function VenueDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr } = useLocale()
+  const v = tr.venueDashboard.myVenues
+  const chrome = tr.dashboardChrome
   const [venues, setVenues] = useState<Venue[]>([])
-  const [pendingBookings, setPendingBookings] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -60,7 +134,7 @@ export default function VenueDashboard() {
     const fetchVenues = async () => {
       try {
         const res = await fetch('/api/venues/my-venues')
-        if (!res.ok) throw new Error('Failed to fetch venues')
+        if (!res.ok) throw new Error(v.loadFailed)
         const data = await res.json()
         setVenues(data)
       } catch (err: any) {
@@ -70,38 +144,27 @@ export default function VenueDashboard() {
       }
     }
 
-    const fetchBookings = async () => {
-      try {
-        const res = await fetch('/api/venues/my-bookings')
-        if (res.ok) {
-          const data = await res.json()
-          setPendingBookings(data.filter((b: any) => b.status === 'PENDING').length)
-        }
-      } catch {
-        // Non-critical for this view; the dedicated bookings page will surface errors.
-      }
-    }
-
     if (session?.user) {
       fetchVenues()
-      fetchBookings()
     }
   }, [session])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={chrome.loading} /></>)
   if (!session) return <SiteNav />
 
   if (venueStatus && !venueStatus.isVenueOwner) {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
-            <p style={{ color: '#0E0C0A', opacity: 0.6, marginBottom: '24px' }}>Apply to list your venue from your profile to start managing bookings.</p>
-            <Link href="/" style={{ color: '#C8441A', fontWeight: 600, textDecoration: 'none' }}>Back to Home</Link>
+        <DashboardShell>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>{v.notOwnerTitle}</h1>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-6)' }}>{v.notOwnerBody}</p>
+            <BackLink href="/" label={v.backToHome} />
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -110,15 +173,17 @@ export default function VenueDashboard() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>Your Venue Owner account is pending approval</h1>
-            <p style={{ color: '#0E0C0A', opacity: 0.6 }}>
-              Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.
+        <DashboardShell>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: 'var(--afa-space-80px) var(--afa-space-6)', textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: 'var(--afa-space-2)' }}><Icon name="clock" size={32} /></div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>{v.pendingTitle}</h1>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+              {v.pendingBody}
             </p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -126,110 +191,133 @@ export default function VenueDashboard() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-            <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
-                Your Venues
-              </h1>
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>Manage your venue listings, seating, and pricing</p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <Link
-                href="/dashboard/venue/bookings"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                Booking Requests
-                {pendingBookings > 0 && (
-                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#C8441A', color: '#F7F3EE', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
-                    {pendingBookings}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/dashboard/venue-requests"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                Flexible Requests
-              </Link>
-              <Link
-                href="/dashboard/venue/create"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                + Register Venue
-              </Link>
-            </div>
-          </div>
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '1120px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
+          {/* BUG-2609-010: Account Settings/Revenue Overview/Booking
+              Requests/Flexible Requests are all now sidebar entries
+              (DashboardShell's VENUE_OWNER ROLE_SECTIONS); Register Venue
+              is the sidebar section's persistent "+" affordance instead
+              of an in-page CTA, per Hitesh's call. pendingBookings/
+              pendingFlexRequests badges moved with Bookings/Flexible
+              Requests into the sidebar (SidebarLink's own badge prop). */}
+          <PageHead eyebrow={v.eyebrow} title={v.title} titleSize="lg" />
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
           )}
 
           {venues.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: '#fff', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '17px', color: '#0E0C0A', marginBottom: '8px' }}>No venues yet</p>
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '20px' }}>Register your first venue to start hosting events</p>
-              <Link
-                href="/dashboard/venue/create"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
-              >
-                Register Venue
-              </Link>
-            </div>
+            <EmptyState
+              icon={<IconVenue size={56} strokeWidth={1} />}
+              caption={v.emptyCaption}
+              action={
+                <Link href="/dashboard/venue/create" className="avp-btn-primary" style={primaryLinkStyle}>
+                  <IconPlus /> {chrome.registerVenue}
+                </Link>
+              }
+            />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: 'var(--afa-space-5)' }}>
               {venues.map((venue) => (
-                <div key={venue.id} style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
-                    <div>
-                      <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: '#0E0C0A' }}>{venue.name}</h3>
-                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginTop: '2px' }}>{venue.address}, {venue.city}</p>
+                <Card
+                  key={venue.id}
+                  onClick={() => router.push(`/dashboard/venue/${venue.id}`)}
+                  style={{ display: 'flex', flexDirection: 'column', padding: 'var(--afa-space-5)', cursor: 'pointer' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-4)', gap: 'var(--afa-space-10px)' }}>
+                    {/* BUG-2608-085/087/088: fixed minHeight + line-clamped
+                        title + 2-line-clamped (not 1-line-truncated)
+                        address so cards in the same grid row start their
+                        stats/actions rows at the same Y position
+                        regardless of name/address length, while the full
+                        address stays readable (Hitesh's call 23 Aug -
+                        okay to wrap to 2 lines, not okay to hide it).
+                        minWidth:0 required (BUG-2608-087) - flex items
+                        default to min-width:auto and won't shrink below
+                        content width otherwise, which silently defeats
+                        the line-clamp/ellipsis below it. minHeight raised
+                        92->118px to fit the address's 2nd line. */}
+                    <div style={{ minHeight: '118px', minWidth: 0 }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 var(--afa-space-6px)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)' }}>
+                        {venue.country && COUNTRY_FLAGS[venue.country] && (() => {
+                          const Flag = COUNTRY_FLAGS[venue.country]
+                          return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: 'var(--afa-radius-xs)', flexShrink: 0, boxShadow: '0 0 0 1px var(--afa-tint-10)' }} />
+                        })()}
+                        {venue.city}
+                      </p>
+                      <h3
+                        style={{
+                          fontFamily: 'var(--font-ui)', fontSize: '21px', fontWeight: 500, lineHeight: 1.2, color: 'var(--afa-text-primary)', margin: 0, // token-ok(font-size-literal): venue card title in the UI font, the only 21px size, between subtitle (20px) and subheading (22px)
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        }}
+                      >
+                        {venue.name}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)', lineHeight: 1.35,
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        }}
+                      >
+                        {venue.address}
+                      </p>
                     </div>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        padding: '5px 10px',
-                        borderRadius: '999px',
-                        background: venue.isApproved ? 'rgba(74,103,65,0.12)' : 'rgba(201,151,58,0.15)',
-                        color: venue.isApproved ? '#4A6741' : '#8a6a1f',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {venue.isApproved ? 'Published' : 'Draft'}
-                    </span>
+                    <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>{venue.isApproved ? v.statusPublished : v.statusDraft}</StatusPill>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '18px', fontSize: '13px', color: '#0E0C0A' }}>
-                    <span><strong>{venue.capacity}</strong> seats</span>
-                    <span><strong>{priceRange(venue)}</strong> per seat</span>
+                  <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-08)', paddingTop: 'var(--afa-space-4)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
+                      <IconUsers size={16} style={{ color: 'var(--afa-amber)' }} />
+                      <div>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>{v.capacity}</p>
+                      </div>
+                    </div>
+                    {venue.seatingMode === 'NUMBERED' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
+                        <IconTag size={16} style={{ color: 'var(--afa-amber)' }} />
+                        <div>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>{v.perSeat}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
+                        <IconTag size={16} style={{ color: 'var(--afa-amber)' }} />
+                        <div>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue, v)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>{v.rateType}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <Link
-                      href={`/dashboard/venue/${venue.id}`}
-                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#0E0C0A', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
-                    >
-                      View
+                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-amber)', marginTop: 'var(--afa-space-14px)', marginBottom: 0 }}>{rateLabel(venue, v)}</p>
+
+                  <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-4)' }} onClick={(e) => e.stopPropagation()}>
+                    <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                      {v.view}
                     </Link>
-                    <Link
-                      href={`/dashboard/venue/${venue.id}/edit`}
-                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
-                    >
-                      Edit
+                    {/* GEN-2609-121 - a secondary action on every card, so the same outline as View. */}
+                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                      {v.edit}
                     </Link>
+                    {venue.seatingMode === 'NUMBERED' && (
+                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} aria-label={v.seatMap} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                        <IconMap size={14} />
+                      </Link>
+                    )}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
+
+

@@ -1,44 +1,218 @@
 "use client"
-import { useState, Suspense } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
+import BrandLoader from '@/components/BrandLoader'
+import AuthLayout from '@/components/AuthLayout'
+import { useLocale } from '@/lib/i18n/translate'
+import Button from '@/components/ui/Button'
+import { isOfflineFailure } from '@/lib/network-error'
+
+type Mode = "password" | "otp-request" | "otp-verify"
+
+// Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - same
+// two-path eye outline as RegisterForm.tsx, re-skinning the 🙈/👁️ emoji.
+function EyeIcon({ visible }: { visible: boolean }) {
+  return visible ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.59 21.59 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.59 21.59 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  )
+}
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t: tr } = useLocale()
   const registered = searchParams.get("registered")
   const justReset = searchParams.get("reset")
+  const wasSuspended = searchParams.get("suspended")
+  const wasIdle = searchParams.get("idle")
+  // S1b-b1 - launch wave W1 (new accounts). null = not known yet / hint
+  // failed: show the normal page. The hint is UX only; register and the
+  // Google createUser step enforce the switch on the server.
+  const [w1Open, setW1Open] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/platform-settings/launch-waves")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && typeof data.W1 === "boolean") setW1Open(data.W1)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const signupsClosed = w1Open === false
+  // SMS OTP toggle (17 Nov) - while PlatformSettings.smsOtpEnabled is off
+  // "Login with OTP" is hidden (password + Google only). Shown until the
+  // flag says off; the OTP endpoints refuse on the server either way.
+  const [smsOtpEnabled, setSmsOtpEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/auth/sms-otp")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && typeof data.enabled === "boolean") setSmsOtpEnabled(data.enabled)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const otpLoginHidden = smsOtpEnabled === false
+  const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true"
+  // A brand-new Google account refused by the W1 gate (WaveClosedError in
+  // createUser) comes back from NextAuth as ?error=OAuthCreateAccount.
+  const oauthCreateFailed = searchParams.get("error") === "OAuthCreateAccount"
+  // Feedback cmrzsmlus - if this login follows a registration that
+  // started from a specific "Join As X" link, land the person on
+  // Profile (where the "Become an X" application cards live) instead of
+  // the generic homepage, which had no memory of why they signed up.
+  //
+  // GEN-2608-036 correction (caught in live click-test): this used to
+  // push to plain "/profile" - the role decided WHETHER to redirect
+  // there but the actual value never made it into the URL, so /profile's
+  // own highlight/auto-focus effect (which reads ?role=) had nothing to
+  // read. Registered fine, verified fine, then landed on a completely
+  // generic profile page with no highlighted card and nothing focused -
+  // exactly what was reported. Now forwards the value.
+  const intendedRole = searchParams.get("role")
+  const postLoginRedirect = () => router.push(intendedRole ? `/profile?role=${intendedRole}` : "/")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [form, setForm] = useState({ email: "", password: "" })
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword] = useState("")
+  const [mode, setMode] = useState<Mode>("password")
+  const [otpCode, setOtpCode] = useState("")
+  const [devOtp, setDevOtp] = useState<string | null>(null) // only ever set in QA
+  // Register got the eye-toggle for Feedback cmrlxz35q (PR #62); login was
+  // missed in that PR. Same pattern, applied here as a same-day follow-up.
+  const [showPassword, setShowPassword] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+  // BUG-2609-063 - Chrome autofill puts saved credentials into the inputs
+  // without firing onChange until the user interacts with the page, so
+  // state can still be "" while the fields visibly hold a value. The submit
+  // buttons used to disable on empty state, which left Sign In dead for
+  // anyone with a saved password. Now they only disable while a request is
+  // in flight, and each handler reads the real DOM value on submit.
+  const identifierRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const otpRef = useRef<HTMLInputElement>(null)
+  const [invalidField, setInvalidField] = useState<"identifier" | "password" | "otp" | null>(null)
+
+  // Falls back to state when the input isn't rendered (the identifier
+  // during OTP verify, e.g. for Resend code).
+  const readInput = (ref: React.RefObject<HTMLInputElement | null>, fallback: string, set: (v: string) => void) => {
+    const value = ref.current ? ref.current.value : fallback
+    if (value !== fallback) set(value)
+    return value
+  }
+  const flagEmpty = (field: "identifier" | "password" | "otp", ref: React.RefObject<HTMLInputElement | null>, message: string) => {
+    setError(message); setInvalidField(field); ref.current?.focus()
   }
 
   const handleLogin = async () => {
+    if (loading) return
+    const id = readInput(identifierRef, identifier, setIdentifier).trim()
+    const pw = readInput(passwordRef, password, setPassword)
+    setInvalidField(null)
+    if (!id) return flagEmpty("identifier", identifierRef, tr.authCommon.enterIdentifier)
+    if (!pw) return flagEmpty("password", passwordRef, tr.authCommon.enterPassword)
+    // BUG-2610-001 follow-up - no signal: say so, not "Failed to sign in".
+    if (isOfflineFailure(null)) return setError(tr.loginPage.offlineSignInError)
     setLoading(true); setError("")
     try {
       const result = await signIn("credentials", {
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
+        identifier: id,
+        password: pw,
         redirect: false,
       })
       if (result?.error) {
         if (result.error === "LOCKED") {
-          setError("Too many attempts. Try again in 15 minutes.")
+          setError(tr.loginPage.lockedError)
+        } else if (result.error === "SUSPENDED") {
+          setError(tr.authCommon.accountSuspendedMessage)
         } else if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password")
+          setError(tr.loginPage.invalidCredentialsError)
         } else {
-          setError("Failed to sign in. Please check your credentials.")
+          setError(tr.loginPage.failedSignInError)
         }
         setLoading(false); return
       }
-      router.push("/")
+      postLoginRedirect()
+    } catch (err) {
+      setError(isOfflineFailure(err) ? tr.loginPage.offlineSignInError : tr.authCommon.somethingWentWrong)
+      setLoading(false)
+    }
+  }
+
+  const handleRequestOtp = async () => {
+    if (loading) return
+    const id = readInput(identifierRef, identifier, setIdentifier).trim()
+    setInvalidField(null)
+    if (!id) return flagEmpty("identifier", identifierRef, tr.authCommon.enterIdentifier)
+    // BUG-2610-001 follow-up - no signal: say so, not "Could not send code."
+    if (isOfflineFailure(null)) return setError(tr.loginPage.offlineCodeError)
+    setLoading(true); setError("")
+    try {
+      const res = await fetch("/api/auth/otp/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ purpose: "LOGIN", identifier: id }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        // `code` is a stable identifier the server returns alongside the
+        // (English) `error` string - look up the translated message
+        // instead of displaying raw English (BUG-2608-038, e.g. "No
+        // account found for that identifier." leaking through in Hindi mode).
+        const code = typeof data.code === "string" ? data.code : undefined
+        const authErrors = tr.authErrors as Record<string, string>
+        setError((code && authErrors[code]) || data.error || tr.loginPage.couldNotSendCodeError)
+        setLoading(false); return
+      }
+      setDevOtp(data.devOtp ?? null)
+      setMode("otp-verify")
+      setLoading(false)
+    } catch (err) {
+      setError(isOfflineFailure(err) ? tr.loginPage.offlineCodeError : tr.loginPage.couldNotSendCodeError)
+      setLoading(false)
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    if (loading) return
+    const code = readInput(otpRef, otpCode, setOtpCode).trim()
+    setInvalidField(null)
+    if (code.length !== 6) return flagEmpty("otp", otpRef, tr.authCommon.enterSixDigitCode)
+    setLoading(true); setError("")
+    try {
+      const result = await signIn("otp-login", {
+        identifier: identifier.trim(),
+        code,
+        redirect: false,
+      })
+      if (result?.error) {
+        if (result.error === "SUSPENDED") {
+          setError(tr.authCommon.accountSuspendedMessage)
+        } else {
+          setError(tr.loginPage.invalidOrExpiredCodeError)
+        }
+        setLoading(false); return
+      }
+      postLoginRedirect()
     } catch {
-      setError("Something went wrong")
+      setError(tr.authCommon.somethingWentWrong)
       setLoading(false)
     }
   }
@@ -46,91 +220,247 @@ function LoginForm() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="font-serif text-[28px] font-bold text-[#0E0C0A] no-underline">
-          <span className="text-[#C8441A]">A</span>forAudience
+        <Link href="/" className="text-[length:var(--afa-text-page-title)] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="text-[color:var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
-        <p className="text-[14px] text-[#0E0C0A] opacity-50 mt-2">
-          Welcome back to the art world
+        <p className="text-[length:var(--afa-text-body)] text-[color:var(--afa-text-primary)] opacity-50 mt-2">
+          {tr.loginPage.welcomeBack}
         </p>
       </div>
 
-      <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", marginBottom: "24px" }}>
-          Sign in
+      <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_var(--afa-shadow)]">
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-6)" }}>
+          {tr.loginPage.signInHeading}
         </h2>
 
         {registered && (
-          <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
-            ✅ Account created! Please sign in.
+          <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+            {tr.loginPage.accountCreatedBanner}
           </div>
         )}
-
         {justReset && (
-          <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
-            ✅ Password updated. Please sign in.
+          <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+            {tr.loginPage.passwordUpdatedBanner}
           </div>
         )}
-
+        {wasSuspended && (
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+            {tr.authCommon.accountSuspendedMessage}
+          </div>
+        )}
+        {wasIdle && !wasSuspended && (
+          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>
+            {tr.loginPage.signedOutIdleBanner}
+          </div>
+        )}
+        {oauthCreateFailed && !error && (
+          <div data-afa-oauth-create-error style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+            {signupsClosed ? tr.launchWaves.newAccountsSoonNote : tr.authCommon.somethingWentWrong}
+          </div>
+        )}
         {error && (
-          <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
             {error}
           </div>
         )}
+        {devOtp && mode === "otp-verify" && (
+          <div style={{ background: "var(--afa-amber-wash)", border: "1px solid var(--afa-amber-border)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)" }}>
+            QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
+          </div>
+        )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-          {[
-            { label: "Email", name: "email", type: "email", placeholder: "you@example.com" },
-            { label: "Password", name: "password", type: "password", placeholder: "Your password" },
-          ].map((field) => (
-            <div key={field.name}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
-                {field.label}
+        {mode !== "otp-verify" && (
+          <div style={{ marginBottom: "var(--afa-space-4)" }}>
+            <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "var(--afa-space-6px)" }}>
+              {tr.loginPage.identifierLabel}
+            </label>
+            <input
+              ref={identifierRef}
+              name="username"
+              autoComplete="username"
+              aria-invalid={invalidField === "identifier" || undefined}
+              value={identifier}
+              onChange={(e) => { setIdentifier(e.target.value); setInvalidField(null) }}
+              placeholder={tr.loginPage.identifierPlaceholder}
+              onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
+              style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+        )}
+
+        {mode === "password" && (
+          <>
+            <div style={{ marginBottom: "var(--afa-space-6)" }}>
+              <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "var(--afa-space-6px)" }}>
+                {tr.loginPage.passwordLabel}
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  ref={passwordRef}
+                  name="password"
+                  autoComplete="current-password"
+                  aria-invalid={invalidField === "password" || undefined}
+                  type={showPassword ? "text" : "password"}
+                  placeholder={tr.loginPage.passwordPlaceholder}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setInvalidField(null) }}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }} // token-ok(spacing-literal): 44px used under 10 times, no exact token (GEN-2609-107)
+                />
+                <Button
+                  variant="icon"
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
+                >
+                  <EyeIcon visible={showPassword} />
+                </Button>
+              </div>
+            </div>
+            <Button
+              variant="form-submit"
+              onClick={handleLogin}
+              disabled={loading}
+            >
+              {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
+            </Button>
+            {!otpLoginHidden && (
+              <Button
+                variant="link"
+                onClick={() => { setMode("otp-request"); setError("") }}
+                style={{ marginTop: "var(--afa-space-2)" }}
+              >
+                {tr.loginPage.useOtpInstead}
+              </Button>
+            )}
+          </>
+        )}
+
+        {mode === "otp-request" && (
+          <>
+            <Button
+              variant="form-submit"
+              onClick={handleRequestOtp}
+              disabled={loading}
+            >
+              {loading ? tr.loginPage.sendingEllipsis : tr.loginPage.sendCodeButton}
+            </Button>
+            <Button
+              variant="link"
+              onClick={() => { setMode("password"); setError("") }}
+              style={{ marginTop: "var(--afa-space-2)" }}
+            >
+              {tr.loginPage.usePasswordInstead}
+            </Button>
+          </>
+        )}
+
+        {mode === "otp-verify" && (
+          <>
+            <div style={{ marginBottom: "var(--afa-space-6)" }}>
+              <label style={{ fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "var(--afa-space-6px)" }}>
+                {tr.loginPage.enterCodeLabel}
               </label>
               <input
-                name={field.name}
-                type={field.type}
-                placeholder={field.placeholder}
-                value={form[field.name as keyof typeof form]}
-                onChange={handleChange}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                ref={otpRef}
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                aria-invalid={invalidField === "otp" || undefined}
+                value={otpCode}
+                onChange={(e) => { setOtpCode(e.target.value); setInvalidField(null) }}
+                maxLength={6}
+                onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
+                style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
             </div>
-          ))}
-        </div>
+            <Button
+              variant="form-submit"
+              onClick={handleVerifyOtp}
+              disabled={loading}
+            >
+              {loading ? tr.loginPage.verifyingEllipsis : tr.loginPage.verifyAndSignInButton}
+            </Button>
+            <Button
+              variant="link"
+              onClick={handleRequestOtp}
+              disabled={loading}
+              style={{ marginTop: "var(--afa-space-2)", opacity: 1 }}
+            >
+              {tr.loginPage.resendCodeButton}
+            </Button>
+          </>
+        )}
 
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
-        >
-          {loading ? "Signing in..." : "Sign In"}
-        </button>
+        {/* QST-2607-009 (10 Aug) - additive alongside password/OTP, not
+            during the OTP-verify step (mid-flow, would be confusing).
+            NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED gates this client-side; the
+            server-side provider is separately gated by whether
+            GOOGLE_CLIENT_ID/SECRET are set (see src/lib/auth.ts) - both
+            need to be true for this to actually work end to end. */}
+        {mode !== "otp-verify" && googleEnabled && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
+              <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
+              <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
+              <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
+            </div>
+            <Button
+              variant="outline-neutral"
+              size="lg"
+              type="button"
+              onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.68-3.88 2.68-6.62z"/>{/* token-ok(hex-color-literal): Google brand logo, fixed official 4-color palette, cannot be tokenized */}
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.95v2.33A9 9 0 0 0 9 18z"/>{/* token-ok(hex-color-literal): Google brand logo, fixed official 4-color palette, cannot be tokenized */}
+                <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.03l3-2.33z"/>{/* token-ok(hex-color-literal): Google brand logo, fixed official 4-color palette, cannot be tokenized */}
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97l3 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>{/* token-ok(hex-color-literal): Google brand logo, fixed official 4-color palette, cannot be tokenized */}
+              </svg>
+              {tr.loginPage.continueWithGoogle}
+            </Button>
+            {signupsClosed && (
+              <p data-afa-new-accounts-soon style={{ textAlign: "center", marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", lineHeight: "round(1.5em, 1px)" }}>
+                {tr.launchWaves.newAccountsSoonNote}
+              </p>
+            )}
+          </>
+        )}
 
-        <div style={{ textAlign: "center", marginTop: "16px" }}>
-          <Link href="/forgot-password" style={{ fontSize: "13px", color: "#C8441A", textDecoration: "none" }}>
-            Forgot password?
+        <div style={{ textAlign: "center", marginTop: "var(--afa-space-4)" }}>
+          <Link href="/forgot-password" style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", textDecoration: "none" }}>
+            {tr.loginPage.forgotPasswordLink}
           </Link>
         </div>
       </div>
 
-      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "#0E0C0A", opacity: 0.6 }}>
-        Don&apos;t have an account?{" "}
-        <Link href="/register" style={{ color: "#C8441A", textDecoration: "none", fontWeight: 500 }}>
-          Create one free
-        </Link>
-      </p>
+      {/* S1b-b1 - no "Create account" while W1 is closed; the note sits
+          under the Google button instead (or here when Google is off). */}
+      {signupsClosed ? (
+        !googleEnabled && (
+          <p data-afa-new-accounts-soon style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", lineHeight: "round(1.5em, 1px)" }}>
+            {tr.launchWaves.newAccountsSoonNote}
+          </p>
+        )
+      ) : (
+        <p style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-body)" }}>
+          <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.loginPage.noAccountPrefix}</span>{" "}
+          <Link href="/register" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
+            {tr.loginPage.createOneFreeLink}
+          </Link>
+        </p>
+      )}
     </div>
   )
 }
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[#F7F3EE] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
-      <Suspense fallback={<div>Loading...</div>}>
+    <AuthLayout>
+      <Suspense fallback={<BrandLoader />}>
         <LoginForm />
       </Suspense>
-    </main>
+    </AuthLayout>
   )
 }

@@ -1,0 +1,236 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
+import BackLink from '@/components/BackLink'
+import BrandLoader from '@/components/BrandLoader'
+import SearchInputBox from '@/components/SearchInputBox'
+import Button from '@/components/ui/Button'
+import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+
+interface UserRow {
+  id: string
+  name: string
+  displayName: string | null
+  email: string
+  role: string
+  isSuspended: boolean
+  suspendedAt: string | null
+  suspendReason: string | null
+  createdAt: string
+}
+
+const ROLES = ['', 'AUDIENCE', 'ARTIST', 'ORGANISER', 'VENUE_OWNER', 'ADMIN']
+
+export default function AdminUsersPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [search, setSearch] = useState('')
+  const [role, setRole] = useState('')
+  const [users, setUsers] = useState<UserRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [actioningId, setActioningId] = useState<string | null>(null)
+  const [reasonDraft, setReasonDraft] = useState<Record<string, string>>({})
+  // BUG-2609-086 - in-app confirm and toasts, not the browser's confirm()/alert().
+  const { showToast } = useToast()
+  const confirm = useConfirm()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
+
+  const fetchUsers = useCallback(async (q: string, r: string) => {
+    try {
+      const params = new URLSearchParams()
+      if (q) params.set('search', q)
+      if (r) params.set('role', r)
+      const res = await fetch(`/api/admin/users?${params.toString()}`)
+      if (!res.ok) {
+        if (res.status === 403) throw new Error('You do not have access to this page')
+        throw new Error('Could not load users')
+      }
+      const json = await res.json()
+      setUsers(json.users)
+      setError('')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    setLoading(true)
+    fetchUsers(search, role)
+  }, [status, fetchUsers]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    fetchUsers(search, role)
+  }
+
+  const handleSuspend = async (userId: string) => {
+    const reason = (reasonDraft[userId] || '').trim()
+    if (!reason) {
+      showToast('Please enter a reason before suspending.', 'error')
+      return
+    }
+    setActioningId(userId)
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/suspend`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suspended: true, reason }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        showToast(err.error || 'Failed to suspend', 'error')
+        return
+      }
+      await fetchUsers(search, role)
+    } finally {
+      setActioningId(null)
+    }
+  }
+
+  const handleUnsuspend = async (userId: string) => {
+    if (!(await confirm({ title: 'Unsuspend this account?', body: 'They will be able to log in again immediately.', confirmLabel: 'Unsuspend' }))) return
+    setActioningId(userId)
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/suspend`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suspended: false }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        showToast(err.error || 'Failed to unsuspend', 'error')
+        return
+      }
+      await fetchUsers(search, role)
+    } finally {
+      setActioningId(null)
+    }
+  }
+
+  if (status === 'loading' || (loading && users.length === 0)) return (<><SiteNav /><BrandLoader /></>)
+  if (!session) return <SiteNav />
+
+  return (
+    <>
+      <SiteNav />
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
+          <div className="lg:hidden">
+            <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          </div>
+
+          <PageTitle style={{ marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
+            Accounts
+          </PageTitle>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)', maxWidth: '640px' }}>
+            Suspending blocks login immediately and hides the account's future events/venues from public
+            listings. It does not cancel existing confirmed bookings or already-published events. Fully
+            reversible — unsuspend at any time.
+          </p>
+
+          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-5)' }}>
+            <SearchInputBox
+              value={search}
+              onChange={setSearch}
+              placeholder="Search name, display name, or email..."
+              className="lg:flex-1"
+            />
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={{ padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+            >
+              {ROLES.map((r) => (
+                <option key={r} value={r}>{r || 'All roles'}</option>
+              ))}
+            </select>
+            <Button
+              variant="outline-accent"
+              size="md"
+              fullWidth={false}
+              type="submit"
+            >
+              Search
+            </Button>
+          </form>
+
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{error}</div>}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
+            {users.length === 0 && !loading && (
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No users match.</p>
+            )}
+            {users.map((u) => (
+              <div
+                key={u.id}
+                style={{
+                  background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)',
+                  border: u.isSuspended ? '1px solid var(--afa-error-edge)' : '1px solid var(--afa-tint-08)',
+                }}
+              >
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: 'var(--afa-space-10px)' }}>
+                  <div>
+                    <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                      {u.displayName || u.name}
+                      {u.isSuspended && <span style={{ marginLeft: 'var(--afa-space-2)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error-bright)', textTransform: 'uppercase' }}>Suspended</span>}
+                    </p>
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{u.email} · {u.role}</p>
+                    {u.isSuspended && u.suspendReason && (
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-6px)' }}>
+                        Reason: {u.suspendReason}
+                      </p>
+                    )}
+                  </div>
+
+                  {u.role !== 'ADMIN' && (
+                    u.isSuspended ? (
+                      <Button
+                        variant="outline-success"
+                        size="md"
+                        fullWidth={false}
+                        onClick={() => handleUnsuspend(u.id)}
+                        disabled={actioningId === u.id}
+                        style={{ flexShrink: 0 }}
+                      >
+                        Unsuspend
+                      </Button>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', alignItems: 'center', flexShrink: 0 }}>
+                        <input
+                          value={reasonDraft[u.id] || ''}
+                          onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
+                          placeholder="Reason..."
+                          style={{ padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                        />
+                        <Button variant="solid" size="md" fullWidth={false} onClick={() => handleSuspend(u.id)} disabled={actioningId === u.id}>
+                          Suspend
+                        </Button>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+      </DashboardShell>
+    </>
+  )
+}

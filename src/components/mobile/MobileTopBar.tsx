@@ -1,0 +1,275 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { signOutAndClearCache } from '@/lib/sw-cache'
+import { useIsOffline } from '@/lib/use-is-offline'
+import { useLocale } from '@/lib/i18n/translate'
+import { LOCALES } from '@/lib/i18n/locales'
+import LocationChip from '@/components/LocationChip'
+import { FilterSlidersIcon } from '@/components/icons/EventIcons'
+import { TopBarSearchIcon, TopBarGlobeIcon } from '@/components/icons/MobileTopBarIcons'
+import Button from '@/components/ui/Button'
+import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, MOBILE_SEARCH_SYNC_EVENT } from '@/lib/app-events'
+
+// Mobile Nav v3, Phase A (GEN-2609-019) - global mobile top bar, ported
+// from the Figma Make "AFA Mobile App v3" export's TopBar.tsx (structure,
+// not literal code - that mock has no real auth/i18n/location system to
+// wire against). Mounted once in the root layout (see layout.tsx),
+// self-gated to mobile via `lg:hidden` same as MobileTabBar.tsx, and
+// replaces SiteNav.tsx's entire header on mobile (not just its hamburger
+// drawer) - see SiteNav.tsx's own comment on why its whole <nav> is now
+// hidden below the same breakpoint rather than just the drawer panel.
+//
+// Two judgment calls made here, flagged per the dispatch brief rather
+// than guessed silently:
+//
+// 1. Language placement (Phase A's own open flag - the Figma mock has no
+//    language control anywhere). Put here, not on Profile: the removed
+//    hamburger drawer's language picker was reachable by EVERYONE,
+//    signed in or not (profile/page.tsx redirects guests to /login, so a
+//    Profile-only home would have regressed guest access to changing
+//    language). A small globe icon next to the auth buttons keeps that
+//    same "no login required" reach.
+// 2. "Search bar replaces the filter icon" on /events (confirmed 8 Sep,
+//    "one unified entry point, not two separate ones"): implemented as a
+//    filter-sliders icon *attached to* this same search input (not a
+//    separate button/row below it, which is what actually existed
+//    before) - tapping it opens the exact same MobileEventFilterSheet via
+//    a custom window event, since that sheet is owned by events/page.tsx
+//    (a different component tree) and this bar is global. Typing in the
+//    input forwards live via the same event bridge to that page's real
+//    `search` state - events/page.tsx's own hero search box is now
+//    hidden on mobile (see that file's own comment) so there's exactly
+//    one search entry point at this width, not two. One accepted
+//    scope-trim: the hero search's BrowseSearchDropdown autocomplete
+//    doesn't follow into this bar - out of scope for Phase A, worth a
+//    fast-follow if it's missed.
+// The event names live in src/lib/app-events.ts (LocationChip, which
+// this file imports, needs one too); re-exported for existing importers.
+export { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT }
+
+export default function MobileTopBar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { data: session, status } = useSession()
+  const { locale, setLocale, t } = useLocale()
+  // BUG-2610-001 follow-up - offline, a failed session fetch is not a
+  // sign-out: no Sign in / Sign up over the saved tickets.
+  const offline = useIsOffline()
+
+  const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
+  const onEventsRoute = normalizedPathname === '/events'
+
+  const [query, setQuery] = useState('')
+  const [langOpen, setLangOpen] = useState(false)
+  const langRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!langOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [langOpen])
+
+  // Query resets per-route rather than persisting globally - matches
+  // events/page.tsx's own `search` state, which is that page's local
+  // state and never survives a navigation away either.
+  useEffect(() => {
+    setQuery('')
+  }, [normalizedPathname])
+
+  // BUG-2610-004 - /events reports its active search (on mount, from
+  // ?search=, and whenever it changes), so this input always shows it
+  // and can clear it. The page's effects run after the reset above, so
+  // a search carried in the URL survives arriving on the route.
+  useEffect(() => {
+    const onSync = (e: Event) => {
+      const detail = (e as CustomEvent<{ query: string }>).detail
+      if (detail) setQuery(detail.query)
+    }
+    window.addEventListener(MOBILE_SEARCH_SYNC_EVENT, onSync)
+    return () => window.removeEventListener(MOBILE_SEARCH_SYNC_EVENT, onSync)
+  }, [])
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value)
+    if (onEventsRoute) {
+      window.dispatchEvent(new CustomEvent(MOBILE_SEARCH_EVENT, { detail: { query: value } }))
+    }
+  }
+
+  const handleOpenFilters = () => {
+    if (!onEventsRoute) return
+    window.dispatchEvent(new CustomEvent(MOBILE_SEARCH_OPEN_FILTERS_EVENT))
+  }
+
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return
+    if (onEventsRoute) return
+    const trimmed = query.trim()
+    if (!trimmed) return
+    router.push(`/events?search=${encodeURIComponent(trimmed)}`)
+  }
+
+  const user = session?.user as { name?: string | null } | undefined
+
+  return (
+    <header
+      // `flex` lives in the className (Tailwind), not the inline style -
+      // an inline `display` would out-specificity `lg:hidden`'s own
+      // `display: none` media rule and defeat it at desktop widths (real
+      // bug, caught via a live computed-style check: this bar was still
+      // `display: flex` at 1440px until this fix). Same reason
+      // MobileTabBar.tsx keeps ALL layout-affecting props (flex,
+      // items-stretch, justify-around, fixed, bottom-0) in its className
+      // and only non-conflicting properties (background, zIndex, padding)
+      // in its style object - matched here.
+      data-afa-top-bar=""
+      className="lg:hidden flex items-center"
+      style={{
+        position: 'sticky',
+        // BUG-2610-017 - the only pinned bar: top 0. NudgeStack's banners
+        // (rendered just before this in layout.tsx) scroll away with the
+        // page instead of sitting sticky above it. Same zIndex as SiteNav
+        // (100) since this bar plays SiteNav's header role on mobile.
+        top: 0,
+        zIndex: 100,
+        gap: 'var(--afa-space-10px)',
+        padding: 'var(--afa-space-10px) var(--afa-space-14px)',
+        background: 'var(--afa-scrim-strong)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--afa-tint-08)',
+      }}
+    >
+      {/* BUG-2609-078 - the chip sits under the logo, not inside its link:
+          as a child of the <Link> every tap on the chip (and on a city in
+          its list) also followed the link to the homepage. */}
+      <div style={{ flexShrink: 0, lineHeight: 1 }}>
+        <Link href="/" style={{ display: 'block', textDecoration: 'none' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
+          </span>
+        </Link>
+        <LocationChip variant="topbar" />
+      </div>
+
+      <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+        <TopBarSearchIcon
+          style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '14px', height: '14px', color: 'var(--afa-text-muted)', pointerEvents: 'none' }}
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => handleQueryChange(e.target.value)}
+          onKeyDown={handleSearchSubmit}
+          placeholder={t.search.mobileTopBarPlaceholder}
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            padding: onEventsRoute ? 'var(--afa-space-2) 30px var(--afa-space-2) 26px' : 'var(--afa-space-2) var(--afa-space-2) var(--afa-space-2) 26px', // token-ok(spacing-literal): 26px/30px used under 10 times, no exact token; ternary, unseen by the checker (GEN-2609-107)
+            borderRadius: 'var(--afa-radius-pill)',
+            border: '1px solid var(--afa-tint-12)',
+            background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
+            fontSize: 'var(--afa-text-ui)',
+            outline: 'none',
+          }}
+        />
+        {onEventsRoute && (
+          <Button
+            variant="icon"
+            type="button"
+            onClick={handleOpenFilters}
+            aria-label={t.eventsPage.filtersButtonLabel}
+            style={{
+              position: 'absolute',
+              right: '6px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              color: 'var(--afa-amber)',
+            }}
+          >
+            <FilterSlidersIcon style={{ width: '15px', height: '15px' }} />
+          </Button>
+        )}
+      </div>
+
+      <div ref={langRef} style={{ position: 'relative', flexShrink: 0 }}>
+        <Button
+          variant="icon"
+          type="button"
+          onClick={() => setLangOpen((v) => !v)}
+          aria-label={t.languagePicker.label}
+          aria-expanded={langOpen}
+          style={{ width: '28px', height: '28px', borderRadius: '50%', color: 'var(--afa-text-secondary)' }}
+        >
+          <TopBarGlobeIcon style={{ width: '17px', height: '17px' }} />
+        </Button>
+        {langOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 6px)',
+              right: 0,
+              background: 'var(--afa-surface-raised)',
+              border: '1px solid var(--afa-tint-10)',
+              borderRadius: 'var(--afa-radius-lg)',
+              boxShadow: '0 8px 24px var(--afa-shadow)',
+              padding: 'var(--afa-space-6px)',
+              minWidth: '150px',
+              zIndex: 20,
+            }}
+          >
+            {LOCALES.map((l) => (
+              <Button
+                variant="menu-row"
+                key={l.id}
+                selected={locale === l.id}
+                onClick={() => { setLocale(l.id); setLangOpen(false) }}
+              >
+                {l.nativeLabel}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? 'var(--afa-space-2)' : '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token; ternary, unseen by the checker (GEN-2609-107) */}
+        {status === 'loading' || (!user && offline) ? null : user ? (
+          <Button
+            // bare-reason: must match the Sign in / Register <Link>s it swaps with in the same top-bar slot (mono caption type); those are links, not Buttons
+            variant="bare"
+            onClick={() => signOutAndClearCache({ callbackUrl: '/' })}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', padding: 0 }}
+          >
+            {t.nav.signOut}
+          </Button>
+        ) : (
+          <>
+            {/* Narrower letter-spacing/padding than the signed-in Sign
+                Out button on purpose - two elements here (vs one) eat
+                into the search input's width at 360-375px, this is the
+                sizing-only fold-in for that. */}
+            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
+              {t.nav.signIn}
+            </Link>
+            <Link
+              href="/register"
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: 'var(--afa-radius-pill)' }} // token-ok(spacing-literal): 5px/7px odd value, no exact token (GEN-2609-107)
+            >
+              {t.nav.signUp}
+            </Link>
+          </>
+        )}
+      </div>
+    </header>
+  )
+}

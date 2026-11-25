@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { requirePhoneVerification } from '@/lib/verification'
+import { parseAmount } from '@/lib/money-validation'
+import { isFlexRequestExpired } from '@/lib/flex-requests'
+import { DIRECT_PAY_PLATFORM_FEE, directPayExpiresAt, shouldUseDirectPay } from '@/lib/venue-direct-pay'
 
 const MAX_OFFERS = 6 // §4.5 suggestion #7 - 3 rounds per side, 6 total
-const EXPIRY_HOURS = 48
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -21,11 +25,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const request = await prisma.venueBookingRequest.findUnique({
       where: { id },
-      include: { venue: true, offers: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        venue: { include: { owner: true } },
+        organiser: true,
+        offers: { orderBy: { createdAt: 'asc' } },
+      },
     })
     if (!request) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 })
     }
+
+    // Whoever didn't just act needs to know something changed - resolved
+    // once here since decline/accept/counter all need it.
+    const otherSideUserId = () =>
+      callerSide === 'ORGANISER' ? request.venue.owner.userId : request.organiser.userId
 
     // Work out which side of the negotiation the caller is on.
     let callerSide: 'ORGANISER' | 'VENUE_OWNER' | null = null
@@ -58,7 +71,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     // 48-hour expiry, checked against the most recent offer.
     const lastOffer = request.offers[request.offers.length - 1]
-    if (lastOffer && Date.now() - new Date(lastOffer.createdAt).getTime() > EXPIRY_HOURS * 60 * 60 * 1000) {
+    if (isFlexRequestExpired(request)) {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'EXPIRED' } })
       if (request.eventId) {
         await prisma.event.updateMany({
@@ -69,7 +82,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'This request expired after 48 hours with no response' }, { status: 400 })
     }
 
-    const { action, amount } = await req.json()
+    const { action, amount, comment, paymentMethod, cashOnly } = await req.json()
 
     if (action === 'decline') {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'DECLINED' } })
@@ -81,6 +94,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           data: { status: 'DRAFT' },
         })
       }
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(otherSideUserId(), {
+            title: 'Venue booking request declined',
+            body:
+              callerSide === 'VENUE_OWNER'
+                ? `${request.venue.name} declined your booking request.`
+                : `The Organiser withdrew their request for ${request.venue.name}.`,
+            url: '/dashboard/venue-requests',
+          }),
+        'booking-request-decline'
+      )
       return NextResponse.json({ message: 'Declined' })
     }
 
@@ -88,8 +113,78 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!lastOffer) {
         return NextResponse.json({ error: 'No offer to accept yet' }, { status: 400 })
       }
+      const verifyError = await requirePhoneVerification(user, 'confirming this booking')
+      if (verifyError) return verifyError
 
-      const platformSettings = await prisma.platformSettings.findFirst()
+      const platformSettings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } })
+
+      // D2 - with online payments off (or the owner choosing direct) the
+      // accepted deal waits for the organiser to pay the owner directly;
+      // it is confirmed only when the owner confirms receipt. The owner
+      // needs a UPI ID on file to accept, or says "cash only". An
+      // organiser accepting the owner's offer is never blocked on it
+      // (the payee block then says cash only).
+      const direct = shouldUseDirectPay(platformSettings?.paidBookingsEnabled === true, paymentMethod)
+      if (direct && callerSide === 'VENUE_OWNER' && !request.venue.owner.upiId && cashOnly !== true) {
+        return NextResponse.json(
+          { error: 'Add your UPI ID in your profile first, or accept as cash only.', code: 'UPI_REQUIRED' },
+          { status: 400 }
+        )
+      }
+
+      // Same overlap enforcement as PATCH /api/venue-bookings/[id] - this
+      // path creates a CONFIRMED VenueBooking directly (Flexible-venue
+      // negotiation acceptance) and was bypassing that guard entirely.
+      const conflicting = await prisma.venueBooking.findFirst({
+        where: {
+          venueId: request.venueId,
+          status: 'CONFIRMED',
+          fromDate: { lte: request.requestedDate },
+          toDate: { gte: request.requestedDate },
+        },
+      })
+      if (conflicting) {
+        return NextResponse.json(
+          { error: 'This venue already has a confirmed booking on this date.' },
+          { status: 409 }
+        )
+      }
+
+      if (direct) {
+        const booking = await prisma.$transaction(async (tx) => {
+          await tx.venueBookingRequest.update({ where: { id }, data: { status: 'ACCEPTED' } })
+          return tx.venueBooking.create({
+            data: {
+              venueId: request.venueId,
+              organiserId: request.organiserId,
+              eventId: request.eventId,
+              fromDate: request.requestedDate,
+              toDate: request.requestedDate,
+              status: 'PENDING',
+              amount: lastOffer.amount,
+              agreedRateType: 'FLEXIBLE',
+              durationHours: request.durationHours,
+              platformFeeAmount: DIRECT_PAY_PLATFORM_FEE,
+              paymentMethod: 'DIRECT',
+              directPayStatus: 'AWAITING_PAYMENT',
+              expiresAt: directPayExpiresAt(),
+            },
+          })
+        })
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(otherSideUserId(), {
+              title: 'Venue deal accepted - payment next',
+              body:
+                callerSide === 'VENUE_OWNER'
+                  ? `${request.venue.name}: pay ₹${lastOffer.amount} directly to the owner within 48 hours, then tap "I've paid".`
+                  : `The Organiser accepted ₹${lastOffer.amount} for ${request.venue.name}. Confirm when you receive the payment.`,
+              url: '/dashboard/venue-requests',
+            }),
+          'booking-request-accept-direct'
+        )
+        return NextResponse.json({ message: 'Accepted - awaiting direct payment', bookingId: booking.id })
+      }
 
       await prisma.$transaction([
         prisma.venueBookingRequest.update({ where: { id }, data: { status: 'ACCEPTED' } }),
@@ -115,12 +210,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           : []),
       ])
 
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(otherSideUserId(), {
+            title: 'Venue booking confirmed!',
+            body: `Your booking at ${request.venue.name} for ₹${lastOffer.amount} is confirmed.`,
+            url: '/dashboard/venue-requests',
+          }),
+        'booking-request-accept'
+      )
+
       return NextResponse.json({ message: 'Accepted - booking confirmed' })
     }
 
     if (action === 'counter') {
-      if (!amount || Number(amount) <= 0) {
-        return NextResponse.json({ error: 'Enter a counter-offer amount' }, { status: 400 })
+      const parsed = parseAmount(amount, { label: 'Counter-offer amount', required: true })
+      if (!parsed.ok) {
+        return NextResponse.json({ error: parsed.error }, { status: 400 })
       }
       if (request.offers.length >= MAX_OFFERS) {
         return NextResponse.json({ error: 'Round limit reached - accept or decline instead' }, { status: 400 })
@@ -131,9 +237,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: "Waiting on the other side to respond" }, { status: 400 })
       }
 
+      // Optional free-text alongside the amount - not required, capped to
+      // keep it a quick note rather than a full negotiation thread.
+      const trimmedComment = typeof comment === 'string' ? comment.trim().slice(0, 300) : null
+
       await prisma.venueBookingOffer.create({
-        data: { requestId: id, proposedBy: callerSide, amount: parseFloat(amount) },
+        data: { requestId: id, proposedBy: callerSide, amount: parsed.value as number, comment: trimmedComment || null },
       })
+
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(otherSideUserId(), {
+            title: 'New counter-offer',
+            body: trimmedComment
+              ? `${request.venue.name} negotiation: counter-offer of ₹${amount} — "${trimmedComment}"`
+              : `${request.venue.name} negotiation: counter-offer of ₹${amount}.`,
+            url: '/dashboard/venue-requests',
+          }),
+        'booking-request-counter'
+      )
 
       return NextResponse.json({ message: 'Counter-offer sent' })
     }

@@ -1,0 +1,123 @@
+'use client'
+
+import { useRef } from 'react'
+import { formatDisplayMoney, type DisplayCurrency } from '@/lib/money-display'
+import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
+
+// Mobile Redesign Phase 3 (GEN-2609-005) - ported from the Figma Make
+// export's FeeSheet.tsx. That mock hardcoded every row to a static ₹500
+// illustration ("Ticket face value ₹500 / Platform commission ₹0 /
+// Booking fee ₹0 / afa ₹0" across the board) - per the brief's ambiguity
+// #4, real implementation derives every number from the actual booking
+// instead. The commission-is-zero callout below was confirmed accurate
+// by Hitesh (6 Sep) and is kept as static copy - but the "Booking /
+// convenience fee" row is NOT always zero in production (see
+// GET /api/platform-settings/audience-fee - `audienceBookingFee` is a
+// real, admin-configurable fee the platform keeps, separate from
+// commission), so that row's "AFA takes" value is real, not hardcoded.
+export function FeeSheet({
+  ticketFaceValue,
+  bookingFee,
+  currency,
+  onClose,
+}: {
+  ticketFaceValue: number
+  bookingFee: number
+  currency: DisplayCurrency | null
+  onClose: () => void
+}) {
+  const sheetRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, sheetRef, onClose)
+  const zero = formatDisplayMoney(0, currency)
+  const rows: { label: string; hint?: string; you: string; afa: string }[] = [
+    { label: 'Ticket face value', you: formatDisplayMoney(ticketFaceValue, currency), afa: zero },
+    { label: 'Platform commission', you: zero, afa: zero },
+    { label: 'Booking / convenience fee', you: zero, afa: formatDisplayMoney(bookingFee, currency) },
+    { label: 'Payment gateway', you: 'at cost', afa: 'absorbed' },
+  ]
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <Button
+        variant="scrim"
+        aria-label="Close"
+        onClick={onClose}
+      >
+        {null}
+      </Button>
+      <div
+        ref={sheetRef}
+        style={{
+          position: 'relative',
+          borderTop: '1px solid var(--afa-tint-10)',
+          borderTopLeftRadius: 'var(--afa-radius-2xl)',
+          borderTopRightRadius: 'var(--afa-radius-2xl)',
+          background: 'var(--afa-surface-raised)',
+          paddingBottom: 'var(--afa-space-32px)',
+          maxWidth: 560,
+          width: '100%',
+          margin: '0 auto',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 'var(--afa-space-3)' }}>
+          <div style={{ height: 4, width: 40, borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-border-resting)' }} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-4) var(--afa-space-5) var(--afa-space-1)' }}>
+          <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subheading)', fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
+            Fee breakdown
+          </h2>
+          <Button variant="close" onClick={onClose} aria-label="Close">
+            ×
+          </Button>
+        </div>
+        <p style={{ padding: 'var(--afa-space-1) var(--afa-space-5) 0', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+          On a {formatDisplayMoney(ticketFaceValue, currency)} ticket, here&rsquo;s exactly where the money goes.
+        </p>
+
+        <div style={{ margin: 'var(--afa-space-5) var(--afa-space-5) 0', overflow: 'hidden', borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)' }}>
+          <div
+            style={{
+              display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 'var(--afa-space-4)',
+              background: 'var(--afa-surface-page)', padding: 'var(--afa-space-10px) var(--afa-space-4)',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase',
+              letterSpacing: '0.1em', color: 'var(--afa-text-muted)',
+            }}
+          >
+            <span>Line</span>
+            <span style={{ textAlign: 'right' }}>Artist/venue</span>
+            <span style={{ textAlign: 'right' }}>AFA takes</span>
+          </div>
+          {rows.map((r, i) => (
+            <div
+              key={r.label}
+              style={{
+                display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 'var(--afa-space-4)', padding: 'var(--afa-space-3) var(--afa-space-4)',
+                borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
+              }}
+            >
+              <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>{r.label}</span>
+              <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)' }}>{r.you}</span>
+              <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{r.afa}</span>
+            </div>
+          ))}
+        </div>
+
+        <div
+          style={{
+            margin: 'var(--afa-space-4) var(--afa-space-5) 0', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-xl)',
+            border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)',
+          }}
+        >
+          <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-amber)' }}>
+            Artist &amp; venue share: 100% · ₹0 commission
+          </p>
+          <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-ui)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+            We keep the lights on through venue subscriptions and optional artist promotions — never by taxing your
+            ticket.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

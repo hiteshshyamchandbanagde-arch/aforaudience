@@ -1,0 +1,121 @@
+"use client"
+import { useEffect, useState, use } from "react"
+import Link from "next/link"
+import SiteNav from "@/components/SiteNav"
+import BrandLoader from "@/components/BrandLoader"
+import { useLocale } from "@/lib/i18n/translate"
+
+interface VenueOwnerDetail {
+  id: string
+  bio: string | null
+  user: { name: string; displayName: string | null; avatar: string | null }
+  venues: { id: string; name: string; city: string; capacity: number; photos: string[]; seatingMode: string }[]
+}
+
+export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  const { t: tr } = useLocale()
+  const [owner, setOwner] = useState<VenueOwnerDetail | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    fetch(`/api/venue-owners/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Venue owner not found")
+        return res.json()
+      })
+      .then(setOwner)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) return (<><SiteNav /><BrandLoader /></>)
+
+  if (error || !owner) {
+    return (
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
+        <SiteNav />
+        <div style={{ maxWidth: "600px", margin: "0 auto", padding: "var(--afa-space-80px) var(--afa-space-6)", textAlign: "center" }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
+          <Link href="/venue-owners" style={{ color: "var(--afa-amber)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}>{tr.venueOwnerDetailPage.backToOwners}</Link>
+        </div>
+      </main>
+    )
+  }
+
+  const displayName = owner.user.displayName || owner.user.name
+
+  return (
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+      <SiteNav />
+
+      <div style={{ background: "var(--afa-surface-raised)", padding: "var(--afa-space-48px) var(--afa-space-6)", borderBottom: "1px solid var(--afa-tint-10)" }}>
+        <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", gap: "var(--afa-space-6)", alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{
+            width: "96px",
+            height: "96px",
+            borderRadius: "50%",
+            background: "var(--afa-tint-10)",
+            border: "3px solid var(--afa-tint-20)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "36px", // token-ok(font-size-literal): initial letter inside the 96px avatar circle, sized to the circle, not a type-scale role
+            fontWeight: 700,
+            color: "var(--afa-text-primary)",
+            flexShrink: 0,
+            overflow: "hidden",
+          }}>
+            {owner.user.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              displayName.charAt(0).toUpperCase()
+            )}
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title-lg)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-6px)" }}>{displayName}</div>
+            <div style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)" }}>
+              {owner.venues.length} {owner.venues.length === 1 ? tr.venueOwnerDetailPage.venueSingular : tr.venueOwnerDetailPage.venuePlural}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "var(--afa-space-32px) var(--afa-space-6)" }}>
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "var(--afa-space-6)", marginBottom: "var(--afa-space-6)", border: "1px solid var(--afa-tint-10)" }}>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
+            {owner.bio || tr.venueOwnerDetailPage.noBioYet}
+          </p>
+        </div>
+
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
+        {owner.venues.length === 0 ? (
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "var(--afa-space-4)" }}>
+            {owner.venues.map((v) => (
+              <Link
+                key={v.id}
+                href={`/venues/${v.id}`}
+                style={{ display: "block", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", overflow: "hidden", border: "1px solid var(--afa-tint-10)", textDecoration: "none" }}
+              >
+                <div style={{ height: "120px", background: "var(--afa-surface-inverse)" }}>
+                  {v.photos?.[0] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={v.photos[0]} alt={v.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  )}
+                </div>
+                <div style={{ padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
+                  <div style={{ fontSize: "var(--afa-text-body-lg)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
+                  <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}

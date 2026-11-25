@@ -1,0 +1,232 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, use, useCallback, useRef, ReactNode, Suspense } from 'react'
+import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
+import RangePicker from '@/components/RangePicker'
+import BrandLoader from '@/components/BrandLoader'
+import { formatDate } from '@/lib/format-date'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { PageTitle, StatLabel } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+
+interface TimelinePoint {
+  date: string
+  revenue: number
+}
+
+interface RecentBooking {
+  id: string
+  organiserName: string
+  eventTitle: string | null
+  fromDate: string
+  toDate: string
+  amount: number
+  createdAt: string
+}
+
+interface VenueSalesData {
+  venue: { id: string; name: string; city: string; capacity: number }
+  totals: {
+    grossRevenue: number
+    confirmedBookingsCount: number
+    upcomingCount: number
+    completedCount: number
+    pendingCount: number
+    pendingValue: number
+  }
+  timeline: TimelinePoint[]
+  recentBookings: RecentBooking[]
+  generatedAt: string
+}
+
+const POLL_MS = 20000
+
+const money = formatINR
+
+// The "ago" words are Revenue Overview's (venueDashboard.sales).
+function timeAgo(iso: string, s: Dictionary['venueDashboard']['sales']) {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (secs < 5) return s.justNow
+  if (secs < 60) return s.secondsAgo.replace('{n}', String(secs))
+  const mins = Math.floor(secs / 60)
+  if (mins < 60) return s.minutesAgo.replace('{n}', String(mins))
+  const hrs = Math.floor(mins / 60)
+  return s.hoursAgo.replace('{n}', String(hrs))
+}
+
+function shortDate(iso: string, locale: string) {
+  return formatDate(iso, 'short', locale)
+}
+
+function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
+  const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.venueSales
+  const s = tr.venueDashboard.sales
+  const { id } = use(params)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [range, setRange] = useState(searchParams.get('range') || 'all')
+  const [data, setData] = useState<VenueSalesData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [refreshedAt, setRefreshedAt] = useState<Date | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+
+  const fetchSales = useCallback(async (r: string) => {
+    try {
+      const res = await fetch(`/api/venues/${id}/sales?range=${r}`)
+      if (!res.ok) {
+        if (res.status === 403) throw new Error(tr.venueDashboard.venueView.accessDenied)
+        throw new Error(v.loadFailed)
+      }
+      const json = await res.json()
+      setData(json)
+      setRefreshedAt(new Date())
+      setError('')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [id, tr, v])
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    setLoading(true)
+    fetchSales(range)
+    if (pollRef.current) clearInterval(pollRef.current)
+    pollRef.current = setInterval(() => fetchSales(range), POLL_MS)
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [status, range, fetchSales])
+
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
+  if (!session) return <SiteNav />
+  if (error && !data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (!data) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{s.noData}</div></>)
+
+  const { venue, totals, timeline, recentBookings } = data
+  const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
+
+  return (
+    <>
+      <SiteNav />
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
+            <BackLink href={`/dashboard/venue/${id}`} label={tr.venueDashboard.venueEdit.backToVenue} />
+            <Link href="/dashboard/venue/sales" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
+              {v.allVenues}
+            </Link>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
+            <PageTitle>
+              {v.title.replace('{venue}', venue.name)}
+            </PageTitle>
+            <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
+              {refreshedAt ? s.updated.replace('{ago}', timeAgo(refreshedAt.toISOString(), s)).replace('{n}', String(POLL_MS / 1000)) : ''}
+            </span>
+          </div>
+
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+            <RangePicker value={range} onChange={setRange} />
+          </div>
+
+          {error && (
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>{s.staleData.replace('{error}', error)}</div>
+          )}
+
+          {/* Summary cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-28px)' }}>
+            <SummaryCard label={v.grossRevenue} value={money(totals.grossRevenue)} sub={v.grossSub.replace('{byEventDate}', tr.common.byEventDate)} />
+            <SummaryCard label={s.confirmedBookings} value={String(totals.confirmedBookingsCount)} sub={tr.common.byEventDate} />
+            <SummaryCard label={v.upcomingCompleted} value={`${totals.upcomingCount} / ${totals.completedCount}`} />
+            <SummaryCard
+              label={v.pending}
+              value={String(totals.pendingCount)}
+              sub={totals.pendingCount > 0 ? v.atStake.replace('{amount}', money(totals.pendingValue)) : v.noneRightNow}
+              muted
+            />
+          </div>
+
+          {/* Timeline */}
+          <Section title={s.revenueOverTime}>
+            {timeline.length === 0 ? (
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{v.noConfirmedInRange}</p>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-6px)', height: '120px', overflowX: 'auto', paddingBottom: 'var(--afa-space-1)' }}>
+                {timeline.map((t) => (
+                  <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-sage)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
+                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                      {t.date.slice(5)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Section>
+
+          {/* Recent bookings */}
+          <Section title={v.recentBookings}>
+            {recentBookings.length === 0 ? (
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>{s.noBookingsInRangeDot}</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+                {recentBookings.map((b) => (
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--afa-space-1)', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-10px) var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-06)' }}>
+                    <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{b.eventTitle || v.noLinkedEvent}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{shortDate(b.fromDate, locale)} – {shortDate(b.toDate, locale)}</span>
+                    <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
+                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt, s)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Section>
+        </div>
+      </main>
+    </>
+  )
+}
+
+function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
+  return (
+    <div style={{ background: muted ? 'var(--afa-tint-04)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)' }}>
+      <StatLabel style={{ marginBottom: 'var(--afa-space-6px)' }}>{label}</StatLabel>
+      <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
+      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)' }}>{sub}</p>}
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-06)' }}>
+      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>{title}</h2>
+      {children}
+    </div>
+  )
+}
+
+export default function VenueSalesPage(props: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<><SiteNav /><BrandLoader /></>}>
+      <VenueSalesPageInner {...props} />
+    </Suspense>
+  )
+}

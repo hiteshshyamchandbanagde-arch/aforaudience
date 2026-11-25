@@ -1,5 +1,22 @@
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import EventDetailClientPage from './EventDetailClientPage'
+import { computeHypeScore } from '@/lib/hype-score'
+import { getLaunchWavesForViewer } from '@/lib/launch-waves.server'
+import { bookingSoonState } from '@/lib/launch-waves-ui'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { requestsPaidTickets } from '@/lib/paid-bookings'
+
+// GEN-2608-027 - same eventStartInstant convention used in
+// bookings/[id]/route.ts, performances/[id]/cancel/route.ts, and
+// api/reviews/route.ts (the real server-side gate this mirrors).
+function eventStartInstant(date: Date, startTime: string): Date {
+  const [h, m] = startTime.split(':').map(Number)
+  const start = new Date(date)
+  start.setHours(h, m, 0, 0)
+  return start
+}
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -8,22 +25,159 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       venue: true,
+      organiser: true,
       lineup: {
         include: {
           artist: { include: { user: true } },
-          reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: 'desc' } },
+          reviews: {
+            include: {
+              user: { select: { name: true, displayName: true } },
+              reply: { include: { author: { select: { name: true, displayName: true } } } },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
         },
         orderBy: { slot: 'asc' },
       },
       ticketTiers: true,
+      // Accept-to-Appear (§8, session 57) - only ACCEPTED entries are ever
+      // fetched for the public page at all; PENDING/DECLINED simply don't
+      // exist as far as this query is concerned. `user` joined so display
+      // reads the account's own current displayName/avatar, not whatever
+      // organiser-typed `name` sits on the row from invite time.
+      panelists: {
+        where: { status: 'ACCEPTED' },
+        orderBy: { order: 'asc' },
+        include: { user: { select: { name: true, displayName: true, avatar: true } } },
+      },
+      celebrities: {
+        where: { status: 'ACCEPTED' },
+        orderBy: { order: 'asc' },
+        include: { user: { select: { name: true, displayName: true, avatar: true } } },
+      },
     },
   })
 
-  if (!event || event.status !== 'APPROVED') {
-    return <EventDetailClientPage event={null} />
+  // Public page must stay reachable for events that have wrapped up too
+  // (Event.status can be COMPLETED), not just APPROVED - otherwise the
+  // page 404s the moment an event is over, which would also hide the
+  // Hype Score badge/reviews it's specifically meant to surface.
+  // DRAFT / PENDING_APPROVAL / CANCELLED remain excluded.
+  if (!event || !['APPROVED', 'COMPLETED'].includes(event.status)) {
+    return <EventDetailClientPage event={null} canReview={false} />
   }
 
-  return <EventDetailClientPage event={JSON.parse(JSON.stringify(event))} />
+  // Accept-to-Appear (§8) - public display always reads the linked
+  // account's own name/photo, never the organiser-typed draft label from
+  // invite time (see docs/artist-reputation-system-design.md §8).
+  type PanelistRow = { id: string; name: string; bio: string | null; photoUrl: string | null; user: { name: string; displayName: string | null; avatar: string | null } | null }
+  type CelebrityRow = { id: string; name: string; photoUrl: string | null; user: { name: string; displayName: string | null; avatar: string | null } | null }
+
+  const panelistsForClient = (event.panelists as PanelistRow[]).map((p) => ({
+    id: p.id,
+    name: p.user?.displayName || p.user?.name || p.name,
+    bio: p.bio,
+    photoUrl: p.user?.avatar || p.photoUrl,
+  }))
+  const celebritiesForClient = (event.celebrities as CelebrityRow[]).map((c) => ({
+    id: c.id,
+    name: c.user?.displayName || c.user?.name || c.name,
+    photoUrl: c.user?.avatar || c.photoUrl,
+  }))
+
+  // `Event.totalSeats`/`Event.availableSeats` are only ever kept accurate
+  // on the flat/GA booking path (POST /api/bookings decrements/derives
+  // from that field there). For NUMBERED venues, occupancy is tracked
+  // per-seat via BookingSeat and was never wired back onto these Event
+  // columns — confirmed live (26 Jul, session 33) on "Jaipur Mic Gala
+  // 100": 3 CONFIRMED bookings holding 11 real seats, yet
+  // Event.availableSeats still read 341/341. The booking route itself
+  // is fine (it computes occupancy live inside its transaction) — this
+  // was purely a stale-display bug on the audience-facing seat count
+  // and Filling Fast/Sold Out badge. Compute the real numbers here for
+  // NUMBERED venues, same "held = CONFIRMED or unexpired PENDING" rule
+  // already proven correct in src/app/api/bookings/route.ts, instead of
+  // touching the shared getAvailabilityStatus()/badge component.
+  let displayTotalSeats = event.totalSeats
+  let displayAvailableSeats = event.availableSeats
+  if (event.venue?.seatingMode === 'NUMBERED') {
+    const now = new Date()
+    const [seatTotal, heldCount] = await Promise.all([
+      prisma.seat.count({ where: { venueId: event.venueId! } }),
+      prisma.bookingSeat.count({
+        where: {
+          booking: {
+            eventId: id,
+            OR: [
+              { status: 'CONFIRMED' },
+              { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+            ],
+          },
+        },
+      }),
+    ])
+    displayTotalSeats = seatTotal
+    displayAvailableSeats = Math.max(0, seatTotal - heldCount)
+  }
+  // Hype Score - per-performance, live-computed from the same reviews
+  // already fetched above (no extra query). Null when not yet eligible;
+  // the client only renders the badge when it gets a number. Shared logic
+  // now lives in src/lib/hype-score.ts (session 56) - also reused by the
+  // admin artist roster.
+  const lineupWithHype = event.lineup.map((p: { reviews: { rating: number | null }[] }) => ({ ...p, hypeScore: computeHypeScore(event, p.reviews) }))
+  const eventForClient = {
+    ...event,
+    lineup: lineupWithHype,
+    totalSeats: displayTotalSeats,
+    availableSeats: displayAvailableSeats,
+    panelists: panelistsForClient,
+    celebrities: celebritiesForClient,
+  }
+
+  // Client-side half of the review-eligibility gate (server-side half —
+  // POST /api/reviews rejecting non-checked-in users — has been in place
+  // since the nineteenth amendment). Computed here rather than fetched
+  // client-side since this page is already force-dynamic (per-request).
+  // Anonymous viewers always get canReview: false, which is correct —
+  // we can't verify a check-in without a session, and if they sign in
+  // and are actually checked in, reloading the page picks it up.
+  const session = await getServerSession(authOptions)
+  let canReview = false
+  if (session?.user) {
+    const checkedInBooking = await prisma.booking.findFirst({
+      where: {
+        userId: (session.user as any).id,
+        eventId: id,
+        status: 'CONFIRMED',
+        checkedInAt: { not: null },
+      },
+      select: { id: true },
+    })
+    // GEN-2608-027 - checked-in alone isn't sufficient: an organiser can
+    // scan a booking in ahead of the actual show, which previously let
+    // the button render for an event that hadn't happened yet. Real
+    // enforcement lives in POST /api/reviews; this just keeps the UI
+    // consistent with it instead of showing a button the API will 403.
+    canReview = !!checkedInBooking && eventStartInstant(event.date, event.startTime).getTime() <= Date.now()
+  }
+
+  // S1a - "paid bookings" master switch: while it is off, a paid event
+  // shows "Booking opens soon" instead of the booking button. The server
+  // routes refuse paid bookings regardless; this is the UI side.
+  // D1 - a PAY_AT_ENTRY event moves no money through AFA, so it is
+  // never paused by the switch.
+  const bookingPaused =
+    event.paymentMode !== 'PAY_AT_ENTRY' &&
+    requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) &&
+    !(await getPaidBookingsEnabled())
+
+  // S1b-b2 - launch wave W3 (tickets) closed: "Tickets open soon" for every
+  // event (free and pay-at-entry too), and it wins over the paid switch.
+  // ADMIN sees it open (bypass). POST /api/bookings refuses regardless.
+  const { W3 } = await getLaunchWavesForViewer()
+  const bookingSoon = bookingSoonState({ w3Open: W3, paidPaused: bookingPaused })
+
+  return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} bookingSoon={bookingSoon} />
 }
 
 // Same reasoning as venues/page.tsx - no dynamic API is used here otherwise,

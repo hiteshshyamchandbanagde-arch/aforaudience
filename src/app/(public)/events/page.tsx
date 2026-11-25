@@ -1,250 +1,838 @@
 "use client"
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { Suspense, useEffect, useLayoutEffect, useRef, useState, useTransition } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import Button from "@/components/ui/Button"
+import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
+import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
+import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
+import SearchInputBox from "@/components/SearchInputBox"
+import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
+import { LOCATION_CHANGED_EVENT, MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT, MOBILE_SEARCH_SYNC_EVENT, type LocationChangedDetail } from "@/lib/app-events"
+import { useLocale } from "@/lib/i18n/translate"
+import { countText } from "@/lib/i18n/plural"
+import { formatDate } from "@/lib/format-date"
+import HeroEmphasis from "@/components/HeroEmphasis"
 
-interface EventItem {
+// Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
+// so the hero search (lifted up here, session 65) can type its dropdown
+// items without importing a component-internal type.
+interface OrganiserItem {
   id: string
+  orgName: string
+  bio: string | null
+  user: { name: string; avatar: string | null }
+  _count: { events: number }
+}
+
+const TYPE_OPTIONS = Object.keys(TYPE_META)
+
+// Same date+startTime instant-comparison pattern as the booking guard
+// (POST /api/bookings) and cancellation routes - kept consistent so
+// "past" means the same thing everywhere in the app.
+function isPastEvent(e: { date: string; startTime: string }): boolean {
+  const [h, m] = e.startTime.split(':').map(Number)
+  const eventStart = new Date(e.date)
+  eventStart.setHours(h, m, 0, 0)
+  return eventStart.getTime() <= Date.now()
+}
+
+// GEN-2609-012 - "this weekend" range: today through the end of the
+// upcoming Sunday. Sunday needs its own branch - by Sunday morning
+// Saturday has already passed, so the weekend "in progress" is just
+// today, not a jump forward to next week's Saturday.
+function getWeekendRange(from: Date): { start: Date; end: Date } {
+  const day = from.getDay() // 0 = Sunday .. 6 = Saturday
+  const start = new Date(from)
+  start.setHours(0, 0, 0, 0)
+  if (day !== 0) start.setDate(from.getDate() + (6 - day))
+  const end = new Date(start)
+  end.setDate(start.getDate() + (day === 0 ? 1 : 2))
+  return { start, end }
+}
+
+// GEN-2609-012 - one horizontally-scrolling, snap-scroll carousel row for
+// the mobile Discover browse experience (Figma v2's Discover.tsx). Reuses
+// EventCard's "grid" variant as-is (poster + title + meta + price, same
+// click-guard props the desktop grid already passes) rather than forking
+// a new card - the narrower width here comes entirely from the wrapping
+// flex-item, not from any change to EventCard itself.
+function DiscoverCarouselRow({
+  title,
+  events,
+  navigatingId,
+  onOpen,
+}: {
   title: string
-  description: string
-  type: string
-  date: string
-  startTime: string
-  isFree: boolean
-  ticketPrice: number | null
-  totalSeats: number
-  availableSeats: number
-  vibe?: string | null
-  venue: { name: string; city: string } | null
-  lineup: { id: string }[]
+  events: EventItem[]
+  navigatingId: string | null
+  onOpen: (id: string) => void
+}) {
+  return (
+    <div>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
+        {title}
+      </div>
+      <div className="afa-discover-carousel-track" style={{ display: "flex", gap: "var(--afa-space-3)", overflowX: "auto", scrollSnapType: "x proximity", paddingBottom: "var(--afa-space-1)", WebkitOverflowScrolling: "touch" }}>
+        {events.map((event) => (
+          <div key={event.id} style={{ flex: "0 0 168px", scrollSnapAlign: "start" }}>
+            <EventCard
+              event={event}
+              view="grid"
+              tab="upcoming"
+              isNavigating={navigatingId === event.id}
+              disabled={navigatingId !== null}
+              onOpen={() => onOpen(event.id)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
-const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
-  OPEN_MIC: { emoji: "🎤", color: "#001a10", label: "Open Mic" },
-  STAND_UP: { emoji: "😂", color: "#1a0500", label: "Stand Up" },
-  POETRY: { emoji: "📜", color: "#0a001a", label: "Poetry" },
-  THEATER: { emoji: "🎩", color: "#1a0a1a", label: "Theater" },
-  LINEUP: { emoji: "🌟", color: "#1a1000", label: "Lineup" },
-}
+function EventsPageContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { t: tr, locale } = useLocale()
+  const [, startTransition] = useTransition()
+  const [navigatingId, setNavigatingId] = useState<string | null>(null)
 
-const TYPE_OPTIONS = ["All", ...Object.keys(TYPE_META)]
+  const goToEvent = (id: string) => {
+    // Guard against rapid repeat clicks: without this, a click that
+    // doesn't render anything right away (slow cold-start render, etc.)
+    // reads as "nothing happened" and the person clicks again - each
+    // extra click was firing a brand new, un-deduped navigation request
+    // (confirmed via Vercel runtime logs: 10+ duplicate GETs for the same
+    // event id within seconds). This makes the first click visibly
+    // "claim" the card and ignores further clicks until it resolves.
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/events/${id}`)
+    })
+  }
 
-export default function EventsPage() {
+  const goToOrganiser = (id: string) => {
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/organisers/${id}`)
+    })
+  }
+
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  // BUG-2609-077 - true only while the latest load failed. Kept apart
+  // from `events` so a failed load can never be mistaken for "loaded,
+  // and there are no events". Bumping reloadKey re-runs the load (Retry).
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
-  const [search, setSearch] = useState("")
-  const [selectedType, setSelectedType] = useState("All")
+  // BUG-2610-004 - the search can arrive in the URL (?search=, from the
+  // top-bar search on another page). The URL and the state are kept in
+  // step: a new ?search= replaces the search; the param going away (the
+  // Discover tab, back) clears a search that still equals it; and
+  // clearing the search drops the param (applySearch below).
+  const urlSearch = searchParams.get("search") ?? ""
+  const [search, setSearch] = useState(urlSearch)
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch)
+  if (urlSearch !== prevUrlSearch) {
+    setPrevUrlSearch(urlSearch)
+    if (urlSearch) setSearch(urlSearch)
+    else if (search === prevUrlSearch) setSearch("")
+  }
+  // BUG-2610-007 - the param is dropped with the native History API, not
+  // router.replace("/events"). /events is a static (prerendered) route;
+  // after a hard load of /events/?search=x the router keeps the current
+  // query on any navigation to the same bare path (replace("/events"),
+  // replace("/events/") and the Events nav link all left ?search= in the
+  // address on a production build). replaceState is synced with
+  // useSearchParams (node_modules/next/dist/docs, "Native History API"),
+  // and it removes only `search`, so any other param stays.
+  const dropSearchParam = () => {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has("search")) return
+    url.searchParams.delete("search")
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`)
+  }
+  const applySearch = (value: string) => {
+    setSearch(value)
+    if (value.trim() === "" && urlSearch) dropSearchParam()
+  }
+  // A search that came in the URL is a deliberate search, so it is not
+  // narrowed by the auto-detected city (see the location effect below).
+  const [arrivedWithSearch] = useState(urlSearch !== "")
+  const [selectedType, setSelectedType] = useState<string | null>(null)
   const [selectedCity, setSelectedCity] = useState("All Cities")
   const [priceFilter, setPriceFilter] = useState("All")
+  // OTH-2608-009: sort control for the events list. "date" preserves the
+  // existing default ordering (API returns date-ascending; Past tab
+  // reverses it below, same as before this feature existed) so nobody's
+  // current experience changes unless they actively pick a different sort.
+  const [sortBy, setSortBy] = useState<"date" | "priceLowHigh" | "priceHighLow" | "fillingFast">("date")
   const [view, setView] = useState<"grid" | "list">("grid")
-
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
+  // GEN-2609-004 (Mobile Redesign Phase 2) - mobile-only filter bottom
+  // sheet (MobileEventFilterSheet.tsx). Below `lg`, the desktop inline
+  // filter row is hidden via CSS and this trigger + sheet take over,
+  // driving the exact same selectedType/selectedCity/priceFilter/sortBy
+  // state - presentation only, no new filtering logic.
+  const [mobileFilterSheetOpen, setMobileFilterSheetOpen] = useState(false)
+  // GEN-2609-019 (Mobile Nav v3, Phase A) - the global MobileTopBar's
+  // search input now covers this page too on mobile (this page's own
+  // hero search below is hidden under `lg`, see its own comment), so it
+  // needs a way to reach this page's `search`/mobileFilterSheetOpen state
+  // from a different component tree. Same custom-window-event pattern
+  // profile/page.tsx already uses for its own cross-tree signal
+  // (afa:feedback-submitted) rather than inventing a Context just for
+  // this one bridge.
   useEffect(() => {
+    const handleSearch = (e: Event) => {
+      const detail = (e as CustomEvent<{ query: string }>).detail
+      if (!detail) return
+      setSearch(detail.query)
+      if (detail.query.trim() === "" && urlSearch) dropSearchParam()
+    }
+    const handleOpenFilters = () => setMobileFilterSheetOpen(true)
+    window.addEventListener(MOBILE_SEARCH_EVENT, handleSearch)
+    window.addEventListener(MOBILE_SEARCH_OPEN_FILTERS_EVENT, handleOpenFilters)
+    return () => {
+      window.removeEventListener(MOBILE_SEARCH_EVENT, handleSearch)
+      window.removeEventListener(MOBILE_SEARCH_OPEN_FILTERS_EVENT, handleOpenFilters)
+    }
+  }, [urlSearch])
+  // The top bar's input mirrors this page's search (BUG-2610-004).
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(MOBILE_SEARCH_SYNC_EVENT, { detail: { query: search } }))
+  }, [search])
+  // GEN-2609-012 - mobile Discover defaults to the carousel-grouped
+  // browse model; "See all events" (or picking any filter/search, see
+  // hasActiveFilters below) switches to the same filtered grid/list
+  // desktop always shows. Irrelevant above `lg` - desktop never reads
+  // this state.
+  const [mobileBrowseMode, setMobileBrowseMode] = useState<"carousels" | "list">("carousels")
+  // Toggle-based discovery entry point for Organisers (session 62,
+  // design.md §9.5) - deliberately not a new top-level nav route.
+  // Independent of `view` above (grid/list is an events-only display mode).
+  const [contentMode, setContentMode] = useState<"events" | "organisers">("events")
+  // Populated via OrganisersGridEmbed's onItemsLoaded callback (session
+  // 65) - the embed still owns the /api/organisers fetch, it just also
+  // reports the list up so the hero's single shared search box can build
+  // its dropdown without a second fetch of the same data.
+  const [organisers, setOrganisers] = useState<OrganiserItem[]>([])
+
+  // FEAT-2608-036 fast-follow (2 Aug) - /api/events now accepts ?city= and
+  // filters server-side (indexed via Venue_city_idx), so the previous
+  // "fetch everything, filter client-side" approach is gone: this effect
+  // re-fetches whenever selectedCity changes, and the request only ever
+  // carries the events that actually match. Dropdown *options* can't come
+  // from this scoped fetch though (narrowing to Pune would leave no way
+  // to discover Mumbai exists) - those come from /api/venues/cities
+  // instead, which always reflects every city regardless of the current
+  // filter.
+  const [cities, setCities] = useState<{ city: string; country: string | null; label: string }[]>([])
+  useEffect(() => {
+    fetch("/api/venues/cities")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.cities) setCities(data.cities) })
+      .catch(() => {})
+  }, [])
+
+  // Resolve the user's default location once and apply it as the initial
+  // filter - still just a starting point, freely changed/cleared via the
+  // same dropdown as before. Waits on `cities` so it can validate the
+  // guess is actually one we have events for before applying it.
+  const cityAutoAppliedRef = useRef(false)
+  const cityNames = cities.map((c) => c.city)
+  useEffect(() => {
+    if (cityAutoAppliedRef.current) return
+    if (cities.length === 0) return
+    cityAutoAppliedRef.current = true
+    if (arrivedWithSearch) return
+    fetch("/api/user/location")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.city && cityNames.includes(data.city)) {
+          setSelectedCity(data.city)
+        }
+      })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cities])
+
+  // BUG-2609-078 - a change on the location chip reaches this page too.
+  // Before the city list has loaded, the auto-apply effect above reads
+  // the saved location itself, so there is nothing to do here yet.
+  useEffect(() => {
+    const onLocationChanged = (e: Event) => {
+      const city = (e as CustomEvent<LocationChangedDetail>).detail?.city
+      if (!city || cities.length === 0) return
+      setSelectedCity(cities.some((c) => c.city === city) ? city : "All Cities")
+    }
+    window.addEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
+    return () => window.removeEventListener(LOCATION_CHANGED_EVENT, onLocationChanged)
+  }, [cities])
+
+  // BUG-2609-077 - the initial "All Cities" load and the load for the
+  // auto-applied location city (effect above) overlap on most visits.
+  // Each run owns an AbortController that its cleanup aborts, so only
+  // the load for the current selectedCity may touch state: a superseded
+  // one is dropped whether it resolves, rejects or was already aborted.
+  // The ref closes the gap between a city change committing and that
+  // (passive) cleanup running, where an old response could still land.
+  const latestCityRef = useRef(selectedCity)
+  useLayoutEffect(() => {
+    latestCityRef.current = selectedCity
+  }, [selectedCity])
+  useEffect(() => {
+    const controller = new AbortController()
+    const city = selectedCity
+    const isStale = () => controller.signal.aborted || latestCityRef.current !== city
     const fetchEvents = async () => {
+      setLoading(true)
+      setLoadFailed(false)
       try {
-        const res = await fetch("/api/events")
+        const url = city === "All Cities" ? "/api/events" : `/api/events?city=${encodeURIComponent(city)}`
+        const res = await fetch(url, { signal: controller.signal })
         if (!res.ok) throw new Error("Failed to load events")
         const data = await res.json()
+        if (isStale()) return
         setEvents(data)
+        setLoading(false)
       } catch (err: any) {
-        setError(err.message)
-      } finally {
+        if (isStale() || err?.name === "AbortError") return
+        setLoadFailed(true)
         setLoading(false)
       }
     }
     fetchEvents()
-  }, [])
-
-  const cities = Array.from(new Set(events.map((e) => e.venue?.city).filter(Boolean))) as string[]
+    return () => controller.abort()
+  }, [selectedCity, reloadKey])
 
   const filtered = events.filter((e) => {
     const matchSearch =
       e.title.toLowerCase().includes(search.toLowerCase()) ||
       (e.venue?.name || "").toLowerCase().includes(search.toLowerCase())
-    const matchType = selectedType === "All" || e.type === selectedType
+    const matchType = selectedType === null || e.type === selectedType
     const matchCity = selectedCity === "All Cities" || e.venue?.city === selectedCity
     const matchPrice =
       priceFilter === "All" || (priceFilter === "Free" && e.isFree) || (priceFilter === "Paid" && !e.isFree)
-    return matchSearch && matchType && matchCity && matchPrice
+    const matchTab = tab === "upcoming" ? !isPastEvent(e) : isPastEvent(e)
+    return matchSearch && matchType && matchCity && matchPrice && matchTab
   })
+  if (sortBy === "date") {
+    if (tab === "past") {
+      // API returns date ascending (soonest-first, right for Upcoming) -
+      // Past reads better newest-first, so reverse rather than re-sort
+      // from scratch.
+      filtered.reverse()
+    }
+  } else if (sortBy === "priceLowHigh" || sortBy === "priceHighLow") {
+    // BUG (caught live by Hitesh's click-test, 11 Aug): a few events are
+    // marked isFree=false but have no real ticketPrice set (bad data -
+    // the create-event API doesn't require a price when isFree is false,
+    // separately flagged as GEN-2608-041). Treating that missing price as
+    // ₹0 made these events sort to the very top of "Price: Low to High" -
+    // showing up as the "cheapest" event even though their own badge
+    // shows "—" (no price to display) instead of a number. Now pushed to
+    // the end regardless of sort direction - never shown as a fake deal.
+    // Second bug caught live (same click-test pass): the E2E test fixture
+    // "Waitlist/Wallet Flow" has isFree=false with ticketPrice explicitly
+    // 0 (not null), which `?? Infinity` doesn't catch - only null/
+    // undefined trigger a `??` fallback, so a real zero sailed straight
+    // through as if it were a genuine ₹0 price. Any non-free event with
+    // no truthy price (null OR 0) is equally "no real price to show" -
+    // its own badge already renders "—" either way - so both must be
+    // treated the same here.
+    const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ? e.ticketPrice : Infinity)
+    filtered.sort((a, b) => {
+      const pa = price(a), pb = price(b)
+      if (pa === Infinity && pb === Infinity) return 0
+      if (pa === Infinity) return 1
+      if (pb === Infinity) return -1
+      return sortBy === "priceLowHigh" ? pa - pb : pb - pa
+    })
+  } else if (sortBy === "fillingFast") {
+    // % of seats already booked, descending - surfaces events closest to
+    // selling out first, a reasonable proxy for "popular" without needing
+    // a dedicated popularity metric.
+    const bookedRatio = (e: EventItem) => (e.totalSeats > 0 ? (e.totalSeats - e.availableSeats) / e.totalSeats : 0)
+    filtered.sort((a, b) => bookedRatio(b) - bookedRatio(a))
+  }
+
+  // BUG-2610-004 - when nothing matches and a search and/or a city is
+  // applied, the empty state names them (a hidden search plus the
+  // auto-applied city used to read as a bare "No events found").
+  const activeQuery = search.trim()
+  const activeCity = selectedCity !== "All Cities" ? selectedCity : null
+  // BUG-2610-020 - "Try adjusting your filters" only when a search or a
+  // filter is actually applied; a city with no events and nothing else
+  // set reads "No shows in Mumbai yet" with "Show all cities". The Past
+  // tab says "No past shows in Mumbai" (events copy A).
+  const filterApplied = activeQuery !== "" || selectedType !== null || priceFilter !== "All"
+  const emptyNamedTitle =
+    activeQuery && activeCity
+      ? tr.eventsPage.emptySearchInCity.replace("{query}", activeQuery).replace("{city}", activeCity)
+      : activeQuery
+      ? tr.eventsPage.emptySearch.replace("{query}", activeQuery)
+      : activeCity
+      ? (tab === "past" ? tr.eventsPage.emptyPastInCity : filterApplied ? tr.eventsPage.emptyInCity : tr.eventsPage.emptyCityYet).replace("{city}", activeCity)
+      : null
+  const emptySub = loadFailed
+    ? tr.eventsPage.loadErrorSub
+    : filterApplied
+    ? tr.eventsPage.emptyNoneFoundSub
+    : tab === "past"
+    ? tr.eventsPage.emptyNoPastSub
+    : emptyNamedTitle
+    ? null
+    : tr.eventsPage.emptyNoneYetSub
+
+  // Same `search` box drives both modes (session 65 fix) - the hero
+  // search is now shared rather than two visually-different boxes for
+  // events vs organisers.
+  const filteredOrganisers = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
+
+  // GEN-2609-012 - Discover mobile carousel rows, built from the same
+  // `filtered` array desktop's grid/list already uses (so city/tab
+  // scoping stays identical) - only meaningful with no active
+  // search/filter, since a carousel browse has no sensible way to
+  // reflect "results matching X". `hasActiveFilters` deliberately
+  // excludes selectedCity: that filter auto-applies from the visitor's
+  // detected location (see the effect above), not a deliberate
+  // "narrow my search" action, so it shouldn't kick the mobile view out
+  // of browse mode on its own.
+  const hasActiveFilters = search.trim() !== "" || selectedType !== null || priceFilter !== "All" || sortBy !== "date"
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const tomorrowStart = new Date(todayStart)
+  tomorrowStart.setDate(todayStart.getDate() + 1)
+  const { start: weekendStart, end: weekendEnd } = getWeekendRange(todayStart)
+  const tonightEvents = filtered.filter((e) => {
+    const d = new Date(e.date)
+    return d >= todayStart && d < tomorrowStart
+  })
+  const weekendEvents = filtered.filter((e) => {
+    const d = new Date(e.date)
+    return d >= weekendStart && d < weekendEnd
+  })
+  // Category buckets straight off the real Event.type enum (TYPE_OPTIONS,
+  // same list the desktop type-filter row already uses) - not the mock's
+  // own invented category names ("Comedy," "Poetry & Words," ...), per
+  // the brief. Reuses tr.eventTypes' existing translated labels, so no
+  // new dictionary keys needed for these rows specifically.
+  const categoryLabel = (type: string) => tr.eventTypes[type as keyof typeof tr.eventTypes]
+  const cityLabel = selectedCity !== "All Cities" ? selectedCity : null
+  const carouselRows = [
+    { key: "tonight", title: cityLabel ? tr.eventsPage.discoverTonightInCityHeading.replace("{city}", cityLabel) : tr.eventsPage.discoverTonightHeading, events: tonightEvents },
+    { key: "weekend", title: tr.eventsPage.discoverWeekendHeading, events: weekendEvents },
+    ...TYPE_OPTIONS.map((type) => ({ key: type, title: categoryLabel(type), events: filtered.filter((e) => e.type === type) })),
+    // Guardrail (non-negotiable, per brief): a row with fewer than 3
+    // events doesn't render at all - no sparse-looking carousels in
+    // lower-inventory cities.
+  ].filter((row) => row.events.length >= 3)
+  // Fallback for "every row is sparse" (small/new city with little
+  // inventory): carouselRows ends up empty, showMobileCarousels goes
+  // false below, and the mobile view quietly renders the same
+  // grid/list desktop always shows instead of an empty Discover page.
+  const showMobileCarousels = tab === "upcoming" && !hasActiveFilters && mobileBrowseMode === "carousels" && carouselRows.length > 0
 
   return (
-    <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+      <style>{`
+        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: var(--afa-space-56px) var(--afa-space-6) 112px; } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
+        @media (min-width: 640px) { .afa-events-page-container { padding: var(--afa-space-80px) var(--afa-space-32px) 112px; } } /* // token-ok(spacing-literal): 112px used under 10 times, no exact token (GEN-2609-107) */
+        .afa-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease, opacity 0.15s ease; }
+        .afa-event-card:hover { border-color: var(--afa-amber-border); }
+        .afa-event-card-grid .afa-event-card-poster { aspect-ratio: 4 / 5; }
+        .afa-event-card-list .afa-event-card-poster { width: 9rem; aspect-ratio: 3 / 4; }
+        @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
+        @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
+        .afa-events-search-box { flex: 1; min-width: 220px; }
+        .afa-events-select { padding: var(--afa-space-2) var(--afa-space-3); border-radius: var(--afa-radius-xs); border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
+        .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--afa-radius-xs); border: none; cursor: pointer; background: transparent; color: var(--afa-text-muted); transition: color 0.2s ease, background 0.2s ease; }
+        .afa-events-view-btn:hover { color: var(--afa-text-primary); }
+        /* GEN-2609-073 (resolved) - Hitesh's call: background moves to
+           --afa-surface-raised, a normal "selected chip on a raised panel"
+           look instead of the light-cream inversion. The paired color
+           also had to move off --afa-surface-inverse - that pairing
+           computes to 1.20:1 contrast against --afa-surface-raised
+           (both near-black, computed via the real WCAG relative-
+           luminance formula, not eyeballed), which would have rendered
+           the active icon essentially invisible. --afa-text-primary
+           against --afa-surface-raised computes to 15.07:1 - the same
+           icon color
+           already used on :hover above, so active/hover are now
+           consistent instead of the icon changing color twice on the way
+           to selected. */
+        .afa-events-view-btn.active { background: var(--afa-surface-raised); color: var(--afa-text-primary); }
+        .afa-discover-carousel-track { scrollbar-width: none; -ms-overflow-style: none; }
+        .afa-discover-carousel-track::-webkit-scrollbar { display: none; }
+      `}</style>
       <SiteNav active="events" />
 
-      {/* HERO SEARCH */}
-      <div style={{ background: "#0E0C0A", padding: "56px 48px" }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            Find your next <em style={{ color: "#C8441A", fontStyle: "italic" }}>live experience</em>
-          </div>
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-            {loading ? "Loading events..." : `${filtered.length} events happening near you`}
-          </p>
-          <div style={{ position: "relative" }}>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search events, venues..."
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "#0E0C0A", outline: "none", boxSizing: "border-box" }}
-            />
-            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
-          </div>
-        </div>
-      </div>
+      <div className="afa-events-page-container">
+        {/* HERO - export EventsDirectory.tsx: eyebrow, display headline with
+            an italic amber emphasis word, static evocative subtitle. No
+            separate boxed/inverse hero background in the export - the hero
+            sits directly on the page. */}
+        <header style={{ maxWidth: "760px" }}>
+          {/* BUG-2610-020 - no eyebrow at zero: "0 events happening near you" advertised the emptiness.
+              This is the page's only count line: "near you" only while a city is picked, else "Showing {n} events". */}
+          {(contentMode === "organisers" || loading || loadFailed || filtered.length > 0) && (
+            <span data-testid="events-count-eyebrow" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+              {contentMode === "organisers"
+                ? tr.eventsPage.heroSubtitleOrganisers
+                : loading ? tr.eventsPage.loadingEvents : loadFailed ? tr.eventsPage.loadErrorTitle : tab === "past" ? countText(locale, filtered.length, tr.eventsPage.countPastOne, tr.eventsPage.countPast) : activeCity ? countText(locale, filtered.length, tr.eventsPage.countNearOne, tr.eventsPage.countNear) : countText(locale, filtered.length, tr.eventsPage.showingCountOne, tr.eventsPage.showingCount)}
+            </span>
+          )}
+          <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
+            {contentMode === "organisers" ? (
+              <>{tr.eventsPage.heroPrefixOrganisers}<HeroEmphasis style={{ fontWeight: 400 }}>{tr.eventsPage.heroEmphasisOrganisers}</HeroEmphasis>{tr.eventsPage.heroSuffixOrganisers}</>
+            ) : (
+              <>{tr.eventsPage.heroPrefixEvents}<HeroEmphasis style={{ fontWeight: 400 }}>{tr.eventsPage.heroEmphasisEvents}</HeroEmphasis>{tr.eventsPage.heroSuffixEvents}</>
+            )}
+          </h1>
+          {contentMode === "events" && (
+            <p style={{ marginTop: "var(--afa-space-5)", maxWidth: "560px", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>
+              {tr.eventsPage.heroSubtitleEvents}
+            </p>
+          )}
+        </header>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
-        {error && (
-          <div style={{ padding: "14px 16px", background: "#FDECEA", border: "1px solid #F5C2C0", borderRadius: "8px", color: "#B3261E", fontSize: "14px", marginBottom: "24px" }}>
-            {error}
+        {/* EVENTS / ORGANISERS TOGGLE - discovery entry point for the
+            public Organiser bio profiles (session 62, design.md §9.5),
+            deliberately not a new top-level nav route. Underline-tab
+            treatment (not pills) matching the Venues/Owners toggle
+            convention elsewhere in the app. */}
+        <div style={{ display: "flex", gap: "var(--afa-space-32px)", marginTop: "var(--afa-space-40px)", borderBottom: "1px solid var(--afa-tint-10)" }}>
+          <Button variant="tab-display" fullWidth={false} selected={contentMode === "events"} onClick={() => setContentMode("events")} style={{ marginBottom: "-1px" }}>
+            {tr.eventsPage.toggleEvents}
+          </Button>
+          <Button variant="tab-display" fullWidth={false} selected={contentMode === "organisers"} onClick={() => setContentMode("organisers")} style={{ marginBottom: "-1px" }}>
+            {tr.eventsPage.toggleOrganisers}
+          </Button>
+        </div>
+
+        {/* GEN-2609-019 (Mobile Nav v3, Phase A) - hidden below `lg`: the
+            global MobileTopBar's search input now covers this route on
+            mobile (bridged via the afa:mobile-search* events above), so
+            keeping this hero search visible too would put two search
+            boxes on screen at once - exactly what the "one unified entry
+            point" decision (8 Sep) was against. Desktop is untouched;
+            BrowseSearchDropdown's autocomplete only exists on this hero
+            box, so mobile trades it away for the unified bar - flagged as
+            an accepted scope-trim in MobileTopBar.tsx's own comment. */}
+        {contentMode === "events" && (
+          <div className="hidden lg:block" style={{ marginTop: "var(--afa-space-6)" }}>
+            <BrowseSearchDropdown
+              query={search}
+              items={filtered}
+              getId={(e) => e.id}
+              emptyLabel={tr.common.nounEvents}
+              translate
+              onSelect={(e) => goToEvent(e.id)}
+              renderRow={(e) => (
+                <>
+                  <span style={{ fontWeight: 600 }}>{e.title}</span>
+                  <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>
+                    {formatDate(e.date, 'medium', locale)}{e.venue?.name ? ` · ${e.venue.name}` : ""}
+                  </span>
+                </>
+              )}
+            >
+              <SearchInputBox
+                value={search}
+                onChange={applySearch}
+                placeholder={tr.eventsPage.searchEventsPlaceholder}
+                className="afa-events-search-box"
+              />
+            </BrowseSearchDropdown>
           </div>
         )}
 
-        {/* FILTERS */}
-        <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-              {TYPE_OPTIONS.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  style={{
-                    padding: "7px 14px", borderRadius: "99px",
-                    border: `1.5px solid ${selectedType === type ? "#C8441A" : "rgba(14,12,10,0.12)"}`,
-                    background: selectedType === type ? "#C8441A" : "transparent",
-                    color: selectedType === type ? "white" : "#0E0C0A",
-                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                  }}
-                >
-                  {type === "All" ? "All" : TYPE_META[type].label}
-                </button>
-              ))}
+        {contentMode === "organisers" ? (
+          <div style={{ marginTop: "var(--afa-space-32px)" }}>
+            {/* Session 65 fix: same hero search box position/styling as
+                Events mode - just pointed at organisers.
+                GEN-2609-019 - hidden below `lg`, same reasoning as the
+                Events-mode hero search above. */}
+            <div className="hidden lg:block">
+              <BrowseSearchDropdown
+                query={search}
+                items={filteredOrganisers}
+                getId={(o) => o.id}
+                emptyLabel={tr.common.nounOrganisers}
+                translate
+                onSelect={(o) => goToOrganiser(o.id)}
+                renderRow={(o) => <span style={{ fontWeight: 600 }}>{o.orgName}</span>}
+              >
+                <SearchInputBox
+                  value={search}
+                  onChange={applySearch}
+                  placeholder={tr.eventsPage.searchOrganisersPlaceholder}
+                  className="afa-events-search-box"
+                  style={{ marginBottom: "var(--afa-space-6)" }}
+                />
+              </BrowseSearchDropdown>
             </div>
-
-            <div style={{ width: "1px", height: "32px", background: "rgba(14,12,10,0.1)" }} />
-
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              style={{ padding: "8px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", color: "#0E0C0A", background: "white", cursor: "pointer", outline: "none" }}
-            >
-              <option>All Cities</option>
-              {cities.map((c) => <option key={c}>{c}</option>)}
-            </select>
-
-            <div style={{ display: "flex", gap: "6px" }}>
-              {["All", "Free", "Paid"].map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPriceFilter(p)}
-                  style={{
-                    padding: "7px 14px", borderRadius: "99px",
-                    border: `1.5px solid ${priceFilter === p ? "#C8441A" : "rgba(14,12,10,0.12)"}`,
-                    background: priceFilter === p ? "#FFF5F2" : "transparent",
-                    color: priceFilter === p ? "#C8441A" : "#0E0C0A",
-                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                  }}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ marginLeft: "auto", display: "flex", gap: "4px" }}>
-              <button onClick={() => setView("grid")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "grid" ? "#0E0C0A" : "transparent", color: view === "grid" ? "white" : "#0E0C0A", cursor: "pointer", fontSize: "16px" }}>⊞</button>
-              <button onClick={() => setView("list")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "list" ? "#0E0C0A" : "transparent", color: view === "list" ? "white" : "#0E0C0A", cursor: "pointer", fontSize: "16px" }}>☰</button>
-            </div>
-          </div>
-        </div>
-
-        <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.6, marginBottom: "20px" }}>
-          Showing <strong style={{ color: "#0E0C0A", opacity: 1 }}>{filtered.length}</strong> events
-        </p>
-
-        {/* EVENTS GRID */}
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "#0E0C0A", opacity: 0.5 }}>Loading events...</div>
-        ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", marginBottom: "8px" }}>
-              {events.length === 0 ? "No events published yet" : "No events found"}
-            </div>
-            <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5 }}>
-              {events.length === 0 ? "Check back soon — organisers are setting things up." : "Try adjusting your filters"}
-            </p>
+            <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: view === "grid" ? "repeat(auto-fill, minmax(340px, 1fr))" : "1fr", gap: "20px" }}>
-            {filtered.map((event) => {
-              const meta = TYPE_META[event.type] || TYPE_META.OPEN_MIC
-              return (
-                <div
-                  key={event.id}
-                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.1)" }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none" }}
+          <>
+            {/* UPCOMING / PAST TAB */}
+            <div style={{ display: "flex", gap: "var(--afa-space-6)", marginTop: "var(--afa-space-28px)" }}>
+              {(["upcoming", "past"] as const).map((t) => (
+                <Button
+                  key={t}
+                  variant="text-toggle"
+                  fullWidth={false}
+                  selected={tab === t}
+                  onClick={() => setTab(t)}
                 >
-                  {view === "grid" && (
-                    <div style={{ height: "160px", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "64px", position: "relative" }}>
-                      {meta.emoji}
-                      <span style={{ position: "absolute", top: "12px", left: "12px", background: "#C8441A", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px", letterSpacing: "0.05em" }}>
-                        {meta.label.toUpperCase()}
-                      </span>
-                      <span style={{ position: "absolute", top: "12px", right: "12px", background: event.isFree ? "#2D6A4F" : "rgba(201,151,58,0.9)", color: "white", fontSize: "12px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                        {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
-                      </span>
-                      {event.availableSeats < 10 && (
-                        <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "#ef4444", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                          🔥 {event.availableSeats} seats left
-                        </span>
-                      )}
+                  {t === "upcoming" ? tr.eventsPage.tabUpcoming : tr.eventsPage.tabPast}
+                </Button>
+              ))}
+            </div>
+
+            {/* FILTERS - desktop inline row, hidden below `lg`.
+                GEN-2609-019 (Mobile Nav v3, Phase A) - the standalone
+                "Filter events" pill that used to live here below `lg` is
+                gone; the global MobileTopBar's search bar now carries that
+                same trigger (an attached filter-sliders icon, see that
+                file's own comment) so there's exactly one way to open
+                MobileEventFilterSheet on mobile, not two competing ones.
+                One accepted regression: this pill's active-filter-count
+                badge doesn't have an equivalent on the new trigger yet
+                (would need this state bridged back up to a global-header
+                component) - worth a fast-follow, not done here. */}
+            <style>{`
+              .events-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--afa-space-3) var(--afa-space-6); }
+              .events-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--afa-space-3) var(--afa-space-6); }
+              @media (max-width: 780px) {
+                .events-filters-row { flex-direction: column; align-items: stretch; }
+                .afa-events-select { width: 100%; box-sizing: border-box; }
+                .afa-events-view-toggle { display: none; }
+              }
+              .afa-desktop-filters { display: block; }
+              @media (max-width: 1023px) {
+                .afa-desktop-filters { display: none; }
+              }
+            `}</style>
+
+            {mobileFilterSheetOpen && (
+              <MobileEventFilterSheet
+                onClose={() => setMobileFilterSheetOpen(false)}
+                resultCount={filtered.length}
+                selectedType={selectedType}
+                onSelectType={setSelectedType}
+                selectedCity={selectedCity}
+                onSelectCity={setSelectedCity}
+                cities={cities}
+                priceFilter={priceFilter}
+                onSelectPrice={setPriceFilter}
+                sortBy={sortBy}
+                onSelectSort={setSortBy}
+                onReset={() => {
+                  setSelectedType(null)
+                  setSelectedCity("All Cities")
+                  setPriceFilter("All")
+                }}
+              />
+            )}
+
+            <div className="afa-desktop-filters" style={{ marginTop: "var(--afa-space-5)", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "var(--afa-space-5)" }}>
+              <div className="events-type-row" style={{ marginBottom: "var(--afa-space-4)" }}>
+                <Button
+                  variant="text-toggle"
+                  fullWidth={false}
+                  selected={selectedType === null}
+                  onClick={() => setSelectedType(null)}
+                >
+                  {tr.eventsPage.filterAllNights}
+                </Button>
+                {TYPE_OPTIONS.map((type) => {
+                  const typeKey = type as keyof typeof tr.eventTypes
+                  const on = selectedType === type
+                  return (
+                    <Button
+                      key={type}
+                      variant="text-toggle"
+                      fullWidth={false}
+                      selected={on}
+                      onClick={() => setSelectedType(on ? null : type)}
+                    >
+                      <EventTypeIcon type={type} style={{ width: "14px", height: "14px", color: "currentColor" }} />
+                      {tr.eventTypes[typeKey]}
+                    </Button>
+                  )
+                })}
+              </div>
+
+              <div className="events-filters-row">
+                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="afa-events-select">
+                  <option value="All Cities">{tr.eventsPage.filterAllCities}</option>
+                  {cities.map((c) => <option key={c.city} value={c.city}>{c.label}</option>)}
+                </select>
+
+                <div style={{ display: "flex", gap: "var(--afa-space-4)" }}>
+                  {["All", "Free", "Paid"].map((p) => (
+                    <Button
+                      key={p}
+                      variant="text-toggle"
+                      fullWidth={false}
+                      selected={priceFilter === p}
+                      onClick={() => setPriceFilter(p)}
+                    >
+                      {p === "All" ? tr.eventsPage.filterAll : p === "Free" ? tr.eventsPage.filterFree : tr.eventsPage.filterPaid}
+                    </Button>
+                  ))}
+                </div>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="afa-events-select"
+                  aria-label={tr.eventsPage.sortLabel}
+                >
+                  <option value="date">{tr.eventsPage.sortDate}</option>
+                  <option value="priceLowHigh">{tr.eventsPage.sortPriceLowHigh}</option>
+                  <option value="priceHighLow">{tr.eventsPage.sortPriceHighLow}</option>
+                  <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
+                </select>
+
+                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "var(--afa-space-1)", border: "1px solid var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "3px" }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
+                  <Button variant="icon" onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`} style={{ color: undefined }}>
+                    <GridViewIcon style={{ width: "16px", height: "16px" }} />
+                  </Button>
+                  <Button variant="icon" onClick={() => setView("list")} aria-pressed={view === "list"} aria-label={tr.eventsPage.listViewLabel} className={`afa-events-view-btn${view === "list" ? " active" : ""}`} style={{ color: undefined }}>
+                    <ListViewIcon style={{ width: "16px", height: "16px" }} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* BUG-2610-009 / events copy A: the "Showing {n} events" line that sat here was a second count under the
+                hero eyebrow, and it still said "Showing 0 events" at zero. The eyebrow is the one count now; this keeps the gap. */}
+            <div aria-hidden="true" style={{ height: "var(--afa-space-6)" }} />
+
+            {/* EVENTS GRID */}
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
+            ) : loadFailed || filtered.length === 0 ? (
+              // A failed load gets the error + Retry here, never the
+              // "nothing published" copy - that one is only true after a
+              // load that succeeded and returned no events.
+              <div role={loadFailed ? "alert" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px var(--afa-space-5)", textAlign: "center" }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
+                <TheaterMark style={{ width: "40px", height: "40px", color: "var(--afa-amber-strong)" }} />
+                <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
+                  {loadFailed ? tr.eventsPage.loadErrorTitle : emptyNamedTitle ?? (tab === "past" ? tr.eventsPage.emptyNoPastTitle : filterApplied ? tr.eventsPage.emptyNoneFoundTitle : tr.eventsPage.emptyNoneYetTitle)}
+                </p>
+                {emptySub && (
+                  <p style={{ maxWidth: "360px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", margin: 0 }}>
+                    {emptySub}
+                  </p>
+                )}
+                {!loadFailed && emptyNamedTitle && (
+                  <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "var(--afa-space-3)" }}>
+                    {activeCity && (
+                      <Button variant="outline-accent" size="pill-md" fullWidth={false} type="button" onClick={() => setSelectedCity("All Cities")}>
+                        {activeQuery ? tr.eventsPage.emptySearchAllCities : tr.eventsPage.emptyShowAllCities}
+                      </Button>
+                    )}
+                    {activeQuery && (
+                      <Button variant="outline-neutral" size="pill-md" fullWidth={false} type="button" onClick={() => applySearch("")}>
+                        {tr.eventsPage.emptyClearSearch}
+                      </Button>
+                    )}
+                  </div>
+                )}
+                {loadFailed && (
+                  <Button variant="outline-accent" size="pill-md" fullWidth={false} onClick={() => setReloadKey((k) => k + 1)}>
+                    {tr.eventsPage.retry}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* GEN-2609-012 - mobile carousel browse, default state.
+                    Only ever visible below `lg` (Tailwind, this codebase's
+                    one non-inline-style breakpoint convention) - the
+                    "hidden"/"block" half of each className below covers
+                    the case where showMobileCarousels is false (active
+                    filters, Past tab, or every row too sparse), so the
+                    plain grid/list renders on mobile too in that case
+                    instead of an empty carousel section. */}
+                <div className={showMobileCarousels ? "lg:hidden flex flex-col" : "hidden"} style={{ gap: "var(--afa-space-32px)" }}>
+                  {carouselRows.map((row) => (
+                    <DiscoverCarouselRow key={row.key} title={row.title} events={row.events} navigatingId={navigatingId} onOpen={goToEvent} />
+                  ))}
+                  <Button
+                    variant="outline-accent"
+                    size="pill-md"
+                    fullWidth={false}
+                    type="button"
+                    onClick={() => setMobileBrowseMode("list")}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    {tr.eventsPage.discoverSeeAllEvents}
+                  </Button>
+                </div>
+
+                <div className={showMobileCarousels ? "hidden lg:block" : "block"}>
+                  {view === "grid" ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "var(--afa-space-6)" }}>
+                      {filtered.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          view="grid"
+                          tab={tab}
+                          isNavigating={navigatingId === event.id}
+                          disabled={navigatingId !== null}
+                          onOpen={() => goToEvent(event.id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
+                      {filtered.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          view="list"
+                          tab={tab}
+                          isNavigating={navigatingId === event.id}
+                          disabled={navigatingId !== null}
+                          onOpen={() => goToEvent(event.id)}
+                        />
+                      ))}
                     </div>
                   )}
-
-                  <div style={{ padding: "20px", display: view === "list" ? "flex" : "block", gap: "24px", alignItems: "center" }}>
-                    {view === "list" && (
-                      <div style={{ width: "60px", height: "60px", background: meta.color, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", flexShrink: 0 }}>
-                        {meta.emoji}
-                      </div>
-                    )}
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "11px", fontFamily: "monospace", color: "#C8441A", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
-                        {event.venue ? `${event.venue.name} · ${event.venue.city}` : "Venue TBD"}
-                      </div>
-                      <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "8px", lineHeight: 1.2 }}>
-                        {event.title}
-                      </div>
-                      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
-                        <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
-                        <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6 }}>🕐 {event.startTime}</span>
-                        {event.lineup.length > 0 && (
-                          <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6 }}>🎤 {event.lineup.length} performing</span>
-                        )}
-                      </div>
-                      {view === "list" && (
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                          <span style={{ background: event.isFree ? "#2D6A4F" : "#C8441A", color: "white", fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px" }}>
-                            {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
-                          </span>
-                          <span style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>{meta.label}</span>
-                          {event.availableSeats < 10 && <span style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600 }}>🔥 {event.availableSeats} left</span>}
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginTop: view === "grid" ? "12px" : "0", flexShrink: 0 }}>
-                      <Link href={`/events/${event.id}`} style={{ background: "#0E0C0A", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>
-                        View Event
-                      </Link>
-                    </div>
-                  </div>
                 </div>
-              )
-            })}
-          </div>
+              </>
+            )}
+          </>
         )}
       </div>
     </main>
+  )
+}
+
+// useSearchParams() (added for BUG-2609-023's mobile-search ?search= param)
+// requires a Suspense boundary around any Client Component that calls it, or
+// the production build fails with "Missing Suspense boundary with
+// useSearchParams" - confirmed in node_modules/next/dist/docs, same pattern
+// login/page.tsx already uses. Fallback is null, not a skeleton - this page
+// already renders its own loading state internally (see `loading` state
+// above) once hydrated, so there's nothing meaningful to show for the brief
+// pre-hydration gap.
+export default function EventsPage() {
+  return (
+    <Suspense fallback={null}>
+      <EventsPageContent />
+    </Suspense>
   )
 }

@@ -1,0 +1,448 @@
+"use client"
+import { useState } from "react"
+import { getAvailabilityStatus } from "@/lib/availability"
+import { useLocale, type Dictionary } from "@/lib/i18n/translate"
+import Photo from "@/components/Photo"
+import { EventTypeIcon, CalendarIcon, ClockIcon, PinIcon } from "@/components/icons/EventIcons"
+import { EventSaveHeartButton } from "@/components/EventSaveButton"
+import SpinnerOverlay from "@/components/SpinnerOverlay"
+import { formatDate } from "@/lib/format-date"
+import { Icon } from "@/components/Icon"
+import { formatINR } from "@/lib/money-display"
+
+export interface EventItem {
+  id: string
+  title: string
+  description: string
+  type: string
+  date: string
+  startTime: string
+  isFree: boolean
+  ticketPrice: number | null
+  // BUG-2609-079 - ticketPrice is the cheapest tier (lib/booking-tiers.ts).
+  priceFromTiers?: boolean
+  totalSeats: number
+  availableSeats: number
+  vibe?: string | null
+  venue: { name: string; city: string } | null
+  posterImage: string | null
+  lineup: { id: string; artist: { id: string; user: { name: string; displayName: string | null } } }[]
+  isCompetitionShow?: boolean
+}
+
+/**
+ * BUG-2609-079 - the price on an event card: "Free", "₹X" for a flat
+ * price, "From ₹X" when the price is the event's cheapest tier, "—" when
+ * there is none. Every card that shows Event.ticketPrice reads it here.
+ */
+export function eventPriceLabel(
+  event: { isFree: boolean; ticketPrice: number | null; priceFromTiers?: boolean },
+  tr: Dictionary,
+): string {
+  if (event.isFree) return tr.eventsPage.freeBadge
+  if (!event.ticketPrice) return "—"
+  return event.priceFromTiers ? tr.eventsPage.priceFrom.replace("{price}", event.ticketPrice.toLocaleString("en-IN")) : formatINR(event.ticketPrice)
+}
+
+export function initials(name: string): string {
+  return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('')
+}
+
+// Circular artist-initials chips for a multi-artist lineup, per the V2
+// spec (PM/AB/RD/NK style) - a cheap way to show a bill without needing a
+// real photo per performer. Caps at 4 visible + an overflow "+N" chip.
+//
+// Still used by the homepage bento tiles (src/app/page.tsx) - kept
+// exactly as-is for GEN-2608-077 (this component's own card below no
+// longer uses it, since the approved Events export doesn't show a
+// lineup preview on the card at all - see the audit note in
+// EventCard's own comment below).
+export function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]; size?: number }) {
+  if (lineup.length === 0) return null
+  const visible = lineup.slice(0, 4)
+  const overflow = lineup.length - visible.length
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      {visible.map((l, i) => {
+        const name = l.artist.user.displayName || l.artist.user.name
+        return (
+          <div
+            key={l.id}
+            title={name}
+            style={{
+              width: size,
+              height: size,
+              marginLeft: i === 0 ? 0 : -size * 0.28,
+              borderRadius: "50%",
+              background: "var(--afa-surface-raised)",
+              border: "1px solid var(--afa-tint-20)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: size * 0.34,
+              fontFamily: "var(--font-mono)",
+              color: "var(--afa-amber)",
+              flexShrink: 0,
+            }}
+          >
+            {initials(name)}
+          </div>
+        )
+      })}
+      {overflow > 0 && (
+        <div
+          style={{
+            width: size,
+            height: size,
+            marginLeft: -size * 0.28,
+            borderRadius: "50%",
+            background: "var(--afa-surface-raised)",
+            border: "1px solid var(--afa-tint-20)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: size * 0.3,
+            fontFamily: "var(--font-mono)",
+            color: "var(--afa-text-secondary)",
+            flexShrink: 0,
+          }}
+        >
+          +{overflow}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Still used by the homepage bento tiles (src/app/page.tsx) for their
+// fallback-tile background color (the unused emoji field went in
+// BUG-2610-025) - untouched, out of scope for
+// this redesign (a separate, already-shipped "Four rooms" homepage
+// project). The Events directory/detail pages below use the export's
+// own illustrated-fallback treatment (IllustratedEventFallback)
+// instead, not this map.
+export const TYPE_META: Record<string, { color: string; label: string }> = {
+  OPEN_MIC: { color: "var(--afa-green-black)", label: "Open Mic" },
+  STAND_UP: { color: "var(--afa-maroon-black)", label: "Stand Up" },
+  POETRY: { color: "var(--afa-indigo-black)", label: "Poetry" },
+  THEATER: { color: "var(--afa-plum-black)", label: "Theater" },
+  LINEUP: { color: "var(--afa-brown-black)", label: "Lineup" },
+}
+
+// Quiet mono type badge (export: bits.tsx TypeBadge) - icon + uppercase
+// label, no pill/chip background of its own. The card overlays this
+// inside a separate backdrop-blur chip (see EventCard below); the
+// detail hero and directory filter row use it bare.
+export function EventTypeBadge({ type, typeLabel, size = 16, style }: { type: string; typeLabel: string; size?: number; style?: React.CSSProperties }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-secondary)", ...style }}>
+      <EventTypeIcon type={type} style={{ width: size, height: size, color: "var(--afa-amber)" }} />
+      {typeLabel}
+    </span>
+  )
+}
+
+// Export's IllustratedFallback (Poster.tsx) - concentric amber rings
+// keyed to the event-type mark, plus a "No poster · Type" caption.
+// Distinct from the grid-texture treatment used on Venues (a different
+// export with its own approved fallback language) - ported faithfully
+// to what THIS export actually shows, not assumed to match Venues.
+// hideCaption lets the homepage bento tile (src/app/page.tsx) drop the
+// caption: that tile already shows type + venue in its own bottom
+// overlay, so the caption is redundant there and colliding with it
+// (both are absolutely-positioned layers on the same tile). Hiding it
+// removes the collision at the root instead of clipping the radial
+// pattern short to make room for it.
+export function IllustratedEventFallback({ type, typeLabel, hideCaption = false }: { type: string; typeLabel: string; hideCaption?: boolean }) {
+  const { t: tr } = useLocale()
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "var(--afa-surface-raised)" }}>
+      <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber-border)" }} fill="none" stroke="currentColor" strokeWidth="0.6">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <circle key={i} cx="100" cy="118" r={22 + i * 20} />
+        ))}
+        <line x1="0" y1="118" x2="200" y2="118" />
+        <line x1="100" y1="0" x2="100" y2="250" />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", color: "var(--afa-amber)" }}>
+        <EventTypeIcon type={type} style={{ width: "44px", height: "44px", opacity: 0.9 }} />
+        {!hideCaption && (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", opacity: 0.7 }}>
+            {tr.eventsPage.noPosterCaption.replace("{type}", typeLabel)}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// BUG-2610-006 - the "🏆 Competition" mark for Competition Show events,
+// lost from the listing card in the #514 rebuild. Same quiet mono chip as
+// the type badge (scrim + blur when it sits on a poster), in amber so it
+// reads as the one highlighted fact on the card. Shared by EventCard,
+// EventRow and the homepage bento tile so the three can't drift.
+export function CompetitionBadge({ onPoster = false, style }: { onPoster?: boolean; style?: React.CSSProperties }) {
+  const { t: tr } = useLocale()
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "var(--afa-space-1)",
+        fontFamily: "var(--font-mono)",
+        fontSize: "var(--afa-text-micro)",
+        textTransform: "uppercase",
+        letterSpacing: "0.14em",
+        color: "var(--afa-amber)",
+        whiteSpace: "nowrap",
+        ...(onPoster
+          ? { background: "var(--afa-scrim)", backdropFilter: "blur(4px)", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "var(--afa-radius-xs)", maxWidth: "calc(100% - 24px)" }
+          : {}),
+        ...style,
+      }}
+    >
+      <Icon name="trophy" size={12} />
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{tr.eventsPage.competitionBadge}</span>
+    </span>
+  )
+}
+
+// Real photo (Photo.tsx's already-verified amber/sepia duotone) or the
+// illustrated fallback - shared by the card poster and the detail-page
+// hero. Deliberately NOT the export's own `.duotone` CSS (mix-blend-mode:
+// lighten against amber, floods real photos with a salmon/coral cast,
+// confirmed broken by testing it against a mock event's posterImage) -
+// Photo.tsx's grayscale+contrast+brightness base plus a single #C9973A
+// multiply overlay at 0.48 opacity is the correct, already-shipped
+// recipe (see docs/venues-full-fidelity-audit-2026-08-20.md's
+// "Re-checked, no action needed" section).
+export function EventPoster({ posterImage, title, type, typeLabel, hideCaption = false }: { posterImage: string | null; title: string; type: string; typeLabel: string; hideCaption?: boolean }) {
+  // BUG-2608-079 - a stored posterImage that 404s/times out (confirmed
+  // live: qa-general-event-04's Unsplash URL) previously left Photo
+  // rendering a broken <img> with the amber overlay still multiplied on
+  // top. Photo now hides itself on error; this local flag is what
+  // actually swaps to the illustrated fallback instead of leaving blank
+  // space where the broken image was.
+  const [failed, setFailed] = useState(false)
+  return posterImage && !failed ? (
+    <Photo src={posterImage} alt={title} onError={() => setFailed(true)} />
+  ) : (
+    <IllustratedEventFallback type={type} typeLabel={typeLabel} hideCaption={hideCaption} />
+  )
+}
+
+// Export's SeatState (bits.tsx) - a small colored dot + label, not a
+// pill badge or a fire emoji. Reuses the real, already-correct
+// getAvailabilityStatus()/tr.availability (ratio-based, sold-out
+// handled explicitly) rather than the export's own mock seatState()
+// thresholds.
+export function SeatStateDot({ totalSeats, availableSeats, showCount = false }: { totalSeats: number; availableSeats: number; showCount?: boolean }) {
+  const { t: tr } = useLocale()
+  const status = getAvailabilityStatus(totalSeats, availableSeats)
+  const color = status === "filling-fast" ? "var(--afa-fill-solid)" : status === "sold-out" ? "var(--afa-text-muted)" : "var(--afa-text-secondary)"
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color }}>
+      <span style={{ position: "relative", display: "inline-flex", width: "8px", height: "8px", flexShrink: 0 }}>
+        {status === "filling-fast" && (
+          <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "var(--afa-fill-solid)", opacity: 0.6, animation: "afa-ping 1.6s cubic-bezier(0,0,0.2,1) infinite" }} />
+        )}
+        <span style={{ position: "relative", width: "8px", height: "8px", borderRadius: "50%", background: color }} />
+      </span>
+      {tr.availability[status]}
+      {showCount && status !== "sold-out" && (
+        <span style={{ color: "var(--afa-text-muted)" }}>· {availableSeats}{tr.eventsPage.leftSuffix}</span>
+      )}
+    </span>
+  )
+}
+
+// GEN-2608-077 - wholesale rebuild against the approved Figma Make
+// export (EventCard.tsx). The export's card has no lineup-chip preview,
+// no colored per-type background block, no emoji, and no pill badges -
+// poster (real duotone photo or the illustrated fallback), a quiet
+// backdrop-blur type chip overlaid top-left, title, a calendar+clock /
+// pin meta row, and a price + seat-state-dot row at the bottom. `bg-ink-
+// raised` card fill and `rounded-sm` corners are this export's own
+// signature (a different export from Venues, verified independently
+// rather than assumed to share Venues' zero-fill sharp-corner rule).
+export function EventCard({
+  event,
+  view,
+  tab,
+  isNavigating,
+  disabled,
+  onOpen,
+}: {
+  event: EventItem
+  view: "grid" | "list"
+  tab: string
+  isNavigating: boolean
+  disabled: boolean
+  onOpen: () => void
+}) {
+  const { t: tr, locale } = useLocale()
+  const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
+  const typeLabel = tr.eventTypes[typeKey]
+  const priceLabel = eventPriceLabel(event, tr)
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      aria-busy={isNavigating}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+      className={`afa-focusable afa-event-card${view === "grid" ? " afa-event-card-grid" : " afa-event-card-list"}`}
+      style={{
+        position: "relative",
+        display: view === "list" ? "flex" : "flex",
+        flexDirection: view === "list" ? "row" : "column",
+        gap: view === "list" ? "20px" : 0,
+        overflow: "hidden",
+        background: "var(--afa-surface-raised)",
+        borderRadius: "var(--afa-radius-xs)",
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled && !isNavigating ? 0.5 : 1,
+        transition: "opacity 0.15s ease",
+        padding: view === "list" ? "16px" : 0,
+      }}
+    >
+      <SpinnerOverlay isNavigating={isNavigating} size={26} accentColor="var(--afa-amber)" scrimBackground="var(--afa-scrim)" />
+
+      <div className="afa-event-card-poster" style={{ position: "relative", overflow: "hidden", borderRadius: "var(--afa-radius-xs)", flexShrink: 0 }}>
+        <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} />
+        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "var(--afa-scrim)", backdropFilter: "blur(4px)", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "var(--afa-radius-xs)" }}>
+          <EventTypeBadge type={event.type} typeLabel={typeLabel} size={14} />
+        </span>
+        <span style={{ position: "absolute", right: "12px", top: "12px" }}>
+          <EventSaveHeartButton eventId={event.id} />
+        </span>
+        {event.isCompetitionShow && <CompetitionBadge onPoster style={{ position: "absolute", left: "12px", bottom: "12px" }} />}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, gap: "var(--afa-space-4)", padding: view === "grid" ? "20px" : 0 }}>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: view === "grid" ? "24px" : "22px", lineHeight: 1.2, color: "var(--afa-cream)", margin: 0 }}>
+          {event.title}
+        </h3>
+
+        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "var(--afa-space-6px)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
+            <CalendarIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
+            <span>{formatDate(event.date, 'short', locale)}</span>
+            <ClockIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0, marginLeft: "var(--afa-space-1)" }} />
+            <span>{event.startTime}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
+            <PinIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {event.venue ? `${event.venue.name}, ${event.venue.city}` : tr.eventsPage.venueTBD}
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "var(--afa-space-3)", marginTop: "var(--afa-space-6px)" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-soft)" }}>{priceLabel}</span>
+            {tab === "past" ? (
+              <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)" }}>{tr.eventsPage.ended}</span>
+            ) : (
+              <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount={view === "list"} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Mobile Redesign Phase 4b (GEN-2609-007) - wide horizontal row card, per
+// the Figma v2 export's components.tsx EventRow. New shared component
+// (no prior equivalent existed) - ported from the mock's Tailwind classes
+// into this codebase's inline-style-object convention, reusing EventPoster/
+// EventTypeIcon/EventSaveHeartButton rather than re-deriving the poster-
+// fallback or save-toggle logic. Same click-guarded isNavigating/disabled/
+// onOpen shape as EventCard above, so a parent page can drive both with
+// one navigatingId state if it ever needs to mix layouts.
+export function EventRow({
+  event,
+  isNavigating,
+  disabled,
+  onOpen,
+  onSaveToggled,
+}: {
+  event: EventItem
+  isNavigating: boolean
+  disabled: boolean
+  onOpen: () => void
+  onSaveToggled?: (saved: boolean) => void
+}) {
+  const { t: tr, locale } = useLocale()
+  const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
+  const typeLabel = tr.eventTypes[typeKey]
+  const priceLabel = eventPriceLabel(event, tr)
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      aria-busy={isNavigating}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+      className="afa-focusable"
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "stretch",
+        gap: "var(--afa-space-14px)",
+        overflow: "hidden",
+        background: "var(--afa-surface-raised)",
+        border: "1px solid var(--afa-tint-08)",
+        borderRadius: "var(--afa-radius-lg)",
+        padding: "var(--afa-space-10px)",
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled && !isNavigating ? 0.5 : 1,
+        transition: "opacity 0.15s ease",
+      }}
+    >
+      <SpinnerOverlay isNavigating={isNavigating} size={24} accentColor="var(--afa-amber)" scrimBackground="var(--afa-scrim)" />
+
+      <div style={{ position: "relative", width: "74px", height: "92px", flexShrink: 0, overflow: "hidden", borderRadius: "var(--afa-radius-md)" }}>
+        <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} hideCaption />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, minWidth: 0, padding: "var(--afa-space-2px) 0" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
+            {typeLabel}
+            {event.isCompetitionShow && <CompetitionBadge style={{ fontSize: "var(--afa-text-caption)", letterSpacing: "0.13em" }} />}
+          </div>
+          <h3 style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {event.title}
+          </h3>
+          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+            <ClockIcon style={{ width: "12px", height: "12px", flexShrink: 0 }} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {formatDate(event.date, 'short', locale)}, {event.startTime}
+              {event.venue && ` · ${event.venue.city}`}
+            </span>
+          </div>
+        </div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)" }}>
+          {priceLabel}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <EventSaveHeartButton eventId={event.id} size="row" onToggled={onSaveToggled} />
+      </div>
+    </div>
+  )
+}

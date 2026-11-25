@@ -1,0 +1,358 @@
+'use client'
+
+import { useState } from 'react'
+import Button from '@/components/ui/Button'
+import { calendarDate, formatDate } from '@/lib/format-date'
+
+// Admin Dashboard v1 trend charts (design.md §9.1).
+//
+// Deliberately hand-rolled inline SVG rather than pulling in a chart
+// library - at MVP feedback volume (dozens to low hundreds of rows) a
+// dependency-free approach is simpler to maintain and keeps this page's
+// bundle small. Revisit if the dataset grows enough to need real
+// interactivity (zoom/tooltip-on-hover across many points).
+//
+// Takes the FULL feedback set (open + resolved) regardless of what the
+// board/list currently has loaded via the "Show Resolved" toggle -
+// trends need the whole picture to be meaningful.
+
+interface TrendFeedbackItem {
+  category: string
+  status: string
+  severity: string | null
+  createdAt: string
+  resolvedAt: string | null
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  BUG: 'Bug',
+  FEATURE_IDEA: 'Feature idea',
+  QUESTION: 'Question',
+  GENERAL: 'General',
+  OTHER: 'Other',
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  BUG: 'var(--afa-error)',
+  FEATURE_IDEA: 'var(--afa-sage)',
+  QUESTION: 'var(--afa-fill-solid)',
+  GENERAL: 'var(--afa-taupe)',
+  OTHER: 'var(--afa-taupe)',
+}
+
+function startOfWeek(d: Date): Date {
+  const copy = new Date(d)
+  const day = copy.getDay() // 0 = Sunday
+  copy.setDate(copy.getDate() - day)
+  copy.setHours(0, 0, 0, 0)
+  return copy
+}
+
+function weekLabel(d: Date): string {
+  return formatDate(calendarDate(d.getFullYear(), d.getMonth(), d.getDate()), 'short')
+}
+
+function buildWeeklySeries(items: TrendFeedbackItem[], weeks = 8) {
+  const now = new Date()
+  const thisWeekStart = startOfWeek(now)
+  const buckets: { weekStart: Date; opened: number; resolved: number }[] = []
+  for (let i = weeks - 1; i >= 0; i--) {
+    const ws = new Date(thisWeekStart)
+    ws.setDate(ws.getDate() - i * 7)
+    buckets.push({ weekStart: ws, opened: 0, resolved: 0 })
+  }
+  const weekIndex = (date: Date) => {
+    const ws = startOfWeek(date)
+    return buckets.findIndex((b) => b.weekStart.getTime() === ws.getTime())
+  }
+  for (const item of items) {
+    const openedIdx = weekIndex(new Date(item.createdAt))
+    if (openedIdx >= 0) buckets[openedIdx].opened += 1
+    if (item.resolvedAt) {
+      const resolvedIdx = weekIndex(new Date(item.resolvedAt))
+      if (resolvedIdx >= 0) buckets[resolvedIdx].resolved += 1
+    }
+  }
+  return buckets
+}
+
+function startOfDay(d: Date): Date {
+  const copy = new Date(d)
+  copy.setHours(0, 0, 0, 0)
+  return copy
+}
+
+function dayLabel(d: Date): string {
+  return formatDate(calendarDate(d.getFullYear(), d.getMonth(), d.getDate()), 'short')
+}
+
+function buildDailySeries(items: TrendFeedbackItem[], days = 14) {
+  const today = startOfDay(new Date())
+  const buckets: { dayStart: Date; opened: number; resolved: number }[] = []
+  for (let i = days - 1; i >= 0; i--) {
+    const ds = new Date(today)
+    ds.setDate(ds.getDate() - i)
+    buckets.push({ dayStart: ds, opened: 0, resolved: 0 })
+  }
+  const dayIndex = (date: Date) => {
+    const ds = startOfDay(date)
+    return buckets.findIndex((b) => b.dayStart.getTime() === ds.getTime())
+  }
+  for (const item of items) {
+    const openedIdx = dayIndex(new Date(item.createdAt))
+    if (openedIdx >= 0) buckets[openedIdx].opened += 1
+    if (item.resolvedAt) {
+      const resolvedIdx = dayIndex(new Date(item.resolvedAt))
+      if (resolvedIdx >= 0) buckets[resolvedIdx].resolved += 1
+    }
+  }
+  return buckets
+}
+
+function buildCategoryBreakdown(items: TrendFeedbackItem[]) {
+  const counts: Record<string, number> = {}
+  for (const item of items) {
+    counts[item.category] = (counts[item.category] || 0) + 1
+  }
+  return Object.entries(counts)
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count)
+}
+
+const AGE_BUCKETS = [
+  { label: '0–1d', maxDays: 1 },
+  { label: '1–3d', maxDays: 3 },
+  { label: '3–7d', maxDays: 7 },
+  { label: '7–14d', maxDays: 14 },
+  { label: '14d+', maxDays: Infinity },
+]
+
+function buildAgeDistribution(openItems: TrendFeedbackItem[]) {
+  const now = Date.now()
+  const buckets = AGE_BUCKETS.map((b) => ({ ...b, count: 0 }))
+  for (const item of openItems) {
+    const ageDays = (now - new Date(item.createdAt).getTime()) / 86_400_000
+    const bucket = buckets.find((b) => ageDays <= b.maxDays)
+    if (bucket) bucket.count += 1
+  }
+  return buckets
+}
+
+function buildKPIs(items: TrendFeedbackItem[]) {
+  return {
+    total: items.length,
+    pending: items.filter((i) => i.status === 'NEW' || i.status === 'UNDER_REVIEW').length,
+    inBuild: items.filter((i) => ['BUILD_QUEUE', 'IN_BUILD', 'BUILD_COMPLETE'].includes(i.status)).length,
+    inTest: items.filter((i) => i.status === 'IN_TEST' || i.status === 'REOPENED').length,
+    resolved: items.filter((i) => i.status === 'RESOLVED').length,
+    rejected: items.filter((i) => i.status === 'REJECTED').length,
+    featureIdeas: items.filter((i) => i.category === 'FEATURE_IDEA').length,
+  }
+}
+
+const kpiCard: React.CSSProperties = {
+  background: 'var(--afa-surface-raised)',
+  borderRadius: 'var(--afa-radius-lg)',
+  border: '1px solid var(--afa-tint-08)',
+  padding: 'var(--afa-space-14px) var(--afa-space-4)',
+  flex: '1 1 120px',
+}
+
+const kpiValue: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: 'var(--afa-text-heading)',
+  fontWeight: 700,
+  color: 'var(--afa-text-primary)',
+}
+
+const kpiLabel: React.CSSProperties = {
+  fontSize: 'var(--afa-text-micro)',
+  color: 'var(--afa-taupe)',
+  marginTop: 'var(--afa-space-2px)',
+}
+
+const chartCard: React.CSSProperties = {
+  background: 'var(--afa-surface-raised)',
+  borderRadius: 'var(--afa-radius-lg)',
+  border: '1px solid var(--afa-tint-08)',
+  padding: 'var(--afa-space-18px)',
+}
+
+const chartTitle: React.CSSProperties = {
+  fontSize: 'var(--afa-text-ui)',
+  fontWeight: 700,
+  color: 'var(--afa-text-primary)',
+  marginBottom: 'var(--afa-space-14px)',
+}
+
+export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }) {
+  const [granularity, setGranularity] = useState<'daily' | 'weekly'>('weekly')
+  const kpis = buildKPIs(items)
+  const weekly = buildWeeklySeries(items)
+  const daily = buildDailySeries(items)
+  const series = granularity === 'daily' ? daily : weekly
+  const labelFor = (b: { weekStart?: Date; dayStart?: Date }) =>
+    granularity === 'daily' ? dayLabel(b.dayStart as Date) : weekLabel(b.weekStart as Date)
+  const categories = buildCategoryBreakdown(items)
+  const openItems = items.filter((i) => i.status !== 'RESOLVED' && i.status !== 'REJECTED')
+  const ageBuckets = buildAgeDistribution(openItems)
+
+  // --- Opened/resolved line chart geometry (weekly or daily) ---
+  const W = 560
+  const H = 160
+  const padL = 28
+  const padB = 20
+  const padT = 10
+  const plotW = W - padL - 12
+  const plotH = H - padB - padT
+  const maxVal = Math.max(1, ...series.map((w) => Math.max(w.opened, w.resolved)))
+  const xFor = (i: number) => padL + (i / Math.max(1, series.length - 1)) * plotW
+  const yFor = (v: number) => padT + plotH - (v / maxVal) * plotH
+  const openedPath = series.map((w, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(w.opened)}`).join(' ')
+  const resolvedPath = series.map((w, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(w.resolved)}`).join(' ')
+
+  // --- Category bar chart geometry ---
+  const maxCatCount = Math.max(1, ...categories.map((c) => c.count))
+
+  // --- Age distribution geometry ---
+  const maxAgeCount = Math.max(1, ...ageBuckets.map((b) => b.count))
+
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 'var(--afa-space-10px)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-14px)' }}>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.total}</div>
+          <div style={kpiLabel}>Total reported</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.pending}</div>
+          <div style={kpiLabel}>Pending (new/under review)</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.inBuild}</div>
+          <div style={kpiLabel}>In build</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.inTest}</div>
+          <div style={kpiLabel}>In test</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.resolved}</div>
+          <div style={kpiLabel}>Resolved</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.rejected}</div>
+          <div style={kpiLabel}>Rejected</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.featureIdeas}</div>
+          <div style={kpiLabel}>Feature ideas</div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: 'var(--afa-space-14px)',
+          marginBottom: 'var(--afa-space-6)',
+        }}
+      >
+        <div style={chartCard}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-14px)' }}>
+            <div style={{ ...chartTitle, marginBottom: 0 }}>
+              Opened vs. resolved{' '}
+              <span style={{ opacity: 0.5, fontWeight: 400 }}>
+                · last {granularity === 'daily' ? '14 days' : '8 weeks'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-1)' }}>
+              {(['weekly', 'daily'] as const).map((g) => (
+                <Button
+                  key={g}
+                  variant="toggle-pill"
+                  size="pill-sm"
+                  fullWidth={false}
+                  selected={granularity === g}
+                  onClick={() => setGranularity(g)}
+                >
+                  {g === 'weekly' ? 'Weekly' : 'Daily'}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+            {/* baseline */}
+            <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} style={{ stroke: 'var(--afa-border-resting)' }} strokeWidth={1} />
+            <path d={openedPath} fill="none" style={{ stroke: 'var(--afa-fill-solid)' }} strokeWidth={2} />
+            <path d={resolvedPath} fill="none" style={{ stroke: 'var(--afa-sage-bright)' }} strokeWidth={2} />
+            {series.map((w, i) => (
+              <g key={i}>
+                <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} style={{ fill: 'var(--afa-fill-solid)' }} />
+                <circle cx={xFor(i)} cy={yFor(w.resolved)} r={2.5} style={{ fill: 'var(--afa-sage-bright)' }} />
+                {(i === 0 || i === series.length - 1 || i === Math.floor(series.length / 2)) && (
+                  <text x={xFor(i)} y={H - 4} fontSize={9} style={{ fill: 'var(--afa-taupe)' }} textAnchor="middle">
+                    {labelFor(w)}
+                  </text>
+                )}
+              </g>
+            ))}
+          </svg>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-micro)' }}>
+            <span style={{ color: 'var(--afa-fill-solid)' }}>● Opened</span>
+            <span style={{ color: 'var(--afa-sage-bright)' }}>● Resolved</span>
+          </div>
+        </div>
+
+      <div style={chartCard}>
+        <div style={chartTitle}>Category breakdown</div>
+        {categories.length === 0 && (
+          <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)' }}>No data yet.</p>
+        )}
+        {categories.map((c) => (
+          <div key={c.category} style={{ marginBottom: 'var(--afa-space-10px)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-micro)', marginBottom: '3px' }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
+              <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
+              <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
+            </div>
+            <div style={{ height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-06)', overflow: 'hidden' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: `${(c.count / maxCatCount) * 100}%`,
+                  background: CATEGORY_COLORS[c.category] || 'var(--afa-taupe)',
+                  borderRadius: 'var(--afa-radius-xs)',
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={chartCard}>
+        <div style={chartTitle}>
+          Open-item age <span style={{ opacity: 0.5, fontWeight: 400 }}>· {openItems.length} open</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--afa-space-2)', height: '110px' }}>
+          {ageBuckets.map((b) => (
+            <div key={b.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)', marginBottom: 'var(--afa-space-1)' }}>{b.count}</span>
+              <div
+                style={{
+                  width: '100%',
+                  maxWidth: '32px',
+                  height: `${Math.max(4, (b.count / maxAgeCount) * 80)}px`,
+                  background: b.label === '14d+' ? 'var(--afa-error)' : 'var(--afa-fill-solid)',
+                  opacity: b.label === '14d+' ? 1 : 0.6 + 0.1 * AGE_BUCKETS.findIndex((ab) => ab.label === b.label),
+                  borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)',
+                }}
+              />
+              <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+            </div>
+          ))}
+        </div>
+      </div>
+      </div>
+    </>
+  )
+}

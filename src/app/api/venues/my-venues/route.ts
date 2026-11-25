@@ -29,7 +29,14 @@ export async function GET() {
 
     const venues = await prisma.venue.findMany({
       where: { ownerId: venueOwner.id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        // NUMBERED venues' pricing lives in VenueZonePrice, not the
+        // seatMap.sections field the GA path uses - dashboard price
+        // range needs both to avoid the "—" bug (same field-mismatch
+        // family as PR #151/#156, this time on the owner's venue list).
+        zonePrices: { select: { suggestedPrice: true } },
+      },
     })
 
     return NextResponse.json(venues)
