@@ -1,4 +1,23 @@
-## Part 84 — START HERE (24 Nov 10:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+## Part 85 — START HERE (26 Nov 01:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE = qa @ 156f9b4)
+Read order: **85 → 84**. 0 open PRs.
+
+- 🚀 **PROD LAUNCHED 26 Nov ~01:10 IST.** Hitesh lifted the prod block for launch day (24 Nov) and approved each step.
+  1. Wipe (24 Nov 12:20 IST, chat via Supabase execute_sql): all public tables/enums/functions dropped (13 July test users, 2 events, 11 ₹0 bookings; samples shown, backup skipped by Hitesh).
+  2. Migrate: chat's apply via MCP was **denied by auto-mode** → Hitesh ran `npx prisma migrate deploy` locally (Session pooler 5432) 26 Nov 00:05 IST → 86/86. Verified: 53 tables, RLS on all, 4 role-code triggers, 5 fns search_path, 115 DesignTokens, PlatformSettings singleton, advisors 0 ERROR/0 WARN. Column diff vs QA = only QA drift (QA has leftover Artist.hypScore; QA has DB uuid defaults on EmailVerificationToken/Otp.id — Prisma uses cuid client-side). `_prisma_migrations` checksums were written by Prisma on Windows (may differ from Linux-computed; `migrate deploy` ignores applied ones).
+  3. Admin row (chat, Hitesh's fresh bcrypt hash): `hiteshshyamchandbanagde@gmail.com`, ADMIN, verified/approved, code AFA2611000001 (trigger works). Password NOT stored anywhere by chat.
+  4. Vercel Production DATABASE_URL re-set by Hitesh to the 6543 transaction pooler (DB password unchanged).
+  5. **#789 merged** (merge commit `052bcc9`, pinned head 1fb6dd7 = commit-tree of qa^{tree} with parents main+qa → main tree == qa; main's 3 prod-only legal ports superseded). CI on head: e2e-preview 742 ✅/0 ❌, design-tokens ✅. Vercel prod `dpl_9YPDbXBaEAkucv64SahJg9UUfjzj` READY; no runtime errors on it in first minutes (only known preview-era warnings).
+- Prod state: `smsOtpEnabled=false`, `paidBookingsEnabled=false`, all 4 wave flags false (defaults) → waves to be opened by Hitesh in Admin → Settings.
+
+### Next (chat)
+1. Read Hitesh's smoke results (email sign-up, admin login, free ticket, push, photo upload, Places) → fix-forward on qa if anything fails.
+2. Waves: open in order on Hitesh OK.
+3. Restore prod hard-block in tooling after launch day (block was lifted for launch only).
+
+### Open for Hitesh
+Smoke test · open waves · delete merged branches (now 8: + release/launch-2611) · optional Google re-login on QA · Anthropic prod key expires 31 Dec · Google OAuth on prod later.
+
+## Part 84 — superseded by 85, (24 Nov 10:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
 Read order: **84 → 83 → 82**. 0 open PRs.
 
 - **#787 MERGED** (`a97bc78`, pinned head bf71187; Hitesh "merge both", 24 Nov). Fresh-replay part 2: catch-up migration `20261122120000` (role-code columns/indexes, EmailVerificationToken, Otp, CodeCounter, generate_role_code + 4 BEFORE INSERT triggers — chat verified against QA pg_get_functiondef/pg_get_triggerdef 22 Nov, identical logic; code columns no default on QA too), `20261122130000` RLS on all public tables, `20260802080000` made replay-safe (checksum changes; deploy ignores applied ones), PGlite `scripts/migration-replay.test.ts` 7/11 → 11/11, 86/86 replay. AGENTS.md RLS rule. CI: e2e-preview 740 ✅ / 0 ❌ / 0 flaky, design-tokens ✅.
