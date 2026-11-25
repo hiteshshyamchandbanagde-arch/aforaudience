@@ -45,5 +45,14 @@ next-env.d.ts
 
 /src/generated/prisma
 
+
 # Local schema dumps — not for source control
 qa-init.sql
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/blob-report/
+# Playwright saved logins (written by e2e/global-setup.ts on every run)
+/e2e/.auth/

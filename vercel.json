@@ -1,0 +1,9 @@
+{
+  "regions": ["bom1"],
+  "crons": [
+    {
+      "path": "/api/cron/post-show-rating-prompts",
+      "schedule": "*/15 * * * *"
+    }
+  ]
+}

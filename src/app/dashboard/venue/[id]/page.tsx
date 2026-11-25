@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
+import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
+import { ErrorBanner, PageHead, Card, SectionTitle, StatusPill, Button } from '@/components/dashboard/VenuePortalUI'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
+import { formatINR } from '@/lib/money-display'
+import { useLocale } from '@/lib/i18n/translate'
+import { countText } from '@/lib/i18n/plural'
 
 interface SeatSection {
   id: string
@@ -18,10 +26,15 @@ interface Venue {
   name: string
   address: string
   city: string
+  state?: string | null
+  country?: string | null
   capacity: number
   acousticRating?: number
   facilities: string[]
   seatMap?: { sections?: SeatSection[] } | null
+  seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
+  seats?: { tierLabel: string; level: string }[]
+  zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
   isApproved: boolean
   createdAt: string
 }
@@ -34,6 +47,11 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [toggling, setToggling] = useState(false)
+  const { showToast } = useToast()
+  const { locale, t: tr } = useLocale()
+  const v = tr.venueDashboard.venueView
+  const statusText = tr.venueDashboard.myVenues
+  const seatsText = (n: number) => countText(locale, n, v.seatsOne, v.seatsOther)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -45,8 +63,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
     try {
       const res = await fetch(`/api/venues/${id}/owner`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this venue')
-        throw new Error('Venue not found')
+        if (res.status === 403) throw new Error(v.accessDenied)
+        throw new Error(v.notFound)
       }
       const data = await res.json()
       setVenue(data)
@@ -73,152 +91,247 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ publish: !venue.isApproved }),
       })
-      if (!res.ok) throw new Error('Failed to update publish status')
-      const updated = await res.json()
-      setVenue(updated)
+      const data = await res.json()
+      // The server already gives a specific, actionable message (e.g. the
+      // publish-gate reason for NUMBERED venues) - a hardcoded generic
+      // string here was throwing that away. Surfacing via toast instead of
+      // the page-level `error` state, since that state blanks the entire
+      // page (looked like a navigation/redirect, not an inline error).
+      if (!res.ok) throw new Error(data.error || v.publishFailed)
+      setVenue(data)
+      showToast(data.isApproved ? v.published : v.unpublished, 'success')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || v.publishFailed, 'error')
     } finally {
       setToggling(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
-  if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{v.notFound}</div></>)
 
   const sections = venue.seatMap?.sections || []
-  const prices = sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
+
+  // NUMBERED venues have no seatMap.sections - their zones live in real
+  // Seat/VenueZonePrice rows instead (same data event-creation pricing
+  // reads). Grouping by level+zoneName (not zoneName alone) so same-named
+  // zones on different levels stay distinct rows with their own price -
+  // found live (28 Jul) that this was previously merging them into one
+  // row and always showing the level='' (Main) price for every level.
+  const numberedZones = (() => {
+    if (venue.seatingMode !== 'NUMBERED' || !venue.seats) return []
+    const counts = new Map<string, { level: string; zoneName: string; count: number }>()
+    for (const seat of venue.seats) {
+      const key = `${seat.level}::${seat.tierLabel}`
+      const existing = counts.get(key)
+      if (existing) existing.count += 1
+      else counts.set(key, { level: seat.level, zoneName: seat.tierLabel, count: 1 })
+    }
+    const priceByZone = new Map<string, number | null>()
+    for (const zp of venue.zonePrices || []) {
+      priceByZone.set(`${zp.level}::${zp.zoneName}`, zp.suggestedPrice)
+    }
+    return Array.from(counts.values())
+      .sort((a, b) => a.level.localeCompare(b.level) || a.zoneName.localeCompare(b.zoneName))
+      .map((z) => ({
+        ...z,
+        price: priceByZone.get(`${z.level}::${z.zoneName}`) ?? null,
+      }))
+  })()
+  // Price Range stat box: same gap as the zone-list fix above missed -
+  // numberedZones already resolves real per-zone prices for NUMBERED
+  // venues, but this summary number was still reading GA-only `sections`
+  // only, showing "—" even when zones were fully priced.
+  const prices =
+    venue.seatingMode === 'NUMBERED'
+      ? numberedZones.map((z) => Number(z.price) || 0).filter((p) => p > 0)
+      : sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
   const minPrice = prices.length ? Math.min(...prices) : null
   const maxPrice = prices.length ? Math.max(...prices) : null
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Venues
-          </Link>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
+          <BackLink href="/dashboard/venue" label={v.backToVenues} />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '16px', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
-            <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
-                {venue.name}
-              </h1>
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>
-                {venue.address}, {venue.city}
-              </p>
-            </div>
-            <span
-              style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                padding: '6px 14px',
-                borderRadius: '999px',
-                background: venue.isApproved ? 'rgba(74,103,65,0.12)' : 'rgba(201,151,58,0.15)',
-                color: venue.isApproved ? '#4A6741' : '#8a6a1f',
-                whiteSpace: 'nowrap',
-              }}
+          <div style={{ marginTop: 'var(--afa-space-5)' }}>
+            <PageHead
+              eyebrow={v.eyebrow}
+              title={venue.name}
+              description={`${venue.address}, ${venue.city}${venue.state ? `, ${venue.state}` : ''}`}
             >
-              {venue.isApproved ? 'Published' : 'Draft'}
-            </span>
+              <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>
+                {venue.isApproved ? statusText.statusPublished : statusText.statusDraft}
+              </StatusPill>
+            </PageHead>
           </div>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
           )}
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+          <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
+            <SectionTitle n="01" title={v.overview} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-6)' }}>
               <div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>{venue.capacity} seats</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{v.totalCapacity}</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{seatsText(venue.capacity)}</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Price Range</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>
-                  {minPrice !== null ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : '—'}
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{v.priceRange}</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                  {minPrice !== null ? (minPrice === maxPrice ? formatINR(minPrice) : `${formatINR(minPrice)}–${formatINR(maxPrice!)}`) : '—'}
                 </p>
               </div>
-              {venue.acousticRating != null && (
-                <div>
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
-                  <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>{venue.acousticRating}/5</p>
-                </div>
-              )}
+              <div>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>{v.acousticRating}</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{v.notRatedYet}</p>
+              </div>
             </div>
 
             {venue.facilities && venue.facilities.length > 0 && (
-              <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Facilities</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+                <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>{v.facilities}</h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: '#F7F3EE', borderRadius: '999px', color: '#0E0C0A' }}>
+                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
                       {facility}
                     </span>
                   ))}
                 </div>
               </div>
             )}
+          </Card>
 
+          <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
+            <SectionTitle n="02" title={v.seatingSections} />
             <div>
-              <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Seating Sections</h2>
-              {sections.length === 0 ? (
-                <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>No seating sections defined yet.</p>
+              {venue.seatingMode === 'NUMBERED' ? (
+                numberedZones.length === 0 ? (
+                  <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+                    {v.noSeatMap}
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+                    {numberedZones.map((z) => (
+                      <div
+                        key={`${z.level}::${z.zoneName}`}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          padding: 'var(--afa-space-3) var(--afa-space-4)',
+                          background: 'var(--afa-surface-page)',
+                          borderRadius: 'var(--afa-radius-md)',
+                          fontSize: 'var(--afa-text-body)',
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+                          {z.zoneName}{z.level ? ` · ${z.level}` : ''}
+                        </span>
+                        <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{seatsText(z.count)}</span>
+                        <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
+                          {z.price === null ? (
+                            '—'
+                          ) : z.price > 0 ? (
+                            formatINR(z.price)
+                          ) : (
+                            // Rule (Hitesh, 27 Jul): ₹0 is a valid,
+                            // explicit "Free" zone now - must read as
+                            // intentional, not as "—" (which means
+                            // "never priced" here) or a broken price.
+                            <span
+                              style={{
+                                fontSize: 'var(--afa-text-micro)',
+                                fontWeight: 700,
+                                color: 'var(--afa-amber)',
+                                background: 'var(--afa-amber-tint)',
+                                padding: '3px var(--afa-space-2)', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
+                                borderRadius: 'var(--afa-radius-xs)',
+                                letterSpacing: '0.02em',
+                              }}
+                            >
+                              {v.free}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : sections.length === 0 ? (
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{v.noSections}</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                   {sections.map((s) => (
                     <div
                       key={s.id}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
-                        padding: '12px 16px',
-                        background: '#F7F3EE',
-                        borderRadius: '8px',
-                        fontSize: '14px',
+                        padding: 'var(--afa-space-3) var(--afa-space-4)',
+                        background: 'var(--afa-surface-page)',
+                        borderRadius: 'var(--afa-radius-md)',
+                        fontSize: 'var(--afa-text-body)',
                       }}
                     >
-                      <span style={{ fontWeight: 600, color: '#0E0C0A' }}>{s.name}</span>
-                      <span style={{ color: '#0E0C0A', opacity: 0.7 }}>{s.seats} seats</span>
-                      <span style={{ fontWeight: 700, color: '#C8441A' }}>₹{s.price}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{s.name}</span>
+                      <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{seatsText(s.seats)}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
+                        {Number(s.price) > 0 ? (
+                          formatINR(s.price)
+                        ) : (
+                          // Rule (Hitesh, 27 Jul): a ₹0 price must read as
+                          // an intentional "Free" section to anyone
+                          // viewing the venue, not as a blank/broken
+                          // price field - same fix as the owner-side
+                          // SeatSectionEditor.
+                          <span
+                            style={{
+                              fontSize: 'var(--afa-text-micro)',
+                              fontWeight: 700,
+                              color: 'var(--afa-amber)',
+                              background: 'var(--afa-amber-tint)',
+                              padding: '3px var(--afa-space-2)', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
+                              borderRadius: 'var(--afa-radius-xs)',
+                              letterSpacing: '0.02em',
+                            }}
+                          >
+                            {v.free}
+                          </span>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          </div>
+          </Card>
 
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/venue/${venue.id}/edit`}
-              style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
-              Edit Venue
+              {v.editVenue}
             </Link>
-            <button
+            <Link
+              href={`/dashboard/venue/${venue.id}/sales`}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
+            >
+              <Icon name="trendUp" size={16} style={INLINE_ICON_STYLE} /> {v.revenue}
+            </Link>
+            <Button
               onClick={togglePublish}
               disabled={toggling}
-              style={{
-                fontSize: '14px',
-                fontWeight: 600,
-                color: venue.isApproved ? '#0E0C0A' : '#F7F3EE',
-                background: venue.isApproved ? 'transparent' : '#C8441A',
-                border: venue.isApproved ? '1px solid rgba(14,12,10,0.2)' : 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                opacity: toggling ? 0.6 : 1,
-              }}
+              variant={venue.isApproved ? 'outline' : 'primary'}
+              style={{ opacity: toggling ? 0.6 : 1 }}
             >
-              {toggling ? 'Updating...' : venue.isApproved ? 'Unpublish' : 'Publish Venue'}
-            </button>
+              {toggling ? v.updating : venue.isApproved ? v.unpublish : v.publishVenue}
+            </Button>
           </div>
         </div>
       </main>

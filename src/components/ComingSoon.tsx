@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
+import { useLocale } from "@/lib/i18n/translate"
 
 type ComingSoonProps = {
   title: string
@@ -7,8 +10,9 @@ type ComingSoonProps = {
 }
 
 export default function ComingSoon({ title, description }: ComingSoonProps) {
+  const { t: tr } = useLocale()
   return (
-    <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
       <div
         style={{
@@ -18,31 +22,37 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
-          padding: "48px 24px",
+          padding: "var(--afa-space-48px) var(--afa-space-6)",
         }}
       >
-        <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "#C8441A", textTransform: "uppercase", marginBottom: "20px" }}>
-          Coming Soon
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "var(--afa-space-5)" }}>
+          {tr.comingSoon.badge}
         </div>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "#0E0C0A", marginBottom: "16px" }}>
+        <h1 style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "36px", // token-ok(font-size-literal): one-off marketing display title on the Coming Soon placeholder (see docs/afa-design-tokens-reference.md, one-off display text)
+          fontWeight: 700,
+          color: "var(--afa-text-primary)",
+          marginBottom: "var(--afa-space-4)",
+        }}>
           {title}
         </h1>
-        <p style={{ fontSize: "15px", color: "#0E0C0A", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
-          {description ?? "We're still putting this page together. Check back soon."}
+        <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "var(--afa-space-32px)" }}>
+          {description ?? tr.comingSoon.defaultDescription}
         </p>
         <Link
           href="/"
           style={{
-            fontSize: "14px",
+            fontSize: "var(--afa-text-body)",
             fontWeight: 600,
-            color: "#F7F3EE",
+            color: "var(--afa-on-fill-solid)",
             textDecoration: "none",
-            background: "#0E0C0A",
-            padding: "12px 28px",
-            borderRadius: "6px",
+            background: "var(--afa-fill-solid)",
+            padding: "var(--afa-space-3) var(--afa-space-28px)",
+            borderRadius: "var(--afa-radius-sm)",
           }}
         >
-          Back to Home
+          {tr.comingSoon.backHome}
         </Link>
       </div>
     </main>

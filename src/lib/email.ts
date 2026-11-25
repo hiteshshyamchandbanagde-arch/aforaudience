@@ -1,4 +1,6 @@
 import { Resend } from "resend"
+import { resolveDesignColors } from "@/lib/design-tokens.server"
+import { textSafeColor } from "@/lib/design-tokens"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 const FROM = process.env.EMAIL_FROM || "AforAudience <no-reply@aforaudience.com>"
@@ -14,6 +16,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   await resend.emails.send({
     from: FROM,
     to,
+    replyTo: "info@aforaudience.com",
     subject: "Reset your AforAudience password",
     html: `
       <p>We received a request to reset your AforAudience password.</p>
@@ -21,4 +24,254 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
       <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
     `,
   })
+}
+
+// Fire-and-forget from register/route.ts - deliberately does not block
+// signup completion. Phone OTP is the one mandatory verification gate;
+// email verification is a background nudge, not a login requirement.
+export async function sendEmailVerificationEmail(to: string, verifyUrl: string) {
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY not set, skipping send. Verify URL:", verifyUrl)
+    return
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    replyTo: "info@aforaudience.com",
+    subject: "Verify your AforAudience email",
+    html: `
+      <p>Welcome to AforAudience! Confirm this is your email address.</p>
+      <p><a href="${verifyUrl}">Verify your email</a></p>
+      <p>This link expires in 24 hours. You can keep using your account either way - this is just a confirmation.</p>
+    `,
+  })
+}
+
+// FEAT-2608-046 - corporate booking inquiry (inquiry-only, no payment
+// flow). Notifies the artist by email since there's no in-app inbox for
+// this yet - the artist dashboard list (GET /api/corporate-inquiries) is
+// the source of truth either way, this is just the "someone reached you"
+// nudge.
+export async function sendCorporateInquiryEmail(
+  to: string,
+  artistName: string,
+  inquiry: { companyName: string; contactName: string; contactEmail: string; contactPhone: string | null; eventType: string | null; city: string | null; message: string | null }
+) {
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY not set, skipping send. Corporate inquiry for:", artistName)
+    return
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    replyTo: inquiry.contactEmail,
+    subject: `New corporate booking inquiry from ${inquiry.companyName}`,
+    html: `
+      <p>Hi ${artistName},</p>
+      <p><strong>${inquiry.companyName}</strong> is interested in booking you for a private/corporate event.</p>
+      <ul>
+        <li><strong>Contact:</strong> ${inquiry.contactName} (${inquiry.contactEmail}${inquiry.contactPhone ? `, ${inquiry.contactPhone}` : ""})</li>
+        ${inquiry.eventType ? `<li><strong>Event type:</strong> ${inquiry.eventType}</li>` : ""}
+        ${inquiry.city ? `<li><strong>City:</strong> ${inquiry.city}</li>` : ""}
+        ${inquiry.message ? `<li><strong>Message:</strong> ${inquiry.message}</li>` : ""}
+      </ul>
+      <p>This is a direct lead, not a platform booking - reach out to them directly to discuss and confirm. You can also view all your inquiries from your AforAudience dashboard.</p>
+    `,
+  })
+}
+
+// Ticket delivery. Sent from the delivery orchestrator once a booking
+// transitions to CONFIRMED. PDF is passed in as bytes so the caller
+// controls PDF generation lifecycle (regenerate on demand from the
+// download endpoint too, so we never store a stale copy).
+//
+// TICKETS_FROM defaults to a role-address on the sending subdomain
+// (`tickets@mail.aforaudience.com`) so filters and DMARC alignment
+// route cleanly. Overridable via env if we ever move senders.
+export type TicketEmailInput = {
+  to: string
+  attendeeName: string
+  eventTitle: string
+  eventDateHuman: string
+  venueLine: string | null
+  seatsSummary: string
+  totalAmount: number
+  subtotalAmount: number
+  bookingFeeAmount: number
+  bookingId: string
+  // BUG-2609-053 - the customer-facing reference (AFA-XXXX-XXXX). Null
+  // only if assignment failed; the raw booking id is shown instead.
+  ticketCode: string | null
+  ticketPdf: Uint8Array
+}
+
+// GEN-2609-119 - email clients can't read CSS custom properties, so the
+// colours are resolved from the design tokens when the mail is built and
+// inlined as concrete values. One helper for every template: the mail is
+// a light document (dark ink on the client's own background, a cream
+// details card), so it reads the ink and cream tokens, not the site's
+// dark page surface.
+// GEN-2610-001 - every text colour here is small text (10-15px), so
+// labels and notes go through textSafeColor: the primary fill's orange
+// tint, darkened just enough for 4.5:1 on the cream card (the fill
+// itself is 2.81:1 there), and taupe likewise. Measured on the card, the
+// darker of the two grounds, so they also pass on a white mail client.
+export const EMAIL_TOKENS = ["--afa-ink", "--afa-cream", "--afa-fill-solid", "--afa-taupe", "--afa-tint-08"] as const
+export function emailColorsFrom(c: Record<(typeof EMAIL_TOKENS)[number], string>) {
+  const card = c["--afa-cream"]
+  return {
+    ink: c["--afa-ink"],
+    card,
+    label: textSafeColor(c["--afa-fill-solid"], card),
+    muted: textSafeColor(c["--afa-taupe"], card),
+    rule: c["--afa-tint-08"],
+  }
+}
+export async function emailColors() {
+  return emailColorsFrom(await resolveDesignColors(EMAIL_TOKENS))
+}
+export type EmailColors = ReturnType<typeof emailColorsFrom>
+
+// The coloured "A" of the wordmark is the logo and keeps its own value.
+const LOGO_A = "#C8441A" // token-ok(hex-color-literal): logo, fixed by design
+
+const TICKETS_FROM =
+  process.env.EMAIL_FROM_TICKETS ||
+  "AforAudience Tickets <tickets@mail.aforaudience.com>"
+
+export async function sendTicketEmail(input: TicketEmailInput) {
+  if (!resend) {
+    // Local dev / mis-configured env — log so the flow is still
+    // testable end-to-end without a real Resend key.
+    console.warn(
+      "[email] RESEND_API_KEY not set, skipping ticket send. Booking:",
+      input.bookingId
+    )
+    return
+  }
+
+  await resend.emails.send({
+    from: TICKETS_FROM,
+    to: input.to,
+    replyTo: "info@aforaudience.com",
+    subject: `You're in! ${input.eventTitle}`,
+    html: renderTicketEmailHtml(input, await emailColors()),
+    attachments: [
+      {
+        filename: `aforaudience-ticket-${input.ticketCode ?? input.bookingId}.pdf`,
+        content: Buffer.from(input.ticketPdf).toString("base64"),
+      },
+    ],
+  })
+}
+
+// The ticket email's HTML, apart from the send, so it can be rendered
+// (and checked) without a mail going out.
+export function renderTicketEmailHtml(input: Omit<TicketEmailInput, "to" | "ticketPdf">, c: EmailColors): string {
+  const hasFee = input.bookingFeeAmount > 0
+  const label = `font-size: 10px; font-weight: 700; color: ${c.label}; letter-spacing: 0.06em; margin-bottom: 4px;`
+
+  // When a fee applied, break out the numbers honestly instead of
+  // showing a single AMOUNT PAID that hides where the money went.
+  const amountRows = hasFee
+    ? `
+      <tr>
+        <td style="padding: 8px 0;">
+          <div style="${label}">TICKET</div>
+          <div style="font-size: 14px;">₹${input.subtotalAmount.toLocaleString("en-IN")}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0;">
+          <div style="${label}">BOOKING FEE</div>
+          <div style="font-size: 14px;">₹${input.bookingFeeAmount.toLocaleString("en-IN")}</div>
+          <div style="font-size: 11px; color: ${c.muted}; margin-top: 3px;">Supports the artist ecosystem.</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; border-top: 1px solid ${c.rule};">
+          <div style="${label}">TOTAL PAID</div>
+          <div style="font-size: 14px; font-weight: 600;">₹${input.totalAmount.toLocaleString("en-IN")}</div>
+        </td>
+      </tr>
+    `
+    : `
+      <tr>
+        <td style="padding: 8px 0;">
+          <div style="${label}">AMOUNT PAID</div>
+          <div style="font-size: 14px;">${input.totalAmount > 0 ? `₹${input.totalAmount.toLocaleString("en-IN")}` : "Free entry"}</div>
+        </td>
+      </tr>
+    `
+
+  return `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: ${c.ink}; max-width: 560px; margin: 0 auto; padding: 24px;">
+        <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">
+          <span style="color: ${LOGO_A};">A</span>forAudience
+        </div>
+        <div style="font-size: 12px; color: ${c.muted}; margin-bottom: 32px;">Where art finds its crowd</div>
+
+        <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 700; line-height: 1.2; margin-bottom: 16px;">
+          You're in.
+        </div>
+        <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
+          Hi ${escapeHtml(input.attendeeName)}, your booking for
+          <strong>${escapeHtml(input.eventTitle)}</strong> is confirmed.
+          Your ticket is attached to this email as a PDF.
+        </p>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%; background: ${c.card}; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-collapse: separate;">
+          <tr>
+            <td style="padding: 8px 0;">
+              <div style="${label}">WHEN</div>
+              <div style="font-size: 14px;">${escapeHtml(input.eventDateHuman)}</div>
+            </td>
+          </tr>
+          ${
+            input.venueLine
+              ? `<tr><td style="padding: 8px 0;">
+                <div style="${label}">WHERE</div>
+                <div style="font-size: 14px;">${escapeHtml(input.venueLine)}</div>
+              </td></tr>`
+              : ""
+          }
+          <tr>
+            <td style="padding: 8px 0;">
+              <div style="${label}">SEATS</div>
+              <div style="font-size: 14px;">${escapeHtml(input.seatsSummary)}</div>
+            </td>
+          </tr>
+          ${amountRows}
+          <tr>
+            <td style="padding: 8px 0;">
+              <div style="${label}">TICKET REF</div>
+              <div style="font-size: 14px; font-family: 'SF Mono', Menlo, Consolas, monospace;">${escapeHtml(input.ticketCode ?? input.bookingId)}</div>
+            </td>
+          </tr>
+        </table>
+
+        <p style="font-size: 13px; color: ${c.muted}; line-height: 1.6; margin: 0 0 8px;">
+          Show the QR on the attached PDF at the door — screen or print is fine.
+          Doors typically open 15 minutes before showtime.
+        </p>
+        <p style="font-size: 13px; color: ${c.muted}; line-height: 1.6; margin: 0 0 24px;">
+          Non-transferable. One entry per booking, up to the seat count shown above.
+        </p>
+
+        <p style="font-size: 12px; color: ${c.muted}; margin: 0;">
+          Reply to this email if you need help — a human reads every reply.
+        </p>
+      </div>
+    `
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
 }

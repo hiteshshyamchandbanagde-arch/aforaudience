@@ -1,133 +1,385 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
+import BrandLoader from '@/components/BrandLoader'
+import { formatDate } from '@/lib/format-date'
+import { PageTitle } from '@/components/dashboard/PageTitle'
 
-interface PendingItem {
-  id: string
-  orgName?: string
-  bio?: string | null
-  createdAt: string
-  user: { name: string | null; email: string | null; createdAt: string }
+// /dashboard/admin — Command Center (design.md §9.6, session 47)
+//
+// v2 (same session, redesign pass): the first cut worked but read as a
+// generic stat-card grid — "boring" per direct feedback. This pass leans
+// into what the platform actually is: a live-events ticketing brand.
+// KPI tiles are styled as torn ticket stubs (punched side-notches, a
+// perforation line separating a stub icon from the number) rather than
+// plain cards — the one deliberate visual signature, kept restrained
+// everywhere else. Quick links are icon+label pills, no arrow glyphs.
+
+interface CommandCenterData {
+  kpis: {
+    totalFeedback: number
+    pending: number
+    tested: number
+    resolved: number
+    featureIdeas: number
+    pendingApprovals: number
+    monthRevenue: number
+    monthBookings: number
+    erroredDeliveries: number
+  }
+  attention: { label: string; count: number; href: string; tone: 'critical' | 'warning' }[]
+  dailyTrend: { day: string; opened: number; resolved: number }[]
+  generatedAt: string
 }
 
-export default function AdminDashboard() {
+function formatINR(rupees: number) {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(rupees)
+}
+
+function dayLabel(iso: string) {
+  return formatDate(iso, 'short')
+}
+
+// --- Minimal line icons (18x18, stroke-only, one weight) ------------------
+// Kept deliberately plain and monochrome — the ticket-stub shape carries
+// the personality, icons just need to be legible at a glance.
+
+function IconClipboard() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="6" y="4" width="12" height="17" rx="2" />
+      <rect x="9" y="2" width="6" height="4" rx="1" />
+      <line x1="9" y1="11" x2="15" y2="11" />
+      <line x1="9" y1="15" x2="13" y2="15" />
+    </svg>
+  )
+}
+function IconClock() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 12V7M12 12l3.5 2" />
+    </svg>
+  )
+}
+function IconFlask() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 3h5M10 3v5.5l-4.6 8.2A2 2 0 0 0 7.2 20h9.6a2 2 0 0 0 1.8-3.3L14 8.5V3" />
+      <path d="M8.5 14.5h7" />
+    </svg>
+  )
+}
+function IconCheckCircle() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M8.2 12.3l2.6 2.6 5-5.6" />
+    </svg>
+  )
+}
+function IconBulb() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.3 18.5h5.4M10.3 21h3.4" />
+      <path d="M12 3.2a6.3 6.3 0 0 0-3.6 11.4c.6.4.9 1.1.9 1.8v.6h5.4v-.6c0-.7.3-1.4.9-1.8A6.3 6.3 0 0 0 12 3.2z" />
+    </svg>
+  )
+}
+function IconTicket() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.2a2 2 0 0 0 0 3.6V15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.2a2 2 0 0 0 0-3.6V9z" />
+      <line x1="12.5" y1="7.5" x2="12.5" y2="16.5" strokeDasharray="2.2 2.2" />
+    </svg>
+  )
+}
+function IconRupee() {
+  return <span style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, lineHeight: 1 }}>₹</span>
+}
+// --- Ticket-stub KPI tile --------------------------------------------------
+// Perforation notches punched into the left/right edges (colored to match
+// the page background so they read as cut-through), plus a dashed
+// tear-line separating the icon "stub" zone from the number. Grounded in
+// what this platform actually sells: tickets.
+
+function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNode; value: React.ReactNode; label: string; accent: string; href?: string }) {
+  const content = (
+    <div
+      style={{
+        position: 'relative',
+        background: 'var(--afa-surface-raised)',
+        borderRadius: 'var(--afa-radius-lg)',
+        border: '1px solid var(--afa-tint-08)',
+        display: 'flex',
+        alignItems: 'stretch',
+        overflow: 'hidden',
+        minHeight: '84px',
+        transition: 'transform 0.12s ease, box-shadow 0.12s ease',
+        cursor: href ? 'pointer' : 'default',
+      }}
+    >
+      <span
+        aria-hidden
+        style={{ position: 'absolute', left: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--afa-surface-raised)' }}
+      />
+      <span
+        aria-hidden
+        style={{ position: 'absolute', right: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--afa-surface-raised)' }}
+      />
+      <div
+        style={{
+          width: '46px',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: `${accent}14`,
+          color: accent,
+          borderRight: '1px dashed var(--afa-tint-12)',
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ padding: 'var(--afa-space-3) var(--afa-space-4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+          {value}
+        </div>
+        <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
+      </div>
+    </div>
+  )
+
+  if (!href) return content
+
+  // Feedback cms9ywqy4: tiles link straight into the filtered/scrolled
+  // board view (see /dashboard/admin/feedback's Command Center deep-link
+  // handling) instead of leaving Hitesh to reapply the same filter by
+  // hand every time.
+  return (
+    <Link href={href} style={{ textDecoration: 'none', display: 'block' }} aria-label={`${label}: ${value}`}>
+      {content}
+    </Link>
+  )
+}
+
+const sectionLabel: React.CSSProperties = {
+  fontSize: 'var(--afa-text-micro)',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  color: 'var(--afa-text-secondary)',
+  textTransform: 'uppercase',
+  marginBottom: 'var(--afa-space-10px)',
+}
+
+export default function AdminCommandCenter() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [organisers, setOrganisers] = useState<PendingItem[]>([])
-  const [venueOwners, setVenueOwners] = useState<PendingItem[]>([])
+  const [data, setData] = useState<CommandCenterData | null>(null)
   const [loading, setLoading] = useState(true)
   const [forbidden, setForbidden] = useState(false)
-  const [actioningId, setActioningId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
-  const load = async () => {
-    setLoading(true)
-    const res = await fetch('/api/admin/approvals')
-    if (res.status === 403) {
-      setForbidden(true)
-      setLoading(false)
-      return
-    }
-    if (res.ok) {
-      const data = await res.json()
-      setOrganisers(data.organisers)
-      setVenueOwners(data.venueOwners)
-    }
-    setLoading(false)
-  }
-
   useEffect(() => {
-    if (session?.user) load()
+    if (!session?.user) return
+    ;(async () => {
+      setLoading(true)
+      const res = await fetch('/api/admin/command-center')
+      if (res.status === 403) {
+        setForbidden(true)
+        setLoading(false)
+        return
+      }
+      if (res.ok) setData(await res.json())
+      setLoading(false)
+    })()
   }, [session])
 
-  const act = async (type: 'organiser' | 'venueOwner', id: string, action: 'approve' | 'reject') => {
-    setActioningId(id)
-    try {
-      await fetch('/api/admin/approvals', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, id, action }),
-      })
-      await load()
-    } finally {
-      setActioningId(null)
-    }
+  if (status === 'loading' || loading) {
+    return (
+      <>
+        <SiteNav />
+        <BrandLoader />
+      </>
+    )
   }
-
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
 
   if (forbidden) {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>Admin access only</h1>
-            <p style={{ color: '#0E0C0A', opacity: 0.6 }}>This page is restricted to platform administrators.</p>
+        <DashboardShell>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+          <div style={{ maxWidth: '720px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-5)' }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
 
-  const cardStyle = { background: '#fff', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '12px' }
+  const k = data?.kpis
+  const maxDaily = Math.max(1, ...(data?.dailyTrend || []).map((d) => Math.max(d.opened, d.resolved)))
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '32px' }}>
-            Pending Approvals
-          </h1>
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
+        <PageTitle style={{ marginBottom: 'var(--afa-space-1)' }}>
+          Command Center
+        </PageTitle>
+        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>{/* token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107) */}
+          Everything that needs your attention, at a glance.
+        </p>
 
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>
-            Organisers ({organisers.length})
-          </h2>
-          {organisers.length === 0 && <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5, marginBottom: '24px' }}>Nothing pending.</p>}
-          {organisers.map((o) => (
-            <div key={o.id} style={cardStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '15px', fontWeight: 600 }}>{o.orgName}</div>
-                  <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
-                  {o.bio && <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button disabled={actioningId === o.id} onClick={() => act('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: '#fff', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
-                  <button disabled={actioningId === o.id} onClick={() => act('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Reject</button>
-                </div>
-              </div>
+        {/* Needs attention — only rendered if something is actually outstanding */}
+        {data && data.attention.length > 0 && (
+          <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
+            <div style={sectionLabel}>Needs attention</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
+              {data.attention.map((a) => (
+                <Link
+                  key={a.label}
+                  href={a.href}
+                  style={{
+                    background: 'var(--afa-surface-raised)',
+                    borderRadius: 'var(--afa-radius-lg)',
+                    border: '1px solid var(--afa-tint-08)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    borderLeft: `4px solid ${a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)'}`,
+                    padding: 'var(--afa-space-14px) var(--afa-space-18px)',
+                  }}
+                >
+                  <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{a.label}</span>
+                  <span
+                    style={{
+                      fontSize: 'var(--afa-text-ui)',
+                      fontWeight: 700,
+                      color: a.tone === 'critical' ? 'var(--afa-error-bright)' : 'var(--afa-amber)',
+                      background: a.tone === 'critical' ? 'var(--afa-error-tint)' : 'var(--afa-amber-tint)',
+                      borderRadius: 'var(--afa-radius-pill)',
+                      padding: 'var(--afa-space-2px) var(--afa-space-10px)',
+                    }}
+                  >
+                    {a.count}
+                  </span>
+                </Link>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+        {data && data.attention.length === 0 && (
+          <div
+            style={{
+              marginBottom: 'var(--afa-space-28px)',
+              background: 'var(--afa-success-tint)',
+              border: '1px solid var(--afa-tint-08)',
+              borderLeft: '4px solid var(--afa-green-deep)',
+              borderRadius: 'var(--afa-radius-lg)',
+              padding: 'var(--afa-space-14px) var(--afa-space-18px)',
+              // BUG-2609-050 - green-deep text on this tint was 2.15:1.
+              // No STATUS_TONE matches this green bg, so text only.
+              color: 'var(--afa-sage-bright)',
+              fontSize: 'var(--afa-text-ui)',
+              fontWeight: 600,
+            }}
+          >
+            Nothing needs attention right now — all clear.
+          </div>
+        )}
 
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, marginTop: '32px', marginBottom: '12px' }}>
-            Venue Owners ({venueOwners.length})
-          </h2>
-          {venueOwners.length === 0 && <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>Nothing pending.</p>}
-          {venueOwners.map((v) => (
-            <div key={v.id} style={cardStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '15px', fontWeight: 600 }}>{v.user.name}</div>
-                  <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>{v.user.email}</div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button disabled={actioningId === v.id} onClick={() => act('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: '#fff', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
-                  <button disabled={actioningId === v.id} onClick={() => act('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Reject</button>
-                </div>
-              </div>
+        {/* Feedback health */}
+        <div style={{ marginBottom: 'var(--afa-space-10px)' }}>
+          <div style={sectionLabel}>Feedback health</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 'var(--afa-space-3)' }}>
+            <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=ALL" />
+            <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=NEW" />
+            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="In Test" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=IN_TEST" />
+            <TicketTile icon={<IconCheckCircle />} value={k?.resolved ?? '—'} label="Resolved" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=RESOLVED" />
+            <TicketTile icon={<IconBulb />} value={k?.featureIdeas ?? '—'} label="Feature ideas" accent="var(--afa-amber)" href="/dashboard/admin/feedback?category=FEATURE_IDEA" />
+          </div>
+        </div>
+
+        {/* Business this month */}
+        <div style={{ marginTop: 'var(--afa-space-6)', marginBottom: 'var(--afa-space-6)' }}>
+          <div style={sectionLabel}>This month</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 'var(--afa-space-3)' }}>
+            <TicketTile icon={<IconRupee />} value={k ? formatINR(k.monthRevenue) : '—'} label="Revenue" accent="var(--afa-amber)" />
+            <TicketTile icon={<IconTicket />} value={k?.monthBookings ?? '—'} label="Bookings" accent="var(--afa-amber)" />
+          </div>
+        </div>
+
+        {/* 14-day daily trend */}
+        <div
+          style={{
+            background: 'var(--afa-surface-raised)',
+            borderRadius: 'var(--afa-radius-lg)',
+            border: '1px solid var(--afa-tint-08)',
+            padding: 'var(--afa-space-5) 22px', // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
+            marginBottom: '26px', // token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107)
+          }}
+        >
+          <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
+            Issues raised vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 14 days</span>
+          </div>
+          {/* Fluid width, no horizontal scroll — bars compress on narrow
+              screens instead of requiring a scroll gesture. Day labels only
+              at the first/last bar (like the design spec's own spark chart)
+              to avoid 14 crowded labels on a ~390px screen; exact per-day
+              values stay available via each bar's title tooltip. */}
+          <div style={{ position: 'relative', height: '130px' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} style={{ borderTop: '1px solid var(--afa-tint-08)' }} />
+              ))}
             </div>
-          ))}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '3px', height: '100%' }}>{/* token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107) */}
+              {(data?.dailyTrend || []).map((d, i, arr) => (
+                <div key={d.day} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-2px)', alignItems: 'flex-end', height: '108px', width: '100%', justifyContent: 'center' }}>
+                    <div
+                      title={`Opened: ${d.opened}`}
+                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }}
+                    />
+                    <div
+                      title={`Resolved: ${d.resolved}`}
+                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-green-deep)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }}
+                    />
+                  </div>
+                  <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-6px)', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
+                    {dayLabel(d.day)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-small)' }}>
+            <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+              <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
+            </span>
+            <span style={{ color: 'var(--afa-green-deep)', display: 'flex', alignItems: 'center', gap: '5px' }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+              <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-green-deep)', display: 'inline-block' }} /> Resolved
+            </span>
+          </div>
+        </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

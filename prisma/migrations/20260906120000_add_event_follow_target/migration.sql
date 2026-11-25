@@ -1,0 +1,21 @@
+-- Mobile Redesign Phase 4b (GEN-2609-007, autonomous run) - adds EVENT
+-- as a valid Follow target, backing the Saved/wishlist feature.
+--
+-- Already applied directly to QA Supabase via Supabase:apply_migration -
+-- this file is documentation of what ran, per standing practice (see
+-- 20260802080000_feedback_workflow_overhaul's own header) - does not
+-- auto-run from this file. `prisma migrate dev`'s shadow-database replay
+-- was attempted first and confirmed broken independent of this change -
+-- it fails re-running the older feedback_workflow_overhaul migration
+-- from scratch (its data-migration UPDATE ... CASE references the old
+-- FeedbackStatus enum's 'TESTED' literal, which a from-empty shadow DB
+-- replay can't resolve). This project has never actually used Prisma's
+-- own migration tracking (`_prisma_migrations` doesn't exist in this
+-- database) - every real migration goes through apply_migration
+-- directly, exactly as this one does.
+--
+-- Confirmed safe to add: Follow.targetId is a plain polymorphic text
+-- column (no FK) and the existing @@unique([userId, targetType,
+-- targetId]) index already covers an EVENT target with no other schema
+-- changes needed.
+ALTER TYPE "FollowTargetType" ADD VALUE 'EVENT';

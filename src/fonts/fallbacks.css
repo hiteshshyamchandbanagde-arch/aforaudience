@@ -1,0 +1,97 @@
+/* BUG-2609-062 - metric-matched fallback faces, copied verbatim from the
+   CSS the Google Fonts loader generated for these families (qa@d2f7739
+   production build). next/font/local would compute its own values from
+   the self-hosted files; those drift from Google's (JetBrains Mono
+   size-adjust 131.49% vs 134.59%, and the script-only Noto files have no
+   Latin to measure), and the fallback face is what actually renders any
+   character a webfont lacks - e.g. the rupee sign in Instrument Sans,
+   JetBrains Mono and Young Serif text. layout.tsx sets
+   adjustFontFallback: false and names these faces via `fallback`. */
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  src: local("Arial");
+  ascent-override: 94.42%;
+  descent-override: 24.33%;
+  line-gap-override: 0.0%;
+  size-adjust: 102.74%;
+}
+@font-face {
+  font-family: "JetBrains Mono Fallback";
+  src: local("Arial");
+  ascent-override: 75.79%;
+  descent-override: 22.29%;
+  line-gap-override: 0.0%;
+  size-adjust: 134.59%;
+}
+@font-face {
+  font-family: "Noto Sans Bengali Fallback";
+  src: local("Arial");
+  ascent-override: 86.24%;
+  descent-override: 38.37%;
+  line-gap-override: 0.0%;
+  size-adjust: 106.33%;
+}
+@font-face {
+  font-family: "Noto Sans Devanagari Fallback";
+  src: local("Arial");
+  ascent-override: 84.27%;
+  descent-override: 38.37%;
+  line-gap-override: 0.0%;
+  size-adjust: 106.33%;
+}
+@font-face {
+  font-family: "Noto Sans Gujarati Fallback";
+  src: local("Arial");
+  ascent-override: 84.27%;
+  descent-override: 38.37%;
+  line-gap-override: 0.0%;
+  size-adjust: 106.33%;
+}
+@font-face {
+  font-family: "Noto Sans Kannada Fallback";
+  src: local("Arial");
+  ascent-override: 75.45%;
+  descent-override: 50.36%;
+  line-gap-override: 0.0%;
+  size-adjust: 107.22%;
+}
+@font-face {
+  font-family: "Noto Sans Malayalam Fallback";
+  src: local("Arial");
+  ascent-override: 80.08%;
+  descent-override: 35.5%;
+  line-gap-override: 0.0%;
+  size-adjust: 107.9%;
+}
+@font-face {
+  font-family: "Noto Sans Tamil Fallback";
+  src: local("Arial");
+  ascent-override: 81.82%;
+  descent-override: 34.8%;
+  line-gap-override: 0.0%;
+  size-adjust: 106.33%;
+}
+@font-face {
+  font-family: "Noto Sans Telugu Fallback";
+  src: local("Arial");
+  ascent-override: 81.05%;
+  descent-override: 45.05%;
+  line-gap-override: 0.0%;
+  size-adjust: 107.22%;
+}
+@font-face {
+  font-family: "Schibsted Grotesk Fallback";
+  src: local("Arial");
+  ascent-override: 93.46%;
+  descent-override: 24.67%;
+  line-gap-override: 0.0%;
+  size-adjust: 104.49%;
+}
+@font-face {
+  font-family: "Young Serif Fallback";
+  src: local("Times New Roman");
+  ascent-override: 83.16%;
+  descent-override: 29.1%;
+  line-gap-override: 0.0%;
+  size-adjust: 125.78%;
+}

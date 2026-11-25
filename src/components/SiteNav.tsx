@@ -1,11 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef, type CSSProperties } from "react"
 import Link from "next/link"
-import { signOut, useSession } from "next-auth/react"
+import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { signOutAndClearCache } from "@/lib/sw-cache"
+import { useIsOffline } from "@/lib/use-is-offline"
 import EnvBadge from "@/components/EnvBadge"
+import SearchBox from "@/components/SearchBox"
+import LocationChip from "@/components/LocationChip"
+import { useLocale, type Dictionary } from "@/lib/i18n/translate"
+import { LOCALES } from "@/lib/i18n/locales"
+import Button from "@/components/ui/Button"
 
-type NavLinkKey = "events" | "artists" | "venues"
+type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
 
 type SiteNavProps = {
   /** Highlights the matching link as the current section. */
@@ -21,6 +29,7 @@ const NAV_LINKS: { key: NavLinkKey; href: string; label: string }[] = [
   { key: "events", href: "/events", label: "Events" },
   { key: "artists", href: "/artists", label: "Artists" },
   { key: "venues", href: "/venues", label: "Venues" },
+  { key: "wall-of-fame", href: "/wall-of-fame", label: "Wall of Fame" },
 ]
 
 function getDashboardLink(role?: string) {
@@ -33,6 +42,68 @@ function getDashboardLink(role?: string) {
       return "/dashboard/organiser"
     case "ADMIN":
       return "/dashboard/admin"
+    case "AUDIENCE":
+      return "/dashboard/audience"
+    default:
+      return null
+  }
+}
+
+// Feedback cmrxou0f6 (23 Jul): a user with more than one role (e.g.
+// Artist + Venue Owner) wasn't sure which one was currently active just
+// from the header - had to check the dashboard content itself. Small
+// badge next to the greeting makes it explicit at a glance.
+// Takes the translated roles dict (t.roles) rather than hardcoding English
+// - Multi-language Phase 1 deepening.
+//
+// BUG-2608-081: this badge used to reuse the old terracotta accent on
+// a faint terracotta tint - the exact same color the active nav link uses
+// (see primaryLinks' isActive styling below) - so it read as a live,
+// clickable nav state ("Hi, Nikita  Venue Owner" looked like "Venue
+// Owner" was itself a link) when it's actually a static identity label.
+// Restyled as a quiet badge instead, borrowing the size/weight/uppercase/
+// letter-spacing/radius from the real "Published" status badge already
+// shipped on venue cards (src/app/dashboard/venue/page.tsx and
+// src/app/dashboard/venue/[id]/page.tsx: fontSize 11px, fontWeight 700,
+// textTransform uppercase, letterSpacing 0.05em, padding 5px 10px,
+// borderRadius 999px) - that badge's own color pairs (sage/gold) are
+// semantic to publish-state though, so wrong to reuse verbatim on a role
+// label; here the color is neutral/muted (--afa-text-secondary text on
+// a subtle --afa-border-resting border, transparent fill) rather than
+// venue-status green, and a border was added (the source badge has none)
+// specifically to read as inert chrome, not nav. One shared style object
+// used by both the desktop and mobile "signed in as" rows below, so this
+// fixes every role (Venue Owner, Artist, Organiser, Admin, Audience) in
+// one place, not just the Venue Owner case.
+const ROLE_BADGE_STYLE: CSSProperties = {
+  fontSize: "var(--afa-text-micro)",
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  padding: "3px 9px", // token-ok(spacing-literal): 3px/9px odd value, no exact token (GEN-2609-107)
+  borderRadius: "var(--afa-radius-pill)",
+  border: "1px solid var(--afa-border-resting)",
+  background: "transparent",
+  color: "var(--afa-text-secondary)",
+  whiteSpace: "nowrap",
+}
+
+function initials(name: string) {
+  return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "?"
+}
+
+function getRoleLabel(role: string | undefined, roles: Dictionary["roles"]) {
+  switch (role) {
+    case "VENUE_OWNER":
+      return roles.VENUE_OWNER
+    case "ARTIST":
+      return roles.ARTIST
+    case "ORGANISER":
+      return roles.ORGANISER
+    case "ADMIN":
+      return roles.ADMIN
+    case "AUDIENCE":
+      return roles.AUDIENCE
     default:
       return null
   }
@@ -49,163 +120,549 @@ function getDashboardLink(role?: string) {
  */
 
 
+// Small line icons for the desktop account row (18x18, one stroke weight,
+// no fill) - keeps the row visually light even with a label hidden.
+// Labels aren't lost: aria-label carries them for assistive tech, and a
+// custom hover tooltip (below) shows them on desktop pointer devices.
+// The mobile dropdown panel keeps full text labels unchanged - hover
+// doesn't exist on touch, and that panel has the full width to spare.
+// navKey is a stable identifier ('dashboard' | 'messages' | 'myTickets' |
+// 'profile'), separate from the display label - Multi-language Phase 1
+// made accountLinks' labels translatable, so icon lookup can no longer
+// switch on the (now locale-dependent) English label text.
+function NavIcon({ navKey }: { navKey: string }) {
+  const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  switch (navKey) {
+    case 'dashboard':
+      return (
+        <svg {...common}>
+          <rect x="4" y="4" width="7" height="7" rx="1.5" />
+          <rect x="13" y="4" width="7" height="7" rx="1.5" />
+          <rect x="4" y="13" width="7" height="7" rx="1.5" />
+          <rect x="13" y="13" width="7" height="7" rx="1.5" />
+        </svg>
+      )
+    case 'messages':
+      return (
+        <svg {...common}>
+          <path d="M4 5h16v11H9l-4 4V5z" />
+        </svg>
+      )
+    case 'myTickets':
+      return (
+        <svg {...common}>
+          <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.2a2 2 0 0 0 0 3.6V15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.2a2 2 0 0 0 0-3.6V9z" />
+          <line x1="12.5" y1="7.5" x2="12.5" y2="16.5" strokeDasharray="2.2 2.2" />
+        </svg>
+      )
+    case 'profile':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8.5" r="3.2" />
+          <path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2" />
+        </svg>
+      )
+    default:
+      return null
+  }
+}
+
 export default function SiteNav({ active, variant = "page", backHref, backLabel }: SiteNavProps) {
+  // GEN-2608-030: the primary nav links (Events/Artists/Venues/Wall of
+  // Fame) already had an `active` prop mechanism for highlighting, but
+  // it's opt-in per-page and only 4 of ~50 pages pass it - separate,
+  // pre-existing gap not addressed here. The actual reported gap (report
+  // came from /tickets/) is that the icon-link row (Dashboard/Messages/
+  // My Tickets/Profile) had no active-state logic at all, on desktop or
+  // mobile. Pathname-prefix match against each link's own href - safe
+  // since dashboardLink is role-specific (e.g. /dashboard/artist) and
+  // never collides with the sibling /dashboard/messages route.
+  const pathname = usePathname()
   const isHome = variant === "home"
   const { data: session, status } = useSession()
-  const user = session?.user as { name?: string | null; email?: string | null; role?: string } | undefined
+  const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
   const dashboardLink = user ? getDashboardLink(user.role) : null
-  const [mobileOpen, setMobileOpen] = useState(false)
+  // BUG-2610-001 follow-up - offline, a failed session fetch is not a
+  // sign-out: no Sign in / Sign up over the saved tickets.
+  const offline = useIsOffline()
+  const hideAuth = status === "loading" || (!user && offline)
+
+  // Feedback cms1ibqtf - Venue Owner/Organiser dashboards already show
+  // per-page pending-request badges, but only once you're already on that
+  // page. This surfaces the same count from anywhere via the nav.
+  const [pendingCount, setPendingCount] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER') return
+    let cancelled = false
+    fetch('/api/notifications/pending-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+  // Feedback 45ac402a (29 Jul) - Messages had no nav entry point for
+  // ANY role (confirmed via code - SiteNav's accountLinks never included
+  // it, not an organiser-specific gap as first reported). Unlike
+  // pendingCount above, this runs for every logged-in user since
+  // conversations span Audience<->Organiser, Artist<->Organiser, and
+  // Organiser<->Venue Owner - not role-restricted.
+  const [unreadCount, setUnreadCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch('/api/conversations/unread-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setUnreadCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
+  // BUG-2608-032 - same "persistent badge, not just a one-shot push"
+  // treatment as unreadCount above, for pending companion-tag
+  // confirmations. Runs for every logged-in user (anyone can be tagged
+  // as a companion regardless of role), lands on the myTickets link
+  // since that's where /tickets already surfaces the accept/decline UI.
+  const [pendingCompanionCount, setPendingCompanionCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch('/api/companions/pending-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCompanionCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
+  // Multi-language Phase 1 - same picker shape as the (now-removed) theme menu
+  // (dropdown desktop, pill row mobile), backed by useLocale()'s
+  // localStorage-persisted state instead of a data- attribute.
+  const [langMenuOpen, setLangMenuOpen] = useState(false)
+  const langMenuRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!langMenuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [langMenuOpen])
+
+  // GEN-2608-015: "page" variant (!isHome) only - collapses the desktop
+  // account row (search/location/language/greeting/role/icon-links/sign
+  // out) into one profile-menu dropdown, matching HomeHeader's approved
+  // avatar-circle + dropdown-panel pattern exactly. The `isHome` branch
+  // below is untouched and keeps using langMenuOpen/langMenuRef above -
+  // this state is separate and only drives the new page-variant menu.
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!menuOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [menuOpen])
+
+  const { locale, setLocale, t } = useLocale()
+
+  const navLabelFor: Record<NavLinkKey, string> = {
+    events: t.nav.events,
+    artists: t.nav.artists,
+    venues: t.nav.venues,
+    "wall-of-fame": t.nav.wallOfFame,
+  }
 
   const primaryLinks = backHref
-    ? [{ key: "back", href: backHref, label: backLabel ?? "← Back", isActive: false }]
-    : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: l.label, isActive: active === l.key }))
+    ? [{ key: "back", href: backHref, label: backLabel ?? t.nav.back, isActive: false }]
+    : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: navLabelFor[l.key], isActive: active === l.key }))
 
+  // BUG-2609-004: the 4 pages below now have DashboardShell's own sidebar
+  // covering Dashboard/Messages/My Tickets/Profile, so this dropdown no
+  // longer needs to duplicate those destinations there - keeping both
+  // just doubles the same nav on screen. Exact-match (not prefix) on
+  // purpose: /dashboard/messages/[id] (the conversation thread page)
+  // deliberately isn't wrapped in the shell, so it still needs this
+  // dropdown's full list as its only way back to those destinations.
+  // next.config.ts sets trailingSlash: true, so the live pathname is
+  // "/profile/" etc - strip exactly one trailing slash before the exact
+  // match rather than switching to a startsWith prefix check, which
+  // would also swallow "/dashboard/messages/[id]/" (no shell there).
+  const SHELL_ROUTES = ["/dashboard/audience", "/dashboard/messages", "/tickets", "/profile"]
+  const normalizedPathname = pathname?.replace(/\/$/, "") ?? ""
+  const insideShell = SHELL_ROUTES.includes(normalizedPathname)
+
+  // key is the stable icon/badge lookup id (see NavIcon); label is the
+  // translated display text - kept separate since Multi-language Phase 1.
   const accountLinks = user
     ? [
-        ...(dashboardLink ? [{ href: dashboardLink, label: "Dashboard", accent: true }] : []),
-        { href: "/tickets", label: "My Tickets", accent: false },
-        { href: "/profile", label: "Profile", accent: false },
+        ...(dashboardLink ? [{ key: "dashboard", href: dashboardLink, label: t.nav.dashboard, accent: true, badge: pendingCount }] : []),
+        { key: "messages", href: "/dashboard/messages", label: t.nav.messages, accent: false, badge: unreadCount },
+        { key: "myTickets", href: "/tickets", label: t.nav.myTickets, accent: false, badge: pendingCompanionCount },
+        { key: "profile", href: "/profile", label: t.nav.profile, accent: false, badge: 0 },
       ]
+        .filter(() => !insideShell)
+        .map((l) => ({ ...l, isActive: pathname === l.href || pathname?.startsWith(l.href + "/") || false }))
     : []
 
   return (
     <nav
+      className="sitenav-root"
       style={{
         position: isHome ? "fixed" : "sticky",
+        // BUG-2610-017 - pinned at 0; the nudge banners above scroll away.
         top: 0,
         left: isHome ? 0 : undefined,
         right: isHome ? 0 : undefined,
         zIndex: 100,
-        background: isHome ? "rgba(247,243,238,0.92)" : "rgba(247,243,238,0.95)",
+        background: isHome ? "var(--afa-scrim-strong)" : "var(--afa-scrim-strong)",
         backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(14,12,10,0.08)",
+        borderBottom: "1px solid var(--afa-tint-08)",
       }}
     >
       <style>{`
         .sitenav-desktop { display: flex; }
-        .sitenav-hamburger { display: none; }
-        .sitenav-mobile-panel { display: none; }
-        @media (max-width: 780px) {
-          .sitenav-desktop { display: none; }
-          .sitenav-hamburger { display: flex; }
-          .sitenav-mobile-panel.open { display: flex; }
+        /* GEN-2609-019 (Mobile Nav v3, Phase A) - this whole header is now
+           hidden below the lg breakpoint (Tailwind's default 1024px -
+           confirmed no --breakpoint-lg override in this project's @theme
+           block), not just collapsed into a hamburger. The global
+           MobileTopBar (src/components/mobile/MobileTopBar.tsx, mounted
+           once in layout.tsx, hidden via Tailwind's own lg:hidden class)
+           replaces it entirely below that same cutover - logo/search/
+           auth-state there, primary nav + role dashboards in the Phase B/C
+           bottom bar, language in that bar's own globe picker. See
+           MobileTopBar.tsx's own comment for the full reasoning on where
+           each piece of the old hamburger panel (nav links, search,
+           location, language, account row, sign out) landed. Desktop
+           (>=1024px, .sitenav-desktop) is untouched.
+           GEN-2609-019 follow-up (post-review) - this was 900px, a stale
+           29 Jul value that predates this whole nav-unification effort and
+           had no relationship to MobileTopBar's own 1024px cutover, so the
+           two headers both rendered in the 901-1023px gap between them
+           (caught in review, not by this session's own screenshot pass -
+           same double-header shape as the HomeHeader bug caught earlier in
+           this same phase, this time from a breakpoint mismatch rather than
+           a missed component). Aligned to 1024px to match MobileTopBar
+           exactly, and to the same lg cutover MobileTabBar.tsx/
+           DashboardShell.tsx already use everywhere else - 900px had no
+           remaining reason to stay a special case.
+        */
+        .sitenav-root { display: block; }
+        @media (max-width: 1023px) {
+          .sitenav-root { display: none; }
+        }
+        /* Header nav wrapped to a second line when logged in. Root cause
+           (confirmed 29 Jul): the account row (Hi, name + role badge +
+           Dashboard + Messages + My Tickets + Profile + Sign out) plus the
+           public nav links + search all share one flex row with no
+           priority ordering - adding the Messages link (same session,
+           Feedback 45ac402a) pushed total content width past what a
+           common laptop window has at 100% zoom, even for the "page"
+           variant that wasn't affected before. Two-part fix instead of
+           another spacing-only patch:
+             1. Hamburger cutover raised 780px -> 900px, so the whole
+                heavy row falls back to the already-solid mobile panel
+                well before it would be forced to wrap.
+             2. Inside the still-desktop 901-1500px band, tighten every
+                gap/width further (this replaces the old 781-1300 patch).
+           Belt-and-braces on top of both: .sitenav-desktop is nowrap (was
+           wrap) and the greeting name is hard max-width + ellipsis - so a
+           long display name or in-between zoom level can never reintroduce
+           a second line; worst case is a tighter row, never a wrap.
+
+           GEN-2608-015: this whole band-aid is now isHome-only chrome -
+           the "page" variant's account row no longer has a greeting,
+           4 icon-links, or an always-visible search box to wrap in the
+           first place (all folded into one profile-menu dropdown), so it
+           doesn't need width-band tightening to stay on one line anymore.
+           .sitenav-account-row/.sitenav-greeting/.afa-search-input below
+           are still real classes used by the untouched isHome path (and
+           the search input inside the page variant's dropdown trigger),
+           left in place for that reason, not because the page variant
+           still relies on them. */
+        @media (min-width: 901px) and (max-width: 1500px) {
+          .sitenav-row { padding: var(--afa-space-4) var(--afa-space-5) !important; }
+          .sitenav-logo { font-size: var(--afa-text-subtitle) !important; }
+          .sitenav-desktop { gap: var(--afa-space-14px) !important; }
+          .sitenav-account-row { gap: var(--afa-space-2) !important; }
+          .afa-search-input { max-width: 110px !important; }
+          .sitenav-greeting { max-width: 70px !important; }
+        }
+        .sitenav-icon-link { position: relative; }
+        .sitenav-icon-link .sitenav-tooltip {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 50%;
+          transform: translateX(-50%) translateY(-4px);
+          background: var(--afa-surface-inverse);
+          color: var(--afa-on-fill-solid);
+          font-size: var(--afa-text-micro);
+          font-weight: 600;
+          white-space: nowrap;
+          padding: var(--afa-space-1) 9px; /* // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */
+          border-radius: var(--afa-radius-sm);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.12s ease, transform 0.12s ease;
+          z-index: 10;
+        }
+        .sitenav-icon-link:hover .sitenav-tooltip,
+        .sitenav-icon-link:focus-visible .sitenav-tooltip {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
         }
       `}</style>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "18px 24px" : "16px 24px" }}>
+      <div className="sitenav-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "var(--afa-space-18px) var(--afa-space-6)" : "var(--afa-space-4) var(--afa-space-6)" }}>
         <Link
           href="/"
-          onClick={() => setMobileOpen(false)}
-          style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}
+          className="sitenav-logo"
+          style={{ fontFamily: "var(--font-display)", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}
         >
-          <span style={{ color: "#C8441A" }}>A</span>forAudience
+          <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
           <EnvBadge />
         </Link>
 
-        {/* Desktop: full row, unchanged from before */}
-        <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "wrap" }}>
+        {/* Desktop: primary links always render the same way; the account
+            area below branches on isHome (untouched legacy row) vs the
+            page variant's collapsed profile-menu dropdown (GEN-2608-015). */}
+        <div className="sitenav-desktop" style={{ gap: isHome ? "var(--afa-space-32px)" : "var(--afa-space-6)", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
-            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "#C8441A" : "#0E0C0A", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
+            <Link key={l.key} href={l.href} style={{ fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-selected)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
             </Link>
           ))}
 
-          {status === "loading" ? null : user ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7 }}>
-                Hi, {(user.name || user.email || "there").split(" ")[0]}
-              </span>
-              {accountLinks.map((l) => (
-                <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "#C8441A" : "#0E0C0A", textDecoration: "none" }}>
-                  {l.label}
-                </Link>
-              ))}
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                style={{ fontSize: "14px", fontWeight: 600, color: "#F7F3EE", background: "#0E0C0A", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
-              >
-                Sign out
-              </button>
-            </div>
+          {isHome ? (
+            <>
+              {/* variant="home" - explicitly out of scope for GEN-2608-015,
+                  left exactly as it was before that change. */}
+              {!backHref && <SearchBox />}
+              {!backHref && <LocationChip />}
+
+              <div ref={langMenuRef} style={{ position: 'relative' }}>
+                <Button
+                  variant="icon"
+                  onClick={() => setLangMenuOpen((v) => !v)}
+                  title={t.languagePicker.label}
+                  aria-label={t.languagePicker.label}
+                  aria-expanded={langMenuOpen}
+                  style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
+                >
+                  {locale.toUpperCase()}
+                </Button>
+                {langMenuOpen && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', boxShadow: '0 8px 24px var(--afa-shadow)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
+                    {LOCALES.map((l) => (
+                      <Button
+                        variant="menu-row"
+                        key={l.id}
+                        selected={locale === l.id}
+                        onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
+                      >
+                        {l.nativeLabel}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {hideAuth ? null : user ? (
+                <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)" }}>
+                  <span
+                    className="sitenav-greeting"
+                    style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
+                  >
+                    {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
+                  </span>
+                  {getRoleLabel(user.role, t.roles) && (
+                    <span style={ROLE_BADGE_STYLE}>
+                      {getRoleLabel(user.role, t.roles)}
+                    </span>
+                  )}
+                  {accountLinks.map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      aria-label={l.label}
+                      aria-current={l.isActive ? "page" : undefined}
+                      className="sitenav-icon-link"
+                      style={{ color: l.isActive ? "var(--afa-selected)" : l.accent ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-selected-bg)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "var(--afa-radius-md)" }}
+                    >
+                      <NavIcon navKey={l.key} />
+                      {l.key === "dashboard" && pendingCount > 0 && (
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+                          {pendingCount}
+                        </span>
+                      )}
+                      {l.key === "messages" && unreadCount > 0 && (
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+                          {unreadCount}
+                        </span>
+                      )}
+                      {l.key === "myTickets" && pendingCompanionCount > 0 && (
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+                          {pendingCompanionCount}
+                        </span>
+                      )}
+                      <span className="sitenav-tooltip">{l.label}</span>
+                    </Link>
+                  ))}
+                  <Button
+                    variant="solid"
+                    size="lg"
+                    fullWidth={false}
+                    onClick={() => signOutAndClearCache({ callbackUrl: "/" })}
+                  >
+                    {t.nav.signOut}
+                  </Button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-4)" }}>
+                  <Link href="/login" style={{ fontSize: "var(--afa-text-body)", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
+                    {t.nav.signIn}
+                  </Link>
+                  <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}>{/* token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107) */}
+                    {t.nav.signUp}
+                  </Link>
+                </div>
+              )}
+            </>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "#0E0C0A", textDecoration: "none", opacity: 0.7 }}>
-                Sign in
-              </Link>
-              <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "#F7F3EE", textDecoration: "none", background: "#0E0C0A", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
-                Sign up
-              </Link>
-            </div>
+            <>
+              {/* GEN-2608-015: desktop "page" variant - search/location/
+                  language/greeting/role-badge/icon-links/sign-out collapsed
+                  into one profile-menu dropdown, matching HomeHeader's
+                  approved avatar-circle + dropdown-panel pattern. */}
+              {!backHref && (
+                <div style={{ overflow: "hidden", transition: "width 0.25s ease, opacity 0.25s ease", width: searchOpen ? "220px" : 0, opacity: searchOpen ? 1 : 0 }}>
+                  {searchOpen && <SearchBox />}
+                </div>
+              )}
+              {!backHref && (
+                <Button
+                  variant="icon"
+                  aria-label={t.search.placeholder}
+                  onClick={() => setSearchOpen((v) => !v)}
+                  style={{ width: "36px", height: "36px", borderRadius: "50%", color: "var(--afa-text-primary)", opacity: 0.7, flexShrink: 0 }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.2-3.2" strokeLinecap="round" />
+                  </svg>
+                </Button>
+              )}
+
+              <div ref={menuRef} style={{ position: "relative" }}>
+                <Button
+                  // bare-reason: account trigger pill whose padding hugs the 28px avatar unevenly (4px left, 10px right); a padding token would push the avatar off-centre
+                  variant="bare"
+                  onClick={() => setMenuOpen((v) => !v)}
+                  aria-label="Account menu"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "var(--afa-space-1) var(--afa-space-10px) var(--afa-space-1) var(--afa-space-1)" : "var(--afa-space-2) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
+                >
+                  {user ? (
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
+                      {initials(user.displayName || user.name || user.email || "?")}
+                    </span>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "var(--afa-text-primary)" }}>
+                      <circle cx="12" cy="8.5" r="3.2" />
+                      <path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2" />
+                    </svg>
+                  )}
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Button>
+
+                {menuOpen && (
+                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-lg)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px var(--afa-shadow)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
+                    {user ? (
+                      <>
+                        <div style={{ padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-10px)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                            {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
+                          </span>
+                          {getRoleLabel(user.role, t.roles) && (
+                            <span style={ROLE_BADGE_STYLE}>
+                              {getRoleLabel(user.role, t.roles)}
+                            </span>
+                          )}
+                        </div>
+                        {accountLinks.map((l) => (
+                          <Link
+                            key={l.href}
+                            href={l.href}
+                            onClick={() => setMenuOpen(false)}
+                            aria-current={l.isActive ? "page" : undefined}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.isActive ? "var(--afa-selected)" : l.accent ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-selected-bg)" : "transparent", textDecoration: "none" }} // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
+                          >
+                            {l.label}
+                            {l.badge > 0 && (
+                              <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
+                                {l.badge}
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                      </>
+                    ) : hideAuth ? null : (
+                      <>
+                        <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>{/* token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107) */}
+                          {t.nav.signIn}
+                        </Link>
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                      </>
+                    )}
+                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
+                      {LOCALES.map((l) => (
+                        <Button
+                          variant="text-toggle"
+                          fullWidth={false}
+                          key={l.id}
+                          selected={locale === l.id}
+                          onClick={() => setLocale(l.id)}
+                          // text-toggle has no padding; a 24px minimum keeps the tap target at WCAG 2.5.8 size
+                          style={{ minWidth: "var(--afa-space-6)", minHeight: "var(--afa-space-6)", padding: "var(--afa-space-2px) var(--afa-space-1)", justifyContent: "center" }}
+                        >
+                          {l.id.toUpperCase()}
+                        </Button>
+                      ))}
+                    </div>
+                    {!backHref && (
+                      <div style={{ padding: "0 var(--afa-space-3) var(--afa-space-1)" }}>
+                        <LocationChip inPanel />
+                      </div>
+                    )}
+                    {user && (
+                      <>
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
+                        <Button
+                          variant="menu-row"
+                          onClick={() => { setMenuOpen(false); signOutAndClearCache({ callbackUrl: "/" }) }}
+                        >
+                          {t.nav.signOut}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {!user && !hideAuth && (
+                <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-2) var(--afa-space-5)", borderRadius: "var(--afa-radius-sm)", flexShrink: 0 }}>
+                  {t.nav.signUp}
+                </Link>
+              )}
+            </>
           )}
         </div>
 
-        {/* Mobile: hamburger toggle, everything moves into the dropdown panel below */}
-        <button
-          className="sitenav-hamburger"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          style={{ alignItems: "center", justifyContent: "center", width: "36px", height: "36px", border: "none", background: "transparent", cursor: "pointer", flexDirection: "column", gap: "4px" }}
-        >
-          <span style={{ display: "block", width: "22px", height: "2px", background: "#0E0C0A", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "#0E0C0A", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "#0E0C0A", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
-        </button>
-      </div>
-
-      {/* Mobile dropdown panel */}
-      <div className={`sitenav-mobile-panel${mobileOpen ? " open" : ""}`} style={{ flexDirection: "column", padding: "8px 24px 20px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
-        {primaryLinks.map((l) => (
-          <Link
-            key={l.key}
-            href={l.href}
-            onClick={() => setMobileOpen(false)}
-            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "#C8441A" : "#0E0C0A", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
-          >
-            {l.label}
-          </Link>
-        ))}
-
-        {status === "loading" ? null : user ? (
-          <>
-            <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6, padding: "12px 0 4px" }}>
-              Signed in as {user.name || user.email}
-            </div>
-            {accountLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setMobileOpen(false)}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "#C8441A" : "#0E0C0A", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
-              >
-                {l.label}
-              </Link>
-            ))}
-            <button
-              onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }) }}
-              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "#F7F3EE", background: "#0E0C0A", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
-            >
-              Sign out
-            </button>
-          </>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingTop: "16px" }}>
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "#0E0C0A", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "#F7F3EE", textDecoration: "none", textAlign: "center", background: "#0E0C0A", padding: "12px 20px", borderRadius: "8px" }}
-            >
-              Sign up
-            </Link>
-          </div>
-        )}
       </div>
     </nav>
   )

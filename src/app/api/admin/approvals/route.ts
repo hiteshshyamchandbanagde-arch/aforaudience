@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -58,6 +59,23 @@ export async function PATCH(req: Request) {
         prisma.user.update({ where: { id: organiser.userId }, data: { role: 'AUDIENCE' } }),
       ])
     }
+
+    // Closes the loop this session started with (admin gets notified of
+    // the application; this is the applicant learning the outcome, which
+    // didn't exist at all before - they'd have had to keep checking the
+    // dashboard manually).
+    notifyAfterResponse(
+      () =>
+        sendPushToUser(organiser.userId, {
+          title: action === 'approve' ? "You're approved as an Organiser!" : 'Organiser application update',
+          body:
+            action === 'approve'
+              ? "You can now create and manage events on AforAudience."
+              : "Your Organiser application wasn't approved this time.",
+          url: action === 'approve' ? '/dashboard/organiser' : '/profile',
+        }),
+      'organiser-decision'
+    )
   } else {
     const venueOwner = await prisma.venueOwner.findUnique({ where: { id } })
     if (!venueOwner) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -70,6 +88,19 @@ export async function PATCH(req: Request) {
         prisma.user.update({ where: { id: venueOwner.userId }, data: { role: 'AUDIENCE' } }),
       ])
     }
+
+    notifyAfterResponse(
+      () =>
+        sendPushToUser(venueOwner.userId, {
+          title: action === 'approve' ? "You're approved as a Venue Owner!" : 'Venue Owner application update',
+          body:
+            action === 'approve'
+              ? "You can now list your venue on AforAudience."
+              : "Your Venue Owner application wasn't approved this time.",
+          url: action === 'approve' ? '/dashboard/venue' : '/profile',
+        }),
+      'venue-owner-decision'
+    )
   }
 
   return NextResponse.json({ message: 'Updated' })

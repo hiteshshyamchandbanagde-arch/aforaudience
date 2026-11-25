@@ -1,0 +1,249 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
+import { PageHead, Card, SectionTitle, Label, Field, outlineLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
+import Button from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
+
+// Session 62, design.md §9.5. First edit surface for VenueOwner - the role
+// had no editable fields of its own at all until bio was added this
+// session. Powers the new public /venue-owners/[id] bio profile page.
+// Avatar lives on User (shared account-level field), same two-request
+// pattern as the Organiser/Artist edit pages.
+export default function VenueOwnerEditPage() {
+  const { t: tr } = useLocale()
+  const v = tr.venueDashboard.editProfile
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
+  const [bio, setBio] = useState('')
+  // D2 - where organisers pay this owner directly for venue hire.
+  const [upiId, setUpiId] = useState('')
+  const [avatar, setAvatar] = useState('')
+  // D2b - optional UPI QR image shown to organisers in the payee block.
+  const [upiQrUrl, setUpiQrUrl] = useState('')
+  const [uploadingQr, setUploadingQr] = useState(false)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const [ownerRes, userRes] = await Promise.all([
+          fetch('/api/venue-owners/me'),
+          fetch('/api/users/me'),
+        ])
+        if (ownerRes.ok) {
+          const d = await ownerRes.json()
+          setBio(d.bio || '')
+          setUpiId(d.upiId || '')
+          setUpiQrUrl(d.upiQrUrl || '')
+        }
+        if (userRes.ok) {
+          const d = await userRes.json()
+          setAvatar(d.user?.avatar || '')
+        }
+      } catch {
+        setError(v.loadFailed)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (session?.user) fetchProfile()
+  }, [session])
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploadingAvatar(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || v.uploadFailed)
+        return
+      }
+      setAvatar(data.url)
+    } catch {
+      setError(v.uploadFailed)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  // D2b - reuses the existing image upload (Vercel Blob); the URL is saved with the profile.
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploadingQr(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || v.uploadFailed)
+        return
+      }
+      setUpiQrUrl(data.url)
+    } catch {
+      setError(v.uploadFailed)
+    } finally {
+      setUploadingQr(false)
+    }
+  }
+
+  const save = async () => {
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const [ownerRes, userRes] = await Promise.all([
+        fetch('/api/venue-owners/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bio, upiId: upiId.trim() || null, upiQrUrl: upiQrUrl || null }),
+        }),
+        fetch('/api/users/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ avatar: avatar.trim() || null }),
+        }),
+      ])
+      if (!ownerRes.ok) {
+        const data = await ownerRes.json().catch(() => ({}))
+        throw new Error(data.error || v.saveFailed)
+      }
+      if (!userRes.ok) {
+        const data = await userRes.json().catch(() => ({}))
+        throw new Error(data.error || v.savePhotoFailed)
+      }
+      setMessage(v.saved)
+    } catch (err: any) {
+      setError(err.message || v.saveFailed)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader label={tr.dashboardChrome.loading} /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
+
+  return (
+    <>
+      <SiteNav />
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) var(--afa-space-80px)' }}>
+          <div>
+            <PageHead eyebrow={v.eyebrow} title={v.title} titleSize="lg" description={v.subtitle} />
+          </div>
+
+          {message && (
+            <SuccessBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{message}</SuccessBanner>
+          )}
+          {error && (
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
+          )}
+
+          <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
+            <SectionTitle n="01" title={v.basicInfo} />
+            <div style={{ marginBottom: 'var(--afa-space-5)' }}>
+              <Label>{v.profilePicture}</Label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-2)' }}>
+                {avatar && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt={v.photoAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
+                )}
+                <label data-afa-photo-button className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                  {uploadingAvatar ? v.uploading : avatar ? v.changePhoto : v.uploadPhoto}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <Label>{v.bio}</Label>
+              <Field as="textarea" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder={v.bioPlaceholder} />
+            </div>
+
+            <div data-afa-upi-setting>
+              <Label>{tr.venueDirectPay.upiSettingLabel}</Label>
+              <Field
+                aria-label={tr.venueDirectPay.upiSettingLabel}
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                maxLength={256}
+                placeholder="name@bank"
+                autoComplete="off"
+              />
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 'var(--afa-space-1) 0 0' }}>
+                {tr.venueDirectPay.upiSettingHelp}
+              </p>
+            </div>
+
+            <div data-afa-upi-qr-setting>
+              <Label>{tr.venueDirectPay.upiQrLabel}</Label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginTop: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
+                {upiQrUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img data-afa-upi-qr-preview src={upiQrUrl} alt={tr.venueDirectPay.upiQrLabel} style={{ width: '96px', height: '96px', objectFit: 'contain', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-inverse)' }} />
+                )}
+                <label className="avp-btn-outline" style={{ ...outlineLinkStyle, cursor: uploadingQr ? 'default' : 'pointer', opacity: uploadingQr ? 0.6 : 1 }}>
+                  {uploadingQr ? v.uploading : tr.venueDirectPay.upiQrUpload}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleQrUpload} disabled={uploadingQr} style={{ display: 'none' }} />
+                </label>
+                {upiQrUrl && (
+                  <Button
+                    variant="outline-neutral"
+                    size="lg"
+                    fullWidth={false}
+                    type="button"
+                    data-afa-upi-qr-remove
+                    className="avp-btn-outline"
+                    onClick={() => setUpiQrUrl('')}
+                    style={{ ...outlineLinkStyle, cursor: 'pointer' }}
+                  >
+                    {tr.venueDirectPay.upiQrRemove}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Card>
+
+          <Button
+            data-afa-action-row
+            data-afa-save-profile
+            variant="solid"
+            size="lg"
+            fullWidth={false}
+            onClick={save}
+            disabled={saving}
+            className="avp-btn-primary"
+          >
+            {saving ? tr.dashboardChrome.saving : v.saveProfile}
+          </Button>
+        </div>
+      </main>
+      </DashboardShell>
+    </>
+  )
+}

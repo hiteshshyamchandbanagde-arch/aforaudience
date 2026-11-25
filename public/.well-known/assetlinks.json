@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.aforaudience.qa.twa",
+      "sha256_cert_fingerprints": [
+        "92:18:CF:3F:57:9C:35:5D:8A:77:FC:8B:1D:3B:8E:B5:28:9B:F0:49:A6:55:B1:00:5C:19:7F:6B:60:BA:05:A5"
+      ]
+    }
+  }
+]

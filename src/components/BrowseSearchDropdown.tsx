@@ -1,0 +1,104 @@
+"use client"
+import { useEffect, useRef, useState } from "react"
+import { useLocale } from "@/lib/i18n/translate"
+import Button from "@/components/ui/Button"
+
+// Wraps a browse page's existing hero search <input> (+ its icon span,
+// passed as children) and adds a live results dropdown underneath - same
+// "type -> see matches immediately" feedback as the nav SearchBox, but
+// without a second filter path: it renders straight from the page's
+// already-computed `items` (the same `filtered` array driving the grid
+// below), so there's exactly one source of truth for what matches.
+//
+// Session 65, Hitesh feedback: grid filtering on /events, /artists,
+// /venue-owners, /organisers was correct but invisible without scrolling
+// past the hero - this closes that gap. See GEN-2608-007 / this session's
+// handoff for the "why not just copy the nav dropdown wholesale" call.
+
+interface BrowseSearchDropdownProps<T> {
+  query: string
+  items: T[]
+  getId: (item: T) => string
+  renderRow: (item: T) => React.ReactNode
+  onSelect: (item: T) => void
+  emptyLabel: string // e.g. "events", "artists" - used in "No {emptyLabel} match ..."
+  maxVisible?: number
+  children: React.ReactNode
+  // Opt-in (default false, back-compat with pages not yet Hindi-translated -
+  // BUG-2608-041). When true, renders the "No X match Y" wrapper via
+  // tr.common.noResultsMatchTemplate instead of the hardcoded English
+  // string, so it follows the site's language toggle. Only pass this (and a
+  // translated emptyLabel from tr.common.nounX) from pages/components that
+  // already call useLocale() for everything else on the page - passing it
+  // from a still-all-English page would produce a mixed-language string,
+  // which is worse than the plain-English original.
+  translate?: boolean
+}
+
+export default function BrowseSearchDropdown<T>({
+  query,
+  items,
+  getId,
+  renderRow,
+  onSelect,
+  emptyLabel,
+  maxVisible = 6,
+  children,
+  translate = false,
+}: BrowseSearchDropdownProps<T>) {
+  const { t: tr } = useLocale()
+  const [focused, setFocused] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setFocused(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const open = focused && query.trim().length > 0
+  const visible = items.slice(0, maxVisible)
+
+  return (
+    <div ref={containerRef} style={{ position: "relative" }} onFocusCapture={() => setFocused(true)}>
+      {children}
+      {open && (
+        <div
+          style={{
+            position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0,
+            background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", boxShadow: "0 12px 40px var(--afa-shadow)",
+            border: "1px solid var(--afa-tint-10)", zIndex: 50, maxHeight: "360px", overflowY: "auto",
+            padding: visible.length ? "var(--afa-space-2) 0" : "var(--afa-space-4) var(--afa-space-5)", textAlign: "left",
+          }}
+        >
+          {visible.length === 0 ? (
+            <div style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+              {translate
+                ? tr.common.noResultsMatchTemplate.replace("{items}", emptyLabel).replace("{query}", query)
+                : <>No {emptyLabel} match &quot;{query}&quot;</>}
+            </div>
+          ) : (
+            visible.map((item) => (
+              <Button
+                variant="menu-row"
+                key={getId(item)}
+                onClick={() => { setFocused(false); onSelect(item) }}
+              >
+                {renderRow(item)}
+              </Button>
+            ))
+          )}
+          {items.length > maxVisible && (
+            <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45, padding: "var(--afa-space-6px) var(--afa-space-5) var(--afa-space-2px)", borderTop: "1px solid var(--afa-tint-08)", marginTop: "var(--afa-space-1)" }}>
+              +{items.length - maxVisible} more below
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

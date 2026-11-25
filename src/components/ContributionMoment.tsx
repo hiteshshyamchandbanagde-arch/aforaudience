@@ -1,0 +1,205 @@
+'use client'
+
+import { useRef } from 'react'
+import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
+
+// The "contribution moment" - shown right after a user's seats are
+// confirmed (free/no-payment booking, or a paid booking's payment
+// success), replacing the old plain "booking confirmed" text with the
+// audit's Strategic Call #1 (docs/afa-uiux-design-audit.md, Section 11):
+// own the moment someone would screenshot and send a friend - the
+// decision to go, not the payment. Deliberately payment-agnostic copy
+// throughout (no "Booking confirmed" / receipt framing) per that brief.
+//
+// Mobile/desktop split is deliberate (task brief, not a bug): mobile
+// reuses this codebase's existing .afa-sheet-mount/.afa-backdrop-mount
+// mount animations (defined in globals.css, already used by
+// MobileEventFilterSheet.tsx) full-bleed; desktop is a centered modal
+// over the same 60%-black backdrop convention, sized as a card rather
+// than a full-bleed sheet. Both variants render the same inner content -
+// only the outer chrome differs, gated by the app's existing 1023px
+// breakpoint (see HomeHeader.tsx's identical @media convention).
+//
+// Type sizes/spacing below follow docs/afa-design-tokens-reference.md
+// Section 8's proposed scale (11/12/13/14/16/24px type, 4/8/12/16/20/24px
+// spacing) wherever a value cleanly maps to it. Two values don't and are
+// called out inline rather than silently forced onto that scale: the
+// headline and seal count are both display-sized "moment" typography,
+// which Section 8.1 explicitly carves out as its own separate, not-yet-
+// specified gap (hero/display headings) - 32px/900 here matches the
+// checkout page's own pre-existing "You're in" celebratory headline
+// (checkout/[bookingId]/page.tsx) rather than inventing a new one.
+
+type ContributionMomentProps = {
+  seatSummary: string
+  venueLabel: string
+  supporterCount: number
+  artistName: string
+  onClose: () => void
+  onViewTicket: () => void
+}
+
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return (
+    <Button variant="close" onClick={onClose} aria-label="Close">
+      ×
+    </Button>
+  )
+}
+
+function ContributionBody({
+  seatSummary,
+  venueLabel,
+  supporterCount,
+  artistName,
+  onClose,
+}: Omit<ContributionMomentProps, 'onViewTicket'>) {
+  return (
+    <>
+      <div style={{ marginBottom: 'var(--afa-space-5)' }}>
+        <CloseButton onClose={onClose} />
+      </div>
+
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-2)' }}>
+        CONFIRMED
+      </div>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 900, color: 'var(--afa-text-primary)', margin: 0, lineHeight: 1.05 }}>
+        You&rsquo;re going.
+      </h1>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-2)' }}>
+        {seatSummary} · {venueLabel}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', margin: 'var(--afa-space-32px) 0' }}>
+        <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
+          <div
+            className="afa-seal-ring-mount"
+            style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              border: '2px solid var(--afa-amber)',
+            }}
+          />
+          <div
+            className="afa-seal-stamp-mount"
+            style={{
+              width: 140, height: 140, borderRadius: '50%',
+              // GEN-2609-118: orange is only for an action you tap; this count is
+              // information, so an amber ring on an amber tint, light text on it.
+              background: 'var(--afa-amber-tint)', border: '3px solid var(--afa-amber)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-page-title)', fontWeight: 800, color: 'var(--afa-text-primary)' }}>
+              {supporterCount}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-xl)', padding: 'var(--afa-space-4)' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-2)' }}>
+          YOUR CONTRIBUTION
+        </div>
+        <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-primary)' }}>
+          You&rsquo;re one of {supporterCount} people supporting {artistName}&rsquo;s show — every seat helps decide if this show happens.
+        </p>
+      </div>
+    </>
+  )
+}
+
+// Same copy as the old confirmed-state screen's tr.checkoutPage.emailedTicketNote
+// (src/lib/i18n/dictionaries/en.ts) - carried forward as hardcoded English,
+// matching the rest of this screen's copy, rather than wired through the
+// 11-locale dictionary (see build report's flagged i18n scope call).
+function EmailedTicketNote() {
+  return (
+    <p style={{ margin: 'var(--afa-space-3) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)', textAlign: 'center' }}>
+      We&rsquo;ve also emailed the ticket to you. Show the QR at the door — screen or print is fine.
+    </p>
+  )
+}
+
+function ViewTicketButton({ onViewTicket }: { onViewTicket: () => void }) {
+  return (
+    <Button variant="primary" onClick={onViewTicket} style={{ flexShrink: 0 }}>
+      View My Ticket
+    </Button>
+  )
+}
+
+export default function ContributionMoment(props: ContributionMomentProps) {
+  // Two CSS-switched layouts; the hook skips whichever is display:none.
+  const mobileRef = useRef<HTMLDivElement>(null)
+  const desktopRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, mobileRef, props.onClose)
+  useModalSheet(true, desktopRef, props.onClose)
+  return (
+    <>
+      <style>{`
+        .cm-desktop { display: flex; }
+        .cm-mobile { display: none; }
+        @media (max-width: 1023px) {
+          .cm-desktop { display: none; }
+          .cm-mobile { display: flex; }
+        }
+        @keyframes cm-modal-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+        .cm-modal-mount { animation: cm-modal-in 0.2s ease-out; }
+        @media (prefers-reduced-motion: reduce) {
+          .cm-modal-mount { animation: none; }
+        }
+      `}</style>
+
+      {/* Mobile - full-bleed sheet, reuses the app's existing sheet-mount
+          animation. CTA pinned to the bottom of the viewport (marginTop:
+          auto) rather than following straight on from the card, matching
+          the mockup - a plain top-to-bottom stack left it floating with
+          empty space beneath it instead of anchored like the reference. */}
+      <div
+        ref={mobileRef}
+        className="cm-mobile afa-sheet-mount"
+        style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'var(--afa-surface-page)',
+          flexDirection: 'column',
+          padding: 'var(--afa-space-6) var(--afa-space-5) calc(var(--afa-space-6) + env(safe-area-inset-bottom))',
+          overflowY: 'auto',
+        }}
+      >
+        <ContributionBody {...props} />
+        <div style={{ marginTop: 'auto', paddingTop: 'var(--afa-space-6)' }}>
+          <ViewTicketButton onViewTicket={props.onViewTicket} />
+          <EmailedTicketNote />
+        </div>
+      </div>
+
+      {/* Desktop - centered modal over a dimmed backdrop, not full-page */}
+      <div className="cm-desktop" style={{ position: 'fixed', inset: 0, zIndex: 1000, alignItems: 'center', justifyContent: 'center' }}>
+        <Button
+          variant="scrim"
+          aria-label="Close"
+          onClick={props.onClose}
+          className="afa-backdrop-mount"
+        >
+          {null}
+        </Button>
+        <div
+          ref={desktopRef}
+          className="cm-modal-mount"
+          style={{
+            position: 'relative', width: '100%', maxWidth: 440, margin: '0 var(--afa-space-5)',
+            background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-2xl)',
+            padding: 'var(--afa-space-6) var(--afa-space-6) var(--afa-space-28px)', boxShadow: '0 20px 60px var(--afa-shadow)',
+          }}
+        >
+          <ContributionBody {...props} />
+          <div style={{ marginTop: 'var(--afa-space-6)' }}>
+            <ViewTicketButton onViewTicket={props.onViewTicket} />
+            <EmailedTicketNote />
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}

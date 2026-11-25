@@ -1,0 +1,1255 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
+import BrandLoader from '@/components/BrandLoader'
+import { useToast } from '@/components/Toast'
+import { ErrorBanner } from '@/components/ErrorBanner'
+import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { useLocale } from '@/lib/i18n/translate'
+import { formatDate } from '@/lib/format-date'
+import { directPayoutsExpiredAt, isDirectPayoutsEnabled, type DirectPayoutsFlag } from '@/lib/direct-payouts'
+import { WAVES, WAVE_FLAG, launchWaveHint, type Wave } from '@/lib/launch-waves'
+
+// S1b-b1 - the four launch wave switches, shown above Paid bookings.
+const WAVE_TOGGLE_COPY: Record<Wave, { label: string; help: string }> = {
+  W1: { label: 'W1 · Discovery + sign-up', help: 'Public pages and new accounts.' },
+  W2: { label: 'W2 · Onboarding', help: 'Organiser, venue owner and artist applications.' },
+  W3: { label: 'W3 · Tickets', help: 'Free and pay-at-entry reservations.' },
+  W4: { label: 'W4 · Direct bookings', help: 'Paid venue hire and paid/buy-in artist slots.' },
+}
+const ALL_WAVES_CLOSED: Record<Wave, boolean> = { W1: false, W2: false, W3: false, W4: false }
+
+// /dashboard/admin/settings
+//
+// Admin-only page for tuning platform-wide config. Right now that's
+// just the audience booking fee. Kept as its own page (rather than a
+// section on the main admin dashboard) because this list is going to
+// grow — SMS provider, ticket layout, email templates — and mixing
+// approvals-queue work with configuration knobs on one screen makes
+// both harder to find.
+//
+// The fee is stored in paise on the DB (matching Payment.amount) but
+// the UI shows/accepts rupees, since that's what a human types. The
+// two-way conversion is done here so backend stays paise-only.
+
+// BUG-2609-051 - the Direct payouts form shows the effective state, the
+// same isDirectPayoutsEnabled() check the payout API uses: a flag still ON
+// in the DB past its auto-disable time shows as OFF, with the lapsed time
+// noted under it. The lapsed time is not put back in the date field, so
+// switching it on again starts with no expiry rather than an instant lapse.
+// `until` is the datetime-local value; '' means no expiry set.
+function directPayoutsFormState(settings: DirectPayoutsFlag): { enabled: boolean; until: string; expiredAt: Date | null } {
+  const expiredAt = directPayoutsExpiredAt(settings)
+  const until = settings.directPayoutsEnabledUntil && !expiredAt
+    ? toLocalDatetimeInputValue(new Date(settings.directPayoutsEnabledUntil))
+    : ''
+  return { enabled: isDirectPayoutsEnabled(settings), until, expiredAt }
+}
+
+// datetime-local inputs need "YYYY-MM-DDTHH:mm" with no timezone suffix,
+// rendered in the browser's local time. Padding by hand rather than
+// pulling in a date lib for one formatting helper.
+function toLocalDatetimeInputValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+export default function AdminSettingsPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const { locale, t: tr } = useLocale()
+
+  const [feeRupees, setFeeRupees] = useState<string>('')
+  const [minFeeRupees, setMinFeeRupees] = useState<string>('')
+  const [maxFeeRupees, setMaxFeeRupees] = useState<string>('')
+  const [initialPaise, setInitialPaise] = useState<number>(0)
+  const [initialMinPaise, setInitialMinPaise] = useState<number>(0)
+  const [initialMaxPaise, setInitialMaxPaise] = useState<number>(50000)
+  const [maxPaise, setMaxPaise] = useState<number>(50000) // absolute code ceiling, not the admin-set max
+  const [chatCap, setChatCap] = useState<string>('')
+  const [initialChatCap, setInitialChatCap] = useState<number>(15)
+  const [maxChatCap, setMaxChatCap] = useState<number>(200)
+  const [chatSaving, setChatSaving] = useState(false)
+
+  // Scene Status thresholds (reputation epic §1, amended session 55) —
+  // Rising and Featured only. Headliner is deliberately not here at all —
+  // fully manual/admin-toggle-only, no formula, no config.
+  const [risingMinGigs, setRisingMinGigs] = useState<string>('')
+  const [risingMinAvgRating, setRisingMinAvgRating] = useState<string>('')
+  const [risingMinAttendees, setRisingMinAttendees] = useState<string>('')
+  const [featuredVouchThreshold, setFeaturedVouchThreshold] = useState<string>('')
+  const [initialRisingMinGigs, setInitialRisingMinGigs] = useState<number>(3)
+  const [initialRisingMinAvgRating, setInitialRisingMinAvgRating] = useState<number>(4.0)
+  const [initialRisingMinAttendees, setInitialRisingMinAttendees] = useState<number>(5)
+  const [initialFeaturedVouchThreshold, setInitialFeaturedVouchThreshold] = useState<number>(5)
+  const [sceneStatusSaving, setSceneStatusSaving] = useState(false)
+
+  // Admin artist roster (session 56) - Hype Score lookback window,
+  // separate save action from the Scene Status thresholds above since
+  // it's a display/aggregation setting, not a tier input.
+  const [rosterLookback, setRosterLookback] = useState<string>('')
+  const [initialRosterLookback, setInitialRosterLookback] = useState<number>(5)
+  const [rosterLookbackSaving, setRosterLookbackSaving] = useState(false)
+
+  // Event-creation forward window (Feedback cms9ynuxi, 2 Aug) - how far
+  // out an organiser can pick a date without contacting admin.
+  const [eventWindow, setEventWindow] = useState<string>('')
+  const [initialEventWindow, setInitialEventWindow] = useState<number>(3)
+  const [eventWindowSaving, setEventWindowSaving] = useState(false)
+
+  // S1a - "paid bookings" master switch (default OFF = free-only launch).
+  const [paidBookingsEnabled, setPaidBookingsEnabledState] = useState<boolean>(false)
+  const [initialPaidBookingsEnabled, setInitialPaidBookingsEnabled] = useState<boolean>(false)
+  const [paidBookingsSaving, setPaidBookingsSaving] = useState(false)
+  // SMS OTP toggle (17 Nov) - phone verification on/off (default OFF).
+  const [smsOtpEnabled, setSmsOtpEnabledState] = useState<boolean>(false)
+  const [initialSmsOtpEnabled, setInitialSmsOtpEnabled] = useState<boolean>(false)
+  const [smsOtpSaving, setSmsOtpSaving] = useState(false)
+  // S1b-b1 - launch wave switches W1-W4.
+  const [waves, setWaves] = useState<Record<Wave, boolean>>(ALL_WAVES_CLOSED)
+  const [initialWaves, setInitialWaves] = useState<Record<Wave, boolean>>(ALL_WAVES_CLOSED)
+  const [wavesSaving, setWavesSaving] = useState(false)
+  const [directPayoutsEnabled, setDirectPayoutsEnabledState] = useState<boolean>(false)
+  const [initialDirectPayoutsEnabled, setInitialDirectPayoutsEnabled] = useState<boolean>(false)
+  const [directPayoutsUntil, setDirectPayoutsUntil] = useState<string>('') // datetime-local string, '' = no expiry
+  const [initialDirectPayoutsUntil, setInitialDirectPayoutsUntil] = useState<string>('')
+  const [directPayoutsSaving, setDirectPayoutsSaving] = useState(false)
+  // BUG-2609-051 - set when the stored flag is ON but its auto-disable time has passed.
+  const [directPayoutsExpired, setDirectPayoutsExpired] = useState<Date | null>(null)
+
+  // Audience Choice voting default weights (§6, session 58)
+  const [audienceWeight, setAudienceWeight] = useState<string>('')
+  const [panelistWeight, setPanelistWeight] = useState<string>('')
+  const [celebrityWeight, setCelebrityWeight] = useState<string>('')
+  const [initialAudienceWeight, setInitialAudienceWeight] = useState<number>(80)
+  const [initialPanelistWeight, setInitialPanelistWeight] = useState<number>(10)
+  const [initialCelebrityWeight, setInitialCelebrityWeight] = useState<number>(10)
+  const [voteWeightsSaving, setVoteWeightsSaving] = useState(false)
+
+  // Display currency rates (Option A). One row per non-INR currency;
+  // rateInputs holds the live-edited value per code, savingCode tracks
+  // which row (if any) is mid-save, so each row's button state is
+  // independent - editing one currency doesn't disable the others.
+  const [currencyRates, setCurrencyRates] = useState<
+    { code: string; label: string; symbol: string; rateFromINR: number }[]
+  >([])
+  const [rateInputs, setRateInputs] = useState<Record<string, string>>({})
+  const [savingCode, setSavingCode] = useState<string | null>(null)
+  const { showToast } = useToast()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [forbidden, setForbidden] = useState(false)
+  const [loadError, setLoadError] = useState('')
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
+
+  useEffect(() => {
+    if (!session?.user) return
+    ;(async () => {
+      try {
+        const res = await fetch('/api/admin/platform-settings')
+        if (res.status === 403) {
+          setForbidden(true)
+          return
+        }
+        if (!res.ok) throw new Error('Failed to load settings')
+        const data = await res.json()
+        const paise = data.settings.audienceBookingFee
+        setInitialPaise(paise)
+        setFeeRupees((paise / 100).toString())
+        setMaxPaise(data.limits.maxBookingFeePaise)
+
+        const minPaise = data.settings.minAudienceBookingFee
+        const maxBandPaise = data.settings.maxAudienceBookingFee
+        setInitialMinPaise(minPaise)
+        setInitialMaxPaise(maxBandPaise)
+        setMinFeeRupees((minPaise / 100).toString())
+        setMaxFeeRupees((maxBandPaise / 100).toString())
+
+        const cap = data.settings.chatMaxMessagesPerSession
+        setInitialChatCap(cap)
+        setChatCap(String(cap))
+        setMaxChatCap(data.limits.maxChatMessagesCap)
+
+        const rGigs = data.settings.sceneStatusRisingMinGigs
+        const rRating = data.settings.sceneStatusRisingMinAvgRating
+        const rAttendees = data.settings.sceneStatusRisingMinAttendees
+        const fThreshold = data.settings.sceneStatusFeaturedVouchThreshold
+        setInitialRisingMinGigs(rGigs)
+        setInitialRisingMinAvgRating(rRating)
+        setInitialRisingMinAttendees(rAttendees)
+        setInitialFeaturedVouchThreshold(fThreshold)
+        setRisingMinGigs(String(rGigs))
+        setRisingMinAvgRating(String(rRating))
+        setRisingMinAttendees(String(rAttendees))
+        setFeaturedVouchThreshold(String(fThreshold))
+
+        const lookback = data.settings.artistRosterHypeScoreLookback
+        setInitialRosterLookback(lookback)
+        setRosterLookback(String(lookback))
+
+        const evWindow = data.settings.eventCreationWindowMonths
+        setInitialEventWindow(evWindow)
+        setEventWindow(String(evWindow))
+
+        const paidOn = data.settings.paidBookingsEnabled === true
+        setInitialPaidBookingsEnabled(paidOn)
+        setPaidBookingsEnabledState(paidOn)
+
+        const smsOn = data.settings.smsOtpEnabled === true
+        setInitialSmsOtpEnabled(smsOn)
+        setSmsOtpEnabledState(smsOn)
+
+        const waveHint = launchWaveHint(data.settings)
+        setInitialWaves(waveHint)
+        setWaves(waveHint)
+
+        const dp = directPayoutsFormState(data.settings)
+        setInitialDirectPayoutsEnabled(dp.enabled)
+        setDirectPayoutsEnabledState(dp.enabled)
+        setInitialDirectPayoutsUntil(dp.until)
+        setDirectPayoutsUntil(dp.until)
+        setDirectPayoutsExpired(dp.expiredAt)
+
+        const aw = data.settings.audienceVoteWeightDefault
+        const pw = data.settings.panelistVoteWeightDefault
+        const cw = data.settings.celebrityVoteWeightDefault
+        setInitialAudienceWeight(aw)
+        setInitialPanelistWeight(pw)
+        setInitialCelebrityWeight(cw)
+        setAudienceWeight(String(aw))
+        setPanelistWeight(String(pw))
+        setCelebrityWeight(String(cw))
+      } catch (err: any) {
+        setLoadError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [session])
+
+  // Independent of the platform-settings load above - a failure here
+  // shouldn't block the booking-fee/chat-cap sections from working.
+  useEffect(() => {
+    if (!session?.user) return
+    ;(async () => {
+      try {
+        const res = await fetch('/api/admin/display-currencies')
+        if (!res.ok) return
+        const data = await res.json()
+        const rows = (data.currencies ?? []).filter((c: { code: string }) => c.code !== 'INR')
+        setCurrencyRates(rows)
+        const inputs: Record<string, string> = {}
+        for (const c of rows) inputs[c.code] = String(c.rateFromINR)
+        setRateInputs(inputs)
+      } catch {
+        // Non-fatal - the section just won't populate.
+      }
+    })()
+  }, [session])
+
+  const saveCurrencyRate = async (code: string) => {
+    setSavingCode(code)
+    try {
+      const rate = Number(rateInputs[code])
+      if (!Number.isFinite(rate) || rate <= 0) {
+        throw new Error('Rate must be a positive number')
+      }
+      const res = await fetch('/api/admin/display-currencies', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, rateFromINR: rate }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setCurrencyRates((prev) =>
+        prev.map((c) => (c.code === code ? { ...c, rateFromINR: data.currency.rateFromINR } : c))
+      )
+      showToast(`Saved. 1 INR = ${data.currency.rateFromINR} ${code} for display purposes.`, 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setSavingCode(null)
+    }
+  }
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      const minRupees = Number(minFeeRupees)
+      const rupees = Number(feeRupees)
+      const maxRupees = Number(maxFeeRupees)
+      if (![minRupees, rupees, maxRupees].every((n) => Number.isFinite(n) && n >= 0)) {
+        throw new Error('Min, standard, and max fee must all be zero or positive')
+      }
+      if (!(minRupees <= rupees && rupees <= maxRupees)) {
+        throw new Error('Min must be ≤ standard, and standard must be ≤ max')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          minAudienceBookingFee: Math.round(minRupees * 100),
+          audienceBookingFee: Math.round(rupees * 100),
+          maxAudienceBookingFee: Math.round(maxRupees * 100),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialPaise(data.settings.audienceBookingFee)
+      setInitialMinPaise(data.settings.minAudienceBookingFee)
+      setInitialMaxPaise(data.settings.maxAudienceBookingFee)
+      showToast(
+        data.settings.audienceBookingFee === 0
+          ? 'Saved. No booking fee will be charged by default.'
+          : `Saved. New bookings default to ₹${(data.settings.audienceBookingFee / 100).toLocaleString('en-IN')}, adjustable between ₹${(data.settings.minAudienceBookingFee / 100).toLocaleString('en-IN')} and ₹${(data.settings.maxAudienceBookingFee / 100).toLocaleString('en-IN')}.`,
+        'success'
+      )
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const currentPaise = Math.round(Number(feeRupees || 0) * 100)
+  const currentMinPaise = Math.round(Number(minFeeRupees || 0) * 100)
+  const currentMaxPaise = Math.round(Number(maxFeeRupees || 0) * 100)
+  const isDirty =
+    currentPaise !== initialPaise || currentMinPaise !== initialMinPaise || currentMaxPaise !== initialMaxPaise
+  const isValid =
+    [minFeeRupees, feeRupees, maxFeeRupees].every((v) => Number.isFinite(Number(v)) && Number(v) >= 0) &&
+    Number(minFeeRupees) <= Number(feeRupees) &&
+    Number(feeRupees) <= Number(maxFeeRupees)
+
+  const saveChatCap = async () => {
+    setChatSaving(true)
+    try {
+      const cap = Number(chatCap)
+      if (!Number.isInteger(cap)) {
+        throw new Error('Message cap must be a whole number')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatMaxMessagesPerSession: cap }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialChatCap(data.settings.chatMaxMessagesPerSession)
+      showToast(
+        data.settings.chatMaxMessagesPerSession <= 0
+          ? 'Saved. Chat is now disabled — visitors see a "temporarily unavailable" message and the feedback form.'
+          : `Saved. Visitors can send up to ${data.settings.chatMaxMessagesPerSession} messages per browser session before being pointed to the feedback form.`,
+        'success'
+      )
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setChatSaving(false)
+    }
+  }
+
+  const currentChatCap = Math.round(Number(chatCap || 0))
+  const isChatCapDirty = currentChatCap !== initialChatCap
+  const isChatCapValid = Number.isInteger(Number(chatCap))
+
+  const saveSceneStatusThresholds = async () => {
+    setSceneStatusSaving(true)
+    try {
+      const gigs = Number(risingMinGigs)
+      const rating = Number(risingMinAvgRating)
+      const attendees = Number(risingMinAttendees)
+      const threshold = Number(featuredVouchThreshold)
+      if (!Number.isInteger(gigs) || gigs < 0) throw new Error('Min gigs must be a non-negative whole number')
+      if (!Number.isFinite(rating) || rating < 0 || rating > 5) throw new Error('Min avg rating must be between 0 and 5')
+      if (!Number.isInteger(attendees) || attendees < 0) throw new Error('Min attendees must be a non-negative whole number')
+      if (!Number.isInteger(threshold) || threshold < 1) throw new Error('Featured vouch threshold must be a positive whole number')
+
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sceneStatusRisingMinGigs: gigs,
+          sceneStatusRisingMinAvgRating: rating,
+          sceneStatusRisingMinAttendees: attendees,
+          sceneStatusFeaturedVouchThreshold: threshold,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialRisingMinGigs(data.settings.sceneStatusRisingMinGigs)
+      setInitialRisingMinAvgRating(data.settings.sceneStatusRisingMinAvgRating)
+      setInitialRisingMinAttendees(data.settings.sceneStatusRisingMinAttendees)
+      setInitialFeaturedVouchThreshold(data.settings.sceneStatusFeaturedVouchThreshold)
+      showToast('Saved. Scene Status thresholds are live-computed, so this takes effect immediately — no deploy needed.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setSceneStatusSaving(false)
+    }
+  }
+
+  const isSceneStatusDirty =
+    Math.round(Number(risingMinGigs || 0)) !== initialRisingMinGigs ||
+    Number(risingMinAvgRating) !== initialRisingMinAvgRating ||
+    Math.round(Number(risingMinAttendees || 0)) !== initialRisingMinAttendees ||
+    Math.round(Number(featuredVouchThreshold || 0)) !== initialFeaturedVouchThreshold
+  const isSceneStatusValid =
+    Number.isInteger(Number(risingMinGigs)) &&
+    Number(risingMinGigs) >= 0 &&
+    Number.isFinite(Number(risingMinAvgRating)) &&
+    Number(risingMinAvgRating) >= 0 &&
+    Number(risingMinAvgRating) <= 5 &&
+    Number.isInteger(Number(risingMinAttendees)) &&
+    Number(risingMinAttendees) >= 0 &&
+    Number.isInteger(Number(featuredVouchThreshold)) &&
+    Number(featuredVouchThreshold) >= 1
+
+  const saveRosterLookback = async () => {
+    setRosterLookbackSaving(true)
+    try {
+      const lookback = Number(rosterLookback)
+      if (!Number.isInteger(lookback) || lookback < 1) {
+        throw new Error('Lookback must be a positive whole number')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artistRosterHypeScoreLookback: lookback }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialRosterLookback(data.settings.artistRosterHypeScoreLookback)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setRosterLookbackSaving(false)
+    }
+  }
+  const isRosterLookbackDirty = Math.round(Number(rosterLookback || 0)) !== initialRosterLookback
+  const isRosterLookbackValid = Number.isInteger(Number(rosterLookback)) && Number(rosterLookback) >= 1
+
+  const saveEventWindow = async () => {
+    setEventWindowSaving(true)
+    try {
+      const months = Number(eventWindow)
+      if (!Number.isInteger(months) || months < 1 || months > 24) {
+        throw new Error('Window must be a whole number of months, 1-24')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventCreationWindowMonths: months }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialEventWindow(data.settings.eventCreationWindowMonths)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setEventWindowSaving(false)
+    }
+  }
+  const isEventWindowDirty = Math.round(Number(eventWindow || 0)) !== initialEventWindow
+  const isEventWindowValid = Number.isInteger(Number(eventWindow)) && Number(eventWindow) >= 1 && Number(eventWindow) <= 24
+
+  const savePaidBookings = async () => {
+    setPaidBookingsSaving(true)
+    try {
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paidBookingsEnabled }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const on = data.settings.paidBookingsEnabled === true
+      setInitialPaidBookingsEnabled(on)
+      setPaidBookingsEnabledState(on)
+      showToast('Saved.', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
+    } finally {
+      setPaidBookingsSaving(false)
+    }
+  }
+
+  const saveSmsOtp = async () => {
+    setSmsOtpSaving(true)
+    try {
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ smsOtpEnabled }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const on = data.settings.smsOtpEnabled === true
+      setInitialSmsOtpEnabled(on)
+      setSmsOtpEnabledState(on)
+      showToast('Saved.', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
+    } finally {
+      setSmsOtpSaving(false)
+    }
+  }
+
+  const isWavesDirty = WAVES.some((w) => waves[w] !== initialWaves[w])
+  const saveWaves = async () => {
+    setWavesSaving(true)
+    try {
+      const body: Record<string, boolean> = {}
+      for (const w of WAVES) body[WAVE_FLAG[w]] = waves[w]
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const next = launchWaveHint(data.settings)
+      setInitialWaves(next)
+      setWaves(next)
+      showToast('Saved.', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Save failed', 'error')
+    } finally {
+      setWavesSaving(false)
+    }
+  }
+
+  const saveDirectPayouts = async () => {
+    setDirectPayoutsSaving(true)
+    try {
+      // Local datetime-local string -> ISO. Empty string means "no expiry".
+      const enabledUntil = directPayoutsUntil ? new Date(directPayoutsUntil).toISOString() : null
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ directPayoutsEnabled, directPayoutsEnabledUntil: enabledUntil }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      const dp = directPayoutsFormState(data.settings)
+      setInitialDirectPayoutsEnabled(dp.enabled)
+      setDirectPayoutsEnabledState(dp.enabled)
+      setInitialDirectPayoutsUntil(dp.until)
+      setDirectPayoutsUntil(dp.until)
+      setDirectPayoutsExpired(dp.expiredAt)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setDirectPayoutsSaving(false)
+    }
+  }
+  const isDirectPayoutsDirty = directPayoutsEnabled !== initialDirectPayoutsEnabled || directPayoutsUntil !== initialDirectPayoutsUntil
+
+  const saveVoteWeightDefaults = async () => {
+    setVoteWeightsSaving(true)
+    try {
+      const a = Number(audienceWeight)
+      const p = Number(panelistWeight)
+      const c = Number(celebrityWeight)
+      if (![a, p, c].every((n) => Number.isInteger(n) && n >= 0)) throw new Error('Weights must be non-negative whole numbers')
+      if (a + p + c !== 100) throw new Error('Weights must sum to 100')
+      if (a < 50) throw new Error('Audience weight must be at least 50 (Audience Choice floor)')
+
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audienceVoteWeightDefault: a,
+          panelistVoteWeightDefault: p,
+          celebrityVoteWeightDefault: c,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialAudienceWeight(data.settings.audienceVoteWeightDefault)
+      setInitialPanelistWeight(data.settings.panelistVoteWeightDefault)
+      setInitialCelebrityWeight(data.settings.celebrityVoteWeightDefault)
+      showToast('Saved. Applies to any Competition Show event that hasn\'t set its own override.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setVoteWeightsSaving(false)
+    }
+  }
+  const isVoteWeightsDirty =
+    Math.round(Number(audienceWeight || 0)) !== initialAudienceWeight ||
+    Math.round(Number(panelistWeight || 0)) !== initialPanelistWeight ||
+    Math.round(Number(celebrityWeight || 0)) !== initialCelebrityWeight
+  const voteWeightsSum = Math.round(Number(audienceWeight || 0)) + Math.round(Number(panelistWeight || 0)) + Math.round(Number(celebrityWeight || 0))
+  const isVoteWeightsValid =
+    Number.isInteger(Number(audienceWeight)) && Number(audienceWeight) >= 50 &&
+    Number.isInteger(Number(panelistWeight)) && Number(panelistWeight) >= 0 &&
+    Number.isInteger(Number(celebrityWeight)) && Number(celebrityWeight) >= 0 &&
+    voteWeightsSum === 100
+
+  if (loading) {
+    return (
+      <>
+        <SiteNav />
+        <BrandLoader label="Loading settings…" />
+      </>
+    )
+  }
+
+  if (forbidden) {
+    return (
+      <>
+        <SiteNav />
+        <DashboardShell>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 'var(--afa-space-48px) var(--afa-space-6)', fontFamily: 'var(--font-sans)' }}>
+          <div style={{ maxWidth: 560, margin: '0 auto' }}>
+            <PageTitle style={{ marginBottom: 'var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
+              Admins only
+            </PageTitle>
+            <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>
+              This page is only visible to platform admins.
+            </p>
+            <Link href="/" style={{ color: 'var(--afa-amber)', fontWeight: 600 }}>
+              ← Home
+            </Link>
+          </div>
+        </main>
+        </DashboardShell>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <SiteNav />
+      <DashboardShell>
+      <main
+        style={{
+          minHeight: '100vh',
+          background: 'var(--afa-surface-raised)',
+          fontFamily: 'var(--font-sans)',
+          color: 'var(--afa-text-primary)',
+        }}
+      >
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
+        {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
+        <div className="lg:hidden" style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-6px)', letterSpacing: '0.04em' }}>
+          <Link href="/dashboard/admin" style={{ color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
+            ← Admin
+          </Link>{' '}
+          / Settings
+        </div>
+
+        <PageTitle style={{ marginBottom: 'var(--afa-space-2)' }}>
+          Platform settings
+        </PageTitle>
+        <p style={{ opacity: 0.65, marginBottom: 'var(--afa-space-28px)', fontSize: 'var(--afa-text-body)', lineHeight: 1.5 }}>
+          Changes here take effect immediately — the next booking anyone starts will use the new values.
+        </p>
+
+        {loadError && (
+          <ErrorBanner style={{ padding: 'var(--afa-space-3) var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', marginBottom: 'var(--afa-space-5)' }}>{loadError}</ErrorBanner>
+        )}
+
+        <div
+          data-afa-launch-waves-card
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Launch waves
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
+            Go-live is staged in four waves. A closed wave is refused on the server. Turn them on one at a time.
+          </p>
+          {WAVES.map((w) => (
+            <label key={w} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-3)', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                data-afa-wave-toggle={w}
+                checked={waves[w]}
+                onChange={(e) => setWaves((prev) => ({ ...prev, [w]: e.target.checked }))}
+                style={{ width: 18, height: 18, marginTop: 'var(--afa-space-2px)', cursor: 'pointer', flexShrink: 0 }}
+              />
+              <span style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', lineHeight: 'round(1.4em, 1px)' }}>
+                  {WAVE_TOGGLE_COPY[w].label}
+                </span>
+                <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.5em, 1px)' }}>
+                  {WAVE_TOGGLE_COPY[w].help}
+                </span>
+              </span>
+            </label>
+          ))}
+          <p data-afa-launch-waves-note style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
+            Admins are never blocked. Bookings already in progress are never affected.
+          </p>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveWaves} disabled={wavesSaving || !isWavesDirty}>
+            {wavesSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          data-afa-paid-bookings-card
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          {/* Line heights snapped to whole pixels: a fractional card height
+              (1.6 x 13px = 20.8px per line) moved every card below by a
+              sub-pixel and changed how the Direct payouts toggle's text
+              rasterised at 390 (BUG-2609-051 baseline). */}
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Paid bookings
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
+            OFF = free-only launch: paid tickets can&apos;t be created or booked, and paid events show &ldquo;Booking opens soon&rdquo;. Enforced on the server. Free events are never affected.
+          </p>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              data-afa-paid-bookings-toggle
+              checked={paidBookingsEnabled}
+              onChange={(e) => setPaidBookingsEnabledState(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+              Enable paid bookings
+            </span>
+          </label>
+          <p data-afa-paid-bookings-warning style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
+            Turns on real payments. Needs Razorpay live keys + GST/compliance sign-off.
+          </p>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={savePaidBookings} disabled={paidBookingsSaving || paidBookingsEnabled === initialPaidBookingsEnabled}>
+            {paidBookingsSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        {/* SMS OTP toggle (17 Nov) - same shape as Paid bookings; line
+            heights snapped to whole pixels so the cards below don't move
+            by a sub-pixel (BUG-2609-051 baseline). */}
+        <div
+          data-afa-sms-otp-card
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, lineHeight: 'round(1.3em, 1px)', marginBottom: 'var(--afa-space-6px)' }}>
+            {tr.adminSettings.smsOtpHeading}
+          </h2>
+          <p data-afa-sms-otp-help style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 'round(1.6em, 1px)', marginBottom: 'var(--afa-space-4)' }}>
+            {tr.adminSettings.smsOtpHelp}
+          </p>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              data-afa-sms-otp-toggle
+              checked={smsOtpEnabled}
+              onChange={(e) => setSmsOtpEnabledState(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', lineHeight: 'round(1.5em, 1px)' }}>
+              {tr.adminSettings.smsOtpToggle}
+            </span>
+          </label>
+          <p data-afa-sms-otp-warning style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', lineHeight: 'round(1.5em, 1px)', marginBottom: 'var(--afa-space-5)' }}>
+            {tr.adminSettings.smsOtpWarning}
+          </p>
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveSmsOtp} disabled={smsOtpSaving || smsOtpEnabled === initialSmsOtpEnabled}>
+            {smsOtpSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Audience booking fee
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+            A small flat fee added to each paid ticket at checkout — the platform's only revenue at MVP. Audiences can adjust it within the band below; "standard" is what's pre-filled for them. Shown as a separate line item with a short "supports the artist ecosystem" note. Set standard and min to ₹0 to make the fee fully optional; free events are never charged a fee regardless.
+          </p>
+
+          {([
+            { label: 'MINIMUM (₹)', value: minFeeRupees, set: setMinFeeRupees, placeholder: '0' },
+            { label: 'STANDARD (₹)', value: feeRupees, set: setFeeRupees, placeholder: '0' },
+            { label: 'MAXIMUM (₹)', value: maxFeeRupees, set: setMaxFeeRupees, placeholder: '0' },
+          ] as const).map((f) => (
+            <div key={f.label}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--afa-text-small)',
+                  fontWeight: 700,
+                  color: 'var(--afa-amber)',
+                  letterSpacing: '0.06em',
+                  marginBottom: 'var(--afa-space-6px)',
+                }}
+              >
+                {f.label}
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-3)' }}>
+                <span style={{ fontSize: 'var(--afa-text-lead)', opacity: 0.5 }}>₹</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="1"
+                  value={f.value}
+                  onChange={(e) => f.set(e.target.value)}
+                  placeholder={f.placeholder}
+                  style={{
+                    flex: 1,
+                    padding: 'var(--afa-space-10px) var(--afa-space-3)',
+                    borderRadius: 'var(--afa-radius-sm)',
+                    border: '1px solid var(--afa-border-resting)',
+                    fontSize: 'var(--afa-text-body-lg)',
+                    background: 'var(--afa-surface-inverse)',
+                    color: 'var(--afa-text-primary)',
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+          {Number(minFeeRupees) > Number(feeRupees) || Number(feeRupees) > Number(maxFeeRupees) ? (
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-2)' }}>
+              Min must be ≤ standard, and standard must be ≤ max.
+            </p>
+          ) : null}
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
+            Absolute ceiling (code-level, requires a deploy to change): ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
+          </p>
+
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || !isDirty || !isValid}>
+            {saving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginTop: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Support chat message cap
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+            The support chatbot is free to use for everyone — guests and paying audience alike — no gate, no login required. This cap only bounds how many messages a single visitor can send per browser session, as a cost/abuse guard. Once reached, the chat tab points them to the feedback form instead. Set to 0 to disable chat entirely (emergency killswitch) without a deploy.
+          </p>
+
+          <label
+            style={{
+              display: 'block',
+              fontSize: 'var(--afa-text-small)',
+              fontWeight: 700,
+              color: 'var(--afa-amber)',
+              letterSpacing: '0.06em',
+              marginBottom: 'var(--afa-space-6px)',
+            }}
+          >
+            MAX MESSAGES PER SESSION
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-3)' }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step="1"
+              value={chatCap}
+              onChange={(e) => setChatCap(e.target.value)}
+              placeholder="15"
+              style={{
+                flex: 1,
+                padding: 'var(--afa-space-10px) var(--afa-space-3)',
+                borderRadius: 'var(--afa-radius-sm)',
+                border: '1px solid var(--afa-border-resting)',
+                fontSize: 'var(--afa-text-body-lg)',
+                background: 'var(--afa-surface-inverse)',
+                color: 'var(--afa-text-primary)',
+              }}
+            />
+          </div>
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
+            Maximum: {maxChatCap}. A new browser session (new tab, cleared storage, or a different device) gets a fresh count — this is a soft cost guard, not a hard security boundary.
+          </p>
+
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveChatCap} disabled={chatSaving || !isChatCapDirty || !isChatCapValid}>
+            {chatSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Scene Status thresholds
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+            Rising and Featured are automatic, computed live on every profile/poster view — changes here take effect immediately, no deploy needed. Headliner isn't configurable here — it's a fully manual, admin-only tag (set per-artist), deliberately not earned via any formula.
+          </p>
+
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
+            RISING — MIN COMPLETED GIGS
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step="1"
+            value={risingMinGigs}
+            onChange={(e) => setRisingMinGigs(e.target.value)}
+            placeholder="3"
+            style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+          />
+
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
+            RISING — MIN AVERAGE REVIEW RATING (0–5)
+          </label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            max={5}
+            step="0.1"
+            value={risingMinAvgRating}
+            onChange={(e) => setRisingMinAvgRating(e.target.value)}
+            placeholder="4.0"
+            style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+          />
+
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
+            RISING — MIN VERIFIED ATTENDEES
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step="1"
+            value={risingMinAttendees}
+            onChange={(e) => setRisingMinAttendees(e.target.value)}
+            placeholder="5"
+            style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+          />
+
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
+            FEATURED — MIN DISTINCT ORGANISERS WHO VOUCHED
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-3)' }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={featuredVouchThreshold}
+              onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
+              placeholder="5"
+              style={{ flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            />
+          </div>
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
+            Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
+          </p>
+
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveSceneStatusThresholds} disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}>
+            {sceneStatusSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Hype Score lookback window
+          </h2>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
+            ADMIN ROSTER — HYPE SCORE LOOKBACK (RECENT N SCORED SHOWS)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={rosterLookback}
+              onChange={(e) => setRosterLookback(e.target.value)}
+              placeholder="5"
+              style={{ width: 100, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            />
+            <Button data-afa-action-row variant="solid" size="md" fullWidth={false} onClick={saveRosterLookback} disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}>
+              {rosterLookbackSaving ? 'Saving…' : 'Save'}
+            </Button>
+          </div>
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)' }}>
+            Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Event-creation forward window
+          </h2>
+          <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>
+            EVENT CREATION WINDOW (MONTHS OUT, MAX)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-2)' }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={24}
+              step="1"
+              value={eventWindow}
+              onChange={(e) => setEventWindow(e.target.value)}
+              placeholder="3"
+              style={{ width: 100, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            />
+            <Button data-afa-action-row variant="solid" size="md" fullWidth={false} onClick={saveEventWindow} disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}>
+              {eventWindowSaving ? 'Saving…' : 'Save'}
+            </Button>
+          </div>
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)' }}>
+            How far out an organiser can pick an event date on Create/Edit Event without contacting admin. Enforced server-side (not just the date-picker's max) — capped at 24 months here as a sanity backstop.
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Direct payouts (Razorpay Route)
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+            Razorpay Route (auto-split payouts) isn't available on the current account tier — confirmed against RBI's 2025 Payment Aggregator Directions, which require ₹40L+ turnover. K2 payouts run on a manual two-step transfer model instead. This is OFF by default so organisers aren't shown a linking flow that can't work. Flip on only if the account tier changes and Route needs re-testing.
+          </p>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-4)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={directPayoutsEnabled}
+              onChange={(e) => setDirectPayoutsEnabledState(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+              Enable direct payouts UI (dashboard link, linking form, API)
+            </span>
+          </label>
+          {directPayoutsExpired && !directPayoutsEnabled && (
+            <p data-afa-direct-payouts-expired style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'calc(-1 * var(--afa-space-2))', marginBottom: 'var(--afa-space-4)' }}>
+              {tr.adminSettings.directPayoutsExpired.replace('{date}', formatDate(directPayoutsExpired, 'dateTime', locale))}
+            </p>
+          )}
+
+          <label
+            style={{
+              display: 'block',
+              fontSize: 'var(--afa-text-small)',
+              fontWeight: 700,
+              color: 'var(--afa-amber)',
+              letterSpacing: '0.06em',
+              marginBottom: 'var(--afa-space-6px)',
+            }}
+          >
+            AUTO-DISABLE AT (OPTIONAL)
+          </label>
+          <input
+            type="datetime-local"
+            value={directPayoutsUntil}
+            onChange={(e) => setDirectPayoutsUntil(e.target.value)}
+            disabled={!directPayoutsEnabled}
+            style={{
+              width: '100%',
+              padding: 'var(--afa-space-10px) var(--afa-space-3)',
+              borderRadius: 'var(--afa-radius-sm)',
+              border: '1px solid var(--afa-border-resting)',
+              fontSize: 'var(--afa-text-body-lg)',
+              marginBottom: 'var(--afa-space-2)',
+              opacity: directPayoutsEnabled ? 1 : 0.5,
+              background: 'var(--afa-surface-inverse)',
+              color: 'var(--afa-text-primary)',
+            }}
+          />
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
+            Lazy-checked on read, no cron job — leave blank for no auto-expiry. If set, this flips back to disabled on its own past that time, without needing to remember to uncheck it.
+          </p>
+
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveDirectPayouts} disabled={directPayoutsSaving || !isDirectPayoutsDirty}>
+            {directPayoutsSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Audience Choice default weights
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+            Applies to any Competition Show event that hasn't set its own override on the Edit Event page. Must sum to 100, Audience must be at least 50 (the "Audience Choice" floor — otherwise it stops being genuinely audience-driven).
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>AUDIENCE</label>
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>PANELIST</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 'var(--afa-space-6px)' }}>CELEBRITY</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+            </div>
+          </div>
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: voteWeightsSum === 100 ? 'var(--afa-text-secondary)' : 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>
+            Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
+          </p>
+
+          <Button data-afa-action-row variant="solid" size="lg" fullWidth={false} onClick={saveVoteWeightDefaults} disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}>
+            {voteWeightsSaving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-6)',
+            marginTop: 'var(--afa-space-5)',
+          }}
+        >
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 'var(--afa-space-6px)' }}>
+            Display currency rates
+          </h2>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
+            Rates behind the display-only currency preference in profiles and checkout — a user who picks e.g. USD sees prices converted at this rate alongside the real ₹ amount. Manually set, not a live feed; update here whenever a rate drifts noticeably. Real charges and settlement are always in Indian Rupees regardless of these values.
+          </p>
+
+          {currencyRates.length === 0 ? (
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>No currencies configured yet.</p>
+          ) : (
+            currencyRates.map((c) => {
+              const inputValue = rateInputs[c.code] ?? String(c.rateFromINR)
+              const isDirtyRow = Number(inputValue) !== c.rateFromINR
+              const isValidRow = Number.isFinite(Number(inputValue)) && Number(inputValue) > 0
+              return (
+                <div
+                  key={c.code}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--afa-space-10px)',
+                    marginBottom: 'var(--afa-space-14px)',
+                    paddingBottom: 'var(--afa-space-14px)',
+                    borderBottom: '1px solid var(--afa-tint-06)',
+                  }}
+                >
+                  <div style={{ width: 92, fontSize: 'var(--afa-text-body)', flexShrink: 0 }}>
+                    {c.symbol} {c.code}
+                  </div>
+                  <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', flexShrink: 0 }}>1 ₹ =</div>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.0001"
+                    value={inputValue}
+                    onChange={(e) => setRateInputs((prev) => ({ ...prev, [c.code]: e.target.value }))}
+                    style={{
+                      width: 110,
+                      padding: 'var(--afa-space-2) var(--afa-space-10px)',
+                      borderRadius: 'var(--afa-radius-sm)',
+                      border: '1px solid var(--afa-border-resting)',
+                      fontSize: 'var(--afa-text-body)',
+                      background: 'var(--afa-surface-inverse)',
+                      color: 'var(--afa-text-primary)',
+                    }}
+                  />
+                  <Button data-afa-action-row variant="solid" size="sm" fullWidth={false} onClick={() => saveCurrencyRate(c.code)} disabled={savingCode === c.code || !isDirtyRow || !isValidRow}>
+                    {savingCode === c.code ? 'Saving…' : 'Save'}
+                  </Button>
+                </div>
+              )
+            })
+          )}
+        </div>
+
+        <div style={{ marginTop: 'var(--afa-space-32px)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>
+          <strong style={{ color: 'var(--afa-text-primary)', fontWeight: 700 }}>Current behavior:</strong>{' '}
+          {initialPaise === 0 && initialMinPaise === 0
+            ? 'No booking fee is charged by default, and audiences can leave it at ₹0. Checkout, ticket PDFs, and email receipts show only the ticket price unless they raise it.'
+            : `A ₹${(initialPaise / 100).toLocaleString('en-IN')} booking fee is pre-filled on every paid booking, adjustable by the audience between ₹${(initialMinPaise / 100).toLocaleString('en-IN')} and ₹${(initialMaxPaise / 100).toLocaleString('en-IN')}, shown as a separate line item on the checkout page.`}
+        </div>
+        </div>
+      </main>
+      </DashboardShell>
+    </>
+  )
+}

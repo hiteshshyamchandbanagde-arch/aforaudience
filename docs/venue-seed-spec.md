@@ -1,0 +1,143 @@
+# Venue Seed Spec (10 venues per Venue Owner)
+
+Companion to `docs/load-test-user-seed-spec.md`. Separate, additive script — does NOT
+touch existing Users, Artists, or the 12 pre-existing Venues. Layers new rows on top.
+
+Decided with Hitesh, session 62 (1 Aug), chat only — hand this spec to Claude Code
+(local repo) to build. Do not use Copilot for any part of this (standing rule, session 60/61).
+
+## Scope
+
+Two-step script:
+1. Backfill missing `VenueOwner` profile rows for the 100 load-test `User` rows
+   (`role: VENUE_OWNER`) that have no `VenueOwner` yet — confirmed gap, session 62
+   (113 Users at this role, only 13 `VenueOwner` rows exist).
+2. Create Venues so every `VenueOwner` (all ~113, after step 1) ends up with exactly
+   10 Venues.
+
+## Step 1 — VenueOwner backfill
+
+- For every `User` with `role: VENUE_OWNER` and no existing `VenueOwner` row
+  (`userId` unique, check before insert): create one, `isApproved: true`.
+- Additive/idempotent — safe to re-run, skips Users that already have a row.
+
+## Step 2 — Venue generation rules (from Hitesh, session 62)
+
+- **Exactly 10 Venues per VenueOwner.** Additive/idempotent — if an owner already has
+  N Venues (e.g. the 13 original owners' 1 each from base seed), top up to 10 rather
+  than duplicating or reducing.
+- **Capacity:** random integer 100–1000 per venue.
+- **Photo required:** every Venue gets a non-empty `photos` array. Per Hitesh's call
+  this session — placeholder image URLs, not a real upload (Lorem Picsum deterministic
+  seed URL keyed to the venue's id/slug, e.g. `https://picsum.photos/seed/{venueId}/1200/800`
+  — stable per venue, no API key, no license/copyright concern for internal QA data).
+- **3 "types" per owner, city-scoped:**
+  - `GA` → `seatingMode: GENERAL_ADMISSION`
+  - `Numbered (Guided)` → `seatingMode: NUMBERED`, seats generated via the existing
+    grid-generator path (rows × columns)
+  - `Manual Canvas` → `seatingMode: NUMBERED`, seats generated via organic/irregular
+    x,y placement (not a perfect grid) — mirrors the real Manual Canvas builder's
+    output shape, not the grid one. **Note:** schema only has two `VenueSeatingMode`
+    values (`GENERAL_ADMISSION`/`NUMBERED`) — "Manual Canvas" vs "Guided" is a
+    generation-method distinction for seed realism only, not a stored field. Worth a
+    one-line code comment in the script so a future reader doesn't go looking for a
+    third enum value.
+  - A single city for one owner may never repeat the same type twice, and every city
+    used gets a minimum of 2, maximum of 3 venues (types can't repeat within a city, so
+    3 is the hard ceiling).
+- **Deterministic per-owner city/type layout** (reaches exactly 10, satisfies all of
+  the above — this is my proposed default, flag if you want a different split):
+
+  | City # | Types present | Count |
+  |--------|---------------------------------|-------|
+  | 1      | GA + Numbered(Guided) + Canvas   | 3     |
+  | 2      | GA + Numbered(Guided) + Canvas   | 3     |
+  | 3      | GA + Numbered(Guided)            | 2     |
+  | 4      | GA + Canvas                      | 2     |
+
+  → 4 distinct cities per owner, 10 venues total, no type repeats within a city.
+
+- **City pool** (Pune-first, per product philosophy), cycled deterministically per
+  owner index so re-runs are reproducible. Expanded per Hitesh (session 62) for real
+  geographic spread across India, plus a light international set (AFA's stated
+  international ambitions):
+  - **India (30):** Pune, Mumbai, Bengaluru, Delhi, Hyderabad, Chennai, Kolkata,
+    Ahmedabad, Jaipur, Nagpur, Indore, Chandigarh, Lucknow, Bhopal, Patna, Surat,
+    Kochi, Coimbatore, Visakhapatnam, Guwahati, Bhubaneswar, Thiruvananthapuram,
+    Amritsar, Dehradun, Ranchi, Raipur, Panaji (Goa), Mysuru, Vadodara, Nashik —
+    deliberately spread across North/South/East/West/Central/Northeast rather than
+    metro-only.
+  - **International (7, lighter weight):** New York, London, Dubai, Singapore,
+    Sydney, Toronto, Tokyo.
+  - Cities **do** repeat across different owners (that's fine/expected) — only "not
+    twice for the same owner" is the actual rule. With ~37 cities in the pool and 4
+    needed per owner, cycle deterministically (e.g. by owner index × offset) so the
+    international set gets used but isn't the majority — India stays Pune-first in
+    practice for most owners given the pool weighting.
+- **Naming — realistic, not deterministic-testing-style (Hitesh, session 62):** every
+  venue gets a real-sounding name, not a `VenueOwner00000005 — Pune GA Venue` style
+  identifier. Build from a curated pool of name components — a "flavor" word/phrase
+  (e.g. Blue Note, Sunset, Silver Screen, Rhythm House, The Attic, Marina Bay, Old
+  Town, Crescent, Skyline, Velvet Room, Riverside, Moonlight) combined with a
+  type-appropriate suffix matched to capacity/seating mode (Hall, Auditorium,
+  Amphitheatre, Arena, Grounds, Theatre, Lounge, Community Center, Convention Centre)
+  — e.g. "The Blue Note Lounge", "Riverside Amphitheatre", "Skyline Convention
+  Centre". City name is not baked into the venue name itself (real venues usually
+  don't put their own city in their name) — city lives in the separate `city` field.
+  **Idempotency note:** since names are no longer deterministic strings, top-up logic
+  on re-run must key off (`ownerId`, `city`, seating-mode/type-tag) combinations
+  already present for that owner — not off matching the name — to decide what's
+  missing and needs creating.
+- **Address / location — realistic, not null (Hitesh, session 62):** every venue gets
+  a real-sounding street address, not a bare city with everything else null. Build
+  from a small per-city pool of real neighborhood/area names (e.g. Pune: Koregaon
+  Park, FC Road, Baner, Viman Nagar, Kalyani Nagar; Mumbai: Bandra, Andheri, Lower
+  Parel, Powai; similar curated lists for the rest of the city pool — Claude Code can
+  source a handful of real, well-known localities per city, this doesn't need to be
+  exhaustive) + a generated building/plot number, e.g. `"221, Koregaon Park, Pune"`.
+  No live Places API calls per venue (keeps this free/fast, in scope stays inside the
+  existing ~$10/month Maps budget which is reserved for real venue registration, not
+  bulk seed data). For `lat`/`lng`: use one approximate **city-centroid** coordinate
+  pair per city (hardcoded lookup table, not per-address precision) so map-based
+  features have something real to plot rather than null — good enough for realism at
+  seed-data scale, not meant to be geocode-accurate to the street. `state`/`country`
+  populated from the same city lookup (e.g. Pune → Maharashtra, India). `placeId`
+  left null (that field is specifically for real Places API-resolved addresses, per
+  the existing `mapsUrl`/`placeId` invariant in the schema comment — don't fake one).
+- **Seats for NUMBERED venues:** generate real `Seat` rows summing to ~the venue's
+  capacity, using the existing `defaultZoneName()` helper (Front → Middle → Back →
+  Recliner → Zone N, per design.md §9.5) for zone labels. Reuse whatever internal
+  helper/logic the real Guided Setup and Manual Canvas builders already use for shape
+  generation, if one is exposed/importable — don't hand-roll a divergent algorithm the
+  app doesn't otherwise produce.
+- **Rate type distribution (Hitesh, session 62):** across each owner's 10 venues —
+  **minimum 3 `HOURLY`, minimum 3 `DAILY`, minimum 3 `FLEXIBLE`.** That's 9 of the 10
+  fixed; the 10th can be any of the three (rotate deterministically per owner index —
+  e.g. owner index mod 3 decides which type gets the 4th venue — so the extra isn't
+  always the same type). This assignment is independent of the GA/Numbered/Canvas
+  seating-mode assignment above — cross the two freely (e.g. a GA venue can be
+  `HOURLY`, `DAILY`, or `FLEXIBLE`; no correlation implied).
+  - `HOURLY`: set `hourlyRate` (scaled loosely to capacity, e.g. ₹500 + capacity × 2),
+    `minDurationHours: 2`. `dailyRate` left null.
+  - `DAILY`: set `dailyRate` (e.g. ₹5000 + capacity × 10). `hourlyRate`/
+    `minDurationHours` left null.
+  - `FLEXIBLE`: **both `hourlyRate` and `dailyRate` left null**, per design.md §4.5/
+    third-amendment note — Flexible venues have no published rate, the amount is
+    negotiated per-booking via `VenueBookingRequest`, not a venue-level field. Don't
+    populate a placeholder number here.
+  - `isApproved: true` on every venue (not otherwise specified, needed so seed venues
+    actually appear as usable/live data rather than stuck pending admin approval).
+
+## Guards (carry over from existing seed scripts)
+
+- Hard-block anything but QA project ref (`nqiyrypmjtogoocerxtu`); never prod
+  (`cncumfwwnjcwacggrgsr`).
+- Never touch `Feedback`/`FeedbackChangeLog`.
+- No DELETE/TRUNCATE — additive only.
+- git fetch/status/reset --hard origin/qa before running, per standing checklist.
+- ~1130 Venues + ~thousands of Seat rows across NUMBERED venues is a real volume —
+  show a row-count/sample preview and get explicit go-ahead before the first real run,
+  same as the load-test user script.
+- Route to Claude Code only, never Copilot.
+- After running, verify independently against Supabase QA DB (via chat) — don't trust
+  only the script's self-reported summary.

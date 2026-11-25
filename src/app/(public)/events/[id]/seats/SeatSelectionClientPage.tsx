@@ -1,0 +1,456 @@
+"use client"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSession, getSession } from "next-auth/react"
+import SiteNav from "@/components/SiteNav"
+import AuthPromptSheet from "@/components/AuthPromptSheet"
+import ContributionMoment from "@/components/ContributionMoment"
+import Button from "@/components/ui/Button"
+import Input from "@/components/ui/Input"
+import SeatPicker from "@/components/SeatPicker"
+import { colorForZone } from "@/components/SeatLayoutPreview"
+import { SeatStateDot } from "@/components/EventCard"
+import { TicketIcon } from "@/components/icons/EventIcons"
+import { useLocale } from "@/lib/i18n/translate"
+import { waveErrorMessage } from "@/lib/launch-waves-ui"
+
+// GEN-2609-004 (Mobile Redesign Phase 2) - the interactive booking panel
+// (seat/tier picker, fee slider, Book button), relocated out of
+// EventDetailClientPage.tsx into its own route. This is a relocation, not
+// a rewrite - every piece of state/logic below is unchanged from that
+// file, just no longer sharing a component with the review/lineup/
+// plus-one sections that stayed on EventDetail. See that file's own
+// history/comments for why each piece works the way it does; only
+// genuinely new here is the page-level wrapper (SiteNav back-link,
+// container) and the isPast/reservedMessage full-page states, which used
+// to be one branch inside EventDetail's larger render and are now this
+// page's only render paths.
+
+interface TicketTier {
+  id: string
+  sectionName: string
+  price: number
+  totalSeats: number
+}
+
+interface EventData {
+  id: string
+  title: string
+  date: string
+  startTime: string
+  endTime: string
+  isFree: boolean
+  ticketPrice: number | null
+  // D1 - FREE | PAY_AT_ENTRY | ONLINE
+  paymentMode?: string
+  totalSeats: number
+  availableSeats: number
+  maxSeatsPerBooking: number
+  venue: { name: string; address: string; city: string; seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED' } | null
+  ticketTiers: TicketTier[]
+}
+
+// Same instant-comparison convention used everywhere else this check
+// happens (EventDetailClientPage.tsx, events/page.tsx, POST /api/bookings).
+function isPastEvent(e: { date: string; startTime: string }): boolean {
+  const [h, m] = e.startTime.split(':').map(Number)
+  const eventStart = new Date(e.date)
+  eventStart.setHours(h, m, 0, 0)
+  return eventStart.getTime() <= Date.now()
+}
+
+// BUG-2609-045 (button consolidation, phase 1) - byte-identical 26x26
+// quantity-stepper button, previously duplicated across every ticket
+// tier row, the General Admission fallback, and the free-event row.
+function SeatStepperButton({ onClick, glyph }: { onClick: () => void; glyph: '−' | '+' }) {
+  return (
+    <Button variant="icon" onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-20)", color: "var(--afa-text-primary)" }}>{glyph}</Button>
+  )
+}
+
+export default function SeatSelectionClientPage({ event }: { event: EventData | null }) {
+  const { t: tr } = useLocale()
+  const router = useRouter()
+  const { data: session, status } = useSession()
+
+  const [selectedSeats, setSelectedSeats] = useState<Record<string, number>>({})
+  const isNumbered = event?.venue?.seatingMode === 'NUMBERED'
+  const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([])
+  const [numberedAmount, setNumberedAmount] = useState(0)
+  const [showAuthSheet, setShowAuthSheet] = useState(false)
+  const [reserving, setReserving] = useState(false)
+  const [reservedMessage, setReservedMessage] = useState("")
+  const [bookingError, setBookingError] = useState("")
+  const [contributionMoment, setContributionMoment] = useState<{
+    seatSummary: string
+    venueLabel: string
+    supporterCount: number
+    artistName: string
+  } | null>(null)
+
+  // Audience-adjustable booking fee (28 Jul) - unchanged from EventDetail,
+  // see that file's own comment for the full rationale.
+  const [defaultBookingFee, setDefaultBookingFee] = useState<number | null>(null)
+  const [feeInput, setFeeInput] = useState<number>(0)
+  const [minBookingFee, setMinBookingFee] = useState<number>(0)
+  const [maxBookingFee, setMaxBookingFee] = useState<number>(500)
+  useEffect(() => {
+    fetch("/api/platform-settings/audience-fee")
+      .then((res) => res.json())
+      .then((data) => {
+        setDefaultBookingFee(data.audienceBookingFeeRupees)
+        setFeeInput(data.audienceBookingFeeRupees)
+        setMinBookingFee(data.minAudienceBookingFeeRupees)
+        setMaxBookingFee(data.maxAudienceBookingFeeRupees)
+      })
+      .catch(() => {
+        setDefaultBookingFee(0)
+        setFeeInput(0)
+      })
+  }, [])
+
+  // Same Router Cache staleness fix as EventDetailClientPage.tsx (live-
+  // caught 28 Jul) - the seat/ticket availability shown here is exactly
+  // what that bug affected, so this page needs the same guard.
+  useEffect(() => {
+    router.refresh()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const totalSelected = isNumbered ? selectedSeatIds.length : Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
+  const totalAmount = isNumbered
+    ? numberedAmount
+    : event
+    ? event.ticketTiers.length > 0
+      ? event.ticketTiers.reduce((sum, t) => sum + (selectedSeats[t.sectionName] || 0) * t.price, 0)
+      : (selectedSeats['General'] || 0) * (event.ticketPrice || 0)
+    : 0
+
+  const updateSeat = (section: string, delta: number, max: number) => {
+    setBookingError("")
+    setSelectedSeats((prev) => {
+      const current = prev[section] || 0
+      const next = Math.max(0, Math.min(current + delta, max, event?.maxSeatsPerBooking || 4))
+      const otherTotal = totalSelected - current
+      if (otherTotal + next > (event?.maxSeatsPerBooking || 4)) return prev
+      return { ...prev, [section]: next }
+    })
+  }
+
+  const reserveSeats = async () => {
+    if (!event) return
+    setReserving(true)
+    setBookingError("")
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          isNumbered
+            ? { eventId: event.id, seatIds: selectedSeatIds, bookingFeeOverride: feeInput }
+            : { eventId: event.id, seats: selectedSeats, bookingFeeOverride: feeInput }
+        ),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        if (data.reason === "PHONE_NOT_VERIFIED") {
+          router.push(`/verify-phone?next=${encodeURIComponent(`/events/${event.id}/seats`)}`)
+          return
+        }
+        // S1b-b2 - a stale page while W3 is closed gets the friendly line, not the raw 403.
+        throw new Error(waveErrorMessage(data, tr.launchWaves, tr.eventDetailPage.reserveFailed))
+      }
+
+      // Two possible responses:
+      //   - payment is attached -> Razorpay was configured; go to checkout
+      //   - no payment (message only) -> this env doesn't have Razorpay
+      //     yet, so show the "reserved, we'll email you" state right here.
+      if (data.payment && data.booking) {
+        router.push(`/checkout/${data.booking.id}`)
+        return
+      }
+
+      // No payment step (free event, or Razorpay not configured in this
+      // env) - booking is already CONFIRMED. Show the contribution
+      // moment instead of the plain inline message, same screen the
+      // paid path's checkout page shows post-payment (see
+      // ContributionMoment.tsx). Reuses GET /api/bookings/[id] - the
+      // same endpoint the checkout page already calls - rather than a
+      // new one, since it already has everything this screen needs.
+      setReservedMessage(data.message)
+      if (data.booking?.id) {
+        try {
+          const detailRes = await fetch(`/api/bookings/${data.booking.id}`)
+          const detail = await detailRes.json()
+          if (detailRes.ok) {
+            const b = detail.booking
+            const seatSummary = b.numberedSeats.length > 0
+              ? b.numberedSeats.length === 1
+                ? `SEAT ${b.numberedSeats[0].row}${b.numberedSeats[0].number} · ROW ${b.numberedSeats[0].row}`
+                : `SEATS ${b.numberedSeats.map((s: { row: string; number: string }) => `${s.row}${s.number}`).join(', ')}`
+              : `${totalSelected} SEAT${totalSelected === 1 ? '' : 'S'}`
+            setContributionMoment({
+              seatSummary,
+              venueLabel: b.event.venue ? `${b.event.venue.name}, ${b.event.venue.city}` : b.event.title,
+              supporterCount: b.event.supporterCount,
+              artistName: b.event.artistName,
+            })
+          }
+        } catch {
+          // Booking already succeeded either way - the plain
+          // reservedMessage set above still shows, just without the
+          // richer contribution-moment screen.
+        }
+      }
+    } catch (err: any) {
+      setBookingError(err.message)
+    } finally {
+      setReserving(false)
+    }
+  }
+
+  const handleBookClick = async () => {
+    if (totalSelected === 0) {
+      setBookingError(tr.eventDetailPage.selectSeatFirst)
+      return
+    }
+    if (!event) return
+    if (isPastEvent(event)) {
+      setBookingError(tr.eventDetailPage.eventAlreadyHappened)
+      return
+    }
+    if (status === "loading") {
+      return
+    }
+    if (status !== "authenticated") {
+      // BUG-2608-055 - see EventDetailClientPage.tsx's own comment for why
+      // this asks the server directly rather than trusting the client
+      // hook's possibly-stale "unauthenticated" reading right after login.
+      const freshSession = await getSession()
+      if (freshSession?.user) {
+        // Genuinely already signed in.
+      } else {
+        setShowAuthSheet(true)
+        return
+      }
+    }
+    reserveSeats()
+  }
+
+  if (!event) {
+    return (
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+        <SiteNav backHref="/events" backLabel={tr.nav.backToEvents} />
+        <div style={{ maxWidth: "560px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.notFound}</div>
+      </main>
+    )
+  }
+
+  const isPast = isPastEvent(event)
+
+  return (
+    <>
+      <SiteNav backHref={`/events/${event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", maxWidth: "560px", margin: "0 auto", padding: "var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)" }}>
+        <div style={{ marginBottom: "var(--afa-space-2)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
+          {tr.eventDetailPage.selectTicketsCta}
+        </div>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-1)" }}>
+          {event.title}
+        </h1>
+        {event.venue && (
+          <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginBottom: "var(--afa-space-6)" }}>
+            {event.venue.name}, {event.venue.city}
+          </p>
+        )}
+
+        <div style={{ borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
+          {contributionMoment ? null : isPast ? (
+            <div>
+              <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
+              <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
+            </div>
+          ) : reservedMessage ? (
+            <div>
+              <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsReserved}</div>
+              <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", lineHeight: 1.6 }}>{reservedMessage}</p>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-6px)" }}>
+                <span style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
+                  {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? (isNumbered ? tr.eventDetailPage.chooseSeats : tr.eventDetailPage.chooseSection) : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
+                </span>
+                <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
+              </div>
+              <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-4)" }}>
+                {tr.eventDetailPage.seatsAvailableSummary.replace("{available}", String(event.availableSeats)).replace("{total}", String(event.totalSeats)).replace("{max}", String(event.maxSeatsPerBooking))}
+              </div>
+
+              {!event.isFree && isNumbered && (
+                <div style={{ marginBottom: 'var(--afa-space-4)' }}>
+                  <SeatPicker
+                    eventId={event.id}
+                    maxSeatsPerBooking={event.maxSeatsPerBooking}
+                    selected={selectedSeatIds}
+                    onChange={(ids, amount) => {
+                      setBookingError("")
+                      setSelectedSeatIds(ids)
+                      setNumberedAmount(amount)
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* BUG-2609-081 - one action row: the quantity steppers (when there is
+                  no seat map), the price summary (seat count, booking fee, Total),
+                  the Reserve button and the payment note, so the chat button
+                  clears all of it. With only the summary marked, the lifted
+                  button landed on the "+" stepper at 360. */}
+              <div data-afa-action-row>
+                {!event.isFree && !isNumbered && (
+                  <div style={{ marginBottom: "var(--afa-space-4)" }}>
+                    {event.ticketTiers.length > 0 ? (
+                      event.ticketTiers.map((t) => (
+                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
+                          <div>
+                            <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{t.sectionName}</div>
+                            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)" }}>₹{t.price}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
+                            <SeatStepperButton onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} glyph="−" />
+                            <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats[t.sectionName] || 0}</span>
+                            <SeatStepperButton onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} glyph="+" />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0" }}>
+                        <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.generalAdmission}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
+                          <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
+                          <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
+                          <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {event.isFree && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--afa-space-10px) 0", marginBottom: "var(--afa-space-2)" }}>
+                    <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsLabel}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
+                      <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
+                      <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
+                      <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
+                    </div>
+                  </div>
+                )}
+
+                {/* GEN-2609-010 - price-tier legend, additive/display-only:
+                    reconciliation with Figma v2's SeatMap.tsx found the
+                    NUMBERED path already gets an equivalent color legend for
+                    free (SeatPicker.tsx renders one above its own canvas,
+                    using this same colorForZone helper). The actual gap was
+                    here - the flat tier list had no color coding at all.
+                    Only shown for >1 tier; a single price isn't a "legend". */}
+                {!event.isFree && !isNumbered && event.ticketTiers.length > 1 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginBottom: "var(--afa-space-4)" }}>
+                    {event.ticketTiers.map((t) => (
+                      <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-primary)", background: "var(--afa-tint-08)", padding: "var(--afa-space-1) var(--afa-space-10px)", borderRadius: "var(--afa-radius-pill)" }}>
+                        <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: colorForZone(t.sectionName, event.ticketTiers.map((tier) => tier.sectionName)), marginRight: "var(--afa-space-6px)" }} />
+                        {t.sectionName} · ₹{t.price}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {bookingError && (
+                  <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)", marginBottom: "var(--afa-space-3)" }}>{bookingError}</div>
+                )}
+
+                {totalAmount > 0 ? (
+                  <div style={{ marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-10px)" }}>
+                      <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                      <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                    {/* D1 - pay at entry: no booking fee (AFA collects nothing). */}
+                    {event.paymentMode !== "PAY_AT_ENTRY" && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--afa-space-10px)", gap: "var(--afa-space-3)" }}>
+                      <div>
+                        <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
+                        <div style={{ fontSize: "var(--afa-text-caption)", color: "var(--afa-text-muted)", maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-1)", flexShrink: 0 }}>
+                        <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹</span>
+                        <Input
+                          variant="compact"
+                          type="number"
+                          min={minBookingFee}
+                          max={maxBookingFee}
+                          step={1}
+                          value={feeInput}
+                          disabled={defaultBookingFee === null}
+                          onChange={(e) => {
+                            const n = Number(e.target.value)
+                            if (!Number.isFinite(n)) return
+                            setFeeInput(Math.max(minBookingFee, Math.min(Math.round(n), maxBookingFee)))
+                          }}
+                          style={{ width: "64px", textAlign: "right" }}
+                        />
+                      </div>
+                    </div>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid var(--afa-tint-10)" }}>
+                      <span style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
+                      <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(event.paymentMode === "PAY_AT_ENTRY" ? totalAmount : totalAmount + feeInput).toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--afa-space-4)", paddingTop: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)" }}>
+                    <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                    {/* "Free" only for a free event; a paid one with nothing chosen yet has no amount to show. */}
+                    <span style={{ fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{event.isFree ? tr.eventDetailPage.freeAmount : "—"}</span>
+                  </div>
+                )}
+
+                <Button variant="primary" onClick={handleBookClick} disabled={reserving || status === "loading"}>
+                  <TicketIcon style={{ width: "18px", height: "18px" }} />
+                  {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : event.paymentMode === "PAY_AT_ENTRY" ? tr.payAtEntry.reserveCta : tr.eventDetailPage.continueToCheckout}
+                </Button>
+
+                <div style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-muted)", textAlign: "center" }}>
+                  {event.isFree ? tr.eventDetailPage.freeEntryFooter : event.paymentMode === "PAY_AT_ENTRY" ? tr.payAtEntry.noCollect : tr.eventDetailPage.securePaymentFooter}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+
+      <AuthPromptSheet
+        open={showAuthSheet}
+        onClose={() => setShowAuthSheet(false)}
+        title={tr.eventDetailPage.signInToReserve}
+        subtitle={`${totalSelected} ${totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}${totalAmount > 0 ? ` · ₹${(totalAmount + feeInput).toLocaleString("en-IN")}` : ""}`}
+        onSuccess={() => {
+          setShowAuthSheet(false)
+          reserveSeats()
+        }}
+      />
+
+      {contributionMoment && (
+        <ContributionMoment
+          seatSummary={contributionMoment.seatSummary}
+          venueLabel={contributionMoment.venueLabel}
+          supporterCount={contributionMoment.supporterCount}
+          artistName={contributionMoment.artistName}
+          onClose={() => router.push("/events")}
+          onViewTicket={() => router.push("/tickets")}
+        />
+      )}
+    </>
+  )
+}

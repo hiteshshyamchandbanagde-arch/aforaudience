@@ -1,0 +1,474 @@
+"use client"
+import { useEffect, useState, useTransition, type CSSProperties, type ComponentType } from "react"
+import { useRouter } from "next/navigation"
+import SiteNav from "@/components/SiteNav"
+import { ErrorBanner } from "@/components/ErrorBanner"
+import { useLocale } from "@/lib/i18n/translate"
+import Photo from "@/components/Photo"
+import { initials } from "@/components/EventCard"
+import { TrophyMark, StarMark } from "@/components/WallOfFameMarks"
+import HeroEmphasis from "@/components/HeroEmphasis"
+
+interface LeaderboardEntry {
+  id: string
+  name: string
+  avgRating: number
+  reviewCount: number
+}
+
+interface WallOfFameData {
+  month: string
+  minReviews: number
+  artistOfMonth: { id: string; name: string; avatar: string | null; avgRating: number; reviewCount: number } | null
+  eventOfMonth: { id: string; title: string; posterImage: string | null; avgRating: number; reviewCount: number } | null
+  topOrganisers: LeaderboardEntry[]
+  topVenues: LeaderboardEntry[]
+}
+
+// Grid/graph-paper texture overlay - same recipe as VenueNoPhoto.tsx (two
+// 1px cream linear-gradients, 22px cell, 4% opacity).
+function GridTexture() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        inset: 0,
+        pointerEvents: "none",
+        opacity: 0.04,
+        backgroundImage:
+          "linear-gradient(var(--afa-text-primary) 1px, transparent 1px), linear-gradient(90deg, var(--afa-text-primary) 1px, transparent 1px)",
+        backgroundSize: "22px 22px",
+      }}
+    />
+  )
+}
+
+// Circular initials-chip avatar for a winner who hasn't uploaded a photo -
+// same PM/AB/RD/NK-style pattern as EventCard.tsx's LineupChips, reusing
+// its initials() extraction rather than rebuilding it.
+function InitialsChip({ name }: { name: string }) {
+  return (
+    <div
+      style={{
+        width: "64px",
+        height: "64px",
+        borderRadius: "50%",
+        background: "var(--afa-amber-tint)",
+        border: "1.5px solid var(--afa-amber-strong)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--font-mono)",
+        fontWeight: 600,
+        fontSize: "var(--afa-text-subtitle)",
+        color: "var(--afa-amber)",
+      }}
+    >
+      {initials(name)}
+    </div>
+  )
+}
+
+// Of-the-month card header zone (180px), three states: no winner
+// (illustrated mark), winner with a photo (Photo.tsx duotone), winner
+// without a photo (initials chip) - see build brief for the confirmed
+// fallback rule.
+function MonthCardHeader({
+  badge,
+  winnerName,
+  photoSrc,
+  photoAlt,
+  Mark,
+}: {
+  badge: string
+  winnerName: string | null
+  photoSrc: string | null
+  photoAlt: string
+  Mark: ComponentType<{ style?: CSSProperties }>
+}) {
+  const [photoFailed, setPhotoFailed] = useState(false)
+  const hasWinner = winnerName !== null
+  const showPhoto = hasWinner && !!photoSrc && !photoFailed
+
+  return (
+    <div style={{ position: "relative", height: "180px", overflow: "hidden", background: "var(--afa-surface-raised)" }}>
+      <span
+        style={{
+          position: "absolute",
+          left: "16px",
+          top: "16px",
+          zIndex: 1,
+          display: "inline-flex",
+          background: "var(--afa-scrim)",
+          backdropFilter: "blur(4px)",
+          padding: "var(--afa-space-6px) var(--afa-space-10px)",
+          borderRadius: "var(--afa-radius-xs)",
+          fontFamily: "var(--font-mono)",
+          fontSize: "var(--afa-text-micro)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "var(--afa-amber)",
+        }}
+      >
+        {badge}
+      </span>
+      {showPhoto ? (
+        <Photo src={photoSrc} alt={photoAlt} onError={() => setPhotoFailed(true)} />
+      ) : (
+        <>
+          <GridTexture />
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {hasWinner ? <InitialsChip name={winnerName} /> : <Mark style={{ width: "56px", height: "56px", color: "var(--afa-amber)", opacity: 0.55 }} />}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default function WallOfFamePage() {
+  const { t: tr } = useLocale()
+  const router = useRouter()
+  const [, startTransition] = useTransition()
+  const [data, setData] = useState<WallOfFameData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  // Same click-guard as /events (#261), /artists (#312), /venues (#313) -
+  // Top Organisers/Top Venues leaderboard rows had ZERO click target
+  // before this (not a guard gap, no navigation existed at all - same
+  // bug class as the My Applications cards fixed in #314). Prefixed key
+  // ("org:"/"venue:") since both lists share one guard state.
+  const [navigatingKey, setNavigatingKey] = useState<string | null>(null)
+
+  const goTo = (key: string, href: string) => {
+    if (navigatingKey) return
+    setNavigatingKey(key)
+    startTransition(() => {
+      router.push(href)
+    })
+  }
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/wall-of-fame")
+        if (!res.ok) throw new Error(tr.wallOfFamePage.failedToLoad)
+        setData(await res.json())
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  const stars = (avg: number) => "★".repeat(Math.round(avg)) + "☆".repeat(5 - Math.round(avg))
+  // artistOfMonthBadge/eventOfMonthBadge carry a leading emoji baked into
+  // every locale dictionary (src/lib/i18n/dictionaries/*.ts) - out of
+  // scope here (this migration touches page.tsx only), so the "no emoji
+  // anywhere" rule is applied at render time instead of editing all 11
+  // dictionary files.
+  const stripLeadingEmoji = (s: string) => s.replace(/^\p{Extended_Pictographic}\s*/u, "")
+
+  return (
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+      <SiteNav active="wall-of-fame" />
+
+      {/* HERO */}
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "var(--afa-space-56px) var(--afa-space-48px)" }}>
+        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)", lineHeight: 1.1 }}>
+            {tr.wallOfFamePage.heroPrefix}<HeroEmphasis>{tr.wallOfFamePage.heroEmphasis}</HeroEmphasis>
+          </div>
+          <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)" }}>
+            {loading ? tr.wallOfFamePage.loading : data ? tr.wallOfFamePage.subtitleTemplate.replace("{month}", data.month) : ""}
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "var(--afa-space-40px) var(--afa-space-6) var(--afa-space-80px)" }}>
+        {error && (
+          <ErrorBanner style={{ marginBottom: "var(--afa-space-6)" }}>{error}</ErrorBanner>
+        )}
+
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "var(--afa-space-80px) var(--afa-space-5)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.loading}</div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--afa-space-6)" }}>
+            {/* ARTIST OF THE MONTH */}
+            <div
+              role={data?.artistOfMonth ? "link" : undefined}
+              tabIndex={data?.artistOfMonth ? 0 : undefined}
+              aria-busy={navigatingKey === "artist-of-month"}
+              onClick={() => data?.artistOfMonth && goTo("artist-of-month", `/artists/${data.artistOfMonth.id}`)}
+              onKeyDown={(e) => {
+                if (data?.artistOfMonth && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault()
+                  goTo("artist-of-month", `/artists/${data.artistOfMonth.id}`)
+                }
+              }}
+              style={{
+                position: "relative",
+                background: "var(--afa-surface-raised)",
+                borderRadius: "var(--afa-radius-xs)",
+                border: "1px solid var(--afa-tint-10)",
+                overflow: "hidden",
+                cursor: data?.artistOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
+                opacity: navigatingKey && navigatingKey !== "artist-of-month" ? 0.5 : 1,
+                transition: "opacity 0.15s ease",
+              }}
+            >
+              {navigatingKey === "artist-of-month" && (
+                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--afa-scrim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                </div>
+              )}
+              <MonthCardHeader
+                badge={stripLeadingEmoji(tr.wallOfFamePage.artistOfMonthBadge)}
+                winnerName={data?.artistOfMonth?.name ?? null}
+                photoSrc={data?.artistOfMonth?.avatar ?? null}
+                photoAlt={data?.artistOfMonth?.name ?? ""}
+                Mark={TrophyMark}
+              />
+              <div style={{ padding: "var(--afa-space-5) var(--afa-space-28px)" }}>
+                {data?.artistOfMonth ? (
+                  <>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{data.artistOfMonth.name}</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginTop: "var(--afa-space-6px)" }}>
+                      {stars(data.artistOfMonth.avgRating)} {data.artistOfMonth.avgRating.toFixed(1)} · {data.artistOfMonth.reviewCount}{tr.wallOfFamePage.reviewsSuffix}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
+                )}
+                <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "var(--afa-space-3) 0 0" }}>
+                  {data?.artistOfMonth
+                    ? tr.wallOfFamePage.artistBlurbFilled.replace("{n}", String(data.minReviews))
+                    : tr.wallOfFamePage.artistBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
+                </p>
+                {data?.artistOfMonth && (
+                  <span style={{ display: "inline-block", marginTop: "var(--afa-space-4)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)" }}>
+                    {tr.wallOfFamePage.viewProfile}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* EVENT OF THE MONTH */}
+            <div
+              role={data?.eventOfMonth ? "link" : undefined}
+              tabIndex={data?.eventOfMonth ? 0 : undefined}
+              aria-busy={navigatingKey === "event-of-month"}
+              onClick={() => data?.eventOfMonth && goTo("event-of-month", `/events/${data.eventOfMonth.id}`)}
+              onKeyDown={(e) => {
+                if (data?.eventOfMonth && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault()
+                  goTo("event-of-month", `/events/${data.eventOfMonth.id}`)
+                }
+              }}
+              style={{
+                position: "relative",
+                background: "var(--afa-surface-raised)",
+                borderRadius: "var(--afa-radius-xs)",
+                border: "1px solid var(--afa-tint-10)",
+                overflow: "hidden",
+                cursor: data?.eventOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
+                opacity: navigatingKey && navigatingKey !== "event-of-month" ? 0.5 : 1,
+                transition: "opacity 0.15s ease",
+              }}
+            >
+              {navigatingKey === "event-of-month" && (
+                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--afa-scrim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                </div>
+              )}
+              <MonthCardHeader
+                badge={stripLeadingEmoji(tr.wallOfFamePage.eventOfMonthBadge)}
+                winnerName={data?.eventOfMonth?.title ?? null}
+                photoSrc={data?.eventOfMonth?.posterImage ?? null}
+                photoAlt={data?.eventOfMonth?.title ?? ""}
+                Mark={StarMark}
+              />
+              <div style={{ padding: "var(--afa-space-5) var(--afa-space-28px)" }}>
+                {data?.eventOfMonth ? (
+                  <>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{data.eventOfMonth.title}</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", marginTop: "var(--afa-space-6px)" }}>
+                      {stars(data.eventOfMonth.avgRating)} {data.eventOfMonth.avgRating.toFixed(1)} · {data.eventOfMonth.reviewCount}{tr.wallOfFamePage.reviewsSuffix}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
+                )}
+                <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "var(--afa-space-3) 0 0" }}>
+                  {data?.eventOfMonth
+                    ? tr.wallOfFamePage.eventBlurbFilled.replace("{n}", String(data.minReviews))
+                    : tr.wallOfFamePage.eventBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
+                </p>
+                {data?.eventOfMonth && (
+                  <span style={{ display: "inline-block", marginTop: "var(--afa-space-4)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)" }}>
+                    {tr.wallOfFamePage.viewEvent}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TOP VENUES / TOP ORGANISERS — all-time leaderboard, separate from the monthly awards above */}
+        {!loading && data && (data.topVenues.length > 0 || data.topOrganisers.length > 0) && (
+          <div style={{ marginTop: "var(--afa-space-40px)" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)", textAlign: "center" }}>
+              {tr.wallOfFamePage.allTimeLeaderboard}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--afa-space-6)" }}>
+              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-6) var(--afa-space-28px)" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>{stripLeadingEmoji(tr.wallOfFamePage.topOrganisers)}</div>
+                {data.topOrganisers.length === 0 ? (
+                  <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
+                    {data.topOrganisers.map((o, i) => {
+                      const key = `org:${o.id}`
+                      const isNavigatingThis = navigatingKey === key
+                      return (
+                        <div
+                          key={o.id}
+                          role="link"
+                          tabIndex={0}
+                          aria-busy={isNavigatingThis}
+                          onClick={() => goTo(key, `/organisers/${o.id}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault()
+                              goTo(key, `/organisers/${o.id}`)
+                            }
+                          }}
+                          className="afa-focusable"
+                          style={{
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "var(--afa-space-3)",
+                            padding: "var(--afa-space-2) var(--afa-space-1)",
+                            borderRadius: "var(--afa-radius-sm)",
+                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid var(--afa-tint-10)" : "none",
+                            cursor: navigatingKey ? "default" : "pointer",
+                            opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
+                            transition: "opacity 0.15s ease, background 0.15s ease",
+                          }}
+                        >
+                          {isNavigatingThis && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                zIndex: 2,
+                                borderRadius: "var(--afa-radius-sm)",
+                                background: "var(--afa-scrim)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "18px",
+                                  height: "18px",
+                                  borderRadius: "50%",
+                                  border: "2px solid var(--afa-border-resting)",
+                                  borderTopColor: "var(--afa-fill-solid)",
+                                  animation: "afa-spin 0.7s linear infinite",
+                                }}
+                              />
+                            </div>
+                          )}
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-amber)", width: "20px" }}>{i + 1}</div>
+                          <div style={{ flex: 1, fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{o.name}</div>
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.6 }}>{o.avgRating.toFixed(1)}★ · {o.reviewCount}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-6) var(--afa-space-28px)" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>{stripLeadingEmoji(tr.wallOfFamePage.topVenues)}</div>
+                {data.topVenues.length === 0 ? (
+                  <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
+                    {data.topVenues.map((v, i) => {
+                      const key = `venue:${v.id}`
+                      const isNavigatingThis = navigatingKey === key
+                      return (
+                        <div
+                          key={v.id}
+                          role="link"
+                          tabIndex={0}
+                          aria-busy={isNavigatingThis}
+                          onClick={() => goTo(key, `/venues/${v.id}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault()
+                              goTo(key, `/venues/${v.id}`)
+                            }
+                          }}
+                          className="afa-focusable"
+                          style={{
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "var(--afa-space-3)",
+                            padding: "var(--afa-space-2) var(--afa-space-1)",
+                            borderRadius: "var(--afa-radius-sm)",
+                            borderBottom: i < data.topVenues.length - 1 ? "1px solid var(--afa-tint-10)" : "none",
+                            cursor: navigatingKey ? "default" : "pointer",
+                            opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
+                            transition: "opacity 0.15s ease, background 0.15s ease",
+                          }}
+                        >
+                          {isNavigatingThis && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                zIndex: 2,
+                                borderRadius: "var(--afa-radius-sm)",
+                                background: "var(--afa-scrim)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "18px",
+                                  height: "18px",
+                                  borderRadius: "50%",
+                                  border: "2px solid var(--afa-border-resting)",
+                                  borderTopColor: "var(--afa-fill-solid)",
+                                  animation: "afa-spin 0.7s linear infinite",
+                                }}
+                              />
+                            </div>
+                          )}
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-amber)", width: "20px" }}>{i + 1}</div>
+                          <div style={{ flex: 1, fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.6 }}>{v.avgRating.toFixed(1)}★ · {v.reviewCount}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}

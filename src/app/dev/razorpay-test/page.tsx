@@ -1,0 +1,415 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useSession, signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Button from "@/components/ui/Button"
+
+// ---------------------------------------------------------------------------
+// /dev/razorpay-test
+//
+// End-to-end payment test page. QA-only. Click the "Pay ₹1" button, walk
+// through the Razorpay Checkout modal with a test card, and confirm the
+// whole round trip works: create-order → checkout modal → verify signature.
+//
+// The environment guard is enforced server-side by `page404IfProduction`
+// below rather than client-side, because a client-side check is trivially
+// bypassable. If someone navigates to /dev/razorpay-test on the real prod
+// site, they get a 404, not a warning banner.
+//
+// Test card values (Razorpay India test mode — the global Visa test card
+// 4111 1111 1111 1111 is rejected here as "international not supported"
+// because our merchant account is India-registered, so a real India-
+// issued test card is required):
+//   Card:   5267 3181 8797 5449   (Mastercard, India)
+//   CVV:    any 3 digits (e.g. 123)
+//   Expiry: any future date (e.g. 12/30)
+//   OTP:    1234
+//
+// Alternative when cards fail: pick Netbanking from the modal and any
+// bank. On the fake bank page that opens, click "Success" to complete.
+// Netbanking is often the most reliable path in Razorpay Test.
+// ---------------------------------------------------------------------------
+
+// Razorpay's Checkout script attaches to window.Razorpay. The type
+// declaration for it now lives in src/lib/razorpay-checkout.ts — that
+// module's `declare global` block is ambient and covers this page too.
+// This page keeps its own script loader (below) since it needs the
+// boolean-return shape rather than the throwing-Promise shape used by
+// razorpay-checkout.ts.
+
+type Status =
+  | { kind: "idle" }
+  | { kind: "loading-script" }
+  | { kind: "creating-order" }
+  | { kind: "awaiting-payment" }
+  | { kind: "verifying" }
+  | { kind: "success"; paymentId: string; orderId: string }
+  | { kind: "error"; message: string }
+  | { kind: "cancelled" }
+
+const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js"
+// GEN-2609-067 - retargeted from the legacy light-theme palette to the
+// current dark-theme tokens, same reasoning as about/page.tsx.
+const INK = "var(--afa-text-primary)"
+const PAPER = "var(--afa-surface-page)"
+const EMBER = "var(--afa-fill-solid)"
+const MIST = "var(--afa-tint-12)"
+const SAGE = "var(--afa-sage-bright)"
+const SERIF = "var(--font-display)"
+const MONO = "var(--font-mono)"
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(false)
+      return
+    }
+    if (window.Razorpay) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement("script")
+    script.src = RAZORPAY_SCRIPT_URL
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
+export default function RazorpayTestPage() {
+  const { data: session, status: sessionStatus } = useSession()
+  const router = useRouter()
+  const [status, setStatus] = useState<Status>({ kind: "idle" })
+  const [amount, setAmount] = useState<number>(100) // paise — ₹1 default
+
+  // Preload the Razorpay script on mount so the button click feels
+  // instant. Doesn't cost anything — the script is small and cached.
+  useEffect(() => {
+    loadRazorpayScript()
+  }, [])
+
+  async function handlePay() {
+    if (!session?.user) {
+      // Auth is required by both API endpoints. Kick to sign-in with a
+      // callback back to this page.
+      signIn(undefined, { callbackUrl: "/dev/razorpay-test" })
+      return
+    }
+
+    setStatus({ kind: "loading-script" })
+
+    const scriptLoaded = await loadRazorpayScript()
+    if (!scriptLoaded) {
+      setStatus({
+        kind: "error",
+        message:
+          "Could not load the Razorpay checkout script. Check your network connection and try again.",
+      })
+      return
+    }
+
+    setStatus({ kind: "creating-order" })
+
+    let orderData: {
+      orderId: string
+      amount: number
+      currency: string
+      key: string
+    }
+    try {
+      const res = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, notes: { source: "dev-test-page" } }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }))
+        setStatus({
+          kind: "error",
+          message: `Failed to create order: ${err.error ?? res.statusText}`,
+        })
+        return
+      }
+      orderData = await res.json()
+    } catch (e) {
+      setStatus({
+        kind: "error",
+        message: `Network error creating order: ${(e as Error).message}`,
+      })
+      return
+    }
+
+    if (!window.Razorpay) {
+      setStatus({
+        kind: "error",
+        message: "Razorpay checkout is not available.",
+      })
+      return
+    }
+
+    setStatus({ kind: "awaiting-payment" })
+
+    const rzp = new window.Razorpay({
+      key: orderData.key,
+      amount: orderData.amount,
+      currency: orderData.currency,
+      order_id: orderData.orderId,
+      name: "AforAudience (QA test)",
+      description: "Checkpoint 1 sanity payment",
+      prefill: {
+        name: session.user.name ?? "",
+        email: session.user.email ?? "",
+      },
+      theme: { color: EMBER },
+      handler: async (response) => {
+        setStatus({ kind: "verifying" })
+        try {
+          const verifyRes = await fetch("/api/payments/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyRes.ok && verifyData.verified) {
+            setStatus({
+              kind: "success",
+              paymentId: verifyData.paymentId,
+              orderId: verifyData.orderId,
+            })
+          } else {
+            setStatus({
+              kind: "error",
+              message: `Verification failed: ${verifyData.error ?? "unknown"}`,
+            })
+          }
+        } catch (e) {
+          setStatus({
+            kind: "error",
+            message: `Network error during verification: ${(e as Error).message}`,
+          })
+        }
+      },
+      modal: {
+        ondismiss: () => setStatus({ kind: "cancelled" }),
+      },
+    })
+
+    rzp.open()
+  }
+
+  return (
+    <main
+      style={{
+        background: PAPER,
+        color: INK,
+        minHeight: "100vh",
+        padding: "clamp(32px, 6vw, 64px) clamp(20px, 5vw, 40px)",
+      }}
+    >
+      <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+        <div
+          style={{
+            fontFamily: MONO,
+            fontSize: "var(--afa-text-micro)",
+            letterSpacing: "0.24em",
+            textTransform: "uppercase",
+            color: EMBER,
+            marginBottom: "var(--afa-space-4)",
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--afa-space-3)",
+          }}
+        >
+          <span aria-hidden style={{ display: "inline-block", width: "32px", height: "1px", background: EMBER }} />
+          <span>Dev · QA only</span>
+        </div>
+        <h1
+          style={{
+            fontFamily: SERIF,
+            fontSize: "clamp(28px, 4vw, 40px)",
+            fontWeight: 700,
+            lineHeight: 1.15,
+            letterSpacing: "-0.02em",
+            marginBottom: "var(--afa-space-4)",
+          }}
+        >
+          Razorpay — Checkpoint 1
+        </h1>
+        <p style={{ fontFamily: SERIF, fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: INK, opacity: 0.75, marginBottom: "var(--afa-space-32px)" }}>
+          End-to-end sanity test. Click the button, complete a Razorpay test
+          payment, and confirm the round trip works: create-order → Checkout
+          modal → verify signature. No real money, no database writes yet.
+        </p>
+
+        <div
+          style={{
+            padding: "var(--afa-space-5) var(--afa-space-6)",
+            background: "var(--afa-surface-raised)",
+            border: `1px solid ${MIST}`,
+            borderRadius: "var(--afa-radius-lg)",
+            marginBottom: "var(--afa-space-32px)",
+            fontFamily: MONO,
+            fontSize: "var(--afa-text-ui)",
+            lineHeight: 1.7,
+            color: INK,
+          }}
+        >
+          <div style={{ fontWeight: 700, marginBottom: "var(--afa-space-2)", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "var(--afa-text-micro)", color: EMBER }}>
+            Test card values (Razorpay India)
+          </div>
+          Card: 5267 3181 8797 5449<br />
+          CVV: any 3 digits (e.g. 123)<br />
+          Expiry: any future date (e.g. 12/30)<br />
+          OTP if prompted: 1234
+          <div style={{ marginTop: "var(--afa-space-14px)", paddingTop: "var(--afa-space-3)", borderTop: `1px dashed ${MIST}`, opacity: 0.75 }}>
+            Global test cards (like 4111 1111 1111 1111) are rejected as
+            &quot;international not supported&quot; on India accounts. If the
+            card above fails too, pick <strong>Netbanking</strong> in the
+            modal, choose any bank, then click <strong>Success</strong> on
+            the simulated bank page — it almost always works.
+          </div>
+          <div style={{ marginTop: "var(--afa-space-10px)", opacity: 0.6, fontSize: "var(--afa-text-small)" }}>
+            Note: Razorpay Test sends a real SMS OTP for card-save
+            tokenization, not for the payment itself. Safe to ignore or
+            enter — no real money moves in Test Mode.
+          </div>
+        </div>
+
+        {sessionStatus === "loading" ? (
+          <p style={{ fontFamily: SERIF, opacity: 0.6 }}>Loading session…</p>
+        ) : !session?.user ? (
+          <div style={{ marginBottom: "var(--afa-space-6)" }}>
+            <p style={{ fontFamily: SERIF, marginBottom: "var(--afa-space-4)" }}>
+              You need to be signed in to run this test — the API endpoints
+              require an authenticated session.
+            </p>
+            <Button
+              variant="solid"
+              size="lg"
+              fullWidth={false}
+              onClick={() => signIn(undefined, { callbackUrl: "/dev/razorpay-test" })}
+            >
+              Sign in
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "var(--afa-text-ui)",
+                color: INK,
+                opacity: 0.6,
+                marginBottom: "var(--afa-space-4)",
+              }}
+            >
+              Signed in as {session.user.name ?? session.user.email ?? "user"}.
+            </div>
+
+            <div style={{ marginBottom: "var(--afa-space-6)" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontFamily: MONO,
+                  fontSize: "var(--afa-text-micro)",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: INK,
+                  opacity: 0.7,
+                  marginBottom: "var(--afa-space-2)",
+                }}
+              >
+                Amount (in paise — 100 = ₹1)
+              </label>
+              <input
+                type="number"
+                min="100"
+                max="100000"
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: "var(--afa-text-title)",
+                  padding: "var(--afa-space-10px) var(--afa-space-14px)",
+                  border: `1px solid ${MIST}`,
+                  borderRadius: "var(--afa-radius-sm)",
+                  width: "200px",
+                  color: INK,
+                  background: "var(--afa-surface-raised)",
+                }}
+              />
+            </div>
+
+            <Button
+              variant="solid"
+              size="lg"
+              fullWidth={false}
+              onClick={handlePay}
+              disabled={
+                status.kind === "loading-script" ||
+                status.kind === "creating-order" ||
+                status.kind === "awaiting-payment" ||
+                status.kind === "verifying"
+              }
+            >
+              Pay ₹{(amount / 100).toFixed(2)} (test)
+            </Button>
+          </>
+        )}
+
+        {/* Status readout — telemetry for the tester */}
+        <div
+          style={{
+            marginTop: "var(--afa-space-48px)",
+            padding: "var(--afa-space-5) var(--afa-space-6)",
+            background: "var(--afa-surface-raised)",
+            border: `1px solid ${MIST}`,
+            borderRadius: "var(--afa-radius-lg)",
+            fontFamily: MONO,
+            fontSize: "var(--afa-text-ui)",
+            lineHeight: 1.7,
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              marginBottom: "var(--afa-space-3)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontSize: "var(--afa-text-micro)",
+              color: EMBER,
+            }}
+          >
+            Status
+          </div>
+          {status.kind === "idle" && <span style={{ opacity: 0.6 }}>Ready.</span>}
+          {status.kind === "loading-script" && <span>Loading Razorpay script…</span>}
+          {status.kind === "creating-order" && <span>Creating order on the server…</span>}
+          {status.kind === "awaiting-payment" && <span>Waiting for payment in the Razorpay modal…</span>}
+          {status.kind === "verifying" && <span>Verifying payment signature…</span>}
+          {status.kind === "success" && (
+            <div style={{ color: SAGE }}>
+              ✓ Payment verified.<br />
+              Order ID: {status.orderId}<br />
+              Payment ID: {status.paymentId}
+            </div>
+          )}
+          {status.kind === "error" && (
+            <div style={{ color: EMBER }}>✗ {status.message}</div>
+          )}
+          {status.kind === "cancelled" && (
+            <span style={{ opacity: 0.6 }}>Payment cancelled.</span>
+          )}
+        </div>
+
+        <div style={{ marginTop: "var(--afa-space-40px)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", opacity: 0.55 }}>
+          <Link href="/" style={{ color: INK, textDecoration: "underline" }}>
+            ← Back home
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}

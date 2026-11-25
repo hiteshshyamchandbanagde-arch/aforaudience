@@ -1,0 +1,1 @@
+ALTER TABLE "VenueBookingOffer" ADD COLUMN IF NOT EXISTS "comment" TEXT;

@@ -1,0 +1,129 @@
+import { ImageResponse } from 'next/og'
+import prisma from '@/lib/prisma'
+import { publicEventUrl } from '@/lib/poster-url'
+import { loadPosterFonts } from '@/lib/poster-fonts'
+import { loadPosterColors, POSTER_LOGO, POSTER_QR } from '@/lib/poster-colors'
+import QRCode from 'qrcode'
+import { formatDate } from '@/lib/format-date'
+
+export const runtime = 'nodejs'
+
+// Session 39 (Feedback ec6e4adf) - artist's individual poster. Triggers
+// on THEIR OWN Performance row existing and being active (cancelledAt
+// null), independent of whether the rest of the event's lineup is still
+// filling - no reason to make one artist wait on others to promote
+// their own set. Uses the artist's AFA profile photo, per Hitesh's
+// decision (hype score explicitly removed from scope).
+//
+// Redesigned (same session, Hitesh: "Poster need improvement in
+// design") - same real serif font and dark background as the organiser
+// poster (see that route's comment for the full reasoning), not a
+// separately-invented style. GEN-2609-119 - same token-resolved palette
+// too (lib/poster-colors.ts).
+export async function GET(req: Request, { params }: { params: Promise<{ performanceId: string }> }) {
+  const { performanceId } = await params
+
+  const performance = await prisma.performance.findUnique({
+    where: { id: performanceId },
+    include: {
+      event: { include: { venue: { select: { name: true, city: true } } } },
+      artist: { select: { user: { select: { displayName: true, name: true, avatar: true } } } },
+    },
+  })
+
+  if (!performance || performance.cancelledAt) {
+    return new Response('Not found', { status: 404 })
+  }
+
+  const artistName = performance.artist.user.displayName || performance.artist.user.name
+  const url = publicEventUrl(performance.event.id, req)
+  const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 240, color: { dark: POSTER_QR.dark, light: POSTER_QR.light } })
+  const dateStr = formatDate(performance.event.date, 'long')
+
+  const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL
+  const isQA = envLabel?.toLowerCase().includes('qa') ?? false
+  const fonts = await loadPosterFonts()
+  // GEN-2609-119 - resolved once per request; see lib/poster-colors.ts.
+  const c = await loadPosterColors()
+  const envBadge = c.envBadge(isQA)
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '1080px',
+          height: '1350px',
+          display: 'flex',
+          flexDirection: 'column',
+          background: c.page,
+          fontFamily: 'Poster Serif',
+          padding: '72px',
+          position: 'relative',
+        }}
+      >
+        {/* BUG-2610-023 - the oversized three-bar watermark that sat here
+            rendered as three stray solid rectangles (dark red, brown,
+            grey) over the bottom right of the artist poster: removed. */}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '56px' }}>
+          <div style={{ display: 'flex', width: '48px', height: '48px', borderRadius: '12px', background: POSTER_LOGO.tile, marginRight: '16px', flexDirection: 'column', padding: '8px' }}>
+            <div style={{ display: 'flex', width: '32px', height: '8px', background: POSTER_LOGO.barTop, marginBottom: '4px' }} />
+            <div style={{ display: 'flex', width: '24px', height: '8px', background: POSTER_LOGO.barMiddle, marginBottom: '4px' }} />
+            <div style={{ display: 'flex', width: '16px', height: '8px', background: POSTER_LOGO.barBottom }} />
+          </div>
+          <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: POSTER_LOGO.wordmark }}>AforAudience</div>
+          {envLabel && (
+            <div style={{ display: 'flex', marginLeft: '10px', padding: '3px 10px', fontSize: '13px', fontWeight: 700, color: envBadge.color, background: envBadge.background, borderRadius: '999px' }}>
+              {envLabel}
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', fontSize: '28px', fontWeight: 700, color: c.accent, textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '32px' }}>
+          I&apos;m Performing At
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: '56px' }}>
+          {performance.artist.user.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={performance.artist.user.avatar} width={170} height={170} style={{ borderRadius: '50%', objectFit: 'cover', marginRight: '36px', border: `4px solid ${c.accent}` }} alt="" />
+          ) : (
+            <div style={{ display: 'flex', width: '170px', height: '170px', borderRadius: '50%', background: c.accent, color: c.onAccent, fontSize: '68px', fontWeight: 700, alignItems: 'center', justifyContent: 'center', marginRight: '36px' }}>
+              {artistName.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div style={{ display: 'flex', fontSize: '52px', fontWeight: 900, color: c.text, maxWidth: '600px', lineHeight: 1.1 }}>{artistName}</div>
+        </div>
+
+        <div style={{ display: 'flex', fontSize: '62px', fontWeight: 900, color: c.text, lineHeight: 1.1, marginBottom: '40px', maxWidth: '900px' }}>
+          {performance.event.title}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', fontSize: '30px', fontWeight: 400, color: c.textSoft, flex: 1 }}>
+          <div style={{ display: 'flex', marginBottom: '10px' }}>{dateStr} · {performance.event.startTime}</div>
+          {performance.event.venue && <div style={{ display: 'flex' }}>{performance.event.venue.name}, {performance.event.venue.city}</div>}
+        </div>
+
+        {/* BUG-2610-023 - a long host (a Vercel preview's) used to push the
+            QR past the right margin: the text column takes what is left
+            and the link wraps; the QR keeps its size. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `2px solid ${c.rule}`, paddingTop: '36px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, marginRight: '32px' }}>
+            <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: c.text }}>Come Watch Me</div>
+            <div style={{ display: 'flex', fontSize: '18px', fontWeight: 400, color: c.textMuted, wordBreak: 'break-all' }}>{url.replace(/^https?:\/\//, '')}</div>
+          </div>
+          <div style={{ display: 'flex', flexShrink: 0, padding: '14px', background: POSTER_QR.light, borderRadius: '12px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qrDataUrl} width={120} height={120} alt="" />
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      width: 1080,
+      height: 1350,
+      fonts: fonts.map((f) => ({ ...f, data: f.data as unknown as ArrayBuffer })),
+      // Same no-store override as the organiser poster route - see there.
+      headers: { 'Cache-Control': 'no-store' },
+    }
+  )
+}

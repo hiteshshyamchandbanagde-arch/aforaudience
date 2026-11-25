@@ -1,0 +1,206 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState, Suspense } from 'react'
+import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import { ErrorBanner } from '@/components/ErrorBanner'
+import { useLocale } from '@/lib/i18n/translate'
+import { useOtpVerification } from '@/lib/useOtpVerification'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
+
+const inputStyle = {
+  width: '100%',
+  padding: 'var(--afa-space-14px) var(--afa-space-4)',
+  borderRadius: 'var(--afa-radius-md)',
+  border: '1px solid var(--afa-border-resting)',
+  fontSize: 'var(--afa-text-lead)',
+  letterSpacing: '0.3em',
+  textAlign: 'center' as const,
+  color: 'var(--afa-text-primary)',
+  background: 'var(--afa-surface-raised)',
+}
+
+// Standalone "verify your phone" completion flow. Before this page existed,
+// the only entry point to phone OTP verification was the immediate
+// post-registration screen in RegisterForm.tsx - once a user clicked past
+// it (or their session ended before finishing), there was no way back in.
+// This reuses the same /api/auth/otp/request + /api/auth/otp/verify
+// endpoints (purpose: SIGNUP_VERIFY), just from a page reachable any time.
+function VerifyPhoneInner() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') || '/profile'
+  const { t: tr } = useLocale()
+
+  const [loading, setLoading] = useState(true)
+  const [phone, setPhone] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [alreadyVerified, setAlreadyVerified] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+
+  const { submitting, devOtp, error, codeSent, sendCode: hookSendCode, verifyCode: hookVerifyCode, setError } = useOtpVerification()
+
+  // SMS OTP toggle (17 Nov) - while PlatformSettings.smsOtpEnabled is off
+  // there's no phone check at all, so this page just sends the user on to
+  // `next` (or home). Same public flag the sign-up/login forms read; a
+  // failed read keeps today's (ON) page. Only a same-site path is followed.
+  const [smsOtpOff, setSmsOtpOff] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/auth/sms-otp')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d || d.enabled !== false) return
+        setSmsOtpOff(true)
+        const raw = searchParams.get('next')
+        const dest = raw && /^\/(?![/\\])/.test(raw) ? raw : '/'
+        router.replace(dest)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [router, searchParams])
+
+  useEffect(() => {
+    if (smsOtpOff) return
+    if (status === 'unauthenticated') router.push(`/login?next=${encodeURIComponent(`/verify-phone?next=${next}`)}`)
+  }, [status, router, next, smsOtpOff])
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/users/me')
+        if (!res.ok) throw new Error(tr.verifyPhonePage.couldNotLoadAccount)
+        const data = await res.json()
+        setUserId(data.user.id)
+        setPhone(data.user.phone)
+        setAlreadyVerified(!!data.user.isVerified)
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (session?.user) load()
+  }, [session])
+
+  const sendCode = async () => {
+    if (!phone) return
+    await hookSendCode(phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>, tr.loginPage.offlineCodeError)
+  }
+
+  // BUG-2609-063 - Verify no longer disables on a short code (SMS autofill
+  // may not fire onChange); the code is read and checked on submit.
+  const otpRef = useRef<HTMLInputElement>(null)
+
+  const verifyCode = async () => {
+    if (!phone || !userId || submitting) return
+    const code = (otpRef.current?.value ?? otpCode).trim()
+    setOtpCode(code)
+    if (code.length !== 6) {
+      setError(tr.authCommon.enterSixDigitCode); otpRef.current?.focus()
+      return
+    }
+    const ok = await hookVerifyCode(phone, userId, code, tr.registerPage.invalidCodeFallback)
+    // hookVerifyCode already refreshed the session (isVerified) via
+    // update() - continue wherever the user was trying to go (e.g. back
+    // to checkout) only once that's confirmed successful.
+    if (ok) router.push(next)
+  }
+
+  if (status === 'loading' || loading || smsOtpOff) {
+    return (<><SiteNav /><BrandLoader /></>)
+  }
+
+  return (
+    <>
+      <SiteNav />
+      {/* BUG-2609-081 - same opt-in as AuthLayout: a short form the chat button must not sit on. */}
+      <main data-afa-avoid-controls="" style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '440px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+            {tr.verifyPhonePage.verifyYourPhoneHeading}
+          </h1>
+
+          {alreadyVerified ? (
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-4)' }}>
+                {tr.verifyPhonePage.alreadyVerifiedMessage}
+              </p>
+              <Link href={next} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
+                {tr.verifyPhonePage.continueArrow}
+              </Link>
+            </div>
+          ) : (
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', border: '1px solid var(--afa-tint-08)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-5)' }}>
+                {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
+              </p>
+
+              {error && (
+                <ErrorBanner style={{ marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)' }}>{error}</ErrorBanner>
+              )}
+              {devOtp && (
+                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) var(--afa-space-4)', marginBottom: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                  QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
+                </div>
+              )}
+
+              {!codeSent ? (
+                <Button
+                  variant="form-submit"
+                  onClick={sendCode}
+                  disabled={submitting || !phone}
+                  style={{ opacity: submitting || !phone ? 0.6 : 1 }}
+                >
+                  {submitting ? tr.loginPage.sendingEllipsis : tr.verifyPhonePage.sendVerificationCodeButton}
+                </Button>
+              ) : (
+                <>
+                  <input
+                    ref={otpRef}
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    maxLength={6}
+                    placeholder={tr.verifyPhonePage.sixDigitCodePlaceholder}
+                    onKeyDown={(e) => e.key === 'Enter' && verifyCode()}
+                    style={{ ...inputStyle, marginBottom: 'var(--afa-space-4)' }}
+                  />
+                  <Button
+                    variant="form-submit"
+                    onClick={verifyCode}
+                    disabled={submitting}
+                    style={{ opacity: submitting ? 0.6 : 1, marginBottom: 'var(--afa-space-10px)' }}
+                  >
+                    {submitting ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
+                  </Button>
+                  <Button
+                    variant="link"
+                    onClick={sendCode}
+                    disabled={submitting}
+                  >
+                    {tr.loginPage.resendCodeButton}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+    </>
+  )
+}
+
+export default function VerifyPhonePage() {
+  return (
+    <Suspense fallback={<><SiteNav /><BrandLoader /></>}>
+      <VerifyPhoneInner />
+    </Suspense>
+  )
+}

@@ -1,17 +1,14 @@
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 
-// P1 prod port (8 Nov 2026) - copied from qa's src/components/LegalDocLayout.tsx
-// (fix/legal-footer-l2). main has no --afa-* design tokens, so every token is
-// replaced by its literal value: sizes/spacing from qa's globals.css (identical
-// to the token values), colours from main's own light palette (the same
-// INK/PAPER/EMBER used by main's homepage and ComingSoon).
-const INK = "#0E0C0A"
-const PAPER = "#F7F3EE"
-const EMBER = "#C8441A"
-const MIST = "#E8E2D9"
-const SERIF = "Georgia, 'Playfair Display', serif"
-const SANS = "system-ui, -apple-system, sans-serif"
+// GEN-2609-067 - retargeted from the legacy light-theme palette to the
+// current dark-theme tokens, same reasoning as about/page.tsx.
+const INK = "var(--afa-text-primary)"
+const PAPER = "var(--afa-surface-page)"
+const EMBER = "var(--afa-fill-solid)"
+const MIST = "var(--afa-tint-12)"
+const SERIF = "var(--font-display)"
+const SANS = "var(--font-sans)"
 
 type LegalDocLayoutProps = {
   title: string
@@ -19,22 +16,24 @@ type LegalDocLayoutProps = {
   children: React.ReactNode
 }
 
-// Shared shell for /privacy, /terms, /refund-policy and /contact.
+// Shared shell for /terms, /privacy, /refund-policy and /contact. The old
+// "Draft — pending legal review" banner was removed in L2b (8 Nov 2026): the
+// company is registered and these pages are the published policies.
 export default function LegalDocLayout({ title, lastUpdated, children }: LegalDocLayoutProps) {
   return (
     <main style={{ minHeight: "100vh", background: PAPER, fontFamily: SANS }}>
       <SiteNav />
-      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "48px 24px 96px" }}>
-        <Link href="/" style={{ fontSize: "14px", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6) 96px" }}>{/* token-ok(spacing-literal): 96px used under 10 times, no exact token (GEN-2609-107) */}
+        <Link href="/" style={{ fontSize: "var(--afa-text-body)", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
           ← Back to AforAudience
         </Link>
 
-        <h1 style={{ marginTop: "32px", fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "8px" }}>
+        <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginTop: "var(--afa-space-32px)", marginBottom: "var(--afa-space-2)" }}>
           {title}
         </h1>
-        <p style={{ fontSize: "13px", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
+        <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "var(--afa-space-40px)" }}>Last updated: {lastUpdated}</p>
 
-        <div style={{ fontSize: "16px", lineHeight: 1.75, color: INK }}>{children}</div>
+        <div style={{ fontSize: "var(--afa-text-title)", lineHeight: 1.75, color: INK }}>{children}</div>
       </div>
     </main>
   )
@@ -46,12 +45,12 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
       id={id}
       style={{
         fontFamily: SERIF,
-        fontSize: "22px",
+        fontSize: "var(--afa-text-subheading)",
         fontWeight: 700,
         color: INK,
-        marginTop: "40px",
-        marginBottom: "14px",
-        paddingBottom: "10px",
+        marginTop: "var(--afa-space-40px)",
+        marginBottom: "var(--afa-space-14px)",
+        paddingBottom: "var(--afa-space-10px)",
         borderBottom: `1px solid ${MIST}`,
         scrollMarginTop: "24px",
       }}
@@ -62,20 +61,20 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
 }
 
 export function P({ children }: { children: React.ReactNode }) {
-  return <p style={{ marginBottom: "16px", opacity: 0.88 }}>{children}</p>
+  return <p style={{ marginBottom: "var(--afa-space-4)", opacity: 0.88 }}>{children}</p>
 }
 
 export function UL({ children }: { children: React.ReactNode }) {
-  return <ul style={{ marginBottom: "16px", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul>
+  return <ul style={{ marginBottom: "var(--afa-space-4)", paddingLeft: "22px", opacity: 0.88 }}>{children}</ul> // token-ok(spacing-literal): 22px used under 10 times, no exact token (GEN-2609-107)
 }
 
 export function LI({ children }: { children: React.ReactNode }) {
-  return <li style={{ marginBottom: "8px" }}>{children}</li>
+  return <li style={{ marginBottom: "var(--afa-space-2)" }}>{children}</li>
 }
 
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ background: "#FDF3E8", color: "#8A5A1E", padding: "1px 6px", borderRadius: "3px", fontWeight: 600 }}>
+    <span style={{ background: "var(--afa-amber-tint)", color: "var(--afa-amber)", padding: "1px var(--afa-space-6px)", borderRadius: "var(--afa-radius-xs)", fontWeight: 600 }}>
       {children}
     </span>
   )

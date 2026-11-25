@@ -1,12 +1,59 @@
 "use client"
 
 import type { CSSProperties } from "react"
+import { normalizeWhitespace, normalizeForCompare } from "@/lib/text"
+import { IconSection } from "@/components/dashboard/VenuePortalUI"
+import Button from "@/components/ui/Button"
+import { formatINR } from "@/lib/money-display"
+import { useLocale } from "@/lib/i18n/translate"
+import { countText } from "@/lib/i18n/plural"
 
 export type SeatSection = {
   id: string
   name: string
   seats: number | ""
   price: number | ""
+}
+
+// A row is "complete" once it has a name, a positive seat count, AND an
+// explicitly-entered price. Rule (Hitesh, 27 Jul): a row that exists
+// must be filled in or removed - it must never be silently dropped OR
+// silently default to a value the owner never chose. Price was
+// originally left out of this check on the theory that a blank price
+// is a valid "Free" section - but that meant a brand-new, completely
+// untouched row (price defaults to '') showed the FREE badge instantly,
+// before the owner had typed anything at all. Live-caught 28 Jul: the
+// badge looked hardcoded because it effectively was - it was declaring
+// a state nobody chose. Price now follows the same rule as name/seats:
+// the owner must explicitly type an amount, or explicitly type 0 for
+// Free. Only an explicit 0 shows the FREE badge (see isFree below).
+export function isIncompleteSection(s: SeatSection): boolean {
+  return s.name.trim() === '' || !(Number(s.seats) > 0) || s.price === ''
+}
+
+export function findIncompleteSections(sections: SeatSection[]): SeatSection[] {
+  return sections.filter(isIncompleteSection)
+}
+
+// Duplicate section-name detection (added 27 Jul, Hitesh's rule): a GA
+// venue has no level concept, so this is simply "no two sections share
+// a name" - live-observed 4 sections all named "general" slipping
+// straight through to Publish with zero validation. Exported so both
+// the create and edit pages can block submit with the same check the
+// server now also enforces.
+//
+// Uses normalizeForCompare (trim + collapse internal whitespace +
+// lowercase), not a bare `.trim().toLowerCase()` - live-observed 27 Jul:
+// "general 2" and "general    2" (extra internal spaces) trimmed to two
+// different strings and both passed as "unique."
+export function findDuplicateSectionNames(sections: SeatSection[]): string[] {
+  const counts = new Map<string, number>()
+  for (const s of sections) {
+    const key = normalizeForCompare(s.name)
+    if (!key) continue
+    counts.set(key, (counts.get(key) || 0) + 1)
+  }
+  return Array.from(counts.entries()).filter(([, c]) => c > 1).map(([name]) => name)
 }
 
 type Props = {
@@ -23,13 +70,42 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     onChange([...sections, { id: makeId(), name: "", seats: "", price: "" }])
   }
 
+  // Cosmetic `max` attributes on the inputs don't stop anyone from
+  // typing past them (these forms use custom onChange handlers, not
+  // native form submission - see PR #100's key learning). Left
+  // unclamped, a long run of digits parses into a valid but absurd JS
+  // number (e.g. a 200-digit string of 1s), which then flows straight
+  // into the totals below and renders as unreadable scientific
+  // notation. Clamp at the point of state update so the field itself
+  // never holds a value beyond what's meaningful.
+  const SEATS_MAX = 100000
+  const PRICE_MAX = 10000000
+
   const updateSection = (id: string, field: keyof SeatSection, value: string) => {
     onChange(
-      sections.map((s) =>
-        s.id === id
-          ? { ...s, [field]: field === "name" ? value : value === "" ? "" : Number(value) }
-          : s
-      )
+      sections.map((s) => {
+        if (s.id !== id) return s
+        if (field === "name") return { ...s, name: value }
+        if (value === "") return { ...s, [field]: "" }
+        const num = Number(value)
+        if (!Number.isFinite(num)) return s
+        const max = field === "seats" ? SEATS_MAX : PRICE_MAX
+        return { ...s, [field]: Math.max(0, Math.min(num, max)) }
+      })
+    )
+  }
+
+  // Free toggle (Hitesh, 28 Jul): live-tested the FREE badge floating
+  // inside the price textbox and it looked cluttered. Replaced with an
+  // explicit checkbox beside the field instead of a badge inside it -
+  // checking it sets price to an explicit 0 (still the same "isFree"
+  // signal isIncompleteSection/isFree already rely on, so no schema or
+  // validation change needed), unchecking clears price back to '' so
+  // the owner must explicitly re-enter an amount rather than a stale 0
+  // lingering unnoticed.
+  const setSectionFree = (id: string, free: boolean) => {
+    onChange(
+      sections.map((s) => (s.id === id ? { ...s, price: free ? 0 : "" } : s))
     )
   }
 
@@ -42,124 +118,189 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
   const minPrice = prices.length ? Math.min(...prices) : 0
   const maxPrice = prices.length ? Math.max(...prices) : 0
 
+  // Field bg is a shade darker than the row card (--afa-surface-page vs
+  // -raised) so fields read as recessed inputs against the row, matching
+  // the Figma export's ga-input treatment (GEN-2608-082).
   const inputStyle: CSSProperties = {
     width: "100%",
-    padding: "10px 12px",
-    borderRadius: "6px",
-    border: "1px solid rgba(14,12,10,0.15)",
-    background: "#fff",
-    fontSize: "14px",
-    color: "#0E0C0A",
+    padding: "var(--afa-space-10px) var(--afa-space-3)",
+    borderRadius: "var(--afa-radius-lg)",
+    border: "1px solid var(--afa-border-resting)",
+    background: "var(--afa-surface-page)",
+    fontSize: "var(--afa-text-body)",
+    color: "var(--afa-text-primary)",
   }
+
+  const duplicateNames = new Set(findDuplicateSectionNames(sections))
+  const { locale, t: tr } = useLocale()
+  const f = tr.venueDashboard.venueForm
 
   return (
     <div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)" }}>
         {sections.length === 0 && (
-          <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, fontStyle: "italic" }}>
-            No sections yet. Add one to start designing your seating layout — e.g. "VIP Front Row", "General", "Balcony".
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, fontStyle: "italic" }}>
+            {f.noSections}
           </p>
         )}
 
-        {sections.map((section, i) => (
+        {sections.map((section, i) => {
+          const isDuplicate = section.name.trim() !== '' && duplicateNames.has(normalizeForCompare(section.name))
+          // Only warn live once the row has SOME content - a freshly
+          // added blank row isn't "incomplete," it's just new. It still
+          // blocks Save if left that way (see the parent page's submit
+          // check), but nagging the instant "+ Add Seating Section" is
+          // clicked would be premature.
+          const hasSomeContent = section.name.trim() !== '' || Number(section.seats) > 0 || section.price !== ''
+          const isPartial = !isDuplicate && hasSomeContent && isIncompleteSection(section)
+          // FREE only reflects an EXPLICIT 0 - a blank price is
+          // "incomplete" (amber, see isPartial), not "Free" (amber
+          // badge). Conflating the two is what caused the badge to show
+          // on untouched rows - see isIncompleteSection's note above.
+          const isFree = section.price !== '' && Number(section.price) === 0
+          const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'var(--afa-tint-08)'
+          return (
           <div
             key={section.id}
             style={{
               display: "grid",
               gridTemplateColumns: "2fr 1fr 1fr auto",
-              gap: "10px",
+              gap: "var(--afa-space-10px)",
               alignItems: "center",
-              padding: "12px",
-              background: "#F7F3EE",
-              borderRadius: "8px",
-              border: "1px solid rgba(14,12,10,0.08)",
+              padding: "var(--afa-space-3)",
+              background: "var(--afa-surface-raised)",
+              borderRadius: "var(--afa-radius-md)",
+              border: `1px solid ${borderColor}`,
             }}
           >
             <input
               type="text"
-              placeholder={`Section name (e.g. Section ${i + 1})`}
+              placeholder={f.sectionNamePlaceholder.replace("{n}", String(i + 1))}
               value={section.name}
               onChange={(e) => updateSection(section.id, "name", e.target.value)}
-              style={inputStyle}
+              onBlur={(e) => {
+                // Collapse internal whitespace once typing is done, so a
+                // name like "general    2" doesn't persist as a visually
+                // distinct "duplicate" of "general 2" - see
+                // normalizeForCompare's note on why comparison alone
+                // isn't enough.
+                const normalized = normalizeWhitespace(e.target.value)
+                if (normalized !== e.target.value) updateSection(section.id, "name", normalized)
+              }}
+              style={{ ...inputStyle, ...(borderColor !== 'var(--afa-tint-08)' ? { border: `1px solid ${borderColor}` } : {}) }}
             />
             <input
               type="number"
-              placeholder="Seats"
+              placeholder={f.seats}
               min={0}
+              max={100000}
+              maxLength={6}
               value={section.seats}
               onChange={(e) => updateSection(section.id, "seats", e.target.value)}
-              style={inputStyle}
+              style={{ ...inputStyle, ...(isPartial && !(Number(section.seats) > 0) ? { border: `1px solid ${borderColor}` } : {}) }}
             />
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#0E0C0A", opacity: 0.5, fontSize: "14px" }}>₹</span>
-              <input
-                type="number"
-                placeholder="Price"
-                min={0}
-                value={section.price}
-                onChange={(e) => updateSection(section.id, "price", e.target.value)}
-                style={{ ...inputStyle, paddingLeft: "26px" }}
-              />
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-1)" }}>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-text-primary)", opacity: 0.5, fontSize: "var(--afa-text-body)" }}>₹</span>
+                <input
+                  type="number"
+                  placeholder={f.price}
+                  min={0}
+                  max={10000000}
+                  maxLength={8}
+                  value={section.price}
+                  disabled={isFree}
+                  onChange={(e) => updateSection(section.id, "price", e.target.value)}
+                  style={{
+                    ...inputStyle,
+                    paddingLeft: "26px", // token-ok(spacing-literal): 26px used under 10 times, no exact token (GEN-2609-107)
+                    ...(isFree ? { opacity: 0.5, background: "var(--afa-tint-04)" } : {}),
+                    ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}),
+                  }}
+                />
+              </div>
+              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>{/* token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107) */}
+                <input
+                  type="checkbox"
+                  checked={isFree}
+                  onChange={(e) => setSectionFree(section.id, e.target.checked)}
+                  style={{ margin: 0 }}
+                />
+                {f.free}
+              </label>
             </div>
-            <button
+            <Button
+              variant="icon"
               type="button"
               onClick={() => removeSection(section.id)}
-              aria-label="Remove section"
+              aria-label={f.removeSection}
+              className="ga-remove-btn"
               style={{
-                background: "none",
-                border: "none",
-                color: "#C8441A",
-                cursor: "pointer",
-                fontSize: "14px",
+                color: "var(--afa-text-muted)",
+                fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
-                padding: "8px",
+                padding: "var(--afa-space-2)",
               }}
             >
               ✕
-            </button>
+            </Button>
           </div>
-        ))}
+          )
+        })}
       </div>
 
-      <button
+      {duplicateNames.size > 0 && (
+        <p style={{ marginTop: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)", fontWeight: 600 }}>
+          {countText(locale, duplicateNames.size, f.duplicateNamesOne, f.duplicateNamesOther).replace("{names}", Array.from(duplicateNames).join('", "'))}
+        </p>
+      )}
+
+      {(() => {
+        const partialCount = sections.filter((s) => {
+          const hasSomeContent = s.name.trim() !== '' || Number(s.seats) > 0 || s.price !== ''
+          return hasSomeContent && isIncompleteSection(s)
+        }).length
+        return partialCount > 0 ? (
+          <p style={{ marginTop: "var(--afa-space-10px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>
+            {countText(locale, partialCount, f.incompleteRowsOne, f.incompleteRowsOther)}
+          </p>
+        ) : null
+      })()}
+
+      <Button
+        variant="dashed"
+        size="md"
         type="button"
         onClick={addSection}
-        style={{
-          marginTop: "14px",
-          background: "none",
-          border: "1px dashed rgba(14,12,10,0.3)",
-          borderRadius: "8px",
-          padding: "10px 18px",
-          fontSize: "14px",
-          fontWeight: 600,
-          color: "#0E0C0A",
-          cursor: "pointer",
-          width: "100%",
-        }}
+        className="ga-add-row"
+        style={{ marginTop: "var(--afa-space-14px)" }}
       >
-        + Add Seating Section
-      </button>
+        <IconSection size={16} /> {f.addSection}
+      </Button>
 
       {sections.length > 0 && (
         <div
           style={{
-            marginTop: "16px",
+            marginTop: "var(--afa-space-4)",
             display: "flex",
-            gap: "24px",
-            fontSize: "14px",
-            color: "#0E0C0A",
-            padding: "12px 16px",
-            background: "rgba(200,68,26,0.06)",
-            borderRadius: "8px",
+            gap: "var(--afa-space-28px)",
+            padding: "var(--afa-space-14px) var(--afa-space-18px)",
+            background: "var(--afa-surface-page)",
+            border: "1px solid var(--afa-fill-tint)",
+            borderRadius: "var(--afa-radius-lg)",
           }}
         >
-          <span><strong>{totalSeats}</strong> total seats</span>
-          <span>
-            <strong>
-              {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}
-            </strong>{" "}
-            per seat
-          </span>
+          <div>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>{f.totalSeats}</div>
+          </div>
+          <div style={{ width: "1px", background: "var(--afa-tint-12)" }} />
+          <div>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
+              {prices.length ? (minPrice === maxPrice ? formatINR(minPrice) : `${formatINR(minPrice)}–${formatINR(maxPrice)}`) : "—"}
+            </div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>{f.perSeatRange}</div>
+          </div>
         </div>
       )}
     </div>

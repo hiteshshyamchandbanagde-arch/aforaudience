@@ -1,0 +1,116 @@
+'use client'
+
+import { useState } from 'react'
+import Button from '@/components/ui/Button'
+
+// Read-only visual preview of a NUMBERED venue's saved seat layout, shown
+// on the event-creation/edit pricing screen. Confirmed still missing
+// (live-observed, 21 Jul session 13 and reconfirmed since): that screen
+// showed zone names/counts/price inputs - enough to price correctly - but
+// no way to actually see the zone shape or which level a zone belongs to.
+// This is deliberately read-only and scaled-down - it's a confirmation
+// view for the Organiser pricing an event, not the Venue Owner's builder
+// (that stays at /dashboard/venue/[id]/seat-map).
+
+export type PreviewSeat = {
+  tierLabel: string
+  level: string
+  row: string
+  number: string
+  x: number
+  y: number
+}
+
+// Same palette as the seat-map builder's colorForTier, duplicated here on
+// purpose - this is a small, self-contained read-only view and doesn't
+// justify a shared-module dependency between the Venue Owner builder and
+// the Organiser pricing screen for a 2-line lookup table.
+//
+// Terracotta is deliberately excluded - it's the app-wide "selected /
+// primary action" color (SeatPicker's selected-seat highlight, buttons
+// throughout). Reported live (28 Jul): whichever zone landed first in
+// rotation got terracotta, which then looked visually identical to a
+// selected seat in that same zone on the audience-facing picker. Kept
+// out of the zone rotation everywhere these two duplicate palettes are
+// used, not just patched in the picker, so this can't recur in the
+// builder's own canvas either.
+// GEN-2609-067 - the 6th tier color was --afa-ink (near-black), a
+// legacy leftover from when this preview's own canvas (line ~81) was
+// still a light cream background - black-on-cream was high-contrast
+// and clearly visible. Now that the canvas is properly dark-themed
+// (matching the seat-map editor it's a preview of), a near-black tier
+// would barely be visible against it - swapped to --afa-cream, which
+// stays clearly distinct from the other 5 (mid-tone/saturated) colors.
+export const TIER_COLORS = ['var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-brown-dark)', 'var(--afa-cream)']
+
+export function colorForZone(zoneName: string, zoneOrder: string[]) {
+  const idx = zoneOrder.indexOf(zoneName)
+  return TIER_COLORS[idx % TIER_COLORS.length] || 'var(--afa-cream)'
+}
+
+// GEN-2610-007 - the Organiser create/edit pages pass their translated labels.
+export default function SeatLayoutPreview({ seats, zoneOrder, title = 'Layout preview', mainLabel = 'Main' }: { seats: PreviewSeat[]; zoneOrder: string[]; title?: string; mainLabel?: string }) {
+  const levels = Array.from(new Set(seats.map((s) => s.level || '')))
+  const [activeLevel, setActiveLevel] = useState(levels[0] ?? '')
+  const levelSeats = seats.filter((s) => (s.level || '') === activeLevel)
+
+  if (seats.length === 0) return null
+
+  const xs = levelSeats.map((s) => s.x)
+  const ys = levelSeats.map((s) => s.y)
+  const minX = Math.min(...xs), maxX = Math.max(...xs)
+  const minY = Math.min(...ys), maxY = Math.max(...ys)
+  const rangeX = maxX - minX || 1
+  const rangeY = maxY - minY || 1
+
+  return (
+    <div style={{ marginTop: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-5)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-2)' }}>
+        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{title}</span>
+        {levels.length > 1 && (
+          <div style={{ display: 'flex', gap: 'var(--afa-space-6px)' }}>
+            {levels.map((lvl) => (
+              <Button
+                variant="toggle-box"
+                size="sm"
+                fullWidth={false}
+                selected={activeLevel === lvl}
+                key={lvl}
+                type="button"
+                onClick={() => setActiveLevel(lvl)}
+              >
+                {lvl || mainLabel}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-surface-page)', padding: 'var(--afa-space-4)', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--afa-tint-20)', color: 'var(--afa-text-primary)', textAlign: 'center', fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '1px', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-1) 0', marginBottom: 'var(--afa-space-14px)' }}>
+          STAGE
+        </div>
+        <div style={{ position: 'relative', width: '100%', height: '160px' }}>
+          {levelSeats.map((s, i) => (
+            <div
+              key={i}
+              title={`${s.tierLabel} - Row ${s.row}${s.number}`}
+              style={{
+                position: 'absolute',
+                left: `${((s.x - minX) / rangeX) * 92 + 4}%`,
+                top: `${((s.y - minY) / rangeY) * 84 + 8}%`,
+                width: '6px',
+                height: '6px',
+                borderRadius: 'var(--afa-radius-xs)',
+                background: colorForZone(s.tierLabel, zoneOrder),
+                transform: 'translate(-50%, -50%)',
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
+        Read-only preview of the venue's saved layout - colors match the sections priced below.{levels.length > 1 ? ' Switch levels above to see each one.' : ''}
+      </p>
+    </div>
+  )
+}

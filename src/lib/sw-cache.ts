@@ -1,0 +1,102 @@
+import { signOut } from 'next-auth/react'
+import { clearOfflineTickets } from './offline-tickets'
+
+// BUG-2609-088. The service worker's runtime cache (public/sw.js,
+// `afora-runtime-<CACHE_VERSION>`) holds the navigation HTML it falls
+// back to when the network fails - that's what makes /tickets work
+// offline. That HTML is rendered for whoever was signed in at the time,
+// so it has to go whenever the identity on this device changes:
+// otherwise the next person to lose signal here gets the previous
+// user's page. Cleared from the page (the Cache Storage API is shared
+// with the worker) rather than via a postMessage round-trip, so it works
+// even when no worker controls the page yet. The prefix match covers
+// every CACHE_VERSION - scripts/stamp-sw-version.js rewrites it per build.
+const RUNTIME_CACHE_PREFIX = 'afora-runtime-'
+const LAST_USER_KEY = 'afa-sw-last-user'
+
+// BUG-2610-001 - the last signed-in user on this device. Offline the
+// session fetch fails, so My Tickets uses this to decide whose saved
+// tickets (src/lib/offline-tickets.ts) it may show: only this user's.
+export function lastSignedInUserId(): string | null {
+  try {
+    return localStorage.getItem(LAST_USER_KEY)
+  } catch {
+    return null
+  }
+}
+
+// BUG-2610-001 (reopened 13 Oct) - asks the service worker to keep a
+// page's HTML for offline (public/sw.js, CACHE_URL). A tab tap is a
+// client-side navigation, so without this My Tickets' HTML was only
+// cached after a full page load. Waits for an active worker, so it also
+// works on the first visit, before the worker controls the page. Also
+// waits for a user-change wipe still in flight (first sign-in on a
+// device): one that lands after the worker stores the page deletes it.
+let pendingUserChangeClear: Promise<void> = Promise.resolve()
+
+export function requestOfflineShell(url: string): void {
+  try {
+    if (typeof navigator === 'undefined' || !navigator.serviceWorker) return
+    Promise.all([navigator.serviceWorker.ready, pendingUserChangeClear])
+      .then(([reg]) => reg.active?.postMessage({ type: 'CACHE_URL', url }))
+      .catch(() => {})
+  } catch {
+    // No service worker here: nothing to cache into.
+  }
+}
+
+export async function clearSwRuntimeCache(): Promise<void> {
+  if (typeof caches === 'undefined') return
+  try {
+    const keys = await caches.keys()
+    await Promise.all(keys.filter((k) => k.startsWith(RUNTIME_CACHE_PREFIX)).map((k) => caches.delete(k)))
+  } catch {
+    // Cache Storage unavailable (private mode, blocked site data) - there
+    // is nothing cached to leak in that case either.
+  }
+}
+
+// Drop-in for next-auth's signOut - every sign-out in the app goes
+// through this so the cache is gone before the session is.
+// BUG-2610-021 - the city cookie (afa_loc) goes with it, so the next
+// person on this device does not start in the last account's city.
+// BUG-2610-001 - and the offline tickets snapshot, so the next person
+// never sees the previous user's tickets.
+export async function signOutAndClearCache(options?: Parameters<typeof signOut>[0]) {
+  clearOfflineTickets()
+  await Promise.all([
+    clearSwRuntimeCache(),
+    fetch('/api/user/location', { method: 'DELETE' }).catch(() => {
+      // Offline: the cookie stays, the sign-out must still happen.
+    }),
+  ])
+  return signOut(options)
+}
+
+// Covers the path signOutAndClearCache can't: a session that expired on
+// its own, followed by a different user signing in on the same device.
+// Only ever compares two signed-in ids - "signed out" is deliberately
+// not treated as a change, because a failed session fetch while offline
+// looks identical to it and clearing then would delete the offline
+// tickets page at exactly the moment it's needed.
+export async function clearSwRuntimeCacheOnUserChange(userId: string): Promise<void> {
+  let lastUserId: string | null = null
+  try {
+    lastUserId = localStorage.getItem(LAST_USER_KEY)
+  } catch {
+    // localStorage unavailable - fall through and clear, the safe side.
+  }
+  if (lastUserId === userId) return
+  // BUG-2610-001 - a different user: the saved tickets go with the cache.
+  clearOfflineTickets()
+  // Chained, not replaced: two loads can each start a wipe before
+  // either has remembered the user.
+  const clear = clearSwRuntimeCache()
+  pendingUserChangeClear = Promise.all([pendingUserChangeClear, clear]).then(() => {})
+  await clear
+  try {
+    localStorage.setItem(LAST_USER_KEY, userId)
+  } catch {
+    // Not remembered - the next load clears again, which is harmless.
+  }
+}

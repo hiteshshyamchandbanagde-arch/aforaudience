@@ -1,0 +1,812 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
+import { formatEventTimeRange } from '@/lib/eventTime'
+import { formatDisplayMoney, type DisplayCurrency } from '@/lib/money-display'
+import { useLocale } from '@/lib/i18n/translate'
+import {
+  loadRazorpayCheckoutScript,
+  openRazorpayCheckout,
+} from '@/lib/razorpay-checkout'
+import { FeeSheet } from '@/components/FeeSheet'
+import ContributionMoment from '@/components/ContributionMoment'
+import Button from '@/components/ui/Button'
+import Input from '@/components/ui/Input'
+import { formatDate } from '@/lib/format-date'
+
+// Checkout page — order summary + Pay button.
+//
+// Flow when this page loads:
+//   1. Fetch booking + payment from GET /api/bookings/[id].
+//   2. If booking is CONFIRMED already, show "you're in" state.
+//   3. If PENDING and not expired and payment is CREATED, show summary
+//      + Pay button. Load Razorpay script in background.
+//   4. If expired, show "reservation expired" state — user should
+//      book again.
+//   5. If no payment attached (i.e. Razorpay wasn't configured when the
+//      booking was created — e.g. on prod today), show "payment not
+//      available" state.
+//
+// On Pay click:
+//   a. Open Razorpay Checkout modal.
+//   b. On success callback, POST to /api/bookings/[id]/confirm with
+//      the signed values.
+//   c. On confirm success, transition to "confirmed" state on-page.
+//   d. On modal dismiss (user closed without paying), stay on page,
+//      let them try again.
+
+type BookingState = {
+  booking: {
+    id: string
+    status: string
+    seats: Record<string, number>
+    numberedSeats: { tierLabel: string; level: string; row: string; number: string; price: number | null }[]
+    totalAmount: number
+    subtotalAmount: number
+    bookingFeeAmount: number
+    expiresAt: string | null
+    isExpired: boolean
+    createdAt: string
+    event: {
+      id: string
+      title: string
+      date: string
+      startTime: string
+      endTime: string
+      venue: { name: string; city: string } | null
+      supporterCount: number
+      artistName: string
+    }
+  }
+  payment: {
+    razorpayOrderId: string
+    amount: number
+    currency: string
+    status: string
+    keyId: string | null
+  } | null
+}
+
+// Companion Tagging Phase 1 (reputation epic §7) types.
+type CompanionUser = { id: string; name: string; displayName: string | null; avatar: string | null }
+type CompanionTag = { id: string; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; taggedUser: CompanionUser }
+
+export default function CheckoutPage() {
+  const params = useParams<{ bookingId: string }>()
+  const bookingId = params?.bookingId
+  const router = useRouter()
+  const { data: session, status: authStatus } = useSession()
+  const { t: tr, locale } = useLocale()
+
+  const [state, setState] = useState<BookingState | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [paying, setPaying] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
+  const [scriptReady, setScriptReady] = useState(false)
+  const [feeSheetOpen, setFeeSheetOpen] = useState(false)
+
+  // Companion Tagging Phase 1 - separate from the payment state above
+  // since tagging never blocks or is blocked by the payment flow.
+  const [companionConsent, setCompanionConsent] = useState(false)
+  const [companionTags, setCompanionTags] = useState<CompanionTag[]>([])
+  // Feedback cmsaodzsy: cap tags to actual seats on this booking (server
+  // is the real enforcement in the API route - this just gives clear
+  // in-line UX instead of letting someone search, pick, and then hit an
+  // error). Null until the GET response arrives.
+  const [companionMax, setCompanionMax] = useState<number | null>(null)
+  const [companionQuery, setCompanionQuery] = useState('')
+  const [companionResults, setCompanionResults] = useState<CompanionUser[]>([])
+  const [companionSearching, setCompanionSearching] = useState(false)
+  const [companionBusy, setCompanionBusy] = useState(false)
+  const [companionError, setCompanionError] = useState('')
+
+  // Display-only currency preference (Option A). Loaded once, alongside
+  // the booking - real charge/settlement is always INR regardless of
+  // this; it only changes how the totals below are *shown*. Falls back
+  // to plain ₹ formatting (via formatDisplayMoney's null-currency path)
+  // if either fetch fails, so checkout never breaks over a cosmetic
+  // feature.
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency | null>(null)
+
+  // Redirect to login if not authenticated. Booking is per-user so an
+  // anonymous user can't do anything useful on this page.
+  useEffect(() => {
+    if (authStatus === 'unauthenticated') {
+      router.push(`/login?next=/checkout/${bookingId}`)
+    }
+  }, [authStatus, router, bookingId])
+
+  // Load booking + payment.
+  useEffect(() => {
+    if (!bookingId || authStatus !== 'authenticated') return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}`)
+        const data = await res.json()
+        if (cancelled) return
+        if (!res.ok) throw new Error(data.error || tr.checkoutPage.failedToLoadBookingFallback)
+        setState(data)
+        if (data.booking.status === 'CONFIRMED') setConfirmed(true)
+      } catch (err: any) {
+        if (!cancelled) setError(err.message)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [bookingId, authStatus])
+
+  // Preload the Razorpay script as soon as we know we'll need it.
+  // If it fails, we'll show an error at Pay-click time; loading it early
+  // just cuts the perceived wait.
+  useEffect(() => {
+    if (!state?.payment || confirmed) return
+    loadRazorpayCheckoutScript()
+      .then(() => setScriptReady(true))
+      .catch(() => setScriptReady(false))
+  }, [state, confirmed])
+
+  // Load the user's display-currency preference + its live rate, once
+  // authenticated. Independent of the booking fetch above - a failure
+  // here just leaves displayCurrency null, which formatDisplayMoney
+  // treats as "show plain ₹", so this can never block or break checkout.
+  useEffect(() => {
+    if (authStatus !== 'authenticated') return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [meRes, ratesRes] = await Promise.all([
+          fetch('/api/users/me'),
+          fetch('/api/display-currencies'),
+        ])
+        if (cancelled || !meRes.ok || !ratesRes.ok) return
+        const me = await meRes.json()
+        const rates = await ratesRes.json()
+        const code = me.user?.displayCurrency
+        if (!code) return // null = India/₹ default, nothing to convert
+        const match = (rates.currencies ?? []).find((c: DisplayCurrency) => c.code === code)
+        if (match) setDisplayCurrency(match)
+      } catch {
+        // Cosmetic feature only - silently fall back to plain ₹.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [authStatus])
+
+  // Load existing companion tags/consent once the booking is known.
+  // Independent of payment state - tagging is available on PENDING
+  // bookings too, same as the rest of this page's summary.
+  useEffect(() => {
+    if (!bookingId || authStatus !== 'authenticated') return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}/companions`)
+        if (!res.ok || cancelled) return
+        const data = await res.json()
+        setCompanionConsent(!!data.companionTaggingConsent)
+        setCompanionTags(data.tags || [])
+        setCompanionMax(typeof data.maxCompanions === 'number' ? data.maxCompanions : null)
+      } catch {
+        // Non-critical - checkout still works without this section.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [bookingId, authStatus])
+
+  // Debounced companion search - 2 char minimum matches the API's floor.
+  useEffect(() => {
+    if (companionQuery.trim().length < 2) {
+      setCompanionResults([])
+      return
+    }
+    let cancelled = false
+    setCompanionSearching(true)
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/users/search?q=${encodeURIComponent(companionQuery.trim())}`)
+        if (!res.ok || cancelled) return
+        const data = await res.json()
+        setCompanionResults(data.users || [])
+      } catch {
+        if (!cancelled) setCompanionResults([])
+      } finally {
+        if (!cancelled) setCompanionSearching(false)
+      }
+    }, 300)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
+  }, [companionQuery])
+
+  const toggleCompanionConsent = async (checked: boolean) => {
+    if (!bookingId) return
+    setCompanionError('')
+    setCompanionConsent(checked) // optimistic
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/companions`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ consent: checked }),
+      })
+      if (!res.ok) throw new Error('Failed to update')
+    } catch {
+      setCompanionConsent(!checked) // revert
+      setCompanionError(tr.checkoutPage.couldNotSaveRetry)
+    }
+  }
+
+  const addCompanion = async (u: CompanionUser) => {
+    if (!bookingId) return
+    setCompanionBusy(true)
+    setCompanionError('')
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/companions`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addUserIds: [u.id] }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || tr.checkoutPage.failedToTagFallback)
+      setCompanionTags(data.tags || [])
+      if (typeof data.maxCompanions === 'number') setCompanionMax(data.maxCompanions)
+      setCompanionQuery('')
+      setCompanionResults([])
+    } catch (err: any) {
+      setCompanionError(err.message || tr.checkoutPage.couldNotTagPerson)
+    } finally {
+      setCompanionBusy(false)
+    }
+  }
+
+  const removeCompanion = async (tagId: string) => {
+    if (!bookingId) return
+    setCompanionBusy(true)
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/companions?tagId=${tagId}`, { method: 'DELETE' })
+      if (res.ok) setCompanionTags((prev) => prev.filter((t) => t.id !== tagId))
+    } finally {
+      setCompanionBusy(false)
+    }
+  }
+
+  const handlePay = async () => {
+    if (!state?.payment || !state.payment.keyId) return
+    setPaying(true)
+    setError('')
+
+    try {
+      // Ensure script is loaded (in case preload hadn't finished).
+      if (!scriptReady) {
+        await loadRazorpayCheckoutScript()
+        setScriptReady(true)
+      }
+
+      const success = await openRazorpayCheckout({
+        keyId: state.payment.keyId,
+        orderId: state.payment.razorpayOrderId,
+        amount: state.payment.amount,
+        currency: state.payment.currency,
+        bookingId: state.booking.id,
+        eventTitle: state.booking.event.title,
+        prefill: {
+          name: (session?.user as any)?.name,
+          email: (session?.user as any)?.email,
+          contact: (session?.user as any)?.phone,
+        },
+      })
+
+      // Paid. Now verify server-side and mark booking CONFIRMED.
+      setConfirming(true)
+      const confirmRes = await fetch(
+        `/api/bookings/${state.booking.id}/confirm`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(success),
+        }
+      )
+      const confirmData = await confirmRes.json()
+      if (!confirmRes.ok) {
+        throw new Error(confirmData.error || tr.checkoutPage.paymentConfirmationFailedFallback)
+      }
+      setConfirmed(true)
+    } catch (err: any) {
+      if (err?.code === 'DISMISSED') {
+        // User just closed the modal. Don't treat as an error — let
+        // them try again.
+        return
+      }
+      setError(err?.message || tr.checkoutPage.paymentFailedFallback)
+    } finally {
+      setPaying(false)
+      setConfirming(false)
+    }
+  }
+
+  if (authStatus === 'loading' || loading) {
+    return (
+      <>
+        <SiteNav />
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', padding: 'var(--afa-space-32px)', fontFamily: 'var(--font-sans)', color: 'var(--afa-text-primary)' }}>
+          {tr.checkoutPage.loadingCheckout}
+        </div>
+      </>
+    )
+  }
+
+  if (!state) {
+    return (
+      <>
+        <SiteNav />
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-32px)', fontFamily: 'var(--font-sans)', maxWidth: 640, margin: '0 auto' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-4)' }}>
+            {tr.checkoutPage.somethingWrongTitle}
+          </h1>
+          <p style={{ color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-6)' }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
+          <Link href="/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>
+            {tr.nav.backToEvents}
+          </Link>
+        </div>
+      </>
+    )
+  }
+
+  // Seat display, GA or Numbered. GA bookings keep using `booking.seats`
+  // ({ sectionName: qty }) exactly as before - untouched. Numbered bookings
+  // store `seats: {}` by design (real picks live in `numberedSeats` instead,
+  // see GET /api/bookings/[id]) - group those by tier for display.
+  const gaSeatEntries = Object.entries(state.booking.seats).filter(
+    ([, q]) => Number(q) > 0
+  ) as [string, number][]
+  const numberedGroups: { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }[] = Object.values(
+    state.booking.numberedSeats.reduce(
+      (
+        acc: Record<string, { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }>,
+        s: { tierLabel: string; level: string; row: string; number: string; price: number | null }
+      ) => {
+        // Group by (level, tierLabel), not tierLabel alone - a same-named
+        // zone on two different levels (as in this booking) can have two
+        // different real prices. Grouping by name only previously merged
+        // them into one line using whichever seat's price happened to be
+        // first, which both mis-priced the line AND meant the line items
+        // didn't even sum to the page's own Total - found live (28 Jul)
+        // testing a multi-level venue with same-named, differently-priced
+        // zones. Backend now returns the correct per-seat price (see
+        // GET /api/bookings/[id]), so this only needs to stop merging.
+        const key = `${s.level || ''}::${s.tierLabel}`
+        if (!acc[key]) {
+          acc[key] = { tierLabel: s.tierLabel, level: s.level, count: 0, price: s.price, seatLabels: [] }
+        }
+        acc[key].count += 1
+        acc[key].seatLabels.push(`${s.row}${s.number}`)
+        return acc
+      },
+      {} as Record<string, { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }>
+    )
+  )
+  // --- Confirmed state
+  if (confirmed) {
+    const seatSummary = state.booking.numberedSeats.length > 0
+      ? state.booking.numberedSeats.length === 1
+        // Single numbered seat - matches the contribution-moment mockup's
+        // "SEAT A7 · ROW A" format exactly.
+        ? `SEAT ${state.booking.numberedSeats[0].row}${state.booking.numberedSeats[0].number} · ROW ${state.booking.numberedSeats[0].row}`
+        // Multiple numbered seats - mockup only shows the single-seat
+        // case, so this generalizes rather than guessing a specific
+        // multi-seat layout: list every seat label, no single "ROW" to
+        // anchor to since a booking can span more than one.
+        : `SEATS ${state.booking.numberedSeats.map((s) => `${s.row}${s.number}`).join(', ')}`
+      // GA booking - no seat/row concept at all, same gap as above.
+      : `${gaSeatEntries.reduce((sum, [, q]) => sum + q, 0)} SEAT${gaSeatEntries.reduce((sum, [, q]) => sum + q, 0) === 1 ? '' : 'S'}`
+    const venueLabel = state.booking.event.venue
+      ? `${state.booking.event.venue.name}, ${state.booking.event.venue.city}`
+      : state.booking.event.title
+
+    return (
+      <>
+        <SiteNav />
+        <ContributionMoment
+          seatSummary={seatSummary}
+          venueLabel={venueLabel}
+          supporterCount={state.booking.event.supporterCount}
+          artistName={state.booking.event.artistName}
+          onClose={() => router.push('/events')}
+          onViewTicket={() => router.push('/tickets')}
+        />
+      </>
+    )
+  }
+
+  // --- Booking already CANCELLED (e.g. user cancelled from tickets page)
+  if (state.booking.status === 'CANCELLED') {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-48px) var(--afa-space-6)', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-3)' }}>
+            {tr.checkoutPage.bookingCancelledTitle}
+          </h1>
+          <p style={{ opacity: 0.7, marginBottom: 'var(--afa-space-6)' }}>
+            {tr.checkoutPage.bookingCancelledBody}
+          </p>
+          <Link
+            href={`/events/${state.booking.event.id}`}
+            style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}
+          >
+            {tr.checkoutPage.backToEventLabel}
+          </Link>
+        </main>
+      </>
+    )
+  }
+
+  // --- Expired reservation
+  if (state.booking.isExpired) {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-48px) var(--afa-space-6)', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-3)' }}>
+            {tr.checkoutPage.reservationExpiredTitle}
+          </h1>
+          <p style={{ opacity: 0.7, marginBottom: 'var(--afa-space-6)' }}>
+            {tr.checkoutPage.reservationExpiredBody}
+          </p>
+          <Button variant="primary" href={`/events/${state.booking.event.id}`} fullWidth={false}>
+            {tr.checkoutPage.backToEventLabel}
+          </Button>
+        </main>
+      </>
+    )
+  }
+
+  // --- Payment not configured for this env (prod today)
+  if (!state.payment || !state.payment.keyId) {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-48px) var(--afa-space-6)', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-3)' }}>
+            {tr.checkoutPage.paymentsNotLiveTitle}
+          </h1>
+          <p style={{ opacity: 0.7, marginBottom: 'var(--afa-space-6)' }}>
+            {tr.checkoutPage.seatsReservedNotice}
+          </p>
+          <Link
+            href="/tickets"
+            style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}
+          >
+            {tr.checkoutPage.viewMyReservationsArrow}
+          </Link>
+        </main>
+      </>
+    )
+  }
+
+  // --- Normal checkout state
+  return (
+    <>
+      <SiteNav backHref={`/events/${state.booking.event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
+      <main
+        style={{
+          minHeight: '100vh',
+          background: 'var(--afa-surface-page)',
+          padding: 'var(--afa-space-32px) var(--afa-space-5)',
+          maxWidth: 560,
+          margin: '0 auto',
+          fontFamily: 'var(--font-sans)',
+          color: 'var(--afa-text-primary)',
+        }}
+      >
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 900, marginBottom: 'var(--afa-space-2)' }}>
+          {tr.checkoutPage.confirmYourBooking}
+        </h1>
+        <p style={{ opacity: 0.6, marginBottom: 'var(--afa-space-6)', fontSize: 'var(--afa-text-body)' }}>
+          {tr.checkoutPage.reserveSeatsNotice}
+        </p>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-5)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--afa-text-subtitle)',
+              fontWeight: 700,
+              marginBottom: 'var(--afa-space-6px)',
+            }}
+          >
+            {state.booking.event.title}
+          </div>
+          <div style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+            {formatDate(state.booking.event.date, 'long', locale)}{' '}
+            · {formatEventTimeRange(state.booking.event.startTime, state.booking.event.endTime)}
+            {state.booking.event.venue && (
+              <>
+                {' · '}
+                {state.booking.event.venue.name}, {state.booking.event.venue.city}
+              </>
+            )}
+          </div>
+
+          <div
+            style={{
+              borderTop: '1px solid var(--afa-tint-08)',
+              paddingTop: 'var(--afa-space-4)',
+              marginBottom: 'var(--afa-space-3)',
+            }}
+          >
+            {numberedGroups.length > 0
+              ? numberedGroups.map((g) => (
+                  <div
+                    key={`${g.level}::${g.tierLabel}`}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: 'var(--afa-space-6px) 0',
+                      fontSize: 'var(--afa-text-body)',
+                    }}
+                  >
+                    <span>
+                      {g.tierLabel}{g.level ? ` · ${g.level}` : ''} × {g.count}
+                      <span style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.6, display: 'block', marginTop: 'var(--afa-space-2px)' }}>
+                        {g.count === 1 ? tr.checkoutPage.seatWordCapSingular : tr.checkoutPage.seatWordCapPlural} {g.seatLabels.join(', ')}
+                      </span>
+                    </span>
+                    <span style={{ opacity: 0.7 }}>
+                      {g.price !== null ? formatDisplayMoney(g.price * g.count, displayCurrency) : '—'}
+                    </span>
+                  </div>
+                ))
+              : gaSeatEntries.map(([section, qty]) => (
+                  <div
+                    key={section}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: 'var(--afa-space-6px) 0',
+                      fontSize: 'var(--afa-text-body)',
+                    }}
+                  >
+                    <span>
+                      {section} × {qty}
+                    </span>
+                    <span style={{ opacity: 0.7 }}>
+                      {formatDisplayMoney(state.booking.subtotalAmount, displayCurrency)}
+                    </span>
+                  </div>
+                ))}
+            {state.booking.bookingFeeAmount > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: 'var(--afa-space-10px) 0 var(--afa-space-1)',
+                  fontSize: 'var(--afa-text-ui)',
+                  opacity: 0.75,
+                  borderTop: '1px dashed var(--afa-tint-12)',
+                  marginTop: 'var(--afa-space-6px)',
+                }}
+              >
+                <span>
+                  {tr.eventDetailPage.bookingFeeLabel}
+                  <span style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.75, display: 'block', marginTop: 'var(--afa-space-2px)' }}>
+                    {tr.checkoutPage.bookingFeeHintCheckout}
+                  </span>
+                </span>
+                <span>
+                  {formatDisplayMoney(state.booking.bookingFeeAmount, displayCurrency)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderTop: '1px solid var(--afa-tint-08)',
+              paddingTop: 'var(--afa-space-4)',
+            }}
+          >
+            <span style={{ fontSize: 'var(--afa-text-body)', opacity: 0.6 }}>{tr.eventDetailPage.totalLabel}</span>
+            <span style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700 }}>
+              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
+            </span>
+          </div>
+
+          {state.booking.totalAmount > 0 && (
+            <Button variant="secondary-reveal" onClick={() => setFeeSheetOpen(true)} style={{ marginTop: 'var(--afa-space-10px)' }}>
+              See fee breakdown →
+            </Button>
+          )}
+        </div>
+
+        {/* Companion Tagging Phase 1 (reputation epic §7) - optional, never
+            blocks payment. Search is disabled until consent is checked,
+            since the API itself refuses to create tags without it. */}
+        <div
+          style={{
+            background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
+            border: '1px solid var(--afa-tint-08)',
+            borderRadius: 'var(--afa-radius-lg)',
+            padding: 'var(--afa-space-5)',
+            marginBottom: 'var(--afa-space-5)',
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-1)' }}>{tr.checkoutPage.tagYourBuddies}</div>
+          <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6, marginBottom: 'var(--afa-space-3)' }}>
+            {tr.checkoutPage.tagBuddiesIntro}
+            {companionMax !== null && (
+              <>
+                {' '}
+                {companionMax === 0
+                  ? tr.checkoutPage.noExtraSeatToTag
+                  : tr.checkoutPage.upToCompanionsTemplate
+                      .replace('{max}', String(companionMax))
+                      .replace('{word}', companionMax === 1 ? tr.checkoutPage.companionSingular : tr.checkoutPage.companionPlural)
+                      .replace('{seats}', String(companionMax + 1))}
+              </>
+            )}
+          </p>
+
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-ui)', opacity: 0.75, marginBottom: 'var(--afa-space-3)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={companionConsent}
+              onChange={(e) => toggleCompanionConsent(e.target.checked)}
+              style={{ marginTop: 'var(--afa-space-2px)' }}
+            />
+            <span>
+              {tr.checkoutPage.companionConsentLabel}
+            </span>
+          </label>
+
+          {companionTags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)', marginBottom: companionConsent ? 'var(--afa-space-3)' : 0 }}>
+              {companionTags.map((t) => (
+                <span
+                  key={t.id}
+                  style={{
+                    fontSize: 'var(--afa-text-ui)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)',
+                    background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 'var(--afa-radius-pill)', padding: '5px var(--afa-space-6px) 5px var(--afa-space-3)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
+                  }}
+                >
+                  {t.taggedUser.displayName || t.taggedUser.name}
+                  <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-micro)' }}>
+                    {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
+                  </span>
+                  <Button
+                    variant="close"
+                    size={20}
+                    onClick={() => removeCompanion(t.id)}
+                    disabled={companionBusy}
+                    aria-label={tr.checkoutPage.removeAriaLabelTemplate.replace('{name}', t.taggedUser.name)}
+                    style={{ fontSize: 'var(--afa-text-body)' }}
+                  >
+                    ×
+                  </Button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {companionConsent && (
+            companionMax !== null && companionTags.filter((t) => t.status !== 'DECLINED').length >= companionMax ? (
+              companionMax > 0 && (
+                <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.55, fontStyle: 'italic' }}>
+                  {tr.checkoutPage.maxTaggedNoticeTemplate.replace('{max}', String(companionMax))}
+                </p>
+              )
+            ) : (
+            <div style={{ position: 'relative' }}>
+              <Input
+                type="text"
+                value={companionQuery}
+                onChange={(e) => setCompanionQuery(e.target.value)}
+                placeholder={tr.checkoutPage.searchByNamePlaceholder}
+                disabled={companionBusy}
+              />
+              {companionSearching && (
+                <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>{tr.checkoutPage.searchingEllipsis}</div>
+              )}
+              {companionResults.length > 0 && (
+                <div style={{ marginTop: 'var(--afa-space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
+                  {companionResults
+                    .filter((u) => !companionTags.some((t) => t.taggedUser.id === u.id))
+                    .map((u) => (
+                      <Button
+                        key={u.id}
+                        variant="menu-row"
+                        onClick={() => addCompanion(u)}
+                        disabled={companionBusy}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      >
+                        <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-small)' }}>@{u.name}</span></span>
+                        <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600, fontSize: 'var(--afa-text-small)' }}>{tr.checkoutPage.tagButtonLabel}</span>
+                      </Button>
+                    ))}
+                </div>
+              )}
+            </div>
+            )
+          )}
+
+          {companionError && (
+            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-2)' }}>{companionError}</div>
+          )}
+        </div>
+
+        {error && (
+          <div
+            style={{
+              background: 'var(--afa-error-tint)',
+              color: 'var(--afa-error-bright)',
+              padding: 'var(--afa-space-10px) var(--afa-space-14px)',
+              borderRadius: 'var(--afa-radius-md)',
+              fontSize: 'var(--afa-text-ui)',
+              marginBottom: 'var(--afa-space-4)',
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <Button data-afa-action-row variant="primary" onClick={handlePay} disabled={paying || confirming}>
+          {confirming
+            ? tr.checkoutPage.confirmingYourBooking
+            : paying
+              ? tr.checkoutPage.openingPayment
+              : state.booking.totalAmount > 0
+                ? `${tr.checkoutPage.payPrefix} ${formatDisplayMoney(state.booking.totalAmount, displayCurrency)}`
+                : tr.eventDetailPage.confirmFreeBooking}
+        </Button>
+
+        <div
+          style={{
+            textAlign: 'center',
+            fontSize: 'var(--afa-text-small)',
+            opacity: 0.5,
+            marginTop: 'var(--afa-space-14px)',
+            lineHeight: 1.6,
+          }}
+        >
+          {tr.checkoutPage.securePaymentFooterCheckout}
+        </div>
+      </main>
+
+      {feeSheetOpen && (
+        <FeeSheet
+          ticketFaceValue={state.booking.subtotalAmount}
+          bookingFee={state.booking.bookingFeeAmount}
+          currency={displayCurrency}
+          onClose={() => setFeeSheetOpen(false)}
+        />
+      )}
+    </>
+  )
+}

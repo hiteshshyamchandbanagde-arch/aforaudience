@@ -1,7 +1,12 @@
 import React from 'react'
-import Link from 'next/link'
+import { cookies, headers } from 'next/headers'
+import { getServerSession } from 'next-auth'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
+import VenuesViewToggle from './VenuesViewToggle'
+import VenuesHero from './VenuesHero'
+import { authOptions } from '@/lib/auth'
+import { resolveLocation } from '@/lib/location'
 
 // Without this, Next.js has no dynamic API (cookies/headers/searchParams) to
 // signal that this page needs per-request data, so it can statically render
@@ -14,6 +19,13 @@ async function getVenues() {
     const venues = await prisma.venue.findMany({
       where: { isApproved: true },
       orderBy: { createdAt: 'desc' },
+      include: {
+        // Same field-mismatch bug family as PR #151/#156: a NUMBERED
+        // venue's real pricing lives in VenueZonePrice, not the GA path's
+        // seatMap.sections - without this, every NUMBERED venue's card
+        // shows no price range regardless of whether it's actually priced.
+        zonePrices: { select: { suggestedPrice: true } },
+      },
     })
     return venues
   } catch (err) {
@@ -22,9 +34,27 @@ async function getVenues() {
   }
 }
 
-function priceRange(seatMap: unknown) {
-  const sections = (seatMap as { sections?: { price?: number }[] } | null)?.sections || []
-  const prices = sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
+// BUG-2608-072 (gap 3) - the Owners tab count needs to be known before the
+// Owners tab is ever opened (VenueOwnersGridEmbed only fetches its list on
+// demand, client-side, when that tab is actually clicked). Fetched here,
+// server-side, alongside venues so the tab label can show a real count from
+// first paint instead of a placeholder.
+async function getOwnerCount() {
+  try {
+    return await prisma.venueOwner.count({ where: { isApproved: true } })
+  } catch (err) {
+    console.error('Failed to count venue owners:', err)
+    return 0
+  }
+}
+
+function priceRange(venue: { seatingMode?: string; seatMap: unknown; zonePrices?: { suggestedPrice: number | null }[] }) {
+  const prices =
+    venue.seatingMode === 'NUMBERED'
+      ? (venue.zonePrices || []).map((z) => Number(z.suggestedPrice) || 0).filter((p) => p > 0)
+      : ((venue.seatMap as { sections?: { price?: number }[] } | null)?.sections || [])
+          .map((s) => Number(s.price) || 0)
+          .filter((p) => p > 0)
   if (prices.length === 0) return null
   const min = Math.min(...prices)
   const max = Math.max(...prices)
@@ -33,43 +63,61 @@ function priceRange(seatMap: unknown) {
 
 export default async function VenuesPage() {
   const venues = await getVenues()
+  const ownerCount = await getOwnerCount()
+
+  // FEAT-2608-036 - resolved server-side (profile choice / cookie /
+  // this-request IP-geo guess) and passed down as the initial city
+  // filter value. Same "pre-filled, always removable" pattern as the
+  // Events page - VenuesGridClient's dropdown still defaults to "All
+  // Cities" as an option and the person can pick it any time.
+  const session = await getServerSession(authOptions)
+  let profileCity: string | null = null
+  let profileLat: number | null = null
+  let profileLng: number | null = null
+  let profileCountry: string | null = null
+  if (session?.user) {
+    const user = await prisma.user.findUnique({
+      where: { id: (session.user as any).id },
+      select: { defaultCity: true, defaultCityLat: true, defaultCityLng: true, defaultCountry: true },
+    })
+    if (user?.defaultCity) {
+      profileCity = user.defaultCity
+      profileLat = user.defaultCityLat
+      profileLng = user.defaultCityLng
+      profileCountry = user.defaultCountry
+    }
+  }
+  const cookieStore = await cookies()
+  const headerStore = await headers()
+  const resolved = await resolveLocation({ profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore })
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+      <style>{`
+        .afa-venues-page-container { max-width: 1240px; margin: 0 auto; padding: var(--afa-space-48px) var(--afa-space-6); }
+        @media (min-width: 768px) { .afa-venues-page-container { padding: var(--afa-space-48px) var(--afa-space-40px); } }
+      `}</style>
       <SiteNav active="venues" />
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '8px' }}>
-          Venues
-        </h1>
-        <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-          Spaces hosting live art near you.
-        </p>
+      <div className="afa-venues-page-container">
+        <VenuesHero count={venues.length} />
 
-        {venues.length === 0 ? (
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6 }}>No venues found yet. Check back soon!</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {venues.map((v) => {
-              const range = priceRange(v.seatMap)
-              return (
-                <Link
-                  key={v.id}
-                  href={`/venues/${v.id}`}
-                  style={{ display: 'block', background: '#fff', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
-                >
-                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: '#0E0C0A', marginBottom: '4px' }}>
-                    {v.name}
-                  </h2>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>{v.city}</p>
-                  <div style={{ display: 'flex', gap: '18px', fontSize: '13px', color: '#0E0C0A' }}>
-                    <span><strong>{v.capacity}</strong> seats</span>
-                    {range && <span style={{ color: '#C8441A', fontWeight: 700 }}>{range}</span>}
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+        <VenuesViewToggle
+          venues={venues.map((v) => ({
+            id: v.id,
+            name: v.name,
+            city: v.city,
+            country: v.country,
+            capacity: v.capacity,
+            priceRangeLabel: priceRange(v),
+            // photos is a plain scalar column on Venue, already returned
+            // by the default findMany (no top-level `select` in
+            // getVenues) - the redesigned card (FEAT-2608-044) is the
+            // first thing on this page to actually render it.
+            photos: v.photos,
+          }))}
+          ownerCount={ownerCount}
+          defaultCity={resolved.city}
+        />
       </div>
     </main>
   )

@@ -1,0 +1,125 @@
+"use client"
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { useLocale } from "@/lib/i18n/translate"
+import Button from "@/components/ui/Button"
+import { formatDate } from "@/lib/format-date"
+
+interface SearchResults {
+  events: { id: string; title: string; date: string; city: string | null }[]
+  artists: { id: string; name: string; genre: string | null }[]
+  venues: { id: string; name: string; city: string }[]
+}
+
+const EMPTY: SearchResults = { events: [], artists: [], venues: [] }
+
+export default function SearchBox() {
+  const router = useRouter()
+  const { t, locale } = useLocale()
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const [results, setResults] = useState<SearchResults>(EMPTY)
+  const [loading, setLoading] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setResults(EMPTY)
+      return
+    }
+    setLoading(true)
+    const timeout = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(query.trim())}`)
+        .then((res) => res.json())
+        .then(setResults)
+        .catch(() => setResults(EMPTY))
+        .finally(() => setLoading(false))
+    }, 250)
+    return () => clearTimeout(timeout)
+  }, [query])
+
+  const hasResults = results.events.length > 0 || results.artists.length > 0 || results.venues.length > 0
+  const go = (href: string) => {
+    setOpen(false)
+    setQuery("")
+    router.push(href)
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: "relative" }}>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
+        onFocus={() => setOpen(true)}
+        placeholder={t.search.placeholder}
+        className="afa-search-input"
+        style={{
+          width: "100%", maxWidth: "220px", padding: "var(--afa-space-2) var(--afa-space-14px)", borderRadius: "var(--afa-radius-pill)",
+          border: "1.5px solid var(--afa-border-resting)", fontSize: "var(--afa-text-ui)",
+          background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box",
+        }}
+      />
+      {open && query.trim().length >= 2 && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", right: 0, width: "320px",
+          background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", boxShadow: "0 8px 30px var(--afa-shadow)",
+          border: "1px solid var(--afa-tint-10)", zIndex: 200, maxHeight: "420px", overflowY: "auto",
+          padding: hasResults || loading ? "var(--afa-space-10px) 0" : "var(--afa-space-4)",
+        }}>
+          {loading ? (
+            <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, padding: "var(--afa-space-6px) var(--afa-space-4)" }}>{t.search.searching}</div>
+          ) : !hasResults ? (
+            <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{t.search.noResultsFor.replace("{query}", query)}</div>
+          ) : (
+            <>
+              {results.events.length > 0 && (
+                <div style={{ marginBottom: "var(--afa-space-6px)" }}>
+                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "var(--afa-space-1) var(--afa-space-4)" }}>{t.nav.events}</div>
+                  {results.events.map((e) => (
+                    <Button variant="menu-row" key={e.id} onClick={() => go(`/events/${e.id}`)}>
+                      <span style={{ fontWeight: 600 }}>{e.title}</span>
+                      <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{formatDate(e.date, 'medium', locale)}{e.city ? ` · ${e.city}` : ""}</span>
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {results.artists.length > 0 && (
+                <div style={{ marginBottom: "var(--afa-space-6px)" }}>
+                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "var(--afa-space-1) var(--afa-space-4)" }}>{t.nav.artists}</div>
+                  {results.artists.map((a) => (
+                    <Button variant="menu-row" key={a.id} onClick={() => go(`/artists/${a.id}`)}>
+                      <span style={{ fontWeight: 600 }}>{a.name}</span>
+                      {a.genre && <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{a.genre}</span>}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {results.venues.length > 0 && (
+                <div>
+                  <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "var(--afa-space-1) var(--afa-space-4)" }}>{t.nav.venues}</div>
+                  {results.venues.map((v) => (
+                    <Button variant="menu-row" key={v.id} onClick={() => go(`/venues/${v.id}`)}>
+                      <span style={{ fontWeight: 600 }}>{v.name}</span>
+                      <span style={{ opacity: 0.5, marginLeft: "var(--afa-space-2)" }}>{v.city}</span>
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

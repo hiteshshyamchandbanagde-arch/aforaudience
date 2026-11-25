@@ -1,0 +1,94 @@
+name: Design Token Check
+
+# GEN-2609-052 - fails CI when a PR adds/changes a line in src/**/*.ts(x)
+# with a raw hex color, rgb()/rgba() literal, or a hardcoded font-family
+# string not using var(--font-*). Diff-only against the PR's base branch
+# (scripts/check-design-tokens.js) - pre-existing literals elsewhere in
+# src/ are known debt and are NOT touched or failed on here.
+#
+# GEN-2609-078 - added 2 more steps: the rule engine's own fixture-based
+# self-tests (so a change to the regex/allowlist logic itself is caught,
+# not just discovered via a future false-positive/negative), and the
+# whole-repo ratchet (scripts/design-token-ratchet.js) - unlike the
+# diff-only check above, this fails if ANY category's total literal
+# count across the whole repo is higher than the committed baseline
+# (scripts/design-token-baseline.json), which is what actually proves
+# migration is converging rather than just "this one PR didn't make it
+# worse."
+#
+# This is the first pull_request-triggered workflow in this repo (the
+# existing e2e*.yml files are push-to-qa/nightly/manual only) - added
+# specifically so this check runs at merge time, before a PR lands on
+# qa, rather than being discovered in a later audit pass.
+on:
+  pull_request:
+    branches: [qa, main]
+
+jobs:
+  design-tokens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Rule-engine self-tests
+        run: node scripts/check-design-tokens.test.js
+
+      # GEN-2609-100 - migrate-tokens.js's shorthand colour matcher gets
+      # its own self-tests, same as check-design-tokens.js's rule engine
+      # above (see migrate-tokens.test.js's own header comment).
+      - name: Migration-script self-tests
+        run: node scripts/dev/migrate-tokens.test.js
+
+      # GEN-2609-113 - #707's pure-helper tests (ticket REF code, username
+      # format). Both import only src/lib files with no npm deps, so npx
+      # fetches tsx without a full npm ci.
+      - name: Ticket-code + username self-tests
+        run: npx --yes tsx@^4.23.1 scripts/ticket-code.test.ts && npx --yes tsx@^4.23.1 scripts/username.test.ts
+
+      # BUG-2609-071 - the shared date formatter (India time, UI locale).
+      # TZ is set to a non-India zone on purpose: the output must not
+      # depend on the machine's zone.
+      - name: Date-formatter self-tests
+        env:
+          TZ: America/New_York
+        run: npx --yes tsx@^4.23.1 scripts/format-date.test.ts
+
+      # BUG-2609-083 - venue hire: half-hour billing and the long-event warning.
+      - name: Venue-billing self-tests
+        run: npx --yes tsx@^4.23.1 scripts/venue-billing.test.ts
+
+      # BUG-2609-087 - venue revenue ranges by event date, India-time periods.
+      - name: Sales-range self-tests
+        env:
+          TZ: America/New_York
+        run: npx --yes tsx@^4.23.1 scripts/sales-range.test.ts
+
+      # BUG-2609-084 - which mobile bottom bar a route gets; fails if a page
+      # that renders DashboardShell has no mapping.
+      - name: Tab-bar route self-tests
+        run: npx --yes tsx@^4.23.1 scripts/tab-bar-routes.test.ts
+
+      # Some self-tests import app code (pdf-lib, resend, the Prisma client),
+      # so install dependencies first; postinstall runs prisma generate.
+      - name: Install dependencies (for self-tests that import app code)
+        run: npm ci
+
+      - name: All TypeScript self-tests (scripts/*.test.ts, GEN-2610-004)
+        run: for f in scripts/*.test.ts; do echo "== $f"; npx --yes tsx@^4.23.1 "$f" || exit 1; done
+
+      - name: Check for new hardcoded design-token literals (diff-only)
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+          HEAD_REF: HEAD
+        run: node scripts/check-design-tokens.js
+
+      - name: Whole-repo design-token ratchet
+        run: node scripts/design-token-ratchet.js

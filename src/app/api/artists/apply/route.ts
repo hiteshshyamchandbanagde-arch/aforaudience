@@ -2,7 +2,17 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { launchWaveBlock } from '@/lib/platform-settings'
+import { logNewGenreRequests } from '@/lib/genre-requests'
 
+// Multi-role support - mirrors /api/organisers/apply's reasoning (only
+// ADMIN excluded; role only auto-flips for true first-timers). Artist
+// itself has no Admin-approval gate ("goes live immediately"), but even
+// so, a second-role application here deliberately does NOT auto-switch
+// the active role either - staying consistent with Organiser/Venue Owner
+// means applying can never silently kick someone out of whatever
+// dashboard they're currently using. They switch explicitly afterward via
+// POST /api/users/me/switch-role, same as the other two roles.
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -14,25 +24,41 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (user.role === 'ARTIST') {
-    return NextResponse.json({ error: 'You already have an Artist account.' }, { status: 400 })
+  // S1b-a - W2 (onboarding) gate: no new applications while closed.
+  const w2 = await launchWaveBlock('W2', user.role)
+  if (w2) return NextResponse.json(w2.body, { status: w2.status })
+
+  if (user.role === 'ADMIN') {
+    return NextResponse.json({ error: "Admin accounts can't apply for a second role." }, { status: 400 })
   }
-  if (user.role !== 'AUDIENCE') {
-    return NextResponse.json({ error: `You're already registered as ${user.role.replace('_', ' ').toLowerCase()}, and can't apply for a second role right now.` }, { status: 400 })
+
+  const existing = await prisma.artist.findUnique({ where: { userId: user.id } })
+  if (existing) {
+    return NextResponse.json({ error: 'You already have an Artist account.' }, { status: 400 })
   }
 
   const body = await req.json().catch(() => ({}))
-  const genre = typeof body?.genre === 'string'
+  // GenrePicker (session 39, PR #219/#220) sends a real string[] now -
+  // kept the comma-string fallback for backward compatibility with any
+  // other caller still sending the old shape.
+  const genre = Array.isArray(body?.genre)
+    ? body.genre.filter((g: unknown): g is string => typeof g === 'string' && g.trim().length > 0).map((g: string) => g.trim())
+    : typeof body?.genre === 'string'
     ? body.genre.split(',').map((g: string) => g.trim()).filter(Boolean)
     : []
 
-  // No Admin approval gate here, unlike Organiser/Venue Owner - the design
-  // doc's admin-approval list only covers those two roles. Artist goes
-  // live immediately.
+  const isFirstRole = user.role === 'AUDIENCE'
+
   await prisma.$transaction([
-    prisma.user.update({ where: { id: user.id }, data: { role: 'ARTIST' } }),
+    ...(isFirstRole ? [prisma.user.update({ where: { id: user.id }, data: { role: 'ARTIST' as const } })] : []),
     prisma.artist.create({ data: { userId: user.id, genre, styleTag: [], videoReel: [] } }),
   ])
 
-  return NextResponse.json({ message: "You're all set — your Artist profile is live. Head to your dashboard to fill in the rest and start applying to events." })
+  if (genre.length > 0) await logNewGenreRequests(genre)
+
+  return NextResponse.json({
+    message: isFirstRole
+      ? "You're all set — your Artist profile is live. Head to your dashboard to fill in the rest and start applying to events."
+      : "Your Artist profile is live. Switch to it from your Profile whenever you're ready - your current account stays exactly as it is until then.",
+  })
 }

@@ -1,0 +1,105 @@
+// GEN-2609-053 - shared rendering wrapper for the status-pill pattern
+// built on src/lib/statusStyle.ts's STATUS_TONE (GEN-2609-051). The
+// tone values (bg/color) stay domain-specific per caller - a booking
+// status and an event status are different domains, per GEN-2609-051's
+// own scoping decision - only the pill chrome (font-size/padding/
+// border-radius) is shared here.
+//
+// Two variants, not one: audited dashboard/organiser/page.tsx's and
+// tickets/page.tsx's actual pill chrome before assuming they matched
+// (they don't) - organiser's is uppercase + letter-spaced + 5px/10px
+// padding, tickets' is plain-case + 4px/10px padding. Forcing both into
+// one shape would be a real visual change to whichever file didn't
+// already look that way; `status` and `status-compact` preserve each
+// file's exact current appearance instead.
+import type { StatusToneStyle } from '@/lib/statusStyle'
+
+// GEN-2609-060 - 3 more real pill shapes found during the -055 audit,
+// each re-verified fresh against qa before adding (not trusted from
+// the earlier flag). None fit `status`/`status-compact` - forcing them
+// in would have been a visible change (font-size/padding/weight all
+// differ) - so each gets its own variant instead, additive only.
+export type BadgeVariant = 'status' | 'status-compact' | 'micro' | 'tag' | 'pill'
+
+// GEN-2609-068 - every variant gets `display: inline-flex, alignItems:
+// center` as a base (below, applied uniformly rather than per-variant)
+// so a leading `icon` lays out correctly next to the label. Harmless
+// for every existing text-only consumer: inline-flex with one child
+// renders identically to inline-block, and `gap` only has an effect
+// once there's more than one child.
+const CHROME: Record<BadgeVariant, React.CSSProperties> = {
+  status: {
+    fontSize: 'var(--afa-text-micro)',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    padding: '5px var(--afa-space-10px)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
+    borderRadius: 'var(--afa-radius-pill)',
+    whiteSpace: 'nowrap',
+  },
+  'status-compact': {
+    fontSize: 'var(--afa-text-micro)',
+    fontWeight: 700,
+    padding: 'var(--afa-space-1) var(--afa-space-10px)',
+    borderRadius: 'var(--afa-radius-pill)',
+    whiteSpace: 'nowrap',
+  },
+  // admin/feedback's category/severity badges. The two real call sites
+  // differ only in `letterSpacing` (category: 0.03em, severity: none) -
+  // baseline matches severity (no letter-spacing), category applies the
+  // 0.03em via its own `style` override rather than picking one value
+  // and quietly changing the other site.
+  micro: {
+    fontSize: 'var(--afa-text-caption)',
+    fontWeight: 700,
+    padding: 'var(--afa-space-2px) var(--afa-space-2)',
+    borderRadius: 'var(--afa-radius-pill)',
+  },
+  // admin/bookings' "FREE" tag - deliberately not folded into `status`/
+  // `status-compact` conceptually either: it's a fixed fact about an
+  // event (isFree), not a lifecycle state with multiple tone-driven
+  // values, so `tag` rather than another `status-*` name.
+  tag: {
+    fontSize: 'var(--afa-text-micro)',
+    fontWeight: 500,
+    padding: 'var(--afa-space-2px) var(--afa-space-2)',
+    borderRadius: 'var(--afa-radius-pill)',
+  },
+  // artist/events' compensation pill + "Lineup full" pill - identical
+  // chrome on both real call sites, no per-site override needed.
+  pill: {
+    fontSize: 'var(--afa-text-ui)',
+    fontWeight: 700,
+    padding: '5px var(--afa-space-3)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
+    borderRadius: 'var(--afa-radius-pill)',
+  },
+}
+
+export default function Badge({
+  variant = 'status',
+  tone,
+  icon,
+  children,
+  style,
+  ...data
+}: {
+  variant?: BadgeVariant
+  tone: StatusToneStyle
+  /** GEN-2609-068 - optional leading icon (e.g. a status chip that
+   * shouldn't rely on color alone). Sized/positioned by the caller -
+   * Badge only lays it out via the shared inline-flex/gap base below,
+   * it doesn't impose a fixed icon size since that varies by variant. */
+  icon?: React.ReactNode
+  children: React.ReactNode
+  style?: React.CSSProperties
+  /** GEN-2610-007 - data-* hooks for tests (the label follows the UI language). */
+  [hook: `data-${string}`]: string | undefined
+}) {
+  // BUG-2610-015 - data-afa-avoid: the floating chat button never rests over a badge.
+  return (
+    <span {...data} data-afa-avoid style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--afa-space-1)', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
+      {icon}
+      {children}
+    </span>
+  )
+}

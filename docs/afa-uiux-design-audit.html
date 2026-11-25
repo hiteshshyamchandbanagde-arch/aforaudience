@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AforAudience — UI/UX Design System Audit</title>
+<style>
+  :root{
+    --afa-surface-page:#0E0C0A;
+    --afa-surface-raised:#17140F;
+    --afa-surface-inverse:#F7F3EE;
+    --afa-text-primary:#F5F5F0;
+    --afa-text-secondary:#B8B2A6;
+    --afa-amber:#C9973A;
+    --afa-fill-solid:#C8441A;
+    --afa-error:#B3261E;
+    --afa-border:rgba(245,245,240,0.12);
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--afa-surface-page);
+    color:var(--afa-text-primary);
+    font-family:var(--sans);
+    line-height:1.5;
+    padding:0 0 80px;
+  }
+  header{
+    padding:56px 24px 40px;
+    max-width:980px;
+    margin:0 auto;
+    border-bottom:1px solid var(--afa-border);
+  }
+  header .eyebrow{
+    color:var(--afa-amber);
+    font-size:13px;
+    letter-spacing:0.02em;
+    margin-bottom:10px;
+  }
+  header h1{
+    font-size:34px;
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:var(--afa-text-secondary);
+    max-width:640px;
+    font-size:15px;
+    margin:0;
+  }
+  main{max-width:980px;margin:0 auto;padding:0 24px;}
+  section{margin-top:56px;}
+  section > h2{
+    font-size:20px;
+    margin:0 0 6px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  section > h2 .num{color:var(--afa-text-secondary);font-size:14px;font-family:var(--mono);}
+  section > .desc{color:var(--afa-text-secondary);font-size:14px;margin:0 0 24px;max-width:680px;}
+
+  .status{
+    display:inline-block;
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:20px;
+    margin-left:8px;
+    vertical-align:middle;
+    font-weight:600;
+  }
+  .status.locked{background:rgba(201,151,58,0.15);color:var(--afa-amber);}
+  .status.gap{background:rgba(179,38,30,0.15);color:#E0685F;}
+  .status.mixed{background:rgba(245,245,240,0.1);color:var(--afa-text-secondary);}
+
+  /* Swatch grid */
+  .swatches{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:14px;
+  }
+  .swatch{
+    border:1px solid var(--afa-border);
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--afa-surface-raised);
+  }
+  .swatch .fill{height:64px;}
+  .swatch .meta{padding:10px 12px;}
+  .swatch .meta .name{font-size:13px;font-weight:600;}
+  .swatch .meta .hex{font-family:var(--mono);font-size:12px;color:var(--afa-text-secondary);margin-top:2px;}
+  .swatch .meta .use{font-size:11px;color:var(--afa-text-secondary);margin-top:6px;}
+
+  /* As-is / To-be panels */
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:18px;
+  }
+  @media (max-width:680px){ .compare{grid-template-columns:1fr;} }
+  .panel{
+    border:1px solid var(--afa-border);
+    border-radius:10px;
+    background:var(--afa-surface-raised);
+    overflow:hidden;
+  }
+  .panel .tag{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    padding:8px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .panel.asis .tag{background:rgba(179,38,30,0.12);color:#E0685F;}
+  .panel.tobe .tag{background:rgba(201,151,58,0.12);color:var(--afa-amber);}
+  .panel .preview{padding:18px 14px;border-bottom:1px solid var(--afa-border);min-height:64px;display:flex;align-items:center;}
+  .panel pre{
+    margin:0;
+    padding:12px 14px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--afa-text-secondary);
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+
+  /* Example UI bits reused inside preview panes */
+  .btn{
+    padding:11px 20px;border-radius:9px;border:none;font-size:14px;font-weight:700;cursor:default;
+  }
+  .btn.legacy{background:#B3492E;color:#fff;}
+  .btn.current{background:var(--afa-fill-solid);color:var(--afa-text-primary);}
+  .banner{padding:9px 13px;border-radius:8px;font-size:13px;width:100%;}
+  .banner.legacy{background:#D98B72;color:#3a1006;border:1px solid #b3492e;}
+  .banner.current{background:rgba(179,38,30,0.1);border:1px solid rgba(179,38,30,0.3);color:var(--afa-error);}
+  .navrow{display:flex;gap:22px;width:100%;justify-content:center;}
+  .navitem{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;}
+  .navitem .dot{width:20px;height:20px;border-radius:6px;}
+  .navitem.legacy .dot{background:var(--afa-fill-solid);}
+  .navitem.legacy span{color:var(--afa-fill-solid);}
+  .navitem.current .dot{background:var(--afa-amber);}
+  .navitem.current span{color:var(--afa-amber);}
+  .navitem:not(.active){opacity:0.5;}
+
+  .photo-demo{width:100%;display:flex;gap:14px;}
+  .photo-demo .ph{
+    flex:1;height:90px;border-radius:8px;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#3a536b,#7a5a3f 60%,#2b2118);
+  }
+  .photo-demo .ph.duotone::after{
+    content:"";position:absolute;inset:0;
+    background:#C9973A;opacity:0.48;mix-blend-mode:multiply;
+  }
+  .photo-demo .ph.duotone{filter:grayscale(1) contrast(1.25) brightness(0.9);}
+
+  table.spec{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.spec th,table.spec td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--afa-border);}
+  table.spec th{color:var(--afa-text-secondary);font-weight:600;font-size:12px;}
+
+  .gap-card{
+    border:1px solid var(--afa-border);border-left:3px solid var(--afa-error);
+    border-radius:8px;padding:14px 16px;background:var(--afa-surface-raised);margin-bottom:12px;
+  }
+  .gap-card h4{margin:0 0 4px;font-size:14px;}
+  .gap-card p{margin:0;color:var(--afa-text-secondary);font-size:13px;}
+  .gap-card .priority{font-family:var(--mono);font-size:11px;color:var(--afa-amber);margin-top:8px;display:block;}
+  .gap-card.high{border-left-color:var(--afa-error);}
+  .gap-card.medium{border-left-color:var(--afa-amber);}
+  .gap-card.low{border-left-color:var(--afa-text-secondary);}
+
+  /* Roadmap table */
+  table.roadmap{width:100%;border-collapse:collapse;font-size:13px;}
+  table.roadmap th,table.roadmap td{text-align:left;padding:10px;border-bottom:1px solid var(--afa-border);vertical-align:top;}
+  table.roadmap th{color:var(--afa-text-secondary);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:0.03em;}
+  table.roadmap td.gapname{font-weight:600;white-space:nowrap;}
+
+  /* Verdict box */
+  .verdict{
+    border:1px solid var(--afa-border);border-radius:10px;padding:20px;background:var(--afa-surface-raised);
+  }
+  .verdict h4{margin:0 0 8px;font-size:15px;color:var(--afa-amber);}
+  .verdict p{margin:0 0 10px;font-size:13.5px;color:var(--afa-text-secondary);}
+  .verdict p:last-child{margin-bottom:0;}
+
+  footer{max-width:980px;margin:70px auto 0;padding:24px;border-top:1px solid var(--afa-border);color:var(--afa-text-secondary);font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">AforAudience · Internal Audit · 12 Sep 2026 · Target audience: 15–35</div>
+  <h1>UI/UX Design System — As-Is vs. To-Be</h1>
+  <p>What's locked and consistent today, what's still legacy debt, and what has never been formally specified — plus how to mature each gap, whether Figma Make should be part of that, whether the palette is centrally configurable in code, and where animation/infographics/interaction could differentiate the product. Built to support a go/no-go call on scoping a dedicated design-system pass.</p>
+</header>
+
+<main>
+
+  <!-- 1. COLOR -->
+  <section>
+    <h2><span class="num">01</span> Color Palette <span class="status locked">Locked, mostly clean</span></h2>
+    <p class="desc">Four core tokens govern every screen. They're well-adopted, but legacy pre-redesign tokens still surface in older components whenever they're touched.</p>
+
+    <div class="swatches">
+      <div class="swatch">
+        <div class="fill" style="background:#0E0C0A;"></div>
+        <div class="meta"><div class="name">Surface / Inverse</div><div class="hex">#0E0C0A</div><div class="use">Page background</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:#F5F5F0;"></div>
+        <div class="meta"><div class="name">Text Primary</div><div class="hex">#F5F5F0</div><div class="use">Body & heading text on dark</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:#C9973A;"></div>
+        <div class="meta"><div class="name">Amber</div><div class="hex">#C9973A</div><div class="use">Quiet accents only — never CTA</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:#C8441A;"></div>
+        <div class="meta"><div class="name">Fill Solid (CTA)</div><div class="hex">#C8441A</div><div class="use">Booking / payment / commit actions only</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:#B3261E;"></div>
+        <div class="meta"><div class="name">Error</div><div class="hex">#B3261E</div><div class="use">Error banners / validation</div></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;margin:28px 0 4px;color:var(--afa-text-secondary);">Example: Nav active-color bleed (BUG-2609-022)</h3>
+    <div class="compare">
+      <div class="panel asis">
+        <div class="tag">AS-IS <span>MobileTabBar.tsx</span></div>
+        <div class="preview"><div class="navrow">
+          <div class="navitem legacy active"><div class="dot"></div><span>Events</span></div>
+          <div class="navitem"><div class="dot" style="background:#555"></div><span>Saved</span></div>
+        </div></div>
+        <pre>color: active
+  ? 'var(--afa-fill-solid)'  // CTA orange leaking into nav
+  : 'var(--afa-text-primary)'</pre>
+      </div>
+      <div class="panel tobe">
+        <div class="tag">TO-BE <span>Fixed, PR #595</span></div>
+        <div class="preview"><div class="navrow">
+          <div class="navitem current active"><div class="dot"></div><span>Events</span></div>
+          <div class="navitem"><div class="dot" style="background:#555"></div><span>Saved</span></div>
+        </div></div>
+        <pre>color: active
+  ? 'var(--afa-amber)'  // quiet accent, CTA reserved
+  : 'var(--afa-text-primary)'</pre>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;margin:28px 0 4px;color:var(--afa-text-secondary);">Example: legacy token cleanup (BUG-2609-024)</h3>
+    <div class="compare">
+      <div class="panel asis">
+        <div class="tag">AS-IS</div>
+        <div class="preview" style="flex-direction:column;gap:10px;">
+          <div class="banner legacy">Something went wrong</div>
+          <button class="btn legacy">Sign In &amp; Continue</button>
+        </div>
+        <pre>background: var(--afa-terracotta-tint)
+color: var(--afa-terracotta)
+button bg: var(--afa-terracotta), text: "white" (hardcoded)</pre>
+      </div>
+      <div class="panel tobe">
+        <div class="tag">TO-BE</div>
+        <div class="preview" style="flex-direction:column;gap:10px;">
+          <div class="banner current">Something went wrong</div>
+          <button class="btn current">Sign In &amp; Continue</button>
+        </div>
+        <pre>background: rgba(179,38,30,0.1)
+color: var(--afa-error)
+button bg: var(--afa-fill-solid), text: var(--afa-on-fill-solid)</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. TYPOGRAPHY -->
+  <section>
+    <h2><span class="num">02</span> Font &amp; Font Size <span class="status mixed">Family locked · Scale undefined</span></h2>
+    <p class="desc">One display font is consistently applied. There is no written type scale — sizes are set per-component from memory of past decisions, not from a spec.</p>
+    <table class="spec">
+      <tr><th>Element</th><th>Value</th><th>Status</th></tr>
+      <tr><td>Wordmark / Headings</td><td><code>var(--font-display)</code> → Archivo</td><td>Locked, consistent mobile + desktop</td></tr>
+      <tr><td>Mobile nav labels</td><td>10px, uppercase, 0.08em tracking</td><td>Mobile-only, undocumented outside this one component</td></tr>
+      <tr><td>Body text</td><td>Not specified</td><td><span style="color:#E0685F;">Gap</span></td></tr>
+      <tr><td>Heading scale (H1–H4)</td><td>Not specified</td><td><span style="color:#E0685F;">Gap</span></td></tr>
+      <tr><td>Line-height rules</td><td>Not specified</td><td><span style="color:#E0685F;">Gap</span></td></tr>
+    </table>
+  </section>
+
+  <!-- 3. STYLING -->
+  <section>
+    <h2><span class="num">03</span> Styling <span class="status locked">Photo treatment locked</span></h2>
+    <p class="desc">Every image on the platform gets the same duotone treatment via one shared component — this is well-adopted with zero known drift.</p>
+    <div class="compare">
+      <div class="panel asis">
+        <div class="tag">AS-IS <span>Raw photo</span></div>
+        <div class="preview"><div class="photo-demo"><div class="ph"></div></div></div>
+        <pre>&lt;img src={photo} /&gt;</pre>
+      </div>
+      <div class="panel tobe">
+        <div class="tag">TO-BE <span>Photo.tsx applied</span></div>
+        <div class="preview"><div class="photo-demo"><div class="ph duotone"></div></div></div>
+        <pre>filter: grayscale(1) contrast(1.25) brightness(0.9);
+overlay: #C9973A @ 48% opacity, mix-blend-mode: multiply;</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. LAYOUT / ALIGNMENT -->
+  <section>
+    <h2><span class="num">04</span> Alignment &amp; Layout <span class="status gap">No formal grid</span></h2>
+    <p class="desc">Mobile and desktop use structurally different navigation shells — this is intentional, not a bug — but neither is built from a documented spacing/grid system.</p>
+    <table class="spec">
+      <tr><th>Surface</th><th>Mobile</th><th>Desktop</th></tr>
+      <tr><td>Navigation shell</td><td>Bottom <code>MobileTabBar</code> + <code>MobileTopBar</code>, breakpoint &lt;1023px</td><td><code>DashboardShell</code> sidebar + <code>SiteNav</code>/<code>HomeHeader</code></td></tr>
+      <tr><td>Floating widget offset</td><td><code>calc(64px + safe-area-inset-bottom)</code></td><td>Flat <code>bottom: 20/88</code>, no tab bar to clear</td></tr>
+      <tr><td>Spacing/grid unit</td><td colspan="2" style="color:#E0685F;">Not documented on either platform</td></tr>
+      <tr><td>Admin page content</td><td style="color:#E0685F;">0/8 pages have mobile-responsive treatment beyond the nav shell</td><td>Fully responsive</td></tr>
+    </table>
+  </section>
+
+  <!-- 5. IMPROVEMENT SCOPE -->
+  <section>
+    <h2><span class="num">05</span> Improvement Scope — Decision Inputs</h2>
+    <p class="desc">Four gaps, ranked by how often they cause rework today.</p>
+
+    <div class="gap-card">
+      <h4>No written type scale</h4>
+      <p>Font sizes/weights/line-heights are set from memory per-component. Causes inconsistency risk every time a new screen is built.</p>
+      <span class="priority">HIGH — touches every new screen</span>
+    </div>
+    <div class="gap-card">
+      <h4>No formal spacing/grid system</h4>
+      <p>Layout spacing is implicit per-component on both platforms; no shared unit to check new work against.</p>
+      <span class="priority">HIGH — compounds with the above</span>
+    </div>
+    <div class="gap-card">
+      <h4>Admin mobile content responsiveness</h4>
+      <p>All 8 Admin pages got the mobile nav shell but not mobile content layout — real gap if Admin is ever used on mobile in practice.</p>
+      <span class="priority">MEDIUM — depends on actual Admin usage pattern</span>
+    </div>
+    <div class="gap-card high">
+      <h4>Legacy token residue</h4>
+      <p>Not a spec gap — a cleanup backlog. Surfaces reactively whenever an old file is touched (e.g. BUG-2609-024/025).</p>
+      <span class="priority">LOW — handled opportunistically, working as intended</span>
+    </div>
+
+    <div class="gap-card high">
+      <h4>Component library / single source of truth</h4>
+      <p>Buttons, inputs, and modals are styled per-file, not from shared components — this is <em>why</em> the token cleanup keeps recurring (BUG-2609-024 fixed 2 files; more still exist).</p>
+      <span class="priority">HIGH — root cause behind the token-residue backlog above</span>
+    </div>
+
+    <div class="gap-card high">
+      <h4>Icon system</h4>
+      <p>No documented icon set, sizing, or stroke-weight rules. Only caught in passing as a "nit" so far (e.g. Users/Artists search using an eye icon instead of a search icon), never formally audited.</p>
+      <span class="priority">MEDIUM — cosmetic today, compounds as more pages ship</span>
+    </div>
+
+    <div class="gap-card medium">
+      <h4>Accessibility spec</h4>
+      <p>No written contrast, focus-state, or reduced-motion rules. The dark theme's limited palette makes silent contrast failures easier to introduce and harder to catch than on a lighter theme.</p>
+      <span class="priority">MEDIUM — currently unverified, not necessarily broken</span>
+    </div>
+
+    <div class="gap-card medium">
+      <h4>Motion / animation guidelines</h4>
+      <p>Intro-splash typing animation, card-load spinners, and nav transitions exist ad hoc with no rule for when motion should or shouldn't be used.</p>
+      <span class="priority">LOW — nothing currently broken, just undocumented</span>
+    </div>
+
+    <div class="gap-card low">
+      <h4>Breakpoint definitions</h4>
+      <p>The mobile/desktop split at <code>1023px</code> is used consistently in code but never written down as a named, reusable breakpoint set.</p>
+      <span class="priority">LOW — works today by convention, risks drift over time</span>
+    </div>
+  </section>
+
+  <!-- 6. HOW TO MATURE -->
+  <section>
+    <h2><span class="num">06</span> How to Mature Each Gap</h2>
+    <p class="desc">Suggested approach only — no action taken. Each row can be scoped independently.</p>
+    <table class="roadmap">
+      <tr><th>Gap</th><th>Maturing approach</th></tr>
+      <tr><td class="gapname">Type scale</td><td>Pick 5–6 sizes (e.g. 12/14/16/20/28/34px) with weight + line-height per level; document in <code>docs/afa-design-tokens-reference.md</code>; retrofit opportunistically like legacy-token cleanup.</td></tr>
+      <tr><td class="gapname">Grid / spacing</td><td>Adopt an 8px (or 4px) base unit; define page-margin/gutter rules per breakpoint; same doc as above.</td></tr>
+      <tr><td class="gapname">Component library</td><td>Extract <code>Button</code>/<code>Input</code>/<code>Modal</code> from the worst-offending files first (already flagged for legacy tokens); require new UI to use them going forward.</td></tr>
+      <tr><td class="gapname">Icon system</td><td>Audit current icon usage across nav + dashboards; pick one size scale and stroke weight; consolidate into a single icon component.</td></tr>
+      <tr><td class="gapname">Accessibility</td><td>Run one contrast/focus-state pass against the 4 locked tokens; document pass/fail combinations so future work doesn't re-derive it each time.</td></tr>
+      <tr><td class="gapname">Motion guidelines</td><td>Catalogue existing motion (splash, spinners, transitions); write one rule for when motion is used vs. not, rather than per-component judgment calls.</td></tr>
+      <tr><td class="gapname">Breakpoints</td><td>Name the existing <code>1023px</code> split (and any others in use) as tokens/constants in one place, referenced everywhere instead of re-typed per file.</td></tr>
+    </table>
+  </section>
+
+  <!-- 7. FIGMA MAKE -->
+  <section>
+    <h2><span class="num">07</span> Should Figma Make Help? <span class="status mixed">Useful, with a caveat</span></h2>
+    <div class="verdict">
+      <p><strong>Yes for exploration, no for trust.</strong> It's already been used well to generate options fast for real decisions (nav placement, wordmark variants) — it's genuinely good at producing several directions quickly.</p>
+      <p><strong>The caveat:</strong> this project's own working notes flag that Figma Make "repeatedly produces confident change descriptions that don't match rendered/grepped reality." Every past exploration that was actually shipped required a manual code-vs-Figma diff before being trusted — never taken on its self-report alone.</p>
+      <p>Net: use it to widen the option set, not to validate what's already built or to skip the verification step.</p>
+    </div>
+  </section>
+
+  <!-- 8. CENTRAL CONFIGURABILITY -->
+  <section>
+    <h2><span class="num">08</span> Is It Centrally Configurable? <span class="status mixed">Mostly — adoption is the gap, not the system</span></h2>
+    <p class="desc">The 4 locked tokens live as CSS variables in <code>globals.css</code>. Changing one there cascades everywhere it's referenced by variable — but only where a file used the variable instead of a hardcoded literal.</p>
+    <div class="compare">
+      <div class="panel tobe">
+        <div class="tag">WORKS <span>Token referenced correctly</span></div>
+        <div class="preview" style="flex-direction:column;gap:10px;">
+          <button class="btn current">Sign In &amp; Continue</button>
+        </div>
+        <pre>background: var(--afa-fill-solid)
+// change --afa-fill-solid once in globals.css →
+// this button updates automatically, everywhere it's used</pre>
+      </div>
+      <div class="panel asis">
+        <div class="tag">BREAKS <span>Hardcoded literal instead</span></div>
+        <div class="preview" style="flex-direction:column;gap:10px;">
+          <button class="btn legacy">Sign In &amp; Continue</button>
+        </div>
+        <pre>background: var(--afa-terracotta)  // legacy token, off-palette
+color: "white"                     // hardcoded literal, not a token at all
+// changing globals.css does nothing to this button</pre>
+      </div>
+    </div>
+    <p class="desc" style="margin-top:16px;">Every legacy-token find (BUG-2609-024, BUG-2609-025) is really this same failure: not a broken system, but a file that opted out of it. The system is centralized; adoption isn't yet 100%.</p>
+  </section>
+
+  <!-- 9. CREATIVE OPPORTUNITIES -->
+  <section>
+    <h2><span class="num">09</span> Creative Opportunity — Animation, Infographics, Interaction, Transitions</h2>
+    <p class="desc">AFA's audience is live art and creative people specifically — this is where the platform can differentiate on feel, not just function. Ideas below are exploratory, not scoped.</p>
+
+    <table class="roadmap">
+      <tr><th>Category</th><th>Idea</th><th>Why it fits AFA</th></tr>
+      <tr>
+        <td class="gapname">Animation</td>
+        <td>Staggered event-card reveal on scroll, echoing a stage curtain / spotlight cue rather than a generic fade.</td>
+        <td>Reinforces "live event" feel instead of a generic SaaS list.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Animation</td>
+        <td>Booking-confirmation moment — a ticket "stamping" or seat "lighting up," not a static success banner.</td>
+        <td>This is the platform's one true celebration moment — currently under-designed.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Infographic</td>
+        <td>Artist journey timeline — visual trail of past shows/venues on the artist profile.</td>
+        <td>More scannable than a text list; reinforces discovery.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Infographic</td>
+        <td>Navarasa mood map — a visual wheel/cluster of emotional event categories.</td>
+        <td>Navarasa is already AFA's core discovery philosophy but is currently text-only.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Interaction</td>
+        <td>Seat-map hover previews — instant sightline/price on hover.</td>
+        <td>Reduces back-and-forth taps during booking.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Interaction</td>
+        <td>Extend the swipe gesture already piloted on the Feedback panel to Discover browsing.</td>
+        <td>Reuses a pattern already built and verified; native mobile feel.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Transition</td>
+        <td>Shared-element transition: event-card image/title morphs into the detail page instead of a hard cut.</td>
+        <td>Visual continuity between browse and detail states.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Transition</td>
+        <td>Role-switch transition (Audience ↔ Organiser ↔ Artist) — a deliberate color/theme shift moment.</td>
+        <td>Reinforces that the user is stepping into a different role on the platform.</td>
+      </tr>
+    </table>
+
+    <div class="verdict" style="margin-top:20px;">
+      <h4>Sequencing note</h4>
+      <p>All eight ideas above should wait on the <strong>Motion Guidelines gap</strong> (Section 06) being defined first. Building any of them ad hoc now adds to the same inconsistency problem already flagged for tokens and components — one rule for "when motion is used" should exist before more motion gets added.</p>
+    </div>
+  </section>
+
+  <!-- 10. AUDIENCE-SPECIFIC GAPS -->
+  <section>
+    <h2><span class="num">10</span> Additional Gaps — Specific to a 15–35 Audience <span class="status gap">Not yet addressed</span></h2>
+    <p class="desc">Function has already been verified as working end-to-end. These are UI/UX-layer gaps that matter specifically because AFA's audience skews young and social-media-native — not general polish items.</p>
+
+    <table class="roadmap">
+      <tr><th>Area</th><th>Gap</th><th>Why it matters for 15–35</th></tr>
+      <tr>
+        <td class="gapname">Personalization</td>
+        <td>No documented approach to a personalized/algorithmic Discover feed; no visual split between "For You" and "Trending Near You."</td>
+        <td>This age group expects adaptive feeds (Instagram/Spotify norms), not a static list.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Social proof / FOMO</td>
+        <td>No visual pattern for "X people viewing," "3 tickets left," or friend-attendance cues.</td>
+        <td>High-impact on booking decisions for this demographic specifically; currently absent entirely.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Shareability</td>
+        <td>Event cards have no design treatment for looking good as a shared screenshot/story.</td>
+        <td>This audience discovers events via peer shares more than in-app browsing.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Empty / loading / error states</td>
+        <td>Writing tone is guided ("errors don't apologize") but there's no visual spec for empty states (no events in city, no bookings yet).</td>
+        <td>Shapes first-time-user impression, which is disproportionately important for retention at this age.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Onboarding</td>
+        <td>Role selection, permission asks (location/notifications), and the intro splash exist but aren't tied together as one designed first-run sequence.</td>
+        <td>First 60 seconds is where this demographic decides to stay or churn.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Dark-mode-only</td>
+        <td>Not a gap — a decision point. App is dark-theme-only currently.</td>
+        <td>Dark-mode-native audience, but outdoor-readability/accessibility tradeoffs are worth naming explicitly rather than assumed.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Notifications</td>
+        <td><code>web-push</code> exists in the stack but has no visual/content design system — tone, timing, visual identity.</td>
+        <td>Notification design is a major retention lever specifically for this age group.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Search &amp; filters</td>
+        <td>Functionally flagged already (<code>BUG-2609-023</code>, search no-op). Even once fixed, no visual design exists for filter chips, applied-filter state, or empty-result guidance.</td>
+        <td>Functional fix alone won't feel complete without the visual layer.</td>
+      </tr>
+      <tr>
+        <td class="gapname">Micro-copy / tone</td>
+        <td>Writing principles exist (active voice, no apology in errors) but haven't been audited across the app for consistency.</td>
+        <td>Voice consistency reads as more important to this audience than to an enterprise-tool audience.</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- 11. STRATEGIC CALL -->
+  <section>
+    <h2><span class="num">11</span> Strategic Call — Before Any More Spec Work</h2>
+    <p class="desc">Everything above is infrastructure. Infrastructure doesn't make someone love a product — one moment, done perfectly, does. Three calls, in priority order.</p>
+
+    <div class="gap-card high">
+      <h4>1. Own one moment, not ten</h4>
+      <p>Section 09 lists eight animation/interaction ideas, all weighted equally. That's wrong. Pick the single moment someone would screenshot and send a friend — the strongest candidate is the decision to go, not the payment — and make everything else quieter so that moment is the loudest thing on the screen.</p>
+    </div>
+
+    <div class="gap-card medium">
+      <h4>2. Say no to a second accent color</h4>
+      <p>Section 08's suggestion of an "excitement" accent color is worth reconsidering. Restraint, not addition, creates drama. Keep the CTA orange sacred and single-purpose. If a moment needs to feel electric, earn it with motion — motion is free to iterate on; a second brand color is a commitment you'll be undoing in six months.</p>
+    </div>
+
+    <div class="gap-card high">
+      <h4>3. Ship the type scale and grid before Figma Make, not after</h4>
+      <p>Not the exciting work — the necessary one. A one-page spec, boring and finished, beats a beautiful screen that can't be repeated. Everything creative built on top of an undefined scale/grid looks like chaos eventually, no matter how good any single screen looks in isolation.</p>
+    </div>
+  </section>
+
+  <!-- 12. HOW TO PROCEED -->
+  <section>
+    <h2><span class="num">12</span> How to Proceed</h2>
+    <p class="desc">Sequence, not a simultaneous push. Each step should be finished and boring before the next one starts.</p>
+    <table class="roadmap">
+      <tr><th>Step</th><th>Action</th><th>Done when</th></tr>
+      <tr><td class="gapname">1</td><td>Write the one-page type scale + 8px grid spec (Section 06).</td><td>It fits on one page and nobody needs to ask "what size is this?" again.</td></tr>
+      <tr><td class="gapname">2</td><td>Decide the one signature moment (Strategic Call #1) — write one sentence describing it, no committee.</td><td>You can say it in one sentence without hedging.</td></tr>
+      <tr><td class="gapname">3</td><td>Design and build that one moment only — obsessively, ignoring the rest of Section 09/10 for now.</td><td>You'd show it to someone outside the team and they'd react.</td></tr>
+      <tr><td class="gapname">4</td><td>Extract the component library from the worst legacy-token offenders (Section 06), so the signature moment doesn't get diluted by inconsistent buttons/inputs around it.</td><td>Zero legacy-token hits remain in the files touching that moment.</td></tr>
+      <tr><td class="gapname">5</td><td>Only now bring in Figma Make — for the remaining Section 09/10 ideas, against the finished spec from steps 1–4.</td><td>Every Figma Make output is checked against real code before being trusted, per Section 07.</td></tr>
+      <tr><td class="gapname">6</td><td>Revisit accessibility, motion guidelines, icons, notifications, onboarding — in that order, opportunistically, not as a blocking project.</td><td>Each gets its own one-page spec, same discipline as step 1.</td></tr>
+    </table>
+    <div class="verdict" style="margin-top:20px;">
+      <h4>The one-line version</h4>
+      <p>Finish the boring spec, decide the one moment, build only that, then let Figma Make loose on everything else — never the other order.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Source: <code>docs/design.md</code>, <code>docs/afa-design-tokens-reference.md</code>, and this session's audit of <code>qa</code> HEAD. Hex values for locked tokens are taken from shipped component code and verified `getComputedStyle` reads where available; documented gaps (type scale, grid, icons, accessibility, motion, breakpoints, component library, personalization, social proof, shareability, empty states, onboarding, notifications, filters, micro-copy) reflect the absence of a written spec, not a guess at what one might contain. Maturing approaches, the Figma Make/configurability sections, the creative-opportunity and audience-specific ideas, and the strategic call in Sections 11–12 are suggestions only — no action has been taken on any of them.
+</footer>
+
+</body>
+</html>

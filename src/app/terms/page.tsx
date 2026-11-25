@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import LegalDocLayout, { H2, P, UL, LI } from "@/components/LegalDocLayout"
+import { DIRECT_PAY_FULL_REFUND_MIN_DAYS } from "@/lib/direct-pay-terms"
 
 export const metadata: Metadata = {
   title: "Terms of Service — AforAudience",
@@ -53,9 +54,10 @@ export default function TermsPage() {
           in at the venue in your place, and check-in is first-come, first-served.
         </LI>
         <LI>
-          <strong>Refunds and cancellations:</strong> you can cancel a booking from My Tickets. For online payments, what
-          you get back depends on how far ahead of the show you cancel, and if the Organiser cancels the event you get a
-          full refund including the booking fee. The full rules are in our{" "}
+          <strong>Refunds and cancellations:</strong> you can cancel a booking from My Tickets. AforAudience holds no
+          money, so it does not issue refunds. Venue hire and artist fees follow the standard term: cancelled{" "}
+          {DIRECT_PAY_FULL_REFUND_MIN_DAYS} days or more before the booked date, any advance is refunded in full by the
+          party who received it; inside that, as agreed between the parties. The full rules are in our{" "}
           <Link href="/refund-policy/">Refund &amp; Cancellation Policy</Link>.
         </LI>
         <LI>Free events are ticketed the same way (PDF + QR) but are never charged a platform fee.</LI>

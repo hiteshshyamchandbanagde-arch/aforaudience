@@ -2,15 +2,58 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, use, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
+import { useToast } from '@/components/Toast'
+import PresetSelectWithOther from '@/components/PresetSelectWithOther'
+import BrandLoader from '@/components/BrandLoader'
+import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
+import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
+import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
+import { billableHours, hourlyNote, hourlyTotal } from '@/lib/venue-billing'
+import { presetLabels, longEventText, seatsText, sectionsText, weekdayName } from '@/components/dashboard/eventFormText'
+import { useLocale } from '@/lib/i18n/translate'
+import { useConfirm } from '@/components/ConfirmDialog'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { formatINR } from '@/lib/money-display'
+import PaymentModePicker, { usePaidBookingsEnabled } from '@/components/dashboard/PaymentModePicker'
+import { useLaunchWaves } from '@/hooks/useLaunchWaves'
+import { WAVE_BLOCKED_CONTROL_STYLE, paymentTypeBlocked, venueAmountBlocked, waveErrorMessage } from '@/lib/launch-waves-ui'
+import WaveSoonNote from '@/components/WaveSoonNote'
+import { type EventPaymentMode, initialPickerMode } from '@/lib/pay-at-entry'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
+
+interface SeatSection {
+  id?: string
+  name: string
+  seats: number
+  price: number
+  level?: string
+}
+
+interface VenueDayRate {
+  dayOfWeek: string
+  hourlyRate: number | null
+  dailyRate: number | null
+}
 
 interface VenueOption {
   id: string
   name: string
   city: string
   capacity: number
+  seatMap?: { sections?: SeatSection[] } | null
+  seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
+  seats?: PreviewSeat[]
+  zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
+  rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
+  hourlyRate?: number | null
+  dailyRate?: number | null
+  minDurationHours?: number | null
+  dayRates?: VenueDayRate[]
 }
 
 interface EventDetail {
@@ -23,40 +66,103 @@ interface EventDetail {
   startTime: string
   endTime: string
   isFree: boolean
+  paymentMode?: string | null
   ticketPrice: number | null
   totalSeats: number
   dresscode?: string | null
   vibe?: string | null
   surpriseAct: boolean
+  plusOnesRequired: number
+  termsChecklist?: string[]
+  specialNotes?: string | null
+  ageLimit?: string | null
+  specialNotesStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  specialNotesRejectionReason?: string | null
+  defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
+  defaultFeeAmount: number | null
+  defaultBuyInAmount: number | null
   venue: { id: string } | null
   venueBooking: { amount: number; fromDate: string; toDate: string } | null
+  ticketTiers?: { sectionName: string; level?: string; price: number; totalSeats: number }[]
+  isCompetitionShow?: boolean
+  competitionPrizeFirst?: string | null
+  competitionPrizeSecond?: string | null
+  competitionPrizeThird?: string | null
+  celebrities?: { id: string; name: string; photoUrl: string | null; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; userId: string | null }[]
+  panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; userId: string | null }[]
+  audienceVoteWeight?: number | null
+  panelistVoteWeight?: number | null
+  celebrityVoteWeight?: number | null
 }
 
 const inputStyle = {
   width: '100%',
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
-  fontSize: '14px',
-  color: '#0E0C0A',
+  padding: 'var(--afa-space-10px) var(--afa-space-3)',
+  borderRadius: 'var(--afa-radius-sm)',
+  border: '1px solid var(--afa-border-resting)',
+  background: 'var(--afa-surface-raised)',
+  fontSize: 'var(--afa-text-body)',
+  color: 'var(--afa-text-primary)',
 }
 
 const labelStyle = {
   display: 'block',
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 600,
-  marginBottom: '6px',
-  color: '#0E0C0A',
+  marginBottom: 'var(--afa-space-6px)',
+  color: 'var(--afa-text-primary)',
 }
 
 const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
+const DRESSCODE_PRESETS = ['Casual', 'Smart Casual', 'Formal', 'Costume / Theme']
+const VIBE_PRESETS = ['High Energy', 'Intimate', 'Chill', 'Curated', 'Family-Friendly']
 
 function toDateInputValue(dateStr: string) {
   return new Date(dateStr).toISOString().slice(0, 10)
 }
 
+// Past-date calendar fix (31 Jul feedback) - same reasoning as
+// create/page.tsx's identical helper: computed in LOCAL time, not UTC, so
+// IST users don't get blocked from selecting today's own date during the
+// first ~5.5 hours of the local day.
+function todayLocalDateString() {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+// Companion to todayLocalDateString (31 Jul follow-up) - see
+// create/page.tsx for the identical helper and reasoning.
+function nowLocalTimeString() {
+  const d = new Date()
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
+}
+
+// BUG-2609-045 (button consolidation, phase 1) - byte-identical dismiss
+// button, previously duplicated in the Celebrity and Panelist invite
+// rows. Local extraction rather than Button.tsx - no existing variant
+// matches this opacity (0.5) + fontSize (16px) combination without a
+// visible change from `secondary` (0.4 opacity, 13px).
+function RemoveRowButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <Button variant="icon" type="button" onClick={onClick} style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-title)' }} aria-label={label}>✕</Button>
+  )
+}
+
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+  // GEN-2610-007 - the form reads organiserDashboard.eventForm (shared with
+  // Create Event) and .editEvent; the terms checklist its translated labels.
+  const { t: tr, locale } = useLocale()
+  const f = tr.organiserDashboard.eventForm
+  const ed = tr.organiserDashboard.editEvent
+  const d = tr.organiserDashboard.eventDetail
+  const labels = presetLabels(f)
+  // Invite pills: the label only; the stored status stays English.
+  const inviteStatusLabel = (st: string) => (st === 'ACCEPTED' ? ed.inviteAccepted : st === 'DECLINED' ? ed.inviteDeclined : st === 'PENDING' ? ed.invitePending : st)
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -64,17 +170,168 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [venues, setVenues] = useState<VenueOption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { showToast } = useToast()
+  const confirm = useConfirm()
   const [saving, setSaving] = useState(false)
 
   const [formData, setFormData] = useState({
     title: '', description: '', type: 'OPEN_MIC', date: '', startTime: '', endTime: '',
     totalSeats: '', dresscode: '', vibe: '',
   })
-  const [isFree, setIsFree] = useState(true)
+  // D1b - Free / Pay at entry / Online payment. Loaded from the event's
+  // stored paymentMode (an ONLINE event stays ONLINE while the switch is
+  // off - never silently converted); isFree is derived from it.
+  const [paymentMode, setPaymentMode] = useState<EventPaymentMode>('FREE')
+  const isFree = paymentMode === 'FREE'
+  const paidBookingsEnabled = usePaidBookingsEnabled()
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
+  // FEAT-2608-045 - specialNotesOriginal tracks what was loaded from the
+  // server so the "you're about to reset this to pending" warning only
+  // shows when the organiser has actually typed something different, not
+  // on every render just because the field has a value.
+  const [termsChecklist, setTermsChecklist] = useState<string[]>([])
+  const [specialNotes, setSpecialNotes] = useState('')
+  const [ageLimit, setAgeLimit] = useState('')
+  const [specialNotesOriginal, setSpecialNotesOriginal] = useState('')
+  const [specialNotesStatus, setSpecialNotesStatus] = useState<'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'>('NONE')
+  const [specialNotesRejectionReason, setSpecialNotesRejectionReason] = useState<string | null>(null)
+  const [isCompetitionShow, setIsCompetitionShow] = useState(false)
+  const [competitionPrizeFirst, setCompetitionPrizeFirst] = useState('')
+  const [competitionPrizeSecond, setCompetitionPrizeSecond] = useState('')
+  const [competitionPrizeThird, setCompetitionPrizeThird] = useState('')
+  // Accept-to-Appear (§8, session 57) - panelists/celebrities are no
+  // longer free-text/full-replace state; they're server-owned rows fetched
+  // straight from `event`, with their own dedicated invite/remove
+  // endpoints. Only the search-and-invite UI needs local state.
+  const [panelistSearch, setPanelistSearch] = useState('')
+  const [panelistSearchResults, setPanelistSearchResults] = useState<{ id: string; name: string; displayName: string | null; avatar: string | null }[]>([])
+  const [panelistBioDraft, setPanelistBioDraft] = useState('')
+  const [panelistInviting, setPanelistInviting] = useState(false)
+  const [celebritySearch, setCelebritySearch] = useState('')
+  const [celebritySearchResults, setCelebritySearchResults] = useState<{ id: string; name: string; displayName: string | null; avatar: string | null }[]>([])
+  const [celebrityInviting, setCelebrityInviting] = useState(false)
+
+  // Audience Choice voting weight override (§6, session 58) - blank
+  // means "follow the platform default", same nullable-resolve pattern
+  // as PlatformSettings.artistRosterHypeScoreLookback elsewhere in this
+  // epic.
+  const [audienceVoteWeight, setAudienceVoteWeight] = useState('')
+  const [panelistVoteWeight, setPanelistVoteWeight] = useState('')
+  const [celebrityVoteWeight, setCelebrityVoteWeight] = useState('')
+  const [voteWeightSaving, setVoteWeightSaving] = useState(false)
+  const [plusOnesRequired, setPlusOnesRequired] = useState('0')
+  const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
+  // S1b-b2 - launch wave W4 (paid B2B) closed: attaching a venue with an
+  // amount > 0 is blocked, and PAID / BUY_IN can't be newly picked (an
+  // event already saved that way keeps its value). Admin bypasses.
+  const w4Open = useLaunchWaves().W4
+  const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
+  const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
+
+
+  // §9.2 (26 Jul) - Edit Event was on an older/diverged pricing form that
+  // never derived per-zone pricing for Numbered venues at all (only a
+  // flat ticketPrice field existed here) - same derivation as the Create
+  // page below, so Numbered-venue events can actually be repriced after
+  // creation instead of silently falling back to a field that doesn't
+  // apply to them.
+  const [tierPrices, setTierPrices] = useState<Record<string, string>>({})
+  const tierKey = (s: { name: string; level?: string }) => `${s.level || ''}::${s.name}`
+  // Existing per-section prices already saved on this event, keyed by
+  // `${level}::${sectionName}` (level-aware, 28 Jul - was sectionName
+  // alone) - takes priority over the venue's own suggested default
+  // when first populating tierPrices, since re-opening Edit shouldn't
+  // silently reset an organiser's already-set prices back to the venue
+  // owner's mere starting suggestion.
+  const [existingTierPrices, setExistingTierPrices] = useState<Record<string, string>>({})
+  const originalVenueId = event?.venue?.id || ''
+  const venueAmountW4Blocked = !!venueId && venueId !== originalVenueId && venueAmountBlocked(bookingAmount, w4Open)
+
+  const selectedVenue = venues.find((v) => v.id === venueId)
+  // Level-aware (28 Jul): grouped by (level, zoneName) so a same-named
+  // zone on two different levels prices independently instead of merging.
+  const numberedZoneSections: SeatSection[] =
+    selectedVenue?.seatingMode === 'NUMBERED'
+      ? Object.entries(
+          (selectedVenue.seats || []).reduce<Record<string, number>>((acc, s) => {
+            const key = `${s.level || ''}::${s.tierLabel}`
+            acc[key] = (acc[key] || 0) + 1
+            return acc
+          }, {})
+        ).map(([key, seatCount]) => {
+          const sepIdx = key.indexOf('::')
+          const level = key.slice(0, sepIdx)
+          const zoneName = key.slice(sepIdx + 2)
+          return {
+            name: zoneName,
+            level,
+            seats: seatCount,
+            price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName && (z.level || '') === level)?.suggestedPrice || 0,
+          }
+        })
+      : []
+  const venueSections =
+    selectedVenue?.seatingMode === 'NUMBERED'
+      ? numberedZoneSections
+      : selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
+  const usingTierPricing = venueSections.length > 0
+  const venueLevels = Array.from(new Set(venueSections.map((s) => s.level || '')))
+
+  const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
+  const eventDayOfWeek = formData.date ? DAY_NAMES[new Date(formData.date + 'T00:00:00').getDay()] : null
+  const dayOverride = selectedVenue?.dayRates?.find((d) => d.dayOfWeek === eventDayOfWeek)
+
+  // BUG-2609-083 - length and billed hours come from one shared helper
+  // (src/lib/venue-billing.ts), the same one the server records with.
+  const eventLength = billableHours(formData.startTime, formData.endTime)
+  const timeWarning = eventLength ? longEventText(f, eventLength) : null
+
+  let suggestedAmount: number | null = null
+  let suggestedAmountNote = ''
+  if (selectedVenue?.rateType === 'HOURLY') {
+    const rate = dayOverride?.hourlyRate || selectedVenue.hourlyRate
+    if (rate && eventLength) {
+      const hire = billableHours(formData.startTime, formData.endTime, selectedVenue.minDurationHours) ?? eventLength
+      suggestedAmount = hourlyTotal(rate, hire.billedHours)
+      // TODO i18n: hourlyNote's "₹/hr × n hr (…, billed as n hr)" formula stays English (venue-billing.ts, shared and unit-tested).
+      suggestedAmountNote = `${hourlyNote(rate, hire, selectedVenue.minDurationHours)}${dayOverride?.hourlyRate ? ` — ${f.dayRateSuffix.replace('{day}', weekdayName(locale, formData.date))}` : ''}`
+    }
+  } else if (selectedVenue?.rateType === 'DAILY') {
+    const rate = dayOverride?.dailyRate || selectedVenue.dailyRate
+    if (rate) {
+      suggestedAmount = rate
+      suggestedAmountNote = `${f.dayRate}${dayOverride?.dailyRate ? ` — ${weekdayName(locale, formData.date)}` : ''}`
+    }
+  }
+
+  // Unlike Create (nothing to preserve), Edit must not silently overwrite
+  // an already-negotiated Offer Amount just because the suggested-rate
+  // calculation re-runs (e.g. the organiser tweaks the event time). Only
+  // auto-fills when the venue itself is being changed away from what was
+  // originally attached - a genuinely new pick has no saved amount yet,
+  // same as Create's fresh-pick behavior.
+  useEffect(() => {
+    if (venueId && venueId !== originalVenueId && suggestedAmount !== null) {
+      setBookingAmount(String(suggestedAmount))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestedAmount, venueId, originalVenueId])
+
+  useEffect(() => {
+    if (venueSections.length > 0) {
+      const initial: Record<string, string> = {}
+      venueSections.forEach((s) => {
+        initial[tierKey(s)] = existingTierPrices[tierKey(s)] ?? (s.price ? String(s.price) : '')
+      })
+      setTierPrices(initial)
+    } else {
+      setTierPrices({})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [venueId, venues.length])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -90,11 +347,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           fetch('/api/venues'),
         ])
         if (!eventRes.ok) {
-          if (eventRes.status === 403) throw new Error('You do not have access to this event')
-          throw new Error('Event not found')
+          if (eventRes.status === 403) throw new Error(d.noAccess)
+          throw new Error(d.notFound)
         }
         const data: EventDetail = await eventRes.json()
         setEvent(data)
+        setAudienceVoteWeight(data.audienceVoteWeight != null ? String(data.audienceVoteWeight) : '')
+        setPanelistVoteWeight(data.panelistVoteWeight != null ? String(data.panelistVoteWeight) : '')
+        setCelebrityVoteWeight(data.celebrityVoteWeight != null ? String(data.celebrityVoteWeight) : '')
         setFormData({
           title: data.title,
           description: data.description,
@@ -106,11 +366,32 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           dresscode: data.dresscode || '',
           vibe: data.vibe || '',
         })
-        setIsFree(data.isFree)
+        // The D1 migration backfilled every event's mode, so the switch
+        // fallback (false = Pay at entry, the safe side) is only for odd rows.
+        setPaymentMode(initialPickerMode(data, false))
         setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : '')
         setSurpriseAct(data.surpriseAct)
+        setTermsChecklist(data.termsChecklist || [])
+        setSpecialNotes(data.specialNotes || '')
+        setAgeLimit(data.ageLimit || '')
+        setSpecialNotesOriginal(data.specialNotes || '')
+        setSpecialNotesStatus(data.specialNotesStatus || 'NONE')
+        setSpecialNotesRejectionReason(data.specialNotesRejectionReason || null)
+        setIsCompetitionShow(Boolean(data.isCompetitionShow))
+        setCompetitionPrizeFirst(data.competitionPrizeFirst || '')
+        setCompetitionPrizeSecond(data.competitionPrizeSecond || '')
+        setCompetitionPrizeThird(data.competitionPrizeThird || '')
+        setPlusOnesRequired(String(data.plusOnesRequired ?? 0))
+        setDefaultCompensationType(data.defaultCompensationType || 'FREE')
+        setDefaultFeeAmount(data.defaultFeeAmount != null ? String(data.defaultFeeAmount) : '')
+        setDefaultBuyInAmount(data.defaultBuyInAmount != null ? String(data.defaultBuyInAmount) : '')
         setVenueId(data.venue?.id || '')
         setBookingAmount(data.venueBooking?.amount != null ? String(data.venueBooking.amount) : '')
+        const existingMap: Record<string, string> = {}
+        for (const t of data.ticketTiers || []) {
+          existingMap[`${t.level || ''}::${t.sectionName}`] = String(t.price)
+        }
+        setExistingTierPrices(existingMap)
 
         if (venuesRes.ok) {
           setVenues(await venuesRes.json())
@@ -133,9 +414,77 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Same clamp-on-change discipline as the create page's equivalent field -
+  // client-side is decorative, PATCH /api/events/[id] validates independently.
+  const handlePlusOnesRequiredChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    if (value === '') {
+      setPlusOnesRequired('')
+      return
+    }
+    const num = Number(value)
+    if (!Number.isFinite(num)) return
+    setPlusOnesRequired(String(Math.max(0, Math.min(num, 20))))
+  }
+
   const save = async (publishOverride?: boolean) => {
+    const publishing = publishOverride !== undefined ? publishOverride : event?.status !== 'DRAFT'
+    // Validation-gap cluster fix (26 Jul) - same as the create page: these
+    // previously had no client-side check, blank sailed through to Publish.
+    const MAX_INR_AMOUNT = 10_000_000
+    if (publishing && venueId && !bookingAmount) {
+      showToast(f.offerBeforePublish, 'error')
+      return
+    }
+    if (venueAmountW4Blocked) {
+      showToast(tr.launchWaves.paidVenueSoonNote, 'error')
+      return
+    }
+    if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
+      showToast(f.offerTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
+      return
+    }
+    if (publishing && defaultCompensationType === 'PAID' && !defaultFeeAmount) {
+      showToast(f.feeBeforePublish, 'error')
+      return
+    }
+    if (defaultFeeAmount && Number(defaultFeeAmount) > MAX_INR_AMOUNT) {
+      showToast(f.feeTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
+      return
+    }
+    if (publishing && defaultCompensationType === 'BUY_IN' && !defaultBuyInAmount) {
+      showToast(f.buyInBeforePublish, 'error')
+      return
+    }
+    if (defaultBuyInAmount && Number(defaultBuyInAmount) > MAX_INR_AMOUNT) {
+      showToast(f.buyInTooHigh.replace('{max}', formatINR(MAX_INR_AMOUNT)), 'error')
+      return
+    }
+    if (usingTierPricing && !isFree) {
+      const missingPrice = venueSections.some((s) => !tierPrices[tierKey(s)] || Number(tierPrices[tierKey(s)]) <= 0)
+      if (missingPrice) {
+        showToast(f.missingSectionPrice, 'error')
+        return
+      }
+    }
+    const totalSeatsValue = usingTierPricing
+      ? String(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))
+      : formData.totalSeats
+    const ticketTiers = usingTierPricing && !isFree
+      ? venueSections.map((s) => ({
+          sectionName: s.name,
+          level: s.level || '',
+          price: Number(tierPrices[tierKey(s)]),
+          totalSeats: Number(s.seats),
+        }))
+      : usingTierPricing
+        // Free entry on a tiered venue still needs `ticketTiers` sent (even
+        // at ₹0) so PATCH's full-replace persists the current section/seat
+        // breakdown rather than leaving stale priced tiers from a previous
+        // Paid save in place.
+        ? venueSections.map((s) => ({ sectionName: s.name, level: s.level || '', price: 0, totalSeats: Number(s.seats) }))
+        : []
     setSaving(true)
-    setError('')
 
     try {
       const res = await fetch(`/api/events/${id}`, {
@@ -143,18 +492,35 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          totalSeats: totalSeatsValue,
           isFree,
-          ticketPrice: isFree ? null : ticketPrice,
+          paymentMode,
+          ticketPrice: isFree || usingTierPricing ? null : ticketPrice,
+          ticketTiers,
           surpriseAct,
+          plusOnesRequired: plusOnesRequired ? Number(plusOnesRequired) : 0,
+          defaultCompensationType,
+          defaultFeeAmount: defaultCompensationType === 'PAID' ? defaultFeeAmount : null,
+          defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? defaultBuyInAmount : null,
+          isCompetitionShow,
+          competitionPrizeFirst: isCompetitionShow ? competitionPrizeFirst : null,
+          competitionPrizeSecond: isCompetitionShow ? competitionPrizeSecond : null,
+          competitionPrizeThird: isCompetitionShow ? competitionPrizeThird : null,
+          termsChecklist,
+          specialNotes: specialNotes.trim() || null,
+          ageLimit: ageLimit || null,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to update event')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(waveErrorMessage(data, tr.launchWaves, ed.updateFailed))
+      }
 
       // Venue booking is a separate resource, so it's updated as its own request.
       if (venueId && (!event?.venue || event.venue.id !== venueId)) {
-        await fetch('/api/venue-bookings', {
+        const vbRes = await fetch('/api/venue-bookings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -165,176 +531,745 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             amount: bookingAmount,
           }),
         })
+        if (!vbRes.ok) {
+          const vbData = await vbRes.json().catch(() => ({}))
+          if (vbData.reason === 'PHONE_NOT_VERIFIED') {
+            router.push(`/verify-phone?next=${encodeURIComponent(`/dashboard/organiser/events/${id}/edit`)}`)
+            return
+          }
+          throw new Error(waveErrorMessage(vbData, tr.launchWaves, ed.bookVenueFailed))
+        }
       }
 
+      showToast(ed.eventSaved, 'success')
       router.push(`/dashboard/organiser/events/${id}`)
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || ed.saveEventFailed, 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  // Accept-to-Appear (§8, session 57) - replaces the old free-text
+  // celebrity/panelist photo-upload handlers entirely. Public display
+  // always reads the linked account's own avatar once ACCEPTED, so
+  // organiser-side photo upload has no path to ever surface publicly
+  // anymore; not worth keeping around. refetchEvent() re-pulls the full
+  // owner payload after any invite/remove action, same pattern the rest
+  // of this page already uses for server-owned state.
+  const refetchEvent = useCallback(async () => {
+    const res = await fetch(`/api/events/${id}/owner`)
+    if (res.ok) setEvent(await res.json())
+  }, [id])
+
+  const saveVoteWeights = async (useDefault: boolean) => {
+    setVoteWeightSaving(true)
+    try {
+      const payload = useDefault
+        ? { audienceVoteWeight: null, panelistVoteWeight: null, celebrityVoteWeight: null }
+        : {
+            audienceVoteWeight: Number(audienceVoteWeight),
+            panelistVoteWeight: Number(panelistVoteWeight),
+            celebrityVoteWeight: Number(celebrityVoteWeight),
+          }
+      const res = await fetch(`/api/events/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || ed.saveFailed)
+      if (useDefault) {
+        setAudienceVoteWeight('')
+        setPanelistVoteWeight('')
+        setCelebrityVoteWeight('')
+      }
+      showToast(ed.saved, 'success')
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || ed.saveFailed, 'error')
+    } finally {
+      setVoteWeightSaving(false)
+    }
+  }
+
+  const searchPanelistCandidates = async (q: string) => {
+    setPanelistSearch(q)
+    if (q.trim().length < 2) {
+      setPanelistSearchResults([])
+      return
+    }
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+    if (res.ok) {
+      const data = await res.json()
+      setPanelistSearchResults(data.users)
+    }
+  }
+
+  const invitePanelist = async (userId: string) => {
+    setPanelistInviting(true)
+    try {
+      const res = await fetch(`/api/events/${id}/panelists/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, bio: panelistBioDraft }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || ed.inviteFailed)
+      setPanelistSearch('')
+      setPanelistSearchResults([])
+      setPanelistBioDraft('')
+      showToast(ed.inviteSent, 'success')
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || ed.inviteFailed, 'error')
+    } finally {
+      setPanelistInviting(false)
+    }
+  }
+
+  const removePanelist = async (panelistId: string) => {
+    if (!(await confirm({ title: ed.removePanelistTitle, confirmLabel: ed.remove, destructive: true }))) return
+    try {
+      const res = await fetch(`/api/events/${id}/panelists/${panelistId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error(ed.removeFailed)
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || ed.removeFailed, 'error')
+    }
+  }
+
+  const searchCelebrityCandidates = async (q: string) => {
+    setCelebritySearch(q)
+    if (q.trim().length < 2) {
+      setCelebritySearchResults([])
+      return
+    }
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+    if (res.ok) {
+      const data = await res.json()
+      setCelebritySearchResults(data.users)
+    }
+  }
+
+  const inviteCelebrity = async (userId: string) => {
+    setCelebrityInviting(true)
+    try {
+      const res = await fetch(`/api/events/${id}/celebrities/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || ed.inviteFailed)
+      setCelebritySearch('')
+      setCelebritySearchResults([])
+      showToast(ed.inviteSent, 'success')
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || ed.inviteFailed, 'error')
+    } finally {
+      setCelebrityInviting(false)
+    }
+  }
+
+  const removeCelebrity = async (celebrityId: string) => {
+    if (!(await confirm({ title: ed.removeCelebrityTitle, confirmLabel: ed.remove, destructive: true }))) return
+    try {
+      const res = await fetch(`/api/events/${id}/celebrities/${celebrityId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error(ed.removeFailed)
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || ed.removeFailed, 'error')
+    }
+  }
+
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
   if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
-  if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>Event not found</div></>)
+  if (error && !event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
+  if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>{d.notFound}</div></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Event
-          </Link>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <BackLink href={`/dashboard/organiser/events/${id}`} label={ed.backToEvent} />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
-            Edit Event
-          </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Update your event details, seats, pricing, and venue.
+          <PageTitle size="lg" style={{ marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
+            {ed.title}
+          </PageTitle>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
+            {ed.subtitle}
           </p>
 
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
-
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
-                Event Details
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+                {f.eventDetails}
               </h2>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
+                {f.liveOnlyNote}
+              </p>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Title *</label>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+                <label style={labelStyle}>{f.titleLabel}</label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} style={inputStyle} required />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Description *</label>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+                <label style={labelStyle}>{f.descriptionLabel}</label>
                 <textarea name="description" value={formData.description} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} required />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Event Type *</label>
+                  <label style={labelStyle}>{f.eventTypeLabel}</label>
                   <select name="type" value={formData.type} onChange={handleChange} style={inputStyle}>
                     {EVENT_TYPES.map((t) => (
-                      <option key={t} value={t}>{t.replace('_', ' ')}</option>
+                      <option key={t} value={t}>{tr.eventTypes[t as keyof typeof tr.eventTypes] ?? t.replace('_', ' ')}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label style={labelStyle}>Date *</label>
-                  <input type="date" name="date" value={formData.date} onChange={handleChange} style={inputStyle} required />
+                  <label style={labelStyle}>{f.dateLabel}</label>
+                  <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} style={inputStyle} required />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Start Time *</label>
-                  <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} style={inputStyle} required />
+                  <label style={labelStyle}>{f.startTimeLabel}</label>
+                  <input
+                    type="time"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    min={formData.date === todayLocalDateString() ? nowLocalTimeString() : undefined}
+                    style={inputStyle}
+                    required
+                  />
                 </div>
                 <div>
-                  <label style={labelStyle}>End Time *</label>
+                  <label style={labelStyle}>{f.endTimeLabel}</label>
                   <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} style={inputStyle} required />
                 </div>
               </div>
+              {timeWarning && (
+                <p role="status" data-afa-time-warning style={{ margin: '0 0 var(--afa-space-18px)', padding: 'var(--afa-space-10px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5 }}>
+                  {timeWarning}
+                </p>
+              )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)' }}>
                 <div>
-                  <label style={labelStyle}>Dress Code</label>
-                  <input type="text" name="dresscode" value={formData.dresscode} onChange={handleChange} style={inputStyle} />
+                  <label style={labelStyle}>{f.dressCode}</label>
+                  <PresetSelectWithOther
+                    value={formData.dresscode}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, dresscode: val }))}
+                    presets={DRESSCODE_PRESETS}
+                    placeholder={f.dressCodePlaceholder}
+                    presetLabels={labels}
+                    noneLabel={f.presetNone}
+                    otherLabel={f.presetOther}
+                    inputStyle={inputStyle}
+                  />
                 </div>
                 <div>
-                  <label style={labelStyle}>Vibe</label>
-                  <input type="text" name="vibe" value={formData.vibe} onChange={handleChange} style={inputStyle} />
+                  <label style={labelStyle}>{f.vibe}</label>
+                  <PresetSelectWithOther
+                    value={formData.vibe}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, vibe: val }))}
+                    presets={VIBE_PRESETS}
+                    placeholder={f.vibePlaceholder}
+                    presetLabels={labels}
+                    noneLabel={f.presetNone}
+                    otherLabel={f.presetOther}
+                    inputStyle={inputStyle}
+                  />
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: '#0E0C0A' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
-                This event includes a surprise act
+                {f.surpriseAct}
               </label>
+
+              {/* FEAT-2608-045 */}
+              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-08)' }}>
+                <label style={labelStyle}>{f.eventTerms}</label>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
+                  {f.eventTermsIntro.split('{link}')[0]}<Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{f.refundPolicyLink}</Link>{f.eventTermsIntro.split('{link}')[1]}
+                </p>
+
+                <div style={{ marginBottom: 'var(--afa-space-4)', maxWidth: '260px' }}>
+                  <label style={labelStyle}>{f.ageLimit}</label>
+                  <PresetSelectWithOther
+                    value={ageLimit}
+                    onChange={setAgeLimit}
+                    presets={AGE_LIMIT_PRESETS}
+                    placeholder={f.ageLimitPlaceholder}
+                    presetLabels={labels}
+                    noneLabel={f.presetNone}
+                    otherLabel={f.presetOther}
+                    inputStyle={inputStyle}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-2) var(--afa-space-4)' }}>
+                  {EVENT_TERMS_CHECKLIST.map((term) => (
+                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
+                      <input
+                        type="checkbox"
+                        checked={termsChecklist.includes(term.key)}
+                        onChange={(e) => {
+                          setTermsChecklist((prev) =>
+                            e.target.checked ? [...prev, term.key] : prev.filter((k) => k !== term.key)
+                          )
+                        }}
+                        style={{ marginTop: '3px' }} // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
+                      />
+                      <span>{tr.eventTermsChecklist[term.key as keyof typeof tr.eventTermsChecklist] || term.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: 'var(--afa-space-18px)' }}>
+                  <label style={labelStyle}>{f.specialNotes}</label>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-6px)' }}>
+                    {ed.specialNotesHint}
+                  </p>
+
+                  {specialNotesStatus !== 'NONE' && (
+                    <div
+                      data-afa-special-notes-status={specialNotesStatus}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 'var(--afa-space-6px)',
+                        fontSize: 'var(--afa-text-small)',
+                        fontWeight: 700,
+                        padding: 'var(--afa-space-1) var(--afa-space-10px)',
+                        borderRadius: 'var(--afa-radius-pill)',
+                        marginBottom: 'var(--afa-space-2)',
+                        // BUG-2609-050 - from STATUS_TONE, not re-typed: the
+                        // copy used --afa-sage / --afa-error text on the tint,
+                        // which fails contrast; the shared tone uses -bright.
+                        background: (specialNotesStatus === 'APPROVED' ? STATUS_TONE.sage : specialNotesStatus === 'REJECTED' ? STATUS_TONE.error : STATUS_TONE.gold).bg,
+                        color: (specialNotesStatus === 'APPROVED' ? STATUS_TONE.sage : specialNotesStatus === 'REJECTED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
+                      }}
+                    >
+                      {specialNotesStatus === 'APPROVED' ? ed.notesApproved : specialNotesStatus === 'REJECTED' ? ed.notesRejected : <><Icon name="clock" size={14} style={INLINE_ICON_STYLE} /> {ed.notesPending}</>}
+                    </div>
+                  )}
+                  {specialNotesStatus === 'REJECTED' && specialNotesRejectionReason && (
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-2)' }}>
+                      {ed.rejectionReason.replace('{reason}', specialNotesRejectionReason)}
+                    </p>
+                  )}
+                  {specialNotesStatus === 'APPROVED' && specialNotes !== specialNotesOriginal && (
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-brown-gold)', marginBottom: 'var(--afa-space-2)' }}>
+                      {ed.notesReReview}
+                    </p>
+                  )}
+
+                  <textarea
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value.slice(0, SPECIAL_NOTES_MAX_LENGTH))}
+                    maxLength={SPECIAL_NOTES_MAX_LENGTH}
+                    rows={3}
+                    placeholder={f.specialNotesPlaceholder}
+                    style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                  />
+                  <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: 'var(--afa-space-1)', textAlign: 'right' }}>
+                    {specialNotes.length}/{SPECIAL_NOTES_MAX_LENGTH}
+                  </p>
+                </div>
+              </div>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
+                <input type="checkbox" data-afa-competition-toggle checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
+                {f.competitionToggle}
+              </label>
+
+              {isCompetitionShow && (
+                <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)' }}>
+                    <div>
+                      <label style={labelStyle}>{f.prizeFirst}</label>
+                      <input data-afa-prize="1" style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder={f.prizeFirstPlaceholder} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>{f.prizeSecond}</label>
+                      <input data-afa-prize="2" style={inputStyle} value={competitionPrizeSecond} onChange={(e) => setCompetitionPrizeSecond(e.target.value)} placeholder={f.optional} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>{f.prizeThird}</label>
+                      <input data-afa-prize="3" style={inputStyle} value={competitionPrizeThird} onChange={(e) => setCompetitionPrizeThird(e.target.value)} placeholder={f.optional} />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+                    <label style={labelStyle}>{ed.celebrityAttending}</label>
+                    <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
+                      {ed.celebrityHint}
+                    </p>
+                    {(event?.celebrities || []).map((c) => (
+                      <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', padding: 'var(--afa-space-2) var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
+                        {c.photoUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={c.photoUrl} alt={c.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                        )}
+                        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, flex: 1 }}>{c.name}</span>
+                        <span style={{
+                          fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
+                          background: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
+                          color: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
+                        }}>
+                          {inviteStatusLabel(c.status)}
+                        </span>
+                        <RemoveRowButton onClick={() => removeCelebrity(c.id)} label={ed.remove} />
+                      </div>
+                    ))}
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        style={inputStyle}
+                        value={celebritySearch}
+                        onChange={(e) => searchCelebrityCandidates(e.target.value)}
+                        placeholder={ed.searchToInvite}
+                        disabled={celebrityInviting}
+                      />
+                      {celebritySearchResults.length > 0 && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid var(--afa-shadow)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                          {celebritySearchResults.map((u) => (
+                            <Button
+                              key={u.id}
+                              variant="menu-row"
+                              type="button"
+                              onClick={() => inviteCelebrity(u.id)}
+                              disabled={celebrityInviting}
+                            >
+                              {u.displayName || u.name}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>{ed.panelists}</label>
+                    <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
+                      {ed.panelistsHint}
+                    </p>
+                    {(event?.panelists || []).map((p) => (
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', padding: 'var(--afa-space-2) var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
+                        {p.photoUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.photoUrl} alt={p.name} style={{ width: '32px', height: '32px', borderRadius: 'var(--afa-radius-sm)', objectFit: 'cover' }} />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>{p.name}</div>
+                          {p.bio && <div style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.6 }}>{p.bio}</div>}
+                        </div>
+                        <span style={{
+                          fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase', // token-ok(spacing-literal): 3px odd value, no exact token (GEN-2609-107)
+                          background: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
+                          color: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
+                        }}>
+                          {inviteStatusLabel(p.status)}
+                        </span>
+                        <RemoveRowButton onClick={() => removePanelist(p.id)} label={ed.remove} />
+                      </div>
+                    ))}
+                    <input
+                      style={{ ...inputStyle, marginBottom: 'var(--afa-space-2)' }}
+                      value={panelistBioDraft}
+                      onChange={(e) => setPanelistBioDraft(e.target.value)}
+                      placeholder={ed.panelistBioPlaceholder}
+                    />
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        style={inputStyle}
+                        value={panelistSearch}
+                        onChange={(e) => searchPanelistCandidates(e.target.value)}
+                        placeholder={ed.searchToInvite}
+                        disabled={panelistInviting}
+                      />
+                      {panelistSearchResults.length > 0 && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid var(--afa-shadow)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                          {panelistSearchResults.map((u) => (
+                            <Button
+                              key={u.id}
+                              variant="menu-row"
+                              type="button"
+                              onClick={() => invitePanelist(u.id)}
+                              disabled={panelistInviting}
+                            >
+                              {u.displayName || u.name}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-10)' }}>
+                    <label style={labelStyle}>{ed.voteWeighting}</label>
+                    <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
+                      {ed.voteWeightingHint}
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
+                      <div>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)', textTransform: 'uppercase' }}>{ed.voteAudience}</label>
+                        <input
+                          type="number"
+                          style={inputStyle}
+                          value={audienceVoteWeight}
+                          onChange={(e) => setAudienceVoteWeight(e.target.value)}
+                          placeholder="80"
+                          min={50}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)', textTransform: 'uppercase' }}>{ed.votePanelist}</label>
+                        <input
+                          type="number"
+                          style={inputStyle}
+                          value={panelistVoteWeight}
+                          onChange={(e) => setPanelistVoteWeight(e.target.value)}
+                          placeholder="10"
+                          min={0}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)', textTransform: 'uppercase' }}>{ed.voteCelebrity}</label>
+                        <input
+                          type="number"
+                          style={inputStyle}
+                          value={celebrityVoteWeight}
+                          onChange={(e) => setCelebrityVoteWeight(e.target.value)}
+                          placeholder="10"
+                          min={0}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        fullWidth={false}
+                        type="button"
+                        onClick={() => saveVoteWeights(false)}
+                        disabled={voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight}
+                        style={{ opacity: voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight ? 0.5 : 1 }}
+                      >
+                        {voteWeightSaving ? ed.saving : ed.saveOverride}
+                      </Button>
+                      <Button
+                        variant="outline-neutral"
+                        size="md"
+                        fullWidth={false}
+                        type="button"
+                        onClick={() => saveVoteWeights(true)}
+                        disabled={voteWeightSaving}
+                      >
+                        {ed.usePlatformDefault}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
 
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
-                Seats & Ticket Price
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
+                {f.seatsAndPrice}
               </h2>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Total Seats *</label>
-                <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" style={inputStyle} required />
+              {usingTierPricing ? (
+                <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-14px)' }}>
+                    {f.sectionsFromSeatMap.replace('{venue}', selectedVenue?.name ?? '')}
+                  </p>
+                  {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
+                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} title={f.layoutPreview} mainLabel={f.mainLevel} />
+                  )}
+                  {venueLevels.map((lvl) => (
+                    <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? 'var(--afa-space-10px)' : 0 }}>
+                      {venueLevels.length > 1 && (
+                        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-1)' }}>
+                          {lvl || f.mainLevel}
+                        </div>
+                      )}
+                      {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-3) 0', borderBottom: '1px solid var(--afa-tint-06)' }}>
+                          <div>
+                            <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)' }}>
+                              {selectedVenue?.seatingMode === 'NUMBERED' && (
+                                <span style={{ width: '9px', height: '9px', borderRadius: 'var(--afa-radius-xs)', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
+                              )}
+                              {s.name}
+                            </div>
+                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{seatsText(locale, f, Number(s.seats) || 0)}</div>
+                          </div>
+                          {!isFree ? (
+                            <input
+                              type="number"
+                              value={tierPrices[tierKey(s)] || ''}
+                              onChange={(e) => setTierPrices((prev) => ({ ...prev, [tierKey(s)]: e.target.value }))}
+                              min="0"
+                              placeholder={f.pricePlaceholder}
+                              style={{ ...inputStyle, width: '120px' }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{f.free}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-14px)' }}>
+                    {f.totalCapacity.replace('{seats}', seatsText(locale, f, venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))).replace('{sections}', sectionsText(locale, f, venueSections.length))}
+                  </p>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+                  <label style={labelStyle}>{f.totalSeatsLabel}</label>
+                  <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" style={inputStyle} required />
+                </div>
+              )}
+
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
+                <label style={labelStyle}>{f.plusOnes} <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.optionalParen}</span></label>
+                <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" style={{ ...inputStyle, maxWidth: '120px' }} />
+                <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>
+                  {ed.plusOnesHint}
+                </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
-                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
-                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
-                </label>
-              </div>
+              <PaymentModePicker value={paymentMode} onChange={setPaymentMode} paidEnabled={paidBookingsEnabled === true} />
 
-              {!isFree && (
+              {!isFree && !usingTierPricing && (
                 <div>
-                  <label style={labelStyle}>Ticket Price (₹)</label>
+                  <label style={labelStyle}>{f.ticketPriceLabel}</label>
                   <input type="number" value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} min="0" style={inputStyle} />
                 </div>
               )}
             </section>
 
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
-                Venue
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+                {f.paymentTerms}
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
-                Changing the venue sends a new booking request.
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
+                {ed.paymentTermsHint}
+              </p>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
+                {([
+                  { value: 'FREE', label: f.compFree },
+                  { value: 'PAID', label: f.compPaid },
+                  { value: 'BUY_IN', label: f.compBuyIn },
+                ] as const).map((opt) => (
+                  <Button
+                    key={opt.value}
+                    variant="toggle-box"
+                    size="md"
+                    fullWidth={false}
+                    selected={defaultCompensationType === opt.value}
+                    type="button"
+                    disabled={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value}
+                    aria-disabled={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value || undefined}
+                    style={paymentTypeBlocked(opt.value, w4Open) && defaultCompensationType !== opt.value ? WAVE_BLOCKED_CONTROL_STYLE : undefined}
+                    data-afa-comp-option={opt.value}
+                    onClick={() => setDefaultCompensationType(opt.value)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+              {!w4Open && (
+                <div style={{ marginBottom: 'var(--afa-space-10px)' }}>
+                  <WaveSoonNote wave="W4" compact>{tr.launchWaves.paidSlotsSoon}</WaveSoonNote>
+                </div>
+              )}
+              {defaultCompensationType === 'PAID' && (
+                <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder={f.feePlaceholder} style={{ ...inputStyle, maxWidth: '200px' }} />
+              )}
+              {defaultCompensationType === 'BUY_IN' && (
+                <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder={f.buyInPlaceholder} style={{ ...inputStyle, maxWidth: '200px' }} />
+              )}
+            </section>
+
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+                {f.venue}
+              </h2>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
+                {ed.changeVenueHint}
               </p>
 
-              <div style={{ marginBottom: venueId ? '18px' : 0 }}>
-                <label style={labelStyle}>Venue</label>
-                <select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
-                  <option value="">No venue selected</option>
+              <div style={{ marginBottom: venueId ? 'var(--afa-space-18px)' : 0 }}>
+                <label style={labelStyle}>{f.venue}</label>
+                <select data-afa-venue-select value={venueId} onChange={(e) => setVenueId(e.target.value)} style={inputStyle}>
+                  <option value="">{f.noVenueSelected}</option>
                   {venues.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name} — {v.city} ({v.capacity} seats)</option>
+                    <option key={v.id} value={v.id}>{f.venueOption.replace('{name}', v.name).replace('{city}', v.city).replace('{seats}', seatsText(locale, f, v.capacity))}</option>
                   ))}
                 </select>
               </div>
 
               {venueId && (
                 <div>
-                  <label style={labelStyle}>Offer Amount (₹)</label>
-                  <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" style={inputStyle} />
+                  {venueId !== originalVenueId && (selectedVenue?.rateType === 'HOURLY' || selectedVenue?.rateType === 'DAILY') && (
+                    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) var(--afa-space-14px)', marginBottom: 'var(--afa-space-10px)' }}>
+                      <div data-afa-rate-note style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2px)' }}>
+                        {selectedVenue.rateType === 'HOURLY' ? f.hourlyRate : f.dailyRate}
+                        {suggestedAmountNote && ` · ${suggestedAmountNote}`}
+                      </div>
+                      <div style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                        {suggestedAmount !== null ? formatINR(suggestedAmount) : f.setDateTimeToCalculate}
+                      </div>
+                    </div>
+                  )}
+                  <label style={labelStyle}>{f.offerAmount} {venueId !== originalVenueId && <span style={{ fontWeight: 400, opacity: 0.6 }}>{f.offerAmountPrefilledHint}</span>}</label>
+                  <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" style={inputStyle} />
+                  {venueAmountW4Blocked && (
+                    <div style={{ marginTop: 'var(--afa-space-2)' }}>
+                      <WaveSoonNote wave="W4" compact>{tr.launchWaves.paidVenueSoonNote}</WaveSoonNote>
+                    </div>
+                  )}
                 </div>
               )}
             </section>
 
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button
+            <div data-afa-action-row style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Button
+                data-afa-save-event
+                variant="primary"
+                size="lg"
+                fullWidth={false}
                 type="button"
                 disabled={saving}
                 onClick={() => save(event.status === 'APPROVED' ? true : undefined)}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ opacity: saving ? 0.6 : 1 }}
               >
-                {saving ? 'Saving...' : event.status === 'APPROVED' ? 'Save Changes' : 'Save & Publish'}
-              </button>
+                {saving ? ed.saving : event.status === 'APPROVED' ? ed.saveChanges : ed.saveAndPublish}
+              </Button>
               {event.status !== 'APPROVED' && (
-                <button
+                <Button
+                  variant="outline-neutral"
+                  size="lg"
+                  fullWidth={false}
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
-                  Save as Draft
-                </button>
+                  {f.saveDraft}
+                </Button>
               )}
-              <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
-                Cancel
+              <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
+                {f.cancel}
               </Link>
             </div>
           </form>

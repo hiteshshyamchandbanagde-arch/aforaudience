@@ -1,54 +1,451 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { signOutAndClearCache } from '@/lib/sw-cache'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import DashboardShell, { getShellDashboardLink, useBadgeCounts } from '@/components/DashboardShell'
+import { useHeldRoles } from '@/components/HeldRolesContext'
+import GenrePicker from '@/components/GenrePicker'
+import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
+import { FeeSheet } from '@/components/FeeSheet'
+import { PlusIcon } from '@/components/icons/VenueIcons'
+import Button, { variantStyle } from '@/components/ui/Button'
+import { useLocale } from '@/lib/i18n/translate'
+import { useLaunchWaves } from '@/hooks/useLaunchWaves'
+import { waveErrorMessage } from '@/lib/launch-waves-ui'
+import WaveSoonNote from '@/components/WaveSoonNote'
+import Badge from '@/components/ui/Badge'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
-type RoleStatus = { isInRole: boolean; isApproved: boolean; hasProfile: boolean }
+// Mobile Redesign Phase 4c (GEN-2609-008) - small inline line-icons for the
+// mobile nav-hub's two grouped action lists below. No dedicated shared
+// icon file for these (Building/Gear/Receipt/Logout) since this is the
+// only page that needs them - PlusIcon above is reused from VenueIcons
+// rather than duplicated, since it already exists there.
+function BuildingIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M5 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16M13 21v-8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 8h0M8 12h0M8 16h0M3 21h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+// One row of the phone profile's grouped menu (Create / Money & account).
+type ProfileMenuRow = { icon: React.ReactNode; title: string; hint?: string; danger?: boolean; soon?: boolean; onClick: () => void }
 
-const cardStyle = {
-  background: '#fff',
-  borderRadius: '12px',
-  padding: '24px',
-  border: '1px solid rgba(14,12,10,0.08)',
-  marginBottom: '16px',
+function UserBadgeIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function ReceiptIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M6 3h12v18l-2.5-1.5L13 21l-1.5-1.5L10 21l-2.5-1.5L6 21V3Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function GearIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3M18 6l-1.8 1.8M7.8 16.2 6 18M18 18l-1.8-1.8M7.8 7.8 6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function LogoutIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4M16 17l4-5-4-5M20 12H9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function ChevronRightIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+// GEN-2609-013 - same shapes as DashboardShell.tsx's internal Icon
+// component's 'dashboard'/'message' cases, redrawn at this file's own
+// strokeWidth (1.4, matching the icons above) rather than importing that
+// non-exported component - same "no dedicated shared icon file" call as
+// every other icon in this block.
+function DashboardIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function MessageIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
 }
 
-export default function ProfilePage() {
-  const { data: session, status } = useSession()
+type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
+
+const DASHBOARD_PATH: Record<'artist' | 'organiser' | 'venue', string> = {
+  artist: '/dashboard/artist',
+  organiser: '/dashboard/organiser',
+  venue: '/dashboard/venue',
+}
+const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
+  artist: 'ARTIST',
+  organiser: 'ORGANISER',
+  venue: 'VENUE_OWNER',
+}
+
+// GEN-2608-036: `active` highlights the card someone was routed to via
+// the ?role= carry-through (see the useEffect below) - a visible cue that
+// this is the specific application they came here for, not just wherever
+// scrollIntoView happened to land them.
+const cardStyle = (active?: boolean) => ({
+  background: 'var(--afa-surface-raised)',
+  borderRadius: 'var(--afa-radius-lg)',
+  padding: 'var(--afa-space-28px) var(--afa-space-28px) var(--afa-space-6)',
+  border: active ? '1.5px solid var(--afa-selected-border)' : '1px solid var(--afa-tint-06)',
+  boxShadow: active ? '0 0 0 4px var(--afa-selected-bg)' : 'none',
+  transition: 'border-color 400ms ease, box-shadow 400ms ease',
+})
+
+// GEN-2609-121 - a card's Save is an outline, and becomes the primary only
+// while that card has unsaved changes (it reverts once the save lands and the
+// card's initial values catch up). Two dirty cards are both primary: each is
+// the action for its own card. Both states share one footprint - the primary
+// carries a transparent 1px border to match the outline's - so the button
+// does not shift when the first character is typed.
+const saveButtonProps = (dirty: boolean) =>
+  dirty
+    ? { variant: 'primary' as const, style: { border: '1px solid transparent' } }
+    : {
+        variant: 'outline-neutral' as const,
+        style: { padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-title)', fontWeight: 700 },
+      }
+
+// GEN-2609-119 (G2) - the role-application buttons ("Become an Artist",
+// "Apply") are outlines in the same pill shape, with primary text so they
+// still read as the card's call to action. The page's one primary is a
+// card Save while that card is dirty.
+const roleCtaProps = {
+  variant: 'outline-neutral' as const,
+  style: { ...saveButtonProps(false).style, color: 'var(--afa-text-primary)' },
+}
+
+// Recessed field look (Figma Make profile-page redesign, 5 Sep 2026 - see
+// docs/design.md) - inputs sit a shade darker than the card so they read as
+// wells instead of blending into the card body. Same border/radius as
+// before, just the background + a subtle amber focus ring.
+const fieldStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '11px var(--afa-space-14px)', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
+  borderRadius: 'var(--afa-radius-md)',
+  border: '1px solid var(--afa-tint-10)',
+  fontSize: 'var(--afa-text-body)',
+  boxSizing: 'border-box',
+  background: 'var(--afa-surface-page)',
+  color: 'var(--afa-text-primary)',
+}
+
+function ProfileContent() {
+  const { t: tr } = useLocale()
+  const { data: session, status, update: updateSession } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Feedback cmrzsmlus - if the person arrived here via the login
+  // redirect's ?role= carry-through (originating from a landing-page
+  // "Join As X" link), scroll straight to that application card instead
+  // of leaving them to find it among three on the page themselves.
+  //
+  // GEN-2608-036: neither apply action can be fully automatic - Artist
+  // needs a genre pick, Organiser needs an org name, and even Venue
+  // Owner (no required field) shouldn't silently submit from a link
+  // click with no confirming action from the person. So this gets as
+  // close to "direct apply" as real required input allows: highlight
+  // the exact card (2.5s glow, cleared after) and focus its first
+  // input/button so the very next thing the person does is fill that
+  // one field and hit the button, instead of scanning three cards to
+  // find the one they meant.
+  const [highlightedCard, setHighlightedCard] = useState<'artist' | 'organiser' | 'venue' | null>(null)
+
+  // Mobile Redesign Phase 4c (GEN-2609-008) - generalized the ?role=
+  // scroll-and-highlight below into a function both that effect AND the
+  // mobile nav-hub's row taps can call, rather than the hub duplicating
+  // its own scroll/focus logic. `focus` defaults true (matches the
+  // original ?role= behavior); the hub's plain "jump to this section"
+  // taps (Settings) pass false since there's no single input to focus.
+  const scrollToCard = (id: string, highlight?: 'artist' | 'organiser' | 'venue', focus = true) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (highlight) {
+      setHighlightedCard(highlight)
+      setTimeout(() => setHighlightedCard(null), 2500)
+    }
+    if (focus) {
+      setTimeout(() => {
+        const focusable = el.querySelector<HTMLElement>('input, button')
+        focusable?.focus()
+      }, 500)
+    }
+  }
+
+  useEffect(() => {
+    const role = searchParams.get('role')
+    if (role !== 'artist' && role !== 'organiser' && role !== 'venue') return
+    scrollToCard(`apply-${role}`, role)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
+  // Mobile Redesign Phase 4c - the hub's "Fee breakdown" row reuses the
+  // real Phase 3 FeeSheet component unmodified (out of scope to edit -
+  // see docs/design.md). FeeSheet needs a specific booking's numbers,
+  // which don't exist on this page (no purchase in progress) - so this
+  // shows a representative example ticket (matches the Figma export's
+  // own ₹500 illustrative framing for this exact "how fees work in
+  // general" context) priced against the REAL current platform booking
+  // fee via the same /api/platform-settings/audience-fee endpoint the
+  // seat picker already uses, rather than inventing that number too.
+  const [feeSheetOpen, setFeeSheetOpen] = useState(false)
+  const [audienceBookingFee, setAudienceBookingFee] = useState(0)
+  const isAudience = (session?.user as any)?.role === 'AUDIENCE'
+
+  // GEN-2609-013 - Dashboard/Messages recovery for the mobile "Quick
+  // links" group below, now that MobileTabBar.tsx's unified bar (not
+  // DashboardShell's own bar) covers this route. Same resolver + hook
+  // DashboardShell.tsx's own topNav uses, not reimplemented - see that
+  // file's exported getShellDashboardLink/useBadgeCounts.
+  const dashboardHref = getShellDashboardLink((session?.user as { role?: string } | undefined)?.role)
+  const { pendingCount, unreadCount } = useBadgeCounts()
+
+  // GEN-2609-019 Phase D - role switcher below, for accounts holding 2+
+  // roles. Reuses the server-resolved HeldRoles context (already driving
+  // DashboardShell.tsx's own ROLE_SECTIONS filtering) rather than
+  // inventing new role-state.
+  const held = useHeldRoles()
+  const activeRole = (session?.user as { role?: string } | undefined)?.role
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
   const [artistStatus, setArtistStatus] = useState<RoleStatus | null>(null)
   const [orgName, setOrgName] = useState('')
-  const [genre, setGenre] = useState('')
+  const [genre, setGenre] = useState<string[]>([])
   const [applying, setApplying] = useState<'organiser' | 'venue' | 'artist' | null>(null)
+  // S1b-b2 - launch wave W2 (applications) closed: each apply card shows
+  // "Applications open soon" instead of its form/button (admin bypasses).
+  const applicationsClosed = !useLaunchWaves().W2
+  const [switching, setSwitching] = useState<'organiser' | 'venue' | 'artist' | null>(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  // Display name lives separately from the login username. Loaded from
+  // /api/users/me on mount so we know whether it's blank; edited via
+  // PATCH. Deliberately not read from session — the session cache doesn't
+  // include displayName (yet) and we want the latest value from the DB.
+  const [displayName, setDisplayName] = useState('')
+  const [initialDisplayName, setInitialDisplayName] = useState('')
+  const [savingName, setSavingName] = useState(false)
+
+  // Feedback cms(profile name-flash) - the heading used to fall back to
+  // the login username (available instantly from the session) while
+  // /api/users/me was still in flight, then swap to the real display
+  // name once it landed - a visible flash on every page load. Not a
+  // cross-user leak (confirmed both values always belong to the same
+  // signed-in user), just a loading-order issue. This flag lets the
+  // heading render a neutral placeholder for that one gap instead.
+  const [nameLoaded, setNameLoaded] = useState(false)
+
+  // Display-only currency preference (Option A). Same load/save shape as
+  // displayName above - separate state loaded from /api/users/me (not the
+  // session cache), its own PATCH, its own saving flag. Real settlement
+  // stays INR always; this only changes how amounts are *shown* to this
+  // user - see src/lib/money-display.ts.
+  const [currencies, setCurrencies] = useState<{ code: string; label: string; symbol: string }[]>([])
+  const [displayCurrency, setDisplayCurrency] = useState('INR')
+  const [initialDisplayCurrency, setInitialDisplayCurrency] = useState('INR')
+  const [savingCurrency, setSavingCurrency] = useState(false)
+
+  // "About You" - optional photo + short bio (session 62, design.md §9.5).
+  // Same load/save shape as displayName/displayCurrency above: loaded from
+  // /api/users/me, its own PATCH, its own saving flag. Never required -
+  // this closes the gap where a person's name+photo already show publicly
+  // in ratings/feedback today but there's nowhere to add context to them.
+  const [avatar, setAvatar] = useState('')
+  const [initialAvatar, setInitialAvatar] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [bio, setBio] = useState('')
+  const [initialBio, setInitialBio] = useState('')
+  const [savingAbout, setSavingAbout] = useState(false)
+
+  // Live preview for the "My Feedback" card below (2 Aug, Hitesh) -
+  // previously a static link with no indication of what's actually in
+  // there. Reuses /api/feedback/mine (same data as the full page) but
+  // only needs counts here, not the full list.
+  const [feedbackSummary, setFeedbackSummary] = useState<{ total: number; open: number } | null>(null)
+  const nameDirty = displayName.trim() !== initialDisplayName.trim()
+  const aboutDirty = avatar !== initialAvatar || bio !== initialBio
+  const currencyDirty = displayCurrency !== initialDisplayCurrency
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
   const loadStatuses = async () => {
-    const [orgRes, venueRes, artistRes] = await Promise.all([
+    const [meRes, orgRes, venueRes, artistRes, currenciesRes, feedbackRes] = await Promise.all([
+      fetch('/api/users/me'),
       fetch('/api/organisers/status'),
       fetch('/api/venue-owners/status'),
       fetch('/api/artists/status'),
+      fetch('/api/display-currencies'),
+      fetch('/api/feedback/mine'),
     ])
+    if (meRes.ok) {
+      const d = await meRes.json()
+      const current = d.user?.displayName ?? ''
+      setDisplayName(current)
+      setInitialDisplayName(current)
+      const currentCurrency = d.user?.displayCurrency ?? 'INR'
+      setDisplayCurrency(currentCurrency)
+      setInitialDisplayCurrency(currentCurrency)
+      const currentAvatar = d.user?.avatar ?? ''
+      setAvatar(currentAvatar)
+      setInitialAvatar(currentAvatar)
+      const currentBio = d.user?.bio ?? ''
+      setBio(currentBio)
+      setInitialBio(currentBio)
+    }
+    // Set regardless of meRes.ok - if the fetch failed we still want to
+    // stop showing the placeholder and fall through to the username,
+    // rather than leaving the heading blank forever.
+    setNameLoaded(true)
+    if (currenciesRes.ok) {
+      const d = await currenciesRes.json()
+      setCurrencies(d.currencies ?? [])
+    }
     if (orgRes.ok) {
       const d = await orgRes.json()
-      setOrgStatus({ isInRole: d.isOrganiser, isApproved: d.isApproved, hasProfile: d.hasProfile })
+      setOrgStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
     }
     if (venueRes.ok) {
       const d = await venueRes.json()
-      setVenueStatus({ isInRole: d.isVenueOwner, isApproved: d.isApproved, hasProfile: d.hasProfile })
+      setVenueStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
     }
     if (artistRes.ok) {
       const d = await artistRes.json()
-      setArtistStatus({ isInRole: d.isArtist, isApproved: d.isApproved, hasProfile: d.hasProfile })
+      setArtistStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
+    }
+    if (feedbackRes.ok) {
+      const d = await feedbackRes.json()
+      const items: { status: string }[] = d.items ?? []
+      const open = items.filter((it) => it.status !== 'RESOLVED' && it.status !== 'REJECTED').length
+      setFeedbackSummary({ total: items.length, open })
+    }
+  }
+
+  const saveDisplayName = async () => {
+    setSavingName(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName: displayName.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || tr.profilePage.genericSaveFailed)
+      setInitialDisplayName(data.user?.displayName ?? '')
+      setMessage(tr.profilePage.displayNameSaved)
+      await updateSession()
+    } catch (err: any) {
+      setError(err.message || tr.profilePage.genericSaveFailed)
+    } finally {
+      setSavingName(false)
+    }
+  }
+
+  const saveDisplayCurrency = async () => {
+    setSavingCurrency(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayCurrency }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || tr.profilePage.genericSaveFailed)
+      const saved = data.user?.displayCurrency ?? 'INR'
+      setDisplayCurrency(saved)
+      setInitialDisplayCurrency(saved)
+      setMessage(tr.profilePage.displayCurrencySaved)
+    } catch (err: any) {
+      setError(err.message || tr.profilePage.genericSaveFailed)
+    } finally {
+      setSavingCurrency(false)
+    }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+    setUploadingAvatar(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || tr.profilePage.uploadFailed)
+        return
+      }
+      setAvatar(data.url)
+    } catch {
+      setError(tr.profilePage.uploadFailed)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  const saveAbout = async () => {
+    setSavingAbout(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: avatar.trim() || null, bio: bio.trim() || null }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || tr.profilePage.genericSaveFailed)
+      setInitialAvatar(data.user?.avatar ?? '')
+      setInitialBio(data.user?.bio ?? '')
+      setMessage(tr.profilePage.aboutYouSaved)
+      await updateSession()
+    } catch (err: any) {
+      setError(err.message || tr.profilePage.genericSaveFailed)
+    } finally {
+      setSavingAbout(false)
     }
   }
 
@@ -56,9 +453,54 @@ export default function ProfilePage() {
     if (session?.user) loadStatuses()
   }, [session])
 
+  useEffect(() => {
+    if (!isAudience) return
+    fetch('/api/platform-settings/audience-fee')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data) setAudienceBookingFee(data.audienceBookingFeeRupees ?? 0) })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAudience])
+
+  // s60-profile-status-stale-no-refetch: loadStatuses only ran on
+  // useEffect([session]) - the NextAuth session object doesn't change on
+  // ordinary navigation, so a user sitting on this page when their
+  // org/venue/artist application gets approved elsewhere saw stale
+  // "pending" until a hard refresh or re-login. Refetch on window focus
+  // and tab visibility change closes that gap without polling - picks up
+  // the change the next time they actually look at the tab, which is
+  // when it matters.
+  useEffect(() => {
+    if (!session?.user) return
+    const handleFocus = () => loadStatuses()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadStatuses()
+    }
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [session])
+
+  // BUG-2608-020: submitting via the SupportWidget is an in-page overlay,
+  // not a real navigation/focus change, so the focus/visibility refetch
+  // above never fired for it. The widget broadcasts this event on a
+  // successful submit; just reuse the same loadStatuses() the other
+  // refetch paths already use so the "My Feedback" count updates without
+  // a full reload.
+  useEffect(() => {
+    if (!session?.user) return
+    const handleFeedbackSubmitted = () => loadStatuses()
+    window.addEventListener('afa:feedback-submitted', handleFeedbackSubmitted)
+    return () => window.removeEventListener('afa:feedback-submitted', handleFeedbackSubmitted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+
   const applyOrganiser = async () => {
     if (!orgName.trim()) {
-      setError('Enter an organisation or brand name first.')
+      setError(tr.profilePage.enterOrgNameFirst)
       return
     }
     setApplying('organiser')
@@ -71,8 +513,9 @@ export default function ProfilePage() {
         body: JSON.stringify({ orgName }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, tr.profilePage.submitApplicationFailed))
       setMessage(data.message)
+      await updateSession()
       await loadStatuses()
     } catch (err: any) {
       setError(err.message)
@@ -88,8 +531,9 @@ export default function ProfilePage() {
     try {
       const res = await fetch('/api/venue-owners/apply', { method: 'POST' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, tr.profilePage.submitApplicationFailed))
       setMessage(data.message)
+      await updateSession()
       await loadStatuses()
     } catch (err: any) {
       setError(err.message)
@@ -109,8 +553,9 @@ export default function ProfilePage() {
         body: JSON.stringify({ genre }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      if (!res.ok) throw new Error(waveErrorMessage(data, tr.launchWaves, tr.profilePage.submitApplicationFailed))
       setMessage(data.message)
+      await updateSession()
       await loadStatuses()
     } catch (err: any) {
       setError(err.message)
@@ -119,123 +564,600 @@ export default function ProfilePage() {
     }
   }
 
-  if (status === 'loading') return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  // Switches the active role to one the user already holds an approved
+  // profile for - the second half of multi-role support. Applying never
+  // silently changes the active role past the first-role case; this is
+  // the explicit action that does, and only for roles already approved.
+  const switchRole = async (kind: 'organiser' | 'venue' | 'artist') => {
+    setSwitching(kind)
+    setError('')
+    setMessage('')
+    try {
+      const res = await fetch('/api/users/me/switch-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: SWITCH_ROLE_VALUE[kind] }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to switch role')
+      await updateSession()
+      router.push(DASHBOARD_PATH[kind])
+    } catch (err: any) {
+      setError(err.message)
+      setSwitching(null)
+    }
+  }
+
+  if (status === 'loading') return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
-  const user = session.user as { name?: string | null; email?: string | null }
+  const user = session.user as { name?: string | null; email?: string | null; code?: string | null }
+
+  // Small, reusable status block covering the four states any of the
+  // three role cards below can be in: no profile, pending approval,
+  // active (visit its own dashboard), or approved-but-not-active (switch
+  // to it). Artist never has a pending state (isApproved always true once
+  // hasProfile is true).
+  const renderRoleStatus = (
+    roleStatus: RoleStatus | null,
+    kind: 'organiser' | 'venue' | 'artist',
+    label: string
+  ) => {
+    if (!roleStatus?.hasProfile) return null
+    if (!roleStatus.isApproved) {
+      return <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)' }}>{tr.profilePage.pendingApproval}</div>
+    }
+    if (roleStatus.isActive) {
+      return (
+        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', textDecoration: 'none' }}>
+          {tr.profilePage.visitDashboardTemplate.replace('{label}', label)}
+        </Link>
+      )
+    }
+    return (
+      <Button
+        variant="outline-accent"
+        size="md"
+        fullWidth={false}
+        onClick={() => switchRole(kind)}
+        disabled={switching === kind}
+      >
+        {switching === kind ? tr.profilePage.switchingEllipsis : tr.profilePage.approvedSwitchTemplate.replace('{label}', label)}
+      </Button>
+    )
+  }
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '4px' }}>
-            {user?.name || 'Your Profile'}
-          </h1>
-          <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>{user?.email}</p>
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div
+          className="afa-profile-page-container"
+          style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(32px, 5vw, 56px) clamp(20px, 5vw, 56px)' }}
+        >
+          {/* Two-column grid on desktop, single column on mobile. Scoped to
+              this wrapper (not global) so it can't affect SiteNav's own
+              inputs/focus states above. 900px matches the breakpoint the
+              rest of the site already uses for this kind of collapse (see
+              HomeHeader, SiteNav, ArtistProfileClientPage, organisers/venues
+              pages) rather than the Figma export's 860px. */}
+          <style>{`
+            .afa-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--afa-space-32px); align-items: start; }
+            .afa-profile-col { display: flex; flex-direction: column; gap: var(--afa-space-5); }
+            @media (max-width: 900px) {
+              .afa-profile-grid { grid-template-columns: 1fr; gap: var(--afa-space-5); }
+            }
+            /* S1b-c2-fix - whole-pixel line heights (design.md §9.0). The
+               inherited 1.5 gave 19.5px (13px) and 16.5px (11px) lines, so
+               every box below sat on a half pixel and its rasterised height
+               flipped 47/48px with the copy above it. Inline lineHeight
+               still wins where a call site sets one. */
+            .afa-profile-page-container :where(p, label, h1, h2, h3) { line-height: round(1.5em, 1px); }
+            .afa-profile-page-container input:focus,
+            .afa-profile-page-container textarea:focus,
+            .afa-profile-page-container select:focus {
+              outline: none;
+              border-color: var(--afa-amber-border) !important;
+              box-shadow: 0 0 0 3px var(--afa-amber-wash);
+            }
+          `}</style>
+
+          {/* GEN-2609-013 - mobile "Quick links" to Dashboard/Messages,
+              recovering what DashboardShell.tsx's own mobile bottom bar
+              used to provide on this route before MobileTabBar.tsx's
+              unified bar replaced it here (see both files' own comments
+              on the 7 Sep decision). Deliberately NOT gated by isAudience
+              like the hub below: the tab-bar swap that created this gap
+              applies to every signed-in role that can reach /profile, not
+              just Audience, so Venue/Organiser/Artist users need it too
+              even though they don't get the rest of the Phase 4c hub.
+              Same row visual as that hub's own groups (icon, title,
+              trailing chevron), plus a badge pill matching
+              DashboardShell.tsx's SidebarLink badge treatment exactly
+              rather than inventing a new one. */}
+          <div className="lg:hidden" style={{ marginBottom: 'var(--afa-space-18px)' }}>
+            <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+              {tr.profilePage.quickLinksLabel}
+            </p>
+            <div style={{ borderRadius: 'var(--afa-radius-lg)', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
+              {[
+                { icon: <DashboardIcon style={{ width: 18, height: 18 }} />, title: tr.nav.dashboard, badge: pendingCount, href: dashboardHref },
+                { icon: <MessageIcon style={{ width: 18, height: 18 }} />, title: tr.nav.messages, badge: unreadCount, href: '/dashboard/messages' },
+              ].map((row, i) => (
+                <Link
+                  key={row.href}
+                  href={row.href}
+                  style={{
+                    display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
+                    textDecoration: 'none',
+                    borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
+                    color: 'var(--afa-text-primary)',
+                  }}
+                >
+                  <span style={{ display: 'flex', flexShrink: 0, color: 'var(--afa-text-secondary)' }}>{row.icon}</span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{row.title}</span>
+                  {!!row.badge && row.badge > 0 && (
+                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3, flexShrink: 0 }}>{/* token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107) */}
+                      {row.badge}
+                    </span>
+                  )}
+                  <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Redesign Phase 4c (GEN-2609-008) - mobile nav-hub, per
+              the Figma v2 export's Profile.tsx, scoped to the Audience
+              role only per the resolved decision (Venue/Organiser/Artist
+              keep today's behavior at every width - they're dashboard-
+              based, out of scope here). Not a fork of this page's data or
+              apply logic - every row below scrolls to and reuses the exact
+              same cards/handlers the desktop column already has. */}
+          {isAudience && (
+            <div className="lg:hidden" style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
+                {avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--afa-tint-10)' }} />
+                ) : (
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-amber-border)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700 }}>
+                    {(initialDisplayName || user?.name || '?').trim().slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
+                  </h1>
+                  <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+                  {user?.code && (
+                    <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* No stats row and no membership-tier badge here, unlike the
+                  mock's "Attended/Saved/Cities" row and "Front-row member"
+                  chip - neither has a real backing computation on this
+                  page today (checked: no attended-shows count, no saved-
+                  events count, no membership-tier concept anywhere server-
+                  side - Scene Status is an Artist-only reputation concept,
+                  unrelated). Per the brief's own instruction to reuse
+                  existing stats rather than compute new ones, the honest
+                  choice was to omit rather than invent three numbers. */}
+
+              {([
+                {
+                  label: 'Create',
+                  rows: [
+                    // S1b-c2 - `soon` marks the row "Opening soon" while W2 is closed; it still scrolls to the card.
+                    { icon: <PlusIcon style={{ width: 18, height: 18 }} />, title: 'List an event', soon: applicationsClosed, onClick: () => scrollToCard('apply-organiser', 'organiser') },
+                    { icon: <BuildingIcon style={{ width: 18, height: 18 }} />, title: 'Register a venue', soon: applicationsClosed, onClick: () => scrollToCard('apply-venue', 'venue') },
+                    { icon: <UserBadgeIcon style={{ width: 18, height: 18 }} />, title: 'Artist profiles', soon: applicationsClosed, onClick: () => scrollToCard('apply-artist', 'artist') },
+                  ],
+                },
+                {
+                  label: 'Money & account',
+                  rows: [
+                    { icon: <ReceiptIcon style={{ width: 18, height: 18 }} />, title: 'Fee breakdown', hint: 'How our 0% commission works', onClick: () => setFeeSheetOpen(true) },
+                    { icon: <GearIcon style={{ width: 18, height: 18 }} />, title: 'Settings', onClick: () => scrollToCard('account-settings', undefined, false) },
+                    { icon: <LogoutIcon style={{ width: 18, height: 18 }} />, title: 'Log out', danger: true, onClick: () => signOutAndClearCache({ callbackUrl: '/' }) },
+                  ],
+                },
+              ] as { label: string; rows: ProfileMenuRow[] }[]).map((group) => (
+                <div key={group.label} style={{ marginTop: 'var(--afa-space-18px)' }}>
+                  <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                    {group.label}
+                  </p>
+                  <div style={{ borderRadius: 'var(--afa-radius-lg)', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
+                    {group.rows.map((row, i) => (
+                      <Button
+                        key={row.title}
+                        // bare-reason: settings list row: icon, two-line title/hint and chevron at touch height, hairline-divided in a grouped card; menu-row is the single-line dropdown row
+                        variant="bare"
+                        onClick={row.onClick}
+                        style={{
+                          display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
+                          textAlign: 'left',
+                          borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
+                          color: row.danger ? 'var(--afa-error-bright)' : 'var(--afa-text-primary)',
+                        }}
+                      >
+                        <span style={{ display: 'flex', flexShrink: 0, color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-secondary)' }}>{row.icon}</span>
+                        <span style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>
+                            {row.title}
+                            {row.soon && (
+                              <Badge variant="status-compact" tone={STATUS_TONE.muted} data-afa-opening-soon-badge>
+                                {tr.launchWaves.openingSoonBadge}
+                              </Badge>
+                            )}
+                          </span>
+                          {row.hint && <span style={{ display: 'block', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: '1px' }}>{row.hint}</span>}
+                        </span>
+                        {!row.danger && <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={isAudience ? 'hidden lg:block' : undefined} style={{ marginBottom: 'var(--afa-space-40px)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
+              {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
+            </h1>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{user?.email}</p>
+            {user?.code && (
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
+                {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
+              </p>
+            )}
+          </div>
+
+          {/* GEN-2609-019 Phase D - role switcher, shown only for accounts
+              holding 2+ roles (HeldRoles only tracks the 3 switchable
+              roles, so this never fires for AUDIENCE-only or 1-role
+              accounts, matching the mobile bar's own single-role
+              assumption everywhere else). Calls the same switchRole()
+              below that already powers each card's per-role "Switch to
+              X" link further down this page - not a second
+              implementation. MobileTabBar.tsx's Discover-sub "Dashboard"
+              item reads session.user.role directly for its target link,
+              so switching the active role here is the only piece that
+              was missing - that file needs no changes of its own. */}
+          {[held.ORGANISER, held.ARTIST, held.VENUE_OWNER].filter(Boolean).length >= 2 && (
+            <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                Active role
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
+                {(
+                  [
+                    { kind: 'artist', held: held.ARTIST, value: 'ARTIST', label: tr.roles.ARTIST },
+                    { kind: 'organiser', held: held.ORGANISER, value: 'ORGANISER', label: tr.roles.ORGANISER },
+                    { kind: 'venue', held: held.VENUE_OWNER, value: 'VENUE_OWNER', label: tr.roles.VENUE_OWNER },
+                  ] as const
+                )
+                  .filter((r) => r.held)
+                  .map((r) => {
+                    const active = activeRole === r.value
+                    return (
+                      <Button
+                        key={r.kind}
+                        variant="toggle-pill"
+                        size="pill-sm"
+                        fullWidth={false}
+                        type="button"
+                        selected={active}
+                        onClick={() => { if (!active) switchRole(r.kind) }}
+                        disabled={switching !== null}
+                        // Deliberately not Button's own disabled-opacity default
+                        // (0.7 on every disabled pill, including the active one)
+                        // - preserves this site's own nuance: only the non-active
+                        // pills dim while a switch is in flight, the active one
+                        // stays fully visible.
+                        style={{
+                          cursor: switching !== null ? 'default' : 'pointer',
+                          opacity: switching !== null && !active ? 0.6 : 1,
+                        }}
+                      >
+                        {switching === r.kind ? tr.profilePage.switchingEllipsis : r.label}
+                      </Button>
+                    )
+                  })}
+              </div>
+            </div>
+          )}
 
           {message && (
-            <div style={{ padding: '14px 16px', background: '#F0FFF4', border: '1px solid #68D391', borderRadius: '8px', color: '#276749', fontSize: '14px', marginBottom: '20px' }}>
-              {message}
-            </div>
+            <SuccessBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{error}</ErrorBanner>
           )}
 
-          {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
-          <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
-              I&apos;m an Artist
+          <div className="afa-profile-grid">
+          <div id="account-settings" className="afa-profile-col">
+
+          {/* Display name — separate from the login username. Shows on
+              tickets, emails, and greetings. Falls back to username if
+              blank, so existing users see no change until they set one. */}
+          <div style={cardStyle()}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              {tr.profilePage.displayNameHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
-              Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+              {tr.profilePage.displayNameDescPrefix}<strong>{user?.name}</strong>{tr.profilePage.displayNameDescSuffix}
+            </p>
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder={nameLoaded ? tr.profilePage.namePlaceholderLoaded : tr.profilePage.namePlaceholderLoading}
+              disabled={!nameLoaded}
+              maxLength={120}
+              style={{
+                ...fieldStyle,
+                marginBottom: 'var(--afa-space-18px)',
+                opacity: nameLoaded ? 1 : 0.5,
+                cursor: nameLoaded ? 'text' : 'default',
+              }}
+            />
+            <Button
+              {...saveButtonProps(nameDirty)}
+              fullWidth={false}
+              data-afa-action-row
+              onClick={saveDisplayName}
+              disabled={savingName || !nameDirty}
+            >
+              {savingName ? tr.profilePage.savingEllipsis : tr.profilePage.saveDisplayNameBtn}
+            </Button>
+          </div>
+
+          {/* "About You" - optional photo + short bio (session 62,
+              design.md §9.5). Never required. Shown wherever this
+              account's name/photo already surface publicly, e.g.
+              ratings and feedback on events. */}
+          <div style={cardStyle()}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              {tr.profilePage.aboutYouHeading}
+            </h2>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+              {tr.profilePage.aboutYouDesc}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-14px)' }}>
+              {avatar && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
+              )}
+              {/* GEN-2609-118 - outline: an optional photo is secondary, not the card's primary action. */}
+              <label style={{ ...variantStyle('outline-neutral', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={3}
+              maxLength={500}
+              placeholder={tr.profilePage.bioPlaceholder}
+              style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px', lineHeight: 1.6 }}
+            />
+            <Button
+              {...saveButtonProps(aboutDirty)}
+              fullWidth={false}
+              data-afa-action-row
+              onClick={saveAbout}
+              disabled={savingAbout || !aboutDirty}
+            >
+              {savingAbout ? tr.profilePage.savingEllipsis : tr.profilePage.saveBtn}
+            </Button>
+          </div>
+
+          {/* Display-only currency preference (Option A). Real settlement
+              stays INR always - this only changes how amounts are shown
+              to this user (event prices, checkout totals). */}
+          <div style={cardStyle()}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              {tr.profilePage.displayCurrencyHeading}
+            </h2>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+              {tr.profilePage.displayCurrencyDesc}
+            </p>
+            <select
+              value={displayCurrency}
+              onChange={(e) => setDisplayCurrency(e.target.value)}
+              style={{
+                ...fieldStyle,
+                marginBottom: 'var(--afa-space-18px)',
+                cursor: 'pointer',
+                appearance: 'none',
+                // Chevron stroke inlined as a literal colour - the same
+                // value as --afa-text-secondary - since a data-URI can't
+                // reference a CSS custom property. Not a new color.
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,245,240,0.65)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", // token-ok(rgb-rgba-literal): chevron stroke inlined into a data-URI, matches --afa-text-secondary, var() can't be embedded in a URL-encoded SVG string
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 14px center',
+                paddingRight: 'var(--afa-space-36px)',
+              }}
+            >
+              {currencies.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.symbol} {c.label} ({c.code})
+                </option>
+              ))}
+            </select>
+            <Button
+              {...saveButtonProps(currencyDirty)}
+              fullWidth={false}
+              data-afa-action-row
+              onClick={saveDisplayCurrency}
+              disabled={savingCurrency || !currencyDirty}
+            >
+              {savingCurrency ? tr.profilePage.savingEllipsis : tr.profilePage.saveCurrencyBtn}
+            </Button>
+          </div>
+          </div>
+
+          <div className="afa-profile-col">
+
+          {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
+          <div id="apply-artist" style={cardStyle(highlightedCard === 'artist')}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              {tr.profilePage.becomeArtistBtn}
+            </h2>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+              {tr.profilePage.artistUpgradeDesc}
+              {/* S1b-c2 - "goes live immediately" is only true while W2 is open. */}
+              {!applicationsClosed && <> {tr.profilePage.artistUpgradeInstant}</>}
             </p>
 
-            {artistStatus?.isInRole ? (
-              <div style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741' }}>
-                ✅ Visit your Artist dashboard
-              </div>
+            {artistStatus?.hasProfile ? (
+              renderRoleStatus(artistStatus, 'artist', tr.profilePage.roleLabelArtist)
+            ) : applicationsClosed ? (
+              <WaveSoonNote wave="W2">{tr.launchWaves.applicationsSoon}</WaveSoonNote>
             ) : (
               <>
-                <input
-                  type="text"
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  placeholder="Genres, comma separated (optional) — e.g. Stand-up, Poetry"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
-                />
-                <button
-                  onClick={applyArtist}
-                  disabled={applying === 'artist'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
-                >
-                  {applying === 'artist' ? 'Setting up...' : 'Become an Artist'}
-                </button>
+                <div style={{ marginBottom: 'var(--afa-space-3)' }}>
+                  <GenrePicker value={genre} onChange={setGenre} size="lg" />
+                </div>
+                <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
+                  {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
+                </Button>
               </>
             )}
           </div>
 
           {/* Organiser upgrade */}
-          <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
-              Become an Organiser
+          <div id="apply-organiser" style={cardStyle(highlightedCard === 'organiser')}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              {tr.profilePage.becomeOrganiserHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
-              Create and publish your own events.
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+              {tr.profilePage.becomeOrganiserDesc}
             </p>
 
-            {orgStatus?.isInRole ? (
-              <div style={{ fontSize: '14px', fontWeight: 600, color: orgStatus.isApproved ? '#4A6741' : '#8a6a1f' }}>
-                {orgStatus.isApproved ? '✅ Approved — visit your Organiser dashboard' : '⏳ Application pending approval'}
-              </div>
+            {orgStatus?.hasProfile ? (
+              renderRoleStatus(orgStatus, 'organiser', tr.profilePage.roleLabelOrganiser)
+            ) : applicationsClosed ? (
+              <WaveSoonNote wave="W2">{tr.launchWaves.applicationsSoon}</WaveSoonNote>
             ) : (
               <>
                 <input
                   type="text"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="Organisation or brand name"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+                  placeholder={tr.profilePage.orgNamePlaceholder}
+                  style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)' }}
                 />
-                <button
-                  onClick={applyOrganiser}
-                  disabled={applying === 'organiser'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
-                >
-                  {applying === 'organiser' ? 'Submitting...' : 'Apply'}
-                </button>
+                <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
+                  {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
+                </Button>
               </>
             )}
           </div>
 
           {/* Venue Owner upgrade */}
-          <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
-              List Your Venue
+          <div id="apply-venue" style={cardStyle(highlightedCard === 'venue')}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              {tr.profilePage.listVenueHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
-              Rent out your space and manage bookings.
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
+              {tr.profilePage.listVenueDesc}
             </p>
 
-            {venueStatus?.isInRole ? (
-              <div style={{ fontSize: '14px', fontWeight: 600, color: venueStatus.isApproved ? '#4A6741' : '#8a6a1f' }}>
-                {venueStatus.isApproved ? '✅ Approved — visit your Venue dashboard' : '⏳ Application pending approval'}
-              </div>
+            {venueStatus?.hasProfile ? (
+              renderRoleStatus(venueStatus, 'venue', tr.profilePage.roleLabelVenue)
+            ) : applicationsClosed ? (
+              <WaveSoonNote wave="W2">{tr.launchWaves.applicationsSoon}</WaveSoonNote>
             ) : (
-              <button
-                onClick={applyVenueOwner}
-                disabled={applying === 'venue'}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
-              >
-                {applying === 'venue' ? 'Submitting...' : 'Apply'}
-              </button>
+              <Button data-afa-action-row {...roleCtaProps} fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
+                {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
+              </Button>
             )}
           </div>
+
+          </div>
+          </div>
+
+          {/* My Feedback link (session 63) was structurally placed OUTSIDE
+              this maxWidth wrapper - the wrapper's closing </div> used to
+              sit right here, before the Link, making it a sibling of this
+              whole centered column instead of the last card inside it.
+              Rendered full-page-width instead of matching every other
+              card (caught live by Hitesh, 2 Aug - "UI/UX not
+              convincing"). Fixed by moving the close to after the Link. */}
+          <Link
+            href="/my-feedback"
+            style={{
+              display: 'block',
+              ...cardStyle(),
+              marginTop: 'var(--afa-space-32px)',
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
+                  {tr.profilePage.myFeedbackHeading}
+                </h2>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>
+                  {feedbackSummary === null
+                    ? tr.profilePage.feedbackSummaryDefault
+                    : feedbackSummary.total === 0
+                      ? tr.profilePage.feedbackSummaryNone
+                      : tr.profilePage.feedbackSummaryReportedTemplate.replace('{total}', String(feedbackSummary.total))
+                        + (feedbackSummary.open > 0
+                          ? tr.profilePage.feedbackOpenSuffix.replace('{n}', String(feedbackSummary.open))
+                          : tr.profilePage.feedbackAllResolvedSuffix)
+                        + tr.profilePage.arrowSuffix}
+                </p>
+              </div>
+              {feedbackSummary !== null && feedbackSummary.open > 0 && (
+                <span
+                  style={{
+                    flexShrink: 0,
+                    fontSize: 'var(--afa-text-ui)',
+                    fontWeight: 700,
+                    color: 'var(--afa-on-fill-solid)',
+                    background: 'var(--afa-amber)',
+                    borderRadius: 'var(--afa-radius-pill)',
+                    padding: 'var(--afa-space-1) var(--afa-space-3)',
+                  }}
+                >
+                  {feedbackSummary.open}
+                </span>
+              )}
+            </div>
+          </Link>
         </div>
       </main>
+      </DashboardShell>
+
+      {feeSheetOpen && (
+        <FeeSheet
+          ticketFaceValue={500}
+          bookingFee={audienceBookingFee}
+          currency={null}
+          onClose={() => setFeeSheetOpen(false)}
+        />
+      )}
     </>
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<BrandLoader />}>
+      <ProfileContent />
+    </Suspense>
   )
 }

@@ -1,0 +1,150 @@
+import { prisma } from "@/lib/prisma"
+import { isValidUsernameFormat } from "@/lib/validation"
+import { generateUsernameVariants, usernameBase } from "@/lib/username-suggestions"
+
+const CODE_PATTERN = /^(AFA|ART|ORG|VEN)\d{10}$/
+// Optional +<countrycode> then 7-15 digits. Loosened for eventual
+// international intent; only +91 numbers actually receive OTPs today.
+const PHONE_PATTERN = /^\+?\d{7,15}$/
+
+/**
+ * Builds the set of phone-number formats a single user-typed string
+ * could reasonably represent, so lookup matches whichever form the row
+ * was stored in.
+ *
+ * Registration currently requires and stores +91-prefixed E.164 (e.g.
+ * "+919876543210"). But at login users type the same number many ways:
+ *   9876543210       — bare 10-digit
+ *   +919876543210    — canonical
+ *   919876543210     — country code, no plus
+ *   +9876543210      — someone hit + by mistake
+ * Prior behavior did an exact-string match on the raw input, so users
+ * who registered with +91 and later typed a bare 10-digit at login
+ * silently failed to authenticate. This function returns every
+ * equivalent form so a single Prisma `IN` query catches whichever one
+ * is on the row.
+ */
+function phoneLookupCandidates(value: string): string[] {
+  const digits = value.replace(/\D/g, '')
+  const candidates = new Set<string>([value])
+
+  if (digits.length === 10) {
+    candidates.add('+91' + digits)
+    candidates.add('91' + digits)
+  }
+  if (digits.length === 12 && digits.startsWith('91')) {
+    candidates.add('+' + digits)
+    candidates.add(digits.slice(2))       // bare 10-digit
+    candidates.add('+' + digits.slice(2)) // + + 10 digits, in case of odd registrations
+  }
+
+  return [...candidates]
+}
+
+/**
+ * Resolves a single login "identifier" field to a User row.
+ * Order: email -> code (User.code, then role-table codes) -> phone -> username (User.name).
+ */
+export async function resolveIdentifierToUser(identifier: string) {
+  const value = identifier.trim()
+  if (!value) return null
+
+  if (value.includes("@")) {
+    return prisma.user.findUnique({ where: { email: value.toLowerCase() } })
+  }
+
+  // §9.2 (26 Jul) - codes are always generated uppercase by the DB's
+  // generate_role_code() function, but login previously did an exact-
+  // case pattern test and lookup - a correct code typed in lowercase or
+  // mixed case (easy to do, since none of the other identifier types on
+  // this same field are case-sensitive for the user - email is
+  // lowercased above, username is matched case-insensitively below)
+  // failed with the same generic invalid-account error as a genuinely
+  // wrong code. Normalizing to uppercase here mirrors what email/
+  // username already do for their own casing quirks.
+  const upperValue = value.toUpperCase()
+  if (CODE_PATTERN.test(upperValue)) {
+    const byUserCode = await prisma.user.findUnique({ where: { code: upperValue } })
+    if (byUserCode) return byUserCode
+
+    const artist = await prisma.artist.findUnique({ where: { code: upperValue } })
+    if (artist) return prisma.user.findUnique({ where: { id: artist.userId } })
+
+    const organiser = await prisma.organiser.findUnique({ where: { code: upperValue } })
+    if (organiser) return prisma.user.findUnique({ where: { id: organiser.userId } })
+
+    const venueOwner = await prisma.venueOwner.findUnique({ where: { code: upperValue } })
+    if (venueOwner) return prisma.user.findUnique({ where: { id: venueOwner.userId } })
+
+    return null
+  }
+
+  if (PHONE_PATTERN.test(value)) {
+    // Match any equivalent form the number may have been stored in.
+    // Single query, uses the phone index on User.
+    return prisma.user.findFirst({
+      where: { phone: { in: phoneLookupCandidates(value) } },
+    })
+  }
+
+  // Username lookup — case-insensitive. Registration currently preserves
+  // the case a user typed at signup, so `MikeSmith` and `mikesmith` are
+  // different rows in the DB; but a user reasonably expects to type
+  // either at login and have it work. `mode: 'insensitive'` uses ILIKE
+  // under the hood on Postgres. `findFirst` (not findUnique) because
+  // the unique constraint is case-sensitive and case-insensitive
+  // matching may hit multiple rows (rare — see also
+  // `isUsernameAvailable` which now blocks new case-collisions from
+  // being created).
+  return prisma.user.findFirst({
+    where: { name: { equals: value, mode: 'insensitive' } },
+  })
+}
+
+/**
+ * Suggests a username from free text: lowercase, alphanumeric only, numeric
+ * suffix if taken. Run C item 1 - only a name that passes the submit-time
+ * rule (isValidUsernameFormat) is ever returned: a 2-letter base gets a
+ * suffix, and the suffix replaces the tail rather than run past 20 chars.
+ */
+export async function suggestAvailableUsername(seed: string): Promise<string> {
+  const base = usernameBase(seed)
+
+  let candidate = base
+  let suffix = 0
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (isValidUsernameFormat(candidate) && (await isUsernameAvailable(candidate))) return candidate
+    suffix += 1
+    candidate = `${base.slice(0, 20 - String(suffix).length)}${suffix}`
+  }
+}
+
+/**
+ * Feedback cmse195bc1e27d60e27596011 follow-up (2 Aug) - up to 3 varied,
+ * de-identified options from the initials seed. Generation and the
+ * validity filter live in lib/username-suggestions.ts (run C item 1);
+ * this supplies the real availability check.
+ */
+export async function suggestUsernameVariants(seed: string): Promise<string[]> {
+  return generateUsernameVariants(seed, isUsernameAvailable)
+}
+
+/**
+ * Case-insensitive availability check. Prevents a new user registering
+ * `Hitesh` when `hitesh` already exists — which prior to this change
+ * was possible and would have caused login ambiguity (`resolveIdentifierToUser`
+ * now looks up case-insensitively, so both names would resolve to the
+ * same account, whichever the DB returned first).
+ *
+ * Existing case-collision rows in the DB (from before this change) are
+ * unaffected — they can still log in, since findFirst returns any
+ * matching row and the password check narrows to the right account.
+ */
+export async function isUsernameAvailable(name: string): Promise<boolean> {
+  if (!name.trim()) return false
+  const existing = await prisma.user.findFirst({
+    where: { name: { equals: name.trim(), mode: 'insensitive' } },
+  })
+  return !existing
+}

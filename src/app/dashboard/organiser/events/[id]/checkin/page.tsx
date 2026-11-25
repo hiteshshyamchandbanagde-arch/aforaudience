@@ -1,0 +1,507 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState, use, useCallback } from 'react'
+import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
+import BrandLoader from '@/components/BrandLoader'
+import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/dashboard/PageTitle'
+import { Icon, INLINE_ICON_STYLE } from '@/components/Icon'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+
+type ScanResult = {
+  ok: boolean
+  reason?: string
+  message?: string
+  attendeeName?: string
+  seats?: Record<string, number>
+  checkedInAt?: string
+}
+
+type Attendee = {
+  bookingId: string
+  ticketCode: string | null
+  name: string
+  seats: Record<string, number>
+  // Display-only, deterministic-not-real seat label for NUMBERED bookings
+  // (see attendees API comment) - null for GA bookings, which have no
+  // per-seat labels at all.
+  seatLabel: string | null
+  checkedInAt: string | null
+  // D1 - attendance and the amount the guest pays at the door.
+  attendance?: 'RESERVED' | 'ATTENDED' | 'NO_SHOW'
+  amountDueAtEntry?: number
+  // Companion Tagging Phase 2 (step 6) - ACCEPTED companions only,
+  // each individually checkable at the door.
+  companions: { id: string; name: string; seatLabel: string | null; checkedInAt: string | null }[]
+}
+
+function seatsSummary(seats?: Record<string, number>) {
+  if (!seats) return ''
+  return Object.entries(seats)
+    .filter(([, n]) => n > 0)
+    .map(([section, n]) => `${n} × ${section}`)
+    .join(', ')
+}
+
+// GEN-2610-007 - the scan result's detail line in the UI language, by the
+// API's reason code; an unknown reason keeps the server's message.
+function resultMessage(r: ScanResult, c: Dictionary['organiserDashboard']['checkin']) {
+  switch (r.reason) {
+    case 'EMPTY': return c.reasonEmpty
+    case 'NOT_FOUND': return c.reasonNotFound
+    case 'WRONG_EVENT': return c.reasonWrongEvent
+    case 'NOT_CONFIRMED': {
+      const m = r.message?.match(/status is (\S+),/)
+      return m ? c.reasonNotConfirmed.replace('{status}', m[1]) : r.message
+    }
+    // The heading already says it.
+    case 'ALREADY_CHECKED_IN': return undefined
+    case 'ERROR': return c.reasonError
+    default: return r.message
+  }
+}
+
+export default function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: eventId } = use(params)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const { t: tr } = useLocale()
+  const c = tr.organiserDashboard.checkin
+
+  const [eventTitle, setEventTitle] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [counts, setCounts] = useState<{ total: number; checkedIn: number } | null>(null)
+
+  const [manualCode, setManualCode] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [lastResult, setLastResult] = useState<ScanResult | null>(null)
+
+  const [cameraOn, setCameraOn] = useState(false)
+  const [cameraError, setCameraError] = useState('')
+  const scannerRef = useRef<any>(null)
+  const scanningRef = useRef(false) // guards against double-fires while a request is in flight
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [listOpen, setListOpen] = useState(false)
+  const [attendees, setAttendees] = useState<Attendee[] | null>(null)
+  // D1 - Reserved / Attended / No-show counts and the no-show window.
+  const [attendanceMeta, setAttendanceMeta] = useState<{ reserved: number; attended: number; noShow: number; canMarkNoShow: boolean } | null>(null)
+  const [rowBusy, setRowBusy] = useState<string | null>(null)
+  const [listFilter, setListFilter] = useState<'all' | 'checked_in' | 'pending'>('all')
+  const [checkingInCompanion, setCheckingInCompanion] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
+
+  useEffect(() => {
+    return () => { if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current) }
+  }, [])
+
+  const refreshCounts = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/checkin`)
+      if (res.ok) setCounts(await res.json())
+    } catch {
+      // non-critical - the counter just won't update this round
+    }
+  }, [eventId])
+
+  const refreshAttendees = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/attendees`)
+      if (res.ok) {
+        const data = await res.json()
+        setAttendees(data.attendees)
+        setAttendanceMeta({
+          reserved: data.reserved ?? 0,
+          attended: data.attended ?? 0,
+          noShow: data.noShow ?? 0,
+          canMarkNoShow: data.canMarkNoShow === true,
+        })
+      }
+    } catch {
+      // non-critical - list just won't refresh this round
+    }
+  }, [eventId])
+
+  // D1 - guest-list row actions: Check in (= Attended) and Mark no-show.
+  const rowAction = useCallback(async (bookingId: string, action: 'checkin' | 'no-show') => {
+    setRowBusy(bookingId)
+    try {
+      await fetch(`/api/events/${eventId}/${action === 'checkin' ? 'checkin' : 'no-show'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(action === 'checkin' ? { code: bookingId } : { bookingId }),
+      })
+    } catch {
+      // the refreshed list below shows the real state either way
+    } finally {
+      setRowBusy(null)
+      refreshAttendees()
+      refreshCounts()
+    }
+  }, [eventId, refreshAttendees, refreshCounts])
+
+  const checkInCompanion = useCallback(async (companionTagId: string) => {
+    setCheckingInCompanion(companionTagId)
+    try {
+      const res = await fetch(`/api/events/${eventId}/checkin/companion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companionTagId }),
+      })
+      if (res.ok && typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(120)
+      await refreshAttendees()
+    } finally {
+      setCheckingInCompanion(null)
+    }
+  }, [eventId, refreshAttendees])
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/events/${eventId}/owner`)
+        if (!res.ok) {
+          throw new Error(res.status === 403 ? c.noAccess : c.notFound)
+        }
+        const data = await res.json()
+        setEventTitle(data.title)
+        await refreshCounts()
+      } catch (err: any) {
+        setLoadError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (session?.user) load()
+  }, [session, eventId, refreshCounts, c])
+
+  const submitCode = useCallback(async (code: string) => {
+    if (!code.trim() || scanningRef.current) return
+    scanningRef.current = true
+    setSubmitting(true)
+    try {
+      const res = await fetch(`/api/events/${eventId}/checkin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code.trim() }),
+      })
+      const data: ScanResult = await res.json()
+      setLastResult(data)
+      // Haptic feedback so a scan register is felt without having to look
+      // away from lining the QR up with the camera.
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(data.ok ? 120 : [80, 60, 80])
+      }
+      // The result is shown as a fixed overlay (not inline in the page
+      // flow) specifically so it's never dependent on scroll position -
+      // an inline card was missed entirely while the camera view filled
+      // the screen. Auto-dismiss after a few seconds so it doesn't sit
+      // there blocking the next scan.
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = setTimeout(() => setLastResult(null), 4000)
+      if (data.ok) {
+        setManualCode('')
+        refreshCounts()
+        if (listOpen) refreshAttendees()
+      }
+    } catch {
+      setLastResult({ ok: false, message: c.networkError })
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = setTimeout(() => setLastResult(null), 4000)
+    } finally {
+      setSubmitting(false)
+      // Small cooldown so the camera loop doesn't instantly re-fire on the
+      // same still-visible QR code before the person walks off.
+      setTimeout(() => { scanningRef.current = false }, 1500)
+    }
+  }, [eventId, refreshCounts, listOpen, refreshAttendees, c])
+
+  useEffect(() => {
+    if (!cameraOn) return
+    let cancelled = false
+
+    import('html5-qrcode').then(({ Html5Qrcode }) => {
+      if (cancelled) return
+      const scanner = new Html5Qrcode('checkin-camera')
+      scannerRef.current = scanner
+      scanner
+        .start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 260, height: 260 } },
+          (decodedText: string) => submitCode(decodedText),
+          () => { /* per-frame no-QR-found noise, ignore */ }
+        )
+        .catch((err: any) => {
+          setCameraError(c.cameraError)
+          setCameraOn(false)
+          console.error('Camera start failed:', err)
+        })
+    })
+
+    return () => {
+      cancelled = true
+      const scanner = scannerRef.current
+      if (scanner) {
+        scanner.stop().then(() => scanner.clear()).catch(() => {})
+        scannerRef.current = null
+      }
+    }
+  }, [cameraOn, submitCode])
+
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader label={tr.dashboardChrome.loading} /></>)
+  if (!session) return <SiteNav />
+  if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{loadError}</div></>)
+
+  return (
+    <>
+      <SiteNav />
+
+      {/* Fixed overlay, not inline in page flow - guarantees visibility
+          regardless of scroll position while the camera view fills the
+          screen. This replaced an inline card that was easy to miss. */}
+      {lastResult && (
+        <div
+          role="status"
+          onClick={() => setLastResult(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+            padding: 'var(--afa-space-18px) var(--afa-space-5)', paddingTop: 'calc(var(--afa-space-18px) + env(safe-area-inset-top, 0px))',
+            background: lastResult.ok ? 'var(--afa-forest)' : 'var(--afa-error)',
+            color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px var(--afa-shadow)',
+            cursor: 'pointer',
+          }}
+        >
+          <p style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, marginBottom: 'var(--afa-space-1)' }}>
+            {lastResult.ok ? c.checkedIn : lastResult.reason === 'ALREADY_CHECKED_IN' ? <><Icon name="alert" size={14} style={INLINE_ICON_STYLE} /> {c.alreadyCheckedIn}</> : c.notValid}
+          </p>
+          {lastResult.attendeeName && (
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-2px)' }}>{lastResult.attendeeName}</p>
+          )}
+          {lastResult.seats && seatsSummary(lastResult.seats) && (
+            <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85, marginBottom: 'var(--afa-space-2px)' }}>{seatsSummary(lastResult.seats)}</p>
+          )}
+          {resultMessage(lastResult, c) && (
+            <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85 }}>{resultMessage(lastResult, c)}</p>
+          )}
+          <p style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.7, marginTop: 'var(--afa-space-6px)' }}>{c.tapToDismiss}</p>
+        </div>
+      )}
+
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
+          <BackLink href={`/dashboard/organiser/events/${eventId}`} label={c.backToEvent} />
+
+          <PageTitle style={{ marginTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-1)' }}>
+            {c.title}
+          </PageTitle>
+          <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{eventTitle}</p>
+          {counts && (
+            <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage-bright)', marginBottom: 'var(--afa-space-6)' }}>
+              {c.countCheckedIn.replace('{n}', String(counts.checkedIn)).replace('{total}', String(counts.total))}
+            </p>
+          )}
+
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            {!cameraOn ? (
+              <Button variant="primary" size="lg" fullWidth={true} onClick={() => { setCameraError(''); setCameraOn(true) }}>
+                <Icon name="camera" size={18} style={INLINE_ICON_STYLE} /> {c.startCamera}
+              </Button>
+            ) : (
+              <>
+                <div id="checkin-camera" style={{ width: '100%', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden' }} />
+                <Button
+                  variant="outline-neutral"
+                  size="md"
+                  onClick={() => setCameraOn(false)}
+                  style={{ marginTop: 'var(--afa-space-3)' }}
+                >
+                  {c.stopCamera}
+                </Button>
+              </>
+            )}
+            {cameraError && (
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-10px)' }}>{cameraError}</p>
+            )}
+          </div>
+
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-2)', color: 'var(--afa-text-primary)' }}>
+              {c.manualEntry} <span style={{ fontWeight: 400, opacity: 0.6 }}>{c.manualEntryHint}</span>
+            </label>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
+              <input
+                type="text"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') submitCode(manualCode) }}
+                placeholder={c.manualPlaceholder}
+                style={{
+                  flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)',
+                  background: 'var(--afa-surface-raised)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)',
+                }}
+              />
+              <Button
+                variant="solid"
+                size="lg"
+                fullWidth={false}
+                onClick={() => submitCode(manualCode)}
+                disabled={submitting || !manualCode.trim()}
+              >
+                {c.checkInButton}
+              </Button>
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <Button
+              // bare-reason: full-width card header (title left, Show/Hide right, body type) toggling the list below; disclosure is the compact small-type toggle, menu-row a list item
+              variant="bare"
+              onClick={() => {
+                const next = !listOpen
+                setListOpen(next)
+                if (next && !attendees) refreshAttendees()
+              }}
+              style={{
+                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)',
+                padding: 0,
+              }}
+            >
+              <span>{c.attendeeList}</span>
+              <span style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>{listOpen ? c.hide : c.show}</span>
+            </Button>
+
+            {listOpen && (
+              <div style={{ marginTop: 'var(--afa-space-4)' }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-14px)' }}>
+                  {(['all', 'checked_in', 'pending'] as const).map((f) => (
+                    <Button
+                      key={f}
+                      variant="toggle-box"
+                      size="md"
+                      fullWidth={false}
+                      selected={listFilter === f}
+                      onClick={() => setListFilter(f)}
+                      style={{ flex: 1 }}
+                    >
+                      {f === 'all' ? c.filterAll : f === 'checked_in' ? c.filterCheckedIn : c.filterPending}
+                    </Button>
+                  ))}
+                </div>
+
+                {attendanceMeta && (
+                  <p data-afa-attendance-counts style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-3)' }}>
+                    {tr.payAtEntry.reserved} {attendanceMeta.reserved} · {tr.payAtEntry.attended} {attendanceMeta.attended} · {tr.payAtEntry.noShow} {attendanceMeta.noShow}
+                  </p>
+                )}
+                {attendees === null ? (
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{tr.dashboardChrome.loading}</p>
+                ) : (
+                  (() => {
+                    const filtered = attendees.filter((a) =>
+                      listFilter === 'all' ? true : listFilter === 'checked_in' ? !!a.checkedInAt : !a.checkedInAt
+                    )
+                    if (filtered.length === 0) {
+                      return <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{c.emptyList}</p>
+                    }
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
+                        {filtered.map((a) => (
+                          <div key={a.bookingId}>
+                            <div
+                              style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                                padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)',
+                                background: a.checkedInAt ? 'var(--afa-mint-tint)' : 'var(--afa-surface-raised)',
+                              }}
+                            >
+                              <div>
+                                <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+                                  {a.name}
+                                  {a.seatLabel && <span style={{ fontWeight: 400, opacity: 0.6 }}> · {a.seatLabel}</span>}
+                                </p>
+                                {seatsSummary(a.seats) && (
+                                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
+                                )}
+                                {a.ticketCode && (
+                                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-mono)' }}>{a.ticketCode}</p>
+                                )}
+                                {(a.amountDueAtEntry ?? 0) > 0 && (
+                                  <p data-afa-due-at-entry style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)' }}>
+                                    {tr.payAtEntry.dueAtEntry.replace('{amount}', (a.amountDueAtEntry ?? 0).toLocaleString('en-IN'))}
+                                  </p>
+                                )}
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--afa-space-1)' }}>
+                                <span data-afa-attendance={a.checkedInAt ? 'ATTENDED' : a.attendance || 'RESERVED'} style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage-bright)' : 'var(--afa-text-primary)', opacity: a.checkedInAt || a.attendance === 'NO_SHOW' ? 1 : 0.4 }}>
+                                  {a.checkedInAt ? c.in : a.attendance === 'NO_SHOW' ? tr.payAtEntry.noShow : c.pending}
+                                </span>
+                                {!a.checkedInAt && (
+                                  <Button variant="secondary" size="sm" fullWidth={false} disabled={rowBusy === a.bookingId} onClick={() => rowAction(a.bookingId, 'checkin')} data-afa-row-checkin>
+                                    {tr.payAtEntry.checkIn}
+                                  </Button>
+                                )}
+                                {!a.checkedInAt && a.attendance !== 'NO_SHOW' && attendanceMeta?.canMarkNoShow && (
+                                  <Button variant="outline-neutral" size="sm" fullWidth={false} disabled={rowBusy === a.bookingId} onClick={() => rowAction(a.bookingId, 'no-show')} data-afa-row-no-show>
+                                    {tr.payAtEntry.markNoShow}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            {/* Companion Tagging Phase 2 (step 6) - accepted
+                                companions get their own check-in row, indented
+                                under the booking they're tagged on. */}
+                            {a.companions.length > 0 && (
+                              <div style={{ marginLeft: 'var(--afa-space-18px)', marginTop: 'var(--afa-space-1)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
+                                {a.companions.map((comp) => (
+                                  <div
+                                    key={comp.id}
+                                    style={{
+                                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                      padding: 'var(--afa-space-2) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)',
+                                      background: comp.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
+                                      border: comp.checkedInAt ? 'none' : '1px dashed var(--afa-border-resting)',
+                                    }}
+                                  >
+                                    <span style={{ color: 'var(--afa-text-primary)' }}>
+                                      <Icon name="users" size={14} style={INLINE_ICON_STYLE} /> {comp.name}
+                                      {comp.seatLabel && <span style={{ opacity: 0.6 }}> · {comp.seatLabel}</span>}
+                                    </span>
+                                    {comp.checkedInAt ? (
+                                      <span style={{ fontWeight: 600, color: 'var(--afa-sage-bright)' }}>{c.in}</span>
+                                    ) : (
+                                      <Button
+                                        variant="primary"
+                                        size="sm"
+                                        fullWidth={false}
+                                        onClick={() => checkInCompanion(comp.id)}
+                                        disabled={checkingInCompanion === comp.id}
+                                        style={{ opacity: checkingInCompanion === comp.id ? 0.6 : 1 }}
+                                      >
+                                        {checkingInCompanion === comp.id ? c.checkingIn : c.checkInCompanion}
+                                      </Button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </>
+  )
+}

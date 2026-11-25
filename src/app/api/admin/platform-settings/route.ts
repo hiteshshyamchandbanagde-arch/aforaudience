@@ -1,0 +1,227 @@
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import {
+  getPlatformSettings,
+  setAudienceFeeSettings,
+  setChatMaxMessagesPerSession,
+  setSceneStatusThresholds,
+  setArtistRosterHypeScoreLookback,
+  setAudienceChoiceWeightDefaults,
+  setEventCreationWindowMonths,
+  setDirectPayoutsEnabled,
+  setPaidBookingsEnabled,
+  setSmsOtpEnabled,
+  setLaunchWaves,
+  MAX_BOOKING_FEE_PAISE,
+  MAX_CHAT_MESSAGES_CAP,
+} from '@/lib/platform-settings'
+import { revalidateLaunchWaves } from '@/lib/launch-waves.server'
+
+// GET /api/admin/platform-settings
+// PATCH /api/admin/platform-settings
+//
+// Admin-only. Reads and writes the singleton PlatformSettings row.
+//
+// Deliberately narrow projection — this endpoint is UI-facing, not a
+// generic config export. If we add more admin-editable fields later,
+// they get plumbed through here explicitly, not passed via generic
+// key/value objects.
+
+async function requireAdmin() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return null
+  const user = await prisma.user.findUnique({
+    where: { id: (session.user as any).id },
+    select: { id: true, role: true },
+  })
+  if (!user || user.role !== 'ADMIN') return null
+  return user
+}
+
+export async function GET() {
+  const admin = await requireAdmin()
+  if (!admin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  const settings = await getPlatformSettings()
+  return NextResponse.json({
+    settings,
+    limits: {
+      maxBookingFeePaise: MAX_BOOKING_FEE_PAISE,
+      maxChatMessagesCap: MAX_CHAT_MESSAGES_CAP,
+    },
+  })
+}
+
+export async function PATCH(req: Request) {
+  const admin = await requireAdmin()
+  if (!admin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  let body: any
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const hasBookingFee = Object.prototype.hasOwnProperty.call(body, 'audienceBookingFee')
+  const hasMinFee = Object.prototype.hasOwnProperty.call(body, 'minAudienceBookingFee')
+  const hasMaxFee = Object.prototype.hasOwnProperty.call(body, 'maxAudienceBookingFee')
+  const hasFeeBand = hasBookingFee || hasMinFee || hasMaxFee
+  const hasChatCap = Object.prototype.hasOwnProperty.call(body, 'chatMaxMessagesPerSession')
+  const hasRisingMinGigs = Object.prototype.hasOwnProperty.call(body, 'sceneStatusRisingMinGigs')
+  const hasRisingMinAvgRating = Object.prototype.hasOwnProperty.call(body, 'sceneStatusRisingMinAvgRating')
+  const hasRisingMinAttendees = Object.prototype.hasOwnProperty.call(body, 'sceneStatusRisingMinAttendees')
+  const hasFeaturedThreshold = Object.prototype.hasOwnProperty.call(body, 'sceneStatusFeaturedVouchThreshold')
+  const hasSceneStatus = hasRisingMinGigs || hasRisingMinAvgRating || hasRisingMinAttendees || hasFeaturedThreshold
+  const hasRosterLookback = Object.prototype.hasOwnProperty.call(body, 'artistRosterHypeScoreLookback')
+  const hasVoteWeightDefaults =
+    Object.prototype.hasOwnProperty.call(body, 'audienceVoteWeightDefault') &&
+    Object.prototype.hasOwnProperty.call(body, 'panelistVoteWeightDefault') &&
+    Object.prototype.hasOwnProperty.call(body, 'celebrityVoteWeightDefault')
+  const hasEventWindow = Object.prototype.hasOwnProperty.call(body, 'eventCreationWindowMonths')
+  const hasDirectPayouts = Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabled')
+  const hasPaidBookings = Object.prototype.hasOwnProperty.call(body, 'paidBookingsEnabled')
+  const hasSmsOtp = Object.prototype.hasOwnProperty.call(body, 'smsOtpEnabled')
+  // S1b-a - launch wave switches. Validated up front, before ANY setter
+  // runs, so a non-boolean wave flag is a 400 with nothing written.
+  const WAVE_KEYS = ['waveDiscoveryOpen', 'waveOnboardingOpen', 'waveTicketsOpen', 'waveDirectBookingsOpen'] as const
+  const waveInput: Partial<Record<(typeof WAVE_KEYS)[number], boolean>> = {}
+  for (const k of WAVE_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(body, k)) continue
+    if (typeof body[k] !== 'boolean') {
+      return NextResponse.json({ error: `${k} must be a boolean` }, { status: 400 })
+    }
+    waveInput[k] = body[k]
+  }
+  const hasWaves = Object.keys(waveInput).length > 0
+
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts && !hasPaidBookings && !hasSmsOtp && !hasWaves) {
+    return NextResponse.json(
+      {
+        error:
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, paidBookingsEnabled, smsOtpEnabled, a wave*Open flag, or all three vote weight defaults together is required',
+      },
+      { status: 400 }
+    )
+  }
+
+  try {
+    let updated = await getPlatformSettings()
+
+    // Fee band (min/standard/max) is saved as a unit — see
+    // setAudienceFeeSettings. Any field the caller omits falls back to
+    // its current value so a single-field PATCH (e.g. just the standard
+    // fee) doesn't accidentally reset min/max. All accepted as PAISE
+    // (integer); the UI converts from rupees on submit.
+    if (hasFeeBand) {
+      const toPaise = (label: string, v: unknown): number => {
+        if (typeof v !== 'number' || !Number.isFinite(v)) {
+          throw new Error(`${label} must be a number (paise)`)
+        }
+        return Math.round(v)
+      }
+      const minPaise = hasMinFee ? toPaise('minAudienceBookingFee', body.minAudienceBookingFee) : updated.minAudienceBookingFee
+      const standardPaise = hasBookingFee ? toPaise('audienceBookingFee', body.audienceBookingFee) : updated.audienceBookingFee
+      const maxPaise = hasMaxFee ? toPaise('maxAudienceBookingFee', body.maxAudienceBookingFee) : updated.maxAudienceBookingFee
+      updated = await setAudienceFeeSettings({ minPaise, standardPaise, maxPaise })
+    }
+
+    if (hasChatCap) {
+      const cap = body.chatMaxMessagesPerSession
+      if (typeof cap !== 'number' || !Number.isFinite(cap)) {
+        return NextResponse.json(
+          { error: 'chatMaxMessagesPerSession must be a number' },
+          { status: 400 }
+        )
+      }
+      updated = await setChatMaxMessagesPerSession(Math.round(cap))
+    }
+
+    if (hasSceneStatus) {
+      updated = await setSceneStatusThresholds({
+        risingMinGigs: hasRisingMinGigs ? Number(body.sceneStatusRisingMinGigs) : undefined,
+        risingMinAvgRating: hasRisingMinAvgRating ? Number(body.sceneStatusRisingMinAvgRating) : undefined,
+        risingMinAttendees: hasRisingMinAttendees ? Number(body.sceneStatusRisingMinAttendees) : undefined,
+        featuredVouchThreshold: hasFeaturedThreshold ? Number(body.sceneStatusFeaturedVouchThreshold) : undefined,
+      })
+    }
+
+    if (hasRosterLookback) {
+      const lookback = Number(body.artistRosterHypeScoreLookback)
+      if (!Number.isInteger(lookback) || lookback < 1) {
+        return NextResponse.json({ error: 'artistRosterHypeScoreLookback must be a positive integer' }, { status: 400 })
+      }
+      updated = await setArtistRosterHypeScoreLookback(lookback)
+    }
+
+    if (hasVoteWeightDefaults) {
+      try {
+        updated = await setAudienceChoiceWeightDefaults({
+          audience: Number(body.audienceVoteWeightDefault),
+          panelist: Number(body.panelistVoteWeightDefault),
+          celebrity: Number(body.celebrityVoteWeightDefault),
+        })
+      } catch (e: any) {
+        return NextResponse.json({ error: e.message || 'Invalid vote weights' }, { status: 400 })
+      }
+    }
+
+    if (hasEventWindow) {
+      try {
+        updated = await setEventCreationWindowMonths(Number(body.eventCreationWindowMonths))
+      } catch (e: any) {
+        return NextResponse.json({ error: e.message || 'Invalid eventCreationWindowMonths' }, { status: 400 })
+      }
+    }
+
+    if (hasDirectPayouts) {
+      const enabled = body.directPayoutsEnabled
+      if (typeof enabled !== 'boolean') {
+        return NextResponse.json({ error: 'directPayoutsEnabled must be a boolean' }, { status: 400 })
+      }
+      let enabledUntil: Date | null = null
+      if (Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabledUntil') && body.directPayoutsEnabledUntil) {
+        const parsed = new Date(body.directPayoutsEnabledUntil)
+        if (Number.isNaN(parsed.getTime())) {
+          return NextResponse.json({ error: 'directPayoutsEnabledUntil must be a valid date' }, { status: 400 })
+        }
+        enabledUntil = parsed
+      }
+      updated = await setDirectPayoutsEnabled({ enabled, enabledUntil })
+    }
+
+    // S1a - "paid bookings" master switch (turns on real payments).
+    if (hasPaidBookings) {
+      if (typeof body.paidBookingsEnabled !== 'boolean') {
+        return NextResponse.json({ error: 'paidBookingsEnabled must be a boolean' }, { status: 400 })
+      }
+      updated = await setPaidBookingsEnabled(body.paidBookingsEnabled)
+    }
+
+    // SMS OTP toggle (17 Nov) - phone verification on/off (off = no SMS,
+    // no phone gate). Turn on only once MSG91 keys + DLT are live.
+    if (hasSmsOtp) {
+      if (typeof body.smsOtpEnabled !== 'boolean') {
+        return NextResponse.json({ error: 'smsOtpEnabled must be a boolean' }, { status: 400 })
+      }
+      updated = await setSmsOtpEnabled(body.smsOtpEnabled)
+    }
+
+    // S1b-a - launch wave switches W1-W4 (validated above).
+    if (hasWaves) {
+      updated = await setLaunchWaves(waveInput)
+      // S1b-b1 - the holding page caches W1 for 30s; drop it now.
+      revalidateLaunchWaves()
+    }
+
+    return NextResponse.json({ settings: updated })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Update failed'
+    return NextResponse.json({ error: message }, { status: 400 })
+  }
+}

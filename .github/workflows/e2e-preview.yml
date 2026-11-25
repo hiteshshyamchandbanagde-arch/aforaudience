@@ -1,0 +1,170 @@
+name: E2E (preview)
+
+# The per-PR gate (docs/testing-rules.md T2/T3): the Playwright suite against
+# a commit's own Vercel preview. Vercel's GitHub integration posts a
+# deployment_status when a deployment finishes; this runs on the successful,
+# non-production ones, with PLAYWRIGHT_BASE_URL set to that deployment.
+#
+# Check-run name: e2e-preview (the job id below), on the deployed commit.
+# Chat requires it on the pinned head before merging. Keep it stable.
+#
+# Previews share the QA database, so this is QA data, never production.
+on:
+  deployment_status:
+
+
+permissions:
+  contents: read
+
+jobs:
+  # Decides OUTSIDE the shared queue whether this deployment needs testing,
+  # so commits already in qa skip at once instead of waiting in the queue and
+  # then being cancelled as superseded pending runs (noise seen 3 Oct).
+  target:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment != 'Production' &&
+      !startsWith(github.event.deployment.environment, 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.target.outputs.run }}
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          fetch-depth: 0
+
+      # The qa branch's own deployments are "Preview" to Vercel too. Those
+      # are tested by e2e.yml (push to qa); running both would put two
+      # suites on the shared fixtures at once.
+      # Skip any commit already CONTAINED in qa, not only its tip: a merge
+      # commit stops being the tip as soon as anything (e.g. a docs-only
+      # handoff) lands on top, and must still not be tested twice at once.
+      - name: Is this commit already in qa?
+        id: target
+        run: |
+          sha="${{ github.event.deployment.sha }}"
+          git fetch --quiet --no-tags origin +refs/heads/qa:refs/remotes/origin/qa
+          if git merge-base --is-ancestor "$sha" refs/remotes/origin/qa 2>/dev/null; then
+            echo "::notice title=e2e-preview::This commit is already in qa - covered by the e2e-qa check; nothing run here."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Testing $PLAYWRIGHT_BASE_URL"
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  e2e-preview:
+    needs: target
+    if: needs.target.outputs.run == 'true'
+    # ONE queue for every e2e run (shared with e2e.yml): shared QA fixtures.
+    concurrency:
+      group: e2e-qa-shared-fixtures
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser (chromium only - matches playwright.config.ts projects)
+        run: npx playwright install --with-deps chromium
+
+      # Small chunks (Hitesh, 11 Oct 2026): six sequential shards, 15 min
+      # each, same as e2e.yml. Never parallel - shared QA fixtures.
+      - name: e2e shard 1/6 against the preview
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=1/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-1.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-1
+
+      - name: e2e shard 2/6 against the preview
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=2/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-2.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-2
+
+      - name: e2e shard 3/6 against the preview
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=3/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-3.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-3
+
+      - name: e2e shard 4/6 against the preview
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=4/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-4.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-4
+
+      - name: e2e shard 5/6 against the preview
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=5/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-5.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-5
+
+      - name: e2e shard 6/6 against the preview
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: npx playwright test --shard=6/6
+        env:
+          CI: true
+          E2E_DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+          E2E_JSON_OUT: e2e-results/shard-6.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/shard-6
+
+      - name: Summary annotation (pass/fail counts, all shards)
+        if: always()
+        env:
+          E2E_SUMMARY_LABEL: e2e-preview
+        run: node e2e/ci-summary.mjs e2e-results/shard-1.json e2e-results/shard-2.json e2e-results/shard-3.json e2e-results/shard-4.json e2e-results/shard-5.json e2e-results/shard-6.json
+
+      - name: Upload Playwright report and shard results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            e2e-results/
+          retention-days: 14
+
+      - name: Upload traces/videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 14

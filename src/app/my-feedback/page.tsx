@@ -1,0 +1,412 @@
+'use client'
+
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
+import Button from '@/components/ui/Button'
+import { useModalSheet } from '@/lib/use-modal-sheet'
+import { useLocale } from '@/lib/i18n/translate'
+import type { Dictionary } from '@/lib/i18n/translate'
+import { STATUS_TONE, type StatusToneStyle } from '@/lib/statusStyle'
+import { formatDate } from '@/lib/format-date'
+
+type FeedbackCategory = 'BUG' | 'FEATURE_IDEA' | 'QUESTION' | 'GENERAL' | 'OTHER'
+type FeedbackStatus =
+  | 'NEW' | 'UNDER_REVIEW' | 'BUILD_QUEUE' | 'IN_BUILD' | 'BUILD_COMPLETE'
+  | 'IN_TEST' | 'RESOLVED' | 'REJECTED' | 'REOPENED'
+type FeedbackDeployStage = 'DEPLOYED_QA' | 'IN_PRODUCT' | 'NOTIFIED_USER' | 'CLOSED' | null
+
+type FeedbackItem = {
+  id: string
+  displayId: string | null
+  title: string | null
+  message: string
+  category: FeedbackCategory
+  status: FeedbackStatus
+  deployStage: FeedbackDeployStage
+  createdAt: string
+  resolvedAt: string | null
+  latestNote: string | null
+}
+
+const CATEGORY_KEY: Record<FeedbackCategory, keyof Dictionary['myFeedbackPage']> = {
+  BUG: 'categoryBug',
+  FEATURE_IDEA: 'categoryFeatureIdea',
+  QUESTION: 'categoryQuestion',
+  GENERAL: 'categoryGeneral',
+  OTHER: 'categoryOther',
+}
+
+// User-facing labels stay deliberately simpler than the admin board's
+// raw internal pipeline (session 63 workflow overhaul) - a submitter
+// doesn't need to distinguish "Build Queue" from "In Build" from "Build
+// Complete", just "we're working on it". RESOLVED's label depends on
+// deployStage (computed below in statusStyleFor), since "fixed" reads
+// very differently depending on whether it's live yet.
+// BUG-2609-046 - migrated off this file's own independent light-theme
+// hex map (bg #FFF3E6/fg #C2410C for the in-progress group, #E8F5E9/
+// #2E7D32 for resolved - Material-Design-ish colors matching no real
+// token, plus a genuinely broken near-black NEW fg) onto the shared
+// STATUS_TONE tones (src/lib/statusStyle.ts), per that file's own
+// documented pattern of each page building its own status->tone map
+// from the 5 shared tones rather than a universal table.
+//
+// REJECTED deliberately does NOT take STATUS_TONE.muted wholesale:
+// this page's own design already dims REJECTED (0.6-alpha text) below
+// NEW's full-strength text as a real, intentional "closed/de-emphasized"
+// vs. "active/current" distinction - if REJECTED took muted's full-
+// opacity color like NEW does, both would render as visually identical
+// badges, silently erasing that distinction. Kept the original dimmed
+// value here rather than flattening it just because a fix was nearby.
+const STATUS_KEY: Record<Exclude<FeedbackStatus, 'RESOLVED'>, { key: keyof Dictionary['myFeedbackPage'] } & StatusToneStyle> = {
+  NEW: { key: 'statusSubmitted', ...STATUS_TONE.muted },
+  UNDER_REVIEW: { key: 'statusInReview', ...STATUS_TONE.orange },
+  BUILD_QUEUE: { key: 'statusQueuedToBuild', ...STATUS_TONE.orange },
+  IN_BUILD: { key: 'statusInProgress', ...STATUS_TONE.orange },
+  BUILD_COMPLETE: { key: 'statusInProgress', ...STATUS_TONE.orange },
+  IN_TEST: { key: 'statusBeingTested', ...STATUS_TONE.orange },
+  REOPENED: { key: 'statusReopened', ...STATUS_TONE.orange },
+  REJECTED: { key: 'statusNotPlanned', bg: STATUS_TONE.muted.bg, color: 'var(--afa-text-secondary)' },
+}
+
+function statusStyleFor(tr: Dictionary, item: FeedbackItem): { label: string } & StatusToneStyle {
+  if (item.status !== 'RESOLVED') {
+    const s = STATUS_KEY[item.status]
+    return { label: tr.myFeedbackPage[s.key], bg: s.bg, color: s.color }
+  }
+  if (item.deployStage === 'IN_PRODUCT' || item.deployStage === 'NOTIFIED_USER' || item.deployStage === 'CLOSED') {
+    return { label: tr.myFeedbackPage.statusFixedLive, ...STATUS_TONE.sage }
+  }
+  // RESOLVED with no deployStage (or DEPLOYED_QA) - fixed, but not yet
+  // shipped to the live app. Under the current prod freeze this is
+  // where everything sits, so it's worth being explicit rather than
+  // just saying "Resolved" and letting someone assume it's live.
+  return { label: tr.myFeedbackPage.statusFixedTesting, ...STATUS_TONE.sage }
+}
+
+
+// BUG-2608-019: this page rendered each row as a plain non-interactive
+// div - there was nothing to click, and the swipe/arrow prev-next pattern
+// from #327 only ever existed in the admin FeedbackDetailPanel. This is
+// the user-facing equivalent: read-only (no status/severity controls,
+// unlike the admin panel), operating entirely on the items array already
+// loaded here, with the same guarded keyboard/swipe nav pattern used by
+// #327/#328/#330 so the behavior feels consistent across the app.
+function FeedbackDetailOverlay({
+  tr,
+  items,
+  index,
+  onClose,
+  onNavigate,
+}: {
+  tr: Dictionary
+  items: FeedbackItem[]
+  index: number
+  onClose: () => void
+  onNavigate: (nextIndex: number) => void
+}) {
+  const item = items[index]
+  const hasPrev = index > 0
+  const hasNext = index < items.length - 1
+  const [navGuard, setNavGuard] = useState(false)
+  const { locale } = useLocale()
+  // Esc is handled by this overlay's own key handler below.
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalSheet(true, panelRef, undefined, { label: 'Feedback details' })
+
+  useEffect(() => {
+    setNavGuard(false)
+  }, [index])
+
+  const guardedPrev = useCallback(() => {
+    if (navGuard || !hasPrev) return
+    setNavGuard(true)
+    onNavigate(index - 1)
+  }, [navGuard, hasPrev, index, onNavigate])
+
+  const guardedNext = useCallback(() => {
+    if (navGuard || !hasNext) return
+    setNavGuard(true)
+    onNavigate(index + 1)
+  }, [navGuard, hasNext, index, onNavigate])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key === 'ArrowLeft') guardedPrev()
+      if (e.key === 'ArrowRight') guardedNext()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose, guardedPrev, guardedNext])
+
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null)
+  const SWIPE_THRESHOLD_PX = 60
+  const handleTouchStart = (e: TouchEvent) => {
+    setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+  }
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (!touchStartPos) return
+    const dx = e.changedTouches[0].clientX - touchStartPos.x
+    const dy = e.changedTouches[0].clientY - touchStartPos.y
+    setTouchStartPos(null)
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) return
+    if (dx > 0) guardedPrev()
+    else guardedNext()
+  }
+
+  if (!item) return null
+  const statusStyle = statusStyleFor(tr, item)
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', justifyContent: 'flex-end' }}
+    >
+      <div
+        onClick={onClose}
+        style={{ position: 'absolute', inset: 0, background: 'var(--afa-scrim)' }}
+      />
+      <div
+        ref={panelRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          position: 'relative',
+          width: 'min(480px, 100%)',
+          height: '100%',
+          background: 'var(--afa-surface-raised)',
+          padding: 'var(--afa-space-28px) var(--afa-space-6)',
+          overflowY: 'auto',
+          boxShadow: '-8px 0 24px var(--afa-shadow)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-5)' }}>
+          <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-muted)' }}>
+            {tr.myFeedbackPage.ofTemplate.replace('{i}', String(index + 1)).replace('{n}', String(items.length))}
+          </div>
+          <Button
+            variant="icon"
+            onClick={onClose}
+            aria-label={tr.myFeedbackPage.closeLabel}
+            style={{ fontSize: 'var(--afa-text-subtitle)', lineHeight: 1, color: 'var(--afa-text-primary)' }}
+          >
+            ✕
+          </Button>
+        </div>
+
+        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+          {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt, 'medium', locale)}
+          {item.displayId && <> · {item.displayId}</>}
+        </div>
+
+        <span
+          style={{
+            display: 'inline-block',
+            marginTop: 'var(--afa-space-10px)',
+            fontSize: 'var(--afa-text-small)',
+            fontWeight: 600,
+            padding: 'var(--afa-space-1) var(--afa-space-10px)',
+            borderRadius: 'var(--afa-radius-pill)',
+            background: statusStyle.bg,
+            color: statusStyle.color,
+          }}
+        >
+          {statusStyle.label}
+        </span>
+
+        <p style={{ marginTop: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-title)', lineHeight: 1.5, color: 'var(--afa-text-primary)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {item.message}
+        </p>
+
+        {item.latestNote && (
+          <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-14px) var(--afa-space-4)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', marginBottom: 'var(--afa-space-1)' }}>
+              {tr.myFeedbackPage.noteFromTeam}
+            </div>
+            <p style={{ margin: 0, fontSize: 'var(--afa-text-body)', fontStyle: 'italic', color: 'var(--afa-text-soft)' }}>&quot;{item.latestNote}&quot;</p>
+          </div>
+        )}
+
+        {item.resolvedAt && (
+          <div style={{ marginTop: 'var(--afa-space-4)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
+            {tr.myFeedbackPage.resolvedTemplate.replace('{date}', formatDate(item.resolvedAt, 'dateTime', locale) || '—')}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--afa-space-32px)', gap: 'var(--afa-space-3)' }}>
+          <Button
+            variant="outline-neutral"
+            size="md"
+            fullWidth={false}
+            onClick={guardedPrev}
+            disabled={!hasPrev}
+            style={{ flex: 1 }}
+          >
+            {tr.myFeedbackPage.previous}
+          </Button>
+          <Button
+            variant="outline-neutral"
+            size="md"
+            fullWidth={false}
+            onClick={guardedNext}
+            disabled={!hasNext}
+            style={{ flex: 1 }}
+          >
+            {tr.myFeedbackPage.next}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function MyFeedbackPage() {
+  const { t: tr, locale } = useLocale()
+  const { status: sessionStatus } = useSession()
+  const router = useRouter()
+  const [items, setItems] = useState<FeedbackItem[] | null>(null)
+  const [error, setError] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (sessionStatus === 'unauthenticated') {
+      router.replace('/login?callbackUrl=/my-feedback')
+    }
+  }, [sessionStatus, router])
+
+  const loadFeedback = useCallback(() => {
+    fetch('/api/feedback/mine')
+      .then((res) => {
+        if (!res.ok) throw new Error(tr.myFeedbackPage.loadFailed)
+        return res.json()
+      })
+      .then((data) => {
+        setItems(data.items ?? [])
+        setError('')
+      })
+      .catch(() => {
+        setError(tr.myFeedbackPage.loadErrorMessage)
+      })
+    // tr intentionally omitted from deps - stable enough within a session,
+    // matches the pattern used for fetchThread in the messages thread page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') return
+    loadFeedback()
+  }, [sessionStatus, loadFeedback])
+
+  // BUG-2608-020: submitting via the SupportWidget is an in-page overlay,
+  // not a real navigation, so this list never picked up a fresh
+  // submission without a hard reload. The widget broadcasts this event on
+  // a successful submit.
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') return
+    window.addEventListener('afa:feedback-submitted', loadFeedback)
+    return () => window.removeEventListener('afa:feedback-submitted', loadFeedback)
+  }, [sessionStatus, loadFeedback])
+
+  if (sessionStatus === 'loading' || sessionStatus === 'unauthenticated') {
+    return <BrandLoader />
+  }
+
+  return (
+    <div style={{ background: 'var(--afa-surface-raised)', minHeight: '100vh' }}>
+      <SiteNav variant="page" />
+      <main style={{ maxWidth: '720px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) var(--afa-space-64px)' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 'var(--afa-space-1)', color: 'var(--afa-text-primary)' }}>
+          {tr.myFeedbackPage.heading}
+        </h1>
+        <p style={{ color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-28px)' }}>
+          {tr.myFeedbackPage.subtitle}
+        </p>
+
+        {error && (
+          <div style={{ padding: 'var(--afa-space-4)', background: 'var(--afa-error-tint)', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-5)' }}>
+            {error}
+          </div>
+        )}
+
+        {items === null && !error && <BrandLoader label={tr.myFeedbackPage.loadingLabel} />}
+
+        {items !== null && items.length === 0 && (
+          <div
+            style={{
+              background: 'var(--afa-surface-raised)',
+              borderRadius: 'var(--afa-radius-lg)',
+              padding: 'var(--afa-space-32px) var(--afa-space-6)',
+              textAlign: 'center',
+              border: '1px solid var(--afa-tint-08)',
+            }}
+          >
+            <p style={{ color: 'var(--afa-text-secondary)', margin: 0 }}>
+              {tr.myFeedbackPage.emptyState}
+            </p>
+          </div>
+        )}
+
+        {items !== null && items.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-3)' }}>
+            {items.map((item, i) => {
+              const statusStyle = statusStyleFor(tr, item)
+              return (
+                <Button
+                  key={item.id}
+                  variant="card"
+                  onClick={() => setSelectedIndex(i)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-3)' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt, 'medium', locale)}
+                        {item.displayId && <> · {item.displayId}</>}
+                      </div>
+                      <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>
+                        {item.title || item.message}
+                      </p>
+                      {item.latestNote && (
+                        <p style={{ margin: 'var(--afa-space-2) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                          &quot;{item.latestNote}&quot;
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        flexShrink: 0,
+                        fontSize: 'var(--afa-text-small)',
+                        fontWeight: 600,
+                        padding: 'var(--afa-space-1) var(--afa-space-10px)',
+                        borderRadius: 'var(--afa-radius-pill)',
+                        background: statusStyle.bg,
+                        color: statusStyle.color,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {statusStyle.label}
+                    </span>
+                  </div>
+                </Button>
+              )
+            })}
+          </div>
+        )}
+      </main>
+
+      {items !== null && selectedIndex !== null && (
+        <FeedbackDetailOverlay
+          tr={tr}
+          items={items}
+          index={selectedIndex}
+          onClose={() => setSelectedIndex(null)}
+          onNavigate={setSelectedIndex}
+        />
+      )}
+    </div>
+  )
+}

@@ -2,15 +2,99 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { withListingPrice } from '@/lib/booking-tiers'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { requirePhoneVerification } from '@/lib/verification'
+import { parseAmount } from '@/lib/money-validation'
+import { notifyFollowersOfNewEvent } from '@/lib/follow'
+import { getPlatformSettings, getPaidBookingsEnabled, launchWaveBlock } from '@/lib/platform-settings'
+import { venueBookingNeedsW4 } from '@/lib/launch-waves'
+import { PAID_BOOKINGS_DISABLED, PAID_TICKETS_COMING_SOON_MESSAGE, requestsPaidTickets } from '@/lib/paid-bookings'
+import { resolveEventPaymentMode } from '@/lib/pay-at-entry'
+import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
+import { recomputeTourStatus } from '@/lib/tours'
+import { formatDate } from '@/lib/format-date'
+import { billableHours, wholeBilledHours } from '@/lib/venue-billing'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url)
+    const city = searchParams.get('city')?.trim() || null
+
     const events = await prisma.event.findMany({
-      where: { status: 'APPROVED' },
-      include: { venue: true, lineup: true },
+      // H3 - a suspended Organiser's future events drop out of public
+      // listings immediately (no new tickets sold while suspended), but
+      // this deliberately does NOT touch existing confirmed bookings for
+      // events already sold - see User.isSuspended comment in schema.
+      // Same COMPLETED-status gap as the event detail page (PR #306) -
+      // this listing was APPROVED-only, so a completed event vanished
+      // from both Upcoming and Past (Past's own date-based split never
+      // got a chance to run on it, since it was filtered out before
+      // reaching the client). Widen to include COMPLETED; DRAFT/
+      // PENDING_APPROVAL/CANCELLED remain excluded.
+      // FEAT-2608-036 fast-follow - optional ?city= narrows this at the
+      // query level (indexed via Venue_city_idx) instead of the client
+      // fetching every event and throwing most of them away. Omitted/
+      // null = unchanged "All Cities" behaviour, so this stays backward
+      // compatible with any other caller of this route.
+      where: {
+        status: { in: ['APPROVED', 'COMPLETED'] },
+        organiser: { user: { isSuspended: false } },
+        ...(city ? { venue: { city } } : {}),
+      },
+      include: { venue: true, ticketTiers: { select: { price: true } }, lineup: { include: { artist: { select: { id: true, user: { select: { name: true, displayName: true } } } } } } },
       orderBy: { date: 'asc' },
     })
-    return NextResponse.json(events)
+
+    // Event.totalSeats/availableSeats are only kept accurate on the flat/
+    // GA booking path - NUMBERED-venue occupancy lives in BookingSeat and
+    // was never wired back onto these columns (confirmed live 26 Jul,
+    // session 33: a NUMBERED event with 3 CONFIRMED bookings/11 held
+    // seats still read availableSeats=totalSeats). Same fix as the event
+    // detail page (EventDetailPage, session 33) applied here in batch so
+    // the listing cards' Filling Fast/Sold Out badges aren't stale too.
+    const numberedEvents = events.filter((e: any) => e.venue?.seatingMode === 'NUMBERED')
+    if (numberedEvents.length > 0) {
+      const now = new Date()
+      const venueIds = [...new Set(numberedEvents.map((e: any) => e.venueId as string))]
+      const eventIds = numberedEvents.map((e: any) => e.id as string)
+
+      const [seatCounts, heldRows] = await Promise.all([
+        prisma.seat.groupBy({ by: ['venueId'], where: { venueId: { in: venueIds } }, _count: { id: true } }),
+        prisma.bookingSeat.findMany({
+          where: {
+            booking: {
+              eventId: { in: eventIds },
+              OR: [
+                { status: 'CONFIRMED' },
+                { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+              ],
+            },
+          },
+          select: { booking: { select: { eventId: true } } },
+        }),
+      ])
+
+      const seatTotalByVenue: Record<string, number> = {}
+      for (const row of seatCounts) seatTotalByVenue[row.venueId] = row._count.id
+      const heldByEvent: Record<string, number> = {}
+      for (const row of heldRows) {
+        const eid = row.booking.eventId
+        heldByEvent[eid] = (heldByEvent[eid] || 0) + 1
+      }
+
+      for (const e of numberedEvents) {
+        const seatTotal = seatTotalByVenue[e.venueId as string] || 0
+        e.totalSeats = seatTotal
+        e.availableSeats = Math.max(0, seatTotal - (heldByEvent[e.id as string] || 0))
+      }
+    }
+
+    // BUG-2610-003 - a tiered event (e.g. a numbered-seat one) leaves
+    // ticketPrice null; the cards and the price sort read the cheapest tier.
+    const listed = events.map((e: any) => withListingPrice(e))
+
+    return NextResponse.json(listed)
   } catch (err) {
     console.error('Error fetching events:', err)
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
@@ -36,14 +120,79 @@ export async function POST(req: Request) {
     if (!organiser.isApproved) {
       return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
     }
-
     const body = await req.json()
     const {
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct,
       venueId, bookingAmount, publish, ticketTiers,
-      maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
+      maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
+      defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
+      isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
+      termsChecklist, specialNotes, ageLimit, paymentMode,
+      tourId, openSlotCount, slotDuration, applicationDeadline,
     } = body
+
+    // S1b-a - W4 (direct B2B bookings) gate: attaching a venue with a paid
+    // booking amount creates a paid venue booking (request) below, so it is
+    // refused while W4 is closed - before the event or anything else is
+    // written. A zero / missing amount is W2 and goes ahead.
+    const w4 = venueId && venueBookingNeedsW4(bookingAmount) ? await launchWaveBlock('W4', user.role) : null
+    if (w4) return NextResponse.json(w4.body, { status: w4.status })
+
+    // Tour by Organiser (12 Aug) - if tourId is present, this is a Tour
+    // stop, not a standalone event. Verified up front (ownership + not
+    // terminal) so the rest of validation can treat it as a normal
+    // event creation with a couple of extra fields tacked on.
+    let tour: { id: string; status: string; organiserId: string } | null = null
+    if (tourId) {
+      tour = await prisma.tour.findUnique({ where: { id: String(tourId) }, select: { id: true, status: true, organiserId: true } })
+      if (!tour || tour.organiserId !== organiser.id) {
+        return NextResponse.json({ error: 'Tour not found' }, { status: 404 })
+      }
+      if (tour.status === 'CANCELLED' || tour.status === 'COMPLETED') {
+        return NextResponse.json({ error: 'This Tour is no longer accepting new stops' }, { status: 400 })
+      }
+    }
+    const MAX_OPEN_SLOTS = 50
+    let openSlotCountValue: number | null = null
+    if (openSlotCount !== undefined && openSlotCount !== null && openSlotCount !== '') {
+      const n = Number(openSlotCount)
+      if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > MAX_OPEN_SLOTS) {
+        return NextResponse.json({ error: `Open slot count must be a whole number between 0 and ${MAX_OPEN_SLOTS}.` }, { status: 400 })
+      }
+      openSlotCountValue = n
+    }
+    let slotDurationValue: number | null = null
+    if (slotDuration !== undefined && slotDuration !== null && slotDuration !== '') {
+      const n = Number(slotDuration)
+      if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 180) {
+        return NextResponse.json({ error: 'Slot duration must be a whole number of minutes between 1 and 180.' }, { status: 400 })
+      }
+      slotDurationValue = n
+    }
+    let applicationDeadlineValue: Date | null = null
+    if (applicationDeadline) {
+      const d = new Date(applicationDeadline)
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json({ error: 'Invalid application deadline' }, { status: 400 })
+      }
+      if (d.getTime() < Date.now()) {
+        return NextResponse.json({ error: 'Application deadline must be in the future' }, { status: 400 })
+      }
+      applicationDeadlineValue = d
+    }
+
+    // Verify-gate only applies at Publish - a Draft isn't a commitment an
+    // Organiser plans around yet (see lib/verification.ts doc comment).
+    // Body is parsed first so Draft saves for unverified organisers always
+    // reach here instead of being rejected before their data is even read.
+    if (publish === true) {
+      const verifyError = await requirePhoneVerification(user, 'publishing this event')
+      if (verifyError) return verifyError
+      if (!venueId) {
+        return NextResponse.json({ error: 'A venue must be attached before publishing. Save as a draft to continue without one.' }, { status: 400 })
+      }
+    }
 
     if (!title || !description || !type || !date || !startTime || !endTime || !totalSeats) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -53,6 +202,146 @@ export async function POST(req: Request) {
     if (!seats || seats < 1) {
       return NextResponse.json({ error: 'Total seats must be at least 1' }, { status: 400 })
     }
+    // Same unbounded-input gap as venue creation (§9.2) - generous but
+    // real-world caps, not a business rule.
+    const MAX_EVENT_SEATS = 100_000
+    const MAX_TICKET_PRICE = 10_000_000 // ₹1 crore
+    const MAX_PERFORMERS = 500
+    if (seats > MAX_EVENT_SEATS) {
+      return NextResponse.json({ error: `Total seats can't exceed ${MAX_EVENT_SEATS.toLocaleString('en-IN')}.` }, { status: 400 })
+    }
+    if (maxPerformers !== undefined && maxPerformers !== null && maxPerformers !== '') {
+      const mp = Number(maxPerformers)
+      if (!Number.isFinite(mp) || !Number.isInteger(mp) || mp < 1 || mp > MAX_PERFORMERS) {
+        return NextResponse.json({ error: `Max performers must be a whole number between 1 and ${MAX_PERFORMERS}.` }, { status: 400 })
+      }
+    }
+    // S1a - "paid bookings" master switch: while it is off, refuse an
+    // ONLINE ticket price above 0 on the server (UI hiding is not enough).
+    // D1 - a priced PAY_AT_ENTRY event is allowed (no money through AFA);
+    // a priced event with no mode defaults to PAY_AT_ENTRY while OFF.
+    const pricedRequest = requestsPaidTickets({ isFree, ticketPrice, ticketTiers })
+    const paidOn = await getPaidBookingsEnabled()
+    const modeResult = resolveEventPaymentMode(paymentMode, pricedRequest, paidOn)
+    if (!modeResult.ok) {
+      return NextResponse.json(
+        modeResult.status === 403
+          ? { error: PAID_TICKETS_COMING_SOON_MESSAGE, code: PAID_BOOKINGS_DISABLED }
+          : modeResult.body,
+        { status: modeResult.status }
+      )
+    }
+    const resolvedPaymentMode = modeResult.mode
+    if (!isFree && ticketPrice !== undefined && ticketPrice !== null && ticketPrice !== '') {
+      const price = Number(ticketPrice)
+      if (!Number.isFinite(price) || price < 0 || price > MAX_TICKET_PRICE) {
+        return NextResponse.json({ error: `Ticket price must be between ₹0 and ₹${MAX_TICKET_PRICE.toLocaleString('en-IN')}.` }, { status: 400 })
+      }
+    }
+    if (Array.isArray(ticketTiers)) {
+      for (const t of ticketTiers) {
+        if (!t?.sectionName) continue
+        const tierSeats = Number(t.totalSeats)
+        const tierPrice = Number(t.price)
+        if (Number.isFinite(tierSeats) && (!Number.isInteger(tierSeats) || tierSeats > MAX_EVENT_SEATS)) {
+          return NextResponse.json({ error: `Each section's seat count must be a whole number up to ${MAX_EVENT_SEATS.toLocaleString('en-IN')}.` }, { status: 400 })
+        }
+        if (Number.isFinite(tierPrice) && tierPrice > MAX_TICKET_PRICE) {
+          return NextResponse.json({ error: `Price per seat must be at most ₹${MAX_TICKET_PRICE.toLocaleString('en-IN')}.` }, { status: 400 })
+        }
+      }
+    }
+
+    // GEN-2608-040 (15 Aug) - a "paid" (isFree=false) event could
+    // previously be published with no ticketPrice and no ticketTiers at
+    // all: the block above only validated ticketPrice's *format* if
+    // provided, never required it. That silently broke Price sort
+    // (already patched separately, PR #430/#431) and left a real gap in
+    // the fee-calculation path this platform's revenue model runs on.
+    // Required at Publish only - a Draft in progress can still be saved
+    // with no price yet, same convention as Offer Amount/Fee-per-artist
+    // below.
+    const hasValidTierPricing = Array.isArray(ticketTiers) && ticketTiers.some(
+      (t: any) => t?.sectionName && t.price !== undefined && t.price !== null && t.price !== '' && Number.isFinite(Number(t.price))
+    )
+    if (publish === true && !isFree && !hasValidTierPricing) {
+      if (ticketPrice === undefined || ticketPrice === null || ticketPrice === '') {
+        return NextResponse.json(
+          { error: 'A ticket price is required before publishing a paid event. Set a price, add priced sections, or mark the event as free.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validation-gap cluster fix (design.md §9.2, 26 Jul): Offer Amount and
+    // Paid-fee previously had no bound at all client- or server-side, and
+    // could be submitted blank at Publish - inverting the negotiation flow
+    // (venue owner names a price first) and defeating the payment-
+    // transparency feature. Required only at Publish, same pattern as
+    // requirePhoneVerification above - a Draft is still a work in progress.
+    const bookingAmountCheck = parseAmount(bookingAmount, {
+      label: 'Offer Amount',
+      required: publish === true && !!venueId,
+      allowZero: true,
+    })
+    if (!bookingAmountCheck.ok) {
+      return NextResponse.json({ error: bookingAmountCheck.error }, { status: 400 })
+    }
+    const feeAmountCheck = parseAmount(defaultFeeAmount, {
+      label: 'Fee per artist',
+      required: publish === true && defaultCompensationType === 'PAID',
+      allowZero: true,
+    })
+    if (!feeAmountCheck.ok) {
+      return NextResponse.json({ error: feeAmountCheck.error }, { status: 400 })
+    }
+    const buyInAmountCheck = parseAmount(defaultBuyInAmount, {
+      label: 'Buy-in amount',
+      required: publish === true && defaultCompensationType === 'BUY_IN',
+      allowZero: true,
+    })
+    if (!buyInAmountCheck.ok) {
+      return NextResponse.json({ error: buyInAmountCheck.error }, { status: 400 })
+    }
+
+    // Backdating check. Combine date + startTime into an actual instant and
+    // compare to now - a bare `date` check alone would still let someone
+    // pick today's date with a startTime that already passed. Client-side
+    // datepicker constraints are trivially bypassed by calling this route
+    // directly, so this has to be enforced here, not just in the form.
+    const startTimeMatch = /^(\d{1,2}):(\d{2})$/.exec(String(startTime))
+    if (!startTimeMatch) {
+      return NextResponse.json({ error: 'Invalid start time' }, { status: 400 })
+    }
+    const eventDate = new Date(date)
+    if (Number.isNaN(eventDate.getTime())) {
+      return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
+    }
+    eventDate.setHours(Number(startTimeMatch[1]), Number(startTimeMatch[2]), 0, 0)
+    if (eventDate.getTime() < Date.now()) {
+      return NextResponse.json({ error: 'Event date and time must be in the future' }, { status: 400 })
+    }
+
+    // Forward-window cap (Feedback cms9ynuxi, 2 Aug) - organisers can't
+    // create an event further out than this without contacting admin.
+    // Admin-configurable, default 3 months. Server-side because the
+    // create form's date-picker max is trivially bypassed by calling
+    // this route directly.
+    const { eventCreationWindowMonths } = await getPlatformSettings()
+    const maxAllowedDate = new Date()
+    maxAllowedDate.setMonth(maxAllowedDate.getMonth() + eventCreationWindowMonths)
+    if (eventDate.getTime() > maxAllowedDate.getTime()) {
+      return NextResponse.json(
+        {
+          error: `Events can only be created up to ${eventCreationWindowMonths} months out. For a later date, reach out to the AforAudience team via the feedback/support widget.`,
+        },
+        { status: 400 }
+      )
+    }
+
+    if (!/^\d{1,2}:\d{2}$/.test(String(endTime))) {
+      return NextResponse.json({ error: 'Invalid end time' }, { status: 400 })
+    }
 
     // §4.5 - per-section pricing, when provided. Validated here rather than
     // trusting the client: every tier needs a real section name and a
@@ -60,6 +349,10 @@ export async function POST(req: Request) {
     const validTiers = Array.isArray(ticketTiers)
       ? ticketTiers.filter((t: any) => t?.sectionName && Number(t.price) >= 0 && Number(t.totalSeats) > 0)
       : []
+
+    // Competition show panelists/celebrity: see the note above the
+    // isCompetitionShow write below - no longer created/validated here at
+    // all as of §8 (Accept-to-Appear, session 57).
 
     const event = await prisma.event.create({
       data: {
@@ -72,6 +365,7 @@ export async function POST(req: Request) {
         startTime,
         endTime,
         isFree: Boolean(isFree),
+        paymentMode: resolvedPaymentMode,
         // Kept for backward compat with anything still reading the flat
         // price directly; null when per-section tiers are in play, since
         // there's no single price to show there any more.
@@ -86,6 +380,19 @@ export async function POST(req: Request) {
         maxSeatsPerBooking: maxSeatsPerBooking && Number(maxSeatsPerBooking) >= 1 && Number(maxSeatsPerBooking) <= 10
           ? parseInt(maxSeatsPerBooking)
           : 4,
+        // Server-side is the only real enforcement point (client clamp is
+        // decorative) - same 0-20 bound as the create form's input.
+        plusOnesRequired: plusOnesRequired && Number(plusOnesRequired) >= 0 && Number(plusOnesRequired) <= 20
+          ? parseInt(plusOnesRequired)
+          : 0,
+        // Default artist payment terms, shown to Artists before applying.
+        // Server-side validated same as the rest of this route - client
+        // clamp/UI is decorative.
+        defaultCompensationType: ['PAID', 'FREE', 'BUY_IN'].includes(defaultCompensationType)
+          ? defaultCompensationType
+          : 'FREE',
+        defaultFeeAmount: defaultCompensationType === 'PAID' ? feeAmountCheck.value : null,
+        defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? buyInAmountCheck.value : null,
         // §4.5 suggestion #1, previously unenforced: an event with a venue
         // attached can't go fully live (APPROVED) until that venue's
         // booking is actually confirmed by the Venue Owner - the booking
@@ -93,16 +400,61 @@ export async function POST(req: Request) {
         // with a venue can never be APPROVED at creation time, regardless
         // of what the Organiser requested. PATCH /api/venue-bookings/[id]
         // auto-promotes it to APPROVED once the Venue Owner confirms.
+        // venueId is guaranteed present whenever publish===true (enforced
+        // above) - the 'no venue' fallback below is unreachable in practice
+        // now, kept only as a defensive default rather than assuming the
+        // invariant silently forever.
         status: !publish ? 'DRAFT' : venueId ? 'PENDING_APPROVAL' : 'APPROVED',
         ticketTiers: validTiers.length > 0
           ? {
               create: validTiers.map((t: any) => ({
                 sectionName: String(t.sectionName),
+                level: String(t.level || ''),
                 price: parseFloat(t.price),
                 totalSeats: parseInt(t.totalSeats),
               })),
             }
           : undefined,
+        // Competition show fields all stay at their false/null defaults
+        // unless isCompetitionShow is explicitly true - prize text is
+        // meaningless (and hidden in the UI) otherwise, so don't persist
+        // stray values from a toggle a user flipped off again.
+        //
+        // Panelists/celebrity (§8, session 57, Accept-to-Appear) are no
+        // longer created here at all - they require a real AFA account
+        // lookup + consent handshake (POST /api/events/[id]/panelists/invite,
+        // /celebrities/invite), which needs an eventId to exist first.
+        // Same "save first" gate that photo uploads already had, just
+        // extended to invites themselves now that free-text naming a real
+        // person is closed off entirely.
+        isCompetitionShow: Boolean(isCompetitionShow),
+        competitionPrizeFirst: isCompetitionShow && competitionPrizeFirst ? String(competitionPrizeFirst).trim().slice(0, 200) : null,
+        competitionPrizeSecond: isCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
+        competitionPrizeThird: isCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
+        // FEAT-2608-045 - termsChecklist filtered against the known key
+        // list server-side (never trust client-sent keys directly into an
+        // array shown publicly). specialNotes goes to PENDING on
+        // creation whenever non-empty - never auto-visible, always needs
+        // admin approval first. Empty/missing notes stay at the DB
+        // default (NONE) - nothing to review.
+        termsChecklist: Array.isArray(termsChecklist)
+          ? termsChecklist.filter((k: unknown) => typeof k === 'string' && EVENT_TERMS_CHECKLIST_KEYS.includes(k))
+          : [],
+        specialNotes: specialNotes ? String(specialNotes).trim().slice(0, SPECIAL_NOTES_MAX_LENGTH) : null,
+        specialNotesStatus: specialNotes && String(specialNotes).trim() ? 'PENDING' : 'NONE',
+        // FEAT-2608-045 follow-up - free string, same 60-char cap as the
+        // Dress Code/Vibe "Other" fallback (PresetSelectWithOther), since
+        // this uses the identical preset-or-custom pattern.
+        ageLimit: ageLimit ? String(ageLimit).trim().slice(0, 60) : null,
+        // Tour by Organiser (12 Aug) - category/tourId set only when a
+        // valid tourId was verified above; openSlotCount/slotDuration/
+        // applicationDeadline are independent of that (kept simple,
+        // not DB-restricted to TOUR_STOP - see schema comment).
+        category: tour ? 'TOUR_STOP' : 'STANDALONE',
+        tourId: tour ? tour.id : null,
+        openSlotCount: openSlotCountValue,
+        slotDuration: slotDurationValue,
+        applicationDeadline: applicationDeadlineValue,
       },
     })
 
@@ -114,14 +466,16 @@ export async function POST(req: Request) {
     // (PATCH /api/venue-booking-requests/[id]) rather than pretending a
     // single proposed number is a booking.
     if (venueId) {
-      const venue = await prisma.venue.findUnique({ where: { id: venueId } })
+      const venue = await prisma.venue.findUnique({ where: { id: venueId }, include: { owner: true } })
+      if (!venue) {
+        return NextResponse.json({ error: 'Venue not found' }, { status: 404 })
+      }
 
-      if (venue?.rateType === 'FLEXIBLE') {
-        const [sh, sm] = String(startTime).split(':').map(Number)
-        const [eh, em] = String(endTime).split(':').map(Number)
-        let mins = (eh * 60 + em) - (sh * 60 + sm)
-        if (mins <= 0) mins += 24 * 60
-        const durationHours = Math.round(mins / 60)
+      if (venue.rateType === 'FLEXIBLE') {
+        // BUG-2609-083 - same half-hour rule the create page shows; the
+        // column is a whole number, so a half-hour is recorded rounded up.
+        const hire = billableHours(String(startTime), String(endTime))
+        const durationHours = hire ? wholeBilledHours(hire.billedHours) : 0
 
         const request = await prisma.venueBookingRequest.create({
           data: {
@@ -133,13 +487,23 @@ export async function POST(req: Request) {
             status: 'PENDING',
           },
         })
-        if (bookingAmount) {
+        if (bookingAmountCheck.value !== null) {
           await prisma.venueBookingOffer.create({
-            data: { requestId: request.id, proposedBy: 'ORGANISER', amount: parseFloat(bookingAmount) },
+            data: { requestId: request.id, proposedBy: 'ORGANISER', amount: bookingAmountCheck.value },
           })
         }
+
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(venue.owner.userId, {
+              title: 'New venue booking request',
+              body: `${venue.name} has a new booking request for ${formatDate(date, 'medium')}.`,
+              url: '/dashboard/venue-requests',
+            }),
+          'venue-booking-request'
+        )
       } else {
-        const platformSettings = await prisma.platformSettings.findFirst()
+        const platformSettings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } })
         await prisma.venueBooking.create({
           data: {
             venueId,
@@ -148,11 +512,34 @@ export async function POST(req: Request) {
             fromDate: new Date(date),
             toDate: new Date(date),
             status: 'PENDING',
-            amount: bookingAmount ? parseFloat(bookingAmount) : 0,
+            amount: bookingAmountCheck.value ?? 0,
             platformFeeAmount: platformSettings?.flatVenueBookingFee ?? 199,
           },
         })
+
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(venue.owner.userId, {
+              title: 'New venue booking request',
+              body: `${venue.name} has a new booking request for ${formatDate(date, 'medium')}.`,
+              url: '/dashboard/venue-requests',
+            }),
+          'venue-booking-request'
+        )
       }
+    }
+
+    // A brand-new event only ever reaches APPROVED at creation time when
+    // it has no venue attached (see the status ternary above) - venue
+    // events always start PENDING_APPROVAL. Guarding on event.status here
+    // rather than assuming keeps this correct if that ternary ever changes.
+    if (event.status === 'APPROVED') {
+      notifyFollowersOfNewEvent('ORGANISER', organiser.id, event)
+      if (venueId) notifyFollowersOfNewEvent('VENUE', venueId, event)
+    }
+
+    if (tour) {
+      await recomputeTourStatus(tour.id)
     }
 
     return NextResponse.json(event, { status: 201 })

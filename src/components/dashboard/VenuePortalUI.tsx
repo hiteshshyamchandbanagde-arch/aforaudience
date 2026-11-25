@@ -1,0 +1,526 @@
+import type { ReactNode, ButtonHTMLAttributes, CSSProperties } from 'react'
+import { STATUS_TONE } from '@/lib/statusStyle'
+import SharedButton from '@/components/ui/Button'
+import { PageTitle, StatLabel, type PageTitleSize } from '@/components/dashboard/PageTitle'
+export { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
+
+// Shared visual layer for the Venue Owner Portal (dashboard/venue/*,
+// dashboard/venue-requests), ported from the approved Figma Make export
+// (docs/venue-owner-portal-export-audit.md). Presentational only - every
+// page keeps its own data fetching/interaction logic, this file just gives
+// them one consistent Card/Button/Pill/EmptyState/PageHead system instead
+// of six copies of hand-rolled inline styles. Inline `style` objects (not
+// Tailwind) to match the rest of dashboard/, even though the export itself
+// is Tailwind-based.
+
+/* ---------------- Icons (line-art, currentColor stroke) ---------------- */
+
+type IconProps = { size?: number; style?: CSSProperties; strokeWidth?: number }
+const svgProps = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
+
+export function IconVenue({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M3 21h18M5 21V8l7-4 7 4v13" />
+      <path d="M9 21v-5h6v5M9 11h.01M15 11h.01M9 14h.01M15 14h.01" />
+    </svg>
+  )
+}
+export function IconCalendar({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 9h18M8 3v4M16 3v4" />
+    </svg>
+  )
+}
+export function IconChart({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M4 4v16h16" />
+      <path d="M8 15l3-4 3 2 4-6" />
+    </svg>
+  )
+}
+export function IconEdit({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" />
+    </svg>
+  )
+}
+export function IconPlus({ size = 16, style, strokeWidth = 1.75 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
+export function IconCheck({ size = 16, style, strokeWidth = 1.75 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  )
+}
+export function IconX({ size = 16, style, strokeWidth = 1.75 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  )
+}
+export function IconUsers({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13A4 4 0 0116 11" />
+    </svg>
+  )
+}
+export function IconClock({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  )
+}
+export function IconTag({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M20.6 13.6L13 21.2a2 2 0 01-2.8 0l-7-7A2 2 0 012.8 12V4.8A1.8 1.8 0 014.6 3h7.2a2 2 0 011.4.6l7.4 7.4a2 2 0 010 2.6z" />
+      <circle cx="7.5" cy="7.5" r="1.3" />
+    </svg>
+  )
+}
+export function IconMap({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, ...style }} {...svgProps} strokeWidth={strokeWidth}>
+      <path d="M12 21s-7-6.3-7-11a7 7 0 1114 0c0 4.7-7 11-7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  )
+}
+
+/* ---------------- GEN-2608-082 glyphs ----------------
+   16x16 inline glyphs ported 1:1 from the Figma export's <Glyph> - kept
+   distinct from the 24x24 Icon* set above (own viewBox/strokeWidth
+   defaults) since these ride inline next to text/labels at small sizes
+   throughout the Seating & Pricing fork and the seat-map builder, not as
+   standalone nav/action icons. One word per concept (Section/Aisle/Level/
+   Seat) always pairs with the matching glyph here - see the Terminology
+   panel. */
+type GlyphProps = { size?: number; style?: CSSProperties }
+const glyphProps = { viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+
+export function IconSection({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="2" y="2.5" width="12" height="3.2" rx="1" />
+      <rect x="2" y="6.5" width="12" height="3.2" rx="1" fill="currentColor" opacity="0.35" />
+      <rect x="2" y="10.5" width="12" height="3.2" rx="1" />
+    </svg>
+  )
+}
+export function IconAisleV({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="2" y="2.5" width="4" height="11" rx="1" />
+      <rect x="10" y="2.5" width="4" height="11" rx="1" />
+      <path d="M8 3v10" strokeDasharray="1.5 1.8" />
+    </svg>
+  )
+}
+export function IconAisleH({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="2.5" y="2" width="11" height="4" rx="1" />
+      <rect x="2.5" y="10" width="11" height="4" rx="1" />
+      <path d="M3 8h10" strokeDasharray="1.5 1.8" />
+    </svg>
+  )
+}
+export function IconLevel({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <path d="M8 2 14 5 8 8 2 5 8 2Z" />
+      <path d="M2 8l6 3 6-3" />
+      <path d="M2 11l6 3 6-3" opacity="0.5" />
+    </svg>
+  )
+}
+export function IconSeatGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <path d="M4 7V4.5A1.5 1.5 0 0 1 5.5 3h5A1.5 1.5 0 0 1 12 4.5V7" />
+      <rect x="3" y="7" width="10" height="4.5" rx="1.2" />
+      <path d="M4.5 11.5V13M11.5 11.5V13" />
+    </svg>
+  )
+}
+export function IconStageGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <path d="M2 11h12" />
+      <path d="M4 11V6l4-3 4 3v5" />
+    </svg>
+  )
+}
+export function IconLockGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="3.5" y="7" width="9" height="6.5" rx="1.5" />
+      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+    </svg>
+  )
+}
+export function IconPhoneGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="4.5" y="2" width="7" height="12" rx="1.6" />
+      <path d="M7 12.2h2" />
+    </svg>
+  )
+}
+
+/* ---------------- Status pill ---------------- */
+// Same bg/color pairs already established by organiser/page.tsx's
+// STATUS_STYLE and the bookings/venue-requests STATUS_STYLE maps -
+// consolidated into one component instead of a fourth copy of the same
+// four color pairs, per docs/venue-owner-portal-export-audit.md's
+// "reuse, don't reimplement" guidance on the export's own Pill/toneMap.
+
+export type StatusPillTone = 'gold' | 'sage' | 'error' | 'muted'
+
+const TONE_STYLE: Record<StatusPillTone, { bg: string; color: string }> = {
+  gold: { ...STATUS_TONE.gold },
+  sage: { ...STATUS_TONE.sage },
+  error: { ...STATUS_TONE.error },
+  muted: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)' },
+}
+
+export function StatusPill({ tone, children }: { tone: StatusPillTone; children: ReactNode }) {
+  const t = TONE_STYLE[tone]
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--afa-text-micro)',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        padding: '5px var(--afa-space-10px)', // token-ok(spacing-literal): 5px odd value, no exact token (GEN-2609-107)
+        borderRadius: 'var(--afa-radius-pill)',
+        lineHeight: 1,
+        background: t.bg,
+        color: t.color,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
+/* ---------------- Buttons ---------------- */
+
+// GEN-2609-110 - was this portal's own raw <button>, so no admin edit to
+// the button tokens reached the venue portal. Now a mapping onto the
+// shared Button at size lg: `primary` is `solid`, `outline` is
+// `outline-neutral`. Its one `ghost` caller (venue-requests "Decline") is
+// a destructive action and uses `outline-error` directly. The avp-* class
+// keeps the portal's hover.
+type ButtonVariant = 'primary' | 'outline'
+
+export function Button({
+  variant = 'primary',
+  className = '',
+  children,
+  ...rest
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
+  return (
+    <SharedButton
+      variant={variant === 'primary' ? 'solid' : 'outline-neutral'}
+      size="lg"
+      fullWidth={false}
+      className={`${variant === 'primary' ? 'avp-btn-primary' : 'avp-btn-outline'} ${className}`}
+      {...rest}
+    >
+      {children}
+    </SharedButton>
+  )
+}
+
+/* ---------------- Card ---------------- */
+
+export function Card({
+  style,
+  className = '',
+  children,
+  ...rest
+}: { style?: CSSProperties; className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={className}
+      style={{
+        borderRadius: 'var(--afa-radius-lg)',
+        border: '1px solid var(--afa-tint-08)',
+        background: 'var(--afa-surface-raised)',
+        ...style,
+      }}
+      {...rest}
+    >
+      {children}
+    </div>
+  )
+}
+
+/* ---------------- Empty state ---------------- */
+
+export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption: string; action?: ReactNode }) {
+  return (
+    <div
+      className="avp-crosshatch"
+      style={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 'var(--afa-radius-lg)',
+        border: '1px solid var(--afa-tint-08)',
+        background: 'var(--afa-surface-raised)',
+        padding: 'var(--afa-space-80px) var(--afa-space-6)',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{ color: 'var(--afa-amber-strong)', marginBottom: 'var(--afa-space-6)' }}>{icon}</div>
+      <p
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--afa-text-micro)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          color: 'var(--afa-text-muted)',
+        }}
+      >
+        {caption}
+      </p>
+      {action ? <div style={{ marginTop: 'var(--afa-space-28px)' }}>{action}</div> : null}
+    </div>
+  )
+}
+
+/* ---------------- Page header ---------------- */
+
+export function PageHead({
+  eyebrow,
+  title,
+  description,
+  titleSize = 'default',
+  children,
+}: {
+  eyebrow: string
+  title: string
+  titleSize?: PageTitleSize
+  description?: ReactNode
+  children?: ReactNode
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--afa-space-5)',
+        borderBottom: '1px solid var(--afa-tint-08)',
+        paddingBottom: 'var(--afa-space-28px)',
+        marginBottom: 'var(--afa-space-32px)',
+      }}
+    >
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'var(--afa-space-5)' }}>
+        <div>
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--afa-text-micro)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.16em',
+              color: 'var(--afa-amber)',
+              marginBottom: 'var(--afa-space-2)',
+            }}
+          >
+            {eyebrow}
+          </p>
+          <PageTitle size={titleSize} style={{ margin: 0 }}>{title}</PageTitle>
+          {description ? (
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginTop: 'var(--afa-space-10px)', marginBottom: 0, maxWidth: '520px' }}>
+              {description}
+            </p>
+          ) : null}
+        </div>
+        {children ? <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--afa-space-3)' }}>{children}</div> : null}
+      </div>
+    </div>
+  )
+}
+
+/* ---------------- Stat ---------------- */
+
+export function Stat({ label, value, delta }: { label: string; value: string; delta?: string }) {
+  return (
+    <Card style={{ padding: 'var(--afa-space-5)' }}>
+      <StatLabel style={{ margin: 0 }}>{label}</StatLabel>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-display)', lineHeight: 1, color: 'var(--afa-text-primary)', margin: 'var(--afa-space-3) 0 0' }}>{value}</p>
+      {delta ? (
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage-bright)', margin: 'var(--afa-space-2) 0 0' }}>▲ {delta}</p>
+      ) : null}
+    </Card>
+  )
+}
+
+/* ---------------- Section title (forms) ---------------- */
+
+export function SectionTitle({ n, title }: { n: string; title: string }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: 'var(--afa-space-3)',
+        borderBottom: '1px solid var(--afa-tint-08)',
+        paddingBottom: 'var(--afa-space-3)',
+        marginBottom: 'var(--afa-space-5)',
+      }}
+    >
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-amber)' }}>{n}</span>
+      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>{title}</h2>
+    </div>
+  )
+}
+
+/* ---------------- Nav pills + CTA links (Next <Link>, not <button>) ---------------- */
+// Same visual system as Button, but as plain style objects for use on
+// next/link <Link> elements where the action is routing, not a click
+// handler - most of the top-of-page actions on these dashboard pages are
+// routes (Edit Profile, Revenue Overview, ...), not button onClicks.
+
+export const primaryLinkStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 'var(--afa-space-2)',
+  borderRadius: 'var(--afa-radius-md)',
+  fontFamily: 'var(--font-sans)',
+  fontSize: 'var(--afa-text-body)',
+  fontWeight: 600,
+  padding: '11px var(--afa-space-5)', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
+  background: 'var(--afa-fill-solid)',
+  color: 'var(--afa-on-fill-solid)',
+  textDecoration: 'none',
+  border: 'none',
+}
+
+export const outlineLinkStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 'var(--afa-space-2)',
+  borderRadius: 'var(--afa-radius-md)',
+  fontFamily: 'var(--font-sans)',
+  fontSize: 'var(--afa-text-body)',
+  fontWeight: 600,
+  padding: '11px var(--afa-space-5)', // token-ok(spacing-literal): 11px odd value, no exact token (GEN-2609-107)
+  background: 'transparent',
+  color: 'var(--afa-text-primary)',
+  textDecoration: 'none',
+  border: '1px solid var(--afa-tint-20)',
+}
+
+export const navPillStyle: CSSProperties = {
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 'var(--afa-space-2)',
+  borderRadius: 'var(--afa-radius-md)',
+  border: '1px solid var(--afa-tint-08)',
+  padding: '9px var(--afa-space-14px)', // token-ok(spacing-literal): 9px odd value, no exact token (GEN-2609-107)
+  fontFamily: 'var(--font-sans)',
+  fontSize: 'var(--afa-text-ui)',
+  color: 'var(--afa-text-secondary)',
+  textDecoration: 'none',
+}
+
+export function NavBadge({ children }: { children: ReactNode }) {
+  return (
+    <span
+      style={{
+        position: 'absolute',
+        top: '-8px',
+        right: '-8px',
+        background: 'var(--afa-gold)',
+        color: 'var(--afa-text-primary)',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--afa-text-micro)',
+        fontWeight: 600,
+        borderRadius: 'var(--afa-radius-pill)',
+        padding: 'var(--afa-space-2px) 7px', // token-ok(spacing-literal): 7px odd value, no exact token (GEN-2609-107)
+        lineHeight: 1.4,
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
+/* ---------------- Form field primitives ---------------- */
+
+export function Label({ children }: { children: ReactNode }) {
+  return (
+    <label style={{ display: 'block', marginBottom: 'var(--afa-space-2)', fontSize: 'var(--afa-text-ui)', fontWeight: 500, color: 'var(--afa-text-secondary)' }}>
+      {children}
+    </label>
+  )
+}
+
+const fieldStyle: CSSProperties = {
+  width: '100%',
+  borderRadius: 'var(--afa-radius-md)',
+  border: '1px solid var(--afa-tint-08)',
+  background: 'var(--afa-surface-inverse)',
+  padding: 'var(--afa-space-10px) var(--afa-space-14px)',
+  fontSize: 'var(--afa-text-body)',
+  fontFamily: 'var(--font-sans)',
+  color: 'var(--afa-text-primary)',
+  boxSizing: 'border-box',
+}
+
+export function Field(
+  props: { as?: 'input' | 'textarea' } & React.InputHTMLAttributes<HTMLInputElement> & React.TextareaHTMLAttributes<HTMLTextAreaElement>
+) {
+  const { as = 'input', style, ...rest } = props
+  if (as === 'textarea') {
+    return (
+      <textarea
+        className="avp-field"
+        style={{ ...fieldStyle, minHeight: '112px', resize: 'vertical', ...style }}
+        {...(rest as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+      />
+    )
+  }
+  return (
+    <input
+      className="avp-field"
+      style={{ ...fieldStyle, ...style }}
+      {...(rest as React.InputHTMLAttributes<HTMLInputElement>)}
+    />
+  )
+}

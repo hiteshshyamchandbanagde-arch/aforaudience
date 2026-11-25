@@ -1,0 +1,51 @@
+import { ROTATE_MS } from "@/hooks/usePhotoRotation"
+import Button from "@/components/ui/Button"
+
+/**
+ * Shared progress-dot row for a crossfading photo hero, extracted from
+ * the homepage Hero (GEN-2608-072) alongside PhotoCrossfadeBackdrop /
+ * usePhotoRotation, so the Artist landing page's hero reuses the same
+ * rotation-progress affordance instead of a parallel copy.
+ */
+export default function PhotoRotationDots({
+  photos,
+  active,
+  setActive,
+  paused,
+  reduced,
+}: {
+  photos: { src: string; alt: string }[]
+  active: number
+  setActive: (i: number) => void
+  paused: boolean
+  reduced: boolean
+}) {
+  if (photos.length < 2) return null
+  return (
+    <div style={{ marginTop: "var(--afa-space-56px)", display: "flex", alignItems: "center", gap: "var(--afa-space-10px)" }}>
+      {photos.map((photo, i) => (
+        <Button
+          // bare-reason: carousel progress dot: a 4px bar whose width animates and which holds the progress fill; not a text button
+          variant="bare"
+          key={photo.src}
+          aria-label={`Photo ${i + 1} of ${photos.length}`}
+          onClick={() => setActive(i)}
+          style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "var(--afa-radius-pill)", overflow: "hidden", padding: 0, transition: "width 0.3s ease", background: "var(--afa-tint-20)" }}
+        >
+          {i === active && !reduced && !paused && (
+            <span style={{ position: "absolute", inset: 0, background: "var(--afa-selected)", transformOrigin: "left", animation: `heroDrawLine ${ROTATE_MS}ms linear` }} />
+          )}
+          {i === active && (reduced || paused) && (
+            <span style={{ position: "absolute", inset: 0, background: "var(--afa-selected)" }} />
+          )}
+        </Button>
+      ))}
+      <style>{`
+        @keyframes heroDrawLine {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+      `}</style>
+    </div>
+  )
+}

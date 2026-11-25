@@ -1,0 +1,84 @@
+import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma'
+import { getLaunchWavesForViewer } from '@/lib/launch-waves.server'
+import { getPaidBookingsEnabled } from '@/lib/platform-settings'
+import { requestsPaidTickets } from '@/lib/paid-bookings'
+import SeatSelectionClientPage from './SeatSelectionClientPage'
+import { PAY_AT_ENTRY_MAX_SEATS } from '@/lib/pay-at-entry'
+
+// GEN-2609-004 (Mobile Redesign Phase 2) - the seat/ticket-tier picker,
+// relocated out of EventDetailClientPage.tsx into its own real,
+// deep-linkable route (was embedded inline before this phase). Lean
+// query - only what the booking panel itself needs, not the full
+// lineup/reviews/panelists/celebrities EventDetailPage fetches - see that
+// file's own query for the full shape if this one is ever missing a field.
+export default async function SeatSelectionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: { venue: true, ticketTiers: true },
+  })
+
+  if (!event || !['APPROVED', 'COMPLETED'].includes(event.status)) {
+    return <SeatSelectionClientPage event={null} />
+  }
+
+  // S1a - "paid bookings" switch off: no booking panel (no Pay/Book) for a
+  // paid event. Back to the event page, which shows "Booking opens soon".
+  // POST /api/bookings refuses these anyway; this keeps a deep link honest.
+  // D1 - PAY_AT_ENTRY is never blocked by the switch.
+  if (event.paymentMode !== 'PAY_AT_ENTRY' && requestsPaidTickets({ isFree: event.isFree, ticketPrice: event.ticketPrice, ticketTiers: event.ticketTiers }) && !(await getPaidBookingsEnabled())) {
+    redirect(`/events/${id}`)
+  }
+
+  // S1b-b2 - launch wave W3 (tickets) closed: no booking panel for any
+  // event (admin bypasses). Back to the event page, which shows "Tickets
+  // open soon"; POST /api/bookings refuses anyway.
+  if (!(await getLaunchWavesForViewer()).W3) {
+    redirect(`/events/${id}`)
+  }
+
+  // Same NUMBERED-venue live-occupancy correction as EventDetailPage
+  // (Event.totalSeats/availableSeats are only kept accurate on the
+  // GA/flat booking path - see that file's own comment for the full
+  // "Jaipur Mic Gala 100" bug history this fixes).
+  let displayTotalSeats = event.totalSeats
+  let displayAvailableSeats = event.availableSeats
+  if (event.venue?.seatingMode === 'NUMBERED') {
+    const now = new Date()
+    const [seatTotal, heldCount] = await Promise.all([
+      prisma.seat.count({ where: { venueId: event.venueId! } }),
+      prisma.bookingSeat.count({
+        where: {
+          booking: {
+            eventId: id,
+            OR: [
+              { status: 'CONFIRMED' },
+              { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+            ],
+          },
+        },
+      }),
+    ])
+    displayTotalSeats = seatTotal
+    displayAvailableSeats = Math.max(0, seatTotal - heldCount)
+  }
+
+  const eventForClient = {
+    ...event,
+    totalSeats: displayTotalSeats,
+    availableSeats: displayAvailableSeats,
+    // D1 - pay at entry is capped at 4 seats per booking (server-enforced).
+    maxSeatsPerBooking:
+      event.paymentMode === 'PAY_AT_ENTRY'
+        ? Math.min(event.maxSeatsPerBooking, PAY_AT_ENTRY_MAX_SEATS)
+        : event.maxSeatsPerBooking,
+  }
+
+  return <SeatSelectionClientPage event={JSON.parse(JSON.stringify(eventForClient))} />
+}
+
+// Same reasoning as events/[id]/page.tsx - seat availability must never be
+// served from a frozen build-time snapshot.
+export const dynamic = 'force-dynamic'
