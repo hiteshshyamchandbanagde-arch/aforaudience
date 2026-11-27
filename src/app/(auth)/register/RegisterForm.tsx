@@ -244,9 +244,11 @@ export default function RegisterForm() {
   const [stage, setStage] = useState<"form" | "otp">("form")
   // SMS OTP toggle (17 Nov) - while PlatformSettings.smsOtpEnabled is off
   // there's no OTP stage: phone is optional and the new account signs in
-  // with its password straight away. Defaults to ON (today's behaviour)
-  // until the flag loads; the server's `signInDirectly` is the final word.
-  const [smsOtpEnabled, setSmsOtpEnabled] = useState(true)
+  // with its password straight away. `null` = not loaded yet: the OTP hint
+  // shows only once the flag is known to be ON (no flash when it's off), and
+  // a submit before it loads still treats phone as required (the old ON
+  // default); the server's `signInDirectly` is the final word.
+  const [smsOtpEnabled, setSmsOtpEnabled] = useState<boolean | null>(null)
   useEffect(() => {
     let cancelled = false
     fetch("/api/auth/sms-otp")
@@ -294,7 +296,7 @@ export default function RegisterForm() {
       setFieldErrors({ username: tr.authErrors.USERNAME_INVALID }); return
     }
     const phoneGiven = live.phoneNumber.trim() !== ""
-    if ((smsOtpEnabled || phoneGiven) && !/^\d{10}$/.test(live.phoneNumber)) {
+    if ((smsOtpEnabled !== false || phoneGiven) && !/^\d{10}$/.test(live.phoneNumber)) {
       setFieldErrors({ phone: tr.registerPage.invalidPhoneNumber }); return
     }
 
@@ -648,7 +650,7 @@ export default function RegisterForm() {
                   style={{ flex: 1, minWidth: 0, padding: "var(--afa-space-3) var(--afa-space-14px)", border: "none", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
-              {smsOtpEnabled && (
+              {smsOtpEnabled === true && (
                 <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
                   {tr.registerPage.otpHint}
                 </p>
