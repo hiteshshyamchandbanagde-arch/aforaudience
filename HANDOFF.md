@@ -1,4 +1,23 @@
-## Part 85 — START HERE (26 Nov 01:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE = qa @ 156f9b4)
+## Part 86 — START HERE (27 Nov 19:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
+Read order: **86 → 85**. 0 open PRs.
+
+- **Prod smoke 26–27 Nov:** admin login ✅ (0 failed attempts), displayName save ✅ ("Hitesh Bangade"), avatar upload → Vercel Blob ✅, push subscription saved ✅ (1 FCM row), public pages (/, events, artists, venues, wall-of-fame, terms, refund-policy, register, admin Command Center) load, 0 console errors, all /api calls 200 (chat via Claude in Chrome on Hitesh's browser).
+- **Waves on prod:** W1 Discovery+sign-up ✅ OPEN, W2 Onboarding ✅ OPEN, W3 Tickets ❌, W4 Direct bookings ❌ (Hitesh, 27 Nov 00:02 IST).
+- **Not yet tested (Hitesh):** email sign-up + Resend verification email (chat can't create accounts with passwords on a live site); free ticket (needs W3 + real event — do with first real event).
+- **Nits to dispatch to CC (small, qa):** (1) RegisterForm defaults `smsOtpEnabled=true` → OTP hint flashes under Mobile number until /api/auth/sms-otp loads; default to null/hidden. (2) Every /api call does 308 → `www` + trailing-slash redirect (apex→www and no-slash fetch URLs); make client fetches use trailing slash / canonical host.
+- Tooling: sandbox egress blocks aforaudience.com (use Claude in Chrome or ask Hitesh to allowlist). GitHub calls in sandbox appear to use session-minted credentials (expiry header identical for two different PATs); Hitesh gave a fresh PAT 27 Nov (stored /home/claude/afa/token.txt, 600).
+- Proposed, awaiting Hitesh yes: daily prod health-check scheduled task (runtime errors, sign-ups, advisors, nightly CI; ping only on problems).
+
+### Next (chat)
+1. Hitesh's email sign-up result → verify User row + Resend.
+2. Dispatch the 2 nits to CC (one small PR).
+3. Restore prod hard-block in tooling notes (launch-day lift over).
+4. Help Hitesh seed first real events/venues → then open W3 Tickets.
+
+### Open for Hitesh
+Email sign-up test · first 3–5 real events · open W3 when ready · delete merged branches (8 incl. release/launch-2611) · Anthropic prod key expires 31 Dec · Google OAuth on prod · payments decision.
+
+## Part 85 — superseded by 86, (26 Nov 01:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE = qa @ 156f9b4)
 Read order: **85 → 84**. 0 open PRs.
 
 - 🚀 **PROD LAUNCHED 26 Nov ~01:10 IST.** Hitesh lifted the prod block for launch day (24 Nov) and approved each step.
