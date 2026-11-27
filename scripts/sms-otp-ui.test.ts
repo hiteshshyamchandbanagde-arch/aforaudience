@@ -34,12 +34,12 @@ test('GET /api/auth/sms-otp returns { enabled } from the settings read, no auth'
 })
 
 const reg = read('src/app/(auth)/register/RegisterForm.tsx')
-test('RegisterForm reads the flag, defaulting to ON', () => {
+test('RegisterForm reads the flag, starting unknown (null)', () => {
   assert.match(reg, /fetch\("\/api\/auth\/sms-otp"\)/)
-  assert.match(reg, /useState\(true\)/)
+  assert.match(reg, /useState<boolean \| null>\(null\)/)
 })
 test('RegisterForm: phone only required while ON; optional (but validated if given) while OFF', () => {
-  assert.match(reg, /\(smsOtpEnabled \|\| phoneGiven\) && !\/\^\\d\{10\}\$\/\.test\(live\.phoneNumber\)/)
+  assert.match(reg, /\(smsOtpEnabled !== false \|\| phoneGiven\) && !\/\^\\d\{10\}\$\/\.test\(live\.phoneNumber\)/)
   assert.match(reg, /const phone = phoneGiven \? `\+91\$\{live\.phoneNumber\}` : undefined/)
 })
 test('RegisterForm: signInDirectly -> password sign-in, skips the OTP stage', () => {
@@ -51,7 +51,7 @@ test('RegisterForm: signInDirectly -> password sign-in, skips the OTP stage', ()
   assert.match(branch, /router\.push\("\/"\)\s*\n\s*return/)
 })
 test('RegisterForm: OTP hint only shown while ON', () => {
-  assert.match(reg, /\{smsOtpEnabled && \(\s*<p[^>]*>\s*\{tr\.registerPage\.otpHint\}/)
+  assert.match(reg, /\{smsOtpEnabled === true && \(\s*<p[^>]*>\s*\{tr\.registerPage\.otpHint\}/)
 })
 
 const login = read('src/app/(auth)/login/page.tsx')
