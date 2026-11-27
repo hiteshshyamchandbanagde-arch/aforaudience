@@ -1,4 +1,23 @@
-## Part 86 — START HERE (27 Nov 19:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
+## Part 87 — START HERE (28 Nov 00:55 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
+Read order: **87 → 86**. 1 open PR (#790).
+
+- **#790** `fix/prod-nits-2711` head a665e1a = OTP-hint nit only (RegisterForm `smsOtpEnabled` null initial state; hint only `=== true`; submit before load still requires phone). Spec e2e/register-otp-hint.spec.ts; scripts/sms-otp-ui.test.ts 3 asserts updated (intended). e2e-preview ✅ (46039437049). **Design Token Check 46039262642 = action_required → Hitesh must click Approve** (CC-autopilot pushes need approval; chat approval is blocked by auto-mode — correct, don't retry). Then squash-merge per workflow.
+- **/api 308 nit DROPPED:** `skipTrailingSlashRedirect` sets __NEXT_MANUAL_TRAILING_SLASH → client <Link> hrefs lose slash (/privacy, /events — caught by footer-legal + design-system-goal specs); internal slash redirect runs before proxy (resolve-routes.js:57) so proxy rewrite can't help. Only fix = trailing slash at ~275 fetch call-sites (low priority, parked). apex→www 308 is Vercel domain config (apex redirects to www) — fine.
+- **Daily prod health check** scheduled task `trig_01A5s6dVMLr3EZsmRyJLQhLr`, 08:36 IST, read-only (prod errors, sign-ups vs verification tokens, advisors, nightly, stale PRs), push notify (Hitesh yes, 27 Nov).
+- **QA ≠ prod settings:** QA PlatformSettings has paid bookings, SMS OTP and all 4 waves ON (nightly e2e relies on it); prod: paid/SMS off, W1+W2 open. Code qa≡main except docs; prod migrations 86/86.
+- **SMS OTP (Hitesh asked):** code ready (MSG91, env MSG91_AUTH_KEY + MSG91_TEMPLATE_ID, admin toggle). Hitesh to do DLT entity + sender ID + OTP template, MSG91 company account → send keys → chat sets Vercel prod env + redeploy → test → toggle on. Advised: not a blocker for free/pay-at-entry launch.
+- Email sign-up on prod: still not done (prod has only admin AFA2611000001, 0 EmailVerificationTokens at 27 Nov 19:20).
+- Hitesh testing QA thoroughly (checklist given: W1 discovery → sign-up → W2 onboarding → venue/event/artist → W3 tickets → admin).
+
+### Next (chat)
+1. After Hitesh approves → merge #790 → verify qa/Vercel → Human check: prod /register on phone (after next qa→main).
+2. Triage Hitesh's QA test findings → Feedback table → small CC dispatches.
+3. Email sign-up verification; seed real events → W3.
+
+### Open for Hitesh
+Approve run 46039262642 · email sign-up test · QA test findings · 3–5 real events · DLT/MSG91 when ready · delete merged branches · Anthropic key expires 31 Dec · Google OAuth on prod · payments decision.
+
+## Part 86 — superseded by 87, (27 Nov 19:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
 Read order: **86 → 85**. 0 open PRs.
 
 - **Prod smoke 26–27 Nov:** admin login ✅ (0 failed attempts), displayName save ✅ ("Hitesh Bangade"), avatar upload → Vercel Blob ✅, push subscription saved ✅ (1 FCM row), public pages (/, events, artists, venues, wall-of-fame, terms, refund-policy, register, admin Command Center) load, 0 console errors, all /api calls 200 (chat via Claude in Chrome on Hitesh's browser).
