@@ -1,5 +1,6 @@
 ## Part 87 — START HERE (28 Nov 00:55 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
-Read order: **87 → 86**. 1 open PR (#791 release qa→main, approved by Hitesh 28 Nov 14:23).
+Read order: **87 → 86**. **main @ 60312f8 = qa @ 339912e (#790 on prod, 28 Nov 18:40 IST; #791 merge commit; prod deploy dpl_BWdPKiYvyp75kJFFsMcGkYi4WGKu READY, 0 errors).** Open: #792 (email suppression for test domains, load-test step 1; NOT for prod without asking).
+- Load test (Hitesh go 28 Nov 15:12; defaults: full-launch prod settings for test window then restore; keep tagged data; no stress test; 1% trial first). Dispatches: loadtest-1 (#792), 1b (pure module fix), 2a (accounts runner — trigger after #792 merges). E2E jobs share concurrency group: never run two at once (pending runs replace each other).
 - **STANDING RULE (Hitesh, 28 Nov 14:36): always ask Hitesh before every prod release (qa→main). No auto-release.**
 - **28 Nov 14:05 IST: #790 MERGED** (squash `45b4587`, Hitesh approved the Design Token Check; pinned head a665e1a). QA deploy dpl_BjU3axKx2deyS2MFF5F7tjCWV88j READY, 0 runtime errors. Branch `fix/prod-nits-2711` NOT deleted (proxy blocks ref delete) → add to Hitesh's branch-cleanup list (now 9). qa is 1 fix ahead of main.
 
