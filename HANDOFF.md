@@ -1,4 +1,62 @@
-## Part 84 — START HERE (24 Nov 10:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
+## Part 87 — START HERE (28 Nov 00:55 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
+Read order: **87 → 86**. 0 open PRs.
+- **28 Nov 14:05 IST: #790 MERGED** (squash `45b4587`, Hitesh approved the Design Token Check; pinned head a665e1a). QA deploy dpl_BjU3axKx2deyS2MFF5F7tjCWV88j READY, 0 runtime errors. Branch `fix/prod-nits-2711` NOT deleted (proxy blocks ref delete) → add to Hitesh's branch-cleanup list (now 9). qa is 1 fix ahead of main.
+
+- **#790** `fix/prod-nits-2711` head a665e1a = OTP-hint nit only (RegisterForm `smsOtpEnabled` null initial state; hint only `=== true`; submit before load still requires phone). Spec e2e/register-otp-hint.spec.ts; scripts/sms-otp-ui.test.ts 3 asserts updated (intended). e2e-preview ✅ (46039437049). **Design Token Check 46039262642 = action_required → Hitesh must click Approve** (CC-autopilot pushes need approval; chat approval is blocked by auto-mode — correct, don't retry). Then squash-merge per workflow.
+- **/api 308 nit DROPPED:** `skipTrailingSlashRedirect` sets __NEXT_MANUAL_TRAILING_SLASH → client <Link> hrefs lose slash (/privacy, /events — caught by footer-legal + design-system-goal specs); internal slash redirect runs before proxy (resolve-routes.js:57) so proxy rewrite can't help. Only fix = trailing slash at ~275 fetch call-sites (low priority, parked). apex→www 308 is Vercel domain config (apex redirects to www) — fine.
+- **Daily prod health check** scheduled task `trig_01A5s6dVMLr3EZsmRyJLQhLr`, 08:36 IST, read-only (prod errors, sign-ups vs verification tokens, advisors, nightly, stale PRs), push notify (Hitesh yes, 27 Nov).
+- **QA ≠ prod settings:** QA PlatformSettings has paid bookings, SMS OTP and all 4 waves ON (nightly e2e relies on it); prod: paid/SMS off, W1+W2 open. Code qa≡main except docs; prod migrations 86/86.
+- **SMS OTP (Hitesh asked):** code ready (MSG91, env MSG91_AUTH_KEY + MSG91_TEMPLATE_ID, admin toggle). Hitesh to do DLT entity + sender ID + OTP template, MSG91 company account → send keys → chat sets Vercel prod env + redeploy → test → toggle on. Advised: not a blocker for free/pay-at-entry launch.
+- Email sign-up on prod: still not done (prod has only admin AFA2611000001, 0 EmailVerificationTokens at 27 Nov 19:20).
+- Hitesh testing QA thoroughly (checklist given: W1 discovery → sign-up → W2 onboarding → venue/event/artist → W3 tickets → admin).
+
+### Next (chat)
+1. Human check on QA: /register on phone, no OTP hint (QA has SMS ON → hint shows by design; check with flag off or after qa→main on prod). qa→main for #790 when Hitesh says.
+2. Triage Hitesh's QA test findings → Feedback table → small CC dispatches.
+3. Email sign-up verification; seed real events → W3.
+
+### Open for Hitesh
+Approve run 46039262642 · email sign-up test · QA test findings · 3–5 real events · DLT/MSG91 when ready · delete merged branches · Anthropic key expires 31 Dec · Google OAuth on prod · payments decision.
+
+## Part 86 — superseded by 87, (27 Nov 19:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
+Read order: **86 → 85**. 0 open PRs.
+
+- **Prod smoke 26–27 Nov:** admin login ✅ (0 failed attempts), displayName save ✅ ("Hitesh Bangade"), avatar upload → Vercel Blob ✅, push subscription saved ✅ (1 FCM row), public pages (/, events, artists, venues, wall-of-fame, terms, refund-policy, register, admin Command Center) load, 0 console errors, all /api calls 200 (chat via Claude in Chrome on Hitesh's browser).
+- **Waves on prod:** W1 Discovery+sign-up ✅ OPEN, W2 Onboarding ✅ OPEN, W3 Tickets ❌, W4 Direct bookings ❌ (Hitesh, 27 Nov 00:02 IST).
+- **Not yet tested (Hitesh):** email sign-up + Resend verification email (chat can't create accounts with passwords on a live site); free ticket (needs W3 + real event — do with first real event).
+- **Nits to dispatch to CC (small, qa):** (1) RegisterForm defaults `smsOtpEnabled=true` → OTP hint flashes under Mobile number until /api/auth/sms-otp loads; default to null/hidden. (2) Every /api call does 308 → `www` + trailing-slash redirect (apex→www and no-slash fetch URLs); make client fetches use trailing slash / canonical host.
+- Tooling: sandbox egress blocks aforaudience.com (use Claude in Chrome or ask Hitesh to allowlist). GitHub calls in sandbox appear to use session-minted credentials (expiry header identical for two different PATs); Hitesh gave a fresh PAT 27 Nov (stored /home/claude/afa/token.txt, 600).
+- Proposed, awaiting Hitesh yes: daily prod health-check scheduled task (runtime errors, sign-ups, advisors, nightly CI; ping only on problems).
+
+### Next (chat)
+1. Hitesh's email sign-up result → verify User row + Resend.
+2. Dispatch the 2 nits to CC (one small PR).
+3. Restore prod hard-block in tooling notes (launch-day lift over).
+4. Help Hitesh seed first real events/venues → then open W3 Tickets.
+
+### Open for Hitesh
+Email sign-up test · first 3–5 real events · open W3 when ready · delete merged branches (8 incl. release/launch-2611) · Anthropic prod key expires 31 Dec · Google OAuth on prod · payments decision.
+
+## Part 85 — superseded by 86, (26 Nov 01:15 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE = qa @ 156f9b4)
+Read order: **85 → 84**. 0 open PRs.
+
+- 🚀 **PROD LAUNCHED 26 Nov ~01:10 IST.** Hitesh lifted the prod block for launch day (24 Nov) and approved each step.
+  1. Wipe (24 Nov 12:20 IST, chat via Supabase execute_sql): all public tables/enums/functions dropped (13 July test users, 2 events, 11 ₹0 bookings; samples shown, backup skipped by Hitesh).
+  2. Migrate: chat's apply via MCP was **denied by auto-mode** → Hitesh ran `npx prisma migrate deploy` locally (Session pooler 5432) 26 Nov 00:05 IST → 86/86. Verified: 53 tables, RLS on all, 4 role-code triggers, 5 fns search_path, 115 DesignTokens, PlatformSettings singleton, advisors 0 ERROR/0 WARN. Column diff vs QA = only QA drift (QA has leftover Artist.hypScore; QA has DB uuid defaults on EmailVerificationToken/Otp.id — Prisma uses cuid client-side). `_prisma_migrations` checksums were written by Prisma on Windows (may differ from Linux-computed; `migrate deploy` ignores applied ones).
+  3. Admin row (chat, Hitesh's fresh bcrypt hash): `hiteshshyamchandbanagde@gmail.com`, ADMIN, verified/approved, code AFA2611000001 (trigger works). Password NOT stored anywhere by chat.
+  4. Vercel Production DATABASE_URL re-set by Hitesh to the 6543 transaction pooler (DB password unchanged).
+  5. **#789 merged** (merge commit `052bcc9`, pinned head 1fb6dd7 = commit-tree of qa^{tree} with parents main+qa → main tree == qa; main's 3 prod-only legal ports superseded). CI on head: e2e-preview 742 ✅/0 ❌, design-tokens ✅. Vercel prod `dpl_9YPDbXBaEAkucv64SahJg9UUfjzj` READY; no runtime errors on it in first minutes (only known preview-era warnings).
+- Prod state: `smsOtpEnabled=false`, `paidBookingsEnabled=false`, all 4 wave flags false (defaults) → waves to be opened by Hitesh in Admin → Settings.
+
+### Next (chat)
+1. Read Hitesh's smoke results (email sign-up, admin login, free ticket, push, photo upload, Places) → fix-forward on qa if anything fails.
+2. Waves: open in order on Hitesh OK.
+3. Restore prod hard-block in tooling after launch day (block was lifted for launch only).
+
+### Open for Hitesh
+Smoke test · open waves · delete merged branches (now 8: + release/launch-2611) · optional Google re-login on QA · Anthropic prod key expires 31 Dec · Google OAuth on prod later.
+
+## Part 84 — superseded by 85, (24 Nov 10:55 IST, chat), qa @ this commit, main @ 636354f (prod frozen)
 Read order: **84 → 83 → 82**. 0 open PRs.
 
 - **#787 MERGED** (`a97bc78`, pinned head bf71187; Hitesh "merge both", 24 Nov). Fresh-replay part 2: catch-up migration `20261122120000` (role-code columns/indexes, EmailVerificationToken, Otp, CodeCounter, generate_role_code + 4 BEFORE INSERT triggers — chat verified against QA pg_get_functiondef/pg_get_triggerdef 22 Nov, identical logic; code columns no default on QA too), `20261122130000` RLS on all public tables, `20260802080000` made replay-safe (checksum changes; deploy ignores applied ones), PGlite `scripts/migration-replay.test.ts` 7/11 → 11/11, 86/86 replay. AGENTS.md RLS rule. CI: e2e-preview 740 ✅ / 0 ❌ / 0 flaky, design-tokens ✅.
