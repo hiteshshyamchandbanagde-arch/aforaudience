@@ -1,11 +1,22 @@
 import { Resend } from "resend"
 import { resolveDesignColors } from "@/lib/design-tokens.server"
 import { textSafeColor } from "@/lib/design-tokens"
+import { isSuppressedTestRecipient, recipientDomain } from "@/lib/email-suppress"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 const FROM = process.env.EMAIL_FROM || "AforAudience <no-reply@aforaudience.com>"
 
+// Test-recipient suppression (load test, 28 Nov 2026): see email-suppress.ts.
+
+// Logs the domain only - never the full address, URL or token.
+function suppressTestRecipient(kind: string, to: string): boolean {
+  if (!isSuppressedTestRecipient(to)) return false
+  console.info("[email] suppressed test recipient", { kind, domain: recipientDomain(to) })
+  return true
+}
+
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
+  if (suppressTestRecipient("password-reset", to)) return
   if (!resend) {
     // No RESEND_API_KEY configured (e.g. local dev). Don't fail the
     // request over it - log the link so the flow is still testable.
@@ -30,6 +41,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 // signup completion. Phone OTP is the one mandatory verification gate;
 // email verification is a background nudge, not a login requirement.
 export async function sendEmailVerificationEmail(to: string, verifyUrl: string) {
+  if (suppressTestRecipient("email-verification", to)) return
   if (!resend) {
     console.warn("[email] RESEND_API_KEY not set, skipping send. Verify URL:", verifyUrl)
     return
@@ -58,6 +70,7 @@ export async function sendCorporateInquiryEmail(
   artistName: string,
   inquiry: { companyName: string; contactName: string; contactEmail: string; contactPhone: string | null; eventType: string | null; city: string | null; message: string | null }
 ) {
+  if (suppressTestRecipient("corporate-inquiry", to)) return
   if (!resend) {
     console.warn("[email] RESEND_API_KEY not set, skipping send. Corporate inquiry for:", artistName)
     return
@@ -142,6 +155,7 @@ const TICKETS_FROM =
   "AforAudience Tickets <tickets@mail.aforaudience.com>"
 
 export async function sendTicketEmail(input: TicketEmailInput) {
+  if (suppressTestRecipient("ticket", input.to)) return
   if (!resend) {
     // Local dev / mis-configured env — log so the flow is still
     // testable end-to-end without a real Resend key.
