@@ -1,31 +1,12 @@
 import { Resend } from "resend"
 import { resolveDesignColors } from "@/lib/design-tokens.server"
 import { textSafeColor } from "@/lib/design-tokens"
+import { isSuppressedTestRecipient, recipientDomain } from "@/lib/email-suppress"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 const FROM = process.env.EMAIL_FROM || "AforAudience <no-reply@aforaudience.com>"
 
-// Load test (28 Nov 2026) - test accounts must never reach Resend. QA sends
-// on the same mail.aforaudience.com domain as prod, so mail to made-up
-// addresses would bounce and hurt prod's sender reputation. These domains
-// never belong to real users, so the check applies in every environment.
-// Exact domain match only: subdomains and look-alikes are NOT suppressed.
-export const SUPPRESSED_TEST_EMAIL_DOMAINS = [
-  "loadtest.aforaudience.qa", // load-test runner accounts
-  "aforaudience.qa", // QA personas
-  "example.com", // e2e fixtures
-] as const
-
-function recipientDomain(to: string): string | null {
-  const t = to.trim()
-  const at = t.lastIndexOf("@")
-  return at < 0 ? null : t.slice(at + 1).toLowerCase()
-}
-
-export function isSuppressedTestRecipient(to: string): boolean {
-  const domain = recipientDomain(to)
-  return domain !== null && (SUPPRESSED_TEST_EMAIL_DOMAINS as readonly string[]).includes(domain)
-}
+// Test-recipient suppression (load test, 28 Nov 2026): see email-suppress.ts.
 
 // Logs the domain only - never the full address, URL or token.
 function suppressTestRecipient(kind: string, to: string): boolean {

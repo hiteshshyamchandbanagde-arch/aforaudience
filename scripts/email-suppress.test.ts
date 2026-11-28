@@ -6,11 +6,14 @@
 //
 //   npx tsx scripts/email-suppress.test.ts
 //
-// email.ts imports the design-token resolver's server half, which builds a
-// Prisma client at import time; it is never queried here.
+// The behaviour checks import the pure module src/lib/email-suppress.ts.
+// email.ts itself is only read as text: importing it builds a Prisma client
+// (design-tokens.server), which needs DATABASE_URL, and CI's self-tests
+// must not need a DB (#792 red, Design Token Check run 46135074039).
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { SUPPRESSED_TEST_EMAIL_DOMAINS, isSuppressedTestRecipient, recipientDomain } from '../src/lib/email-suppress'
 
 let passed = 0
 async function test(name: string, fn: () => void | Promise<void>) {
@@ -20,12 +23,11 @@ async function test(name: string, fn: () => void | Promise<void>) {
 }
 
 async function main() {
-  const email = (await import('../src/lib/email')) as Record<string, unknown>
-  const isSuppressed = email.isSuppressedTestRecipient as ((to: string) => boolean) | undefined
-  const domains = email.SUPPRESSED_TEST_EMAIL_DOMAINS as readonly string[] | undefined
+  const isSuppressed: ((to: string) => boolean) | undefined = isSuppressedTestRecipient
+  const domains: readonly string[] | undefined = SUPPRESSED_TEST_EMAIL_DOMAINS
 
   await test('the helper and the domain list are exported', () => {
-    assert.equal(typeof isSuppressed, 'function', 'isSuppressedTestRecipient is not exported from src/lib/email.ts')
+    assert.equal(typeof isSuppressed, 'function', 'isSuppressedTestRecipient is not exported from src/lib/email-suppress.ts')
     assert.deepEqual([...(domains ?? [])].sort(), ['aforaudience.qa', 'example.com', 'loadtest.aforaudience.qa'])
   })
 
@@ -83,21 +85,26 @@ async function main() {
     })
   }
 
-  await test('a suppressed send returns without error and logs the domain only', async () => {
-    const logs: unknown[][] = []
-    const orig = console.info
-    console.info = (...a: unknown[]) => void logs.push(a)
-    try {
-      const reset = email.sendPasswordResetEmail as (to: string, url: string) => Promise<void>
-      await reset('Persona@AforAudience.QA', 'https://qa.aforaudience.com/reset?token=SECRET123')
-    } finally {
-      console.info = orig
-    }
-    assert.equal(logs.length, 1)
-    assert.equal(logs[0][0], '[email] suppressed test recipient')
-    assert.deepEqual(logs[0][1], { kind: 'password-reset', domain: 'aforaudience.qa' })
-    const text = JSON.stringify(logs)
-    assert.ok(!text.includes('SECRET123') && !text.toLowerCase().includes('persona@'), 'log leaks the address or token')
+  await test('email.ts uses the pure module for the check', () => {
+    assert.match(src, /import \{[^}]*\bisSuppressedTestRecipient\b[^}]*\} from "@\/lib\/email-suppress"/)
+    assert.ok(!/export const SUPPRESSED_TEST_EMAIL_DOMAINS/.test(src), 'email.ts keeps its own copy of the domain list')
+  })
+
+  // Was a runtime call of sendPasswordResetEmail; that needs importing
+  // email.ts (and so DATABASE_URL), so it is now checked on the source.
+  await test('a suppressed send logs the kind and domain only', () => {
+    const m = src.match(/function suppressTestRecipient\(kind: string, to: string\): boolean \{([\s\S]*?)\n\}/)
+    assert.ok(m, 'suppressTestRecipient not found in email.ts')
+    const body = m[1]
+    assert.match(body, /if \(!isSuppressedTestRecipient\(to\)\) return false/)
+    const logs = [...body.matchAll(/console\.\w+\(([^\n]*)\)/g)].map((x) => x[1])
+    assert.deepEqual(logs, ['"[email] suppressed test recipient", { kind, domain: recipientDomain(to) }'])
+    assert.match(body, /return true\s*$/)
+  })
+
+  await test('recipientDomain gives the bare lower-case domain for the log', () => {
+    assert.equal(recipientDomain('  Persona@AforAudience.QA '), 'aforaudience.qa')
+    assert.equal(recipientDomain('no-at-sign'), null)
   })
 
   console.log(`\n${passed} passed`)
