@@ -1,5 +1,6 @@
 ## Part 87 — START HERE (28 Nov 00:55 IST, chat), qa @ this commit, main @ 052bcc9 (PROD LIVE)
-Read order: **87 → 86**. 1 open PR (#790).
+Read order: **87 → 86**. 0 open PRs.
+- **28 Nov 14:05 IST: #790 MERGED** (squash `45b4587`, Hitesh approved the Design Token Check; pinned head a665e1a). QA deploy dpl_BjU3axKx2deyS2MFF5F7tjCWV88j READY, 0 runtime errors. Branch `fix/prod-nits-2711` NOT deleted (proxy blocks ref delete) → add to Hitesh's branch-cleanup list (now 9). qa is 1 fix ahead of main.
 
 - **#790** `fix/prod-nits-2711` head a665e1a = OTP-hint nit only (RegisterForm `smsOtpEnabled` null initial state; hint only `=== true`; submit before load still requires phone). Spec e2e/register-otp-hint.spec.ts; scripts/sms-otp-ui.test.ts 3 asserts updated (intended). e2e-preview ✅ (46039437049). **Design Token Check 46039262642 = action_required → Hitesh must click Approve** (CC-autopilot pushes need approval; chat approval is blocked by auto-mode — correct, don't retry). Then squash-merge per workflow.
 - **/api 308 nit DROPPED:** `skipTrailingSlashRedirect` sets __NEXT_MANUAL_TRAILING_SLASH → client <Link> hrefs lose slash (/privacy, /events — caught by footer-legal + design-system-goal specs); internal slash redirect runs before proxy (resolve-routes.js:57) so proxy rewrite can't help. Only fix = trailing slash at ~275 fetch call-sites (low priority, parked). apex→www 308 is Vercel domain config (apex redirects to www) — fine.
@@ -10,7 +11,7 @@ Read order: **87 → 86**. 1 open PR (#790).
 - Hitesh testing QA thoroughly (checklist given: W1 discovery → sign-up → W2 onboarding → venue/event/artist → W3 tickets → admin).
 
 ### Next (chat)
-1. After Hitesh approves → merge #790 → verify qa/Vercel → Human check: prod /register on phone (after next qa→main).
+1. Human check on QA: /register on phone, no OTP hint (QA has SMS ON → hint shows by design; check with flag off or after qa→main on prod). qa→main for #790 when Hitesh says.
 2. Triage Hitesh's QA test findings → Feedback table → small CC dispatches.
 3. Email sign-up verification; seed real events → W3.
 
